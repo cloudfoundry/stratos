@@ -1,10 +1,14 @@
 import { CreatePagination } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationState } from '../../types/pagination.types';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 describe('CreatePaginationActionReducer', () => {
-  const entityKey = 'entityKey';
+  const entityType = 'entityType';
+  const endpointType = 'endpointType';
+  const entityKey = entityCatalog.getEntityKey(endpointType, entityType);
+
   it('should return exact state', () => {
     const paginationState: PaginationState = {
       [entityKey]: {
@@ -12,7 +16,10 @@ describe('CreatePaginationActionReducer', () => {
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
@@ -28,7 +35,10 @@ describe('CreatePaginationActionReducer', () => {
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       paginationKey
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
@@ -61,7 +71,10 @@ describe('CreatePaginationActionReducer', () => {
       }
     };
     const action = new CreatePagination(
-      entityKey,
+      {
+        entityType,
+        endpointType
+      },
       paginationKey,
       'paginationKey'
     );

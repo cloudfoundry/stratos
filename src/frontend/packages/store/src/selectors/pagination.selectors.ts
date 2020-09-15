@@ -1,7 +1,8 @@
 import { compose } from '@ngrx/store';
+
 import { AppState } from '../app-state';
 import { PaginationEntityTypeState } from '../types/pagination.types';
-import { PaginationEntityState, PaginationState } from './../types/pagination.types';
+import { PaginationEntityState, PaginationState } from '../types/pagination.types';
 
 export function isIdInPagination(entityId: string, entityKey: string, paginationKey: string) {
   return compose(
@@ -50,7 +51,7 @@ export function getPaginationEntityState(entityKey: string) {
   };
 }
 
-export function getPaginationState(state: AppState) {
+export function getPaginationState<T extends AppState>(state: T) {
   return state.pagination;
 }
 

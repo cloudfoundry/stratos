@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { SharedModule } from '../../../shared/shared.module';
-import { UserProfileService } from '../user-profile.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { EditProfileInfoComponent } from './edit-profile-info.component';
 
 describe('EditProfileInfoComponent', () => {
@@ -22,10 +24,11 @@ describe('EditProfileInfoComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ],
-      providers: [UserProfileService, TabNavService],
+      providers: [UserProfileService, TabNavService, CurrentUserPermissionsService],
     })
       .compileComponents();
   });

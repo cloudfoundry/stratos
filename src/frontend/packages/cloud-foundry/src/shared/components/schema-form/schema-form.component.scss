@@ -1,0 +1,24 @@
+@import '../../../../../core/sass/mixins';
+
+.schema-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 450px;
+
+  &__radios {
+    padding: 10px 0;
+
+    &-btn {
+      padding-right: 20px;
+    }
+  }
+
+  &__form {
+    margin-top: 10px;
+
+    &--data-bad {
+      margin: 10px 0;
+      padding: 10px;
+    }
+  }
+}

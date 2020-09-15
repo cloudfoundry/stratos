@@ -1,0 +1,83 @@
+suite: test stratos user configuration
+templates:
+  - deployment.yaml
+  - secrets.yaml
+tests:
+  - it: should use default UAA zone
+    set:
+      env.UAA_HOST: test.com
+      env.DOMAIN: test.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: UAA_ENDPOINT
+            value: https://scf.test.com:2793
+  - it: should use configured UAA zone
+    set:
+      env.UAA_HOST: test.com
+      env.DOMAIN: test.com
+      env.UAA_ZONE: testzone
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: UAA_ENDPOINT
+            value: https://testzone.test.com:2793
+
+  - it: should use UAA user by default
+    set:
+      env.UAA_HOST: test.com
+      env.DOMAIN: test.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: UAA_ENDPOINT
+            value: https://scf.test.com:2793
+  - it: should use local admin password in secret when specified
+    set:
+      console.localAdminPassword: TEST_PASSWORD
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: CONSOLE_ADMIN_SCOPE
+            value: stratos.admin
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: AUTH_ENDPOINT_TYPE
+            value: local
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: LOCAL_USER
+            value: admin
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: LOCAL_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: localAdminPassword
+                name: RELEASE-NAME-secret
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: LOCAL_USER_SCOPE
+            value: stratos.admin
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: LOCAL_USER_SCOPE
+            value: stratos.admin
+  - it: should use local user when configured
+    set:
+      console.localAdminPassword: TEST_PASSWORD
+    asserts:
+      - equal:
+          path: data.localAdminPassword
+          value: VEVTVF9QQVNTV09SRA==
+        template: secrets.yaml
+        documentIndex: 0

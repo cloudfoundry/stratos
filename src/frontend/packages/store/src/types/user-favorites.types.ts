@@ -1,9 +1,12 @@
-import { favoritesConfigMapper } from '../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
-import { endpointSchemaKey } from '../helpers/entity-factory';
-import { EndpointModel } from './endpoint.types';
-import { LoggerService } from '../../../core/src/core/logger.service';
+import { IEntityMetadata } from '../entity-catalog/entity-catalog.types';
 
 export const userFavoritesPaginationKey = 'userFavorites';
+
+
+export interface IFavoritesInfo {
+  fetching: boolean;
+  error: boolean;
+}
 
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
@@ -14,6 +17,7 @@ export interface IFavoriteTypeInfo {
 }
 
 export interface IFavoriteMetadata {
+  name: string;
   [key: string]: string;
 }
 export interface IEndpointFavMetadata extends IFavoriteMetadata {
@@ -21,6 +25,7 @@ export interface IEndpointFavMetadata extends IFavoriteMetadata {
   address: string;
   user: string;
   admin: string;
+  subType: string;
 }
 
 // Metadata is a json string when stored in the backend so we use this interface to
@@ -35,9 +40,9 @@ export interface BackendUserFavorite {
 
 const favoriteGuidSeparator = '-';
 
-export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavoriteTypeInfo {
+export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo {
   public guid: string;
-  public metadata: T = null;
+
   constructor(
     public endpointId: string,
     public endpointType: string,
@@ -46,11 +51,8 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
     */
     public entityType: string,
     public entityId?: string,
-    entity?: Y,
+    public metadata: T = null
   ) {
-    if (entity) {
-      this.metadata = favoritesConfigMapper.getEntityMetadata(this, entity);
-    }
     this.guid = UserFavorite.buildFavoriteStoreEntityGuid(this);
   }
 
@@ -79,10 +81,10 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
       .join(favoriteGuidSeparator);
   }
 
-  static getEntityGuidFromFavoriteGuid(favoriteGuid: string, logger: LoggerService): string {
+  static getEntityGuidFromFavoriteGuid(favoriteGuid: string): string {
     const parts = favoriteGuid.split(favoriteGuidSeparator);
     if (parts.length < 3) {
-      logger.error('Failed to determine entity guid from favorite guid: ', parts);
+      console.error('Failed to determine entity guid from favorite guid: ', parts);
       return null;
     } else if (parts.length === 3) {
       return favoriteGuid.split(favoriteGuidSeparator)[0];
@@ -95,17 +97,5 @@ export class UserFavorite<T extends IFavoriteMetadata, Y = any> implements IFavo
   }
 }
 
-export class UserFavoriteEndpoint extends UserFavorite<IEndpointFavMetadata> {
-  constructor(
-    endpoint: EndpointModel
-  ) {
-    super(
-      endpoint.guid,
-      endpoint.cnsi_type,
-      endpointSchemaKey,
-      null,
-      endpoint
-    );
-  }
-}
+export type UserFavoriteEndpoint = UserFavorite<IEndpointFavMetadata>;
 

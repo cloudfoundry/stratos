@@ -1,7 +1,0 @@
-@mixin cf-admin-add-user-warning($theme, $app-theme) {
-  $status-colors: map-get($app-theme, status);
-  $warning: map-get($status-colors, warning);
-  .user-warning {
-    background-color: lighten($warning, 45%);
-  }
-}

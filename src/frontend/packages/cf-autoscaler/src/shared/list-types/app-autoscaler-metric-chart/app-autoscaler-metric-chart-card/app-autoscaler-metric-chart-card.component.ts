@@ -3,11 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { CardCell, IListRowCell } from '../../../../../../core/src/shared/components/list/list.types';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../../../../store/src/app-state';
-import { entityFactory } from '../../../../../../store/src/helpers/entity-factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AutoscalerConstants, buildLegendData } from '../../../../core/autoscaler-helpers/autoscaler-util';
@@ -17,7 +16,7 @@ import {
   AppAutoscalerMetricDataPoint,
   AppScalingTrigger,
 } from '../../../../store/app-autoscaler.types';
-import { appAutoscalerAppMetricSchemaKey } from '../../../../store/autoscaler.store.module';
+import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../../../store/autoscaler-entity-factory';
 
 
 @Component({
@@ -112,9 +111,10 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        entityFactory(appAutoscalerAppMetricSchemaKey)
+        autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
+        true
       )
-    }, false).entities$.pipe(
+    }, true).entities$.pipe(
       filter(entities => !!entities)
     );
   }

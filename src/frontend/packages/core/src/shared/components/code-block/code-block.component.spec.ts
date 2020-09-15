@@ -1,10 +1,10 @@
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { CodeBlockComponent } from './code-block.component';
-import { DOCUMENT } from '@angular/common';
-import { CommonModule } from '@angular/common';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
+import { CodeBlockComponent } from './code-block.component';
 
 describe('CodeBlockComponent', () => {
   let component: CodeBlockComponent;
@@ -14,9 +14,11 @@ describe('CodeBlockComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CodeBlockComponent,
+        CopyToClipboardComponent
       ],
       imports: [
         CoreModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     })

@@ -2,14 +2,14 @@ import { StepperComponent } from '../po/stepper.po';
 
 
 export class QuotaFormStepperBase extends StepperComponent {
-  private name = 'name';
-  private totalServices = 'totalservices';
-  private totalRoutes = 'totalroutes';
-  private memoryLimit = 'memorylimit';
-  private instanceMemoryLimit = 'instancememorylimit';
-  private nonBasicServicesAllowed = 'nonbasicservicesallowed';
-  private totalReservedRoutePorts = 'totalreservedrouteports';
-  private appInstanceLimit = 'appinstancelimit';
+  public name = 'name';
+  public totalServices = 'totalservices';
+  public totalRoutes = 'totalroutes';
+  public memoryLimit = 'memorylimit';
+  public instanceMemoryLimit = 'instancememorylimit';
+  public nonBasicServicesAllowed = 'nonbasicservicesallowed';
+  public totalReservedRoutePorts = 'totalreservedrouteports';
+  public appInstanceLimit = 'appinstancelimit';
 
   setName(name: string) {
     this.getStepperForm().fill({ [this.name]: name });

@@ -8,19 +8,13 @@ if [ -z "${AWS_ENDPOINT}" ]; then
   exit 0
 fi
 
-wget https://dl.minio.io/client/mc/release/linux-amd64/mc
-chmod +x mc
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${DIRNAME}/e2e-mc-helper.sh"
 
-echo "Uploading test report...."
+echo "Uploading test report ..."
 
-./mc -install -y
-
-echo "Configuring upload client"
-./mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
-
-echo "Uploading ..."
 # Sync the E2E reports
-./mc cp -q --insecure -r e2e-reports s3/${S3_BUCKET}
+mc cp -q --insecure -r e2e-reports s3/${S3_BUCKET}
 
 if [[ $? != 0 ]]; then
   echo 'Error uploading test reports: $?'

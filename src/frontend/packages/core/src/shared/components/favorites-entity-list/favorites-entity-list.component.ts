@@ -1,8 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/favorite-config-mapper';
+
+import { FavoritesConfigMapper, IFavoriteTypes } from '../../../../../store/src/favorite-config-mapper';
+import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
 
 
 @Component({
@@ -11,6 +12,8 @@ import { favoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
   styleUrls: ['./favorites-entity-list.component.scss']
 })
 export class FavoritesEntityListComponent implements OnInit {
+
+  constructor(private favoritesConfigMapper: FavoritesConfigMapper) {}
 
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
@@ -28,17 +31,20 @@ export class FavoritesEntityListComponent implements OnInit {
   public endpointDisconnected = false;
 
   @Input()
+  public autoExpand = false;
+
+  @Input()
   set endpointTypes(types: string[] | string) {
     if (!this.favoriteTypes) {
       if (Array.isArray(types)) {
         this.favoriteTypes = types.reduce((allTypes, endpointType) => {
           return [
             ...allTypes,
-            ...favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
+            ...this.favoritesConfigMapper.getAllTypesForEndpoint(endpointType)
           ];
         }, []);
       } else {
-        this.favoriteTypes = favoritesConfigMapper.getAllTypesForEndpoint(types) || [];
+        this.favoriteTypes = this.favoritesConfigMapper.getAllTypesForEndpoint(types) || [];
       }
     }
   }
@@ -47,6 +53,7 @@ export class FavoritesEntityListComponent implements OnInit {
   public set searchValue(searchValue: string) {
     this.searchValueSubject.next(searchValue);
   }
+
   public hasEntities = false;
   public typeSubject = new ReplaySubject<string>();
   private entitiesSubject = new ReplaySubject<IFavoriteEntity[]>();
@@ -123,6 +130,7 @@ export class FavoritesEntityListComponent implements OnInit {
       }),
       map(searchEntities => searchEntities || [])
     );
+
     this.limitedEntities$ = combineLatest(
       this.searchedEntities$,
       this.limitToggle$
@@ -136,7 +144,12 @@ export class FavoritesEntityListComponent implements OnInit {
       type$,
       this.limitedEntities$,
     ).pipe(
-      map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type))
+      map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type)),
+      startWith(false)
     );
+
+    if (this.autoExpand) {
+      this.toggleExpand();
+    }
   }
 }

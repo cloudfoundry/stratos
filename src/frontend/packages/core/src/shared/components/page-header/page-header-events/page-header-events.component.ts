@@ -3,14 +3,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
-import { ToggleHeaderEvent } from '../../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../../../../store/src/helpers/entity-factory';
-import { endpointListKey, EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 
 @Component({
@@ -20,15 +16,15 @@ import { PaginationMonitor } from '../../../monitors/pagination-monitor';
   animations: [
     trigger(
       'eventEnter', [
-        transition(':enter', [
-          style({ opacity: 0 }),
-          animate('250ms ease-in', style({ opacity: 1 }))
-        ]),
-        transition(':leave', [
-          style({ opacity: 1 }),
-          animate('250ms ease-out', style({ opacity: 0 }))
-        ])
-      ]
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('250ms ease-in', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ opacity: 1 }),
+        animate('250ms ease-out', style({ opacity: 0 }))
+      ])
+    ]
     )
   ]
 })
@@ -38,51 +34,69 @@ export class PageHeaderEventsComponent implements OnInit {
   @Input()
   public simpleErrorMessage = false;
 
-  public eventMinimized$: Observable<boolean>;
   public errorMessage$: Observable<string>;
-
+  endpointId: any;
+  private events$: Observable<any>;
   constructor(
-    private internalEventMonitorFactory: InternalEventMonitorFactory,
     private activatedRoute: ActivatedRoute,
-    private store: Store<AppState>
-  ) {
-    this.eventMinimized$ = this.store.select('dashboard').pipe(
-      map(dashboardState => dashboardState.headerEventMinimized),
-      distinctUntilChanged()
-    );
-  }
+    private store: Store<AppState>,
+    private eventService: GlobalEventService,
+  ) { }
 
-  public toggleEvent() {
-    this.store.dispatch(new ToggleHeaderEvent());
+  public markEventsAsRead() {
+    this.events$.pipe(
+      first(),
+    ).subscribe((events: IGlobalEvent[]) => {
+      if (events && !!events.length) {
+        events.forEach(event => this.eventService.updateEventReadState(event, true));
+      }
+    });
   }
 
   ngOnInit() {
-    if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId) {
-      this.endpointIds$ = observableOf([this.activatedRoute.snapshot.params.endpointId]);
+    this.endpointId = this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.endpointId ?
+      this.activatedRoute.snapshot.params.endpointId : null;
+    if (!this.endpointIds$ && this.endpointId) {
+      this.endpointIds$ = observableOf([this.endpointId]);
     }
     if (this.endpointIds$) {
-      const endpointMonitor = new PaginationMonitor<EndpointModel>(
-        this.store, endpointListKey, entityFactory(endpointSchemaKey)
-      );
-      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
-      this.errorMessage$ = combineLatest(
-        cfEndpointEventMonitor.hasErroredOverTime(),
-        endpointMonitor.currentPage$
+      this.events$ = combineLatest(
+        this.eventService.events$,
+        this.endpointIds$,
       ).pipe(
-        filter(([errors]) => !!errors && !!errors.length),
-        map(([errors, endpoints]) => {
-          const endpointString = errors
-            .map(id => endpoints.find(endpoint => endpoint.guid === id))
-            .map(endpoint => endpoint.name).reduce((message, endpointName, index, { length }) => {
-              if (index === 0) {
-                return endpointName;
-              }
-              return index + 1 === length ? `${message} & ${endpointName}` : `${message}, ${endpointName}`;
-            }, '');
-          return `We've been having trouble communicating with ${endpointString}` +
-            `${this.simpleErrorMessage ? '' : ' - You may be seeing out-of-date information'}`;
-        })
+        map(([events, endpointIds]) => {
+          const filteredEvents = events.filter(event => {
+            // Is it an error of type endpoint?
+            if (event.key.startsWith(endpointEventKey)) {
+              const endpointId = this.getEndpointId(event);
+              // Is it an endpoint error for an endpoint we're interested in?
+              const relevantEndpoint = endpointIds.find(id => id === endpointId);
+              const unread = !event.read;
+              return relevantEndpoint && unread;
+            }
+          });
+          return filteredEvents;
+        }),
+        publishReplay(1),
+        refCount()
+      );
+      this.errorMessage$ = this.events$.pipe(
+        // Fixme this emits a lot, we should fix this.
+        map((events: IGlobalEvent[]) => {
+          if (!events || events.length === 0) {
+            return '';
+          }
+          const endpointErrorKeys = events.reduce((endpointIds, event) => {
+            return endpointIds.add(this.getEndpointId(event));
+          }, new Set<string>());
+          return endpointErrorKeys.size > 1 ? `There are multiple endpoints with errors` : events[0].message;
+        }),
+        share()
       );
     }
+  }
+
+  private getEndpointId(event: IGlobalEvent): string {
+    return event.link.split('/')[2];
   }
 }

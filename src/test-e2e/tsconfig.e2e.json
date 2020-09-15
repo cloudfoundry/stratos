@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.e2e.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/e2e",
+    "outDir": "../out-tsc",
     "baseUrl": "./"
   }
 }

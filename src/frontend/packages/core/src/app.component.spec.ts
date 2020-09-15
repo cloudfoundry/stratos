@@ -1,10 +1,11 @@
 import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
+import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
-import { createBasicStoreModule } from '../test-framework/store-test-helper';
 
 describe('AppComponent', () => {
 
@@ -19,6 +20,7 @@ describe('AppComponent', () => {
       imports: [
         SharedModule,
         RouterTestingModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     }).compileComponents();

@@ -23,4 +23,22 @@
     color: $status-tentative;
   }
 
+  // Border colors
+
+  .border-success {
+    border-color: $status-success;
+  }
+
+  .border-warning {
+    border-color: $status-warning;
+  }
+
+  .border-danger {
+    border-color: $status-danger;
+  }
+
+  .border-tentative {
+    border-color: $status-tentative;
+  }
+
 }

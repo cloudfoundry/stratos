@@ -1,6 +1,6 @@
 import { by, promise } from 'protractor';
 
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { RadioGroup } from './radio-group.po';
 import { SnackBarPo } from './snackbar.po';
@@ -11,7 +11,7 @@ const customUserLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_USER_LABE
 
 export class InviteUserStepperPo extends StepperComponent {
 
-  snackBar = new SnackBarPo;
+  snackBar = new SnackBarPo();
   static createUserEmail = (isoTime?: string, postFix?: string): string => {
     const username = E2EHelpers.createCustomName(customUserLabel + (postFix || ''), isoTime).toLowerCase();
     return CFHelpers.cleanRouteHost(username) + '@e2e.com';

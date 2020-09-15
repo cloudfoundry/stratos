@@ -5,23 +5,17 @@ import { map } from 'rxjs/operators';
 
 import { SendEventAction } from '../actions/internal-events.actions';
 import { RequestTypes } from '../actions/request.actions';
-import { AppState } from '../app-state';
-import { endpointSchemaKey } from '../helpers/entity-factory';
+import { InternalAppState } from '../app-state';
+import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { WrapperRequestActionFailed } from '../types/request.types';
-
-
-
-// RequestTypes.FAILED
-
-
 
 @Injectable()
 export class EndpointApiError {
 
   constructor(
     private actions$: Actions,
-    private store: Store<AppState>,
+    private store: Store<InternalAppState>,
   ) { }
 
   @Effect({ dispatch: false }) endpointApiError$ = this.actions$.pipe(
@@ -32,12 +26,16 @@ export class EndpointApiError {
         const { eventCode, message, error, url } = internalEndpointError;
         internalEndpointError.endpointIds.forEach(endpoint =>
           this.store.dispatch(
-            new SendEventAction(endpointSchemaKey, endpoint, {
+            new SendEventAction(endpointEntityType, endpoint, {
               eventCode,
               severity: InternalEventSeverity.ERROR,
               message,
               metadata: {
-                error,
+                httpMethod: action.apiAction.options ? action.apiAction.options.method : '',
+                errorResponse: error,
+                // FIXME We can do a better job at displaying the full url once
+                // the angular 8 HttpClient migration is done.
+                // action.apiAction.options
                 url,
               },
             }),
@@ -46,4 +44,3 @@ export class EndpointApiError {
       }
     }));
 }
-

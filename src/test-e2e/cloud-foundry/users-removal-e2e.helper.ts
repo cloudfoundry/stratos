@@ -1,8 +1,10 @@
 import { browser, by, element, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/cf-user.types';
+import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { UaaHelpers } from '../helpers/uaa-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
@@ -47,45 +49,63 @@ export function setupCfUserRemovalTests(
 
   beforeAll(() => {
     const e2eSetup = e2e.setup(ConsoleUserType.admin)
-    .clearAllEndpoints()
-    .registerDefaultCloudFoundry()
-    .connectAllEndpoints(ConsoleUserType.admin)
-    .loginAs(ConsoleUserType.admin)
-    .getInfo(ConsoleUserType.admin);
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints(ConsoleUserType.admin)
+      .loginAs(ConsoleUserType.admin)
+      .getInfo(ConsoleUserType.admin);
+
     cfHelper = new CFHelpers(e2eSetup);
-
-
     return uaaHelpers.setup()
+      .then(() => e2e.log(`Creating User: ${userName}`))
       .then(() => uaaHelpers.createUser(userName))
       .then(newUser => {
         uaaUserGuid = newUser.id;
+        e2e.log(`Created UAA User: ${newUser.userName}. Guid: ${uaaUserGuid}`);
         const defaultCf = e2e.secrets.getDefaultCFEndpoint();
         cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
       })
       .then(() => cfHelper.createUser(cfGuid, uaaUserGuid))
-      .then(() => setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true, e2eSetup))
+      .then(cfUser => {
+        expect(cfUser).toBeTruthy();
+        expect(cfUser.entity.username).toBeTruthy();
+        expect(cfUser.metadata.guid).toBeTruthy();
+
+        e2e.log(`Created Cf User: ${cfUser.entity.username}. Guid: ${cfUser.metadata.guid}`);
+        userGuid = cfUser.metadata.guid;
+        return setUpTestOrgSpaceE2eTest(orgName, spaceName, userName, true, e2eSetup);
+      })
       .then(res => {
         cfGuid = res.cfGuid;
         orgGuid = res.orgGuid;
         spaceGuid = res.spaceGuid;
-        return cfHelper.fetchUser(cfGuid, userName);
       })
-      .then(user => {
-        expect(user).toBeTruthy();
-        userGuid = user.metadata.guid;
-
+      // Ensure that cf responds with the user we've just created, otherwise it won't appear in the ui
+      .then(() => cfHelper.cfRequestHelper.chain<APIResource<CfUser>>(
+        null,
+        () => cfHelper.fetchUser(cfGuid, userName),
+        10,
+        (user: APIResource<CfUser>) => !!user,
+        0
+      ))
+      .then(cfUser => {
+        expect(cfUser).toBeTruthy();
+        expect(cfUser.entity.username).toBeTruthy();
+        expect(cfUser.metadata.guid).toBe(userGuid);
+      })
+      .then(() => {
         removeUsersPage = new RemoveUsersPage(cfGuid, orgGuid, spaceGuid, userGuid);
-
         return protractor.promise.controlFlow().execute(() => {
           return navToUserTableFn(cfGuid, orgGuid, spaceGuid);
         });
-      });
-  });
+      })
+      .then(() => e2e.log(`Nav'd to user table`));
+  }, 75000);
 
-  it ('Clicks on remove menu option', () => {
+  it('Clicks on remove menu option', () => {
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1);
+    usersTable.waitForTotalResultsToBe(1, 10000, `Failed to find user in table: ${userName}`);
 
     if (removalLevel === CfRolesRemovalLevel.OrgsSpaces) {
       usersTable.table.openRowActionMenuByIndex(0).clickItem('Remove from org');
@@ -94,11 +114,12 @@ export function setupCfUserRemovalTests(
     }
 
     removeUsersStepper = removeUsersPage.stepper;
+    removeUsersStepper.waitUntilShown('Remove Users Stepper');
 
     // ... check button state
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
   });
 
   it('Confirm roles removal', () => {
@@ -119,13 +140,16 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget);
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
+
 
     // apply roles removal changes
     removeUsersStepper.next();
+
+    confirmStep.actionTable.table.waitUntilNotBusy('Failed to wait for busy state');
 
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
@@ -140,10 +164,10 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget, 'done');
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeFalsy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeFalsy('Cancel button should not be visible//enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
 
     // close
     removeUsersStepper.next();
@@ -151,7 +175,7 @@ export function setupCfUserRemovalTests(
   });
 
   if (cfLevel !== CfUserRemovalTestLevel.Space &&
-      removalLevel === CfRolesRemovalLevel.Spaces) {
+    removalLevel === CfRolesRemovalLevel.Spaces) {
 
     it('Shows user with org roles only', () => {
       // user was removed from space level
@@ -162,7 +186,7 @@ export function setupCfUserRemovalTests(
       expect(usersTable.getPermissions(0, false).getChipElements().count()).toBe(0);
     });
   } else {
-    it('Doesnt show user with roles anymore', () => {
+    it(`Doesn't show user with roles any more`, () => {
       const usersTable = new CFUsersListComponent();
       usersTable.header.setSearchText(userName);
 
@@ -232,8 +256,8 @@ export function setupCfUserRemovalTests(
   afterAll(() => {
     const deleteUser = uaaUserGuid ? cfHelper.deleteUser(cfGuid, userGuid, userName, uaaUserGuid) : promise.fullyResolved(true);
     return promise.all([
-      deleteUser,
-      cfHelper.deleteOrgIfExisting(cfGuid, orgName)
-    ]) ;
+      deleteUser.then(() => e2e.log(`Deleted Cf user ${userGuid} & UAA user ${uaaUserGuid}`)),
+      cfHelper.deleteOrgIfExisting(cfGuid, orgName).then(() => e2e.log(`Deleted Org: ${orgName}`))
+    ]);
   });
 }

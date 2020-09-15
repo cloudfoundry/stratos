@@ -1,25 +1,10 @@
-<div class="page-container">
+<div class="page-container setup">
   <app-page-header hideMenu="true" [showHistory]="false">
-    <h1>Stratos Setup</h1>
+    <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="uaa-wizard">
     <app-steppers>
-      <app-step title="Introduction">
-        <div>
-          <app-stratos-title></app-stratos-title>
-          <p class="uaa-wizard__intro">Welcome to Stratos</p>
-          <p>
-            Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and
-            administrators to both manage applications running in the Cloud Foundry cluster and perform cluster
-            management
-            tasks.
-          </p>
-          <p>Before accessing Stratos for the first time some configuration information is required.</p>
-
-          <p>Press <b>NEXT</b> to get started.</p>
-        </div>
-      </app-step>
       <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
         <div class="uaa-wizard__form">
           <p class="uaa-wizard__form-section">Please enter the following information to allow Stratos to authenticate
@@ -35,7 +20,12 @@
                 <input matInput formControlName="clientId" placeholder="Client ID">
               </mat-form-field>
               <mat-form-field>
-                <input matInput formControlName="clientSecret" placeholder="Client Secret">
+                <input matInput formControlName="clientSecret" placeholder="Client Secret"
+                  [type]="!show ? 'password' : 'text'">
+                <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
+                  [attr.aria-pressed]="!show">
+                  <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
               </mat-form-field>
             </div>
             <p class="uaa-wizard__form-section">Enter the username and password of an admin user (this is used to
@@ -46,7 +36,12 @@
                 <input matInput formControlName="adminUsername" placeholder="Admin Username">
               </mat-form-field>
               <mat-form-field>
-                <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password">
+                <input matInput type="password" formControlName="adminPassword" placeholder="Admin Password"
+                  [type]="!showPassword ? 'password' : 'text'">
+                <button mat-icon-button matSuffix (click)="showPassword = !showPassword"
+                  [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword">
+                  <mat-icon>{{!showPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
               </mat-form-field>
             </div>
             <!-- Single Sign-on -->

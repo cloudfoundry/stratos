@@ -65,7 +65,10 @@ describe('Edit Service Instance', () => {
         menu.waitUntilNotShown();
 
         return browser.getCurrentUrl().then(url => {
-          expect(url.endsWith('edit')).toBeTruthy();
+          const query = url.indexOf('?');
+          const urlWithoutQuery = query >= 0 ? url.substring(0, query) : url;
+          expect(urlWithoutQuery.endsWith('edit')).toBeTruthy();
+
           servicesHelperE2E.setServicePlan(true);
           servicesHelperE2E.createServiceInstance.stepper.next();
 
@@ -93,7 +96,7 @@ describe('Edit Service Instance', () => {
         menu.clickItem('Delete');
         return ConfirmDialogComponent.expectDialogAndConfirm('Delete', 'Delete Service Instance', editedServiceInstanceName);
       })
-      .then(() => servicesHelperE2E.noServiceCardWithTitle(servicesWall.serviceInstancesList, editedServiceInstanceName))
+      .then(() => servicesHelperE2E.noServiceCardWithTitleAttempt(servicesWall.serviceInstancesList, editedServiceInstanceName, 1, 5))
       .then(totalResults => {
         if (totalResults === 0) {
           serviceNamesToDelete = serviceNamesToDelete.slice(serviceNamesToDelete.indexOf(editedServiceInstanceName), 1);

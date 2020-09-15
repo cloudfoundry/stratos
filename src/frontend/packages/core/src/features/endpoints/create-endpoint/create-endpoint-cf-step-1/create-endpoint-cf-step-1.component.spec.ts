@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { initEndpointTypes } from '../../endpoint-helpers';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
 describe('CreateEndpointCfStep1Component', () => {
@@ -18,6 +18,7 @@ describe('CreateEndpointCfStep1Component', () => {
       imports: [
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule(),
         NoopAnimationsModule
       ],
@@ -32,7 +33,6 @@ describe('CreateEndpointCfStep1Component', () => {
       }]
     })
       .compileComponents();
-    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

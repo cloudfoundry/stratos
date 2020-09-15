@@ -5,7 +5,7 @@ import { UserProfileRoutingModule } from './user-profile.routing';
 import { SharedModule } from '../../shared/shared.module';
 import { CoreModule } from '../../core/core.module';
 import { EditProfileInfoComponent } from './edit-profile-info/edit-profile-info.component';
-import { UserProfileService } from './user-profile.service';
+import { UserProfileService } from '../../core/user-profile.service';
 
 @NgModule({
   imports: [

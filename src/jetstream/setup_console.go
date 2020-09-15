@@ -14,6 +14,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
@@ -21,15 +22,25 @@ import (
 )
 
 const (
-	setupRequestRegex      = "^/pp/v1/setup$"
+	setupRequestRegex      = "^/pp/v1/setup/save$"
 	setupCheckRequestRegex = "^/pp/v1/setup/check$"
 	versionRequestRegex    = "^/pp/v1/version$"
+	pingRequestRegex       = "^/pp/v1/ping$"
 	backendRequestRegex    = "^/pp/v1/"
 	systemGroupName        = "env"
 )
 
 func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, error) {
 	consoleConfig := new(interfaces.ConsoleConfig)
+
+	// Local admin user configuration?
+	password := c.FormValue("local_admin_password")
+	if len(password) > 0 {
+		consoleConfig.LocalUserPassword = password
+		consoleConfig.AuthEndpointType = "local"
+		return consoleConfig, nil
+	}
+
 	url, err := url.Parse(c.FormValue("uaa_endpoint"))
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
@@ -59,7 +70,7 @@ func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, erro
 
 // Check the initial parameter set and fetch the list of available scopes
 // This does not persist the configuration to the database at this stage
-func (p *portalProxy) setupConsoleCheck(c echo.Context) error {
+func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 
 	// Check if already set up
 	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
@@ -112,6 +123,44 @@ func (p *portalProxy) setupConsoleCheck(c echo.Context) error {
 }
 
 func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+		return saveLocalUserConsoleConfig(consoleRepo, consoleConfig)
+	}
+
+	return saveUAAConsoleConfig(consoleRepo, consoleConfig)
+}
+
+func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+
+	log.Debug("saveLocalUserConsoleConfig")
+
+	if err := consoleRepo.SetValue(systemGroupName, "AUTH_ENDPOINT_TYPE", "local"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "CONSOLE_ADMIN_SCOPE", "stratos.admin"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER", "admin"); err != nil {
+		return err
+	}
+
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_SCOPE", "stratos.admin"); err != nil {
+		return err
+	}
+
+	// Do not save the raw password - we will create the account during setup, so we don't need it beyond that
+	// We need to store a value so that console believes everything is setup - but we have created the account
+	// already, so we don't need to save the actual password
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_PASSWORD", "--"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
 	log.Debugf("Saving ConsoleConfig: %+v", consoleConfig)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
@@ -145,8 +194,10 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *int
 	return nil
 }
 
-// Save the console setup
-func (p *portalProxy) setupConsole(c echo.Context) error {
+// Save the console setup data to the database
+func (p *portalProxy) setupSaveConfig(c echo.Context) error {
+
+	log.Debug("setupSaveConfig")
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -171,8 +222,21 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Console configuration data storage failed due to %s", err)
 	}
 
+	// If setting up with a local admin user, then log the user in
+	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+		consoleConfig.LocalUser = "admin"
+		if consoleConfig.IsSetupComplete() {
+			p.GetConfig().ConsoleConfig.AuthEndpointType = "local"
+			p.InitStratosAuthService(interfaces.Local)
+			c.Request().Form.Add("username", "admin")
+			c.Request().Form.Add("password", consoleConfig.LocalUserPassword)
+			c.Request().RequestURI = "/pp/v1/login"
+			setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+			return p.consoleLogin(c)
+		}
+	}
+
 	c.NoContent(http.StatusOK)
-	log.Infof("Updated Stratos setup")
 	return nil
 }
 
@@ -200,20 +264,18 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 			}
 		} else if val == interfaces.Remote {
 			// Auth endpoint type is set to "remote", so need to load local user config vars
-			// Nothing to do
+			// Default authorization endpoint to be UAA endpoint
+			if consoleConfig.AuthorizationEndpoint == nil {
+				// No Authorization endpoint
+				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
+				log.Debugf("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
+			}
 		} else {
 			//Auth endpoint type has been set to an invalid value
 			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
 		}
 	} else {
 		return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
-	}
-
-	// Default authorization endpoint to be UAA endpoint
-	if consoleConfig.AuthorizationEndpoint == nil {
-		// No Authorization endpoint
-		consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
-		log.Infof("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 	}
 
 	return consoleConfig, nil
@@ -242,21 +304,35 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	consoleConfig.LocalUser = localUserName
 	consoleConfig.LocalUserPassword = localUserPassword
 
+	return setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+}
+
+func setupInitialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) error {
+
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
 		return err
 	}
+
 	userGUID := uuid.NewV4().String()
-	password := localUserPassword
-	passwordHash, err := HashPassword(password)
+	password := consoleConfig.LocalUserPassword
+	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
 		return err
 	}
-	scope := localUserScope
+	scope := consoleConfig.LocalUserScope
 	email := ""
-	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: localUserName, Email: email, Scope: scope}
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: consoleConfig.LocalUser, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
+
+	// Don't add the user if they already exist
+	_, err = localUsersRepo.FindUserGUID(consoleConfig.LocalUser)
+	if err == nil {
+		// Can't modify the user once created else we loose any updates that might have neen made
+		return nil
+	}
+
 	err = localUsersRepo.AddLocalUser(user)
 	if err != nil {
 		log.Errorf("Unable to add Stratos local user due to: %+v", err)
@@ -300,6 +376,12 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 			if isVersionRequest {
 				return h(c)
 			}
+
+			isPingRequest, _ := regexp.MatchString(pingRequestRegex, requestURLPath)
+			if isPingRequest {
+				return h(c)
+			}
+
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
 			if !isBackendRequest {
@@ -336,6 +418,8 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
+		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
+		portalProxy.InitStratosAuthService(interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType])
 	}
 
 	return consoleConfig.IsSetupComplete()

@@ -4,7 +4,6 @@ templates:
     config.properties.erb: config/config.properties
     ssl_cert.erb: config/dev-certs/pproxy.crt
     ssl_cert_key.erb: config/dev-certs/pproxy.key
-    dbconf.yml.erb: /config/dbconf.yml
     backend_ctl.erb: bin/backend_ctl
     pre-start.erb: bin/pre-start
     post-deploy.erb: bin/post-deploy

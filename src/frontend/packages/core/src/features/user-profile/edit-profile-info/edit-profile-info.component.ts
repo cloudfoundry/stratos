@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Subscription } from 'rxjs';
-import { first, map, take } from 'rxjs/operators';
+import { delay, first, map, take, tap } from 'rxjs/operators';
 
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-import { UserProfileService } from '../user-profile.service';
 
 
 @Component({
@@ -23,6 +23,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   editProfileForm: FormGroup;
 
+  needsPasswordForEmailChange: boolean;
+
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
@@ -36,6 +38,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       newPassword: '',
       confirmPassword: '',
     });
+
+    this.needsPasswordForEmailChange = false;
   }
 
   private sub: Subscription;
@@ -49,13 +53,15 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
 
   // Only allow password change if user has the 'password.write' group
-  public canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
+  public canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);
 
   public passwordRequired = false;
 
   ngOnInit() {
-    this.userProfileService.fetchUserProfile();
     this.userProfileService.userProfile$.pipe(first()).subscribe(profile => {
+      // UAA needs the user's password for email changes. Local user does not
+      // Both need it for password change
+      this.needsPasswordForEmailChange = (profile.origin === 'uaa');
       this.profile = profile;
       this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
       this.editProfileForm.setValue({
@@ -76,7 +82,10 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   onChanges() {
     this.sub = this.editProfileForm.valueChanges.subscribe(values => {
-      const required = values.emailAddress !== this.emailAddress || values.newPassword.length;
+      // Old password is required if either email or new pw is specified (uaa)
+      // or only if new pw is specified (local account)
+      const required = this.needsPasswordForEmailChange ?
+        values.emailAddress !== this.emailAddress || values.newPassword.length : values.newPassword.length;
       this.passwordRequired = !!required;
       if (required !== this.lastRequired) {
         this.lastRequired = required;
@@ -110,8 +119,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         updates[key] = this.editProfileForm.value[key];
       }
     }
-    const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.pipe(
+    return this.userProfileService.updateProfile(this.profile, updates).pipe(
       take(1),
       map(([profileResult, passwordResult]) => {
         const okay = !profileResult.error && !passwordResult.error;
@@ -121,6 +129,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
           redirect: okay,
           message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
         };
-      }));
+      }),
+      delay(300), // Ensure that the profile is updated before fetching to refresh local copy
+      tap(() => this.userProfileService.fetchUserProfile())
+    );
   }
 }

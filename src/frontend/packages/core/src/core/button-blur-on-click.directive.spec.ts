@@ -1,4 +1,4 @@
-import { Component, DebugElement, ElementRef, Renderer } from '@angular/core';
+import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
@@ -24,7 +24,7 @@ describe('ButtonBlurOnClickDirective', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ElementRef, useClass: MockElementRef },
-        { provide: Renderer, useClass: MockRenderer }
+        { provide: Renderer2, useClass: MockRenderer }
       ],
       declarations: [
         TestButtonComponent,

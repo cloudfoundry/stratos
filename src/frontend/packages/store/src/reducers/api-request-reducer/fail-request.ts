@@ -1,36 +1,38 @@
-import { IFailedRequestAction, IRequestAction } from '../../types/request.types';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import { IFailedRequestAction } from '../../types/request.types';
+import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
 export function failRequest(state, action: IFailedRequestAction) {
-  if (action.apiAction.guid) {
-    const apiAction = action.apiAction as IRequestAction;
-    const requestFailedState = getEntityRequestState(state, apiAction);
-    if (apiAction.updatingKey) {
-      requestFailedState.updating = mergeUpdatingState(
-        apiAction,
-        requestFailedState.updating,
-        {
-          busy: false,
-          error: true,
-          message: action.message
-        }
-      );
-    } else if (action.requestType === 'delete') {
-      requestFailedState.deleting = {
-        ...requestFailedState.deleting,
-        busy: false,
-        deleted: false,
-        error: true,
-      };
-      requestFailedState.message = action.message;
-    } else {
-      requestFailedState.fetching = false;
-      requestFailedState.error = true;
-      requestFailedState.creating = false;
-      requestFailedState.message = action.message;
-      requestFailedState.response = action.response;
-    }
-    return setEntityRequestState(state, requestFailedState, apiAction);
+  if (isNullOrUndefined(action.apiAction.guid)) {
+    return state;
   }
-  return state;
+  const apiAction = action.apiAction as BaseEntityRequestAction;
+  const requestFailedState = getEntityRequestState(state, apiAction);
+  if (apiAction.updatingKey) {
+    requestFailedState.updating = mergeUpdatingState(
+      apiAction,
+      requestFailedState.updating,
+      {
+        busy: false,
+        error: true,
+        message: action.message
+      }
+    );
+  } else if (action.requestType === 'delete') {
+    requestFailedState.deleting = {
+      ...requestFailedState.deleting,
+      busy: false,
+      deleted: false,
+      error: true,
+      message: action.message
+    };
+  } else {
+    requestFailedState.fetching = false;
+    requestFailedState.error = true;
+    requestFailedState.creating = false;
+    requestFailedState.message = action.message;
+    requestFailedState.response = action.response;
+  }
+  return setEntityRequestState(state, requestFailedState, apiAction);
 }

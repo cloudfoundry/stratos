@@ -1,4 +1,9 @@
-<!--- For bugs and general issues -->
+<!--------- For bugs and general issues --------->
+### Stratos Version
+<!-- What version of Stratos does this related to? -->
+<!-- Version information can be seen in the `About` page reached via the User Icon top right -->
+<!-- If directly using code which branch, commit, etc did the source come from, what repository was it cloned from? -->
+
 ### Frontend Deployment type
 <!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
@@ -29,7 +34,7 @@ Insert log hereCopy
 ```
 
 
-<!--- For feature requests -->
+<!--------- For feature requests --------->
 ### Detailed Description
 <!--- Provide a detailed description of the change or addition you are proposing -->
 

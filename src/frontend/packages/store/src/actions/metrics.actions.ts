@@ -1,14 +1,12 @@
-import { environment } from '../../../core/src/environments/environment';
-import { MetricQueryType } from '../../../core/src/shared/services/metrics-range-selector.types';
-import { metricSchemaKey } from '../helpers/entity-factory';
+import { metricEntityType } from '../helpers/stratos-entity-factory';
+import { proxyAPIVersion } from '../jetstream';
+import { MetricQueryType } from '../types/metric.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
+import { EntityRequestAction } from '../types/request.types';
 
 export const METRICS_START = '[Metrics] Fetch Start';
 export const METRICS_START_SUCCESS = '[Metrics] Fetch Succeeded';
 export const METRICS_START_FAILED = '[Metrics] Fetch Failed';
-
-const { proxyAPIVersion } = environment;
 
 export interface IMetricQueryConfigParams {
   window?: string;
@@ -38,9 +36,10 @@ export class MetricQueryConfig {
   ) { }
 }
 
-
-export class MetricsAction implements IRequestAction {
+// FIXME: Final solution for Metrics - STRAT-152
+export class MetricsAction implements EntityRequestAction {
   constructor(
+    // FIXME: This is ignored in all cases - STRAT-152
     guid: string,
     public endpointGuid: string,
     public query: MetricQueryConfig,
@@ -48,11 +47,13 @@ export class MetricsAction implements IRequestAction {
     public windowValue: string = null,
     public queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true,
-    buildMetricsKey = true) {
+    public endpointType: string,
+    buildMetricsKey = true) { // TODO: RC test where this should be set
     this.guid = buildMetricsKey ? MetricsAction.buildMetricKey(guid, query, isSeries, queryType, windowValue) : guid;
   }
   public guid: string;
-  entityKey = metricSchemaKey;
+
+  entityType = metricEntityType;
   type = METRICS_START;
   directApi = false;
 
@@ -71,7 +72,8 @@ export class MetricsChartAction extends MetricsAction {
     guid: string,
     endpointGuid: string,
     query: MetricQueryConfig,
-    url: string
+    url: string,
+    endpointType: string
   ) {
     super(
       guid,
@@ -80,11 +82,13 @@ export class MetricsChartAction extends MetricsAction {
       url,
       null,
       MetricQueryType.RANGE_QUERY,
-      true
+      true,
+      endpointType
     );
   }
 }
 
+// TODO: RC review all
 export class FetchCFMetricsAction extends MetricsAction {
   constructor(
     guid: string,
@@ -177,7 +181,7 @@ export class FetchApplicationChartMetricsAction extends MetricsChartAction {
   constructor(
     guid: string,
     cfGuid: string,
-    query: MetricQueryConfig, ) {
+    query: MetricQueryConfig,) {
     super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`);
   }
 }

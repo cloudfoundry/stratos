@@ -1,5 +1,6 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { by, element, promise } from 'protractor';
+import { ElementFinder } from 'protractor/built';
+
 import { Component } from './component.po';
 
 export class MenuItemMap {
@@ -10,7 +11,7 @@ export class MenuItem {
   index: number;
   label: string;
   class: string;
-  click: Function;
+  click: () => promise.Promise<void>;
   disabled: boolean;
 }
 /**
@@ -25,7 +26,7 @@ export class MenuComponent extends Component {
   getItems(): promise.Promise<MenuItem[]> {
     return this.locator.all(by.tagName('button')).map((elm, index) => {
       return {
-        index: index,
+        index,
         label: elm.getText(),
         class: elm.getAttribute('class'),
         click: elm.click,

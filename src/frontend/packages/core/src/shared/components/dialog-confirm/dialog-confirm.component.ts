@@ -1,8 +1,8 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.config';
 import { environment } from '../../../environments/environment';
+import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.config';
 
 @Component({
   selector: 'app-dialog-confirm',

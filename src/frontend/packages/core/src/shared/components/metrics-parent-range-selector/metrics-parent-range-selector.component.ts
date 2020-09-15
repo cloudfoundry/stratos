@@ -1,12 +1,11 @@
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { MetricQueryType } from '../../services/metrics-range-selector.types';
-import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { metricSchemaKey, entityFactory } from '../../../../../store/src/helpers/entity-factory';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
+import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
+import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 
 @Component({
   selector: 'app-metrics-parent-range-selector',
@@ -36,8 +35,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     const action = this.metricsCharts.first.metricsConfig.metricsAction;
     const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.guid,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
+      action
     );
     this.rangeSelectorManager.init(metricsMonitor, action);
     this.actionSub = this.rangeSelectorManager.metricsAction$.subscribe(newAction => {

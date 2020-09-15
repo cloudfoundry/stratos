@@ -5,6 +5,7 @@ $spacing: 10px;
   opacity: .6;
 }
 .recent-entity {
+  display: flex;
   outline: 0;
   padding: $spacing;
   & + & {
@@ -19,7 +20,17 @@ $spacing: 10px;
   }
 
   &--name {
+    line-height: 24px;
     word-break: break-all;
+  }
+  &__icon {
+    opacity: .7;
+  }
+  &__icon-container {
+    display: flex;
+    height: 24px;
+    text-align: center;
+    width: 32px;
   }
 }
 
@@ -28,7 +39,6 @@ $spacing: 10px;
 }
 
 .recent-tab {
-  padding-top: $spacing;
   &.standalone {
     padding-top: 0;
   }

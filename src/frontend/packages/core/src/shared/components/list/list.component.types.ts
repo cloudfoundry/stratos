@@ -1,4 +1,5 @@
-import * as moment from 'moment';
+import { Injectable, Type } from '@angular/core';
+import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -12,6 +13,7 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { CardCell } from './list.types';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -28,11 +30,11 @@ export interface IListConfig<T> {
   /**
    * List of actions that are presented as individual buttons when one or more rows are selected. For example `Delete` of selected rows.
    */
-  getMultiActions: (schemaKey: string) => IMultiListAction<T>[];
+  getMultiActions: () => IMultiListAction<T>[];
   /**
    * List of actions that are presented in a mat-menu for an individual entity. For example `unmap` an application route
    */
-  getSingleActions: (schemaKey: string) => IListAction<T>[];
+  getSingleActions: () => IListAction<T>[];
   /**
    * Collection of column definitions to show when the list is in table mode
    */
@@ -47,6 +49,12 @@ export interface IListConfig<T> {
    * to the data sources transformEntities collection should be used to apply these custom settings to the data.
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  /**
+   * Collection of filter definitions to support filtering across multiple fields in a list.
+   * When the filter is selected in a dropdown the filterString filters results using the chosen field.
+   * Combined with a transformEntities DataFunction that consumes the filterKey.
+   */
+  getFilters?: () => IListFilter[];
   /**
    * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
    * something from the store which requires an async call
@@ -73,9 +81,9 @@ export interface IListConfig<T> {
    */
   enableTextFilter?: boolean;
   /**
-   * Fix the height of a table row
+   * Set a custom value for the minimum height of a table row
    */
-  tableFixedRowHeight?: boolean;
+  minRowHeight?: string;
   /**
    * Set the align-self of each cell in the row
    */
@@ -84,6 +92,13 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: CardTypes<T>;
+  /**
+   * The component to show when expanding a row
+   */
+  expandComponent?: ListExpandedComponentType<T>;
+  /**
+   * Hide the fresh button
+   */
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions
@@ -120,6 +135,13 @@ export interface IListMultiFilterConfig {
   select: BehaviorSubject<any>;
 }
 
+export interface IListFilter {
+  default?: boolean;
+  key: string;
+  label: string;
+  placeholder: string;
+}
+
 export interface IListMultiFilterConfigItem {
   label: string;
   item: any;
@@ -129,11 +151,12 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
+@Injectable()
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text = null;
+  text: ITableText = null;
   enableTextFilter = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
@@ -144,6 +167,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getFilters = (): IListFilter[] => [];
   getInitialised = () => observableOf(true);
 }
 
@@ -168,7 +192,7 @@ export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    */
-  action: (items: T[]) => boolean | Observable<ActionState>;
+  action: (items?: T[]) => boolean | Observable<ActionState>;
 }
 
 export interface IGlobalListAction<T> extends IOptionalAction<T> {
@@ -231,3 +255,5 @@ export class MultiFilterManager<T> {
     this.value = itemValue;
   }
 }
+
+export type ListExpandedComponentType<T> = Type<CardCell<T>>;

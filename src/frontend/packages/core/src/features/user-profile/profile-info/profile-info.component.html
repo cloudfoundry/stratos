@@ -1,14 +1,18 @@
 <app-page-header>
   <h1>User Profile</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="edit" routerLink="/user-profile/edit" matTooltip="Edit">
+    <button *ngIf="canEdit$ | async" mat-icon-button name="edit" routerLink="/user-profile/edit" matTooltip="Edit">
       <mat-icon>edit</mat-icon>
     </button>
   </div>
 </app-page-header>
 <div class="user-profile">
-  <app-user-profile-banner *ngIf="userProfile$ | async as profile"
-    name="{{ profile.name.givenName }} {{ profile.name.familyName }}" email="{{ primaryEmailAddress$ | async }}">
+  <app-no-content-message *ngIf="isError$ | async" icon="error"
+    firstLine="An error occurred retrieving the User Profile" [secondLine]="{
+    text: ''
+  }"></app-no-content-message>
+  <app-user-profile-banner *ngIf="userProfile$ | async as profile" [user]="profile"
+    [allowGravatar]="allowGravatar$ | async">
   </app-user-profile-banner>
   <div class="user-profile__info" *ngIf="userProfile$ | async as profile">
     <div class="user-profile__content">
@@ -20,11 +24,20 @@
           <div class="app-metadata">
             <div class="app-metadata__two-cols">
               <app-metadata-item icon="person" label="User id">{{ profile.userName }}</app-metadata-item>
-              <app-metadata-item icon="title" label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}
-              </app-metadata-item>
-              <app-metadata-item icon="email" label="Email">{{ primaryEmailAddress$ | async }}</app-metadata-item>
+              <app-metadata-item *ngIf="(profile.name.givenName || profile.name.familyName); else noName" icon="title"
+                label="Name">{{ profile.name.givenName }} {{ profile.name.familyName }}</app-metadata-item>
+              <ng-template #noName>
+                <app-metadata-item icon="title" label="Name">No Name</app-metadata-item>
+              </ng-template>
+              <app-metadata-item *ngIf="primaryEmailAddress$ | async; else noEmail" icon="email" label="Email">
+                {{ primaryEmailAddress$ | async }}</app-metadata-item>
+              <ng-template #noEmail>
+                <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
+              </ng-template>
+              <app-metadata-item *ngIf="(this.userService.isAdmin$ | async)" icon="security" label="User Type">
+                Administrator</app-metadata-item>
             </div>
-            <div class="app-metadata__two-cols">
+            <div class="app-metadata__two-cols" *ngIf="profile.origin === 'uaa'">
               <app-metadata-item icon="date_range" label="Account Created">{{ profile.meta.created | date:'medium' }}
               </app-metadata-item>
               <app-metadata-item icon="date_range" label="Account Last Modified">
@@ -39,46 +52,71 @@
         <mat-card-header>
           <mat-card-title>Settings</mat-card-title>
         </mat-card-header>
-        <div class="user-profile__option" *ngIf="timeoutSession$ | async as timeoutSession"
-          [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
-          <div class="user-profile__option-inner">
-            <div class="user-profile__option-header">
-              Session timeout
-              <mat-icon *ngIf="timeoutSession === 'false'"
-                matTooltip="Session timeout is disabled, you are now at a greater security risk."
-                matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
-                warning
-              </mat-icon>
+        <div class="user-profile__options">
+
+          <div class="user-profile__option" *ngIf="gravatarEnabled$ | async as enableGravatar">
+            <div class="user-profile__option-inner">
+              <mat-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
+                <div class="user-profile__option-header">Use Gravatar for user icon</div>
+              </mat-slide-toggle>
+              <div class="user-profile__option-subtext">Use image from Gravatar for the user profile icon when email
+                address is available</div>
             </div>
-            <button mat-flat-button (click)="updateSessionKeepAlive(timeoutSession !== 'true')"
-              [color]="timeoutSession === 'true' ? 'warn' : 'primary'">
-              {{ timeoutSession === 'true' ? 'Disable' : 'Enable' }} session timeout
-            </button>
-            <div class="user-profile__option-subtext">Automatically log you out of the application if you are inactive
-              for a long period of time. Disabling this is considered a security risk.</div>
           </div>
-        </div>
-        <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
-          [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
-          <div class="user-profile__option-inner">
-            <div class="user-profile__option-header">
-              Polling
-              <mat-icon *ngIf="pollingEnabled === 'false'"
-                matTooltip="Polling is disabled, some pages may not automatically update." matTooltipPosition="right"
-                class="user-profile__option-warning-icon" inline="true">
-                warning
-              </mat-icon>
+
+          <div class="user-profile__option" *ngIf="timeoutSession$ | async as timeoutSession"
+            [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
+            <div class="user-profile__option-inner">
+              <mat-slide-toggle color="warn" [checked]="timeoutSession === 'false'"
+                (change)="updateSessionKeepAlive(timeoutSession)">
+                <div class="user-profile__option-header">Disable session timeout
+                  <mat-icon *ngIf="timeoutSession === 'false'"
+                    matTooltip="Session timeout is disabled, you are now at a greater security risk."
+                    matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
+                    warning
+                  </mat-icon>
+                </div>
+              </mat-slide-toggle>
+              <div class="user-profile__option-subtext">Disable automatic logout if you are inactive
+                for a long period of time. Disabling session timeout is considered a security risk.</div>
             </div>
-            <button mat-flat-button (click)="setPollingEnabled(pollingEnabled !== 'true')"
-              [color]="pollingEnabled === 'true' ? 'warn' : 'primary'">
-              {{ pollingEnabled === 'true' ? 'Disable' : 'Enable' }} polling
-            </button>
-            <div class="user-profile__option-subtext">Disabling polling wil result in some pages not automatically
-              updating.</div>
+          </div>
+
+          <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
+            [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
+            <div class="user-profile__option-inner">
+              <mat-slide-toggle color="warn" [checked]="pollingEnabled === 'false'"
+                (change)="updatePolling(pollingEnabled)">
+                <div class="user-profile__option-header">Disable polling
+                  <mat-icon *ngIf="pollingEnabled === 'false'" #tooltip="matTooltip"
+                    matTooltip="Polling is disabled, some pages may not automatically update."
+                    matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
+                    warning
+                  </mat-icon>
+                </div>
+              </mat-slide-toggle>
+              <div class="user-profile__option-subtext">Disable automatically refreshing data throughout the
+                application. Disabling
+                polling may result in some pages showing out-of-date information.</div>
+            </div>
+          </div>
+
+          <div class="user-profile__sectiom" *ngIf="hasMultipleThemes">
+            <mat-card-title class="user-profile__section">Theme</mat-card-title>
+            <div class="user-profile__option">
+              <div class="user-profile__option-inner">
+                <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
+                  (change)="themeService.setTheme($event.value)" name="theme" aria-label="Theme">
+                  <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key">
+                    {{ theme.label }}
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+            </div>
           </div>
         </div>
       </mat-card>
-      <mat-card>
+      <mat-card *ngIf="profile.origin === 'uaa'">
         <mat-card-header>
           <mat-card-title>Groups</mat-card-title>
         </mat-card-header>

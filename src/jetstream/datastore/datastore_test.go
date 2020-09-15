@@ -145,7 +145,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when database is missing", func() {
 
 				mockDatabaseConfigNoSSL.Database = ""
-				expectedErrorMessage := "parameter validation failed: Parameter was nil: database"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: database name"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -156,7 +156,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when host is missing", func() {
 
 				mockDatabaseConfigNoSSL.Host = ""
-				expectedErrorMessage := "parameter validation failed: Parameter was nil: host"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: host/hostname"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigNoSSL)
@@ -335,7 +335,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when database is missing", func() {
 
 				mockDatabaseConfigSSL.Database = ""
-				expectedErrorMessage := "parameter validation failed: Parameter was nil: database"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: database name"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)
@@ -346,7 +346,7 @@ func TestDatastore(t *testing.T) {
 			Convey("when host is missing", func() {
 
 				mockDatabaseConfigSSL.Host = ""
-				expectedErrorMessage := "parameter validation failed: Parameter was nil: host"
+				expectedErrorMessage := "parameter validation failed: Parameter was nil: host/hostname"
 
 				Convey("an error should be returned", func() {
 					_, err := NewDatabaseConnectionParametersFromConfig(mockDatabaseConfigSSL)

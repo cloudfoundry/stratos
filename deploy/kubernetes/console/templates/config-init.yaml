@@ -1,0 +1,194 @@
+---
+# Service account "config-init"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: "config-init"
+  labels:
+    app.kubernetes.io/component: "config-init"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- end }}
+---
+# Role "config-init-role" only used by account "[- config-init]"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  name: "config-init-role"
+  labels:
+    app.kubernetes.io/component: "config-init-role"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "secrets"
+  verbs:
+  - "create"
+  - "post"
+  - "get"
+  - "delete"
+{{- end }}
+---
+# Role binding for service account "config-init" and role "config-init-role"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  name: "config-init-secrets-role-binding"
+  labels:
+    app.kubernetes.io/component: "config-init-secrets-role-binding"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+subjects:
+- kind: "ServiceAccount"
+  name: "config-init"
+roleRef:
+  apiGroup: "rbac.authorization.k8s.io"
+  kind: "Role"
+  name: "config-init-role"
+{{- end }}
+---
+# Config init job will create a secrets for the Encryption Key and Certificate (auto-generated)
+apiVersion: "batch/v1"
+kind: "Job"
+metadata:
+{{- if .Values.console.jobAnnotations }}
+  annotations:
+{{ toYaml .Values.console.jobAnnotations | indent 4 }}
+{{- end }}
+  name: "stratos-config-init-{{ .Release.Revision }}"
+  labels:
+    app.kubernetes.io/component: "stratos-config-init-{{ .Release.Revision }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.jobExtraLabels }}
+{{ toYaml .Values.console.jobExtraLabels | indent 4 }}
+{{- end }}
+spec:
+  template:
+    metadata:
+      name: "stratos-config-init"
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        app.kubernetes.io/component: "stratos-config-init"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.podExtraLabels}}
+{{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+{{- end }}
+    spec:
+{{- if .Values.configInit }}
+{{- if .Values.configInit.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | trim  | indent 8 }}
+{{- end }}
+{{- end }}
+      containers:
+      - env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
+        - name: "STRATOS_VOLUME_MIGRATION"
+          value: "true"
+        - name: "IS_UPGRADE"
+          value: "{{ .Release.IsUpgrade }}"
+        - name: "NAMESPACE"
+          value: "{{ .Release.Namespace }}"
+        - name: "RELEASE_NAME"
+          value: "{{ .Release.Name }}"
+        - name: "RELEASE_REVISION"
+          value: "{{ .Release.Revision }}"
+        - name: "RELEASE_VERSION"
+          value: "{{ .Chart.AppVersion }}"
+        - name: "HELM_CHART"
+          value:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        - name: CONSOLE_TLS_SECRET_NAME
+          value: "{{ default "" .Values.console.tlsSecretName }}"
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{default "stratos-config-init" .Values.images.configInit}}:{{.Values.consoleVersion}}
+        command: ["/config-init.sh"]
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        livenessProbe: ~
+        name: "config-init"
+        readinessProbe: ~
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      restartPolicy: "OnFailure"
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "config-init"
+      {{- end }}
+      terminationGracePeriodSeconds: 600
+---
+{{- if .Values.autoCleanup }}
+# Cleanup job will delete the created secret when the release is deleted
+apiVersion: "batch/v1"
+kind: "Job"
+metadata:
+  name: "stratos-cleanup-{{ .Release.Revision }}"
+  annotations:
+    "helm.sh/hook": "pre-delete"
+    "helm.sh/hook-delete-policy": "hook-succeeded, hook-failed, before-hook-creation"
+  labels:
+    app.kubernetes.io/component: "stratos-cleanup-{{ .Release.Revision }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  template:
+    metadata:
+      name: "stratos-cleanup"
+      labels:
+        app.kubernetes.io/component: "stratos-config-init"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    spec:
+{{- if .Values.configInit }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | indent 8 }}
+{{- end }}
+      containers:
+      - env:
+        - name: "NAMESPACE"
+          value: "{{ .Release.Namespace }}"
+        - name: "RELEASE_NAME"
+          value: "{{ .Release.Name }}"
+        - name: "RELEASE_REVISION"
+          value: "{{ .Release.Revision }}"
+        - name: "RELEASE_VERSION"
+          value: "{{ .Chart.AppVersion }}"
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{default "stratos-config-init" .Values.images.configInit}}:{{.Values.consoleVersion}}
+        command: ["/config-init.sh", "--delete"]
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        livenessProbe: ~
+        name: "cleanup"
+        readinessProbe: ~
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      restartPolicy: "Never"
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "config-init"
+      {{- end }}
+      terminationGracePeriodSeconds: 30
+{{- end }}

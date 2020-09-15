@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { appReducers } from '../../../../../store/src/reducers.module';
-import { TabNavService } from '../../../../tab-nav.service';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
+import { SidePanelService } from './../../../shared/services/side-panel.service';
 import { EndpointsPageComponent } from './endpoints-page.component';
 
 describe('EndpointsPageComponent', () => {
@@ -19,18 +22,19 @@ describe('EndpointsPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EndpointsPageComponent],
       imports: [
+        CoreTestingModule,
         createBasicStoreModule(),
         CommonModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         StoreModule.forRoot(
           appReducers
         ),
-        BrowserAnimationsModule
+        NoopAnimationsModule
       ],
-      providers: [TabNavService]
+      providers: [TabNavService, SidePanelService, CurrentUserPermissionsService]
     })
       .compileComponents();
   }));

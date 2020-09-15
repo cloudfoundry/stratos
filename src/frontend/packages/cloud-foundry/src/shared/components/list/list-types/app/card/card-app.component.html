@@ -1,0 +1,32 @@
+<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]"
+  [status$]="appStatus$" [entityConfig]="entityConfig" [favorite]="favorite" [statusIcon]="false">
+  <app-meta-card-title>
+    <app-multiline-title>{{ row.entity.name }}</app-multiline-title>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>State</app-meta-card-key>
+    <app-meta-card-value>
+      <app-application-state [hideIcon]="true" [state]="applicationState$"></app-application-state>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Instances</app-meta-card-key>
+    <app-meta-card-value>
+      <app-running-instances [instances]="row.entity.instances" [cfGuid]="row.entity.cfGuid"
+        [appGuid]="row.metadata.guid">
+      </app-running-instances>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>{{cfOrgSpace.getLabel() | async}}</app-meta-card-key>
+    <app-meta-card-value>
+      <app-cf-org-space-links [service]="cfOrgSpace"></app-cf-org-space-links>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Created</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.metadata.created_at | date:'medium' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

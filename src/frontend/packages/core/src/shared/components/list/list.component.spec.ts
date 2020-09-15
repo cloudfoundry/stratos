@@ -2,24 +2,25 @@ import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { GeneralAppState } from '../../../../../store/src/app-state';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { createBasicStoreModule, getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../shared.module';
-import { ApplicationStateService } from '../application-state/application-state.service';
+import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
 import { ListComponent } from './list.component';
 import { ListConfig, ListViewTypes } from './list.component.types';
-import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
-import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 
 class MockedNgZone {
   run = fn => fn();
@@ -42,6 +43,7 @@ describe('ListComponent', () => {
         getInitialised: () => null,
         getMultiActions: () => null,
         getMultiFiltersConfigs: () => null,
+        getFilters: () => null,
         getSingleActions: () => null,
         isLocal: false,
         pageSizeOptions: [1],
@@ -50,10 +52,10 @@ describe('ListComponent', () => {
       };
     }
 
-    function setup(store: AppState, config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
+    function setup(config: ListConfig<APIResource>, test: (component: ListComponent<APIResource>) => void) {
       TestBed.configureTestingModule({
         imports: [
-          createBasicStoreModule(store),
+          createBasicStoreModule(),
         ],
         providers: [
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
@@ -62,7 +64,9 @@ describe('ListComponent', () => {
           EndpointListHelper
         ]
       });
-      inject([Store, ChangeDetectorRef, NgZone], (iStore: Store<AppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone) => {
+      inject([Store, ChangeDetectorRef, NgZone], (
+        iStore: Store<GeneralAppState>, cd: ChangeDetectorRef, ngZone: MockedNgZone
+      ) => {
         const component = new ListComponent<APIResource>(iStore, cd, config, ngZone as NgZone);
         test(component);
       })();
@@ -73,7 +77,7 @@ describe('ListComponent', () => {
 
       config.getInitialised = null;
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
@@ -93,7 +97,7 @@ describe('ListComponent', () => {
       const config = createBasicListConfig();
       spyOn<any>(config, 'getInitialised').and.returnValue(observableOf(true));
 
-      setup(getInitialTestStoreState(), config, (component) => {
+      setup(config, (component) => {
         const componentDeTyped = (component as any);
         spyOn<any>(componentDeTyped, 'initialise');
         expect(componentDeTyped.initialise).not.toHaveBeenCalled();
@@ -119,14 +123,16 @@ describe('ListComponent', () => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
-          ApplicationStateService,
+          // ApplicationStateService,
           PaginationMonitorFactory,
           EntityMonitorFactory,
-          EndpointListHelper
+          EndpointListHelper,
+          CurrentUserPermissionsService
         ],
         imports: [
           CoreModule,
           SharedModule,
+          CoreTestingModule,
           createBasicStoreModule(),
           NoopAnimationsModule
         ],
@@ -149,6 +155,7 @@ describe('ListComponent', () => {
     describe('Header', () => {
       it('Nothing enabled', () => {
         component.config.getMultiFiltersConfigs = () => [];
+        component.config.getFilters = () => [];
         component.config.enableTextFilter = false;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;
@@ -206,6 +213,19 @@ describe('ListComponent', () => {
             }
           ];
         };
+        component.config.getFilters = () => ([
+          {
+            default: true,
+            key: 'a',
+            label: 'A',
+            placeholder: 'Filter by A'
+          },
+          {
+            key: 'b',
+            label: 'B',
+            placeholder: 'Filter by B'
+          }
+        ]);
         component.config.enableTextFilter = true;
         component.config.viewType = ListViewTypes.CARD_ONLY;
         component.config.defaultView = 'card' as ListView;

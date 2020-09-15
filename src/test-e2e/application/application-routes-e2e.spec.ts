@@ -1,8 +1,9 @@
 import { browser, promise, protractor } from 'protractor';
 
-import { IApp } from '../../frontend/packages/core/src/core/cf-api.types';
+import { IApp } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../e2e';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
@@ -10,11 +11,13 @@ import { ApplicationPageRoutesTab } from './po/application-page-routes.po';
 import { CreateRoutesPage } from './po/routes-create-page.po';
 
 describe('Application Routes -', () => {
-
+  let cfHelper: CFHelpers;
   let applicationE2eHelper: ApplicationE2eHelper;
-  let cfGuid, app: APIResource<IApp>;
+  let cfGuid;
+  let app: APIResource<IApp>;
   let appRoutes;
-  let routeHostName, routePath;
+  let routeHostName;
+  let routePath;
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
@@ -24,18 +27,9 @@ describe('Application Routes -', () => {
       .connectAllEndpoints(ConsoleUserType.admin)
       .getInfo();
     applicationE2eHelper = new ApplicationE2eHelper(setup);
-    protractor.promise.controlFlow().execute(() => {
-      const defaultCf = e2e.secrets.getDefaultCFEndpoint();
-      // Only available until after `info` call has completed as part of setup
-      cfGuid = e2e.helper.getEndpointGuid(e2e.info, defaultCf.name);
-      return applicationE2eHelper.createApp(
-        cfGuid,
-        e2e.secrets.getDefaultCFEndpoint().testOrg,
-        e2e.secrets.getDefaultCFEndpoint().testSpace,
-        ApplicationE2eHelper.createApplicationName(),
-        defaultCf
-      ).then(appl => app = appl);
-    });
+    cfHelper = applicationE2eHelper.cfHelper;
+    protractor.promise.controlFlow().execute(() => cfHelper.updateDefaultCfOrgSpace());
+
   });
 
   function spaceContainsRoute(spaceGuid: string, host: string, path: string): promise.Promise<boolean> {
@@ -58,6 +52,15 @@ describe('Application Routes -', () => {
   }
 
   // All of these tests assume that they run after each other
+
+  it('Create skeleton app in default org/space', done => {
+    // Needs browser.wait OR done
+    cfHelper.createTestAppAndNav(ApplicationE2eHelper.createApplicationName(), false).then(pApp => {
+      app = pApp.app;
+      cfGuid = pApp.cfGuid;
+      done();
+    });
+  });
 
   it('Go to Application Routes Tab', () => {
     appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
@@ -152,7 +155,7 @@ describe('Application Routes -', () => {
     // Find the row index of the route that's just been unbound
     mapExistingRoutesList.header.setSearchText(routeHostName);
     const rowIndexP = mapExistingRoutesList.table.getTableData().then(rows =>
-      rows.findIndex(row => row['route'].startsWith(routeHostName, 7) && row['route'].endsWith('/' + routePath))
+      rows.findIndex(row => row.route.startsWith(routeHostName, 7) && row.route.endsWith('/' + routePath))
     );
 
     expect(rowIndexP).toBeGreaterThanOrEqual(0);

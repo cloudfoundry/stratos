@@ -1,18 +1,23 @@
-import {
-  LocalPaginationHelpers,
-} from '../../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
-import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { IgnorePaginationMaxedState, UpdatePaginationMaxedState } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { LocalPaginationHelpers } from '../../helpers/local-list.helpers';
 import { PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
+import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
 export function paginationMaxReached(state: PaginationState, action: UpdatePaginationMaxedState): PaginationState {
-  if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
+  const entityKey = entityCatalog.getEntityKey(action);
+  if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
     return state;
   }
   const requestSection = LocalPaginationHelpers.getEntityPageRequest(
-    state[action.entityKey][action.paginationKey],
-    action.forcedEntityKey || action.entityKey
+    state[entityKey][action.paginationKey],
+    action.forcedEntityKey || entityKey
   );
-  const { maxedMode: oldMaxedMode } = state[action.entityKey][action.paginationKey];
+  const { maxedState: oldMaxedState } = state[entityKey][action.paginationKey];
+  if (oldMaxedState.ignoreMaxed) {
+    return state;
+  }
+  const oldMaxedMode = oldMaxedState.isMaxedMode;
   const { pageNumber, pageRequest } = requestSection;
   const { maxed: oldCurrentlyMaxed = false } = pageRequest;
   const newCurrentlyMaxed = action.allEntities >= action.max;
@@ -28,23 +33,57 @@ export function paginationMaxReached(state: PaginationState, action: UpdatePagin
   }
 
   const entityState: PaginationEntityTypeState = {
-    ...state[action.entityKey],
+    ...state[entityKey],
     [action.paginationKey]: {
-      ...state[action.entityKey][action.paginationKey],
-      // currentlyMaxed: newCurrentlyMaxed,
+      ...state[entityKey][action.paginationKey],
       pageRequests: {
-        ...state[action.entityKey][action.paginationKey].pageRequests,
+        ...state[entityKey][action.paginationKey].pageRequests,
         [pageNumber]: {
           ...pageRequest,
           maxed: newCurrentlyMaxed
         }
       },
       // Once a list is maxed it can never go back, so can't set true to false
-      maxedMode: oldMaxedMode || newMaxedMode
+      maxedState: {
+        ...state[entityKey][action.paginationKey].maxedState,
+        isMaxedMode: oldMaxedMode || newMaxedMode
+      }
     }
   };
   return {
     ...state,
-    [action.entityKey]: entityState
+    [entityKey]: entityState
   };
+}
+
+export function paginationIgnoreMaxed(state: PaginationState, ignoreAction: IgnorePaginationMaxedState): PaginationState {
+  // Reset the pagination back to default and set the ignoreMaxed flag
+  const entityKey = entityCatalog.getEntityKey(ignoreAction);
+  const defaultPaginationEntityState = getDefaultPaginationEntityState();
+  // Retain the page size, order, etc. We may need to look at this again when applying max to other entity types
+  const { q, ...params } = state[entityKey][ignoreAction.paginationKey].params;
+  const entityState: PaginationEntityTypeState = {
+    ...state[entityKey],
+    [ignoreAction.paginationKey]: {
+      ...defaultPaginationEntityState,
+      clientPagination: {
+        ...defaultPaginationEntityState.clientPagination,
+        filter: {
+          // Retain the original filter. Losing this would leave the list controls in an odd way (see cf users table)
+          ...state[entityKey][ignoreAction.paginationKey].clientPagination.filter
+        }
+      },
+      params,
+      maxedState: {
+        // Retain the original maxed state. This will be true, but is ignored anyway
+        ...state[entityKey][ignoreAction.paginationKey].maxedState,
+        ignoreMaxed: true,
+      }
+    }
+  };
+  return {
+    ...state,
+    [entityKey]: entityState
+  };
+
 }

@@ -32,6 +32,7 @@ export class UnlimitedInputComponent implements OnInit {
 
   onChange() {
     if (this.unlimited) {
+      this.initialValue = this.formControl.value;
       this.formControl.setValue('');
       this.formControl.disable();
     } else {

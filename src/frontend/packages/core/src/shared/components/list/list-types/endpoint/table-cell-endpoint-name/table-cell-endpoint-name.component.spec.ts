@@ -1,9 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { createBasicStoreModule } from '../../../../../../../test-framework/store-test-helper';
+import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
 import { CoreModule } from '../../../../../../core/core.module';
-import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
 describe('TableCellEndpointNameComponent', () => {
@@ -12,12 +12,13 @@ describe('TableCellEndpointNameComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellEndpointNameComponent],
       imports: [
         CoreModule,
-        createBasicStoreModule()
+        ...BaseTestModules,
       ],
-      providers: [EntityMonitorFactory]
+      providers: [
+        EntityMonitorFactory,
+      ]
     })
       .compileComponents();
   }));
@@ -25,7 +26,9 @@ describe('TableCellEndpointNameComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointNameComponent);
     component = fixture.componentInstance;
-    component.row = {} as EndpointModel;
+    component.row = {
+      guid: ''
+    } as EndpointModel;
     fixture.detectChanges();
   });
 

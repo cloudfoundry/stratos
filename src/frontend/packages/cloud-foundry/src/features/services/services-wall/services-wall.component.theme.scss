@@ -1,0 +1,5 @@
+@import '../../../../sass/mixins';
+
+.services-wall {
+  @include apply-smaller-list-input;
+}

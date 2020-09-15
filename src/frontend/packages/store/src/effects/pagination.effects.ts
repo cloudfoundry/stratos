@@ -12,7 +12,7 @@ import {
   SET_PARAMS,
   SetParams,
 } from '../actions/pagination.actions';
-import { AppState } from './../app-state';
+import { AppState } from '../app-state';
 
 @Injectable()
 export class PaginationEffects {
@@ -27,7 +27,7 @@ export class PaginationEffects {
     map(action => {
       const addAction = action as AddParams;
       if (!addAction.keepPages) {
-        this.store.dispatch(new ResetPagination(action.entityKey, action.paginationKey));
+        this.store.dispatch(new ResetPagination(action.entityConfig, action.paginationKey));
       }
     }));
 }

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 
 @Component({
   selector: 'app-start-end-date',
@@ -20,11 +20,7 @@ export class StartEndDateComponent {
   @Input()
   set start(start: moment.Moment) {
     this.valid = true;
-    if (!start) {
-      this.startValue = start;
-      return;
-    }
-    if (start.isValid()) {
+    if (start && start.isValid()) {
       const clone = moment(start);
       this.startValue = clone;
       if (!this.pValidate(start, this.end)) {
@@ -42,10 +38,6 @@ export class StartEndDateComponent {
   @Input()
   set end(end: moment.Moment) {
     this.valid = true;
-    if (!end) {
-      this.endValue = end;
-      return;
-    }
     if (end && end.isValid()) {
       const clone = moment(end);
       this.endValue = clone;

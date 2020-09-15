@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -7,7 +7,8 @@ export enum BooleanIndicatorType {
   yesNo = 'yes-no',
   trueFalse = 'true-false',
   healthyUnhealthy = 'healthy-unhealthy',
-  succeededFailed = 'success-failed'
+  succeededFailed = 'success-failed',
+  progressProgress = 'progress-progress'
 }
 
 interface IBooleanConfig {
@@ -38,18 +39,7 @@ export class BooleanIndicatorComponent {
   @Input() inverse = false;
   // Should we use a subtle display - this won't show the No option as danger (typically red)
   @Input() subtle = true;
-  @Input() type: BooleanIndicatorType;
   @Input() showText = true;
-
-  @Input() set isTrue(isTrue: boolean) {
-    const isUnknown = typeof isTrue !== 'boolean';
-    this.booleanOutput = this.getIconTextAndSeverity({
-      isTrue,
-      isUnknown,
-      inverse: this.inverse,
-      subtle: this.subtle
-    });
-  }
 
   private icons = {
     Yes: 'check_circle',
@@ -66,13 +56,44 @@ export class BooleanIndicatorComponent {
     Remove: 'remove_circle',
     Locked: 'lock_outline',
     Unlocked: 'lock_open',
-    Unknown: 'help_outline'
+    Unknown: 'help_outline',
+    Progress: 'cached'
   };
+
+  private pType: BooleanIndicatorType;
+  @Input()
+  get type(): BooleanIndicatorType {
+    return this.pType;
+  }
+  set type(type: BooleanIndicatorType) {
+    this.pType = type;
+    this.updateBooleanOutput();
+  }
+
+  private pIsTrue: boolean;
+  @Input()
+  get isTrue(): boolean {
+    return this.pIsTrue;
+  }
+  set isTrue(isTrue: boolean) {
+    this.pIsTrue = isTrue;
+    this.updateBooleanOutput();
+  }
+
+  private updateBooleanOutput() {
+    const isUnknown = typeof this.isTrue !== 'boolean';
+    this.booleanOutput = this.getIconTextAndSeverity({
+      isTrue: this.isTrue,
+      isUnknown,
+      inverse: this.inverse,
+      subtle: this.subtle
+    });
+  }
 
   private getIconTextAndSeverity = (
     { isTrue = false, isUnknown = false, inverse = false, subtle = true }: IBooleanConfig
   ): IBooleanOutput => {
-    if (isUnknown) {
+    if (isUnknown || !this.type) {
       return {
         icon: this.icons.Unknown,
         text: 'Unknown',
@@ -87,13 +108,13 @@ export class BooleanIndicatorComponent {
       isTrue: inverse ? !isTrue : isTrue,
       subtle
     };
-  }
+  };
 
   private getText = ({ isTrue = false, inverse = false }: IBooleanConfig): string => {
     const [enabledText, disabledText] = this.getTypeText(this.type);
     const value = inverse ? !isTrue : isTrue;
     return this.capitalizeFirstLetter(value ? enabledText : disabledText);
-  }
+  };
 
   private getTypeText = (s: string) => s.split('-');
 

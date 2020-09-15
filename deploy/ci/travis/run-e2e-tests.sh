@@ -5,6 +5,8 @@ set -e
 echo "Stratos e2e tests"
 echo "================="
 
+DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
+
 echo "Checking docker version"
 
 docker version
@@ -40,24 +42,30 @@ fi
 
 echo "Using local deployment for e2e tests"
 # Quick deploy locally
-# Start a local UAA - this will take a few seconds to come up in the background
-docker run -d -p 8080:8080 splatform/stratos-uaa
 
-# Get go
-curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-chmod +x ~/bin/gimme
-eval "$(gimme 1.12.4)"
-go version
+# Build if needed or use existing build for this commit
+DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set +e
+source "${DIRNAME}/e2e-build-script.sh"
+set -e
 
-npm run build
-npm run build-backend
 # Copy travis config.properties file
 cp deploy/ci/travis/config.properties src/jetstream/
 pushd src/jetstream
 ./jetstream > backend.log &
 popd
 
-E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+CHROME_VERSION=$(google-chrome --version | grep -iEo "[0-9.]{10,20}")
+echo "Chrome version: ${CHROME_VERSION}"
+
+npm run update-webdriver -- --versions.chrome=${CHROME_VERSION}
+
+export STRATOS_E2E_BASE_URL="https://127.0.0.1:5443"
+
+E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
+
+# Set Stratos debug if running a PR with the appropriate label
+source "${DIRPATH}/deploy/ci/travis/check-e2e-pr.sh"
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then

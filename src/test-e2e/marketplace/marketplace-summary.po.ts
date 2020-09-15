@@ -23,4 +23,5 @@ export class MarketplaceSummaryPage extends Page {
     return element(by.name('add-service-instance'));
   }
 
+
 }

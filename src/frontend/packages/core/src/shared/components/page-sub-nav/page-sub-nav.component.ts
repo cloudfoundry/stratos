@@ -1,6 +1,7 @@
-import { Component, ViewChild, TemplateRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { TabNavService } from '../../../../tab-nav.service';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+
+import { TabNavService } from '../../../tab-nav.service';
 
 @Component({
   selector: 'app-page-sub-nav',
@@ -8,7 +9,7 @@ import { TabNavService } from '../../../../tab-nav.service';
   styleUrls: ['./page-sub-nav.component.scss']
 })
 export class PageSubNavComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('subNavTmpl') subNavTmpl: TemplateRef<any>;
+  @ViewChild('subNavTmpl', { static: true }) subNavTmpl: TemplateRef<any>;
 
   constructor(private tabNavService: TabNavService) { }
 

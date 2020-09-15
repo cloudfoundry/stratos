@@ -10,7 +10,7 @@ apt-get install -y curl
 apt-get install -y git
 curl -sL -o ./gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
 chmod +x ./gimme
-eval "$(./gimme 1.12.4)"
+eval "$(./gimme 1.13.4)"
 mkdir -p /root/go/bin
 export PATH=/root/go/bin:$PATH
 cd /stratos/src/jetstream

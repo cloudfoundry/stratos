@@ -1,100 +1,24 @@
 import { denormalize } from 'normalizr';
 
+import { IRequestTypeState } from '../app-state';
 import { IRecursiveDelete } from '../effects/recursive-entity-delete.effect';
-import { IRequestDataState } from '../types/entity.types';
-import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  cfUserSchemaKey,
-  domainSchemaKey,
-  EntitySchema,
-  organizationSchemaKey,
-  privateDomainsSchemaKey,
-  quotaDefinitionSchemaKey,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  stackSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from './entity-factory';
+import { EntitySchema } from './entity-schema';
 
+export interface IFlatTreeValue {
+  schema: EntitySchema;
+  ids: Set<string>;
+}
 export interface IFlatTree {
-  [entityKey: string]: Set<string>;
+  [entityKey: string]: IFlatTreeValue;
 }
 
-interface IExcludes {
-  [entityKey: string]: string[];
-}
 export class EntitySchemaTreeBuilder {
-  constructor(private excludes: IExcludes = {
-    // Delete org
-    [organizationSchemaKey]: [
-      domainSchemaKey,
-      quotaDefinitionSchemaKey,
-      privateDomainsSchemaKey,
-    ],
-    // Delete space
-    [spaceSchemaKey]: [
-      domainSchemaKey,
-      // Service instance related
-      serviceSchemaKey,
-      servicePlanSchemaKey,
-      // App Related
-      stackSchemaKey
-    ],
-    // Delete app
-    [applicationSchemaKey]: [
-      stackSchemaKey,
-      spaceSchemaKey,
-      routeSchemaKey,
-      serviceBindingSchemaKey,
-      serviceInstancesSchemaKey
-    ],
-    // Terminate app instance
-    [appStatsSchemaKey]: [],
-    // Delete route, unbind route
-    [routeSchemaKey]: [
-      domainSchemaKey,
-      applicationSchemaKey
-    ],
-    // Unbind service instance
-    [serviceBindingSchemaKey]: [
-      applicationSchemaKey,
-      serviceInstancesSchemaKey,
-      serviceSchemaKey
-    ],
-    // Delete service instance
-    [serviceInstancesSchemaKey]: [
-      servicePlanSchemaKey,
-      // Service bindings
-      applicationSchemaKey,
-      serviceInstancesSchemaKey,
-      serviceSchemaKey
-    ],
-    [userProvidedServiceInstanceSchemaKey]: [
-      servicePlanSchemaKey,
-      // Service bindings
-      applicationSchemaKey,
-      serviceInstancesSchemaKey,
-      serviceSchemaKey,
-      organizationSchemaKey,
-      spaceSchemaKey
-    ],
-    // Remove a user role
-    [cfUserSchemaKey]: [
-      organizationSchemaKey,
-      spaceSchemaKey
-    ]
-  }) { }
 
   private entityExcludes: string[];
-  public getFlatTree(treeDefinition: IRecursiveDelete, state: Partial<IRequestDataState>): IFlatTree {
+  public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);
-    this.entityExcludes = this.excludes[schema.key] || [];
+    this.entityExcludes = schema.excludeFromRecursiveDelete || [];
     return this.build(schema, denormed, undefined, true);
   }
 
@@ -102,7 +26,7 @@ export class EntitySchemaTreeBuilder {
     if (Array.isArray(schema)) {
       schema = schema[0];
     }
-    if (!schema || !entity || this.entityExcludes.includes(schema.key)) {
+    if (!schema || !entity || this.entityExcludes.includes(schema.entityType)) {
       return flatTree;
     }
     const keys = schema.definition ? Object.keys(schema.definition) : null;
@@ -125,11 +49,11 @@ export class EntitySchemaTreeBuilder {
     }
     const { definition } = schema;
     if (!schema.getId) {
-      return this.build(schema[schema.key], schema[schema.key], flatTree);
+      return this.build(schema[schema.entityType], schema[schema.entityType], flatTree);
     }
-    // Don't add the root element to the tree to avoid duplication actions whe consuming tree
+    // Don't add the root element to the tree to avoid duplication actions when consuming tree
     if (!root) {
-      flatTree = this.addIdToTree(flatTree, schema.key, schema.getId(entity));
+      flatTree = this.addIdToTree(flatTree, schema.key, schema.getId(entity), schema);
     }
     if (!keys) {
       return flatTree;
@@ -140,18 +64,22 @@ export class EntitySchemaTreeBuilder {
       if (Array.isArray(newEntity)) {
         return this.build(entityDefinition, newEntity, fullFlatTree);
       }
-
-      return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, key);
+      return this.handleSingleChildEntity(entityDefinition, newEntity, fullFlatTree, entityDefinition.key);
     }, flatTree);
   }
 
-  private addIdToTree(flatTree: IFlatTree, key: string, newId: string) {
-    const ids = flatTree[key] || new Set<string>();
-    flatTree[key] = ids.add(newId);
+  private addIdToTree(flatTree: IFlatTree, key: string, newId: string, schema: EntitySchema) {
+    if (!flatTree[key]) {
+      flatTree[key] = {
+        schema,
+        ids: new Set<string>()
+      };
+    }
+    flatTree[key].ids = flatTree[key].ids.add(newId);
     return flatTree;
   }
 
-  private getDefinition(definition) {
+  private getDefinition(definition): EntitySchema {
     if (Array.isArray(definition)) {
       return definition[0];
     }
@@ -166,14 +94,14 @@ export class EntitySchemaTreeBuilder {
       return this.build(entityDefinition, entity, flatTree);
     }
     const id = entityDefinition.getId(entity);
-    const entityKeys = flatTree[key];
+    const entityKeys = flatTree[key] ? flatTree[key].ids : null;
     if (!id || (entityKeys && entityKeys.has(id))) {
       if (entityDefinition.definition) {
         return this.build(entityDefinition.definition as EntitySchema, entity, flatTree);
       }
       return flatTree;
     }
-    flatTree = this.addIdToTree(flatTree, key, id);
+    flatTree = this.addIdToTree(flatTree, key, id, entityDefinition);
     const subKeys = Object.keys(entityDefinition);
     if (subKeys.length > 0) {
       return this.build(entityDefinition, entity, flatTree);

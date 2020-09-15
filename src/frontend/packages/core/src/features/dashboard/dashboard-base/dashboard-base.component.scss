@@ -1,9 +1,9 @@
-@import '../../../../sass/colors';
 @import '../../../../sass/mixins';
 
 $app-sub-header-height: 48px;
+$app-header-height: 56px;
+
 .dashboard {
-  background-color: transparent;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -16,12 +16,17 @@ $app-sub-header-height: 48px;
   }
   &__side-help-outer {
     z-index: 9999;
+
+    @include breakpoint(mobileonly) {
+      left: 0;
+    }
   }
-  &__side-help-button {
-    position: absolute;
-    right: 5px;
-    top: 7px;
+
+  &__side_preview {
+    top: $app-header-height;
+    height: calc(100vw - #{$app-header-height} - 1px);
   }
+
   &__page-tabs {
     background-color: rgba(146, 146, 146, .1);
   }
@@ -52,6 +57,11 @@ $app-sub-header-height: 48px;
   }
   &__side-help {
     max-width: 600px;
+    min-width: 600px;
+
+    @include breakpoint(mobileonly) {
+      min-width: auto;
+    }
   }
 }
 
@@ -75,7 +85,6 @@ $app-sub-header-height: 48px;
   height: $app-sub-header-height;
   margin-left: 200px;
   padding: 0;
-  width: 100%;
   @include breakpoint(tablet) {
     margin: 0;
     padding: 0 20px;

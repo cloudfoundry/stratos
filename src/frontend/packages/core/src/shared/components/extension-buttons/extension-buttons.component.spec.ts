@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { ExtensionButtonsComponent } from './extension-buttons.component';
-import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('ExtensionButtonsComponent', () => {
   let component: ExtensionButtonsComponent;
@@ -9,10 +9,10 @@ describe('ExtensionButtonsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ExtensionButtonsComponent ],
+      declarations: [ExtensionButtonsComponent],
       imports: [...BaseTestModulesNoShared],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

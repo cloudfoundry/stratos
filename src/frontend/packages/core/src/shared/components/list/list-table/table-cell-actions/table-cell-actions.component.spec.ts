@@ -1,12 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 import { of as observableOf } from 'rxjs';
 
+import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../../core/core.module';
-import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ListConfig } from '../../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions.component';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
@@ -20,6 +21,7 @@ describe('TableCellActionsComponent', () => {
       declarations: [TableCellActionsComponent],
       imports: [
         CoreModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     })

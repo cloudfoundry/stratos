@@ -9,7 +9,9 @@ describe('EntitySummaryTitleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [CoreModule],
+      imports: [
+        CoreModule,
+      ],
       declarations: [EntitySummaryTitleComponent]
     })
       .compileComponents();

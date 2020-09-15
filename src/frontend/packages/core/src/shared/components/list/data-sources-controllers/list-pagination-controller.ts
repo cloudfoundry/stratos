@@ -12,7 +12,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
+import { GeneralAppState } from '../../../../../../store/src/app-state';
 import {
   defaultClientPaginationPageSize,
 } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
@@ -44,7 +44,7 @@ function onPaginationEntityState(
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
-    private store: Store<AppState>,
+    private store: Store<GeneralAppState>,
     public dataSource: IListDataSource<T>,
     private ngZone: NgZone
   ) {
@@ -76,13 +76,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     const page = pageIndex + 1;
     if (this.dataSource.isLocal) {
       this.store.dispatch(new SetClientPage(
-        this.dataSource.entityKey, this.dataSource.paginationKey, page
+        this.dataSource, this.dataSource.paginationKey, page
       ));
     } else {
       onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
         if (paginationEntityState.currentPage !== page) {
           this.store.dispatch(new SetPage(
-            this.dataSource.entityKey, this.dataSource.paginationKey, page
+            this.dataSource, this.dataSource.paginationKey, page
           ));
         }
       });
@@ -93,11 +93,11 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       if (this.dataSource.isLocal) {
         if (paginationEntityState.clientPagination.pageSize !== pageSize) {
           this.store.dispatch(new SetClientPageSize(
-            this.dataSource.entityKey, this.dataSource.paginationKey, pageSize
+            this.dataSource, this.dataSource.paginationKey, pageSize
           ));
         }
       } else if (paginationEntityState.params['results-per-page'] !== pageSize) {
-        this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
           ['results-per-page']: pageSize,
         }, this.dataSource.isLocal));
       }
@@ -109,7 +109,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         paginationEntityState.params['order-direction-field'] !== listSort.field ||
         paginationEntityState.params['order-direction'] !== listSort.direction
       ) {
-        this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
           ['order-direction-field']: listSort.field,
           ['order-direction']: listSort.direction
         }, this.dataSource.isLocal));
@@ -123,7 +123,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
           newFilter.string = filterString;
           this.store.dispatch(new SetClientFilter(
-            this.dataSource.entityKey,
+            this.dataSource,
             this.dataSource.paginationKey,
             newFilter
           ));
@@ -161,13 +161,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           }
         };
         this.store.dispatch(new SetClientFilter(
-          this.dataSource.entityKey,
+          this.dataSource,
           this.dataSource.paginationKey,
           newFilter
         ));
       }
 
-      if (paginationEntityState.maxedMode) {
+      if (paginationEntityState.maxedState.isMaxedMode && !paginationEntityState.maxedState.ignoreMaxed) {
         this.dataSource.setMultiFilter(changes, paginationEntityState.params);
       }
 
@@ -191,7 +191,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       filter(pag => !!pag),
       map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
         // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;

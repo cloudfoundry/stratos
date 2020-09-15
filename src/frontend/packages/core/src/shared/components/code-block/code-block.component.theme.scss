@@ -1,16 +1,19 @@
 @import '~@angular/material/theming';
-@mixin display-value-theme($theme, $app-theme) {
+@mixin code-block-theme($theme, $app-theme) {
+  $is-dark: map-get($theme, is-dark);
   $primary: map-get($theme, primary);
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   .app-code-block {
-    background-color: mat-color($foreground-colors, text);
-    color: darken(mat-color($background-colors, background), 2%);
-    &___copied-icon {
-      color: mat-color($primary);
+    $background-color: mat-color($foreground-colors, text);
+    $color: darken(mat-color($background-colors, background), 2%);
+    @if $is-dark == true {
+      // See the app variable and cf cli pages
+      $background-color: lighten(mat-color($background-colors, background), 5%);
+      $color: mat-color($foreground-colors, text);
     }
-    &__copied-div {
-      background-color: mat-color($foreground-colors, text);
-    }
+
+    background-color: $background-color;
+    color: $color;
   }
 }

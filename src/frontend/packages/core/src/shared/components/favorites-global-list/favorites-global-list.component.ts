@@ -1,21 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
-import {
-  errorFetchingFavoritesSelector,
-  fetchingFavoritesSelector,
-} from '../../../../../store/src/selectors/favorite-groups.selectors';
-import { LoggerService } from '../../../core/logger.service';
-import { IFavoriteEntity, IGroupedFavorites, UserFavoriteManager } from '../../../core/user-favorite-manager';
+import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
+import { IFavoriteEntity, IGroupedFavorites } from '../../../../../store/src/types/user-favorite-manager.types';
+import { IFavoritesInfo } from '../../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 
-
-interface IFavoritesInfo {
-  fetching: boolean;
-  error: boolean;
-}
 
 @Component({
   selector: 'app-favorites-global-list',
@@ -25,25 +18,19 @@ interface IFavoritesInfo {
 export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
-  constructor(private store: Store<AppState>, private logger: LoggerService) { }
+  constructor(
+    private store: Store<AppState>,
+    private userFavoriteManager: UserFavoriteManager
+  ) { }
 
   @Input() showFilters: boolean;
 
   ngOnInit() {
-    const manager = new UserFavoriteManager(this.store, this.logger);
-    this.favoriteGroups$ = manager.hydrateAllFavorites().pipe(
+    this.favoriteGroups$ = this.userFavoriteManager.hydrateAllFavorites().pipe(
       map(favs => this.sortFavoriteGroups(favs))
     );
 
-    this.favInfo$ = combineLatest(
-      this.store.select(fetchingFavoritesSelector),
-      this.store.select(errorFetchingFavoritesSelector)
-    ).pipe(
-      map(([fetching, error]) => ({
-        fetching,
-        error
-      }))
-    );
+    this.favInfo$ = getFavoriteInfoObservable(this.store);
   }
 
   private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {

@@ -10,7 +10,6 @@ image_resource:
   source:
    # Generated using scripts/Dockerfile.stratos-ci
    repository: splatform/stratos-ci-concourse
-   tag: "latest"
 
 run:
   path: bash
@@ -27,6 +26,7 @@ run:
       VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
       COMMIT_HASH=$(git log -1 --format="%h")
       LATEST_TAG=$VERSION-${COMMIT_HASH}
+      SOURCE_CODE_REPO=$(git config --get remote.origin.url)
 
       echo "Got version $VERSION from package.json."
 
@@ -61,8 +61,15 @@ run:
       { "stratos_version": "${LATEST_TAG}" }
       EOF
       cat > image-labels << EOF
-      { "commit": "${COMMIT_HASH}" }
+      { "com.stratos.commit": "${COMMIT_HASH}" }
       EOF
+
+      # Use uppercase values
+      cat > ui-build-args << EOF
+      { "STRATOS_COMMIT": "${COMMIT_HASH}", "STRATOS_BRANCH": "${COMMIT_HASH}", "STRATOS_PROJECT": "${SOURCE_CODE_REPO}" }
+      EOF
+
+      set +x
 
       echo "Created v2-alpha-tag, v2-version and build-args."
 
@@ -75,6 +82,11 @@ run:
       echo "Contents of v2-alpha-tag:"
       cat v2-alpha-tag
       
+      echo "Contents of image-labels:"
+      cat image-labels
+
+      set -x
+
       echo "Creating tag file tar..."
       tar -cf ${FILENAME}.tar v2-alpha-tag v2-version v2-tag v2-commit build-args ui-build-args image-labels
 

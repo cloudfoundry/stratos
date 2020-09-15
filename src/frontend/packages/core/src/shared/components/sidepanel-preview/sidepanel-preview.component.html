@@ -1,0 +1,11 @@
+<div class="sidepanel-preview" [ngClass]="{'sidepanel-preview__preview': (sidePanelService.previewMode$ | async)}">
+  <div class="sidepanel-preview__header">
+    <h1>{{ title }}</h1>
+    <button class="sidepanel__close" mat-icon-button (click)="sidePanelService.hide()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="sidepanel-preview__content">
+    <ng-content></ng-content>
+  </div>
+</div>

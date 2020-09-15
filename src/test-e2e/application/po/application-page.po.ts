@@ -60,6 +60,14 @@ export class ApplicationBasePage extends CFPage {
     return this.goToTab('GitHub', 'gitscm');
   }
 
+  public goToAutoscalerTab() {
+    return this.goToTab('Autoscale', 'autoscale');
+  }
+
+  public waitForAutoscalerTab() {
+    return this.tabs.waitForItem('Autoscale', 15000);
+  }
+
   private goToTab(label: string, urlSuffix: string) {
     return this.tabs.goToItemAndWait(label, this.navLink.substring(0, this.navLink.lastIndexOf('/')), urlSuffix);
   }
@@ -68,7 +76,7 @@ export class ApplicationBasePage extends CFPage {
     return this.header.getTitleText();
   }
 
-  public delete(appName: string): DeleteApplication {
+  public delete(): DeleteApplication {
     const deleteApp = new DeleteApplication(this.cfGuid, this.appGuid);
     this.subHeader.clickIconButton('delete');
     deleteApp.waitForPage();

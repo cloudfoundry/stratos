@@ -2,8 +2,9 @@ import { browser, promise } from 'protractor';
 
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
+import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
 import { InviteUserStepperPo } from '../po/invite-users-stepper.po';
 import { StackedInputActionsPo } from '../po/stacked-input-actions.po';
@@ -163,7 +164,13 @@ export function setupInviteUserTests(
       inviteUserStepper.snackBar.waitForMessage('Failed to invite one or more users. Please address per user message and try again');
       expect(stackedActions.isInputSuccess(0)).toBe(true);
       expect(stackedActions.isInputSuccess(1)).toBe(false);
-      expect(stackedActions.getInputMessage(1)).toBe(`${slightlyValidEmail} is invalid email.`);
+
+      // Check message - flexibility on old and newer UAA
+      stackedActions.getInputMessage(1).then(msg => {
+        const okay = msg === `${slightlyValidEmail} is invalid email.` || msg === 'No authentication provider found.';
+        expect(okay).toBeTruthy('Error message is not as expected');
+      });
+
       // Clear state
       inviteUserStepper.cancel();
       usersTable.inviteUser();
@@ -184,7 +191,7 @@ export function setupInviteUserTests(
         usersTable.getPermissions(0, false).getChips().then(chips => {
           expect(chips.length).toBe(1);
           chips[0].getText().then(text => {
-            expect(text.startsWith('Manager')).toBeTruthy();
+            expect(text.startsWith(spaceRole)).toBeTruthy();
           });
         });
       } else {
@@ -192,28 +199,34 @@ export function setupInviteUserTests(
       }
     }
 
-    it('Invite two users', () => {
-      localLog('Invite two users: Started');
-      stackedActions.addInput();
-      expect(stackedActions.getInputCount()).toBe(2);
+    describe('', () => {
+      extendE2ETestTime(60000);
 
-      const user1 = InviteUserStepperPo.createUserEmail(null, 'Invite1');
-      const user2 = InviteUserStepperPo.createUserEmail(null, 'Invite2');
-      stackedActions.setInput({ [fieldOne]: user1, [fieldTwo]: user2 });
+      it('Invite two users', () => {
+        localLog('Invite two users: Started');
+        stackedActions.addInput();
+        expect(stackedActions.getInputCount()).toBe(2);
 
-      const spaceRole = 'Manager';
-      if (isSpace) {
-        inviteUserStepper.setSpaceRole(2);
-      }
-      inviteUserStepper.next();
-      usersToDelete.push(user1, user2);
+        const user1 = InviteUserStepperPo.createUserEmail(null, 'Invite1');
+        const user2 = InviteUserStepperPo.createUserEmail(null, 'Invite2');
+        stackedActions.setInput({ [fieldOne]: user1, [fieldTwo]: user2 });
 
-      usersTable.waitUntilShown(null, 15000);
-      usersTable.waitForNoLoadingIndicator();
+        const spaceRole = 'Manager';
+        if (isSpace) {
+          inviteUserStepper.setSpaceRole(2);
+        }
+        inviteUserStepper.next();
+        usersToDelete.push(user1, user2);
 
-      testUser(user1, spaceRole);
-      testUser(user2, spaceRole);
+        usersTable.waitUntilShown(null, 15000);
+        usersTable.waitForNoLoadingIndicator();
+
+        testUser(user1, spaceRole);
+        testUser(user2, spaceRole);
+      });
     });
+
+
 
     afterAll(() => {
       localLog('afterAll: Started');

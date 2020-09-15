@@ -1,23 +1,26 @@
 <app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
 </app-page-header-events>
 <app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
-  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': row.connectionStatus === 'disconnected', 'endpoint-card--checking': row.connectionStatus === 'checking'}" 
-  [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$"
-  [statusIcon]="false" [statusBackground]="true">
+  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': connectionStatus === 'disconnected', 'endpoint-card--checking': connectionStatus === 'checking'}"
+  [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      <div *ngIf="!!endpointConfig && endpointConfig.imagePath" class="endpoint-card__image-wrapper">
-        <img class="endpoint-card__image" src="{{endpointConfig.imagePath}}" />
+      <div *ngIf="!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl"
+        class="endpoint-card__image-wrapper">
+        <img class="endpoint-card__image" src="{{endpointCatalogEntity.definition.logoUrl}}" />
       </div>
       <div class="endpoint-card__title-text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
-        <div class="endpoint-card__title-subtext">{{!endpointConfig ? 'Unknown' : endpointConfig.label}}
+        <div class="endpoint-card__title-subtext">
+          {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
           <!--
           <ng-container *ngIf="endpointParentType">
             ({{ endpointParentType }})</ng-container>
           -->
         </div>
       </div>
+      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard"
+        [showSuccessText]="false"></app-copy-to-clipboard>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>
@@ -35,9 +38,13 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>
-    <app-meta-card-value>{{ address }}</app-meta-card-value>
+    <app-meta-card-value>
+      <div class="endpoint-card__address">
+        <div class="endpoint-card__address__value">{{ address }}</div>
+      </div>
+    </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="hasDetails">
+  <app-meta-card-item [hidden]="!hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>
       <div #endpointDetails></div>

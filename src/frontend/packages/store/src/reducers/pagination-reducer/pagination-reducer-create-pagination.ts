@@ -1,7 +1,12 @@
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
+function getPaginationKey(entityConfig: EntityCatalogEntityConfig) {
+  return entityCatalog.getEntityKey(entityConfig);
+}
 /**
  * Creates new pagination from default values or a seed pagination section.
  * If the pagination exists and a seed pagination key is provided, sync the current pagination section and the seed.
@@ -10,32 +15,35 @@ import { spreadClientPagination } from './pagination-reducer.helper';
  */
 export function createNewPaginationSection(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState)
   : PaginationState {
-  if (state[action.entityKey][action.paginationKey] && !action.seed) {
+  const entityKey = getPaginationKey(action.entityConfig);
+  if (state[entityKey][action.paginationKey] && !action.seed) {
     return state;
   }
-  if (!state[action.entityKey][action.paginationKey] && !action.seed) {
+  if (!state[entityKey][action.paginationKey] && !action.seed) {
     return createNew(state, action, defaultState);
   }
   return mergeWithSeed(state, action, defaultState);
 }
 
 function createNew(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
+  const entityKey = getPaginationKey(action.entityConfig);
   return {
     ...state,
-    [action.entityKey]: {
-      ...state[action.entityKey],
+    [entityKey]: {
+      ...state[entityKey],
       [action.paginationKey]: defaultState
     }
   };
 }
 
 function mergeWithSeed(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
+  const entityKey = getPaginationKey(action.entityConfig);
   const newState = { ...state };
-  const currentPagination = state[action.entityKey][action.paginationKey] || defaultState;
-  const seeded = action.seed && state[action.entityKey] && state[action.entityKey][action.seed];
-  const seedPagination = seeded ? state[action.entityKey][action.seed] : defaultState;
+  const currentPagination = state[entityKey][action.paginationKey] || defaultState;
+  const seeded = action.seed && state[entityKey] && state[entityKey][action.seed];
+  const seedPagination = seeded ? state[entityKey][action.seed] : defaultState;
   const entityState = {
-    ...newState[action.entityKey],
+    ...newState[entityKey],
     [action.paginationKey]: {
       ...seedPagination,
       // If we already have a pagination section, retain these values.
@@ -47,7 +55,7 @@ function mergeWithSeed(state: PaginationState, action: CreatePagination, default
   };
   return {
     ...newState,
-    [action.entityKey]: entityState
+    [entityKey]: entityState
   };
 }
 
@@ -72,8 +80,6 @@ function hasResultCountChanged(currentPagination: PaginationEntityState, seedPag
 
 function getCurrentPage(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
   const currentPage = currentPagination.clientPagination.currentPage;
-  const seededTotalResults = seedPagination.clientPagination.totalResults;
-  const totalResults = currentPagination.clientPagination.totalResults;
   if (hasResultCountChanged(currentPagination, seedPagination)) {
     return 1;
   } else {

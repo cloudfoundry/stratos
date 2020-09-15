@@ -54,9 +54,13 @@ export function endpointHasCfMetrics(endpoint: EndpointModel): boolean {
     !!endpoint.relations.receives.find(relation => relation.type === EndpointRelationTypes.METRICS_CF) : false;
 }
 
-function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
-  guid: string
-},                                      connectionStatus: endpointConnectionStatus) {
+function changeEndpointConnectionStatus(
+  state: IRequestEntityTypeState<EndpointModel>,
+  action: {
+    guid: string
+  },
+  connectionStatus: endpointConnectionStatus
+) {
   if (!action.guid) {
     return state;
   }
@@ -86,7 +90,20 @@ function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action
         }
       },
     };
+  } else if (action.queryType === MetricAPIQueryTypes.STRATOS_METADATA) {
+    const existingEndpoint = state[action.endpointGuid];
+    return {
+      ...state,
+      [action.endpointGuid]: {
+        ...existingEndpoint,
+        metadata: {
+          ...existingEndpoint.metadata,
+          metrics_stratos: action.data
+        }
+      },
+    };
   }
+
   return state;
 
 }

@@ -7,6 +7,11 @@ import (
 	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
+// NOTE: This migration script has been modified
+// We originally had a triiger, which is removed in a later migration script
+// This requires a certain level of privilege to create, so it has been removed in this scipt for new installs.
+// Upgrades will still remove the trigger if it exists
+
 func init() {
 	RegisterMigration(20190522121200, "LocalUsers", func(txn *sql.Tx, conf *goose.DBConf) error {
 		binaryDataType := "BYTEA"
@@ -31,43 +36,14 @@ func init() {
 		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 		createLocalUsers += "PRIMARY KEY (user_guid) )"
 
-		//Trigger to update last_updated timestamp
-		createUpdateModifiedTrigger := "CREATE TRIGGER update_last_updated "
-		createUpdateModifiedTrigger += "AFTER UPDATE ON local_users "
-		createUpdateModifiedTrigger += "BEGIN UPDATE local_users SET last_updated = DATETIME('now') WHERE _rowid_ = new._rowid_; "
-		createUpdateModifiedTrigger += "END;"
-
-		//Configure Postgres migration options 
+		//Configure Postgres migration options
 		if strings.Contains(conf.Driver.Name, "postgres") {
 			createLocalUsers += " WITH (OIDS=FALSE);"
-
-			//Postgres requires a trigger function
-			//Create trigger function and generate trigger statement
-			postgresTrigger, err := setupPostgresTrigger(txn)
-			if err != nil {
-				return err
-			}
-			createUpdateModifiedTrigger = postgresTrigger
-
-		} else if strings.Contains(conf.Driver.Name, "mysql") {
-			// MySQL
-			createUpdateModifiedTrigger = "CREATE TRIGGER update_last_updated "
-			createUpdateModifiedTrigger += "AFTER UPDATE ON local_users "
-			createUpdateModifiedTrigger += "FOR EACH ROW BEGIN "
-			createUpdateModifiedTrigger += "UPDATE local_users SET last_updated = NOW() WHERE user_guid = NEW.user_guid; "
-			createUpdateModifiedTrigger += "END;"
-
-			createLocalUsers += ";"
-			} else {
+		} else {
 			createLocalUsers += ";"
 		}
 
 		_, err = txn.Exec(createLocalUsers)
-		if err != nil {
-			return err
-		}
-
-		_, err = txn.Exec(createUpdateModifiedTrigger)
 		if err != nil {
 			return err
 		}
@@ -86,27 +62,3 @@ func init() {
 		return nil
 	})
 }
-
-func setupPostgresTrigger(txn *sql.Tx) (string, error) {
-	
-	createPostgresUpdateModifiedTrigger :=  "CREATE TRIGGER update_trigger "
-	createPostgresUpdateModifiedTrigger +=	"AFTER UPDATE ON local_users FOR EACH ROW "
-	createPostgresUpdateModifiedTrigger +=	"EXECUTE PROCEDURE update_last_modified_time(); "
-
-	postgresTriggerFunction :=	"CREATE OR REPLACE FUNCTION update_last_modified_time() "
-	postgresTriggerFunction +=	"RETURNS trigger AS "
-	postgresTriggerFunction +=	"$BODY$ "
-	postgresTriggerFunction +=	"BEGIN "
-	postgresTriggerFunction +=	"UPDATE local_users "
-	postgresTriggerFunction +=	"SET last_updated = CURRENT_TIMESTAMP WHERE new.user_guid = old.user_guid; "
-	postgresTriggerFunction +=	"RETURN NEW; END; $BODY$ "
-	postgresTriggerFunction +=	"LANGUAGE plpgsql VOLATILE COST 100;"
-
-	_, err := txn.Exec(postgresTriggerFunction)
-	if err != nil {
-		return "", err
-	}
-
-	return createPostgresUpdateModifiedTrigger, err
-}
-

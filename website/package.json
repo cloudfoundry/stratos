@@ -1,0 +1,35 @@
+{
+  "name": "website",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "docusaurus start",
+    "start-no-watch": "docusaurus start --no-open --poll",
+    "build": "npm run versions && docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "./deploy.sh",
+    "version": "docusaurus docs:version",
+    "versions": "./build-versions.sh",
+    "docusaurus": "docusaurus",
+    "serve": "docusaurus serve"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^2.0.0-alpha.59",
+    "@docusaurus/preset-classic": "^2.0.0-alpha.59",
+    "clsx": "^1.1.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

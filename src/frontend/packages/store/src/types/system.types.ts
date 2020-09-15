@@ -1,5 +1,5 @@
-import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { EndpointUser, EndpointModel } from './endpoint.types';
+import { EndpointModel, EndpointUser } from './endpoint.types';
+
 export interface SystemInfo {
   version: {
     proxy_version: string,
@@ -12,11 +12,3 @@ export interface SystemInfo {
     }
   };
 }
-
-export const systemStoreNames: {
-  section: TRequestTypeKeys,
-  type: string
-} = {
-    section: RequestSectionKeys.Other,
-    type: 'system'
-  };

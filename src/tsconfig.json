@@ -1,15 +1,22 @@
 {
   "compileOnSave": false,
   "preserveWhitespaces": "off",
+  "angularCompilerOptions": {
+    "preserveSymlinks": true
+  },
   "compilerOptions": {
+    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es5",
-    "module": "es2015",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,    
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
     "types": [
       "hammerjs",
       "jasmine",
@@ -20,9 +27,17 @@
       "node_modules/@types"
     ],
     "lib": [
-      "es2017",
+      "es2018",
       "dom"
     ],
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
+    "paths": {
+      "@stratosui/core": ["frontend/packages/core/src/public-api.ts"],
+      "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
+      "@stratosui/store/testing": ["frontend/packages/store/testing/public-api.ts"],
+      "@stratosui/cloud-foundry": ["frontend/packages/cloud-foundry/src/public_api.ts"],
+      "@stratosui/cf-autoscaler": ["frontend/packages/cf-autoscaler/src/public_api.ts"],
+      "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
+    }
   }
 }

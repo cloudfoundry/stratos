@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import {
   AppAutoscalerMetricDataPoint,
@@ -88,11 +88,19 @@ export class AutoscalerConstants {
     }
   };
 
-  public static getMetricUnit(metricType: string) {
+  public static getMetricUnit(metricType: string, unit?: string) {
     if (AutoscalerConstants.metricMap[metricType]) {
       return AutoscalerConstants.metricMap[metricType].unit_internal;
     } else {
-      return '';
+      return unit || '';
+    }
+  }
+
+  public static getMetricInterval(metricType: string) {
+    if (AutoscalerConstants.metricMap[metricType]) {
+      return AutoscalerConstants.metricMap[metricType].interval;
+    } else {
+      return 40;
     }
   }
 
@@ -106,28 +114,29 @@ export class AutoscalerConstants {
 }
 
 export const PolicyAlert = {
-  alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be a integer less than the Maximum Instance Count.',
-  alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be a integer greater than the Minimum Instance Count.',
+  alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be an integer less than the Maximum Instance Count.',
+  alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be an integer greater than the Minimum Instance Count.',
   alertInvalidPolicyInitialMaximumRange:
-    'The Initial Minimum Instance Count must be a integer in the range of Minimum Instance Count to Maximum Instance Count.',
+    'The Initial Minimum Instance Count must be an integer between Minimum Instance Count and Maximum Instance Count.',
+  alertInvalidPolicyTriggerMetricName: 'Invalid metric type name, only combination of letters, numbers and underlines "_" are allowed.',
   alertInvalidPolicyTriggerUpperThresholdRange: 'The Upper Threshold value must be an integer greater than the Lower Threshold value.',
-  alertInvalidPolicyTriggerLowerThresholdRange: 'The Lower Threshold value must be an integer in the range of 1 to (Upper Threshold-1).',
+  alertInvalidPolicyTriggerLowerThresholdRange: 'The Lower Threshold value must be an integer between 1 and (Upper Threshold-1).',
   alertInvalidPolicyTriggerThreshold100: 'The Lower/Upper Threshold value of memoryutil must be an integer below or equal to 100.',
-  alertInvalidPolicyTriggerStepPercentageRange: 'The Instance Step Up/Down percentage must be a integer greater than 1.',
-  alertInvalidPolicyTriggerStepRange: 'The Instance Step Up/Down value must be a integer in the range of 1 to (Maximum Instance-1).',
+  alertInvalidPolicyTriggerStepPercentageRange: 'The Instance Step Up/Down percentage must be an integer greater than 1.',
+  alertInvalidPolicyTriggerStepRange: 'The Instance Step Up/Down value must be an integer between 1 and (Maximum Instance-1).',
   alertInvalidPolicyTriggerBreachDurationRange:
-    `The breach duration value must be an integer in the range of ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min} to
+    `The breach duration value must be an integer between ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min} and
     ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
   alertInvalidPolicyTriggerCooldownRange:
-    `The cooldown period value must be an integer in the range of ${AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min} to
+    `The cooldown period value must be an integer between ${AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min} and
     ${AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max} seconds.`,
-  alertInvalidPolicyScheduleDateBeforeNow: 'Start/End date should be after or equal to current date.',
+  alertInvalidPolicyScheduleDateBeforeNow: 'Start/End date should be after or equal to the current date.',
   alertInvalidPolicyScheduleEndDateBeforeStartDate: 'Start date must be earlier than the end date.',
   alertInvalidPolicyScheduleEndTimeBeforeStartTime: 'Start time must be earlier than the end time.',
   alertInvalidPolicyScheduleRepeatOn: 'Please select at least one "Repeat On" day.',
   alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime: 'Start date and time must be earlier than the end date and time.',
-  alertInvalidPolicyScheduleStartDateTimeBeforeNow: 'Start date and time must be after or equal to current date time.',
-  alertInvalidPolicyScheduleEndDateTimeBeforeNow: 'End date and time must be after or equal the current date and time.',
+  alertInvalidPolicyScheduleStartDateTimeBeforeNow: 'Start date and time must be after or equal to the current date time.',
+  alertInvalidPolicyScheduleEndDateTimeBeforeNow: 'End date and time must be after or equal to the current date and time.',
   alertInvalidPolicyScheduleRecurringConflict: 'Recurring schedule configuration conflict occurs.',
   alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
   alertInvalidPolicyTriggerScheduleEmpty: 'At least one Scaling Rule or Schedule should be defined.',

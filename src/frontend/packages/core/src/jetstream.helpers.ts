@@ -1,14 +1,4 @@
-export interface JetStreamError {
-  error: {
-    status: string;
-    statusCode: number;
-  };
-  errorResponse: any;
-}
+import { HttpErrorResponse } from '@angular/common/http';
 
-export function isJetStreamError(obj: Partial<JetStreamError>): JetStreamError {
-  return obj &&
-    obj.error && obj.error.status && obj.error.statusCode &&
-    'errorResponse' in obj ?
-    obj as JetStreamError : null;
-}
+import { isHttpErrorResponse, JetStreamErrorResponse } from '../../store/src/jetstream';
+

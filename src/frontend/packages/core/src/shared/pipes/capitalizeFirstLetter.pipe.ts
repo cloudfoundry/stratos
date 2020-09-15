@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+
 /*
  * Capitalize the first letter of the string
 */
@@ -7,7 +8,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class CapitalizeFirstPipe implements PipeTransform {
   transform(text: string): string {
-    if (text === null) {
+    if (!text) {
       return text;
     }
     return text.charAt(0).toUpperCase() + text.slice(1);

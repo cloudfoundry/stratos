@@ -1,16 +1,17 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupUAA, SetupUAASave } from '../../../../../store/src/actions/setup.actions';
-import { AppState } from '../../../../../store/src/app-state';
+import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
+import { InternalAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
+import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-console-uaa-wizard',
@@ -22,10 +23,10 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   private clientRedirectURI: string;
 
-  constructor(private store: Store<AppState>, private router: Router) {
+  constructor(
+    private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) {
     // Client Redirect URI for SSO
-    this.clientRedirectURI = window.location.protocol + '//' + window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
+    this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
   uaaForm: FormGroup;
@@ -34,8 +35,11 @@ export class ConsoleUaaWizardComponent implements OnInit {
   selectedScope = '';
   applyingSetup$ = new BehaviorSubject<boolean>(false);
 
+  public show = false;
+  public showPassword = false;
+
   uaaFormNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetupUAA({
+    this.store.dispatch(new SetupConsoleGetScopes({
       uaa_endpoint: this.uaaForm.get('apiUrl').value,
       console_client: this.uaaForm.get('clientId').value,
       password: this.uaaForm.get('adminPassword').value,
@@ -67,7 +71,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetupUAASave({
+    this.store.dispatch(new SetupSaveConfig({
       uaa_endpoint: this.uaaForm.get('apiUrl').value,
       console_client: this.uaaForm.get('clientId').value,
       password: this.uaaForm.get('adminPassword').value,
@@ -83,7 +87,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
       }),
-      delay(3000),
+      delay(2000),
       take(10),
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;

@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { GlobalEventService } from './global-events.service';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
+import { CoreTestingModule } from '../../test-framework/core-test.modules';
 import { CoreModule } from '../core/core.module';
-import { AppStoreModule } from '../../../store/src/store.module';
+import { GlobalEventService } from './global-events.service';
 import { SharedModule } from './shared.module';
-import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 
 describe('GlobalEventsService', () => {
@@ -11,6 +12,7 @@ describe('GlobalEventsService', () => {
     imports: [
       CoreModule,
       SharedModule,
+      CoreTestingModule,
       createBasicStoreModule()
     ]
   }));

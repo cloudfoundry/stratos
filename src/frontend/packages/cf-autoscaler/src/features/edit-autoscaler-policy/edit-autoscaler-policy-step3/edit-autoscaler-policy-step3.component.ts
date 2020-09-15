@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import * as moment from 'moment-timezone';
-import { Observable } from 'rxjs';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ActivatedRoute } from '@angular/router';
+import moment from 'moment-timezone';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,
@@ -12,7 +12,7 @@ import {
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal, AppAutoscalerInvalidPolicyError } from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
@@ -34,7 +34,6 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: FormGroup;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
@@ -49,9 +48,10 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editRecurringScheduleForm = this.fb.group({
       days_of_week: [0],
       days_of_month: [0],
@@ -63,12 +63,12 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
       start_time: [0, [Validators.required, this.validateRecurringScheduleTime('end_time'), this.validateRecurringScheduleGlobal()]],
       end_time: [0, [Validators.required, this.validateRecurringScheduleTime('start_time'), this.validateRecurringScheduleGlobal()]],
       effective_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
-      repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
+      repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal('repeat_type')]],
     });
   }
 
   addRecurringSchedule = () => {
-    const {...newSchedule} = AutoscalerConstants.PolicyDefaultRecurringSchedule;
+    const { ...newSchedule } = AutoscalerConstants.PolicyDefaultRecurringSchedule;
     this.currentPolicy.schedules.recurring_schedule.push(newSchedule);
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
   }
@@ -159,9 +159,13 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     this.editIndex = -1;
   }
 
-  validateRecurringScheduleGlobal(): ValidatorFn {
+  validateRecurringScheduleGlobal(controlName?: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       if (this.editRecurringScheduleForm) {
+        if (controlName === 'repeat_type') {
+          this.editRepeatType = control.value;
+          this.setRecurringScheduleValidator();
+        }
         if (this.editRepeatType === 'week') {
           this.editRecurringScheduleForm.controls.days_of_week.updateValueAndValidity();
         } else {
@@ -231,11 +235,6 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
 
   resetEffectiveType(key: string) {
     this.editEffectiveType = key;
-    this.setRecurringScheduleValidator();
-  }
-
-  resetRepeatType(key: string) {
-    this.editRepeatType = key;
     this.setRecurringScheduleValidator();
   }
 

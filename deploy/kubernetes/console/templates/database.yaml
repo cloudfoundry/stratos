@@ -1,0 +1,118 @@
+{{- if not .Values.mariadb.external }}
+---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
+apiVersion: apps/v1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Deployment
+metadata:
+  name: stratos-db
+{{- if .Values.console.deploymentAnnotations }}
+  annotations:
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
+{{- end }}
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-db"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
+{{- end }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-db"
+  template:
+    metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "stratos-db"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
+        {{- if .Values.console.podExtraLabels}}
+        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+        {{- end}}        
+    spec:
+{{- if .Values.mariadb }}
+{{- if .Values.mariadb.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.mariadb.nodeSelector | trim | indent 8 }}
+{{- end }}
+{{- end }}
+      containers:
+      - name: mariadb
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: rootPassword
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: user
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: database
+        ports:
+        - name: mysql
+          containerPort: 3306
+        livenessProbe:
+          exec:
+            command:
+            - /dbping.sh
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - /dbping.sh
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          timeoutSeconds: 3
+        resources:
+{{ toYaml .Values.mariadb.resources | indent 10 }}
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      volumes:
+      - name: data
+      {{- if .Values.mariadb.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.mariadb.persistence.existingClaim | default "console-mariadb" }}
+      {{- else }}
+        emptyDir: {}
+      {{- end -}}
+{{- end -}}

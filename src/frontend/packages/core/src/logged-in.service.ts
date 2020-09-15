@@ -1,7 +1,6 @@
-import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
@@ -9,9 +8,10 @@ import { tap, withLatestFrom } from 'rxjs/operators';
 import { VerifySession } from '../../store/src/actions/auth.actions';
 import { AppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
+import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
+import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
-import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
 
 @Injectable()
 export class LoggedInService {
@@ -95,7 +95,7 @@ export class LoggedInService {
             this.store.select(selectDashboardState),
             this.store.select(s => s.auth)
           ),
-          tap(([i, dashboardState, authState]) => {
+          tap(([, dashboardState, authState]) => {
             this.ngZone.run(() => {
               this._checkSession(dashboardState, authState);
             });

@@ -1,30 +1,25 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
-import { Component, NgZone, OnDestroy, OnInit, ViewChild, Inject } from '@angular/core';
-import { MatDrawer } from '@angular/material';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { MatDrawer } from '@angular/material/sidenav';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription, of } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
-import { GetCFInfo } from '../../../../../store/src/actions/cloud-foundry.actions';
-import {
-  CloseSideHelp,
-  CloseSideNav,
-  DisableMobileNav,
-  EnableMobileNav,
-} from '../../../../../store/src/actions/dashboard-actions';
+import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../store/src/actions/dashboard-actions';
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
-import { GetUserFavoritesAction } from '../../../../../store/src/actions/user-favourites-actions/get-user-favorites-action';
-import { AppState } from '../../../../../store/src/app-state';
+import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
-import { EndpointHealthCheck } from '../../../../endpoints-health-checks';
-import { TabNavService } from '../../../../tab-nav.service';
+import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 
 
 @Component({
@@ -33,27 +28,40 @@ import { Customizations, CustomizationsMetadata } from '../../../core/customizat
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, OnDestroy {
+export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   public activeTabLabel$: Observable<string>;
   public subNavData$: Observable<[string, Portal<any>]>;
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
   public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
-  public rightNavState$: Observable<{ opened: boolean; documentUrl: string; }>;
+  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object }>;
   private dashboardState$: Observable<DashboardState>;
+  public noMargin$: Observable<boolean>;
+  private closeSub: Subscription;
+  private mobileSub: Subscription;
   private drawer: MatDrawer;
+  public iconModeOpen = false;
+  public sideNavWidth = 54;
+
+  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
+  sideNaveMode = 'side';
+
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
+
+  @ViewChild('content') public content;
 
   constructor(
     public pageHeaderService: PageHeaderService,
-    private store: Store<AppState>,
+    private store: Store<DashboardOnlyAppState>,
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private endpointsService: EndpointsService,
     public tabNavService: TabNavService,
     private ngZone: NgZone,
-    @Inject(Customizations) private customizations: CustomizationsMetadata
+    public sidePanelService: SidePanelService,
+    private cs: CustomizationService
   ) {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
@@ -83,23 +91,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
         }
       })
     );
-    this.rightNavState$ = this.dashboardState$.pipe(
-      map(state => ({
-        opened: !!state.sideHelpDocument && state.sideHelpOpen,
-        documentUrl: state.sideHelpDocument
-      }))
-    );
+
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
   }
-
-  public helpDocumentUrl: string;
-
-  private closeSub: Subscription;
-
-  public noMargin$: Observable<boolean>;
-
-  private mobileSub: Subscription;
 
   @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
@@ -113,15 +108,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     }
   }
 
-  @ViewChild('content') public content;
-
-  sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
-
-  sideNaveMode = 'side';
-
-  public iconModeOpen = false;
-  public sideNavWidth = 54;
-
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
@@ -134,6 +120,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
     this.store.dispatch(new GetCurrentUsersRelations());
   }
 
+  sideHelpClosed() {
+    this.sidePanelService.hide();
+  }
+
+  ngAfterViewInit() {
+    this.sidePanelService.setContainer(this.previewPanelContainer);
+  }
+
   ngOnInit() {
     this.subNavData$ = combineLatest(
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
@@ -141,16 +135,22 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       ),
       this.tabNavService.tabSubNav$
     );
-    this.endpointsService.registerHealthCheck(
-      new EndpointHealthCheck('cf', (endpoint) => this.store.dispatch(new GetCFInfo(endpoint.guid)))
-    );
+
+    // Register all health checks for endpoint types that support this
+    entityCatalog.getAllEndpointTypes().forEach(epType => {
+      if (epType && epType.definition && epType.definition.healthCheck) {
+        this.endpointsService.registerHealthCheck(epType.definition.healthCheck);
+      }
+    });
+
     this.dispatchRelations();
-    this.store.dispatch(new GetUserFavoritesAction());
+    stratosEntityCatalog.userFavorite.api.getAll();
   }
 
   ngOnDestroy() {
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
+    this.sidePanelService.unsetContainer();
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
@@ -161,10 +161,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
       }
     }
     return false;
-  }
-
-  public sideHelpClosed() {
-    this.store.dispatch(new CloseSideHelp());
   }
 
   private getNavigationRoutes(): SideNavItem[] {
@@ -194,9 +190,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy {
           link: path + '/' + route.path
         };
         if (item.requiresEndpointType) {
-          // Upstream always likes to show Cloud Foundry related endpoints - other distributions can chane this behaviour
-          const alwaysShow = this.customizations.alwaysShowNavForEndpointTypes ?
-            this.customizations.alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          // Upstream always likes to show Cloud Foundry related endpoints - other distributions can change this behaviour
+          const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
+            this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));

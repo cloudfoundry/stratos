@@ -18,15 +18,16 @@ export class MetaCardItemComponent implements OnInit {
     column: 'meta-card-item-column',
     'long-text': 'meta-card-item-long-text',
     'long-text-fixed': 'meta-card-item-long-text-fixed',
+    multiline: 'meta-card-item-multiline',
   };
   itemStyle = 'meta-card-item-row';
-  @ContentChild(MetaCardKeyComponent)
+  @ContentChild(MetaCardKeyComponent, { static: true })
   key: MetaCardKeyComponent;
 
-  @ContentChild(MetaCardValueComponent)
+  @ContentChild(MetaCardValueComponent, { static: true })
   value: MetaCardValueComponent;
 
-  @ViewChild('content') content: TemplateRef<any>;
+  @ViewChild('content', { static: true }) content: TemplateRef<any>;
 
   @Input() customStyle = this.defaultStyle;
 

@@ -365,11 +365,56 @@ func createMetricsMetadataFromTokenMetadata(tokenMetadata string, endpointGuid s
 
 func hasMetricsProvider(providers []MetricsMetadata, url string) (*MetricsMetadata, bool) {
 	for _, provider := range providers {
-		if provider.URL == url {
+		if compareURL(provider.URL, url) {
 			return &provider, true
 		}
 	}
 	return nil, false
+}
+
+// Compare two URLs, taking into account default HTTP/HTTPS ports and ignoring query string
+func compareURL(a, b string) bool {
+
+	ua, err := url.Parse(a)
+	if err != nil {
+		return false
+	}
+
+	ub, err := url.Parse(b)
+	if err != nil {
+		return false
+	}
+
+	aPort := getPort(ua)
+	bPort := getPort(ub)
+
+	aPath := trimPath(ua.Path)
+	bPath := trimPath(ub.Path)
+
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && aPath == bPath
+}
+
+func getPort(u *url.URL) string {
+	port := u.Port()
+	if len(port) == 0 {
+		switch u.Scheme {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		default:
+			port = ""
+		}
+	}
+
+	return port
+}
+
+func trimPath(path string) string {
+	if strings.HasSuffix(path, "/") {
+		return path[:len(path)-1]
+	}
+	return path
 }
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 )
@@ -20,6 +21,7 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+// V2Info is the response for the Cloud Foundry /v2/info API
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -27,6 +29,10 @@ type V2Info struct {
 	AppSSHEndpoint           string `json:"app_ssh_endpoint"`
 	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint"`
 	AppSSHOauthCLient        string `json:"app_ssh_oauth_client"`
+	APIVersion               string `json:"api_version"`
+	RoutingEndpoint          string `json:"routing_endpoint"`
+	MinCLIVersion            string `json:"min_cli_version"`
+	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
@@ -67,12 +73,10 @@ type ConnectedEndpoint struct {
 const (
 	// AuthTypeOAuth2 means OAuth2
 	AuthTypeOAuth2 = "OAuth2"
-	// AuthTypeOIDC means no OIDC
+	// AuthTypeOIDC means OIDC
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeAKS means AKS
-	AuthTypeAKS = "AKS"
 )
 
 const (
@@ -82,13 +86,21 @@ const (
 	AuthConnectTypeNone = "none"
 )
 
-// Token record for an endpoint (includes the Endpoint GUID)
-type EndpointTokenRecord struct {
-	*TokenRecord
-	EndpointGUID    string
-	EndpointType    string
-	APIEndpint      string
-	LoggingEndpoint string
+// // Token record for an endpoint (includes the Endpoint GUID)
+// type EndpointTokenRecord struct {
+// 	*TokenRecord
+// 	EndpointGUID    string
+// 	EndpointType    string
+// 	APIEndpint      string
+// 	LoggingEndpoint string
+// }
+
+// BackupTokenRecord used when backing up tokens
+type BackupTokenRecord struct {
+	TokenRecord  TokenRecord
+	UserGUID     string
+	EndpointGUID string
+	TokenType    string
 }
 
 // TokenRecord represents an endpoint or uaa token
@@ -203,7 +215,10 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview bool `json:"enableTechPreview"`
+		TechPreview        bool   `json:"enableTechPreview"`
+		ListMaxSize        int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled     string `json:"APIKeysEnabled"`
 	} `json:"config"`
 }
 
@@ -267,8 +282,41 @@ type ConsoleConfig struct {
 	UseSSO                bool     `json:"use_sso" configName:"SSO_LOGIN"`
 }
 
+const defaultAdminScope = "stratos.admin"
+
 // IsSetupComplete indicates if we have enough config
 func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+
+	// Local user - check setup complete
+	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
+
+		// Need LocalUser and LocalUserPassword
+		if len(consoleConfig.LocalUser) == 0 || len(consoleConfig.LocalUserPassword) == 0 {
+			return false
+		}
+
+		// Also, we will make sure that admin scopes are set up for admin, if not specified
+		if len(consoleConfig.LocalUserScope) == 0 {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Neither set, so use default for both
+				consoleConfig.LocalUserScope = defaultAdminScope
+				consoleConfig.ConsoleAdminScope = defaultAdminScope
+			} else {
+				// admin scope set, so just use that
+				consoleConfig.LocalUserScope = consoleConfig.ConsoleAdminScope
+			}
+		} else {
+			if len(consoleConfig.ConsoleAdminScope) == 0 {
+				// Console admin scope not set, so use local user scope
+				consoleConfig.ConsoleAdminScope = consoleConfig.LocalUserScope
+			}
+		}
+
+		// Setup is complete if we have LocalUser and LocalUserPassword set
+		return true
+	}
+
+	// UAA - check setup complete for UAA
 	if consoleConfig.UAAEndpoint == nil {
 		return false
 	}
@@ -288,6 +336,7 @@ type CNSIRequest struct {
 	StatusCode  int         `json:"statusCode"`
 	Status      string      `json:"status"`
 	PassThrough bool        `json:"-"`
+	LongRunning bool        `json:"-"`
 
 	Response     []byte `json:"-"`
 	Error        error  `json:"-"`
@@ -302,38 +351,53 @@ type RelationsRecord struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
-	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                        string   `configName:"CF_CLIENT"`
-	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
-	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
-	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
-	SSOLogin                        bool     `configName:"SSO_LOGIN"`
-	SSOOptions                      string   `configName:"SSO_OPTIONS"`
-	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
-	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
-	LogLevel                        string   `configName:"LOG_LEVEL"`
-	CFAdminIdentifier               string
-	CloudFoundryInfo                *CFInfo
-	HTTPS                           bool
-	EncryptionKeyInBytes            []byte
-	ConsoleVersion                  string
-	IsCloudFoundry                  bool
-	LoginHooks                      []LoginHook
-	SessionStore                    SessionStorer
-	ConsoleConfig                   *ConsoleConfig
-	PluginConfig                    map[string]string
-	DatabaseProviderName            string
-	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
+	HTTPClientTimeoutInSecs            int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs    int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPClientTimeoutLongRunningInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs        int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                         string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                            string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                           string   `configName:"CF_CLIENT"`
+	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
+	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
+	SSOLogin                           bool     `configName:"SSO_LOGIN"`
+	SSOOptions                         string   `configName:"SSO_OPTIONS"`
+	SSOWhiteList                       string   `configName:"SSO_WHITELIST"`
+	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
+	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                           string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	CFAdminIdentifier                  string
+	CloudFoundryInfo                   *CFInfo
+	HTTPS                              bool
+	EncryptionKeyInBytes               []byte
+	ConsoleVersion                     string
+	IsCloudFoundry                     bool
+	LoginHooks                         []LoginHook
+	SessionStore                       SessionStorer
+	ConsoleConfig                      *ConsoleConfig
+	PluginConfig                       map[string]string
+	DatabaseProviderName               string
+	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema           bool
+	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
+	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
+	// This depends on the deployment mechanism and the database config
+	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
+	// can perform migrations
+}
+
+// SetCanPerformMigrations updates the state that records if we can perform Database migrations
+func (c *PortalConfig) SetCanPerformMigrations(value bool) {
+	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
 }

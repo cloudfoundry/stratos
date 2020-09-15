@@ -1,29 +1,29 @@
 import { Action } from '@ngrx/store';
-import { UaaSetupData } from '../types/uaa-setup.types';
+import { UaaSetupData, LocalAdminSetupData } from '../types/uaa-setup.types';
 
-export const SETUP_UAA = '[Setup] Setup UAA';
-export const SETUP_UAA_SAVE = '[Setup] Setup UAA save';
-export const SETUP_UAA_SUCCESS = '[Setup] Setup UAA success';
-export const SETUP_UAA_FAILED = '[Setup] Setup UAA failed';
+export const SETUP_GET_SCOPES = '[Setup] Setup get scopes';
+export const SETUP_SAVE_CONFIG = '[Setup] Setup save';
+export const SETUP_SUCCESS = '[Setup] Setup success';
+export const SETUP_FAILED = '[Setup] Setup failed';
 
-export class SetupUAA implements Action {
+export class SetupConsoleGetScopes implements Action {
   constructor(
-    public setupData: UaaSetupData
+    public setupData: UaaSetupData | LocalAdminSetupData
   ) { }
-  type = SETUP_UAA;
+  type = SETUP_GET_SCOPES;
 }
 
-export class SetupUAASave extends SetupUAA {
-  type = SETUP_UAA_SAVE;
+export class SetupSaveConfig extends SetupConsoleGetScopes {
+  type = SETUP_SAVE_CONFIG;
 }
 
-export class SetupUAASuccess implements Action {
+export class SetupSuccess implements Action {
   constructor(public payload: {}) { }
-  type = SETUP_UAA_SUCCESS;
+  type = SETUP_SUCCESS;
 }
 
-export class SetupUAAFailed implements Action {
+export class SetupFailed implements Action {
   constructor(public message: string) { }
-  type = SETUP_UAA_FAILED;
+  type = SETUP_FAILED;
 }
 

@@ -1,21 +1,14 @@
-import { getEndpointSchemeKeys } from '../../../../core/src/core/extension/extension-service';
-import { EndpointAction } from '../../actions/endpoint.actions';
-import {
-  applicationSchemaKey,
-  cfUserSchemaKey,
-  organizationSchemaKey,
-  serviceInstancesSchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  userProvidedServiceInstanceSchemaKey,
-} from '../../helpers/entity-factory';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationState } from '../../types/pagination.types';
+import { getDefaultPaginationEntityState } from './pagination-reducer-reset-pagination';
 
-export function paginationClearAllTypes(state: PaginationState, entityKeys: string[], defaultPaginationEntityState) {
+export function paginationClearAllTypes(state: PaginationState, entityKeys: string[]) {
   return entityKeys.reduce((prevState, entityKey) => {
     if (prevState[entityKey]) {
       const entityState = state[entityKey];
       const clearedEntity = Object.keys(entityState).reduce((prevEntityState, key) => {
+        const defaultPaginationEntityState = getDefaultPaginationEntityState(entityState[key].maxedState.ignoreMaxed);
         return {
           ...prevEntityState,
           [key]: defaultPaginationEntityState
@@ -30,30 +23,12 @@ export function paginationClearAllTypes(state: PaginationState, entityKeys: stri
   }, state);
 }
 
-export function clearEndpointEntities(state: PaginationState, action: EndpointAction, defaultPaginationEntityState) {
-  if (action.endpointType === 'cf') {
-    return paginationClearAllTypes(
-      state,
-      [
-        applicationSchemaKey,
-        spaceSchemaKey,
-        organizationSchemaKey,
-        serviceSchemaKey,
-        cfUserSchemaKey,
-        serviceInstancesSchemaKey,
-        userProvidedServiceInstanceSchemaKey
-      ],
-      defaultPaginationEntityState
-    );
-  }
-
-  // Check extensions
-  const entityKeys = getEndpointSchemeKeys(action.endpointType);
+export function clearEndpointEntities(state: PaginationState, action: EndpointActionComplete) {
+  const entityKeys = entityCatalog.getAllEntitiesForEndpointType(action.endpointType).map(entity => entity.entityKey);
   if (entityKeys.length > 0) {
     return paginationClearAllTypes(
       state,
-      entityKeys,
-      defaultPaginationEntityState
+      entityKeys
     );
   }
   return state;

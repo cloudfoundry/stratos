@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, Input, TemplateRef, ViewChild } fro
 })
 export class MetaCardTitleComponent {
 
-  @ViewChild(TemplateRef)
+  @ViewChild(TemplateRef, { static: true })
   content: TemplateRef<any>;
 
   @Input() noMargin;

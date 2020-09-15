@@ -9,8 +9,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { getEndpointType } from '../../../../../../features/endpoints/endpoint-helpers';
 import { TableCellCustom } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 
@@ -25,13 +25,17 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   @Input() component: Type<EndpointListDetailsComponent>;
 
   private endpointDetails: ViewContainerRef;
-  @ViewChild('target', { read: ViewContainerRef }) set target(content: ViewContainerRef) {
+  @ViewChild('target', { read: ViewContainerRef, static: true }) set target(content: ViewContainerRef) {
     this.endpointDetails = content;
   }
 
   cell: EndpointListDetailsComponent;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private endpointListHelper: EndpointListHelper) {
+  constructor(
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private endpointListHelper: EndpointListHelper,
+
+  ) {
     super();
   }
 
@@ -40,7 +44,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
   set row(row: EndpointModel) {
     this.pRow = row;
 
-    const e = getEndpointType(row.cnsi_type, row.sub_type);
+    const e = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;
     if (!e || !e.listDetailsComponent) {
       return;
     }

@@ -16,6 +16,7 @@ import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   StackedInputActionComponent,
+  StackedInputActionConfig,
   StackedInputActionResult,
   StackedInputActionUpdate,
 } from './stacked-input-action/stacked-input-action.component';
@@ -41,10 +42,13 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   @Input() stateIn$: Observable<StackedInputActionsState[]>;
+  @Input() isEmailInput = true;
+  @Input() stackedActionConfig: StackedInputActionConfig;
+
   @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
 
 
-  @ViewChild('inputs', { read: ViewContainerRef })
+  @ViewChild('inputs', { read: ViewContainerRef, static: true })
   inputs: ViewContainerRef;
 
   disabled = false;
@@ -74,6 +78,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     // Track a unique key for the component and it's position in the stack
     stackedAction.key = this.count++;
     stackedAction.position = this.inputs.length - 1;
+    stackedAction.config = this.stackedActionConfig;
     // Handle when the component wants to be removed
     this.subs.push(stackedAction.remove.subscribe(() => {
       this.removeComponent(stackedAction);

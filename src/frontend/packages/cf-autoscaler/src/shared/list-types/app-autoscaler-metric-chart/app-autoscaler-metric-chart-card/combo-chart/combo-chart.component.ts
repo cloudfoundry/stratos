@@ -60,8 +60,8 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   @Output() activate: EventEmitter<any> = new EventEmitter();
   @Output() deactivate: EventEmitter<any> = new EventEmitter();
 
-  @ContentChild('tooltipTemplate') tooltipTemplate: TemplateRef<any>;
-  @ContentChild('seriesTooltipTemplate') seriesTooltipTemplate: TemplateRef<any>;
+  @ContentChild('tooltipTemplate', { static: true }) tooltipTemplate: TemplateRef<any>;
+  @ContentChild('seriesTooltipTemplate', { static: true }) seriesTooltipTemplate: TemplateRef<any>;
 
   dims: ViewDimensions;
   xScale: any;

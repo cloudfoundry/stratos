@@ -1,12 +1,11 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Store } from '@ngrx/store';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 
-import { ShowSideHelp } from '../../../../../store/src/actions/dashboard-actions';
-import { ShowSnackBar } from '../../../../../store/src/actions/snackBar.actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
 
@@ -26,19 +25,20 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
-    private store: Store<AppState>,
     endpointsService: EndpointsService,
+    private sidePanelService: SidePanelService,
+    private snackBarService: SnackBarService,
   ) {
-    this.connectService = new ConnectEndpointService(store, endpointsService, data);
+    this.connectService = new ConnectEndpointService(endpointsService, data);
 
     this.hasConnected = this.connectService.hasConnected$.subscribe(() => {
-      this.store.dispatch(new ShowSnackBar(`Connected endpoint '${this.data.name}'`));
+      this.snackBarService.show(`Connected endpoint '${this.data.name}'`);
       this.dialogRef.close();
     });
   }
 
   showHelp() {
-    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   ngOnDestroy(): void {

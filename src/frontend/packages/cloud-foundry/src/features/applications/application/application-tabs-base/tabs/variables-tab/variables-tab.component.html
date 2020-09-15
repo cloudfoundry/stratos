@@ -1,0 +1,43 @@
+<div class="variables-tab">
+  <div class="variables-tab__env-table">
+    <app-list [addForm]="addForm">
+      <div app-table-add class="variables-tab__env-table--add-form">
+        <form #addForm="ngForm" novalidate>
+          <mat-form-field floatLabel="never">
+            <input matInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name"
+              [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="(envVars$ | async)?.names">
+            <mat-error *ngIf="envVarName.errors && envVarName.errors.required">Name is required</mat-error>
+            <mat-error *ngIf="envVarName.errors && envVarName.errors.appUnique">{{envVarName.errors.appUnique.message}}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field floatLabel="never">
+            <input matInput #addRowName id="envVarValue" name="envVarValue" placeholder="Value"
+              [(ngModel)]="envVarsDataSource.addItem.value">
+          </mat-form-field>
+        </form>
+      </div>
+    </app-list>
+  </div>
+
+  <div class="variables-tab__env-code-block">
+    <mat-card>
+      <mat-card-header>
+        <div>All Variables</div>
+      </mat-card-header>
+      <mat-card-content>
+        <app-code-block>
+          <ng-container *ngFor="let envVar of (allEnvVars$ | async)">
+            <div class="variables-tab__env-code-block--line"
+              [ngClass]="{'variables-tab__env-code-block--section': envVar.section}">
+              <pre *ngIf="envVar.section; else env">{{envVar.name}}</pre>
+              <ng-template #env>
+                <pre>{{envVar.name}}=<span *ngIf="!isObject(envVar.value)">{{envVar.value}}</span></pre>
+                <pre *ngIf="isObject(envVar.value)">{{ envVar.value | json }}</pre>
+              </ng-template>
+            </div>
+          </ng-container>
+        </app-code-block>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

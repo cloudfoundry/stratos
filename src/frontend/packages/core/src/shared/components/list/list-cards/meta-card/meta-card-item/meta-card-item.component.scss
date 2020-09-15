@@ -1,6 +1,5 @@
 .meta-card-item-row,
 .meta-card-item-row-top {
-  $text-color: rgba(0, 0, 0, .6);
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -20,8 +19,6 @@
 }
 
 .meta-card-item__key {
-  $text-color: rgba(0, 0, 0, .6);
-  color: $text-color;
   flex: none;
   font-weight: 300;
   padding-right: 10px;
@@ -51,7 +48,6 @@
     line-height: 18px;
     position: relative;
     &::after {
-      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 75%);
       bottom: 0;
       content: '';
       height: 1.2em;
@@ -60,5 +56,16 @@
       text-align: right;
       width: 25%;
     }
+  }
+}
+
+.meta-card-item-multiline {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  min-height: 30px;
+  padding: 7px 0 2px;
+  .meta-card-item__value {
+    white-space: unset;
   }
 }

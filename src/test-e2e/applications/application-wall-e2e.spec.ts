@@ -1,11 +1,11 @@
 import { browser, promise } from 'protractor';
 
-import { IOrganization, ISpace } from '../../frontend/packages/core/src/core/cf-api.types';
+import { IOrganization, ISpace } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationE2eHelper } from '../application/application-e2e-helpers';
 import { e2e } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { FormComponent } from '../po/form.po';
@@ -125,7 +125,7 @@ describe('Application Wall Tests -', () => {
 
   function createPageSizeSelectId(): string {
     // The ctrl is hidden inside a mat-paginator, the id will change depending on other selects on page
-    return hasCfFilter ? 'mat-select-4' : 'mat-select-3';
+    return hasCfFilter ? 'mat-select-5' : 'mat-select-4';
   }
 
   function tearDown(orgName: string) {

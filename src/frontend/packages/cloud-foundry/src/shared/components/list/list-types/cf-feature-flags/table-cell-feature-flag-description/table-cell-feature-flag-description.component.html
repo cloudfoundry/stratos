@@ -1,0 +1,4 @@
+<div *ngIf="description; else noDescription">{{ description }}</div>
+<ng-template #noDescription>
+  See <a target="_blank" noopener noreferrer href="https://v3-apidocs.cloudfoundry.org/index.html#list-of-feature-flags">Feature Flag reference</a>
+</ng-template>

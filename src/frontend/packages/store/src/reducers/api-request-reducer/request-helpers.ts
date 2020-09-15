@@ -1,27 +1,30 @@
-import { RequestMethod } from '@angular/http';
-import { IRequestTypeState, AppState } from '../../app-state';
-import { mergeState } from '../../helpers/reducer.helper';
-import { NormalizedResponse } from '../../types/api.types';
-import { IRequestDataState } from '../../types/entity.types';
-import { PaginatedAction } from '../../types/pagination.types';
-import {
-  ICFAction,
-  IRequestAction,
-  SingleEntityAction,
-  StartRequestAction,
-  APISuccessOrFailedAction,
-  WrapperRequestActionSuccess,
-  WrapperRequestActionFailed,
-  InternalEndpointError
-} from '../../types/request.types';
-import { defaultDeletingActionState, getDefaultActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { APIResponse } from '../../actions/request.actions';
-import { pathGet } from '../../../../core/src/core/utils.service';
 import { Store } from '@ngrx/store';
 
+import { APIResponse } from '../../actions/request.actions';
+import { BaseRequestState, GeneralAppState } from '../../app-state';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { mergeState } from '../../helpers/reducer.helper';
+import { NormalizedResponse } from '../../types/api.types';
+import { PaginatedAction } from '../../types/pagination.types';
+import {
+  APISuccessOrFailedAction,
+  EntityRequestAction,
+  ICFAction,
+  InternalEndpointError,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../../types/request.types';
+import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 
-export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
-  const { entityKey, guid } = action;
+export function getEntityRequestState(
+  state: BaseRequestState,
+  actionOrKey: BaseEntityRequestAction | string,
+  guid: string = (actionOrKey as BaseEntityRequestAction).guid
+): RequestInfoState {
+  const entityKey = getKeyFromActionOrKey(actionOrKey);
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
     return requestState;
@@ -29,7 +32,13 @@ export function getEntityRequestState(state: IRequestTypeState, action: SingleEn
   return getDefaultRequestState();
 }
 
-export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: IRequestAction) {
+export function setEntityRequestState(
+  state: BaseRequestState,
+  requestState,
+  actionOrKey: BaseEntityRequestAction | string,
+  guid: string = (actionOrKey as BaseEntityRequestAction).guid
+) {
+  const entityKey = getKeyFromActionOrKey(actionOrKey);
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -40,8 +49,17 @@ export function setEntityRequestState(state: IRequestTypeState, requestState, { 
   return mergeState(state, newState);
 }
 
+function getKeyFromActionOrKey(actionOrKey: BaseEntityRequestAction | string) {
+  if (typeof actionOrKey === 'string') {
+    return actionOrKey;
+  }
+  return entityCatalog.getEntityKey(actionOrKey) || actionOrKey.entityType;
+}
 
-export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestTypeState) {
+export function createRequestStateFromResponse(
+  response: NormalizedResponse,
+  state: BaseRequestState
+) {
   if (!response || !response.entities) {
     return state;
   }
@@ -49,12 +67,12 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
   let newState = { ...state };
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {
-      const entState = getEntityRequestState(state, { entityKey, guid } as SingleEntityAction);
+      const entState = getEntityRequestState(state, entityKey, guid);
       entState.fetching = entState.fetching || false;
       entState.error = entState.error || false;
       const busy = entState.deleting ? entState.deleting.busy : false;
       entState.deleting = { ...defaultDeletingActionState, busy };
-      newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);
+      newState = setEntityRequestState(newState, entState, entityKey, guid);
     });
   });
   return newState;
@@ -62,8 +80,8 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
 
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
-export function getRequestTypeFromMethod(action): ApiRequestTypes {
-  let method = pathGet('options.method', action);
+export function getRequestTypeFromMethod(action: EntityRequestAction): ApiRequestTypes {
+  let method = action.options ? action.options.method : undefined;
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
     if (method === 'post') {
@@ -73,16 +91,6 @@ export function getRequestTypeFromMethod(action): ApiRequestTypes {
       return 'update';
     }
     if (method === 'delete') {
-      return 'delete';
-    }
-  } else if (typeof method === 'number') {
-    if (method === RequestMethod.Post) {
-      return 'create';
-    }
-    if (method === RequestMethod.Put) {
-      return 'update';
-    }
-    if (method === RequestMethod.Delete) {
       return 'delete';
     }
   }
@@ -129,13 +137,13 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
 export function generateDefaultState(keys: Array<string>, initialSections?: {
   [key: string]: string[];
 }) {
-  const defaultState = {} as IRequestDataState;
+  const defaultState = {} as BaseRequestState;
 
   keys.forEach(key => {
     defaultState[key] = {};
     if (initialSections && initialSections[key] && initialSections[key].length) {
       initialSections[key].forEach(sectionKey => {
-        defaultState[key][sectionKey] = getDefaultActionState();
+        defaultState[key][sectionKey] = getDefaultRequestState();
       });
     }
   });
@@ -143,8 +151,8 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
 }
 
 
-export function startApiRequest(
-  store: Store<AppState>,
+export function startApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
   apiAction: ICFAction | PaginatedAction,
   requestType: ApiRequestTypes = 'fetch'
 ) {
@@ -152,8 +160,8 @@ export function startApiRequest(
   store.dispatch(getActionFromString(apiAction.actions[0]));
 }
 
-export function completeApiRequest(
-  store: Store<AppState>,
+export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
   apiAction: ICFAction | PaginatedAction,
   apiResponse: APIResponse,
   requestType: ApiRequestTypes = 'fetch',
@@ -168,10 +176,11 @@ export function completeApiRequest(
   ));
 }
 
-export function failApiRequest(
-  store: Store<AppState>,
-  apiAction: ICFAction | PaginatedAction,
+export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
+  store: Store<T>,
+  apiAction: EntityRequestAction,
   error,
+  catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
 ) {
@@ -179,6 +188,7 @@ export function failApiRequest(
     apiAction,
     error,
     requestType,
+    catalogEntity,
     internalEndpointError
   );
   store.dispatch(actions[0]);
@@ -186,13 +196,14 @@ export function failApiRequest(
 }
 
 export function getFailApiRequestActions(
-  apiAction: ICFAction | PaginatedAction,
+  apiAction: EntityRequestAction,
   error,
   requestType: ApiRequestTypes = 'fetch',
-  internalEndpointError?: InternalEndpointError
+  catalogEntity: StratosBaseCatalogEntity,
+  internalEndpointError?: InternalEndpointError,
 ) {
   return [
-    new APISuccessOrFailedAction(apiAction.actions[2], apiAction, error.message),
+    new APISuccessOrFailedAction(catalogEntity.getRequestType('failure', apiAction), apiAction, error.message),
     new WrapperRequestActionFailed(
       error.message,
       apiAction,

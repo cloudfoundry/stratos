@@ -1,5 +1,3 @@
-import { TRequestTypeKeys, RequestSectionKeys } from '../reducers/api-request-reducer/types';
-
 // UAA User Info
 export interface UserProfileInfo {
   id: string;
@@ -34,14 +32,6 @@ export interface UserProfileInfoEmail {
   primary: boolean;
   value: string;
 }
-
-export const userProfileStoreNames: {
-  section: TRequestTypeKeys,
-  type: string
-} = {
-    section: RequestSectionKeys.Other,
-    type: 'userProfile'
-  };
 
 export interface UserProfilePasswordUpdate {
   oldPassword: string;

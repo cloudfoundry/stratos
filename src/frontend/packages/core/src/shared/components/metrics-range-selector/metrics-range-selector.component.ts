@@ -1,14 +1,14 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Subscription } from 'rxjs';
 
 import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
-import { entityFactory, metricSchemaKey } from '../../../../../store/src/helpers/entity-factory';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
-import { ITimeRange, MetricQueryType } from '../../services/metrics-range-selector.types';
+import { ITimeRange } from '../../services/metrics-range-selector.types';
 
 @Component({
   selector: 'app-metrics-range-selector',
@@ -55,8 +55,11 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     this.baseActionValue = action;
     this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       action.guid,
-      metricSchemaKey,
-      entityFactory(metricSchemaKey)
+      // Look specifically for metrics entity type for the given endpoint. See #3783
+      {
+        entityType: action.entityType,
+        endpointType: action.endpointType
+      }
     );
     this.rangeSelectorManager.init(this.metricsMonitor, action);
   }

@@ -5,8 +5,7 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState } from '../../../store/src/app-state';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
+import { InternalAppState } from '../../../store/src/app-state';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap = {};
@@ -26,14 +25,12 @@ export function queryParamMap(): { [key: string]: string } {
 export class AuthGuardService implements CanActivate {
 
   constructor(
-    private store: Store<AppState>,
-    private router: Router,
-    private route: ActivatedRoute
+    private store: Store<InternalAppState>,
   ) { }
 
   canActivate(): Observable<boolean> {
     return this.store.select('auth').pipe(
-      map((state: AuthState) => {
+      map((state) => {
         if (!state.sessionData || !state.sessionData.valid) {
           this.store.dispatch(new RouterNav({
             path: ['/login']
@@ -46,5 +43,4 @@ export class AuthGuardService implements CanActivate {
         return true;
       }), first());
   }
-
 }

@@ -15,20 +15,11 @@ set -e
 
 if [ "$IS_SLES" == "false" ]; then
   zypper in -y curl jq make gcc-c++
-  zypper in -y libopenssl-devel readline-devel  
+  zypper in -y libopenssl-devel readline-devel
+  zypper in -y ruby-devel
 fi
 
-# Build from source
-mkdir -p /tmp/ruby
-cd /tmp/ruby
-wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.8.tar.gz
-gunzip ./ruby-2.3.8.tar.gz
-tar -xvf ./ruby-2.3.8.tar
-cd ruby-2.3.8
-
-./configure
-
-make
-make install
+# OpenSUSE Leap 15.1 will install ruby 2.5
+zypper in -y ruby
 
 ruby --version

@@ -7,11 +7,13 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-BASE_IMAGE=opensuse:42.3
+BASE_IMAGE=opensuse/leap:15.1
 REGISTRY=docker.io
 ORGANIZATION=splatform
-TAG=opensuse
+TAG=leap15_1
 PROG=$(basename ${BASH_SOURCE[0]})
+SQUASH_ARGS="--squash"
+NO_SQUASH="stratos-base"
 
 function usage {
     echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
@@ -79,10 +81,10 @@ fi
 
 if [ -n "${IS_SLE}" ]; then
   # Check env vars
-  : "${SMT_INTERNAL?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_UPDATE?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SDK?Environment variable must be set when building SLE images}"
-  : "${SMT_INTERNAL_SERVER?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_BASE_UPDATE?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_GA?Environment variable must be set when building SLE images}"
+  : "${ZYP_REPO_SP_UPDATE?Environment variable must be set when building SLE images}"
 fi
 
 set -x
@@ -115,8 +117,15 @@ build_and_push_image() {
     printf "${CYAN}Building image ${YELLOW}${image_name}${CYAN} with docker file ${YELLOW}${docker_file}${RESET}\n"
     printf "${CYAN}========= >>>>${RESET}\n"
     echo ""
+
+    # We can't squash base image as its the same as the base (just re-tagged)
+    ARG=""
+    if [ "${image_name}" != "$NO_SQUASH" ]; then
+        ARG="${SQUASH_ARGS}"
+    fi
     set -x
-    docker build . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
+    # Always remove intermediate containers
+    docker build --force-rm ${ARG} . -f $docker_file  -t ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi
@@ -142,6 +151,9 @@ tag_and_push_image() {
 build_and_push_image stratos-base Dockerfile.stratos-base
 
 # Base with ruby
+build_and_push_image stratos-ruby-base Dockerfile.stratos-ruby-base
+
+# Build base with ruby
 build_and_push_image stratos-ruby-build-base Dockerfile.stratos-ruby-build-base
 
 # Base with go
@@ -161,6 +173,9 @@ build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 
 # Used for building the DB image
 build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
+
+# Used for building the init image
+build_and_push_image stratos-bk-init-base Dockerfile.stratos-bk-init-base
 
 # Used for building the AIO image
 tag_and_push_image stratos-bk-build-base stratos-aio-base

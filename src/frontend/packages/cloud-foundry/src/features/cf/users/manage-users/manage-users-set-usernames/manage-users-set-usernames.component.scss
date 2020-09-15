@@ -1,0 +1,20 @@
+:host {
+  flex: 1;
+}
+
+.usernames {
+  display: flex;
+  flex-direction: column;
+
+  &__addRemove {
+    padding-bottom: 35px;
+
+    mat-radio-button {
+      padding-right: 20px;
+    }
+  }
+
+  &__usernames {
+    margin-bottom: 20px;
+  }
+}

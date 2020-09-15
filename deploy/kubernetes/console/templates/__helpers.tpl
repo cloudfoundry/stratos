@@ -41,15 +41,24 @@ This will do the following:
 {{- end -}}
 {{ end }}
 
-
 {{/*
-Get SCf UAA Endpoint
+Get SCF UAA Endpoint
 */}}
 {{- define "scfUaaEndpoint" -}}
+
+{{- $uaa_zone := default "scf" .Values.env.UAA_ZONE -}}
 {{- if and .Values.env.DOMAIN (not .Values.env.UAA_HOST) -}}
-{{- printf "https://scf.uaa.%s:%v" .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- if .Values.env.UAA_ZONE -}}
+{{- printf "https://%s.uaa.%s:%v" .Values.env.UAA_ZONE .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- else -}}
+{{- printf "https://uaa.%s:%v" .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- end -}}
 {{- else if .Values.env.UAA_HOST -}}
-{{- printf "https://scf.%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- if .Values.env.UAA_ZONE -}}
+{{- printf "https://%s.%s:%v" .Values.env.UAA_ZONE .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- else -}}
+{{- printf "https://%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -103,4 +112,59 @@ Generate self-signed certificate
 {{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
 tls.crt: {{ $cert.Cert | b64enc }}
 tls.key: {{ $cert.Key | b64enc }}
+{{- end -}}
+
+{{/*
+Generate self-signed certificate for ingress if needed
+*/}}
+{{- define "console.generateIngressCertificate" -}}
+{{- $altNames := list (printf "%s" .Values.console.service.ingress.host) (printf "%s.%s" (include "console.certName" .) .Release.Namespace ) ( printf "%s.%s.svc" (include "console.certName" .) .Release.Namespace ) -}}
+{{- $ca := genCA "stratos-ca" 365 -}}
+{{- $cert := genSignedCert ( include "console.certName" . ) nil $altNames 365 $ca -}}
+{{- if .Values.console.service.ingress.tls.crt }}
+  tls.crt: {{ .Values.console.service.ingress.tls.crt | b64enc | quote }}
+{{- else }}
+  tls.crt: {{ $cert.Cert | b64enc | quote }}
+{{- end -}}
+{{- if .Values.console.service.ingress.tls.key }}
+  tls.key: {{ .Values.console.service.ingress.tls.key | b64enc | quote }}
+{{- else }}
+  tls.key: {{ $cert.Key | b64enc | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Ingress Host from .Values.console.service
+*/}}
+{{- define "ingress.host.value" -}}
+{{- if .Values.console.service -}}
+{{- if .Values.console.service.ingress -}}
+{{- if .Values.console.service.ingress.host -}}
+{{ .Values.console.service.ingress.host }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Ingress Host:
+*/}}
+{{- define "ingress.host" -}}
+{{ $host := (include "ingress.host.value" .) }}
+{{- if $host -}}
+{{ $host | quote }}
+{{- else if .Values.env.DOMAIN -}}
+{{ print "console." .Values.env.DOMAIN }}
+{{- else -}}
+{{ required "Host name is required" $host | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "fullname" -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

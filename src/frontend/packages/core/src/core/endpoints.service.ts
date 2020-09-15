@@ -1,24 +1,20 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, combineLatest, Observable, of } from 'rxjs';
-import { filter, first, map, skipWhile, switchMap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { cfEiriniRelationship, eiriniEnabled } from '../../../cloud-foundry/src/shared/eirini.helper';
-import { FetchCFCellMetricsPaginatedAction, MetricQueryConfig } from '../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { endpointSchemaKey, entityFactory } from '../../../store/src/helpers/entity-factory';
+import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
+import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { EndpointModel, entityCatalog } from '../../../store/src/public-api';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { getPaginationObservables } from '../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectEntity } from '../../../store/src/selectors/api.selectors';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { IMetrics } from '../../../store/src/types/base-metric.types';
-import { EndpointModel, EndpointsRelation, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthCheck, endpointHealthChecks } from '../../endpoints-health-checks';
-import { getEndpointHasCfMetrics, getEndpointType } from '../features/endpoints/endpoint-helpers';
-import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
-import { MetricQueryType } from '../shared/services/metrics-range-selector.types';
+import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
+import { EndpointsRelation, EndpointState } from '../../../store/src/types/endpoint.types';
+import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
 
@@ -35,24 +31,29 @@ export class EndpointsService implements CanActivate {
     if (!endpoint) {
       return '';
     }
-    const ext = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-    if (ext && ext.homeLink) {
-      return ext.homeLink(endpoint.guid).join('/');
+    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogEntity) {
+      return catalogEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private endpointHealthChecks: EndpointHealthChecks
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
     this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
       !!Object.values(endpoints).find(endpoint => {
-        const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-        return epType.doesNotSupportConnect ||
+        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+        if (!epType || !epType.definition) {
+          return false;
+        }
+        const epEntity = epType.definition;
+        return epEntity.unConnectable ||
           endpoint.connectionStatus === 'connected' ||
           endpoint.connectionStatus === 'checking';
       }))
@@ -67,11 +68,11 @@ export class EndpointsService implements CanActivate {
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
-    endpointHealthChecks.registerHealthCheck(healthCheck);
+    this.endpointHealthChecks.registerHealthCheck(healthCheck);
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
-    endpointHealthChecks.checkEndpoint(endpoint);
+    this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
   public checkAllEndpoints() {
@@ -80,7 +81,7 @@ export class EndpointsService implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
     // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-    return observableCombineLatest(
+    return combineLatest(
       this.store.select('auth'),
       this.store.select(endpointStatusSelector)
     ).pipe(
@@ -119,43 +120,13 @@ export class EndpointsService implements CanActivate {
       }));
   }
 
-  hasMetrics(endpointId: string) {
-    return getEndpointHasCfMetrics(endpointId, this.store);
-  }
-
-  hasCellMetrics(endpointId: string): Observable<boolean> {
-    return this.hasMetrics(endpointId).pipe(
-      switchMap(hasMetrics => {
-        if (!hasMetrics) {
-          return of(false);
-        }
-
-        // Check that we successfully retrieve some stats. If the metric is unknown an empty list is returned
-        const action = new FetchCFCellMetricsPaginatedAction(
-          endpointId,
-          endpointId,
-          new MetricQueryConfig('firehose_value_metric_rep_unhealthy_cell', {}),
-          MetricQueryType.QUERY
-        );
-        return getPaginationObservables<IMetrics>({
-          store: this.store,
-          action,
-          paginationMonitor: this.paginationMonitorFactory.create(
-            action.paginationKey,
-            entityFactory(action.entityKey)
-          )
-        }).entities$.pipe(
-          filter(entities => !!entities),
-          map(entities => !!entities.find(entity => !!entity.data.result.length)),
-          first()
-        );
-      })
-    );
+  hasMetrics(endpointId: string): Observable<boolean> {
+    return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
-    const eiriniProvider$ = this.store.select(selectEntity<EndpointModel>(endpointSchemaKey, endpointId)).pipe(
-      map(cf => cfEiriniRelationship(cf))
+    const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
+      map(em => cfEiriniRelationship(em.entity))
     );
     return combineLatest([
       eiriniEnabled(this.store),
@@ -188,8 +159,11 @@ export class EndpointsService implements CanActivate {
       map(ep => {
         return Object.values(ep)
           .filter(endpoint => {
-            const epType = getEndpointType(endpoint.cnsi_type, endpoint.sub_type);
-            return endpoint.cnsi_type === type && (epType.doesNotSupportConnect || endpoint.connectionStatus === 'connected');
+            if (endpoint.cnsi_type !== type) {
+              return;
+            }
+            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+            return epType.unConnectable || endpoint.connectionStatus === 'connected';
           });
       })
     );

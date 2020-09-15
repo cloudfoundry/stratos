@@ -1,9 +1,10 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { UserService } from './user.service';
-import { CoreModule } from './core.module';
+import { CoreTestingModule } from '../../test-framework/core-test.modules';
 import { SharedModule } from '../shared/shared.module';
-import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { CoreModule } from './core.module';
+import { UserService } from './user.service';
 
 describe('UserService', () => {
   beforeEach(() => {
@@ -13,6 +14,7 @@ describe('UserService', () => {
       imports: [
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule(),
       ]
     });

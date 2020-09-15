@@ -16,7 +16,7 @@ import (
 	"github.com/labstack/echo"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
@@ -136,7 +136,9 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		SessionStoreSecret:   "hiddenraisinsohno!",
 		EncryptionKeyInBytes: mockEncryptionKey,
 		CFAdminIdentifier:    CFAdminIdentifier,
+		AuthEndpointType:     "remote",
 	}
+
 
 	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)

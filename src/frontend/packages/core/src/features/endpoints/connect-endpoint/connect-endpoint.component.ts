@@ -13,13 +13,12 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../core/extension/extension-types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
+import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { getCanShareTokenForEndpointType, getEndpointAuthTypes, getEndpointType } from '../endpoint-helpers';
-
 
 @Component({
   selector: 'app-connect-endpoint',
@@ -56,7 +55,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();
 
   // Component reference for the dynamically created auth form
-  @ViewChild('authForm', { read: ViewContainerRef })
+  @ViewChild('authForm', { read: ViewContainerRef, static: true })
   public container: ViewContainerRef;
 
   public endpointForm: FormGroup;
@@ -75,28 +74,24 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
-    private resolver: ComponentFactoryResolver
-  ) {
+    private resolver: ComponentFactoryResolver,
 
-  }
+  ) { }
 
   private init(config: ConnectEndpointConfig) {
-    const endpointType = getEndpointType(config.type, config.subType);
-
+    const endpoint = entityCatalog.getEndpoint(config.type, config.subType);
     // Populate the valid auth types for the endpoint that we want to connect to
-    getEndpointAuthTypes().forEach(authType => {
-      const authTypeHasEndpoint = authType.types.find(t => t === config.type);
-      const endpointHasAuthType = endpointType.authTypes && endpointType.authTypes.find(t => t === authType.value);
-      if (authTypeHasEndpoint || endpointHasAuthType) {
-        this.authTypesForEndpoint.push(authType);
-      }
-    });
 
     // Remove SSO if not allowed on this endpoint
-    this.authTypesForEndpoint = this.authTypesForEndpoint.filter(authType => authType.value !== 'sso' || config.ssoAllowed);
+    if (config.ssoAllowed) {
+      this.authTypesForEndpoint = endpoint.definition.authTypes;
+    } else {
+      this.authTypesForEndpoint = endpoint.definition.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
+    }
+
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
-    this.canShareEndpointToken = getCanShareTokenForEndpointType(endpointType.type, endpointType.subType);
+    this.canShareEndpointToken = endpoint.definition.tokenSharing;
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;
@@ -118,11 +113,14 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     // Template container reference is not available at construction
     this.createComponent(this.autoSelected.component);
 
-    this.subs.push(this.endpointForm.valueChanges.pipe(
-      map(() => this.endpointForm.valid)
-    ).subscribe(res => {
-      this.setData();
-      this.valid.next(res);
+    this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
+      const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
+      let valid = false;
+      if (authType.component === this.authFormComponentRef.componentType) {
+        this.setData();
+        valid = this.endpointForm.valid;
+      }
+      this.valid.next(valid);
     }));
 
     // Set initial valid status
@@ -164,6 +162,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (this.authFormComponentRef) {
       this.authFormComponentRef.destroy();
     }
+
     const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;

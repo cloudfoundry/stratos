@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { MetricsModule } from '../../metrics/metrics.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig } from '../connect.service';
-import { initEndpointTypes } from '../endpoint-helpers';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
@@ -33,7 +35,8 @@ describe('ConnectEndpointDialogComponent', () => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock }
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        SidePanelService
       ],
       declarations: [
         ConnectEndpointDialogComponent,
@@ -45,8 +48,10 @@ describe('ConnectEndpointDialogComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule,
-        createBasicStoreModule()
+        NoopAnimationsModule,
+        CoreTestingModule,
+        createBasicStoreModule(),
+        MetricsModule,
       ]
     }).overrideModule(BrowserDynamicTestingModule, {
       set: {
@@ -54,7 +59,6 @@ describe('ConnectEndpointDialogComponent', () => {
       }
     });
     testingModule.compileComponents();
-    initEndpointTypes([]);
   }));
 
   beforeEach(() => {

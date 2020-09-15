@@ -1,7 +1,0 @@
-@import '~@angular/material/theming';
-@mixin app-deploy-app-theme($theme, $app-theme) {
-  $ansi-colors: map-get($app-theme, ansi-colors);
-  .deploy-app {
-    background-color: map-get(map-get($ansi-colors, 'white'), intense);
-  }
-}

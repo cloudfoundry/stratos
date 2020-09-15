@@ -28,7 +28,13 @@ type EndpointNotificationPlugin interface {
 	OnEndpointNotification(EndpointAction, *CNSIRecord)
 }
 
+// TODO: RC understand
 type TokenNotificationPlugin interface {
 	OnConnect(*CNSIRecord, *TokenRecord, string)
 	OnDisconnect()
+}
+
+// StratosPluginCleanup is interface a plugin can implement if it wants to cleanup on exit
+type StratosPluginCleanup interface {
+	Destroy()
 }

@@ -1,22 +1,25 @@
 import { Component, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
-  RemoveUserFavoriteAction,
-} from '../../../../../store/src/actions/user-favourites-actions/remove-user-favorite-action';
-import { AppState } from '../../../../../store/src/app-state';
-import { entityFactory, userFavoritesSchemaKey } from '../../../../../store/src/helpers/entity-factory';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
+import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { MenuItem } from '../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../store/src/types/shared.types';
+import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { StratosStatus, ComponentEntityMonitorConfig } from '../../shared.types';
+import { isEndpointConnected } from '../../../features/endpoints/connect.service';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
-import { MetaCardMenuItem } from '../list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { IFavoritesMetaCardConfig } from './favorite-config-mapper';
 
+interface FavoriteIconData {
+  hasIcon: boolean;
+  icon?: string;
+  iconFont?: string;
+  logoUrl?: string;
+}
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -62,15 +65,19 @@ export class FavoritesMetaCardComponent {
   public endpointConnected$: Observable<boolean>;
   public name$: Observable<string>;
   public routerLink$: Observable<string>;
-  public actions$: Observable<MetaCardMenuItem[]>;
+  public actions$: Observable<MenuItem[]>;
+
+  // Optional icon for the favorite
+  public iconUrl$: Observable<string>;
+
+  // Optional icon for the favorite
+  public icon: FavoriteIconData;
 
   @Input()
   set favoriteEntity(favoriteEntity: IFavoriteEntity) {
     if (!this.placeholder && favoriteEntity) {
-      const endpoint$ = this.store.select(endpointEntitiesSelector).pipe(
-        map(endpoints => endpoints[favoriteEntity.favorite.endpointId])
-      );
-      this.endpointConnected$ = endpoint$.pipe(map(endpoint => !!endpoint.user));
+      const endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(favoriteEntity.favorite.endpointId).entity$;
+      this.endpointConnected$ = endpoint$.pipe(map(endpoint => isEndpointConnected(endpoint)));
       this.actions$ = this.endpointConnected$.pipe(
         map(connected => connected ? this.config.menuItems : [])
       );
@@ -78,18 +85,33 @@ export class FavoritesMetaCardComponent {
       this.favorite = favorite;
       this.metaFavorite = !this.endpoint || (this.endpoint && !this.endpointHasEntities) ? favorite : null;
       this.prettyName = prettyName || 'Unknown';
-      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, entityFactory(userFavoritesSchemaKey));
+      this.entityConfig = new ComponentEntityMonitorConfig(favorite.guid, stratosEntityFactory(userFavouritesEntityType));
+
+      // If this favorite is an endpoint, lookup the image for it from the entity catalog
+      if (this.favorite.entityType === 'endpoint') {
+        this.iconUrl$ = endpoint$.pipe(map(a => entityCatalog.getEndpoint(a.cnsi_type, a.sub_type).definition.logoUrl));
+      } else {
+        this.iconUrl$ = observableOf('');
+      }
+
+      const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
+      this.icon = {
+        hasIcon: !!entityDef.definition.logoUrl || !!entityDef.definition.icon,
+        icon: entityDef.definition.icon,
+        iconFont: entityDef.definition.iconFont,
+        logoUrl: entityDef.definition.logoUrl,
+      };
 
       this.setConfirmation(this.prettyName, favorite);
 
       const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
+
       if (config) {
+        this.name$ = observableOf(config.name);
         if (this.endpoint) {
-          this.name$ = endpoint$.pipe(map(endpoint => config.name + (endpoint.user ? '' : ' (Disconnected)')));
-          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : '/endpoints'));
+          this.routerLink$ = this.endpointConnected$.pipe(map(connected => connected ? config.routerLink : '/endpoints'));
         } else {
-          this.name$ = observableOf(config.name);
-          this.routerLink$ = endpoint$.pipe(map(endpoint => endpoint.user ? config.routerLink : null));
+          this.routerLink$ = this.endpointConnected$.pipe(map(connected => connected ? config.routerLink : null));
         }
         config.lines = this.mapLinesToObservables(config.lines);
         this.config = config;
@@ -97,7 +119,9 @@ export class FavoritesMetaCardComponent {
     }
   }
 
-  constructor(private store: Store<AppState>, private confirmDialog: ConfirmationDialogService) { }
+  constructor(
+    private confirmDialog: ConfirmationDialogService
+  ) { }
 
   public setConfirmation(prettyName: string, favorite: UserFavorite<IFavoriteMetadata>) {
     this.confirmation = new ConfirmationDialogConfig(
@@ -113,8 +137,8 @@ export class FavoritesMetaCardComponent {
   }
 
   private removeFavorite = () => {
-    this.store.dispatch(new RemoveUserFavoriteAction(this.favorite));
-  }
+    stratosEntityCatalog.userFavorite.api.delete(this.favorite);
+  };
 
   public toggleMoreError() {
     this.showMore = !this.showMore;

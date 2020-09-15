@@ -1,0 +1,14 @@
+.logout {
+  &__card {
+    padding: 0;
+    width: 300px;
+  }
+  &__body {
+    padding: 24px;
+    text-align: center;    
+  }
+  &__msg {
+    font-size: 18px;
+    padding-bottom: 20px;
+  }
+}

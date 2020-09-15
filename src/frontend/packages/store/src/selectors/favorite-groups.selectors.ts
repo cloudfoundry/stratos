@@ -1,35 +1,37 @@
 import { compose } from '@ngrx/store';
 
-import { deriveEndpointFavoriteFromFavorite } from '../../../core/src/core/user-favorite-helpers';
-import { AppState, IRequestEntityTypeState } from '../app-state';
+import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from '../helpers/stratos-entity-factory';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import { deriveEndpointFavoriteFromFavorite } from '../user-favorite-helpers';
 
+const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
 
-export const favoriteEntitiesSelector = (state: AppState):
-  IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData.userFavorites;
+export const favoriteEntitiesSelector = (state: InternalAppState):
+  IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>> => state.requestData[favoritesEntityKey];
 
+const favoriteGroupsStateSelector = (state: InternalAppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
 
-export const favoriteGroupsStateSelector = (state: AppState): IUserFavoritesGroupsState => state.userFavoritesGroups;
+const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
 
-export const favoriteGroupsFetchingSelector = (state: IUserFavoritesGroupsState): boolean => state.busy;
+const favoriteGroupsErrorSelector = (state: IUserFavoritesGroupsState): boolean => state.error;
 
-export const favoriteGroupsErrorSelector = (state: IUserFavoritesGroupsState): boolean => state.error;
 
 export const favoriteGroupsSelector = compose(
   (state: IUserFavoritesGroupsState): IUserFavoritesGroups => state.groups,
   favoriteGroupsStateSelector
 );
 
-
-export const favoriteGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
+const favoriteGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
   const endpointFavorite = deriveEndpointFavoriteFromFavorite(favorite);
   return (groups: IUserFavoritesGroups): IUserFavoriteGroup => {
     return groups[endpointFavorite.guid];
   };
 };
 
-export const favoriteInGroupGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
+const favoriteInGroupGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
   return (group: IUserFavoriteGroup): boolean => {
     if (!group) {
       return false;

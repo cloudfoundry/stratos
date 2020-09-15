@@ -1,46 +1,40 @@
-import { RequestOptions } from '@angular/http';
+import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { EntitySchema } from '../helpers/entity-factory';
+import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import { EntitySchema } from '../helpers/entity-schema';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
 
 export interface SingleEntityAction {
-  entityKey: string;
   // For single entity requests
   guid?: string;
 }
 
-export interface RequestAction extends Action, SingleEntityAction {
-  endpointGuid?: string;
+export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
 }
 
-/**
- * The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
- * @export
- */
-export enum RequestEntityLocation {
-  RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
-  ARRAY, // The response is an array which contains the entities
-  OBJECT, // The response is the entity
-}
-
-export type IRequestActionEntity = EntitySchema | EntitySchema[];
-export interface IRequestAction extends RequestAction {
-  entity?: IRequestActionEntity;
-  entityKey: string;
+export type RequestActionEntity = EntitySchema | EntitySchema[];
+export interface EntityRequestAction extends EntityCatalogEntityConfig, RequestAction {
+  /**
+   * This is just to maintain backwards compatibility while transitioning
+   * to entity pipeline proper usage
+   */
+  actions?: string[];
+  entity?: RequestActionEntity;
   /**
    * This is used for multiaction lists where the deleted entity
    * is going to be part of another entities pagination section
    */
-  proxyPaginationEntityKey?: string;
+  proxyPaginationEntityConfig?: EntityCatalogEntityConfig;
 
   /**
    * For a delete action, clear the pagination section for the given keys.
-   * if proxyPaginationEntityKey isn't set, pagination sections for the entityKey will also be deleted.
+   * if proxyPaginationEntityConfig isn't set, pagination sections for the entityKey will also be deleted.
    */
   clearPaginationEntityKeys?: string[];
   endpointGuid?: string;
@@ -49,29 +43,30 @@ export interface IRequestAction extends RequestAction {
    * For single entity requests
    */
   guid?: string;
-  entityLocation?: RequestEntityLocation;
   /**
    * For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
    * like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
    */
   removeEntityOnDelete?: boolean;
+  options?: HttpRequest<any>;
 }
 
 export interface IUpdateRequestAction {
-  apiAction: IRequestAction | PaginatedAction;
+  type: string;
+  apiAction: EntityRequestAction | PaginatedAction;
   busy: boolean;
   error: string;
 }
 
 export interface IStartRequestAction {
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
 }
 
 export interface ISuccessRequestAction {
   type: string;
   response: NormalizedResponse;
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
   totalResults?: number;
 }
@@ -79,14 +74,15 @@ export interface ISuccessRequestAction {
 export interface IFailedRequestAction {
   type: string;
   message: string;
-  apiAction: IRequestAction | PaginatedAction;
+  apiAction: EntityRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
   response?: any;
 }
 
-export abstract class CFStartAction implements Action {
+export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
+
 export abstract class RequestAction implements Action {
   type = RequestTypes.START;
 }
@@ -102,7 +98,7 @@ export abstract class RequestUpdateAction implements Action {
 
 export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
   constructor(
-    public apiAction: IRequestAction,
+    public apiAction: EntityRequestAction,
     public busy: boolean,
     public error: string,
   ) {
@@ -110,28 +106,20 @@ export class UpdateCfAction extends RequestUpdateAction implements IUpdateReques
   }
 }
 
-export interface ICFAction extends IRequestAction {
-  options: RequestOptions;
+export interface ICFAction extends EntityRequestAction {
+  options: HttpRequest<any>;
   actions: string[];
   skipValidation?: boolean;
+  validate?: boolean;
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {
-  constructor(public type, public apiAction: ICFAction | PaginatedAction, public response?: T) { }
-}
-
-export class StartCFAction extends CFStartAction implements IStartRequestAction {
-  constructor(
-    public apiAction: ICFAction | PaginatedAction,
-    public requestType: ApiRequestTypes = 'fetch'
-  ) {
-    super();
-  }
+  constructor(public type: string, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartRequestAction extends RequestAction {
   constructor(
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
@@ -141,7 +129,7 @@ export class StartRequestAction extends RequestAction {
 export class WrapperRequestActionSuccess<T = any> extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(
     public response: NormalizedResponse<T>,
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number,
     public totalPages?: number,
@@ -161,7 +149,7 @@ export interface InternalEndpointError {
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(
     public message: string,
-    public apiAction: IRequestAction | PaginatedAction,
+    public apiAction: EntityRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
     public internalEndpointError?: InternalEndpointError,
     public response?: any

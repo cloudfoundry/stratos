@@ -5,11 +5,11 @@ import { first, map } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
 import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-groups.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { UserFavorite } from '../../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { LoggerService } from '../../../core/logger.service';
-import { UserFavoriteManager } from '../../../core/user-favorite-manager';
 
 @Component({
   selector: 'app-home-page',
@@ -23,7 +23,11 @@ export class HomePageComponent {
   public showFilterToggle$: Observable<boolean>;
   public showFilters = false;
 
-  constructor(endpointsService: EndpointsService, store: Store<AppState>, logger: LoggerService) {
+  constructor(
+    endpointsService: EndpointsService,
+    store: Store<AppState>,
+    public userFavoriteManager: UserFavoriteManager
+  ) {
     this.allEndpointIds$ = endpointsService.endpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
@@ -44,12 +48,13 @@ export class HomePageComponent {
       first()
     ).subscribe();
 
-    const manager = new UserFavoriteManager(store, logger);
-    this.showFilterToggle$ = manager.getAllFavorites().pipe(
-      map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite<IFavoriteMetadata, any>>]) => {
-        for (const favEntity of Object.values(favEntities)) {
-          if (favEntity.entityType !== 'endpoint') {
-            return true;
+    this.showFilterToggle$ = userFavoriteManager.getAllFavorites().pipe(
+      map(([, favEntities]: [IUserFavoritesGroups, IRequestEntityTypeState<UserFavorite>]) => {
+        if (favEntities) {
+          for (const favEntity of Object.values(favEntities)) {
+            if (favEntity.entityType !== EntityCatalogHelpers.endpointType) {
+              return true;
+            }
           }
         }
         return false;

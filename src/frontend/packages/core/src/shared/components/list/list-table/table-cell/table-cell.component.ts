@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
   Component,
   ComponentFactoryResolver,
@@ -10,81 +9,15 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
-  TableCellEventActionComponent,
-} from '../../list-types/app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../../list-types/app-event/table-cell-event-detail/table-cell-event-detail.component';
-import {
-  TableCellEventTimestampComponent,
-} from '../../list-types/app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
-import { TableCellCfCellComponent } from '../../list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
-import {
   TableCellKubeNodeComponent,
 } from '../../list-types/app-instance/table-cell-kube-node/table-cell-kube-node.component';
-import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import {
-  TableCellEditVariableComponent,
-} from '../../list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
-import {
-  TableCellAppCfOrgSpaceHeaderComponent,
-} from '../../list-types/app/table-cell-app-cforgspace-header/table-cell-app-cforgspace-header.component';
-import {
-  TableCellAppCfOrgSpaceComponent,
-} from '../../list-types/app/table-cell-app-cforgspace/table-cell-app-cforgspace.component';
-import {
-  TableCellAppInstancesComponent,
-} from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
-import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
-import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
-import {
-  TableCellConfirmOrgSpaceComponent,
-} from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
-import {
-  TableCellConfirmRoleAddRemComponent,
-} from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import {
-  TableCellFeatureFlagStateComponent,
-} from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
-import { TableCellQuotaComponent } from '../../list-types/cf-quotas/table-cell-quota/table-cell-quota.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from '../../list-types/cf-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import { TableCellRouteComponent } from '../../list-types/cf-routes/table-cell-route/table-cell-route.component';
-import { TableCellTCPRouteComponent } from '../../list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
-import {
-  TableCellServiceInstanceAppsAttachedComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-import {
-  TableCellServiceInstanceTagsComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import {
-  TableCellServiceNameComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import {
-  TableCellServicePlanComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import {
-  TableCellSpaceNameComponent,
-} from '../../list-types/cf-spaces-service-instances/table-cell-space-name/table-cell-space-name.component';
-import {
-  TableCellRoleOrgSpaceComponent,
-} from '../../list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
-import {
-  TableCellSelectOrgComponent,
-} from '../../list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
-import {
-  CfOrgPermissionCellComponent,
-} from '../../list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component';
-import {
-  CfSpacePermissionCellComponent,
-} from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+  TableCellEndpointAddressComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import {
   TableCellEndpointDetailsComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
@@ -94,82 +27,43 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import {
-  TableCellCommitAuthorComponent,
-} from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
-import {
-  TableCellAServicePlanExtrasComponent,
-} from '../../list-types/service-plans/table-cell-service-plan-extras/table-cell-service-plan-extras.component';
-import {
-  TableCellAServicePlanPriceComponent,
-} from '../../list-types/service-plans/table-cell-service-plan-price/table-cell-service-plan-price.component';
-import {
-  TableCellAServicePlanPublicComponent,
-} from '../../list-types/service-plans/table-cell-service-plan-public/table-cell-service-plan-public.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellExpanderComponent } from '../table-cell-expander/table-cell-expander.component';
 import { TableCellFavoriteComponent } from '../table-cell-favorite/table-cell-favorite.component';
+import { TableCellIconComponent } from '../table-cell-icon/table-cell-icon.component';
 import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import {
   TableCellRequestMonitorIconComponent,
 } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
+import { TableCellSidePanelComponent } from '../table-cell-side-panel/table-cell-side-panel.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { MultiActionListEntity } from './../../../../monitors/pagination-monitor';
 
-/* tslint:enable:max-line-length */
-export const listTableCells = [
+
+export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
   TableCellEditComponent,
-  TableCellEditVariableComponent,
-  TableCellEventTimestampComponent,
-  TableCellEventTypeComponent,
-  TableCellEventActionComponent,
-  TableCellEventDetailComponent,
   TableCellActionsComponent,
-  TableCellAppNameComponent,
   TableCellEndpointStatusComponent,
   TableCellEndpointNameComponent,
-  TableCellAppStatusComponent,
-  TableCellUsageComponent,
-  TableCellCfCellComponent,
   TableCellBooleanIndicatorComponent,
-  TableCellRouteComponent,
-  TableCellQuotaComponent,
-  TableCellTCPRouteComponent,
-  TableCellAppInstancesComponent,
   TableCellRadioComponent,
-  TableCellServiceInstanceAppsAttachedComponent,
-  TableCellServiceInstanceTagsComponent,
-  TableCellServicePlanComponent,
-  TableCellServiceNameComponent,
-  TableCellRouteAppsAttachedComponent,
-  CfOrgPermissionCellComponent,
-  CfSpacePermissionCellComponent,
-  TableCellFeatureFlagStateComponent,
-  TableCellConfirmOrgSpaceComponent,
   TableCellRequestMonitorIconComponent,
-  TableCellConfirmRoleAddRemComponent,
-  TableCellRoleOrgSpaceComponent,
-  TableCellSelectOrgComponent,
-  TableCellCommitAuthorComponent,
-  TableCellRequestMonitorIconComponent,
-  TableCellSpaceNameComponent,
-  TableCellAppCfOrgSpaceHeaderComponent,
-  TableCellAppCfOrgSpaceComponent,
-  TableCellAServicePlanPublicComponent,
-  TableCellAServicePlanPriceComponent,
-  TableCellAServicePlanExtrasComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
+  TableCellSidePanelComponent,
+  TableCellIconComponent,
+  TableCellExpanderComponent,
+  TableCellEndpointAddressComponent,
   ...coreEndpointListDetailsComponents,
-  TableCellKubeNodeComponent
+  TableCellKubeNodeComponent // TODO: RC Move
 ];
 
 @Component({
@@ -182,7 +76,7 @@ export const listTableCells = [
   entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit {
-  @ViewChild('target', { read: ViewContainerRef })
+  @ViewChild('target', { read: ViewContainerRef, static: true })
   target: ViewContainerRef;
   private rcRow: T | MultiActionListEntity;
 

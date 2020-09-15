@@ -1,27 +1,15 @@
-import { Injectable, Type } from '@angular/core';
+import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { AppState } from '../../../../store/src/app-state';
+import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
-import { EntityServiceFactory } from '../entity-service-factory.service';
-import { EndpointAuthTypeConfig, EndpointTypeExtensionConfig, ExtensionEntitySchema } from './extension-types';
+import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
-export interface EndpointTypeExtension {
-  type: string;
-  label: string;
-  authTypes: string[];
-}
-
-export interface StratosExtensionConfig {
-  routes?: Route[];
-  endpointTypes?: EndpointTypeExtensionConfig[];
-  authTypes?: EndpointAuthTypeConfig[];
-  entities?: ExtensionEntitySchema[];
-}
 
 // The different types of Tab
 export enum StratosTabType {
@@ -34,9 +22,14 @@ export enum StratosTabType {
 export interface StratosTabMetadata {
   label: string;
   link: string;
-  icon: string;
+  icon?: string;
   iconFont?: string;
-  hidden?: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => Observable<boolean>;
+  hidden?: (
+    store: Store<AppState>,
+    esf: EntityServiceFactory,
+    activatedRoute: ActivatedRoute,
+    cups: CurrentUserPermissionsService
+  ) => Observable<boolean>;
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
@@ -59,21 +52,8 @@ export interface StratosActionMetadata {
   link: string;
   icon: string;
   iconFont?: string;
-  visible?: (store: Store<AppState>) => Observable<boolean>;
+  visible?: (store: Store<GeneralEntityAppState>) => Observable<boolean>;
   visible$?: Observable<boolean>;
-}
-
-export interface StratosEndpointMetadata {
-  type: string;
-  label: string;
-  authTypes: string[];
-  icon: string;
-  iconFont: string;
-}
-
-export interface StratosEndpointExtensionConfig {
-  endpointTypes?: EndpointTypeExtensionConfig[];
-  authTypes?: EndpointAuthTypeConfig[];
 }
 
 export type StratosRouteType = StratosTabType | StratosActionType;
@@ -86,12 +66,9 @@ export interface StratosExtensionRoutes {
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[] },
-  tabs: {} as { [key: string]: IPageSideNavTab[] },
-  actions: {} as { [key: string]: StratosActionMetadata[] },
-  endpointTypes: [],
-  authTypes: [],
-  entities: [] as ExtensionEntitySchema[]
+  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
+  tabs: {} as { [key: string]: IPageSideNavTab[], },
+  actions: {} as { [key: string]: StratosActionMetadata[], },
 };
 
 /**
@@ -106,23 +83,6 @@ export function StratosTab(props: StratosTabMetadataConfig) {
  */
 export function StratosAction(props: StratosActionMetadata) {
   return target => addExtensionAction(props.type, target, props);
-}
-
-/**
- * Decorator for an Extension module
- */
-export function StratosExtension(config: StratosExtensionConfig) {
-  return target => {
-    if (config.endpointTypes) {
-      extensionMetadata.endpointTypes.push(...config.endpointTypes);
-    }
-    if (config.authTypes) {
-      extensionMetadata.authTypes.push(...config.authTypes);
-    }
-    if (config.entities) {
-      extensionMetadata.entities.push(...config.entities);
-    }
-  };
 }
 
 export function StratosLoginComponent() {
@@ -158,23 +118,33 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
   extensionMetadata.actions[action].push(props);
 }
 
+// Empty module used to support the registration of Extension Components
+@NgModule()
+export class ExtEmptyModule { }
+
 // Injectable Extension Service
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ExtensionService {
 
   public metadata = extensionMetadata;
 
   constructor(private router: Router) { }
 
+  // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
+  // optimize out any extension components
+  public static declare(components: any[]): ModuleWithProviders {
+    return {
+      ngModule: ExtEmptyModule
+    };
+  }
+
   /**
    * Initialize the extensions - to be invoked in the AppModule
    */
   public init() {
     this.applyRoutesFromExtensions(this.router);
-  }
-
-  public getEndpointExtensionConfig(): StratosEndpointExtensionConfig {
-    return this.metadata as StratosEndpointExtensionConfig;
   }
 
   /**
@@ -201,7 +171,8 @@ export class ExtensionService {
 
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
+      const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
+      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
       loginRoute.component = extensionMetadata.loginComponent;
       needsReset = true;
     }
@@ -212,7 +183,7 @@ export class ExtensionService {
   }
 
   private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
-    const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
+    const index = routeConfig.findIndex(r => !!r.data && (!!r.data.stratosNavigation || r.data.stratosNavigationPage));
     if (index >= 0) {
       const removed = routeConfig.splice(index, 1);
       dashboardRoute.children = dashboardRoute.children.concat(removed);
@@ -233,13 +204,4 @@ export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[
 
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
-}
-
-export function getEndpointSchemeKeys(type: string): string[] {
-  const ep = extensionMetadata.endpointTypes.find(e => e.value === type);
-  return ep ? ep.entitySchemaKeys || [] : [];
-}
-
-export function getEntitiesFromExtensions() {
-  return extensionMetadata.entities;
 }

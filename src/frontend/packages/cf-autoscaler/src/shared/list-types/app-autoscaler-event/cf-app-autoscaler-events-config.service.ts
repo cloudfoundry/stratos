@@ -1,15 +1,16 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
-import { ITimeRange, MetricQueryType } from '../../../../../core/src/shared/services/metrics-range-selector.types';
-import { AppState } from '../../../../../store/src/app-state';
+import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
 import { CfAppAutoscalerEventsDataSource } from './cf-app-autoscaler-events-data-source';
 import {
@@ -84,7 +85,7 @@ export class CfAppAutoscalerEventsConfigService
   isLocal = false;
 
   showCustomTime = true;
-  customTimePollingInterval = 120000;
+  customTimePollingInterval = 30000;
   customTimeInitialValue = '1:month';
   customTimeWindows: ITimeRange[] = [
     {
@@ -122,7 +123,7 @@ export class CfAppAutoscalerEventsConfigService
   }
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store<CFAppState>,
     private appService: ApplicationService,
     private datePipe: DatePipe,
     metricsRangeService: MetricsRangeSelectorService) {

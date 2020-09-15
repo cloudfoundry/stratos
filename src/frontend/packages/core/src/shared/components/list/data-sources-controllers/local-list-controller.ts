@@ -2,10 +2,10 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
+import { LocalPaginationHelpers } from '../../../../../../store/src/helpers/local-list.helpers';
 import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
-import { LocalPaginationHelpers } from './local-list.helpers';
 
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
@@ -57,13 +57,13 @@ export class LocalListController<T = any> {
           return { paginationEntity, entities: [] };
         }
         if (dataFunctions && dataFunctions.length) {
-          entities = dataFunctions.reduce((value, fn) => {
-            return fn(value, paginationEntity);
-          }, entities);
+          entities = dataFunctions.reduce((value, fn) => fn(value, paginationEntity), entities);
         }
         return { paginationEntity, entities };
       }),
-      tap(({ paginationEntity, entities }) => this.setResultCount(paginationEntity, entities)),
+      tap(({ paginationEntity, entities }) => {
+        this.setResultCount(paginationEntity, entities);
+      }),
       map(({ entities }) => entities)
     );
     return cleanPagination$.pipe(
@@ -133,9 +133,10 @@ export class LocalListController<T = any> {
   private getPaginationCompareString(paginationEntity: PaginationEntityState) {
     // Unique string excluding local pagination (watched elsewhere)
     return paginationEntity.totalResults
-      + (paginationEntity.params['order-direction-field'] || '') + ','
-      + (paginationEntity.params['order-direction'] || '') + ','
+      + (paginationEntity.params['order-direction-field'] as string || '') + ','
+      + (paginationEntity.params['order-direction'] as string || '') + ','
       + paginationEntity.clientPagination.filter.string + ','
+      + paginationEntity.clientPagination.filter.filterKey + ','
       + paginationEntity.forcedLocalPage
       + Object.values(paginationEntity.clientPagination.filter.items);
     // Some outlier cases actually fetch independently from this list (looking at you app variables)

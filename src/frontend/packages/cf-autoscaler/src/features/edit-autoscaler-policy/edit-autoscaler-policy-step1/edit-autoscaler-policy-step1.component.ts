@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import * as moment from 'moment-timezone';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ActivatedRoute } from '@angular/router';
+import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
@@ -32,9 +33,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicy imp
   constructor(
     public applicationService: ApplicationService,
     private fb: FormBuilder,
-    service: EditAutoscalerPolicyService
+    service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
   ) {
-    super(service);
+    super(service, route);
     this.editLimitForm = this.fb.group({
       instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
       instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],

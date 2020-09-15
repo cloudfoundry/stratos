@@ -37,38 +37,40 @@ describe('Endpoints', () => {
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             endpointsPage.list.waitForNoLoadingIndicator();
             // Should have removed the only row, so we should see welcome message again
-            expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
+            expect(endpointsPage.isWelcomeMessageAdmin(false)).toBeTruthy();
           });
         });
       });
 
       // Skip test if we only have one Cloud Foundry endpoint
-      describe('Multiple endpoints -', e2e.secrets.haveSingleCloudFoundryEndpoint, () => {
-        beforeAll(() => {
-          // Ensure we have multiple endpoints registered
-          e2e.setup(ConsoleUserType.admin)
-            .clearAllEndpoints()
-            .registerMultipleCloudFoundries();
-        });
-
-        it('Successfully unregister', () => {
-          expect(endpointsPage.isActivePage()).toBeTruthy();
-
-          // Current number of rows
-          let endpointCount = 0;
-          endpointsPage.cards.getCardCount().then(count => endpointCount = count);
-
-          // Get the row in the table for this endpoint
-          endpointsPage.cards.findCardByTitle(toUnregister.name).then(card => {
-            card.openActionMenu();
-            const menu = new MenuComponent();
-            menu.waitUntilShown();
-            menu.clickItem('Unregister');
-            ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
-            endpointsPage.list.waitForNoLoadingIndicator();
-            expect(endpointsPage.cards.getCardCount()).toBe(endpointCount - 1);
+      describe('Multiple endpoints -', () => {
+        if (!e2e.secrets.haveSingleCloudFoundryEndpoint) {
+          beforeAll(() => {
+            // Ensure we have multiple endpoints registered
+            e2e.setup(ConsoleUserType.admin)
+              .clearAllEndpoints()
+              .registerMultipleCloudFoundries();
           });
-        });
+
+          it('Successfully unregister', () => {
+            expect(endpointsPage.isActivePage()).toBeTruthy();
+
+            // Current number of rows
+            let endpointCount = 0;
+            endpointsPage.cards.getCardCount().then(count => endpointCount = count);
+
+            // Get the row in the table for this endpoint
+            endpointsPage.cards.findCardByTitle(toUnregister.name).then(card => {
+              card.openActionMenu();
+              const menu = new MenuComponent();
+              menu.waitUntilShown();
+              menu.clickItem('Unregister');
+              ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
+              endpointsPage.list.waitForNoLoadingIndicator();
+              expect(endpointsPage.cards.getCardCount()).toBe(endpointCount - 1);
+            });
+          });
+        }
       });
     });
 
@@ -92,8 +94,8 @@ describe('Endpoints', () => {
           const menu = new MenuComponent();
           menu.waitUntilShown();
           menu.getItemMap().then(items => {
-            expect(items['unregister']).not.toBeDefined();
-            expect(items['connect']).toBeDefined();
+            expect(items.unregister).not.toBeDefined();
+            expect(items.connect).toBeDefined();
           });
         });
       });

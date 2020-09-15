@@ -1,48 +1,27 @@
 <mat-card class="card-autoscaler-default">
-  <div class="card-autoscaler-default__left">
-    <mat-card-header>
-      <mat-card-title>Instances</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="Current">
-            <app-running-instances [instances]="applicationInstances$ | async" [cfGuid]="appService.cfGuid"
-              [appGuid]="this.appService.appGuid">
-            </app-running-instances>
-          </app-metadata-item>
+  <mat-card-header>
+    <mat-card-title>Instances</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <app-metadata-item label="Current">
+      <app-running-instances [instances]="applicationInstances$ | async" [cfGuid]="appService.cfGuid"
+        [appGuid]="this.appService.appGuid">
+      </app-running-instances>
+    </app-metadata-item>
+    <div class="card-autoscaler-default__min-max">
+      <app-metadata-item label="Minimum">
+        <div *ngIf="appAutoscalerPolicy$ | async as policy">
+          <div>{{ policy.instance_min_count }}</div>
         </div>
-      </div>
-    </mat-card-content>
-  </div>
-  <div class="card-autoscaler-default__right">
-    <mat-card-header>
-      <mat-card-title>Limits</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="Minimum">
-            <div *ngIf="appAutoscalerPolicy$ | async as policy">
-              <div>{{ policy.instance_min_count }}</div>
-            </div>
-            <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
-          </app-metadata-item>
+        <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
+      </app-metadata-item>
+      <app-metadata-item label="Maximum">
+        <div *ngIf="appAutoscalerPolicy$ | async as policy">
+          <div>{{ policy.instance_max_count }}</div>
         </div>
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="Maximum">
-            <div *ngIf="appAutoscalerPolicy$ | async as policy">
-              <div>{{ policy.instance_max_count }}</div>
-            </div>
-            <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
-          </app-metadata-item>
-        </div>
-      </div>
-    </mat-card-content>
-  </div>
-  <mat-card-actions *ngIf="(appAutoscalerPolicy$ | async)" class="card-autoscaler-default__actions">
-    <button (click)="onUpdate()" mat-icon-button>
-      <mat-icon>edit</mat-icon>
-    </button>
-  </mat-card-actions>
+        <div *ngIf="!(appAutoscalerPolicy$ | async)">-</div>
+      </app-metadata-item>
+    </div>
+  </mat-card-content>
+
 </mat-card>

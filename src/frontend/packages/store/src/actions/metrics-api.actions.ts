@@ -1,14 +1,15 @@
 import { Action } from '@ngrx/store';
-import { environment } from '../../../core/src/environments/environment';
+
+import { proxyAPIVersion } from '../jetstream';
 
 export const METRIC_API_START = '[Metrics] API Start';
 export const METRIC_API_SUCCESS = '[Metrics] API Success';
 export const METRIC_API_FAILED = '[Metrics] API Failed';
 
-const { proxyAPIVersion } = environment;
 
 export const MetricAPIQueryTypes = {
-  TARGETS: 'targets'
+  TARGETS: 'targets',
+  STRATOS_METADATA: 'stratos'
 };
 
 export interface MetricAPIResponse {
@@ -29,10 +30,24 @@ export interface MetricsAPITargets {
   }[];
 }
 
+export interface MetricsStratosInfo {
+  name: string;
+
+}
+
 export class MetricsAPIAction implements Action {
   public url;
   constructor(public endpointGuid: string, public query: string, public queryType = MetricAPIQueryTypes.TARGETS) {
     this.url = `/pp/${proxyAPIVersion}/proxy/api/v1/` + query;
+  }
+  type = METRIC_API_START;
+}
+
+export class MetricsStratosAction implements Action {
+  public url;
+  public queryType = MetricAPIQueryTypes.STRATOS_METADATA;
+  constructor(public endpointGuid: string) {
+    this.url = `/pp/${proxyAPIVersion}/proxy/stratos`;
   }
   type = METRIC_API_START;
 }

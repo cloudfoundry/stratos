@@ -1,4 +1,9 @@
 @mixin app-card-status-theme($theme, $app-theme) {
+  @keyframes flickerAnimation {
+    0% { opacity: 1; }
+    50% { opacity: .3; }
+    100% { opacity: 1; }
+  }
   $status-colors: map-get($app-theme, status);
   .app-card-status {
     background-color: transparent;
@@ -12,6 +17,7 @@
       background-color: map-get($status-colors, danger);
     }
     &--tentative {
+      animation: flickerAnimation 1.5s infinite;
       background-color: map-get($status-colors, tentative);
     }
     &--incomplete {

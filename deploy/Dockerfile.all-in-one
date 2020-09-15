@@ -1,5 +1,5 @@
 # Docker build for all-in-one Stratos
-FROM splatform/stratos-aio-base:opensuse as builder
+FROM splatform/stratos-aio-base:leap15_1 as builder
 
 # Ensure that we copy the custom-src folder
 COPY --chown=stratos:users . ./
@@ -17,7 +17,8 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
     && chmod +x jetstream
 
 # use --target=aio to build All-in-one image
-FROM splatform/stratos-bk-base:opensuse
+FROM splatform/stratos-bk-base:leap15_1
+ARG CANARY_BUILD
 COPY --from=builder /home/stratos/deploy/db /src/deploy/db
 COPY --from=builder /home/stratos/dev-certs /srv/dev-certs
 COPY --from=builder /home/stratos/ui /srv/ui
@@ -25,6 +26,12 @@ COPY --from=builder /home/stratos/jetstream /srv/jetstream
 COPY --from=builder /home/stratos/config.properties /srv/config.properties
 # User Invite templates
 COPY --from=builder /home/stratos/src/jetstream/templates /srv/templates
+
+# Enable persistence features if canary build flag is set
+RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEATURES=true\n" >> /srv/config.properties ; fi
+
+# Enable tech preview features if canary build flag is set
+RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nENABLE_TECH_PREVIEW=true\n" >> /srv/config.properties ; fi
 
 EXPOSE 443
 

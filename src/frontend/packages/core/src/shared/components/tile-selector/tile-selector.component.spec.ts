@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MDAppModule } from '../../../core/md.module';
 
 import { TileSelectorComponent } from './tile-selector.component';
-import { MDAppModule } from '../../../core/md.module';
+import { TileSelectorTileComponent } from './../tile-selector-tile/tile-selector-tile.component';
 
 describe('TileSelectorComponent', () => {
   let component: TileSelectorComponent;
@@ -12,7 +13,7 @@ describe('TileSelectorComponent', () => {
       imports: [
         MDAppModule
       ],
-      declarations: [TileSelectorComponent]
+      declarations: [TileSelectorComponent, TileSelectorTileComponent]
     })
       .compileComponents();
   }));

@@ -1,39 +1,12 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { first, map, pairwise, skipWhile } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { AppState } from '../app-state';
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { BasePaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { setDefaultPaginationState } from '../reducers/pagination-reducer/pagination.reducer';
-import { defaultCfEntitiesState } from '../types/entity.types';
-
-
-export const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) =>
-  store.select(selectPaginationState(action.entityKey, action.paginationKey));
-
-/**
- * Using the given action wait until the associated pagination section changes from busy to not busy
- */
-export const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePaginatedAction): Observable<boolean> =>
-  fetchPaginationStateFromAction(store, action).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return pageRequest ? pageRequest.busy : true;
-    }),
-    pairwise(),
-    map(([oldFetching, newFetching]) => {
-      return oldFetching === true && newFetching === false;
-    }),
-    skipWhile(completed => !completed),
-    first(),
-  );
-
-export function initStore() {
-  setDefaultPaginationState({ ...defaultCfEntitiesState });
-}
+import { MultiActionListEntity } from '../monitors/pagination-monitor';
+import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
+import { APIResource } from '../types/api.types';
+import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
 export function getDashboardStateSessionId(username?: string) {
@@ -47,3 +20,22 @@ export function getDashboardStateSessionId(username?: string) {
   }
   return null;
 }
+
+export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IFavoritesInfo> {
+  return combineLatest(
+    store.select(fetchingFavoritesSelector),
+    store.select(errorFetchingFavoritesSelector)
+  ).pipe(
+    map(([fetching, error]) => ({
+      fetching,
+      error
+    }))
+  );
+}
+
+export const getRowMetadata = (entity: APIResource | MultiActionListEntity) => {
+  if (entity instanceof MultiActionListEntity) {
+    return entity.entity.metadata ? entity.entity.metadata.guid : null;
+  }
+  return entity.metadata ? entity.metadata.guid : null;
+};

@@ -1,10 +1,10 @@
-import { promise, protractor } from 'protractor';
+import { protractor } from 'protractor';
 
-import { IApp } from '../../frontend/packages/core/src/core/cf-api.types';
+import { IApp } from '../../frontend/packages/cloud-foundry/src/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageEventsTab } from './po/application-page-events.po';
@@ -21,20 +21,7 @@ describe('Application View -', () => {
   let app: APIResource<IApp>;
   let appSummary: ApplicationPageSummaryTab;
   let defaultStack = '';
-
-  function createTestAppAndNav(): promise.Promise<any> {
-    return cfHelper.basicCreateApp(
-      CFHelpers.cachedDefaultCfGuid,
-      CFHelpers.cachedDefaultSpaceGuid,
-      appName
-    )
-      .then(pApp => app = pApp)
-      .then(() => {
-        appSummary = new ApplicationPageSummaryTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
-        appSummary.navigateTo();
-        appSummary.waitForPage();
-      });
-  }
+  let cfGuid: string;
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
@@ -47,7 +34,6 @@ describe('Application View -', () => {
     cfHelper = applicationE2eHelper.cfHelper;
 
     protractor.promise.controlFlow().execute(() => cfHelper.updateDefaultCfOrgSpace());
-    return protractor.promise.controlFlow().execute(() => createTestAppAndNav());
   });
 
   beforeAll(() => {
@@ -60,30 +46,46 @@ describe('Application View -', () => {
     }
   });
 
+  it('Create skeleton app in default org/space', done => {
+    // Needs browser.wait OR done
+    cfHelper.createTestAppAndNav(appName).then(pApp => {
+      app = pApp.app;
+      cfGuid = pApp.cfGuid;
+      appSummary = new ApplicationPageSummaryTab(cfGuid, app.metadata.guid);
+      done();
+    });
+  });
+
   describe('Breadcrumbs', () => {
 
     function testApplicationsBreadcrumb() {
+      appSummary.breadcrumbs.waitUntilShown();
       appSummary.breadcrumbs.getBreadcrumbs().then(breadcrumbs => {
         expect(breadcrumbs.length).toBe(1);
         expect(breadcrumbs[0].label).toBe('Applications');
       });
     }
 
-    it('Fresh load', testApplicationsBreadcrumb);
+    it('Fresh load', () => {
+      // Should be on the app summary page already
+      appSummary.waitForPage();
+      testApplicationsBreadcrumb();
+    });
 
     it('From App Wall', () => {
+      // Start at app wall
       const appWall = new ApplicationsPage();
       appWall.navigateTo();
       appWall.waitForPage();
-      appSummary.navigateTo();
-      appSummary.waitForPage();
+      // Nav to app summary via app wall
+      ApplicationsPage.goToAppSummary(app.entity.name, cfGuid, app.metadata.guid);
       testApplicationsBreadcrumb();
     });
   });
 
   describe('Tabs', () => {
     beforeAll(() => {
-      ApplicationsPage.goToAppSummary(appName, CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+      ApplicationsPage.goToAppSummary(appName, cfGuid, app.metadata.guid);
     });
 
     it('Walk tabs', () => {
@@ -133,8 +135,7 @@ describe('Application View -', () => {
       });
 
       it('Deployment Info', () => {
-        appSummary.cardDeployInfo.waitForTitle('Deployment Info');
-        expect(appSummary.cardDeployInfo.getContent()).toBe('None');
+        expect(appSummary.cardDeployInfo.isPresent()).toBeFalsy();
       });
     });
 
@@ -142,7 +143,7 @@ describe('Application View -', () => {
       let appInstances: ApplicationPageInstancesTab;
 
       beforeAll(() => {
-        appInstances = new ApplicationPageInstancesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+        appInstances = new ApplicationPageInstancesTab(cfGuid, app.metadata.guid);
         appInstances.goToInstancesTab();
         appInstances.waitForPage();
       });
@@ -170,7 +171,7 @@ describe('Application View -', () => {
       let appRoutes: ApplicationPageRoutesTab;
 
       beforeAll(() => {
-        appRoutes = new ApplicationPageRoutesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+        appRoutes = new ApplicationPageRoutesTab(cfGuid, app.metadata.guid);
         appRoutes.goToRoutesTab();
         appRoutes.waitForPage();
       });
@@ -186,7 +187,7 @@ describe('Application View -', () => {
         expect(appRoutes.list.header.getAdd().isDisplayed()).toBeTruthy();
         appRoutes.list.header.getAdd().click();
 
-        const addRoutePage = new CreateRoutesPage(CFHelpers.cachedDefaultCfGuid, app.metadata.guid, app.entity.space_guid);
+        const addRoutePage = new CreateRoutesPage(cfGuid, app.metadata.guid, app.entity.space_guid);
         expect(addRoutePage.isActivePage()).toBeTruthy();
         expect(addRoutePage.header.getTitleText()).toBe('Create Route');
         expect(addRoutePage.type.getSelected().getText()).toBe('Create and map new route');
@@ -204,7 +205,7 @@ describe('Application View -', () => {
       let appEvents: ApplicationPageEventsTab;
 
       beforeAll(() => {
-        appEvents = new ApplicationPageEventsTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+        appEvents = new ApplicationPageEventsTab(cfGuid, app.metadata.guid);
         appEvents.goToEventsTab();
         appEvents.waitForPage();
       });
@@ -214,7 +215,7 @@ describe('Application View -', () => {
         expect(appEvents.list.isTableView()).toBeTruthy();
         expect(appEvents.list.getTotalResults()).toBe(1);
         expect(appEvents.list.table.getCell(0, 1).getText()).toBe('audit\napp\ncreate');
-        expect(appEvents.list.table.getCell(0, 2).getText()).toBe('person\nadmin');
+        expect(appEvents.list.table.getCell(0, 0).getText()).toBe('person\nadmin');
       });
 
     });
@@ -222,8 +223,8 @@ describe('Application View -', () => {
     describe('Variables Tab -', () => {
       let appVariables: ApplicationPageVariablesTab;
 
-      beforeAll(() => {
-        appVariables = new ApplicationPageVariablesTab(CFHelpers.cachedDefaultCfGuid, app.metadata.guid);
+      it('Navigate to variables tab', () => {
+        appVariables = new ApplicationPageVariablesTab(cfGuid, app.metadata.guid);
         appVariables.goToVariablesTab();
         appVariables.waitForPage();
       });
@@ -241,14 +242,16 @@ describe('Application View -', () => {
         const envVarValue = 'new env var value';
         appVariables.addVariable(envVarName, envVarValue);
 
+        appVariables.list.table.waitUntilNotBusy();
+
         expect(appVariables.list.table.getRows().count()).toBe(1);
-        expect(appVariables.list.table.getCell(0, 1).getText()).toBe(envVarName);
-        expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValue);
+        appVariables.list.table.waitForCellText(0, 1, envVarName);
+        appVariables.list.table.waitForCellText(0, 2, envVarValue);
 
         // Edit Env Var
         const envVarValueEdited = `${envVarValue}-edited`;
         appVariables.editVariable(0, envVarValueEdited);
-        expect(appVariables.list.table.getCell(0, 2).getText()).toBe(envVarValueEdited);
+        appVariables.list.table.waitForCellText(0, 2, envVarValueEdited);
 
         // Delete Env Var
         appVariables.deleteVariable(0, envVarName);

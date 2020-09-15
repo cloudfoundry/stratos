@@ -1,22 +1,14 @@
-import { RequestMethod } from '@angular/http';
+import { HttpRequest } from '@angular/common/http';
 import { Action } from '@ngrx/store';
 
-import { MetricQueryConfig } from '../actions/metrics.actions';
+import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { ListActionState } from '../reducers/api-request-reducer/types';
-import { IRequestAction } from './request.types';
+import { EntityRequestAction } from './request.types';
 
-export class QParam {
-  constructor(
-    public key: string,
-    public value: string | string[],
-    public joiner: '>=' | '<=' | '<' | '>' | ' IN ' | ':' | '=' = ':'
-  ) { }
-}
 
 export interface PaginationParam {
-  q?: QParam[];
-  metricConfig?: MetricQueryConfig;
-  [entityKey: string]: any;
+  [entityKey: string]: string | string[] | number;
 }
 
 export interface PaginationClientFilter {
@@ -24,6 +16,7 @@ export interface PaginationClientFilter {
   items: {
     [key: string]: any;
   };
+  filterKey?: string;
 }
 
 export interface PaginationClientPagination {
@@ -33,9 +26,27 @@ export interface PaginationClientPagination {
   totalResults: number;
 }
 
+export interface PaginationMaxedState {
+  /**
+   * Is the pagination in maxed mode?
+   * - flattenPagination and flattenPaginationMax is true
+   * - Initial fetch of entities brought back a total above the allowed IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
+   *   value
+   * - Pagination notionally now changes from local (has all entities & filtering locally) to non-local (has a single page &
+   *   filtering remotely)
+   */
+  isMaxedMode?: boolean;
+  /**
+   * Disregard flattenPaginationMax and ignore isMaxedMode true
+   */
+  ignoreMaxed?: boolean;
+}
+
+
 export class PaginationEntityState {
   /**
-   * For multi action lists, this is used to force a particular entity type.
+   * For multi action lists, this is used to force a particular entity type. For instance in the service instance wall selecting the option
+   * to only show user provided service instances
    */
   forcedLocalPage?: number;
   currentPage = 0;
@@ -51,44 +62,34 @@ export class PaginationEntityState {
    * The pagination key from where we share our values.
    */
   seed?: string;
-  /**
-   * Is the pagination state in maxed mode. This means the initial collection contained too many entities too handle, see PaginatedAction
-   * flattenPagination & flattenPaginationMax
-   */
-  maxedMode?: boolean;
+  maxedState: PaginationMaxedState;
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
 }
 
-export interface BasePaginatedAction extends Action {
-  entityKey: string;
+export interface BasePaginatedAction extends BasePipelineRequestAction, Action {
   paginationKey: string;
 }
 
-export interface PaginatedAction extends BasePaginatedAction, IRequestAction {
-  actions: string[];
+export interface PaginatedAction extends BasePaginatedAction, EntityRequestAction {
+  actions?: string[];
   /*
    * Fetch all pages and add them to a single page
    */
   flattenPagination?: boolean;
   /*
-   * The maximum number of entities to fetch. Note - Should be equal or higher than the page size
+   * When fetching all pages, abort if they exceed the maximum allowed. See IStratosBaseEntityDefinition paginationConfig maxedStateStartAt
    */
-  flattenPaginationMax?: number;
+  flattenPaginationMax?: boolean;
   initialParams?: PaginationParam;
   pageNumber?: number;
-  options?: {
-    params?: {
-      paramsMap: any;
-    },
-    method?: RequestMethod | string | null
-  };
+  options?: HttpRequest<any>;
   skipValidation?: boolean;
   // Internal, used for local multi action lists
   __forcedPageNumber__?: number;
-  __forcedPageSchemaKey__?: string;
+  __forcedPageEntityConfig__?: EntityCatalogEntityConfig;
 }
 
 export interface PaginationEntityTypeState {

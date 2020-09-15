@@ -1,0 +1,12 @@
+.event-actee {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  word-break: break-word;
+
+  mat-icon {
+    // Note - Should be 5px but some icons aren't 24x24 (`service-instance`)
+    margin-right: 10px;
+  }
+}

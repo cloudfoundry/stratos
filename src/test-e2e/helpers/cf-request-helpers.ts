@@ -1,10 +1,10 @@
 import { promise } from 'protractor';
 
-import { CFResponse } from '../../frontend/packages/store/src/types/api.types';
 import { EndpointModel } from '../../frontend/packages/store/src/types/endpoint.types';
 import { e2e, E2ESetup } from '../e2e';
 import { E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
+import { CFResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 
 export class CFRequestHelpers extends RequestHelpers {
 

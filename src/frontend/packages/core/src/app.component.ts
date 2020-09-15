@@ -1,12 +1,13 @@
-import { AfterContentInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { AfterContentInit, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
+import { AuthOnlyAppState } from '../../store/src/app-state';
+import { ThemeService } from '../../store/src/theme.service';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/src/app-state';
-import { Observable } from 'rxjs';
-
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<AppState>
+    store: Store<AuthOnlyAppState>,
+    public themeService: ThemeService,
+    @Inject(DOCUMENT) private document: Document,
   ) {
     // We use the username to key the session storage. We could replace this with the users id?
     this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
@@ -55,6 +58,16 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnInit() {
     this.loggedInService.init();
+
+    // Material design defines smaller sizes when on desktop but angular-material uses larger mobile sizes
+    // Add a style to the body if we detect a desktop browser, so we can adjust styling to match the MD Specification
+
+    // Approximation for detecting desktop browser - see: Stack Overflow: https://goo.gl/e1KuJR
+    const isTouchDevice = () => 'ontouchstart' in window || 'onmsgesturechange' in window;
+    const isDesktop = window.screenX !== 0 && !isTouchDevice() ? true : false;
+    if (isDesktop) {
+      this.document.body.classList.add('mat-desktop');
+    }
   }
 
   ngOnDestroy() {

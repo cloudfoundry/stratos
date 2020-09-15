@@ -1,0 +1,40 @@
+suite: test stratos deployment with kube versions
+templates:
+  - deployment.yaml
+tests:
+  - it: should use newer API versions when kube >= 1.16
+    capabilities:
+      kubeVersion:
+        major: 1
+        minor: 16
+    asserts:
+      - equal:
+          path: apiVersion
+          value: apps/v1
+  - it: should use newer API versions when kube >= 2
+    capabilities:
+      kubeVersion:
+        major: 2
+        minor: 1
+    asserts:
+      - equal:
+          path: apiVersion
+          value: apps/v1
+  - it: should use older API versions when kube < 1.16
+    capabilities:
+      kubeVersion:
+        major: 1
+        minor: 14
+    asserts:
+      - equal:
+          path: apiVersion
+          value: apps/v1beta1
+  - it: should use older API versions when kube is set to 1.14+
+    capabilities:
+      kubeVersion:
+        major: 1
+        minor: 14+
+    asserts:
+      - equal:
+          path: apiVersion
+          value: apps/v1beta1

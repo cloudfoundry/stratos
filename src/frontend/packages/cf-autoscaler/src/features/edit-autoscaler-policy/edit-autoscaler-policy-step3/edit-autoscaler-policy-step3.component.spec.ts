@@ -1,17 +1,16 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
+import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationServiceMock } from '../../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import { ApplicationService } from '../../../../../core/src/features/applications/application.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/tab-nav.service';
-import { ApplicationServiceMock } from '../../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../../core/test-framework/store-test-helper';
-import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
-import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3.component';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3.component';
 
 describe('EditAutoscalerPolicyStep3Component', () => {
   let component: EditAutoscalerPolicyStep3Component;
@@ -21,12 +20,11 @@ describe('EditAutoscalerPolicyStep3Component', () => {
     TestBed.configureTestingModule({
       declarations: [EditAutoscalerPolicyStep3Component],
       imports: [
-        BrowserAnimationsModule,
-        createBasicStoreModule(),
+        NoopAnimationsModule,
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule
       ],
       providers: [
         DatePipe,

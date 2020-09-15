@@ -1,5 +1,5 @@
 #!/bin/bash
-CREATE=true
+CREATE_ORG_SPACE="true"
 ORG=many-spaces
 SPACE_PREFIX=many-spaces
 COUNT=10
@@ -10,11 +10,12 @@ SERVICE_COUNT=0
 SERVICE=
 SERVICE_PLAN=
 
-while getopts o:s:c:a:r:d:j:v:i: option
+while getopts o:p:s:c:a:r:d:j:v:i: option
 do
  case "${option}"
  in
  o) ORG=${OPTARG};;
+ p) CREATE_ORG_SPACE=${OPTARG};;
  s) SPACE_PREFIX=${OPTARG};;
  c) COUNT=${OPTARG};;
  a) APP_COUNT=${OPTARG};;
@@ -29,7 +30,7 @@ done
 echo "Creating $COUNT spaces with '$APP_COUNT' apps in org '$ORG'"
 
 
-if [ "$CREATE" = true ]; then
+if [ "$CREATE_ORG_SPACE" = "true" ]; then
     cf create-org $ORG
 fi
 cf target -o $ORG
@@ -45,6 +46,6 @@ do
     if [ -n "$SERVICE" ]; then
       ./create-many-services.sh -o "$ORG" -s "$SPACE" -a "$SERVICE_INSTANCE" -c $SERVICE_COUNT -e false -v "$SERVICE" -i "$SERVICE_PLAN"
     fi
-    ./create-many-apps.sh -o "$ORG" -s "$SPACE" -a "$SPACE-app-" -c $APP_COUNT -r "false" -r $APP_ROUTES -d "$DOMAIN" -v "$SERVICE_INSTANCE-0"
+    ./create-many-apps.sh -o "$ORG" -s "$SPACE" -a "$SPACE-app-" -c $APP_COUNT -r "false" -r $APP_ROUTES -d "$DOMAIN" -v "$SERVICE_INSTANCE-0" -e $CREATE_ORG_SPACE
 done
-echo "Created $COUNT spaces with '$APP_COUNT' apps in org '$ORG'"
+echo "Created $counter spaces with '$APP_COUNT' apps in org '$ORG'"

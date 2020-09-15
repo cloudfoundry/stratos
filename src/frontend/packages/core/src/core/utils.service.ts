@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { LoggerService } from './logger.service';
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}
 
 export const urlValidationExpression =
   '^' +
@@ -103,21 +111,6 @@ export class UtilsService {
     return retBytes;
   }
 
-  getDefaultPrecision(precision: number): number {
-    if (precision === undefined || precision === null) {
-      precision = 0;
-    }
-    return precision;
-  }
-
-  getNumber(value: number): number {
-    return Math.floor(Math.log(value) / Math.log(1024));
-  }
-
-  getReducedValue(value: number, multiplier: number): number {
-    return (value / Math.pow(1024, Math.floor(multiplier)));
-  }
-
   usageBytes(usage, usedPrecision?, totalPrecision?): string {
     const used = usage[0];
     const total = usage[1];
@@ -157,7 +150,7 @@ export class UtilsService {
    * @returns formatted uptime string
    */
   formatUptime(uptime): string {
-    if (uptime === undefined || uptime === null) {
+    if (uptime === undefined || uptime === null || isNaN(uptime)) {
       return '-';
     }
 
@@ -176,8 +169,30 @@ export class UtilsService {
       this.formatPart(hours, 'h', 'h') +
       this.formatPart(minutes, 'm', 'm') +
       this.formatPart(seconds, 's', 's')
-        .trim()
-    );
+    ).trim();
+  }
+
+  percent(value: number, decimals: number = 2): string {
+    if (!value && value !== 0) {
+      return '';
+    }
+    const val = (value * 100).toFixed(decimals);
+    return val + '%';
+  }
+
+  private getReducedValue(value: number, multiplier: number): number {
+    return (value / Math.pow(1024, Math.floor(multiplier)));
+  }
+
+  private getDefaultPrecision(precision: number): number {
+    if (precision === undefined || precision === null) {
+      precision = 0;
+    }
+    return precision;
+  }
+
+  private getNumber(value: number): number {
+    return Math.floor(Math.log(value) / Math.log(1024));
   }
 
   private getFormattedTime(isPlural, value, unit): string {
@@ -195,14 +210,6 @@ export class UtilsService {
     } else {
       return this.getFormattedTime(true, count, plural) + ' ';
     }
-  }
-
-  percent(value: number, decimals: number = 2): string {
-    if (!value && value !== 0) {
-      return '';
-    }
-    const val = (value * 100).toFixed(decimals);
-    return val + '%';
   }
 }
 
@@ -235,18 +242,6 @@ export function pathSet(path: string, object: any, value: any) {
   }
 }
 
-export function parseHttpPipeError(res: any, logger: LoggerService): { message?: string } {
-  if (!res.status) {
-    return res;
-  }
-  try {
-    return res.json();
-  } catch (e) {
-    logger.warn('Failed to parse response body', e);
-  }
-  return {};
-}
-
 export function safeStringToObj<T = object>(value: string): T {
   try {
     if (value) {
@@ -274,9 +269,37 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
 export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
 
-export const sortStringify = (obj: { [key: string]: string }): string => {
-  const keys = Object.keys(obj).sort();
-  return keys.reduce((res, key) => {
-    return res += `${key}-${obj[key]},`;
-  }, '');
+/**
+ * Real basic, shallow check
+ */
+export const arraysEqual = (a: any[], b: any[]): boolean => {
+  // Both falsy
+  if (!a && !b) {
+    return true;
+  }
+  // Both truthy
+  if (a && b) {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (const vA of a) {
+      if (!b.includes(vA)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  // Falsy/Truthy
+  return false;
 };
+
+
+/* tslint:disable:no-bitwise  */
+export const createGuid = (): string => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+/* tslint:enable */

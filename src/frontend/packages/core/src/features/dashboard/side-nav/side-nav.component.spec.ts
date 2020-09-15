@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed, async } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Customizations } from '../../../core/customizations.types';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CustomizationService } from '../../../core/customizations.types';
 import { MDAppModule } from '../../../core/md.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { SideNavComponent } from './side-nav.component';
 
 
@@ -16,10 +18,11 @@ describe('SideNavComponent', () => {
       imports: [
         RouterTestingModule,
         MDAppModule,
+        CoreTestingModule,
         createBasicStoreModule()
       ],
       providers: [
-        { provide: Customizations, useValue: {} }
+        CustomizationService
       ]
     })
       .compileComponents();

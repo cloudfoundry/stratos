@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "================="
-echo "Stratos Helm Test"
-echo "================="
-
 DIRPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STRATOS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../.. && pwd)"
 
@@ -12,16 +8,24 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
+echo -e "${YELLOW}${BOLD}"
+echo "========================================================================================================="
+echo "===== Stratos Helm Tests                                                                            ====="
+echo "========================================================================================================="
+echo -e "${RESET}"
+
 set -e
 
 # We should be running in the Stratos GitHub folder
 
 NAME=stratos-test
 NAMESPACE=stratos-ns
-HELM_REPO=https://cloudfoundry-incubator.github.io/stratos
+HELM_REPO=https://cloudfoundry.github.io/stratos
 HELM_REPO_NAME=cfstratos
 
-DEV_IMAGE_VERSION=2.0.0-dev
+# Image tag to use - this script only builds the chart
+# Normally we use the nightly images for testing here
+DEV_IMAGE_VERSION=${STRATOS_IMAGE_TAG:-3.0.0-nightly}
 
 function deleteRelease {
   helm delete ${NAME} --purge
@@ -53,9 +57,10 @@ function waitForHelmRelease {
       TOTAL=$(($READY + $COMPLETED))
       EXPECTED=$(($COUNT - 1))
       if [ $TOTAL -eq $EXPECTED ]; then
-        READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
-        READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
-        READY=$(($READY1 + $READY2))
+        READY3=$(kubectl get po --namespace=${NAMESPACE} | grep "3/3" | wc -l)
+        READY2=$(kubectl get po --namespace=${NAMESPACE} | grep "2/2" | wc -l)
+        READY1=$(kubectl get po --namespace=${NAMESPACE} | grep "1/1" | wc -l)
+        READY=$(($READY1 + $READY2 + $READY3))
         if [ $READY -eq 2 ]; then
           DONE="true"
         fi
@@ -63,7 +68,7 @@ function waitForHelmRelease {
     fi
     if [ "$DONE" != "true" ]; then
       echo "Waiting for Stratos Helm release to be ready..."
-      sleep 5
+      sleep 10
       TIMEOUT=$((TIMEOUT+1))
       if [ ${TIMEOUT} -gt 60 ]; then
         echo "Timed out waiting for Helm release to be ready"
@@ -77,7 +82,7 @@ function checkVersion {
   VERS=$1
   STATUS=$(helm list ${NAME} | grep ${NAME})
   STATUS=$(echo $STATUS | awk '{$1=$1};1')
-  local HELM_STATUS_REGEX='^([a-z\-]*) ([0-9]*) ([A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]* [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]) ([A-Z]*) ([0-9\.a-z\-]*) ([0-9\.]*) ([a-z\-]*)'
+  local HELM_STATUS_REGEX='^([a-z\-]*) ([0-9]*) ([A-Z][a-z][a-z] [A-Z][a-z][a-z] [0-9]* [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [0-9][0-9][0-9][0-9]) ([A-Z]*) ([0-9\.a-z\-]*) ([0-9\.a-z\-]*) ([a-z\-]*)'
   echo -e $STATUS
   if [[ "${STATUS}" =~ ${HELM_STATUS_REGEX} ]]; then
     # 6 is version
@@ -89,11 +94,17 @@ function checkVersion {
     echo "Helm status parsing failed"
     exit 1
   fi
+
+  echo "Helm release version ok (${BASH_REMATCH[5]})"
 }
 
 function log {
   MSG=$1
-  echo -e "${CYAN}${BOLD}${MSG}${RESET}"
+  echo -e "${CYAN}${BOLD}"
+  echo "========================================================================================================="
+  echo "==>> ${MSG}"
+  echo "========================================================================================================="
+  echo -e "${RESET}"
 }
 
 log "Performing checks..."
@@ -112,6 +123,14 @@ if [ "$EXISTING" -ne 1 ]; then
   helm repo add ${HELM_REPO_NAME} ${HELM_REPO}
 fi
 
+KUBE_FOLDER="${STRATOS}/deploy/kubernetes"
+HELM_TMP="${STRATOS}/deploy/kubernetes/helm-chart"
+echo $HELM_TMP
+echo  "${KUBE_FOLDER}"
+pushd "${KUBE_FOLDER}" > /dev/null
+rm -rf *.tgz
+popd > /dev/null
+
 # Update repos
 helm repo update
 
@@ -128,37 +147,37 @@ waitForHelmRelease
 # Try and upgrade to the latest Chart
 
 # Copy the helm chart folder to a temp location
-TMP_DIR=${TMP_DIR:-/tmp}
-HELM_TMP=${TMP_DIR}/stratos_helm_test
+
+# Use the buil script to build the Helm Chart
+KUBE_FOLDER="${STRATOS}/deploy/kubernetes"
+HELM_TMP="${STRATOS}/deploy/kubernetes/helm-chart"
 echo $HELM_TMP
 
-rm -rf ${HELM_TMP}
-mkdir -p ${HELM_TMP}
-cp -R "${STRATOS}/deploy/kubernetes/console" ${HELM_TMP}
+echo  "${KUBE_FOLDER}"
+ls -al "${KUBE_FOLDER}"
+rm -rf "${KUBE_FOLDER}/*.tgz"
 
-pushd ${HELM_TMP} > /dev/null
-# Make sure we can package the chart
-helm package ${HELM_TMP}/console
+# Build the chart with the specific version for images
+"${STRATOS}/deploy/kubernetes/build.sh" -z -c -n -t ${DEV_IMAGE_VERSION}
 
-CHART_FILE=$(ls ${HELM_TMP}/*.tgz)
-CHART_FILE=$(printf %q "${CHART_FILE}")
+CHART_FILE="${KUBE_FOLDER}/console-${DEV_IMAGE_VERSION}.tgz"
 echo "Chart file path: ${CHART_FILE}"
 
-popd > /dev/null
-
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm upgrade ${NAME} "${CHART_FILE}" --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
-checkVersion console-0.1.0
+checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
 
+ls -al "${HELM_TMP}"
+
 # Change just the chart version and try to upgrade
-sed -i.bak -e 's/version: 0.1.0/version: 0.2.0/g' ${HELM_TMP}/console/Chart.yaml
-sed -i.bak -e 's/appVersion: 0.1.0/appVersion: 0.2.0/g' ${HELM_TMP}/console/Chart.yaml
-cat ${HELM_TMP}/console/Chart.yaml
+sed -i.bak -e 's/version: '"${DEV_IMAGE_VERSION}"'/version: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
+sed -i.bak -e 's/appVersion: '"${DEV_IMAGE_VERSION}"'/appVersion: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
+cat "${HELM_TMP}/Chart.yaml"
 
 log "Upgrading using latest Helm Chart (checking chart upgrade)"
-helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm upgrade ${NAME} "${HELM_TMP}" --debug --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.2.0
@@ -167,10 +186,10 @@ checkVersion console-0.2.0
 deleteRelease
 
 log "Installing using latest Helm Chart"
-helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm install "${CHART_FILE}" --name ${NAME} --namespace ${NAMESPACE} --set imagePullPolicy=Always
 
 waitForHelmRelease
-checkVersion console-0.1.0
+checkVersion console-${DEV_IMAGE_VERSION}
 
 deleteRelease
 
@@ -185,7 +204,7 @@ helm install ${HELM_REPO_NAME}/console --name ${NAME} --namespace ${NAMESPACE}
 waitForHelmRelease
 
 log "Upgrading using --reuse-values"
-helm upgrade ${NAME} ${HELM_TMP}/console --recreate-pods --debug --reuse-values
+helm upgrade ${NAME} "${HELM_TMP}" --debug --reuse-values
 
 waitForHelmRelease
 # Should have used same values as before

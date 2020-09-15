@@ -2,7 +2,6 @@ import { NavigationExtras } from '@angular/router';
 import { Action } from '@ngrx/store';
 
 import { RouterRedirect } from '../reducers/routing.reducer';
-import { LoggerAction, LogLevel } from './log.actions';
 
 export const RouterActions = {
   GO: '[Router] Go To',
@@ -16,8 +15,7 @@ export interface IRouterNavPayload {
   query?: RouterQueryParams;
   extras?: NavigationExtras;
 }
-export class RouterNav implements Action, LoggerAction {
-  public logLevel: LogLevel.INFO;
+export class RouterNav implements Action {
   public message: string;
   type = RouterActions.GO;
   constructor(public payload: IRouterNavPayload, public redirect?: RouterRedirect) {

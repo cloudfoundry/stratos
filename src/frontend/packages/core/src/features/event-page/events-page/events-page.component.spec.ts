@@ -1,11 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { EventsPageComponent } from './events-page.component';
-import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../../shared/shared.module';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
-import { TabNavService } from '../../../../tab-nav.service';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+
+import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
+import { EventsPageComponent } from './events-page.component';
 
 describe('EventsPageComponent', () => {
   let component: EventsPageComponent;
@@ -17,10 +19,14 @@ describe('EventsPageComponent', () => {
       imports: [
         CoreModule,
         SharedModule,
+        CoreTestingModule,
         createBasicStoreModule(),
         RouterTestingModule
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

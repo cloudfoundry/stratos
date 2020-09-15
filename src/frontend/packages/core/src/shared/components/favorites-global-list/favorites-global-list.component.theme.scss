@@ -2,7 +2,7 @@
   $foreground: map-get($theme, foreground);
   .favorite-list {
     &__seperator {
-      border-bottom: 1px solidmat-color($foreground, divider);
+      border-bottom: 1px solid mat-color($foreground, divider);
     }
   }
 }

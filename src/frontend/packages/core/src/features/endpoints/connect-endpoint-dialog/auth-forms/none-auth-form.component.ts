@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { IAuthForm } from '../../../../core/extension/extension-types';
+
+import { IAuthForm } from '../../../../../../store/src/extension-types';
 
 @Component({
   selector: 'app-none-auth-form',

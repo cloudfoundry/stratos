@@ -1,6 +1,3 @@
-<div class="markdown-preview">
-  <div class="markdown-preview__header">
-    <h1>{{ title }}</h1>
-  </div>
+<app-sidepanel-preview [title]="title">
   <div #markdown class="markdown-preview__content" [innerHtml]="markdownHtml" appMarkdownContentObserver (innerHtmlRendered)="markdownRendered()"></div>
-</div>
+</app-sidepanel-preview>

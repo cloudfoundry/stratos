@@ -5,7 +5,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 resources:
 # Stratos Git Repository
 - name: stratos
@@ -14,8 +13,8 @@ resources:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-    # Match any Version 2 release (alpha, beta, rc) other than the actual release
-    tag_filter: "2*-*"
+    # Match any Version 3 release (alpha, beta, rc) other than the actual release
+    tag_filter: "3*-*"
 - name: helm-repo
   type: git
   source:
@@ -29,12 +28,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-jetstream
-- name: postflight-image
+- name: config-init-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-repository))/stratos-postflight-job
+    repository: ((docker-repository))/stratos-config-init
 - name: mariadb-image
   type: docker-image
   source:
@@ -122,18 +121,18 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: postflight-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  postflight-job
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+    - do:
+      - put: config-init-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.init
+          build: stratos/
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))

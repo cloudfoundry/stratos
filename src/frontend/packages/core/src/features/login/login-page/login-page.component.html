@@ -4,10 +4,10 @@
     <div class="login__body">
       <div class="login__form-outer" [ngClass]="{'login-sso': ssoLogin}">
         <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field *ngIf="!ssoLogin">
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
             <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
           </mat-form-field>
-          <mat-form-field *ngIf="!ssoLogin">
+          <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
             <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
           </mat-form-field>
           <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>

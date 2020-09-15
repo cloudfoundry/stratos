@@ -7,7 +7,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 
 resources:
 - name: midnight
@@ -34,12 +33,12 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-organization))/stratos-jetstream
-- name: postflight-image
+- name: config-init-image
   type: docker-image
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos-postflight-job
+    repository: ((docker-organization))/stratos-config-init
 - name: mariadb-image
   type: docker-image
   source:
@@ -109,16 +108,16 @@ jobs:
           target_name:  prod-build
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
           build_args_file: image-tag/build-args
-      - put: postflight-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  postflight-job
-          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
+          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+    - do:
+      - put: config-init-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.init
+          build: stratos/
           tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
       - put: ui-image
         params:

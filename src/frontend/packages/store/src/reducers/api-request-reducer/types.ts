@@ -1,3 +1,5 @@
+import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
+
 export const enum RequestSectionKeys {
   CF = 'cf',
   Other = 'other'
@@ -12,24 +14,32 @@ export interface ActionState {
   message: string;
 }
 
+// Status of an action
+export interface ActionStatus {
+  busy: boolean;
+  error: boolean;
+  message?: string;
+  completed: boolean;
+}
+
 /**
  * Multi action lists can have different entity types per page
  * We use schemaKey to track this type
  */
 export interface ListActionState extends ActionState {
-  schemaKey?: string;
+  entityConfig?: EntityCatalogEntityConfig;
   /**
    * Does the collection size exceed the max allowed? Used in conjunction PaginationEntityState maxedMode.
    */
   maxed?: boolean;
-  entityKey?: string;
+  baseEntityConfig?: EntityCatalogEntityConfig;
 }
 
 export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }
 
-export const getDefaultActionState = () => ({
+export const getDefaultActionState = (): ActionState => ({
   busy: false,
   error: false,
   message: ''
@@ -43,7 +53,7 @@ export const defaultDeletingActionState = {
 };
 
 export interface UpdatingSection {
-  _root_: ActionState;
+  [rootUpdatingKey]: ActionState;
   [key: string]: ActionState;
 }
 export interface RequestInfoState {
@@ -59,7 +69,7 @@ export interface RequestInfoState {
 const defaultRequestState = {
   fetching: false,
   updating: {
-    _root_: getDefaultActionState()
+    [rootUpdatingKey]: getDefaultActionState()
   },
   creating: false,
   error: false,

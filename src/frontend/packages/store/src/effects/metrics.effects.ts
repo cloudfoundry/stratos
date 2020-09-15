@@ -11,9 +11,9 @@ import {
   MetricsAPIActionSuccess,
 } from '../actions/metrics-api.actions';
 import { getFullMetricQueryQuery, METRICS_START, MetricsAction } from '../actions/metrics.actions';
-import { metricSchemaKey } from '../helpers/entity-factory';
+import { DispatchOnlyAppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { AppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class MetricsEffect {
   constructor(
     private actions$: Actions,
     private httpClient: HttpClient,
-    private store: Store<AppState>
+    private store: Store<DispatchOnlyAppState>
   ) { }
 
   @Effect() metrics$ = this.actions$.pipe(
@@ -35,6 +35,7 @@ export class MetricsEffect {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
         map(metrics => {
+          const catalogEntity = entityCatalog.getEntity(action);
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
             [guid]: {
@@ -46,7 +47,7 @@ export class MetricsEffect {
           return new WrapperRequestActionSuccess(
             {
               entities: {
-                [metricSchemaKey]: metricObject
+                [catalogEntity.entityKey]: metricObject
               },
               result: [guid]
             },
@@ -59,11 +60,11 @@ export class MetricsEffect {
             errObservable.message,
             action,
             'fetch', {
-              endpointIds: [action.endpointGuid],
-              url: errObservable.url || fullUrl,
-              eventCode: errObservable.status ? errObservable.status + '' : '500',
-              message: 'Metric request error',
-            }
+            endpointIds: [action.endpointGuid],
+            url: errObservable.url || fullUrl,
+            eventCode: errObservable.status ? errObservable.status + '' : '500',
+            message: 'Metric request error',
+          }
           )
         ];
       }));
@@ -77,7 +78,7 @@ export class MetricsEffect {
       }).pipe(
         map(metrics => {
           const metric = metrics[action.endpointGuid];
-          return new MetricsAPIActionSuccess(action.endpointGuid, metric);
+          return new MetricsAPIActionSuccess(action.endpointGuid, metric, action.queryType);
         })
       ).pipe(catchError(errObservable => {
         return [

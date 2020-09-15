@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../core/src/core/entity-service-factory.service';
-import { entityFactory } from '../../../../store/src/helpers/entity-factory';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
-import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
-import { appAutoscalerPolicySchemaKey } from '../../store/autoscaler.store.module';
+import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
@@ -32,11 +30,8 @@ export class EditAutoscalerPolicyService {
 
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(
-      appAutoscalerPolicySchemaKey,
-      entityFactory(appAutoscalerPolicySchemaKey),
       appGuid,
-      new GetAppAutoscalerPolicyAction(appGuid, cfGuid),
-      false
+      new GetAppAutoscalerPolicyAction(appGuid, cfGuid)
     );
 
     appAutoscalerPolicyService.entityObs$.pipe(
@@ -47,13 +42,13 @@ export class EditAutoscalerPolicyService {
       first(),
     ).subscribe((({ entity }) => {
       if (entity && entity.entity) {
-        this.stateSubject.next(entity.entity);
+        this.setState(entity.entity);
       }
     }));
   }
 
   setState(state: AppAutoscalerPolicyLocal) {
-    const {...newState} = state;
+    const newState = JSON.parse(JSON.stringify(state));
     this.stateSubject.next(newState);
   }
 

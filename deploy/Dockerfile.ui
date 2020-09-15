@@ -1,4 +1,4 @@
-FROM splatform/stratos-ui-build-base:opensuse as base-build
+FROM splatform/stratos-ui-build-base:leap15_1 as base-build
 ARG project
 ARG branch
 ARG commit
@@ -13,16 +13,16 @@ RUN npm install && \
     mkdir -p /usr/dist && \
     cp -R dist/* /usr/dist
 
-FROM splatform/stratos-nginx-base:opensuse as prod-build
+FROM splatform/stratos-nginx-base:leap15_1 as prod-build
 RUN mkdir -p /usr/share/doc/suse
 COPY  deploy/containers/nginx/LICENSE.txt /usr/share/doc/suse/LICENSE.txt
-COPY  deploy/containers/nginx/conf/nginx.k8s.conf /etc/nginx/nginx.conf
+COPY  deploy/containers/nginx/conf/nginx.k8s.conf /etc/nginx/nginx.conf.tmpl
 COPY --from=base-build /usr/dist /usr/share/nginx/html
 COPY deploy/containers/nginx/run-nginx.sh/ /run-nginx.sh
 EXPOSE 80 443
 CMD [ "/run-nginx.sh" ]
 
-FROM splatform/stratos-nginx-base:opensuse as dev-build
+FROM splatform/stratos-nginx-base:leap15_1 as dev-build
 RUN mkdir -p /etc/secrets/ && \
   openssl req -batch -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /etc/secrets/server.key -out /etc/secrets/server.crt && \
   chmod 0600 /etc/secrets && \

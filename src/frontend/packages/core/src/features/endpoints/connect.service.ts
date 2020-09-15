@@ -1,27 +1,13 @@
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
-import {
-  delay,
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { AuthParams, ConnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
-import { GetSystemInfo } from '../../../../store/src/actions/system.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../store/src/effects/endpoint.effects';
-import { SystemEffects } from '../../../../store/src/effects/system.effects';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { EndpointType } from '../../../../store/src/extension-types';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../../store/src/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../../store/src/types/endpoint.types';
+import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../core/endpoints.service';
-import { EndpointType } from '../../core/extension/extension-types';
 import { safeUnsubscribe } from '../../core/utils.service';
 
 export interface ConnectEndpointConfig {
@@ -38,6 +24,12 @@ export interface ConnectEndpointData {
   systemShared: boolean;
   bodyContent: string;
 }
+
+// Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
+export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
+  const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+  return endpoint.connectionStatus === 'connected' || epType.unConnectable;
+};
 
 export class ConnectEndpointService {
 
@@ -62,7 +54,6 @@ export class ConnectEndpointService {
   private connectDelay = 1000;
 
   constructor(
-    private store: Store<AppState>,
     private endpointsService: EndpointsService,
     public config: ConnectEndpointConfig,
   ) {
@@ -76,33 +67,29 @@ export class ConnectEndpointService {
     ).subscribe(([oldVal, newVal]) => {
       if (!newVal.error && (oldVal.busy && !newVal.busy)) {
         // Has finished fetching
-        this.store.dispatch(new GetSystemInfo());
+        stratosEntityCatalog.endpoint.api.get(this.config.guid);
       }
     }));
 
     this.subs.push(this.connected$.pipe(
-      filter(([connected]) => connected),
+      filter(([isConnected]) => isConnected),
       delay(this.connectDelay),
       tap(() => this.hasConnected.next(true)),
-      distinctUntilChanged(([connected], [oldConnected]) => connected && oldConnected),
-    ).subscribe(([connected, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
+      distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
+    ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
 
   private setupObservables() {
-    this.update$ = this.store.select(
-      this.getUpdateSelector()
-    ).pipe(filter(update => !!update));
+    this.update$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).getUpdatingSection(ConnectEndpoint.UpdatingKey)
+      .pipe(filter(update => !!update));
 
-    this.fetchingInfo$ = this.store.select(
-      this.getRequestSelector()
-    ).pipe(
+    this.fetchingInfo$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entityRequest$.pipe(
       filter(request => !!request),
-      map(request => request.fetching));
+      map(request => request.fetching)
+    );
 
-    this.connected$ = this.store.select(
-      this.getEntitySelector()
-    ).pipe(
+    this.connected$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(this.config.guid).entity$.pipe(
       map(endpoint => {
         const isConnected = !!(endpoint && endpoint.api_endpoint && endpoint.user);
         return [isConnected, endpoint] as [boolean, EndpointModel];
@@ -138,28 +125,6 @@ export class ConnectEndpointService {
     );
   }
 
-  private getUpdateSelector() {
-    return selectUpdateInfo(
-      endpointStoreNames.type,
-      this.config.guid,
-      EndpointsEffect.connectingKey
-    );
-  }
-
-  private getRequestSelector() {
-    return selectRequestInfo(
-      endpointStoreNames.type,
-      SystemEffects.guid
-    );
-  }
-
-  private getEntitySelector() {
-    return selectEntity<EndpointModel>(
-      endpointStoreNames.type,
-      this.config.guid,
-    );
-  }
-
   public setData(data: ConnectEndpointData) {
     this.pData = data;
   }
@@ -168,25 +133,21 @@ export class ConnectEndpointService {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared, bodyContent } = this.pData;
 
-    this.store.dispatch(new ConnectEndpoint(
+    return stratosEntityCatalog.endpoint.api.connect<ActionState>(
       this.config.guid,
       this.config.type,
       authType,
       authVal,
       systemShared,
       bodyContent,
-    ));
-
-    return this.isBusy$.pipe(
+    ).pipe(
       pairwise(),
-      filter(([oldBusy, newBusy]) => {
-        return !(oldBusy === true && newBusy === false);
-      }),
-      withLatestFrom(this.update$),
-      map(([, updateSection]) => ({
+      filter(([oldV, newV]) => oldV.busy && !newV.busy),
+      map(([, newV]) => newV),
+      map(updateSection => ({
         success: !updateSection.error,
         errorMessage: updateSection.message
-      }))
+      })),
     );
   }
 

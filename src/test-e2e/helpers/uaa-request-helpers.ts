@@ -1,5 +1,5 @@
 import { promise } from 'protractor';
-import * as request from 'request-promise-native';
+import request from 'request-promise-native';
 
 import { e2e } from '../e2e';
 import { E2EUaa } from '../e2e.types';
@@ -66,7 +66,12 @@ export class UaaRequestHelpers extends RequestHelpers {
         headers: this.createUaaHeader(),
         method,
         url
-      }, body));
+      }, body)
+      ).catch(error => {
+        // Track the url against the error. Sometimes we don't get this from the stack trace
+        e2e.log(`Failed to handle UAA request to url: '${url}'. Reason: '${error}'`);
+        throw error;
+      });
   }
 
   private createUaaToken(req): promise.Promise<string> {
@@ -79,10 +84,16 @@ export class UaaRequestHelpers extends RequestHelpers {
       method: 'POST', url: `oauth/token`, headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }, body).then(body => {
-      const tokenResponse = JSON.parse(body);
-      return tokenResponse.access_token;
-    });
+    }, body)
+      .then(res => {
+        const tokenResponse = JSON.parse(res);
+        return tokenResponse.access_token;
+      })
+      .catch(error => {
+        // Track the url against the error. Sometimes we don't get this from the stack trace
+        e2e.log(`Failed to create UAA token. Reason: '${error}'`);
+        throw error;
+      });
   }
 
 }

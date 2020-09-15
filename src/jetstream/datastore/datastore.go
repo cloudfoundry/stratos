@@ -54,6 +54,7 @@ type DatabaseConfig struct {
 type SSLValidationMode string
 
 const (
+	// PGSQL SSL Modes
 	// SSLDisabled means no checking of SSL
 	SSLDisabled SSLValidationMode = "disable"
 	// SSLRequired requires SSL without validation
@@ -65,8 +66,8 @@ const (
 	// SQLiteSchemaFile - SQLite schema file
 	SQLiteSchemaFile = "./deploy/db/sqlite_schema.sql"
 	// SQLiteDatabaseFile - SQLite database file
-	SQLiteDatabaseFile = "./console-database.db"
-	// Default database provider when not specified
+	SQLiteDatabaseFile = "console-database.db"
+	// DefaultDatabaseProvider is the efault database provider when not specified
 	DefaultDatabaseProvider = MYSQL
 )
 
@@ -96,7 +97,6 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 	}
 
 	// Database Config validation - check required values and the SSL Mode
-
 	err := validateRequiredDatabaseParams(dc.Username, dc.Password, dc.Database, dc.Host, dc.Port)
 	if err != nil {
 		return dc, err
@@ -106,12 +106,19 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
-		} else {
-			// Invalid SSL mode
-			return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 		}
+		// Invalid SSL mode
+		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 	} else if dc.DatabaseProvider == MYSQL {
-		return dc, nil
+		// Map default of disabled to false for MySQL
+		if dc.SSLMode == "disable" {
+			dc.SSLMode = "false"
+		}
+		if dc.SSLMode == "true" || dc.SSLMode == "false" || dc.SSLMode == "skip-verify" || dc.SSLMode == "preferred" {
+			return dc, nil
+		}
+		// Invalid SSL mode
+		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 	}
 	return dc, fmt.Errorf("Invalid provider %v", dc)
 }
@@ -122,8 +129,8 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
 		vala.IsNotNil(password, "password"),
-		vala.IsNotNil(database, "database"),
-		vala.IsNotNil(host, "host"),
+		vala.IsNotNil(database, "database name"),
+		vala.IsNotNil(host, "host/hostname"),
 		vala.GreaterThan(port, 0, "port"),
 		vala.Not(vala.GreaterThan(port, 65535, "port")),
 	).Check()
@@ -134,65 +141,99 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 	return nil
 }
 
-// GetConnection returns a database connection to either PostgreSQL or SQLite
-func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
+// GetConnection returns a database connection to either MySQL, PostgreSQL or SQLite
+func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
 	log.Debug("GetConnection")
 
-	if dc.DatabaseProvider == PGSQL {
-		return sql.Open("postgres", buildConnectionString(dc))
+	// Get a Goose Configuration so that we can pass that to the schema migrator
+	conf, err := NewGooseDBConf(dc, env)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	if dc.DatabaseProvider == MYSQL {
-		return sql.Open("mysql", buildConnectionStringForMysql(dc))
-
-	}
-
-	// SQL Lite - SQLITE_DB_DIR env var allows directory for console db to be changed
-	return GetSQLLiteConnection(env.MustBool("SQLITE_KEEP_DB"), env.String("SQLITE_DB_DIR", "."))
+	db, err := sql.Open(conf.Driver.Name, conf.Driver.OpenStr)
+	return db, conf, err
 }
 
-// GetSQLLiteConnection returns an SQLite DB Connection
-func GetSQLLiteConnection(sqliteKeepDB bool, sqlDbDir string) (*sql.DB, error) {
+// GetInMemorySQLLiteConnection returns an SQLite DB Connection
+func GetInMemorySQLLiteConnection() (*sql.DB, *goose.DBConf, error) {
 
-	dbFilePath := path.Join(sqlDbDir, SQLiteDatabaseFile)
-	log.Infof("SQLite Database file: %s", dbFilePath)
-
-	return GetSQLLiteConnectionWithPath(dbFilePath, sqliteKeepDB)
-}
-
-// GetSQLLiteConnectionWithPath returns an SQLite DB Connection
-func GetSQLLiteConnectionWithPath(databaseFile string, sqliteKeepDB bool) (*sql.DB, error) {
-	if !sqliteKeepDB {
-		os.Remove(databaseFile)
-	}
-
+	databaseFile := "file::memory:?cache=shared"
+	log.Info("Using In Memory Database file")
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	conf := CreateFakeSQLiteGooseDriver()
+	driver := newDBDriver("sqlite3", databaseFile)
+	conf := &goose.DBConf{
+		Driver: driver,
+	}
+
 	err = ApplyMigrations(conf, db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return db, nil
+	return db, conf, nil
 }
 
-// CreateFakeSQLiteGooseDriver creates a fake Goose Driver for SQLite
-func CreateFakeSQLiteGooseDriver() *goose.DBConf {
-	// Create fake goose db conf object for SQLite
-	d := goose.DBDriver{
-		Name:    "sqlite3",
-		Import:  "github.com/mattn/go-sqlite3",
-		Dialect: &goose.Sqlite3Dialect{},
+// NewGooseDBConf creates a new Goose config for database migrations
+func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
+
+	var openStr, name string
+
+	if dc.DatabaseProvider == PGSQL {
+		name = "postgres"
+		openStr = buildConnectionString(dc)
+	} else if dc.DatabaseProvider == MYSQL {
+		name = "mysql"
+		openStr = buildConnectionStringForMysql(dc)
+	} else {
+		name = "sqlite3"
+		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
+		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
+		sqliteKeepDB := env.MustBool("SQLITE_KEEP_DB")
+		log.Infof("SQLite Database file: %s", openStr)
+
+		if !sqliteKeepDB {
+			os.Remove(openStr)
+		}
 	}
 
-	conf := &goose.DBConf{
-		Driver: d,
+	driver := newDBDriver(name, openStr)
+	return &goose.DBConf{
+		MigrationsDir: ".",
+		Env:           fmt.Sprintf("%s_dbenv", name),
+		Driver:        driver,
+		PgSchema:      "",
+	}, nil
+}
+
+// Create a new DBDriver and populate driver specific
+// fields for drivers that we know about.
+func newDBDriver(name, open string) goose.DBDriver {
+
+	d := goose.DBDriver{
+		Name:    name,
+		OpenStr: open,
 	}
-	return conf
+
+	switch name {
+	case "postgres":
+		d.Import = "github.com/lib/pq"
+		d.Dialect = &goose.PostgresDialect{}
+
+	case "mysql":
+		d.Import = "github.com/go-sql-driver/mysql"
+		d.Dialect = &goose.MySqlDialect{}
+
+	case "sqlite3":
+		d.Import = "github.com/mattn/go-sqlite3"
+		d.Dialect = &goose.Sqlite3Dialect{}
+	}
+
+	return d
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -235,25 +276,23 @@ func buildConnectionString(dc DatabaseConfig) string {
 }
 
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
-	log.Debug("buildConnectionString")
+	log.Debug("buildConnectionStringForMysql")
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
 
-	connStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true",
-		escapeStr(dc.Username),
-		escapeStr(dc.Password),
-		dc.Host,
-		dc.Port,
-		escapeStr(dc.Database))
-
-	log.Printf("DB Connection string: %s:*********@tcp(%s:%d)/%s?parseTime=true",
+	connStr := fmt.Sprintf("%s:%%s@tcp(%s:%d)/%s?parseTime=true",
 		escapeStr(dc.Username),
 		dc.Host,
 		dc.Port,
 		escapeStr(dc.Database))
 
-	return connStr
+	if len(dc.SSLMode) > 0 {
+		log.Infof("Setting SSL Mode for mysql: %s", dc.SSLMode)
+		connStr = fmt.Sprintf("%s&tls=%s", connStr, dc.SSLMode)
+	}
+	log.Infof(connStr, "*********")
+	return fmt.Sprintf(connStr, escapeStr(dc.Password))
 }
 
 // Ping - ping the database to ensure the connection/pool works.
@@ -300,7 +339,7 @@ func WaitForMigrations(db *sql.DB) error {
 			}
 			log.Infof("Database schema check: %s", errorMsg)
 		} else if databaseVersionRec.VersionID == targetVersion.Version {
-			log.Info("Database schema is up to date")
+			log.Infof("Database schema is up to date (%d)", databaseVersionRec.VersionID)
 			break
 		} else {
 			log.Info("Waiting for database schema to be initialized")

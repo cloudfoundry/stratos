@@ -2,37 +2,68 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { APIKeyAuthGuardService } from './core/apiKey-auth-guard.service';
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
+import { NotSetupGuardService } from './core/not-setup-guard.service';
 import { PageNotFoundComponentComponent } from './core/page-not-found-component/page-not-found-component.component';
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
+import { LoginPageComponent } from './features/login/login-page/login-page.component';
+import { LogoutPageComponent } from './features/login/logout-page/logout-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
+import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
+import { SetupWelcomeComponent } from './features/setup/setup-welcome/setup-welcome.component';
 import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 import { SharedModule } from './shared/shared.module';
-import { NotSetupGuardService } from './core/not-setup-guard.service';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
-    path: 'uaa',
-    component: ConsoleUaaWizardComponent,
-    canActivate: [NotSetupGuardService]
+    path: 'setup',
+    canActivate: [NotSetupGuardService],
+    children: [
+      {
+        path: '',
+        component: SetupWelcomeComponent
+      },
+      {
+        path: 'uaa',
+        component: ConsoleUaaWizardComponent
+      },
+      {
+        path: 'local',
+        component: LocalAccountWizardComponent
+      },
+    ]
   },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
-  { path: 'login', loadChildren: './features/login/login.module#LoginModule' },
+  {
+    path: 'login',
+    children: [
+      {
+        path: '',
+        component: LoginPageComponent
+      },
+      {
+        path: 'logout',
+        component: LogoutPageComponent
+      },
+    ]
+  },
   {
     path: '',
     component: DashboardBaseComponent,
     canActivate: [AuthGuardService, EndpointsService],
     children: [
       {
-        path: 'home', component: HomePageComponent,
+        path: 'home',
+        component: HomePageComponent,
         data: {
           stratosNavigation: {
             label: 'Home',
@@ -43,74 +74,37 @@ const appRoutes: Routes = [
         }
       },
       {
-        path: 'applications',
-        loadChildren: './features/applications/applications.module#ApplicationsModule',
-        data: {
-          stratosNavigation: {
-            label: 'Applications',
-            matIcon: 'apps',
-            requiresEndpointType: 'cf',
-            position: 20
-          }
-        },
-      },
-      {
         path: 'endpoints',
         data: {
           stratosNavigation: {
             label: 'Endpoints',
-            matIcon: 'settings_ethernet',
+            matIcon: 'endpoints',
+            matIconFont: 'stratos-icons',
             position: 100,
             requiresPersistence: true
           }
         },
         children: [{
-          path: '',
-          loadChildren: './features/endpoints/endpoints.module#EndpointsModule',
+          path: 'metrics',
+          loadChildren: () => import('./features/metrics/metrics.module').then(m => m.MetricsModule),
         },
         {
-          path: 'metrics',
-          loadChildren: './features/metrics/metrics.module#MetricsModule',
+          path: '',
+          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
         }]
       },
+      { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
+      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
       {
-        path: 'marketplace', loadChildren: './features/service-catalog/service-catalog.module#ServiceCatalogModule',
-        data: {
-          stratosNavigation: {
-            label: 'Marketplace',
-            matIcon: 'store',
-            requiresEndpointType: 'cf',
-            position: 30
-          }
-        },
+        path: 'api-keys',
+        loadChildren: () => import('./features/api-keys/api-keys.module').then(m => m.ApiKeysModule),
+        canActivate: [APIKeyAuthGuardService]
       },
+      { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
       {
-        path: 'services', loadChildren: './features/services/services.module#ServicesModule',
-        data: {
-          stratosNavigation: {
-            label: 'Services',
-            matIcon: 'service',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 40
-          }
-        },
+        path: 'errors/:endpointId',
+        loadChildren: () => import('./features/error-page/error-page.module').then(m => m.ErrorPageModule)
       },
-      {
-        path: 'cloud-foundry', loadChildren: './features/cloud-foundry/cloud-foundry.module#CloudFoundryModule',
-        data: {
-          stratosNavigation: {
-            label: 'Cloud Foundry',
-            matIcon: 'cloud_foundry',
-            matIconFont: 'stratos-icons',
-            requiresEndpointType: 'cf',
-            position: 50
-          }
-        },
-      },
-      { path: 'about', loadChildren: './features/about/about.module#AboutModule' },
-      { path: 'user-profile', loadChildren: './features/user-profile/user-profile.module#UserProfileModule' },
-      { path: 'events', loadChildren: './features/event-page/event-page.module#EventPageModule' },
     ]
   },
   {
@@ -121,7 +115,7 @@ const appRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent
-  }
+  },
 ];
 
 @NgModule({

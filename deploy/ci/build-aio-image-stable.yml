@@ -9,12 +9,10 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 - name: stratos-git-resource
   type: docker-image
   source:
     repository: splatform/stratos-git-tag-resource
-    tag: "latest"
 
 resources:
 # Stratos Git Repository
@@ -44,7 +42,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-organization))/stratos
+    repository: ((docker-organization))/((aio-docker-image-name))
     tag: stable
 
 jobs:
@@ -101,3 +99,4 @@ jobs:
       tag_as_latest: true
       labels_file: image-tag/image-labels
       additional_tags: image-tag/v2-version      
+      build_args_file: image-tag/ui-build-args

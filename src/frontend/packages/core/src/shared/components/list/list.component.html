@@ -36,6 +36,11 @@
             *ngIf="!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)">
             {{dataSource.selectedRows.size}} Selected
           </div>
+          <!-- Injected filters -->
+          <div *ngIf="customFilters">
+            <ng-container *ngTemplateOutlet="customFilters">
+            </ng-container>
+          </div>
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
@@ -56,7 +61,7 @@
           </div>
         </div>
         <div class="list-component__header__right">
-          <div class="filter" *ngIf="entitySelectConfig">
+          <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
             <mat-form-field [floatLabel]="'never'">
               <mat-select matInput [value]="initialEntitySelection$ | async"
                 (selectionChange)="setEntityPage($event.value)">
@@ -69,12 +74,23 @@
             </mat-form-field>
           </div>
           <!-- Filter by text input -->
+          <div class="filter" id="listFilterSelect"
+            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            <mat-form-field>
+              <mat-label>Filter Selection</mat-label>
+              <mat-select [(value)]="filterSelected" (selectionChange)="updateListFilter($event.value)">
+                <mat-option *ngFor="let filter of filterColumns" [value]="filter">
+                  {{ filter.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
           <div class="filter" id="listSearchFilter"
             [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <mat-form-field floatLabel="never" class="list-component__header__right-filter">
               <input matInput [ngModel]="filterString" #filter="ngModel"
-                [disabled]="(dataSource.isLoadingPage$ | async)" name="filter"
-                placeholder="{{config.text?.filter || 'Filter'}}">
+                [disabled]="(filterColumns.length > 1 && filterSelected === undefined) || (dataSource.isLoadingPage$ | async)"
+                name="filter" placeholder="{{ filterSelected?.placeholder || config.text?.filter || 'Filter'}}">
             </mat-form-field>
           </div>
           <!-- Sort Button & Drop down -->
@@ -160,8 +176,8 @@
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
         <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
           [addSelect]="config.allowSelection || (haveMultiActions | async)"
-          [paginationController]="paginationController" [columns]="columns"
-          [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+          [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
+          [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
@@ -177,19 +193,14 @@
         </mat-card-content>
       </mat-card>
     </ng-template>
-    <ng-template #defaultNoEntriesMaxedResults>
-      <mat-card class="list-component__default-no-entries">
-        <mat-card-content>
-          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to
-            reduce the number of results.'}}</div>
-        </mat-card-content>
-      </mat-card>
-    </ng-template>
     <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)"
       class="list-component__no-entries">
       <ng-container *ngIf="dataSource.maxedResults$ | async">
-        <ng-container *ngTemplateOutlet="noEntriesMaxedResults ? noEntriesMaxedResults : defaultNoEntriesMaxedResults">
-        </ng-container>
+        <app-max-list-message (showAllAfterMax)="showAllAfterMax()"
+          [count]="entitySelectConfig ? null : paginatorSettings.length"
+          [maxCount]="dataSource.maxedStateStartAt$ | async" [config]="config.text?.maxedResults"
+          [catalogueEntity]="config.getDataSource().masterAction">
+        </app-max-list-message>
       </ng-container>
       <ng-container *ngIf="(noRowsNotFiltering$ | async)">
         <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">

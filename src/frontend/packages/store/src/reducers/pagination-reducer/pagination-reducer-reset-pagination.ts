@@ -1,4 +1,5 @@
 import { ResetPagination } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export const defaultClientPaginationPageSize = 9;
@@ -20,25 +21,33 @@ const defaultPaginationEntityState: PaginationEntityState = {
       items: {}
     },
     totalResults: 0
+  },
+  maxedState: {
+    isMaxedMode: false
   }
 };
 
-export function getDefaultPaginationEntityState(): PaginationEntityState {
+export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {
   return {
-    ...defaultPaginationEntityState
+    ...defaultPaginationEntityState,
+    maxedState: {
+      ...defaultPaginationEntityState.maxedState,
+      ignoreMaxed
+    }
   };
 }
 
 export function paginationResetPagination(state: PaginationState, action: ResetPagination): PaginationState {
-  if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
+  const entityKey = entityCatalog.getEntityKey(action.entityConfig);
+  if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
     return state;
   }
   const { ids, pageRequests, pageCount, currentPage, totalResults } = getDefaultPaginationEntityState();
   const newState = { ...state };
   const entityState = {
-    ...newState[action.entityKey],
+    ...newState[entityKey],
     [action.paginationKey]: {
-      ...newState[action.entityKey][action.paginationKey],
+      ...newState[entityKey][action.paginationKey],
       ids,
       pageRequests,
       pageCount,
@@ -48,6 +57,6 @@ export function paginationResetPagination(state: PaginationState, action: ResetP
   } as PaginationEntityTypeState;
   return {
     ...newState,
-    [action.entityKey]: entityState
+    [entityKey]: entityState
   };
 }

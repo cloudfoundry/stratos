@@ -1,72 +1,70 @@
-import { createSelector } from '@ngrx/store';
+import { compose } from '@ngrx/store';
 
-import { AppState, IRequestEntityTypeState } from '../app-state';
-import { EndpointModel, EndpointState, endpointStoreNames } from '../types/endpoint.types';
+import { InternalAppState, IRequestEntityTypeState } from '../app-state';
+import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
+import { EndpointModel, EndpointState } from '../types/endpoint.types';
 import { selectEntities, selectEntity, selectRequestInfo } from './api.selectors';
 
 // The custom status section
-export const endpointStatusSelector = (state: AppState): EndpointState => state.endpoints;
+export const endpointStatusSelector = (state: InternalAppState): EndpointState => state.endpoints;
 
 // All endpoint request data
-export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointStoreNames.type);
+// Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
+const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
+export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-export const metricsEndpointEntitiesSelector =
+// TODO: RC
+// export const metricsEndpointEntitiesSelector =
+//   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
+//     const metrics = {};
+//     Object.values(endpoints).forEach(endpoint => {
+//       if (endpoint.cnsi_type === 'metrics') {
+//         metrics[endpoint.guid] = endpoint;
+//       }
+//     });
+//     return metrics;
+//   };
+
+export const endpointOfType = (type: string) =>
   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
-    const metrics = {};
-    Object.values(endpoints).forEach(endpoint => {
-      if (endpoint.cnsi_type === 'metrics') {
-        metrics[endpoint.guid] = endpoint;
+    return Object.values(endpoints || {}).reduce((endpointsOfType, endpoint) => {
+      if (endpoint.cnsi_type === type) {
+        endpointsOfType[endpoint.guid] = endpoint;
       }
-    });
-    return metrics;
+      return endpointsOfType;
+    }, {} as IRequestEntityTypeState<EndpointModel>);
   };
 
-export const cfEndpointEntitiesSelector = (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
-  const cf = {};
-  Object.values(endpoints).forEach(endpoint => {
-    if (endpoint.cnsi_type === 'cf') {
-      cf[endpoint.guid] = endpoint;
+export const endpointOfTypeSelector = (endpointType: string) => compose(
+  endpointOfType(endpointType),
+  endpointEntitiesSelector,
+);
+
+
+const getConnectedEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) =>
+  Object.values(endpoints || {}).reduce((connected, endpoint) => {
+    // FIXME: This won't work for helm as endpoint type is `unConnectable`. We have the info to determine endpoint type `unConnectable`(see
+    // `isEndpointConnected`) however it would bring in `entityCatalog`.. which creates circular references
+    if (endpoint.connectionStatus === 'connected') {
+      connected[endpoint.guid] = endpoint;
     }
-  });
-  return cf;
-};
+    return connected;
+  }, {} as IRequestEntityTypeState<EndpointModel>);
 
-export const getRegisteredEndpoints = (endpoints: IRequestEntityTypeState<EndpointModel>) => {
-  const registered = {} as IRequestEntityTypeState<EndpointModel>;
-  Object.values(endpoints).forEach(endpoint => {
-    if (endpoint.registered) {
-      registered[endpoint.guid] = endpoint;
-    }
-  });
-  return registered;
-};
-// All Registered  endpoint request data
-export const endpointsRegisteredEntitiesSelector = createSelector(
+export const connectedEndpointsSelector = () => compose(
+  getConnectedEndpoints,
   endpointEntitiesSelector,
-  getRegisteredEndpoints
 );
 
-export const endpointsCFEntitiesSelector = createSelector(
+export const connectedEndpointsOfTypesSelector = (endpointType: string) => compose(
+  getConnectedEndpoints,
+  endpointOfType(endpointType),
   endpointEntitiesSelector,
-  cfEndpointEntitiesSelector
 );
 
-export const endpointsMetricsEntitiesSelector = createSelector(
-  endpointEntitiesSelector,
-  metricsEndpointEntitiesSelector
-);
-
-export const endpointsRegisteredCFEntitiesSelector = createSelector(
-  endpointsCFEntitiesSelector,
-  getRegisteredEndpoints
-);
-
-export const endpointsRegisteredMetricsEntitiesSelector = createSelector(
-  endpointsMetricsEntitiesSelector,
-  getRegisteredEndpoints
-);
 
 // Single endpoint request information
-export const endpointsEntityRequestSelector = (guid) => selectRequestInfo(endpointStoreNames.type, guid);
+export const endpointsEntityRequestSelector = (guid: string) => selectRequestInfo(endpointEntityKey, guid);
 // Single endpoint request data
-export const endpointsEntityRequestDataSelector = (guid) => selectEntity<EndpointModel>(endpointStoreNames.type, guid);
+export const endpointsEntityRequestDataSelector = (guid: string) => selectEntity<EndpointModel>(endpointEntityKey, guid);

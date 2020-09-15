@@ -47,8 +47,8 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *interfaces.CNSIRequest, req 
 	}
 }
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doOauthFlowRequest")
+func (p *portalProxy) DoOAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+	log.Debug("DoOAuthFlowRequest")
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 

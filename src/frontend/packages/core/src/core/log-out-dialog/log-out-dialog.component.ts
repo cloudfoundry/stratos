@@ -1,11 +1,8 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Store } from '@ngrx/store';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
-import { Logout } from '../../../../store/src/actions/auth.actions';
-import { AppState } from '../../../../store/src/app-state';
 
 @Component({
   selector: 'app-log-out-dialog',
@@ -16,24 +13,26 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private store: Store<AppState>) { }
+    private router: Router
+  ) { }
 
   private autoLogout: Subscription;
-  public countDown: number;
-  public countdownTotal: number;
+  private countDown: number;
+  private countdownTotal: number;
   public percentage = 0;
 
   ngOnInit() {
     const updateInterval = 500;
-    this.countdownTotal = this.countDown = this.data.expiryDate - Date.now();
+    this.countdownTotal = this.calcCountdown();
     this.autoLogout = interval(updateInterval)
       .pipe(
         tap(() => {
+          // Recalculate this every time, as `interval` slows down when tab not focused
+          this.countDown = this.calcCountdown();
           if (this.countDown <= 0) {
             this.autoLogout.unsubscribe();
-            this.store.dispatch(new Logout());
+            this.router.navigate(['/login/logout']);
           } else {
-            this.countDown -= updateInterval;
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
           }
         })
@@ -45,4 +44,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     this.autoLogout.unsubscribe();
   }
 
+  private calcCountdown(): number {
+    return this.data.expiryDate - Date.now();
+  }
 }

@@ -31,8 +31,6 @@ export class TileSelectorComponent {
     return this.pOptions;
   }
 
-
-
   @Output() selection = new EventEmitter<ITileConfig>();
   public selected: ITileConfig;
 

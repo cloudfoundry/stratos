@@ -16,6 +16,7 @@ import (
 var (
 	cellQueryWhiteList = []string{
 		"firehose_value_metric_rep_unhealthy_cell",
+		"firehose_value_metric_rep_garden_health_check_failed",
 		"firehose_value_metric_rep_capacity_remaining_containers",
 		"firehose_value_metric_rep_capacity_remaining_disk",
 		"firehose_value_metric_rep_capacity_remaining_memory",

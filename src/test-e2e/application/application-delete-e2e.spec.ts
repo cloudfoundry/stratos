@@ -58,7 +58,7 @@ describe('Application Delete', () => {
       appSummaryPage.navigateTo();
       appSummaryPage.waitForPage(40000);
       // Open delete app dialog
-      const deleteApp = appSummaryPage.delete(testAppName);
+      const deleteApp = appSummaryPage.delete();
       // App did not have a route, so there should be no routes step
       expect(deleteApp.hasRouteStep()).toBeFalsy();
       // 1 step - np header shown
@@ -71,7 +71,7 @@ describe('Application Delete', () => {
     });
 
     describe('Long running tests', () => {
-      const timeout = 100000;
+      const timeout = 120000;
       extendE2ETestTime(timeout);
 
       beforeAll(() => {
@@ -93,7 +93,7 @@ describe('Application Delete', () => {
         const appSummaryPage = new ApplicationBasePage(cfGuid, app.metadata.guid);
         appSummaryPage.navigateTo();
         appSummaryPage.waitForPage();
-        const deleteApp = appSummaryPage.delete(testAppName);
+        const deleteApp = appSummaryPage.delete();
 
         // App did not have a route, so there should be no routes step
         expect(deleteApp.hasRouteStep()).toBeFalsy();

@@ -1,4 +1,5 @@
 import { OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,8 +10,14 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 export abstract class EditAutoscalerPolicy implements OnInit {
   public currentPolicy: AppAutoscalerPolicyLocal;
   public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  protected isCreate = false;
 
-  constructor(protected service: EditAutoscalerPolicyService) { }
+  constructor(
+    protected service: EditAutoscalerPolicyService,
+    route: ActivatedRoute
+  ) {
+    this.isCreate = route.snapshot.queryParams.create;
+  }
 
   ngOnInit() {
     this.appAutoscalerPolicy$ = this.service.getState().pipe(

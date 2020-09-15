@@ -1,52 +1,35 @@
+<app-page-sub-nav>
+  <ng-container *ngIf="appAutoscalerPolicy$ | async as policy; else noPolicy">
+    <button mat-button name="edit" (click)="updatePolicyPage()" class="nav-button-with-text">
+      <span class="nav-button-with-text__span">
+        <mat-icon class="nav-button-with-text__icon">edit</mat-icon> Edit Policy
+      </span>
+    </button>
+    <button mat-button name="delete" (click)="disableAutoscaler()" class="nav-button-with-text">
+      <span class="nav-button-with-text__span">
+        <mat-icon class="nav-button-with-text__icon">delete</mat-icon> Delete Policy
+      </span>
+    </button>
+    <button *ngIf="canManageCredentials$ | async" mat-button name="credential" (click)="manageCredentialPage()"
+      class="nav-button-with-text">
+      <span class="nav-button-with-text__span">
+        <mat-icon class="nav-button-with-text__icon">vpn_key</mat-icon> Manage Credentials
+      </span>
+    </button>
+  </ng-container>
+  <ng-template #noPolicy>
+    <button mat-button name="add" (click)="updatePolicyPage(true)" class="nav-button-with-text">
+      <span class="nav-button-with-text__span">
+        <mat-icon class="nav-button-with-text__icon">add</mat-icon> Create Policy
+      </span>
+    </button>
+  </ng-template>
+</app-page-sub-nav>
 <div class="autoscaler-tab">
   <app-tile-grid class="app-autoscaler-tile-grid-100">
-    <app-tile-group *ngIf="!(appAutoscalerPolicy$ | async)">
-      <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Status</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="app-metadata">
-              <div class="app-metadata__two-cols">
-                <mat-slide-toggle checked="false" (click)="updatePolicyPage()">Disabled</mat-slide-toggle>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </app-tile>
-      <app-tile>
-        <app-card-app-instances></app-card-app-instances>
-      </app-tile>
-    </app-tile-group>
     <app-tile-group *ngIf="appAutoscalerPolicy$ | async as policy">
-
-      <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Status</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="app-metadata">
-              <div class="app-metadata__two-cols">
-                <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 0" checked="true"
-                  (click)="disableAutoscaler()">Enabled</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 1" checked="true"
-                  (click)="disableAutoscaler()">Enabled</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="policy.enabled && detachConfirmOk == 2" checked="false"
-                  (click)="updatePolicyPage()">Disabled</mat-slide-toggle>
-                <mat-slide-toggle *ngIf="!policy.enabled" checked="false" (click)="updatePolicyPage()">Disabled
-                </mat-slide-toggle>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </app-tile>
-      <app-tile *ngIf="!policy.enabled">
-        <app-card-app-instances></app-card-app-instances>
-      </app-tile>
       <app-tile *ngIf="policy.enabled">
-        <app-card-autoscaler-default [onUpdate]="updatePolicyPage"></app-card-autoscaler-default>
+        <app-card-autoscaler-default></app-card-autoscaler-default>
       </app-tile>
       <app-tile *ngIf="policy.enabled" class="autoscaler-tab__latest-metrics">
         <app-card-app-usage *ngIf="policy.scaling_rules.length == 0"></app-card-app-usage>
@@ -56,16 +39,15 @@
           </mat-card-header>
           <mat-card-content>
             <div class="app-metadata">
-              <div class="app-metadata__two-cols" *ngFor="let metricName of appAutoscalerAppMetricNames$ | async">
-                <app-metadata-item *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData"
-                  label={{metricName}}>
-                  <!-- {{ metricData[0].entity.latest.length > 0 && metricData[0].entity.latest[0].value ? metricData[0].entity.latest[0].value + " " + metricData[0].entity.unit : "NaN"}} -->
-                  <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]"
-                    [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
-                    [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]=""
-                    [scheme]="'cool'" [min]="0" [max]="metricData[0].entity.chartMaxValue"
-                    [units]="metricData[0].entity.unit" [angleSpan]="240" [startAngle]="-120" [showAxis]="false"
-                    [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false" (select)="select($event)">
+              <div class="app-metadata__two-cols" *ngFor="let metric of appAutoscalerAppMetricNames$ | async">
+                <app-metadata-item label={{metric.name}}>
+                  <ngx-charts-gauge *ngIf="appAutoscalerAppMetrics[metric.name] | async as metricData" [view]="[80, 80]"
+                    [margin]="[5, 5, 0, 5]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
+                    [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [scheme]="'cool'" [min]="0"
+                    [max]="metricData[0].entity.chartMaxValue"
+                    [units]="metricData[0].entity.unit || metric.unit || '__'" [angleSpan]="240" [startAngle]="-120"
+                    [showAxis]="false" [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false"
+                    (select)="select($event)">
                   </ngx-charts-gauge>
                 </app-metadata-item>
               </div>
@@ -83,7 +65,7 @@
     </app-tile-group>
     <div *ngIf="appAutoscalerPolicy$ | async as policy" class="autoscaler-tab-policy">
       <app-tile-group *ngIf="policy.enabled">
-        <app-tile>
+        <app-tile class="autoscaler-tab-policy-trigger">
           <mat-card>
             <mat-card-header>
               <mat-card-title>Scaling Rules </mat-card-title>
@@ -98,7 +80,7 @@
                   <ng-container matColumnDef="condition">
                     <th mat-header-cell *matHeaderCellDef> Condition </th>
                     <td mat-cell *matCellDef="let element">
-                      {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type)}} for
+                      {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type, element.unit)}} for
                       {{element.breach_duration_secs}} secs. </td>
                   </ng-container>
                   <ng-container matColumnDef="action">
@@ -113,14 +95,9 @@
                 </div>
               </div>
             </mat-card-content>
-            <mat-card-actions class="autoscaler-tab__actions">
-              <button (click)="updatePolicyPage()" mat-icon-button>
-                <mat-icon>edit</mat-icon>
-              </button>
-            </mat-card-actions>
           </mat-card>
         </app-tile>
-        <app-tile>
+        <app-tile class="autoscaler-tab-policy-schedule">
           <mat-card>
             <mat-card-header>
               <mat-card-title>
@@ -131,7 +108,7 @@
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <div class="app-metadata app-metadata-table">
+              <div class="app-metadata app-metadata-table autoscaler-table-policy-specific">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.specific_date">
                   <ng-container matColumnDef="from">
                     <th mat-header-cell *matHeaderCellDef> From </th>
@@ -162,7 +139,7 @@
                   No specific date schedule.</div>
               </div>
               <br />
-              <div class="app-metadata app-metadata-table">
+              <div class="app-metadata app-metadata-table autoscaler-table-policy-recurring">
                 <table mat-table [dataSource]="policy && policy.schedules && policy.schedules.recurring_schedule">
                   <ng-container matColumnDef="effect">
                     <th mat-header-cell *matHeaderCellDef> Effective Duration </th>
@@ -204,24 +181,22 @@
                   No recurring schedule.</div>
               </div>
             </mat-card-content>
-            <mat-card-actions class="autoscaler-tab__actions">
-              <button (click)="updatePolicyPage()" mat-icon-button>
-                <mat-icon>edit</mat-icon>
-              </button>
-            </mat-card-actions>
           </mat-card>
         </app-tile>
       </app-tile-group>
     </div>
-    <app-tile-group class="autoscaler-tile-events" *ngIf="appAutoscalerScalingHistory$ | async as scalingHistory">
-      <app-tile>
+    <app-tile-group class="autoscaler-tile-events" *ngIf="showAutoscalerHistory$ | async">
+      <span *ngIf="!(appAutoscalerPolicy$ | async)" class="autoscaler-tile-events__no-policy">
+        {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
+      </span>
+      <app-tile *ngIf="appAutoscalerScalingHistory$ | async as scalingHistory">
         <mat-card>
           <mat-card-header class="autoscaler-tile-events__header">
             <mat-card-title>Latest Events </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="app-metadata app-metadata-table">
-              <table mat-table [dataSource]="scalingHistory.resources">
+              <table mat-table [dataSource]="scalingHistory">
                 <ng-container matColumnDef="event">
                   <th mat-header-cell *matHeaderCellDef> Event </th>
                   <td mat-cell *matCellDef="let element"> Instances scaled
@@ -243,7 +218,7 @@
                 <tr mat-header-row *matHeaderRowDef="scalingHistoryColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: scalingHistoryColumns;"></tr>
               </table>
-              <div class="autoscaler-tab-table-no-record" *ngIf="scalingHistory.resources.length == 0">
+              <div class="autoscaler-tab-table-no-record" *ngIf="scalingHistory.length == 0">
                 No events.</div>
             </div>
           </mat-card-content>
@@ -259,5 +234,8 @@
         </mat-card>
       </app-tile>
     </app-tile-group>
+    <app-no-content-message *ngIf="showNoPolicyMessage$ | async" [icon]="'meter'" [iconFont]="'stratos-icons'"
+      [firstLine]="noPolicyMessageFirstLine" [secondLine]="noPolicyMessageSecondLine">
+    </app-no-content-message>
   </app-tile-grid>
 </div>

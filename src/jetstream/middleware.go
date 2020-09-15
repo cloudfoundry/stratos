@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/subtle"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 )
 
 const cfSessionCookieName = "JSESSIONID"
@@ -28,7 +30,18 @@ const StratosSSOHeader = "x-stratos-sso-login"
 // Header to communicate any error during SSO
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
+// APIKeySkipperContextKey - name of a context key that indicates that valid API key was supplied
+const APIKeySkipperContextKey = "valid_api_key"
+
+// APIKeyHeader - API key authentication header name
+const APIKeyHeader = "Authentication"
+
+// APIKeyAuthScheme - API key authentication scheme
+const APIKeyAuthScheme = "Bearer"
+
 func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
+	log.Debug("handleSessionError")
+
 	// Add header so front-end knows SSO login is enabled
 	if config.SSOLogin {
 		// A non-empty SSO Header means SSO is enabled
@@ -48,10 +61,14 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 		)
 	}
 
-	var logMessage = ""
-	if !doNotLog {
-		logMessage = msg + ": %v"
+	if doNotLog {
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			msg, msg,
+		)
 	}
+
+	var logMessage = msg + ": %v"
 
 	return interfaces.NewHTTPShadowError(
 		http.StatusUnauthorized,
@@ -59,69 +76,118 @@ func handleSessionError(config interfaces.PortalConfig, c echo.Context, err erro
 	)
 }
 
-func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		log.Debug("sessionMiddleware")
+type (
+	// Skipper - skipper function for middlewares
+	Skipper func(echo.Context) bool
 
-		p.removeEmptyCookie(c)
+	// MiddlewareConfig defines the config for the middleware.
+	MiddlewareConfig struct {
+		// Skipper defines a function to skip middleware.
+		Skipper Skipper
+	}
+)
 
-		userID, err := p.GetSessionValue(c, "user_id")
-		if err == nil {
-			c.Set("user_id", userID)
-			return h(c)
+func (p *portalProxy) sessionMiddleware() echo.MiddlewareFunc {
+
+	return p.sessionMiddlewareWithConfig(MiddlewareConfig{})
+}
+
+func (p *portalProxy) sessionMiddlewareWithConfig(config MiddlewareConfig) echo.MiddlewareFunc {
+	// Default skipper function always returns false
+	if config.Skipper == nil {
+		config.Skipper = func(c echo.Context) bool { return false }
+	}
+
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			log.Debug("sessionMiddleware")
+
+			if config.Skipper(c) {
+				log.Debug("Skipping sessionMiddleware")
+				return h(c)
+			}
+
+			p.removeEmptyCookie(c)
+
+			userID, err := p.GetSessionValue(c, "user_id")
+			if err == nil {
+				c.Set("user_id", userID)
+				return h(c)
+			}
+
+			// Don't log an error if we are verifying the session, as a failure is not an error
+			isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
+			if isVerify {
+				// Tell the frontend what the Cookie Domain is so it can check if sessions will work
+				c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
+			}
+
+			// Clear any session cookie
+			cookie := new(http.Cookie)
+			cookie.Name = p.SessionCookieName
+			cookie.Value = ""
+			cookie.Expires = time.Now().Add(-24 * time.Hour)
+			cookie.Domain = p.SessionStoreOptions.Domain
+			cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
+			cookie.Secure = p.SessionStoreOptions.Secure
+			cookie.Path = p.SessionStoreOptions.Path
+			cookie.MaxAge = 0
+			c.SetCookie(cookie)
+
+			return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
 		}
-
-		// Don't log an error if we are verifying the session, as a failure is not an error
-		isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
-		if isVerify {
-			// Tell the frontend what the Cookie Domain is so it can check if sessions will work
-			c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
-		}
-
-		// Clear any session cookie
-		cookie := new(http.Cookie)
-		cookie.Name = p.SessionCookieName
-		cookie.Value = ""
-		cookie.Expires = time.Now().Add(-24 * time.Hour)
-		cookie.Domain = p.SessionStoreOptions.Domain
-		cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
-		cookie.Secure = p.SessionStoreOptions.Secure
-		cookie.Path = p.SessionStoreOptions.Path
-		cookie.MaxAge = 0
-		c.SetCookie(cookie)
-
-		return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
 	}
 }
 
-// Support for Angular XSRF
-func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		log.Debug("xsrfMiddleware")
+func (p *portalProxy) xsrfMiddleware() echo.MiddlewareFunc {
+	return p.xsrfMiddlewareWithConfig(MiddlewareConfig{})
+}
 
-		// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
-		if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
-			return h(c)
-		}
-		errMsg := "Failed to get stored XSRF token from user session"
-		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
-		if err == nil {
-			// Check the token against the header
-			requestToken := c.Request().Header.Get(XSRFTokenHeader)
-			if len(requestToken) > 0 {
-				if compareTokens(requestToken, token) {
-					return h(c)
-				}
-				errMsg = "Supplied XSRF Token does not match"
-			} else {
-				errMsg = "XSRF Token was not supplied in the header"
+func (p *portalProxy) xsrfMiddlewareWithConfig(config MiddlewareConfig) echo.MiddlewareFunc {
+	// Default skipper function always returns false
+	if config.Skipper == nil {
+		config.Skipper = func(c echo.Context) bool { return false }
+	}
+
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			log.Debug("xsrfMiddleware")
+
+			if config.Skipper(c) {
+				log.Debug("Skipping xsrfMiddleware")
+				return h(c)
 			}
+
+			// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
+			if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
+				return h(c)
+			}
+
+			// Routes registered with /apps are assumed to be web apps that do their own XSRF
+			if strings.HasPrefix(c.Request().URL.String(), "/pp/v1/apps/") {
+				return h(c)
+			}
+
+			errMsg := "Failed to get stored XSRF token from user session"
+			token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
+			if err == nil {
+				// Check the token against the header
+				requestToken := c.Request().Header.Get(XSRFTokenHeader)
+				if len(requestToken) > 0 {
+					if compareTokens(requestToken, token) {
+						return h(c)
+					}
+					errMsg = "Supplied XSRF Token does not match"
+				} else {
+					errMsg = "XSRF Token was not supplied in the header"
+				}
+			}
+			return interfaces.NewHTTPShadowError(
+				http.StatusUnauthorized,
+				"XSRF Token could not be found or does not match",
+				"XSRF Token error: %s", errMsg,
+			)
 		}
-		return interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"XSRF Token could not be found or does not match",
-			"XSRF Token error: %s", errMsg,
-		)
 	}
 }
 
@@ -163,6 +229,7 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-cache")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
@@ -170,6 +237,7 @@ func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.H
 func (p *portalProxy) setSecureCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-store")
+		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)
 	}
 }
@@ -182,7 +250,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err == nil {
 			// check their admin status in UAA
-			u, err := p.GetUAAUser(userID.(string))
+			u, err := p.StratosAuthService.GetUser(userID.(string))
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
@@ -205,6 +273,8 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 				log.Error(shadowError.LogMessage)
 			}
 			return shadowError.HTTPError
+		} else if jetstreamError, ok := err.(interfaces.JetstreamError); ok {
+			return jetstreamError.HTTPErrorInContext(c)
 		}
 
 		return err
@@ -237,4 +307,78 @@ func retryAfterUpgradeMiddleware(h echo.HandlerFunc, env *env.VarSet) echo.Handl
 
 		return h(c)
 	}
+}
+
+func getAPIKeyFromHeader(c echo.Context) (string, error) {
+	header := c.Request().Header.Get(APIKeyHeader)
+
+	l := len(APIKeyAuthScheme)
+	if len(header) > l+1 && header[:l] == APIKeyAuthScheme {
+		return header[l+1:], nil
+	}
+
+	return "", errors.New("No API key in the header")
+}
+
+func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("apiKeyMiddleware")
+
+		// skipping thise middleware if API keys are disabled
+		if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.Disabled {
+			log.Debugf("apiKeyMiddleware: API keys are disabled, skipping")
+			return h(c)
+		}
+
+		apiKeySecret, err := getAPIKeyFromHeader(c)
+		if err != nil {
+			log.Debugf("apiKeyMiddleware: %v", err)
+			return h(c)
+		}
+
+		apiKey, err := p.APIKeysRepository.GetAPIKeyBySecret(apiKeySecret)
+		if err != nil {
+			switch {
+			case err == sql.ErrNoRows:
+				log.Debug("apiKeyMiddleware: Invalid API key supplied")
+			default:
+				log.Errorf("apiKeyMiddleware: %v", err)
+			}
+
+			return h(c)
+		}
+
+		// checking if user is an admin if API keys are enabled for admins only
+		if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.AdminOnly {
+			user, err := p.StratosAuthService.GetUser(apiKey.UserGUID)
+			if err != nil {
+				log.Errorf("apiKeyMiddleware: %v", err)
+				return h(c)
+			}
+
+			if !user.Admin {
+				log.Debugf("apiKeyMiddleware: user isn't admin, skipping")
+				return h(c)
+			}
+		}
+
+		c.Set(APIKeySkipperContextKey, true)
+		c.Set("user_id", apiKey.UserGUID)
+
+		// some endpoints check not only the context store, but also the contents of the session store
+		sessionValues := make(map[string]interface{})
+		sessionValues["user_id"] = apiKey.UserGUID
+		p.setSessionValues(c, sessionValues)
+
+		err = p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID)
+		if err != nil {
+			log.Errorf("apiKeyMiddleware: %v", err)
+		}
+
+		return h(c)
+	}
+}
+
+func (p *portalProxy) apiKeySkipper(c echo.Context) bool {
+	return c.Get(APIKeySkipperContextKey) != nil && c.Get(APIKeySkipperContextKey).(bool) == true
 }

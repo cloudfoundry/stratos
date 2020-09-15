@@ -1,10 +1,6 @@
-<div class="app-code-block" [ngClass]="{'app-code-block__success': copySuccessWait, 'app-code-block__pre': codeBlockStyle === 'pre'}">
+<div class="app-code-block" [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
   <div class="app-code-block__content" #preBlock>
     <ng-content></ng-content>
   </div>
-  <div class="app-code-block__copied-div">
-    <span class="app-code-block__copied-msg">Copied to clipboard</span>
-    <mat-icon class="app-code-block__copied-icon">check_circle</mat-icon>
-  </div>
-  <mat-icon class="app-code-block__copy-icon" *ngIf="!hideCopy && canCopy" (click)="copyToClipboard($event)">content_copy</mat-icon>
+  <app-copy-to-clipboard *ngIf="!hideCopy" class="app-code-block__copy" [text]="text"></app-copy-to-clipboard>
 </div>

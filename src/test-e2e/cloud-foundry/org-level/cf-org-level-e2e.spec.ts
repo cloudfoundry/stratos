@@ -67,7 +67,7 @@ describe('CF - Org Level - ', () => {
     });
 
     describe('Basic Tests - ', () => {
-      beforeEach(navToPage);
+      it('Nav to org', navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 
@@ -84,7 +84,7 @@ describe('CF - Org Level - ', () => {
     });
 
     describe('Basic Tests - ', () => {
-      beforeEach(navToPage);
+      it('Nav to org', navToPage);
 
       it('Breadcrumb', testBreadcrumb);
 

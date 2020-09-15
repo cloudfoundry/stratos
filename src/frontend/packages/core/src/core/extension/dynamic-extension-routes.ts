@@ -39,7 +39,6 @@ export class DynamicExtensionRoutes implements CanActivate {
       const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
       newChildRoutes = newChildRoutes.concat(newRoutes);
     }
-
     // Update the route config and navigate again to the same route that was intercepted
     this.setChildRoutes(route.parent.routeConfig, newChildRoutes);
     this.router.navigateByUrl(state.url);
@@ -48,11 +47,17 @@ export class DynamicExtensionRoutes implements CanActivate {
   }
 
   private getChildRoutes(r: any) {
+    if (!r) {
+      return [];
+    }
     const loadedRoutes = r._loadedConfig ? r._loadedConfig.routes : [];
     return r.children ? r.children : loadedRoutes;
   }
 
   private setChildRoutes(r: any, newRoutes: any) {
+    if (!r) {
+      return [];
+    }
     const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
     if (r.children) {
       r.children = newRoutes;

@@ -7,33 +7,42 @@ import {
   GetAllEndpointsSuccess,
   UNREGISTER_ENDPOINTS_SUCCESS,
 } from '../../actions/endpoint.actions';
+import { EntityDeleteCompleteAction } from '../../actions/entity.delete.actions';
 import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
-import { addNewHit, cleanRecentsList, getDefaultRecentState } from './recently-visited.reducer.helpers';
+import {
+  addRecentlyVisitedEntity,
+  cleanRecentsList,
+  clearEntityFromRecentsList,
+  getDefaultRecentState,
+} from './recently-visited.reducer.helpers';
 
 export function recentlyVisitedReducer(
   state: IRecentlyVisitedState = getDefaultRecentState(),
   action: Action
 ): IRecentlyVisitedState {
   switch (action.type) {
+    case EntityDeleteCompleteAction.ACTION_TYPE:
+      return clearEntityFromRecentsList(state, action as EntityDeleteCompleteAction);
     case AddRecentlyVisitedEntityAction.ACTION_TYPE:
-      return addNewHit(state, action as AddRecentlyVisitedEntityAction);
+      return addRecentlyVisitedEntity(state, action as AddRecentlyVisitedEntityAction);
     case SetRecentlyVisitedEntityAction.ACTION_TYPE:
       const setAction = action as SetRecentlyVisitedEntityAction;
-      return {
-        hits: state.hits,
-        entities: {
-          ...state.entities,
-          [setAction.recentlyVisited.guid]: setAction.recentlyVisited
-        }
+      const newState = {
+        ...state,
+        [setAction.recentlyVisited.guid]: setAction.recentlyVisited
       };
+      return newState;
     case DISCONNECT_ENDPOINTS_SUCCESS:
     case UNREGISTER_ENDPOINTS_SUCCESS:
       const removeEndpointAction = action as DisconnectEndpoint;
       return cleanRecentsList(state, [removeEndpointAction.guid]);
     case GET_ENDPOINTS_SUCCESS:
       const getAllAction = action as GetAllEndpointsSuccess;
-      const connectedIds = Object.values(getAllAction.payload.entities.endpoint).reduce((ids, endpoint) => {
+      const endpointKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
+      const connectedIds = Object.values(getAllAction.payload.entities[endpointKey]).reduce((ids, endpoint) => {
         if (endpoint.user) {
           ids.push(endpoint.guid);
         }

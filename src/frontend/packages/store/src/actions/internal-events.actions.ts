@@ -1,15 +1,22 @@
 import { Action } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 
-import { SEND_EVENT, InternalEventSeverity, CLEAR_EVENTS, InternalEventState } from '../types/internal-events.types';
+import {
+  CLEAR_ENDPOINT_ERROR_EVENTS,
+  CLEAR_EVENTS,
+  InternalEventSeverity,
+  InternalEventState,
+  InternalEventStateMetadata,
+  SEND_EVENT,
+} from '../types/internal-events.types';
 
-export class SendEventAction implements Action {
+export class SendEventAction<T = InternalEventStateMetadata> implements Action {
   public type = SEND_EVENT;
   public timestamp: number;
   constructor(
     public eventType: string,
     public eventSubjectId: string,
-    public eventState: InternalEventState
+    public eventState: InternalEventState<T>
   ) {
     eventState.timestamp = moment.now();
     if (!eventState.severity) {
@@ -26,12 +33,20 @@ export class SendClearEventAction implements Action {
     public params: {
       timestamp?: number,
       eventCode?: string,
+      endpointGuid?: string
       clean: boolean
     }
   ) {
-    const { timestamp, eventCode, clean } = params;
-    if (!timestamp && !eventCode && !clean) {
+    const { timestamp, eventCode, endpointGuid, clean } = params;
+    if (!timestamp && !eventCode && !endpointGuid && !clean) {
       throw new Error('Either a timestamp or event code is needed to clear events');
     }
   }
+}
+
+export class SendClearEndpointEventsAction implements Action {
+  public type = CLEAR_ENDPOINT_ERROR_EVENTS;
+  constructor(
+    public endpointGuid: string
+  ) { }
 }

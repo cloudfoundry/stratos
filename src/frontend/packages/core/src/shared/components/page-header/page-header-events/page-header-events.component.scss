@@ -3,37 +3,27 @@
   align-items: center;
   border-radius: 0 0 2px 2px;
   display: flex;
-  margin-top: -$event-top-line-width / 2;
   min-height: 40px;
   padding: 10px;
-  &__message-wrapper {
-    margin: 0 $event-top-line-width;
+  &__error-icon {
+    margin-right: 5px;
   }
   &__outer {
-    border-top-style: solid;
-    border-top-width: $event-top-line-width;
-    display: flex;
-    height: 0;
     justify-content: center;
     overflow: visible;
     z-index: 1;
   }
-  &--minimized {
-    .header-event {
-      min-height: 25px;
-      padding: 5px 20px;
-      &__error-icon,
-      &__message-wrapper {
-        display: none;
-      }
-    }
+  &__error-message {
+    display: flex;
+    flex: 1;
   }
-  &__minimize {
+  &__error-dismiss {
     cursor: pointer;
-    $minimize-icon-size: 16px;
-    font-size: $minimize-icon-size;
-    height: $minimize-icon-size;
-    line-height: $minimize-icon-size;
-    width: $minimize-icon-size;
   }
+  // &__details-link {
+  //   &:hover {
+  //     font-weight: bold;
+  //   }
+  // }
+
 }

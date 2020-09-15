@@ -1,3 +1,5 @@
+import { browser } from 'protractor';
+
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { HomePage } from '../home/home.po';
@@ -5,19 +7,39 @@ import { LoginPage } from '../login/login.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { FormItemMap } from '../po/form.po';
 import { MenuComponent } from '../po/menu.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
 import { SnackBarPo } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
+  const snackBar = new SnackBarPo();
 
-  describe('Connect/Disconnect endpoints -', () => {
+  describe('Connect/Disconnect endpoints - ', () => {
 
-    beforeAll(() => {
-      e2e.setup(ConsoleUserType.user)
-        .clearAllEndpoints()
-        .registerDefaultCloudFoundry();
+    describe('Reach Endpoint Page - ', () => {
+      beforeAll(() => {
+        browser.waitForAngularEnabled(false);
+
+        e2e.setup(ConsoleUserType.user)
+          .clearAllEndpoints()
+          .registerDefaultCloudFoundry();
+      });
+
+      it('should reach the endpoints page', () => {
+        endpointsPage.waitForPage();
+      });
+
+      it('handle show snackbar', () => {
+        // Close the snack bar telling us that there are no connected endpoints
+        endpointsPage.waitForNoneConnectedSnackBar(snackBar);
+        snackBar.safeClose();
+      });
+
+      afterAll(() => {
+        browser.waitForAngularEnabled(true);
+      });
     });
 
     describe('endpoint `Connect` dialog -', () => {
@@ -25,14 +47,6 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        endpointsPage.waitForPage();
-        // expect(endpointsPage.isActivePage()).toBeTruthy();
-
-        // Close the snack bar telling us that there are no connected endpoints
-        connectDialog.snackBar.waitForMessage('There are no connected endpoints, connect with your personal credentials to get started.');
-        connectDialog.snackBar.safeClose();
-
-
         endpointsPage.cards.findCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
           .then(actionMenu => actionMenu.getItem('Connect'))
@@ -92,6 +106,7 @@ describe('Endpoints', () => {
 
       // NOTE: We connected as the User not the Admin, so logging in as admin will NOT have the endpoint connected
       it('should go directly to endpoints view on logout and login (as admin)', () => {
+        endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
@@ -116,6 +131,14 @@ describe('Endpoints', () => {
 
     describe('endpoint `Disconnect` -', () => {
 
+      beforeAll(() => {
+        browser.waitForAngularEnabled(false);
+      });
+
+      afterAll(() => {
+        browser.waitForAngularEnabled(true);
+      });
+
       const toDisconnect = e2e.secrets.getDefaultCFEndpoint();
 
       it('should update row in table when disconnected', () => {
@@ -132,7 +155,6 @@ describe('Endpoints', () => {
             ConfirmDialogComponent.expectDialogAndConfirm('Disconnect', 'Disconnect Endpoint');
 
             // Wait for snackbar
-            const snackBar = new SnackBarPo();
             snackBar.waitUntilShown();
             expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
             endpointsPage.cards.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {

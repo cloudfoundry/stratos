@@ -1,7 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
-
-import { IBreadcrumb, IBreadcrumbLink, BREADCRUMB_URL_PARAM } from './breadcrumbs.types';
+import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
+import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
 
 @Component({
   selector: 'app-breadcrumbs',
@@ -10,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class BreadcrumbsComponent {
   public breadcrumbDefinitions: IBreadcrumbLink[] = null;
-  private breadcrumbKey: string;
+  breadcrumbKey: string;
 
   @Input()
   set breadcrumbs(breadcrumbs: IBreadcrumb[]) {

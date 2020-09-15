@@ -1,0 +1,11 @@
+@import './acme-colors';
+
+// Style overrides
+
+body.stratos {
+  .favorite-list {
+    .app-no-content-container {
+      color: $acme-dark-blue;
+    }
+  }
+}

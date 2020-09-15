@@ -12,6 +12,11 @@
       border-color: $info
     }
   }
+  .header-event__details-link,
+  .header-event__details-link:hover,
+  .header-event__details-link:visited {
+    color: #fff;
+  }
   .header-event--error {
     .header-event {
       background: $error;

@@ -1,27 +1,35 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import {
   ApplicationEnvVarsHelper,
-} from '../../../../../../core/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+} from '../../../../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
-  ApplicationStateService,
-} from '../../../../../../core/src/shared/components/application-state/application-state.service';
+  ServiceActionHelperService,
+} from '../../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
+import { ApplicationStateService } from '../../../../../../cloud-foundry/src/shared/services/application-state.service';
+import {
+  generateTestApplicationServiceProvider,
+} from '../../../../../../cloud-foundry/test-framework/application-service-helper';
+import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ServiceActionHelperService } from '../../../../../../core/src/shared/data-services/service-action-helper.service';
-import { EntityMonitorFactory } from '../../../../../../core/src/shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../core/src/shared/monitors/pagination-monitor.factory';
-import { generateTestApplicationServiceProvider } from '../../../../../../core/test-framework/application-service-helper';
-import { BaseTestModules } from '../../../../../../core/test-framework/cloud-foundry-endpoint-service.helper';
+import { AppTestModule } from '../../../../../../core/test-framework/core-test.helper';
+import {
+  EntityCatalogHelper,
+} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
+
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
@@ -30,11 +38,15 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         AppAutoscalerComboSeriesVerticalComponent
       ],
       imports: [
-        ...BaseTestModules,
-        NgxChartsModule
+        CfAutoscalerTestingModule,
+        createEmptyStoreModule(),
+        CoreModule,
+        NgxChartsModule,
+        AppTestModule
       ],
       providers: [
         EntityMonitorFactory,
+        EntityCatalogHelper,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         ApplicationStateService,

@@ -1,0 +1,45 @@
+<div class="edit-endpoint" *ngIf="endpoint$ | async as endpoint">
+  <form [formGroup]="editEndpoint" class="stepper-form" *ngIf="definition$ | async as definition">
+    <h1 class="edit-endpoint__section-title">{{definition.label}} Information</h1>
+    <mat-form-field>
+      <input matInput id="name" name="name" formControlName="name" required placeholder="Name"
+        [appUnique]="(existingEndpoinNames$ | async)">
+      <mat-error *ngIf="name.errors && name.errors.required">Name is required</mat-error>
+      <mat-error *ngIf="name.errors && name.errors.appUnique">Name is not unique</mat-error>
+    </mat-form-field>
+    <mat-form-field novalidate>
+      <input matInput id="url" name="url" type="url" formControlName="url" rrequired placeholder="Endpoint Address">
+    </mat-form-field>
+    <mat-checkbox matInput name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
+    </mat-checkbox>
+    <div *ngIf="showAdvancedFields" class="edit-endpoint__section">
+      <h1 class="edit-endpoint__section-title">Advanced Information (Optional)</h1>
+
+      <mat-checkbox matInput name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
+      </mat-checkbox>
+
+      <mat-form-field>
+        <input matInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
+        <mat-error *ngIf="clientID.errors && clientID.errors.required">Client ID is required</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput id="client_secret" name="client_secret" formControlName="clientSecret"
+          placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+        <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+          [attr.aria-pressed]="!show">
+          <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+    <div *ngIf="endpointTypeSupportsSSO" class="edit-endpoint__sso">
+      <mat-checkbox matInput formControlName="allowSSO" name="ssoAllowed">Allow SSO login to this endpoint
+      </mat-checkbox>
+      <div *ngIf="editEndpoint.value.allowSSO">
+        <p>
+          Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
+        </p>
+        <pre>{{clientRedirectURI}}</pre>
+      </div>
+    </div>
+  </form>
+</div>

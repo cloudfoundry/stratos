@@ -1,10 +1,11 @@
-import { Component, OnInit, Input, Output } from '@angular/core';
-import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { schema } from 'normalizr';
-import { EntityMonitor } from '../../monitors/entity-monitor';
-import { Observable } from 'rxjs';
-import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
-import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { Component, Input, OnInit, Output } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
+import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { ActionState, RequestInfoState, rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -13,45 +14,30 @@ export enum AppMonitorComponentTypes {
   FETCHING = 'MONITOR_FETCHING',
 }
 
-export interface IApplicationMonitorComponentState {
+export interface IActionMonitorComponentState {
   busy: boolean;
   error: boolean;
   completed: boolean;
+  message: string;
 }
 
-@Component({
-  selector: 'app-action-monitor-icon',
-  templateUrl: './app-action-monitor-icon.component.html',
-  styleUrls: ['./app-action-monitor-icon.component.scss']
-})
-export class AppActionMonitorIconComponent implements OnInit {
+export class ActionMonitorComponentState {
 
-  @Input()
-  public entityKey: string;
+  public currentState: Observable<IActionMonitorComponentState>;
 
-  @Input()
-  public id: string;
-
-  @Input()
-  public schema: schema.Entity;
-
-  @Input()
-  public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
-
-  @Input()
-  public updateKey = rootUpdatingKey;
-
-  @Output()
-  public currentState: Observable<IApplicationMonitorComponentState>;
-
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
-
-  ngOnInit() {
-    const entityMonitor = this.entityMonitorFactory.create(this.id, this.entityKey, this.schema);
-    this.currentState = this.getStateObservable(entityMonitor, this.monitorState);
+  constructor(
+    private entityMonitorFactory: EntityMonitorFactory,
+    id: string,
+    schema: EntitySchema,
+    monitorState: AppMonitorComponentTypes,
+    private updateKey: string
+  ) {
+    const entityMonitor = this.entityMonitorFactory.create(id, schema);
+    this.currentState = this.getStateObservable(entityMonitor, monitorState);
   }
 
-  private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes) {
+  private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes)
+    : Observable<IActionMonitorComponentState> {
     switch (monitorState) {
       case AppMonitorComponentTypes.DELETE:
         return this.getDeletingState(entityMonitor);
@@ -64,17 +50,18 @@ export class AppActionMonitorIconComponent implements OnInit {
     }
   }
 
-  private getDeletingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getDeletingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
     return entityMonitor.entityRequest$.pipe(
       map(requestState => ({
         busy: requestState.deleting.busy,
         error: requestState.deleting.error,
-        completed: requestState.deleting.deleted
+        completed: requestState.deleting.deleted,
+        message: requestState.deleting.message
       }))
     );
   }
 
-  private getFetchingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getFetchingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
     const completed$ = this.getHasCompletedObservable(
       entityMonitor.entityRequest$.pipe(
         map(requestState => requestState.fetching),
@@ -83,12 +70,11 @@ export class AppActionMonitorIconComponent implements OnInit {
     return entityMonitor.entityRequest$.pipe(
       withLatestFrom(completed$),
       map(([requestState, completed]) => {
-        const oldUpdatingState = requestState.fetching;
-        const updatingState = requestState.updating[this.updateKey];
         return {
           busy: requestState.fetching,
           error: requestState.error,
-          completed
+          completed,
+          message: requestState.message
         };
       })
     );
@@ -96,7 +82,7 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   private fetchUpdatingState = (requestState: RequestInfoState): ActionState =>
     (requestState.updating[this.updateKey] || { busy: false, error: false, message: '' })
-  private getUpdatingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+  private getUpdatingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
 
 
     const completed$ = this.getHasCompletedObservable(
@@ -105,26 +91,74 @@ export class AppActionMonitorIconComponent implements OnInit {
       )
     );
     return entityMonitor.entityRequest$.pipe(
-      pairwise(),
       withLatestFrom(completed$),
-      map(([[oldRequestState, requestState], completed]) => {
-        const oldUpdatingState = this.fetchUpdatingState(requestState);
+      map(([requestState, completed]) => {
         const updatingState = this.fetchUpdatingState(requestState);
         return {
           busy: updatingState.busy,
           error: updatingState.error,
-          completed
+          completed,
+          message: updatingState.message
         };
       })
     );
   }
 
   private getHasCompletedObservable(busy$: Observable<boolean>) {
-    return busy$.pipe(
+    return this.currentState ? of(true) : busy$.pipe(
       distinctUntilChanged(),
       pairwise(),
       map(([oldBusy, newBusy]) => oldBusy && !newBusy),
       startWith(false)
     );
+  }
+}
+
+
+
+@Component({
+  selector: 'app-action-monitor-icon',
+  templateUrl: './app-action-monitor-icon.component.html',
+  styleUrls: ['./app-action-monitor-icon.component.scss']
+})
+export class AppActionMonitorIconComponent implements OnInit {
+
+  // State observable - use this instead of creating one
+  @Input()
+  public state: Observable<IActionMonitorComponentState>;
+
+  @Input()
+  public entityKey: string;
+
+  @Input()
+  public id: string;
+
+  @Input()
+  public schema: EntitySchema;
+
+  @Input()
+  public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
+
+  @Input()
+  public updateKey = rootUpdatingKey;
+
+  @Output()
+  public currentState: Observable<IActionMonitorComponentState>;
+
+  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
+
+  ngOnInit() {
+    if (this.state) {
+      this.currentState = this.state;
+    } else {
+      const state: ActionMonitorComponentState = new ActionMonitorComponentState(
+        this.entityMonitorFactory,
+        this.id,
+        this.schema,
+        this.monitorState,
+        this.updateKey
+      );
+      this.currentState = state.currentState;
+    }
   }
 }

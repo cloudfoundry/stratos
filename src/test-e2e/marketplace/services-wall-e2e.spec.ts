@@ -128,11 +128,14 @@ describe('Service Instances Wall', () => {
         expect(editMenuItem.getText()).toEqual('Edit');
         expect(editMenuItem.isEnabled()).toBeTruthy();
         editMenuItem.click();
+
         browser.getCurrentUrl().then(url => {
-          expect(url.endsWith('edit')).toBeTruthy();
+          const query = url.indexOf('?');
+          const urlWithoutQuery = query >= 0 ? url.substring(0, query) : url;
+          expect(urlWithoutQuery.endsWith('edit')).toBeTruthy();
         });
-        const createServiceInstance = new CreateMarketplaceServiceInstance();
-        createServiceInstance.stepper.cancel();
+        const createMarketplaceServiceInstance = new CreateMarketplaceServiceInstance();
+        createMarketplaceServiceInstance.stepper.cancel();
         servicesWallPage.isActivePage();
       });
   });

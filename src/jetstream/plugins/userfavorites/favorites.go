@@ -139,7 +139,9 @@ func (uf *UserFavorites) create(c echo.Context) error {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to save favorite to db",
-			"Failed to save favorite to db")
+			"Failed to save favorite to db %+v",
+			err,
+		)
 	}
 
 	jsonString, err := json.Marshal(updatedFavorite)
@@ -147,7 +149,9 @@ func (uf *UserFavorites) create(c echo.Context) error {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to Marshal favorite from db",
-			"Failed to Marshal favorite from db")
+			"Failed to Marshal favorite from db %+v",
+			err,
+		)
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")

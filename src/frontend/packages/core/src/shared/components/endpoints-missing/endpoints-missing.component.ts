@@ -1,7 +1,6 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { delay, map, startWith, tap } from 'rxjs/operators';
+import { delay, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 
@@ -20,15 +19,12 @@ export interface EndpointMissingMessageParts {
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss']
 })
-export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnInit {
+export class EndpointsMissingComponent implements AfterViewInit, OnInit {
 
   @Input() showToolbarHint = true;
+  @Input() showDirectToEndpointMessage = true;
 
   noContent$: Observable<EndpointMissingMessageParts>;
-  snackBarText = {
-    message: `There are no connected endpoints, connect with your personal credentials to get started.`,
-    action: 'Got it'
-  };
 
   protected noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered endpoints',
@@ -45,12 +41,11 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
     },
   };
 
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
   protected showNoConnected = false;
   protected haveRegistered$: Observable<boolean>;
   protected haveConnected$: Observable<boolean>;
 
-  constructor(private snackBar: MatSnackBar, public endpointsService: EndpointsService) {
+  constructor(public endpointsService: EndpointsService) {
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
     this.haveConnected$ = this.endpointsService.haveConnected$;
   }
@@ -68,9 +63,6 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
       this.endpointsService.disablePersistenceFeatures$
     ).pipe(
       delay(1),
-      tap(([hasRegistered, hasConnected]) => {
-        this.showSnackBar(hasRegistered && !hasConnected);
-      }),
       map(([hasRegistered, hasConnected, disablePersistenceFeatures]) => {
         if (!hasRegistered) {
           return this.removeAdvice(this.noneRegisteredText, disablePersistenceFeatures);
@@ -95,17 +87,4 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy, OnIn
       }
     };
   }
-
-  ngOnDestroy() {
-    this.showSnackBar(false);
-  }
-
-  private showSnackBar(show: boolean) {
-    if (!this.snackBarRef && show) {
-      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
-    } else if (this.snackBarRef && !show) {
-      this.snackBarRef.dismiss();
-    }
-  }
-
 }

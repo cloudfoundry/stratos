@@ -8,7 +8,8 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
@@ -16,11 +17,9 @@ import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
-import { LoggerService } from '../../../../core/logger.service';
+import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
-import { ActivatedRoute } from '@angular/router';
-import { BASE_REDIRECT_QUERY } from '../stepper.types';
 
 
 
@@ -63,7 +62,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     private steppersService: SteppersService,
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    private logger: LoggerService,
     private route: ActivatedRoute
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
@@ -125,7 +123,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.nextSub = obs$.pipe(
         first(),
         catchError(err => {
-          this.logger.warn('Stepper failed: ', err);
+          console.warn('Stepper failed: ', err);
           return observableOf({
             success: false,
             message: 'Failed',

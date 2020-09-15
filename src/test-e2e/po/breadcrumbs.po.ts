@@ -22,7 +22,7 @@ export class BreadcrumbsComponent extends Component {
   getBreadcrumbs(): promise.Promise<Breadcrumb[]> {
     return this.locator.all(by.css('.page-header__breadcrumb')).map((elm, index) => {
       return {
-        index: index,
+        index,
         label: elm.getText(),
         isLink: elm.getAttribute('class').then(cls => cls.indexOf('page-header__breadcrumb-link') >= 0),
         click: elm.click

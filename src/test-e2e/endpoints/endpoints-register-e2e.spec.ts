@@ -36,164 +36,173 @@ describe('Endpoints', () => {
       e2eSetup.clearAllEndpoints();
     });
 
-    beforeEach(() => {
-      navToRegCf();
-    });
-
-    it('should show add form detail view when btn in tile is pressed', () => {
-      expect(register.stepper.canNext()).toBeFalsy();
-      expect(register.stepper.canCancel()).toBeTruthy();
-      expect(register.stepper.canPrevious()).toBeTruthy();
-    });
-
-    describe('Form -', () => {
-
-      let name, address;
+    describe('', () => {
       beforeEach(() => {
-        name = register.getName();
-        address = register.getAddress();
+        navToRegCf();
       });
 
-      describe('Invalid address -', () => {
+      it('should show add form detail view when btn in tile is pressed', () => {
+        expect(register.stepper.canNext()).toBeFalsy();
+        expect(register.stepper.canCancel()).toBeTruthy();
+        expect(register.stepper.canPrevious()).toBeTruthy();
+      });
 
-        const invalidUrl = 'Invalid API URL';
+      describe('Form -', () => {
 
+        let name;
+        let address;
         beforeEach(() => {
-          // Enter a name so the form will become valid on valid address
-          name.set('abc');
-          expect(register.stepper.canNext()).toBeFalsy();
+          name = register.getName();
+          address = register.getAddress();
         });
 
-        it('Incorrect format', () => {
-          address.set(invalidUrl);
-          // Move focus so that we get the validation of the address field
-          name.focus();
+        describe('Invalid address -', () => {
 
-          // Check address is invalid
-          expect(register.stepper.canNext()).toBeFalsy();
-          expect(address.isInvalid()).toBeTruthy();
-          expect(address.getError()).toEqual(invalidUrl);
+          const invalidUrl = 'Invalid API URL';
+
+          beforeEach(() => {
+            // Enter a name so the form will become valid on valid address
+            name.set('abc');
+            expect(register.stepper.canNext()).toBeFalsy();
+          });
+
+          it('Incorrect format', () => {
+            address.set(invalidUrl);
+            // Move focus so that we get the validation of the address field
+            name.focus();
+
+            // Check address is invalid
+            expect(register.stepper.canNext()).toBeFalsy();
+            expect(address.isInvalid()).toBeTruthy();
+            expect(address.getError()).toEqual(invalidUrl);
+          });
+
+          it('Valid format', () => {
+            address.set(validEndpoint.url);
+            // Move focus so that we get the validation of the address field
+            name.focus();
+
+            expect(register.stepper.canNext()).toBeTruthy();
+            expect(address.isInvalid()).toBeFalsy();
+          });
+
+          it('Invalid to valid to invalid', () => {
+            // Invalid
+            address.set(invalidUrl);
+            // Move focus so that we get the validation of the address field
+            name.focus();
+            expect(register.stepper.canNext()).toBeFalsy();
+            expect(address.isInvalid()).toBeTruthy();
+            expect(address.getError()).toEqual(invalidUrl);
+
+            // Valid
+            address.clear();
+            address.set(validEndpoint.url);
+            // Move focus so that we get the validation of the address field
+            name.focus();
+
+            expect(register.stepper.canNext()).toBeTruthy();
+            expect(address.isInvalid()).toBeFalsy();
+
+            // Invalid
+            address.set(invalidUrl);
+            // Move focus so that we get the validation of the address field
+            name.focus();
+            expect(register.stepper.canNext()).toBeFalsy();
+            expect(address.isInvalid()).toBeTruthy();
+            expect(address.getError()).toEqual(invalidUrl);
+
+          });
         });
 
-        it('Valid format', () => {
-          address.set(validEndpoint.url);
-          // Move focus so that we get the validation of the address field
-          name.focus();
+        describe('Invalid name -', () => {
+
+          beforeEach(() => {
+            // Enter a url so the form will become valid on valid Name
+            address.set(validEndpoint.url);
+            expect(register.stepper.canNext()).toBeFalsy();
+          });
+
+          it('Valid', () => {
+            name.set(validEndpoint.name);
+            expect(register.stepper.canNext()).toBeTruthy();
+            expect(name.isInvalid()).toBeFalsy();
+          });
+
+          it('Invalid', () => {
+            name.clear();
+            address.focus();
+            expect(register.stepper.canNext()).toBeFalsy();
+            expect(name.isInvalid()).toBeTruthy();
+            expect(name.getError()).toEqual('Name is required');
+          });
+
+          it('Valid to invalid to valid', () => {
+            name.set(validEndpoint.name);
+            expect(register.stepper.canNext()).toBeTruthy();
+            expect(name.isInvalid()).toBeFalsy();
+
+            name.clear();
+            expect(register.stepper.canNext()).toBeFalsy();
+            // input has been touched so 'required' validation kicks in
+            expect(name.isInvalid()).toBeTruthy();
+
+            name.set(validEndpoint.name);
+            expect(register.stepper.canNext()).toBeTruthy();
+            expect(name.isInvalid()).toBeFalsy();
+          });
+        });
+
+        it('Should hint at SSL errors', () => {
+          register.form.fill({
+            name: selfSignedEndpoint.name,
+            url: selfSignedEndpoint.url,
+            skipsll: false
+          });
+          register.stepper.next();
+
+          const snackBar = new SnackBarPo();
+          snackBar.waitUntilShown();
+
+          // Handle the error case for invalid certificate - could be unknown authority or bad certificate
+          // so check for correct message at the start and the helpful message for the user to correct the problem
+          expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
+          expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted'))
+            .toBeTruthy();
+        });
+
+        it('Successful register (no connect)', () => {
+          register.form.fill({
+            name: validEndpoint.name,
+            url: validEndpoint.url,
+            skipsll: true
+          });
 
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(address.isInvalid()).toBeFalsy();
-        });
+          register.stepper.next();
 
-        it('Invalid to valid to invalid', () => {
-          // Invalid
-          address.set(invalidUrl);
-          // Move focus so that we get the validation of the address field
-          name.focus();
-          expect(register.stepper.canNext()).toBeFalsy();
-          expect(address.isInvalid()).toBeTruthy();
-          expect(address.getError()).toEqual(invalidUrl);
+          register.stepper.waitForStep('Connect (Optional)');
+          register.stepper.next();
 
-          // Valid
-          address.clear();
-          address.set(validEndpoint.url);
-          // Move focus so that we get the validation of the address field
-          name.focus();
+          expect(endpointsPage.isActivePage()).toBeTruthy();
+          expect(endpointsPage.cards.isPresent()).toBeTruthy();
 
-          expect(register.stepper.canNext()).toBeTruthy();
-          expect(address.isInvalid()).toBeFalsy();
-
-          // Invalid
-          address.set(invalidUrl);
-          // Move focus so that we get the validation of the address field
-          name.focus();
-          expect(register.stepper.canNext()).toBeFalsy();
-          expect(address.isInvalid()).toBeTruthy();
-          expect(address.getError()).toEqual(invalidUrl);
-
+          endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
+            expect(data.name).toEqual(validEndpoint.name);
+            expect(data.url).toEqual(validEndpoint.url);
+            expect(data.connected).toBeFalsy();
+          });
         });
       });
+    });
 
-      describe('Invalid name -', () => {
 
-        beforeEach(() => {
-          // Enter a url so the form will become valid on valid Name
-          address.set(validEndpoint.url);
-          expect(register.stepper.canNext()).toBeFalsy();
-        });
-
-        it('Valid', () => {
-          name.set(validEndpoint.name);
-          expect(register.stepper.canNext()).toBeTruthy();
-          expect(name.isInvalid()).toBeFalsy();
-        });
-
-        it('Invalid', () => {
-          name.clear();
-          address.focus();
-          expect(register.stepper.canNext()).toBeFalsy();
-          expect(name.isInvalid()).toBeTruthy();
-          expect(name.getError()).toEqual('Name is required');
-        });
-
-        it('Valid to invalid to valid', () => {
-          name.set(validEndpoint.name);
-          expect(register.stepper.canNext()).toBeTruthy();
-          expect(name.isInvalid()).toBeFalsy();
-
-          name.clear();
-          expect(register.stepper.canNext()).toBeFalsy();
-          // input has been touched so 'required' validation kicks in
-          expect(name.isInvalid()).toBeTruthy();
-
-          name.set(validEndpoint.name);
-          expect(register.stepper.canNext()).toBeTruthy();
-          expect(name.isInvalid()).toBeFalsy();
-        });
+    describe('Successful register (with connect) - ', () => {
+      beforeAll(() => {
+        navToRegCf();
       });
 
-      it('Should hint at SSL errors', () => {
-        register.form.fill({
-          name: selfSignedEndpoint.name,
-          url: selfSignedEndpoint.url,
-          skipsll: false
-        });
-        register.stepper.next();
-
-        const snackBar = new SnackBarPo();
-        snackBar.waitUntilShown();
-
-        // Handle the error case for invalid certificate - could be unknown authority or bad certificate
-        // so check for correct message at the start and the helpful message for the user to correct the problem
-        expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
-        /* tslint:disable-line:max-line-length*/
-        expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted"'))
-          .toBeTruthy();
-      });
-
-      it('Successful register (no connect)', () => {
-        register.form.fill({
-          name: validEndpoint.name,
-          url: validEndpoint.url,
-          skipsll: true
-        });
-
-        expect(register.stepper.canNext()).toBeTruthy();
-        register.stepper.next();
-
-        register.stepper.waitForStep('Connect (Optional)');
-        register.stepper.next();
-
-        expect(endpointsPage.isActivePage()).toBeTruthy();
-        expect(endpointsPage.cards.isPresent()).toBeTruthy();
-
-        endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
-          expect(data.name).toEqual(validEndpoint.name);
-          expect(data.url).toEqual(validEndpoint.url);
-          expect(data.connected).toBeFalsy();
-        });
-      });
-
-      it('Successful register (with connect)', () => {
+      it('Register', () => {
         const resetHelper = new ResetsHelpers();
         resetHelper.removeEndpoint(e2eSetup.adminReq, validEndpoint.name);
 
@@ -211,6 +220,8 @@ describe('Endpoints', () => {
         expect(register.stepper.canNext()).toBeTruthy();
         register.stepper.next();
 
+      });
+      it('Connect', () => {
         register.stepper.waitForStep('Connect (Optional)');
         expect(register.stepper.canPrevious()).toBeFalsy();
         expect(register.stepper.canNext()).toBeTruthy();
@@ -236,7 +247,8 @@ describe('Endpoints', () => {
 
         expect(register.stepper.canNext()).toBeTruthy();
         register.stepper.next();
-
+      });
+      it('Check result', () => {
         endpointsPage.waitForPage();
         expect(endpointsPage.cards.isPresent()).toBeTruthy();
         endpointsPage.cards.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {

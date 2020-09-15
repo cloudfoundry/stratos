@@ -1,14 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { TabNavService } from '../../../../tab-nav.service';
+import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { SetupModule } from '../setup.module';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
 
@@ -27,10 +29,13 @@ describe('ConsoleUaaWizardComponent', () => {
         PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
-        StoreModule.forRoot({}),
-        BrowserAnimationsModule,
+        StoreModule.forRoot(appReducers),
+        NoopAnimationsModule,
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

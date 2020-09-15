@@ -1,0 +1,68 @@
+<app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null"
+  *ngIf="!!serviceEntity">
+  <app-meta-card-title noMargin="true">
+    <div class="service-card__title">
+      <app-multiline-title class="service-card__title__link">{{ getDisplayName() }}</app-multiline-title>
+      <app-service-icon [service]="serviceEntity"></app-service-icon>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item customStyle="long-text-fixed">
+    <app-meta-card-key></app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceEntity.entity.description}}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Broker</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-broker [row]="serviceEntity" [config]="brokerNameConfig"></app-table-cell-service-broker>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Scope</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-broker [row]="serviceEntity" [config]="brokerScopeConfig"></app-table-cell-service-broker>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Plans</app-meta-card-key>
+    <app-meta-card-value>
+      {{ serviceEntity.entity.service_plans.length }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Active</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-active [row]="serviceEntity"></app-table-cell-service-active>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Bindable</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-bindable [row]="serviceEntity"></app-table-cell-service-bindable>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>References</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-references [row]="serviceEntity">
+      </app-table-cell-service-references>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="extraInfo?.providerDisplayName">
+    <app-meta-card-key>Provider</app-meta-card-key>
+    <app-meta-card-value>{{ extraInfo?.providerDisplayName }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="cfOrgSpace.multipleConnectedEndpoints$ | async">
+    <app-meta-card-key>CF Endpoint</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-cf-breadcrumbs [row]="serviceEntity"></app-table-cell-service-cf-breadcrumbs>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item customStyle="column">
+    <app-meta-card-key>Tags</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-service-tags [row]="serviceEntity"></app-table-cell-service-tags>
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

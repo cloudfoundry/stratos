@@ -7,6 +7,7 @@ import { BooleanIndicatorComponent, BooleanIndicatorType } from './boolean-indic
 describe('BooleanIndicatorComponent', () => {
   let component: BooleanIndicatorComponent;
   let fixture: ComponentFixture<BooleanIndicatorComponent>;
+  let element: HTMLElement;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -20,10 +21,28 @@ describe('BooleanIndicatorComponent', () => {
     fixture = TestBed.createComponent(BooleanIndicatorComponent);
     component = fixture.componentInstance;
     component.type = BooleanIndicatorType.enabledDisabled;
+    component.isTrue = true;
     fixture.detectChanges();
+    element = fixture.nativeElement;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should show text by default', () => {
+    expect(element.textContent).toContain('Enabled');
+  });
+
+  it('should hide text if set', () => {
+    component.showText = false;
+    fixture.detectChanges();
+    expect(element.textContent).not.toContain('Enabled');
+  });
+
+  it('should show unknown if not boolean value', () => {
+    component.isTrue = null;
+    fixture.detectChanges();
+    expect(element.textContent).toContain('Unknown');
   });
 });

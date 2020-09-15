@@ -14,8 +14,6 @@ export const VERIFY_SESSION = '[Auth] Verify session';
 export const SESSION_VERIFIED = '[Auth] Session verified';
 export const SESSION_INVALID = '[Auth] Session invalid';
 
-export const GET_INFO = '[Auth] Get session info';
-
 export const RESET_AUTH = '[Auth] Reset auth data';
 export const RESET_SSO_AUTH = '[Auth] Reset auth data (SSO)';
 
@@ -59,9 +57,6 @@ export class ResetAuth implements Action {
 
 export class ResetSSOAuth implements Action {
   type = RESET_SSO_AUTH;
-}
-export class GetInfo implements Action {
-  type = GET_INFO;
 }
 
 export class Logout implements Action {

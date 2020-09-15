@@ -1,21 +1,22 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createEmptyStoreModule } from '@stratosui/store/testing';
 
+import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
-import { ApplicationService } from '../../../../core/src/features/applications/application.service';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/tab-nav.service';
-import { ApplicationServiceMock } from '../../../../core/test-framework/application-service-helper';
-import { createBasicStoreModule } from '../../../../core/test-framework/store-test-helper';
+import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
-import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy.component';
+import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
 import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2/edit-autoscaler-policy-step2.component';
 import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3/edit-autoscaler-policy-step3.component';
 import { EditAutoscalerPolicyStep4Component } from './edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
-import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
+import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy.component';
 
 describe('EditAutoscalerPolicyComponent', () => {
   let component: EditAutoscalerPolicyComponent;
@@ -31,18 +32,19 @@ describe('EditAutoscalerPolicyComponent', () => {
         EditAutoscalerPolicyStep4Component,
       ],
       imports: [
-        BrowserAnimationsModule,
-        createBasicStoreModule(),
+        CfAutoscalerTestingModule,
+        NoopAnimationsModule,
+        createEmptyStoreModule(),
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        CfAutoscalerTestingModule
       ],
       providers: [
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
         EditAutoscalerPolicyService,
+        CurrentUserPermissionsService
       ]
     })
       .compileComponents();

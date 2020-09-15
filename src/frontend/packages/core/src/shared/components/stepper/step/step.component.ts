@@ -84,11 +84,14 @@ export class StepComponent {
   @Input()
   public destructiveStep = false;
 
-  @ViewChild(TemplateRef)
+  @ViewChild(TemplateRef, { static: true })
   content: TemplateRef<any>;
 
   @Input()
   skip = false;
+
+  @Input()
+  showBusy = false;
 
   @Input()
   onNext: StepOnNextFunction = () => observableOf({ success: true })

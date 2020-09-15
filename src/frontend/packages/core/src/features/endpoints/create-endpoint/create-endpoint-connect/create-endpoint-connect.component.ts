@@ -1,12 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ShowSideHelp } from '../../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../../store/src/app-state';
 import { EndpointsService } from '../../../../core/endpoints.service';
+import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
 
 
@@ -25,17 +24,17 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public doConnect = false;
 
   constructor(
-    private store: Store<AppState>,
-    private endpointsService: EndpointsService
+    private endpointsService: EndpointsService,
+    private sidePanelService: SidePanelService,
   ) {
   }
 
   showHelp() {
-    this.store.dispatch(new ShowSideHelp(this.helpDocumentUrl));
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
-    this.connectService = new ConnectEndpointService(this.store, this.endpointsService, data);
+    this.connectService = new ConnectEndpointService(this.endpointsService, data);
   }
 
   onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(

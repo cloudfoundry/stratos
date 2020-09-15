@@ -1,28 +1,37 @@
 <form #form="ngForm" class="stepper-form">
-  <h1 class="create-endpoint__section-title">{{endpoint.label}} Information</h1>
+  <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
   <mat-form-field>
-    <input matInput id="name" name="name" ngModel #nameField="ngModel" required placeholder="Name" [appUnique]="(existingEndpoints | async)?.names">
+    <input matInput id="name" name="name" ngModel #nameField="ngModel" required placeholder="Name"
+      [appUnique]="(existingEndpoints | async)?.names">
     <mat-error *ngIf="nameField.errors && nameField.errors.required">Name is required</mat-error>
     <mat-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</mat-error>
   </mat-form-field>
   <mat-form-field novalidate>
-    <input matInput id="url" name="url" ngModel #urlField="ngModel" type="url" required placeholder="Endpoint Address" pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
+    <input matInput id="url" name="url" ngModel #urlField="ngModel" type="url" required placeholder="Endpoint Address"
+      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
     <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
   </mat-form-field>
-  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint</mat-checkbox>
+  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint
+  </mat-checkbox>
   <div *ngIf="showAdvancedFields" class="create-endpoint__section">
     <h1 class="create-endpoint__section-title">Advanced Information (Optional)</h1>
     <mat-form-field>
       <input matInput id="client_id" name="client_id" ngModel #clientIDField="ngModel" placeholder="Client ID">
     </mat-form-field>
     <mat-form-field>
-      <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel" placeholder="Client Secret">
+      <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel"
+        placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+        [attr.aria-pressed]="!show">
+        <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
     </mat-form-field>
   </div>
   <div *ngIf="endpointTypeSupportsSSO" class="create-endpoint__sso">
-    <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint</mat-checkbox>
+    <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint
+    </mat-checkbox>
     <div *ngIf="!!ssoAllowedField.value">
       <p>
         Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.

@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
-import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
+import { TabNavService } from '../../../tab-nav.service';
 import { PageSideNavComponent } from './page-side-nav.component';
 
 describe('PageSideNavComponent', () => {

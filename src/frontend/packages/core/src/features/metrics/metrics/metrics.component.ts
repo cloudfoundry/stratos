@@ -4,12 +4,17 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { MetricsAPIAction, MetricsAPITargets } from '../../../../../store/src/actions/metrics-api.actions';
+import {
+  MetricsAPIAction,
+  MetricsAPITargets,
+  MetricsStratosAction,
+} from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
+import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
-import { EndpointIcon, getIconForEndpoint, getNameForEndpointType } from '../../endpoints/endpoint-helpers';
+import { EndpointIcon } from '../../endpoints/endpoint-helpers';
+import { mapMetricsData, MetricsEndpointInfo } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
 
 interface EndpointMetadata {
@@ -40,12 +45,13 @@ interface PrometheusJobs {
   styleUrls: ['./metrics.component.scss']
 })
 export class MetricsComponent {
-
-  getNameForEndpointType = getNameForEndpointType;
-
-  public metricsEndpoint$: Observable<MetricsInfo>;
+  public metricsEndpoint$: Observable<MetricsEndpointProvider>;
+  public metricsInfo$: Observable<MetricsEndpointInfo[]>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   public jobDetails$: Observable<PrometheusJobs>;
+
+  // Was there an error retrieving data from the Prometheus server?
+  public error = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -54,45 +60,50 @@ export class MetricsComponent {
   ) {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
-    const metricsAction = new MetricsAPIAction(metricsGuid, 'targets');
-    this.store.dispatch(metricsAction);
+    this.store.dispatch(new MetricsAPIAction(metricsGuid, 'targets'));
+    this.store.dispatch(new MetricsStratosAction(metricsGuid));
 
+    // TODO: RC
+    // map(eps => eps.find((item) => item.provider.guid === metricsGuid)),
+    // map(ep => {
+    //   const metadata = {};
+
+    //   Object.values(ep.endpoints).forEach(endpoint => {
+    //     metadata[endpoint.guid] = {
+    //       type: endpoint.cnsi_type,
+    //       typeLabel: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
+    //       icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
+    //     };
+    //   });
+    //   return {
+    //     entity: ep,
+    //     metadata
+    //   };
+
+    // Raw endpoint data for this metrics endpoint
     this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
-      map(eps => eps.find((item) => item.provider.guid === metricsGuid)),
-      map(ep => {
-        const metadata = {};
+      map((ep) => ep.find((item) => item.provider.guid === metricsGuid)),
+    );
 
-        Object.values(ep.endpoints).forEach(endpoint => {
-          metadata[endpoint.guid] = {
-            type: endpoint.cnsi_type,
-            typeLabel: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
-            icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
-          };
-        });
-        return {
-          entity: ep,
-          metadata
-        };
+    // Processed endpoint data
+    this.metricsInfo$ = this.metricsEndpoint$.pipe(map((ep) => {
+      if (ep.provider && ep.provider.metadata && ep.provider.metadata && ep.provider.metadata.metrics_stratos
+        && (ep.provider.metadata.metrics_stratos as any).error) {
+        this.error = true;
       }
-      ));
+      return mapMetricsData(ep);
+    }));
 
+    // Breadcrumbs
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(
-      map(() => ([
-        {
-          breadcrumbs: [
-            {
-              value: 'Endpoints',
-              routerLink: `/endpoints`
-            }
-          ]
-        }
-      ])),
+      map(() => ([{ breadcrumbs: [{ value: 'Endpoints', routerLink: `/endpoints` }] }])),
       first()
     );
 
+    // Job details obtained from the Prometheus server
     this.jobDetails$ = this.metricsEndpoint$.pipe(
-      filter(mi => !!mi && !!mi.entity.provider && !!mi.entity.provider.metadata && !!mi.entity.provider.metadata.metricsTargets),
-      map(mi => mi.entity.provider.metadata.metricsTargets),
+      filter(mi => !!mi && !!mi.provider && !!mi.provider.metadata && !!mi.provider.metadata.metrics_targets),
+      map(mi => mi.provider.metadata.metrics_targets),
       map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped, t) => {
         if (t.labels && t.labels.job) {
           mapped[t.labels.job] = t;
