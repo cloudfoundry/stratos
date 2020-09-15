@@ -5,6 +5,7 @@ export interface ITileIconConfig {
 
 export interface ITileImgConfig {
   location: string;
+  transform?: string;
 }
 
 export type ITileGraphic = ITileIconConfig | ITileImgConfig;

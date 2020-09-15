@@ -34,7 +34,8 @@ export class ApplicationDeploySourceTypes {
       helpText: 'Please select the public GitHub project and branch you would like to deploy from.',
       graphic: {
         // TODO: Move cf assets to CF package (#3769)
-        location: '/core/assets/endpoint-icons/github-logo.png'
+        location: '/core/assets/endpoint-icons/github-logo.png',
+        transform: 'scale(0.7)'
       }
     },
     {
@@ -51,7 +52,8 @@ export class ApplicationDeploySourceTypes {
       id: DEPLOY_TYPES_IDS.GIT_URL,
       helpText: 'Please enter the public git url and branch or tag you would like to deploy from.',
       graphic: {
-        location: '/core/assets/endpoint-icons/Git-logo.png'
+        location: '/core/assets/endpoint-icons/Git-logo.png',
+        transform: 'scale(0.7)'
       }
     },
     {
@@ -59,7 +61,8 @@ export class ApplicationDeploySourceTypes {
       id: DEPLOY_TYPES_IDS.DOCKER_IMG,
       helpText: 'Please specify an application name and the Docker image to be used (registry/org/image-name).',
       graphic: {
-        location: '/core/assets/endpoint-icons/docker.png'
+        location: '/core/assets/endpoint-icons/docker.png',
+        transform: 'scale(0.8)'
       },
       disabledText: 'The selected Cloud Foundry cannot deploy Docker images. Please check that the Diego Docker feature flag is enabled'
     },

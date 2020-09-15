@@ -5,7 +5,7 @@
       <mat-icon *ngIf="tile.graphic.matIcon; else imgIcon" class="tile-selector__icon"
         [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</mat-icon>
       <ng-template #imgIcon>
-        <img src="{{tile.graphic.location}}" />
+        <img src="{{tile.graphic.location}}" [style.transform]="tile.graphic.transform" />
       </ng-template>
     </div>
     <div class="tile-selector__content">
