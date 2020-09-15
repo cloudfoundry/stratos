@@ -1,5 +1,40 @@
 # Change Log
 
+## 4.1.0
+
+[Full Changelog](https://github.com/SUSE/stratos/compare/4.0.1...4.1.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Helm: Add support for JSON Schema when inputting values [\#447](https://github.com/SUSE/stratos/issues/447)
+- Helm: Improve chart values YAML editor [\#481](https://github.com/SUSE/stratos/issues/481)
+- Helm: Support helm upgrade of a workload [\#446](https://github.com/SUSE/stratos/issues/446)
+- Helm: Allow users to view and use repositories from Helm Hub [\#445](https://github.com/SUSE/stratos/issues/445)
+- Add support for API Keys [\#4504](https://github.com/cloudfoundry/stratos/issues/4504)
+- Workload List: Show Chart Version instead of Release Version [\#473](https://github.com/SUSE/stratos/issues/473)
+- Helm: Allow users to view revision history for a Helm Release [\#460](https://github.com/SUSE/stratos/issues/460)
+- Kubernetes Terminal: It can take a long time to get to the prompt with large helm repositories registered [\#452](https://github.com/SUSE/stratos/issues/452)
+- Show CaaSP Node version and whether updates are pending on the summary view [\#450](https://github.com/SUSE/stratos/issues/450)
+- Update SUSE login screen to latest EOS design [\#448](https://github.com/SUSE/stratos/issues/448)
+- Toggle live updates in workloads view [\#442](https://github.com/SUSE/stratos/issues/442)
+- Container List in Pods List Improvements [\#360](https://github.com/SUSE/stratos/issues/360)
+- Register Endpoint: Reduce size of cards [\#4568](https://github.com/cloudfoundry/stratos/issues/4568)
+- Metrics view: Add "The last day" to time range selector  [\#4516](https://github.com/cloudfoundry/stratos/issues/4516)
+
+
+**Fixes:**
+
+- Helm Install: Install button becomes enabled before namespace supplied [\#471](https://github.com/SUSE/stratos/issues/471)
+- Helm Chart: Charts view incorrectly shows development versions as the latest versions [\#455](https://github.com/SUSE/stratos/issues/455)
+- Sort endpoint table by type results in empty sort drop down in cf endpoints list [\#4565](https://github.com/cloudfoundry/stratos/issues/4565)
+- Endpoint unregister clears user sort & filter selection [\#4563](https://github.com/cloudfoundry/stratos/issues/4563)
+- Metrics: Metrics detail page can show two endpoint cards if URLs have trailing slash [\#4528](https://github.com/cloudfoundry/stratos/issues/4528)
+- Deploy from Gitlab: Repos in groups do not work [\#4153](https://github.com/cloudfoundry/stratos/issues/4153)
+- Deploy app from Github repo only shows branches from a-e in dropdown [\#3966](https://github.com/cloudfoundry/stratos/issues/3966)
+
+
 ## 4.0.1
 
 [Full Changelog](https://github.com/SUSE/stratos/compare/4.0.0...4.0.1)
