@@ -28,7 +28,17 @@
                 "input": "custom-src/frontend/assets/custom",
                 "output": "/core/assets/custom"
               },
-              "src/frontend/packages/core/favicon.ico"
+              "src/frontend/packages/core/favicon.ico",
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-monaco-editor/assets/monaco",
+                "output": "/core/assets/monaco"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@cfstratos/monaco-yaml/lib",
+                "output": "/core/assets/monaco/vs/language/yaml"
+              }
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",

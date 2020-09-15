@@ -39,7 +39,7 @@ export class ChartDetailsUsageComponent implements OnInit {
   }
 
   get installUrl(): string {
-    return `/monocular/install/${getMonocularEndpoint(this.route, this.chart)}/${this.chart.id}/${this.currentVersion}`;
+    return `/workloads/install/${getMonocularEndpoint(this.route, this.chart)}/${this.chart.id}/${this.currentVersion}`;
   }
 
 }

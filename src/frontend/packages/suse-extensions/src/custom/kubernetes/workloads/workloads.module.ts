@@ -1,10 +1,14 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { MonacoEditorModule, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { KubernetesModule } from '../kubernetes.module';
+import { ChartValuesEditorComponent } from './chart-values-editor/chart-values-editor.component';
+import { CreateReleaseComponent } from './create-release/create-release.component';
 import { HelmReleaseCardComponent } from './list-types/helm-release-card/helm-release-card.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
 import {
@@ -25,6 +29,12 @@ import { WorkloadsRouting } from './workloads.routing';
 import { HelmReleaseHistoryTabComponent } from './release/tabs/helm-release-history-tab/helm-release-history-tab.component';
 import { WorkloadLiveReloadComponent } from './release/workload-live-reload/workload-live-reload.component';
 
+// Default config for the Monaco edfior
+const monacoConfig: NgxMonacoEditorConfig = {
+  baseUrl: '/core/assets', // configure base path for monaco editor
+  defaultOptions: { scrollBeyondLastLine: false }
+};
+
 @NgModule({
   imports: [
     CoreModule,
@@ -34,6 +44,8 @@ import { WorkloadLiveReloadComponent } from './release/workload-live-reload/work
     WorkloadsRouting,
     NgxGraphModule,
     KubernetesModule,
+    MaterialDesignFrameworkModule,
+    MonacoEditorModule.forRoot(monacoConfig),
   ],
   declarations: [
     HelmReleasesTabComponent,
@@ -46,6 +58,8 @@ import { WorkloadLiveReloadComponent } from './release/workload-live-reload/work
     HelmReleaseResourceGraphComponent,
     HelmReleaseCardComponent,
     HelmReleaseAnalysisTabComponent,
+    ChartValuesEditorComponent,
+    CreateReleaseComponent,
     WorkloadLiveReloadComponent,
     UpgradeReleaseComponent,
     HelmReleaseHistoryTabComponent,

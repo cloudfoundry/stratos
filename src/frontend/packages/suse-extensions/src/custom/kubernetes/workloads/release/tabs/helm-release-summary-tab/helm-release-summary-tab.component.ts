@@ -122,6 +122,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
     this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map(v => v ? v.version : null));
 
+    // Can upgrade if the Chart is available
     this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map(v => !!v));
 
     this.resources$ = combineLatest(

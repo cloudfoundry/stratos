@@ -1,0 +1,18 @@
+:host {
+  flex: 1;
+}
+
+.helm-create-release {
+  &__heading {
+    align-items: center;
+    display: flex;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 14px;
+  }
+  &__button {
+    height: 36px;
+  }
+}

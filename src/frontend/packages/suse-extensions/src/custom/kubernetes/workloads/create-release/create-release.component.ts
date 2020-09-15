@@ -1,27 +1,26 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatTextareaAutosize } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
-import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { kubeEntityCatalog } from '../../kubernetes/kubernetes-entity-catalog';
-import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
-import { KubernetesNamespace } from '../../kubernetes/store/kube.types';
-import { getFirstChartUrl } from '../../kubernetes/workloads/workload.utils';
-import { helmEntityCatalog } from '../helm-entity-catalog';
-import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
-import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
-import { HelmInstallValues } from '../store/helm.types';
-import { ChartsService } from './../monocular/shared/services/charts.service';
-import { HelmChartReference } from './../store/helm.types';
+import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
+import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import {
+  StepOnNextFunction,
+  StepOnNextResult,
+} from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
+import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
+import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
+import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
+import { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.types';
+import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
+import { KubernetesNamespace } from '../../store/kube.types';
+import { getFirstChartUrl } from '../workload.utils';
+import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 
 @Component({
   selector: 'app-create-release',
@@ -33,13 +32,6 @@ import { HelmChartReference } from './../store/helm.types';
 })
 export class CreateReleaseComponent implements OnInit, OnDestroy {
 
-  // Confirmation dialog
-  overwriteValuesConfirmation = new ConfirmationDialogConfig(
-    'Overwrite Values?',
-    'Are you sure you want to replace your values with those from values.yaml?',
-    'Overwrite'
-  );
-
   // isLoading$ = observableOf(false);
   paginationStateSub: Subscription;
 
@@ -49,47 +41,33 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   details: FormGroup;
   namespaces$: Observable<string[]>;
-  overrides: FormGroup;
 
   private endpointChanged = new BehaviorSubject(null);
 
   @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
-  @ViewChild('overridesYamlTextArea', { static: true }) overridesYamlTextArea: ElementRef;
-  @ViewChild(MatTextareaAutosize, { static: false }) overridesYamlAutosize: MatTextareaAutosize;
-
-  public valuesYaml = '';
+  @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
 
   private subs: Subscription[] = [];
   private createdNamespace = false;
 
   private chart: HelmChartReference;
+  public config: ChartValuesConfig;
 
   constructor(
     private route: ActivatedRoute,
     public endpointsService: EndpointsService,
-    private httpClient: HttpClient,
-    private confirmDialog: ConfirmationDialogService,
     private chartsService: ChartsService,
   ) {
     const chart = this.route.snapshot.params as HelmChartReference;
     this.cancelUrl = `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo}/${chart.name}/${chart.version}`;
     this.chart = chart;
 
+    this.config = {
+      valuesUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.yaml`,
+      schemaUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.schema.json`,
+    }
+
     this.setupDetailsStep();
-
-    this.overrides = new FormGroup({
-      values: new FormControl('')
-    });
-
-    // Fetch the values.yaml for the Chart
-    const valuesYamlUrl = `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.yaml`;
-
-    this.httpClient.get(valuesYamlUrl, { responseType: 'text' })
-      .subscribe(response => {
-        this.valuesYaml = response;
-      }, err => {
-        console.error('Failed to fetch chart values: ', err.message || err);
-      });
   }
 
   private setupDetailsStep() {
@@ -186,21 +164,6 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     return lowerCase.length ? namespaces.filter(ns => ns.toLowerCase().indexOf(lowerCase) >= 0) : namespaces;
   }
 
-  public useValuesYaml() {
-    if (this.overrides.value.values.length !== 0) {
-      this.confirmDialog.open(this.overwriteValuesConfirmation, () => {
-        this.replaceWithValuesYaml();
-      });
-
-    } else {
-      this.replaceWithValuesYaml();
-    }
-  }
-
-  private replaceWithValuesYaml() {
-    this.overrides.controls.values.setValue(this.valuesYaml, { onlySelf: true });
-  }
-
   ngOnInit() {
     // Auto select endpoint if there is only one
     this.kubeEndpoints$.pipe(first()).subscribe(ep => {
@@ -214,11 +177,9 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Ensure the editor is resized when the overrides step becomes visible
   onEnterOverrides = () => {
-    setTimeout(() => {
-      // this.overridesYamlAutosize.resizeToFitContent(true);
-      this.overridesYamlTextArea.nativeElement.focus();
-    }, 1);
+    this.editor.resizeEditor();
   };
 
   submit: StepOnNextFunction = () => {
@@ -261,7 +222,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     // Build the request body
     const values: HelmInstallValues = {
       ...this.details.value,
-      ...this.overrides.value,
+      values: this.editor.getValues(),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,

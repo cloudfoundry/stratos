@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { StepComponent, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import {
+  StepComponent,
+  StepOnNextFunction,
+  StepOnNextResult,
+} from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
 import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
+import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
 import { getFirstChartUrl } from '../workload.utils';
@@ -34,11 +38,14 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
 })
 export class UpgradeReleaseComponent {
 
+  @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
+
   public cancelUrl;
   public listConfig: ReleaseUpgradeVersionsListConfig;
   public validate$: Observable<boolean>;
   private version: MonocularVersion;
-  public overrides: FormGroup;
+
+  public config: ChartValuesConfig;
 
   private monocularEndpointId: string;
 
@@ -51,11 +58,6 @@ export class UpgradeReleaseComponent {
   ) {
 
     this.cancelUrl = `/workloads/${this.helper.guid}`;
-
-    // Form for overrides step (Helm Values)
-    this.overrides = new FormGroup({
-      values: new FormControl('')
-    });
 
     this.helper.hasUpgrade(true).pipe(
       filter(c => !!c),
@@ -80,6 +82,32 @@ export class UpgradeReleaseComponent {
     });
   }
 
+  // Ensure the editor is resized when the overrides step becomes visible
+  onEnterOverrides = () => {
+    this.editor.resizeEditor();
+  }
+
+  // Update the editor with the chosen version when the user moves to the next step
+  onNext = (): Observable<StepOnNextResult> => {
+    const chart = this.version.relationships.chart.data;
+    const version = this.version.attributes.version;
+
+    // Fetch the release metadata so that we have the values used to install the current release
+    return this.helper.release$.pipe(
+      first(),
+      tap(release => {
+        this.config = {
+          schemaUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo.name}/${chart.name}/versions/${version}/values.schema.json`,
+          valuesUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo.name}/${chart.name}/versions/${version}/values.yaml`,
+          releaseValues: release.config
+        };
+      }),
+      map(() => {
+        return { success: true }
+      })
+    );
+  }
+
   // Hide/show the advanced options step
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
@@ -93,7 +121,7 @@ export class UpgradeReleaseComponent {
 
     // Add the chart url into the values
     const values: HelmUpgradeValues = {
-      values: this.overrides.controls.values.value,
+      values: this.editor.getValues(),
       restartPods: false,
       chart: {
         name: this.version.relationships.chart.data.name,

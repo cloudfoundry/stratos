@@ -6,6 +6,7 @@
 @import '../src/custom/helm/list-types/monocular-chart-card/monocular-chart-card.component.theme';
 @import '../src/custom/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.theme';
 @import '../src/custom/kubernetes/list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component.theme';
+@import '../src/custom/kubernetes/workloads/chart-values-editor/chart-values-editor.component.theme';
 
 @mixin apply-theme-suse-extensions($stratos-theme) {
 
@@ -18,5 +19,5 @@
   @include monocular-chart-card($theme, $app-theme);
   @include helm-release-summary-tab-theme($theme, $app-theme);
   @include kube-node-link-theme($theme, $app-theme);
-
+  @include app-chart-values-editor-theme($theme, $app-theme);
 }

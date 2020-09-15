@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
+import { CreateReleaseComponent } from './create-release/create-release.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
 import {
   HelmReleaseAnalysisTabComponent,
@@ -27,6 +28,8 @@ const routes: Routes = [
         component: HelmReleasesTabComponent,
         pathMatch: 'full',
       },
+      { pathMatch: 'full', path: 'install/:endpoint/:repo/:name/:version', component: CreateReleaseComponent },
+      { pathMatch: 'full', path: 'install/:endpoint/:repo/:name', component: CreateReleaseComponent },
       {
         // guid = kube endpoint
         path: ':guid/upgrade',

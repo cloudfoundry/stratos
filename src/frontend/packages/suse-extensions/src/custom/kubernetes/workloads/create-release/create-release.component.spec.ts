@@ -3,15 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TabNavService } from '../../../../../core/tab-nav.service';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { KubernetesBaseTestModules } from '../../kubernetes/kubernetes.testing.module';
-import { MockChartService } from '../monocular/shared/services/chart.service.mock';
-import { ChartsService } from '../monocular/shared/services/charts.service';
-import { ConfigService } from '../monocular/shared/services/config.service';
+import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+import { MockChartService } from '../../../helm/monocular/shared/services/chart.service.mock';
+import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
+import { ConfigService } from '../../../helm/monocular/shared/services/config.service';
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { CreateReleaseComponent } from './create-release.component';
 
 describe('CreateReleaseComponent', () => {
@@ -52,8 +52,6 @@ describe('CreateReleaseComponent', () => {
   });
 
   it('should be created', () => {
-    httpMock.expectOne('/pp/v1/chartsvc/v1/assets/undefined/undefined/versions/undefined/values.yaml');
-
     expect(component).toBeTruthy();
   });
 

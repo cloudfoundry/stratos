@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { MonocularChartViewComponent } from './chart-view/monocular.component';
-import { CreateReleaseComponent } from './create-release/create-release.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 
@@ -18,8 +17,6 @@ const monocular: Routes = [
   },
   { pathMatch: 'full', path: 'charts/:endpoint/:repo/:chartName/:version', component: MonocularChartViewComponent },
   { path: 'charts/:endpoint/:repo/:chartName', component: MonocularChartViewComponent },
-  { pathMatch: 'full', path: 'install/:endpoint/:repo/:name/:version', component: CreateReleaseComponent },
-  { path: 'install/:endpoint/:repo/:name', component: CreateReleaseComponent },
 ];
 
 @NgModule({

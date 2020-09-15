@@ -2,29 +2,11 @@
   Upgrade Workload
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step title="Version" [valid]="validate$ | async">
+  <app-step title="Version" [valid]="validate$ | async" [onNext]="onNext">
     <app-list class="workload-upgrade__list" *ngIf="listConfig" [listConfig]="listConfig"></app-list>
   </app-step>
-  <app-step title="Overrides" [onNext]="doUpgrade" finishButtonText="Upgrade">
-    <div class="workload-upgrade__form">
-    <form [formGroup]="overrides" class="stepper-form overrides_form">
-      <div class="workload-upgrade__heading">
-        <h3 class="workload-upgrade__title">Enter YAML Value Overrides</h3>
-        <!--
-        <button (click)="useValuesYaml()" [disabled]="!valuesYaml" class=""workload-upgrade__button" mat-button
-          color="primary">Copy from values.yaml</button>
-        -->
-      </div>
-      <mat-form-field [floatLabel]="'always'" class="overrides_form-field">
-        <mat-label>Values</mat-label>
-        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"
-          spellcheck="false"></textarea>
-      </mat-form-field>
-    </form>
-    <!--
-    <mat-slide-toggle (change)="toggleAdvancedOptions()">Show Advanced Options</mat-slide-toggle>
-    -->
-    </div>
+  <app-step title="Overrides" [onNext]="doUpgrade" finishButtonText="Upgrade" [onEnter]="onEnterOverrides">
+    <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
   </app-step>
 
   <!-- Add support for recreate pods and other advanced options in the future
@@ -32,6 +14,5 @@
     Advanced Options
   </app-step>
   -->
-
 
 </app-steppers>

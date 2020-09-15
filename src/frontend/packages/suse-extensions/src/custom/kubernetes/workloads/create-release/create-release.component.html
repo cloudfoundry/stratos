@@ -36,17 +36,6 @@
     </form>
   </app-step>
   <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
-    <form [formGroup]="overrides" class="stepper-form overrides_form">
-      <div class="helm-create-release__heading">
-        <h3 class="helm-create-release__title">Enter YAML Value Overrides</h3>
-        <button (click)="useValuesYaml()" [disabled]="!valuesYaml" class="helm-create-release__button" mat-button
-          color="primary">Copy from values.yaml</button>
-      </div>
-      <mat-form-field [floatLabel]="'always'" class="overrides_form-field">
-        <mat-label>Values</mat-label>
-        <textarea #overridesYamlTextArea class="overrides__yaml" matInput formControlName="values" name="Values"
-          spellcheck="false"></textarea>
-      </mat-form-field>
-    </form>
+    <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
   </app-step>
 </app-steppers>
