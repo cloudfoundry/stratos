@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, TestBed } from '@angular/core/testing';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { TabNavService } from 'frontend/packages/core/src/tab-nav.service';
 
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';

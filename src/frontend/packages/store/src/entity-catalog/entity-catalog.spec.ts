@@ -1,13 +1,10 @@
-import {
-  EndpointListDetailsComponent,
-} from '../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { EntitySchema } from '../helpers/entity-schema';
 import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
 
-fdescribe('EntityCatalogService', () => {
+describe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;
   function getEndpointDefinition() {
     return {
@@ -18,7 +15,7 @@ fdescribe('EntityCatalogService', () => {
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
       authTypes: [],
-      listDetailsComponent: EndpointListDetailsComponent,
+      listDetailsComponent: 'Test Component',
     } as IStratosEndpointDefinition;
   }
   function getDefaultSchema() {
@@ -136,7 +133,7 @@ fdescribe('EntityCatalogService', () => {
       ...subtypeDefinition,
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',
-      listDetailsComponent: EndpointListDetailsComponent,
+      listDetailsComponent: 'Test Component',
       schema: {
         default: stratosEntityFactory(endpointEntityType)
       },

@@ -2,7 +2,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
-import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubedashConfigurationComponent } from './kubedash-configuration.component';
 
@@ -13,7 +13,7 @@ describe('KubedashConfigurationComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [...KubernetesBaseTestModules],
-      declarations: [ KubedashConfigurationComponent ],
+      declarations: [KubedashConfigurationComponent],
       providers: [
         {
           provide: ActivatedRoute,
@@ -31,7 +31,7 @@ describe('KubedashConfigurationComponent', () => {
         HttpHandler,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

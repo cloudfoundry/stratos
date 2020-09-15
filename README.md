@@ -22,7 +22,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
 1. Guides for [developers](https://stratos.app/docs/developer/introduction).
 1. How to [extend](https://stratos.app/docs/extensions/introduction) Stratos [functionality](https://stratos.app/docs/extensions/frontend) and apply a custom [theme](https://stratos.app/docs/extensions/theming).
 
-> For more SUSE specific information, specifically regarding Stratos Kubernetes and Helm functionality, please see our `/docs` folder.
+> For more SUSE specific information, for example regarding Stratos Kubernetes and Helm functionality, please see our `/docs` folder.
 
 ## Acknowledgements
 

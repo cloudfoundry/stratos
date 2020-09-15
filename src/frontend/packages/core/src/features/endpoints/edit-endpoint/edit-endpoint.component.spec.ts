@@ -4,10 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { createBasicStoreModule } from '../../../../../store/testing/public-api';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { EditEndpointStepComponent } from './edit-endpoint-step/edit-endpoint-step.component';
 import { EditEndpointComponent } from './edit-endpoint.component';
 
@@ -36,7 +37,8 @@ describe('EditEndpointComponent', () => {
             }
           }
         },
-        TabNavService
+        TabNavService,
+        CurrentUserPermissionsService
       ]
     })
       .compileComponents();

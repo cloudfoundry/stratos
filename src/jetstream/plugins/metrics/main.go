@@ -388,7 +388,11 @@ func compareURL(a, b string) bool {
 
 	aPort := getPort(ua)
 	bPort := getPort(ub)
-	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && ua.Path == ub.Path
+
+	aPath := trimPath(ua.Path)
+	bPath := trimPath(ub.Path)
+
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && aPath == bPath
 }
 
 func getPort(u *url.URL) string {
@@ -405,6 +409,13 @@ func getPort(u *url.URL) string {
 	}
 
 	return port
+}
+
+func trimPath(path string) string {
+	if strings.HasSuffix(path, "/") {
+		return path[:len(path)-1]
+	}
+	return path
 }
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {

@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ComponentFactoryResolver, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { LoggerService } from 'frontend/packages/core/src/core/logger.service';
 import { ConfirmationDialogConfig } from 'frontend/packages/core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from 'frontend/packages/core/src/shared/components/confirmation-dialog.service';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
@@ -93,7 +92,6 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private httpClient: HttpClient,
-    private logService: LoggerService,
     private snackbarService: SnackBarService,
     public analyzerService: KubernetesAnalysisService,
     private previewPanel: SidePanelService,
@@ -221,7 +219,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         error: (err: any) => {
           this.endDelete();
           this.snackbarService.show('Failed to delete release', 'Close');
-          this.logService.error('Failed to delete release: ', err);
+          console.error('Failed to delete release: ', err);
         },
         complete: () => {
           const action = workloadsEntityCatalog.release.actions.getMultiple();

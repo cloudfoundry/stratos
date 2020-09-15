@@ -11,8 +11,8 @@ import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-ca
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthChecks } from '../../endpoints-health-checks';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
 

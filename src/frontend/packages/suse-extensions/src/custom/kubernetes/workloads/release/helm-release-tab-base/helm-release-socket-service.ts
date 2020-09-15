@@ -4,7 +4,6 @@ import { Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../../../../core/src/core/logger.service';
 import { SnackBarService } from '../../../../../../../core/src/shared/services/snackbar.service';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
@@ -37,7 +36,6 @@ export class HelmReleaseSocketService implements OnDestroy {
   constructor(
     private helmReleaseHelper: HelmReleaseHelperService,
     private store: Store<AppState>,
-    private logService: LoggerService,
     private snackbarService: SnackBarService,
   ) {
 
@@ -56,7 +54,7 @@ export class HelmReleaseSocketService implements OnDestroy {
     );
 
     const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
-      this.logService.error(
+      console.error(
         'Error while connecting to socket: ' + JSON.stringify(e)
       );
       return [];

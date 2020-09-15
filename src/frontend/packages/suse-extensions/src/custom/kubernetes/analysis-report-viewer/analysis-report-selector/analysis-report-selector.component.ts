@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
@@ -60,7 +60,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
           this.onSelected(reports[0]);
         }
       })
-    )
+    );
   }
 
 
@@ -75,13 +75,13 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   }
 
   public refreshReports($event: MouseEvent) {
-    this.analysisService.getByPath(this.endpoint, this.path, true)
+    this.analysisService.getByPath(this.endpoint, this.path, true);
     $event.preventDefault();
     $event.cancelBubble = true;
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(...this.subs)
+    safeUnsubscribe(...this.subs);
   }
 
 }

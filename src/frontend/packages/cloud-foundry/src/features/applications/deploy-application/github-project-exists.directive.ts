@@ -14,11 +14,9 @@ interface GithubProjectExistsResponse {
   githubProjectError: string;
 }
 
-/* tslint:disable:no-use-before-declare  */
 const GITHUB_PROJECT_EXISTS = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => GithubProjectExistsDirective), multi: true
 };
-/* tslint:enable */
 
 @Directive({
   selector: '[appGithubProjectExists][ngModel]',

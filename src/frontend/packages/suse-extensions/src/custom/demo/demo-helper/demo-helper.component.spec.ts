@@ -1,7 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { DemoHelperComponent } from './demo-helper.component';
 

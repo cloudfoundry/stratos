@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
-import * as markdown from 'marked';
+import markdown from 'marked';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 

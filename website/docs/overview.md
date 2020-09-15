@@ -12,7 +12,7 @@ Stratos stores endpoint metadata in a relational database. Administrators of Str
 
 The high-level architecture of Stratos is shown in the diagram below:
 
-![Stratos High-Level Architecture](../images/high-level-arch.png)
+![Stratos High-Level Architecture](/images/high-level-arch.png)
 
 The main components:
 

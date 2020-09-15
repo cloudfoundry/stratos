@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
-import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ChartListComponent } from '../chart-list/chart-list.component';
@@ -51,7 +50,6 @@ describe('ChartsComponent', () => {
           }
         },
         ReposService,
-        LoggerService
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

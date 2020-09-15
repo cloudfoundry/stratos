@@ -9,10 +9,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import {

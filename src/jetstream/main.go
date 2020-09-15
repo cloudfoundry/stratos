@@ -37,6 +37,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -178,6 +179,7 @@ func main() {
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
 	localusers.InitRepositoryProvider(dc.DatabaseProvider)
 	sessiondata.InitRepositoryProvider(dc.DatabaseProvider)
+	apikeys.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
 	databaseConnectionPool, migratorConf, err := initConnPool(dc, envLookup)
@@ -657,6 +659,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 
 	log.Infof("Session Cookie name: %s", cookieName)
 
+	// Setting default value for APIKeysEnabled
+	if pc.APIKeysEnabled == "" {
+		log.Debug(`APIKeysEnabled not set, setting to "admin_only"`)
+		pc.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
+	}
+
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
@@ -680,6 +688,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
 		Handler: pp.DoOidcFlowRequest,
 	})
+
+	var err error
+	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool)
+	if err != nil {
+		panic(fmt.Errorf("Can't initialize APIKeysRepository: %v", err))
+	}
 
 	return pp
 }
@@ -905,8 +919,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
-	sessionGroup.Use(p.sessionMiddleware)
-	sessionGroup.Use(p.xsrfMiddleware)
+	sessionGroup.Use(p.sessionMiddleware())
+	sessionGroup.Use(p.xsrfMiddleware())
+
+	sessionGroup.POST("/api_keys", p.addAPIKey)
+	sessionGroup.GET("/api_keys", p.listAPIKeys)
+	sessionGroup.DELETE("/api_keys", p.deleteAPIKey)
+
+	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
+
+	apiKeyGroup := pp.Group("/v1")
+	apiKeyGroup.Use(p.apiKeyMiddleware)
+	apiKeyGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
+	apiKeyGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
@@ -932,8 +957,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// CNSI operations
-	sessionGroup.GET("/cnsis", p.listCNSIs)
-	sessionGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
+	apiKeyGroup.GET("/cnsis", p.listCNSIs)
+	apiKeyGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
 
 	// Info
 	sessionGroup.GET("/info", p.info)

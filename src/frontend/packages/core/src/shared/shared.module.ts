@@ -57,6 +57,7 @@ import { TableCellStatusDirective } from './components/list/list-table/table-cel
 import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
+import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
@@ -319,6 +320,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     ListConfig,
     EndpointListHelper,
     EndpointsListConfigService,
+    ApiKeyListConfigService,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,

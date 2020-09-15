@@ -1,5 +1,5 @@
 import { Injectable, Type } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
@@ -230,7 +230,7 @@ export class MultiFilterManager<T> {
         if (options && options.length > 0) {
           this.selectItem(options[0].value);
         }
-      })
+      });
     }
   }
 

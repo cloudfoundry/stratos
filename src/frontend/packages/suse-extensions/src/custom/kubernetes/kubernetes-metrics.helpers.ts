@@ -1,5 +1,4 @@
-import { ValidatorFn } from '@angular/forms';
-import * as moment from 'moment';
+import moment from 'moment';
 
 
 export function formatCPUTime(value: string | number, debug = false): string {

@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { appReducers } from '../../../../../store/src/reducers.module';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
 import { PageHeaderModule } from './page-header.module';
@@ -28,7 +29,8 @@ describe('PageHeaderComponent', () => {
             }
           }
         },
-        TabNavService
+        TabNavService,
+        CurrentUserPermissionsService
       ],
       imports: [
         MDAppModule,

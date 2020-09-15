@@ -4,7 +4,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
-import { LoggerService } from '../../../../../../core/src/core/logger.service';
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
@@ -23,7 +22,6 @@ describe('Component: ChartItem', () => {
         HttpClient,
         ConfigService,
         ChartsService,
-        LoggerService,
         {
           provide: ActivatedRoute,
           useValue: {

@@ -10,7 +10,6 @@ import { IUserFavoritesGroups } from '../../../../../store/src/types/favorite-gr
 import { UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { LoggerService } from '../../../core/logger.service';
 
 @Component({
   selector: 'app-home-page',
@@ -27,7 +26,6 @@ export class HomePageComponent {
   constructor(
     endpointsService: EndpointsService,
     store: Store<AppState>,
-    logger: LoggerService,
     public userFavoriteManager: UserFavoriteManager
   ) {
     this.allEndpointIds$ = endpointsService.endpoints$.pipe(

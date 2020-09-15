@@ -1,7 +1,7 @@
 /* tslint:disable:max-line-length */
 import { TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 

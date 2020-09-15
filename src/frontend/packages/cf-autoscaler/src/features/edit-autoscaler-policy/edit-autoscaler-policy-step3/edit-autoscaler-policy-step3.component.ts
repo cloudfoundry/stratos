@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
@@ -12,11 +12,7 @@ import {
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import {
-  AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
-  AppAutoscalerPolicyLocal,
-} from '../../../store/app-autoscaler.types';
+import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {

@@ -5,13 +5,18 @@
   "scripts": {
     "start": "docusaurus start",
     "start-no-watch": "docusaurus start --no-open --poll",
-    "build": "docusaurus build",
+    "build": "npm run versions && docusaurus build",
     "swizzle": "docusaurus swizzle",
-    "deploy": "./deploy.sh"
+    "deploy": "./deploy.sh",
+    "version": "docusaurus docs:version",
+    "versions": "./build-versions.sh",
+    "add-version": "./add-version.sh",
+    "docusaurus": "docusaurus",
+    "serve": "docusaurus serve"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.0.0-alpha.58",
-    "@docusaurus/preset-classic": "^2.0.0-alpha.58",
+    "@docusaurus/core": "^2.0.0-alpha.59",
+    "@docusaurus/preset-classic": "^2.0.0-alpha.59",
     "clsx": "^1.1.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4"

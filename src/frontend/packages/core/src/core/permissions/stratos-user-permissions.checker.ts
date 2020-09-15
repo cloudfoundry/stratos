@@ -1,12 +1,15 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../../store/src/app-state';
+import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
 import {
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
   PermissionValues,
 } from '../../../../store/src/selectors/current-user-role.selectors';
+import { APIKeysEnabled } from '../../../../store/src/types/auth.types';
 import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
@@ -19,6 +22,10 @@ import {
 export enum StratosCurrentUserPermissions {
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password',
+  /**
+   * Does the user have permission to view/create/delete their own API Keys?
+   */
+  API_KEYS = 'api-keys'
 }
 
 export enum StratosPermissionStrings {
@@ -34,20 +41,28 @@ export enum StratosScopeStrings {
 
 export enum StratosPermissionTypes {
   STRATOS = 'internal',
-  STRATOS_SCOPE = 'internal-scope'
+  STRATOS_SCOPE = 'internal-scope',
+  API_KEY = 'api-key'
 }
 
 // For each set permissions are checked by permission types of ENDPOINT, ENDPOINT_SCOPE, STRATOS_SCOPE, FEATURE_FLAG or a random bag.
 // Every group result must be true in order for the permission to be true. A group result is true if all or some of it's permissions are
 // true (see `getCheckFromConfig`).
 export const stratosPermissionConfigs: IPermissionConfigs = {
-  [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(StratosPermissionTypes.STRATOS, StratosPermissionStrings.STRATOS_ADMIN),
-  [StratosCurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(StratosPermissionTypes.STRATOS_SCOPE, StratosScopeStrings.STRATOS_CHANGE_PASSWORD),
+  [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS,
+    StratosPermissionStrings.STRATOS_ADMIN
+  ),
+  [StratosCurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.STRATOS_CHANGE_PASSWORD
+  ),
+  [StratosCurrentUserPermissions.API_KEYS]: new PermissionConfig(StratosPermissionTypes.API_KEY, '')
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   constructor(private store: Store<GeneralEntityAppState>, ) {
-    super()
+    super();
   }
 
   getPermissionConfig(action: string) {
@@ -75,6 +90,8 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
         return this.getInternalCheck(permissionConfig.permission as StratosPermissionStrings);
       case (StratosPermissionTypes.STRATOS_SCOPE):
         return this.getInternalScopesCheck(permissionConfig.permission as StratosScopeStrings);
+      case (StratosPermissionTypes.API_KEY):
+        return this.apiKeyCheck();
     }
   }
 
@@ -95,6 +112,20 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     return this.check(StratosPermissionTypes.STRATOS_SCOPE, permission);
   }
 
+  private apiKeyCheck(): Observable<boolean> {
+    return this.store.select(selectSessionData()).pipe(
+      switchMap(sessionData => {
+        switch (sessionData.config.APIKeysEnabled) {
+          case APIKeysEnabled.ADMIN_ONLY:
+            return this.store.select(getCurrentUserStratosRole(StratosPermissionStrings.STRATOS_ADMIN));
+          case APIKeysEnabled.ALL_USERS:
+            return of(true);
+        }
+        return of(false);
+      })
+    );
+  }
+
   public getComplexCheck(
     permissionConfig: PermissionConfig[],
     ...args: any[]
@@ -108,7 +139,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
             checks: this.getInternalScopesChecks(configGroup),
           };
       }
-    })
+    });
     // Checker must handle all configs
     return res.every(check => !!check) ? res : null;
   }

@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { TabNavService } from 'frontend/packages/core/src/tab-nav.service';
 
 import { SidePanelService } from '../../../../../../../../core/src/shared/services/side-panel.service';
 import { HelmReleaseProviders, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';

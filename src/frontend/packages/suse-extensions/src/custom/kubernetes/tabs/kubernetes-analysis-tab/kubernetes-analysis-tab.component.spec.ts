@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { TabNavService } from 'frontend/packages/core/src/tab-nav.service';
 
 import { MDAppModule } from '../../../../../../core/src/public-api';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
@@ -15,7 +15,7 @@ describe('KubernetesAnalysisTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ KubernetesAnalysisTabComponent, AnalysisReportViewerComponent ],
+      declarations: [KubernetesAnalysisTabComponent, AnalysisReportViewerComponent],
       imports: [
         KubernetesBaseTestModules,
         MDAppModule
@@ -27,7 +27,7 @@ describe('KubernetesAnalysisTabComponent', () => {
         TabNavService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -1,13 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TabNavService } from 'frontend/packages/core/src/tab-nav.service';
 
-import { HelmReleaseAnalysisTabComponent } from './helm-release-analysis-tab.component';
-import { AnalysisReportSelectorComponent } from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
-import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
-import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
-import { HelmReleaseProviders } from '../../../../kubernetes.testing.module';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { HelmReleaseProviders, KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
+import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
+import {
+  AnalysisReportSelectorComponent,
+} from './../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { HelmReleaseAnalysisTabComponent } from './helm-release-analysis-tab.component';
 
 describe('HelmReleaseAnalysisTabComponent', () => {
   let component: HelmReleaseAnalysisTabComponent;
@@ -15,7 +16,7 @@ describe('HelmReleaseAnalysisTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HelmReleaseAnalysisTabComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
+      declarations: [HelmReleaseAnalysisTabComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
       imports: [
         KubernetesBaseTestModules,
       ],
@@ -27,7 +28,7 @@ describe('HelmReleaseAnalysisTabComponent', () => {
         TabNavService
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

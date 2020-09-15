@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { TabNavService } from 'frontend/packages/core/tab-nav.service';
+import { TabNavService } from 'frontend/packages/core/src/tab-nav.service';
 
 import { HelmReleaseProviders, KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { HelmReleaseValuesTabComponent } from './helm-release-values-tab.component';

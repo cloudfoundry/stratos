@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../../../../core/src/core/logger.service';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../stratos-monocular.helper';
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
@@ -21,7 +20,6 @@ export class ChartsService {
   constructor(
     private http: HttpClient,
     config: ConfigService,
-    private loggerService: LoggerService,
     private route: ActivatedRoute,
   ) {
     this.hostname = `${config.backendHostname}/chartsvc`;
@@ -204,9 +202,7 @@ export class ChartsService {
   private handleError(error: any) {
     const errMsg = (error.message) ? error.message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    if (!!this.loggerService) {
-      this.loggerService.error(errMsg);
-    }
+    console.error(errMsg);
     return throwError(errMsg);
   }
 

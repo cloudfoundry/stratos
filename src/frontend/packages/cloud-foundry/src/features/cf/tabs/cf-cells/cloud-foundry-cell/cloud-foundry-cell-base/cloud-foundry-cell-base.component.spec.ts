@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../../../core/src/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';

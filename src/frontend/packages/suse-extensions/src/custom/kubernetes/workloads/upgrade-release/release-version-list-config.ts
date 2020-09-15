@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 

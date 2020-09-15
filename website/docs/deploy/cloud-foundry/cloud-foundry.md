@@ -65,7 +65,7 @@ applications:
 
 This will set the the UAA client and UAA secret used to invite users for the default CF only.
 
-See the [invite users guide](../guides/admin/invite-user-guide) for more information about user invites in Stratos.
+See the [invite users guide](../../advanced/invite-user-guide) for more information about user invites in Stratos.
 
 #### Use of the Default Embedded SQLite Database
 
@@ -127,7 +127,7 @@ cf push console -o splatform/stratos:stable -m 128M -k 384M
 
 Alternatively cf push using a manifest
 
-- download [manifest-docker.yml](../../../manifest-docker.yml) or create your own manifest file:
+- download [manifest-docker.yml](https://raw.githubusercontent.com/cloudfoundry/stratos/master/manifest-docker.yml) or create your own manifest file:
     ```yaml
     applications:
     - name: console
@@ -147,7 +147,7 @@ Follow instructions [here](db-migration).
 
 ## Use SSO Login
 
-By default Stratos will present its own login UI and only supports username and password authentication with your UAA. You can configure Stratos to use UAA's login UI by specifying the  the `SSO_LOGIN` environment variable in the manifest, for example:
+By default Stratos will present its own login UI and only supports username and password authentication with your UAA. You can configure Stratos to use UAA's login UI by specifying the `SSO_LOGIN` environment variable in the manifest, for example:
 
 ```
 applications:

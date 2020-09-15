@@ -7,7 +7,7 @@ import {
   IListMultiFilterConfig,
   ListViewTypes,
 } from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import * as moment from 'moment';
+import moment from 'moment';
 import { of } from 'rxjs';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';

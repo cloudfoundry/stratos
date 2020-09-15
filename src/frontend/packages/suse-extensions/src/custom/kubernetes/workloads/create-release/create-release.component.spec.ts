@@ -4,7 +4,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TabNavService } from '../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -37,7 +37,7 @@ describe('CreateReleaseComponent', () => {
         ConfirmationDialogService,
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ConfigService, useValue: { appName: 'appName' } },
-    ]
+      ]
     })
       .compileComponents();
 

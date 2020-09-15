@@ -46,7 +46,7 @@ function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Acti
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.FAILURE)
       };
     case SESSION_VERIFIED:
-      const svAction = action as VerifiedSession
+      const svAction = action as VerifiedSession;
       return applyInternalScopes(state, svAction.sessionData.user);
   }
   return state;
@@ -59,7 +59,10 @@ export enum RolesRequestStateStage {
   OTHER
 }
 
-export function currentUserRolesRequestStateReducer(state: RolesRequestState = getDefaultRolesRequestState(), stage: RolesRequestStateStage) {
+export function currentUserRolesRequestStateReducer(
+  state: RolesRequestState = getDefaultRolesRequestState(),
+  stage: RolesRequestStateStage
+) {
   switch (stage) {
     case RolesRequestStateStage.START:
       return {

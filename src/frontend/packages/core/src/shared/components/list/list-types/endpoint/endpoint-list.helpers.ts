@@ -10,7 +10,6 @@ import { entityCatalog } from '../../../../../../../store/src/entity-catalog/ent
 import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { LoggerService } from '../../../../../core/logger.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import {
@@ -66,7 +65,6 @@ export class EndpointListHelper {
     private dialog: MatDialog,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
-    private log: LoggerService,
     private snackBarService: SnackBarService,
   ) { }
 
@@ -192,7 +190,7 @@ export class EndpointListHelper {
       endpointDetails: container
     };
     if (!component) {
-      this.log.warn(`Attempted to create a non-endpoint list details component "${listDetailsComponent}"`);
+      console.warn(`Attempted to create a non-endpoint list details component "${listDetailsComponent}"`);
       this.destroyEndpointDetails(refs);
     }
     return refs;

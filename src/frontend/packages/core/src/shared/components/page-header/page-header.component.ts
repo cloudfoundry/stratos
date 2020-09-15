@@ -2,7 +2,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -15,9 +15,11 @@ import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.sel
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { TabNavService } from '../../../../tab-nav.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
+import { TabNavService } from '../../../tab-nav.service';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
@@ -29,6 +31,7 @@ import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from '
   styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
+  public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
@@ -156,6 +159,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     eventService: GlobalEventService,
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
+    private cups: CurrentUserPermissionsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -185,6 +189,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.gravatarEnabled)
     );
+
+    this.canAPIKeys$ = this.cups.can(StratosCurrentUserPermissions.API_KEYS);
   }
 
   ngOnDestroy() {

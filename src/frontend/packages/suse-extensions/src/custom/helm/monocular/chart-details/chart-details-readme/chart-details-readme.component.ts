@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import * as markdown from 'marked';
+import markdown from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 

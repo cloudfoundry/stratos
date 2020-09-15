@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';

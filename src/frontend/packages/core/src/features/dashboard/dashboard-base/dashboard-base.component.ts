@@ -14,11 +14,11 @@ import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-ca
 import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { TabNavService } from '../../../../tab-nav.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { TabNavService } from '../../../tab-nav.service';
 import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { SideNavItem } from './../side-nav/side-nav.component';
@@ -36,8 +36,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean }>;
-  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object }>;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean; }>;
+  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object; }>;
   private dashboardState$: Observable<DashboardState>;
   public noMargin$: Observable<boolean>;
   private closeSub: Subscription;
