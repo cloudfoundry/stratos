@@ -36,7 +36,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
-    endpointsListConfigService: EndpointsListConfigService
+    endpointsListConfigService: EndpointsListConfigService,
   ) {
     this.columns = endpointsListConfigService.columns.filter(column => {
       return column.columnId !== 'type';
@@ -46,7 +46,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
       this,
       paginationMonitorFactory,
       entityMonitorFactory,
-      internalEventMonitorFactory);
+      internalEventMonitorFactory,
+    );
   }
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
