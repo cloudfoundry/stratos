@@ -1,15 +1,20 @@
 import { Component, Input } from '@angular/core';
+import {
+  IFavoritesMetaCardConfig,
+  IFavoriteEntity,
+  entityCatalog,
+  MenuItem,
+  ComponentEntityMonitorConfig,
+  StratosStatus,
+  stratosEntityFactory,
+  userFavouritesEntityType,
+  stratosEntityCatalog,
+  IFavoriteMetadata,
+  UserFavorite,
+} from '@stratosui/store';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
-import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { MenuItem } from '../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { isEndpointConnected } from '../../../features/endpoints/connect.service';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';

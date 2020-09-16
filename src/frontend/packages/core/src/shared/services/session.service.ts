@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { selectSessionData, GeneralEntityAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
-import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
 
 @Injectable()
 export class SessionService {

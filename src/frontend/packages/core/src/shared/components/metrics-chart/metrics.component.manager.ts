@@ -1,5 +1,6 @@
+import { IMetricsData, ChartSeries } from '@stratosui/store';
+
 import { MetricsConfig } from './metrics-chart.component';
-import { IMetricsData, ChartSeries } from '../../../../../store/src/types/base-metric.types';
 
 function dateLessThanUnix(date: Date, unix: number) {
   const unixDate = date.getTime() / 1000;

@@ -1,5 +1,4 @@
 import { InjectionToken } from '@angular/core';
-
 import { Title } from '@angular/platform-browser';
 
 export const APP_TITLE = new InjectionToken<string>('appTitle');

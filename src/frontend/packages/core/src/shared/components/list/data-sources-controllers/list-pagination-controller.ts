@@ -1,22 +1,23 @@
 import { NgZone } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
-import { tag } from 'rxjs-spy/operators';
-import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
-
-import { ListFilter, ListPagination, ListSort } from '../../../../../../store/src/actions/list.actions';
 import {
+  ListFilter,
+  ListPagination,
+  ListSort,
+  GeneralAppState,
+  defaultClientPaginationPageSize,
   AddParams,
   SetClientFilter,
   SetClientPage,
   SetClientPageSize,
   SetPage,
-} from '../../../../../../store/src/actions/pagination.actions';
-import { GeneralAppState } from '../../../../../../store/src/app-state';
-import {
-  defaultClientPaginationPageSize,
-} from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { PaginationClientFilter, PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
+  PaginationClientFilter,
+  PaginationEntityState,
+} from '@stratosui/store';
+import { asyncScheduler, BehaviorSubject, Observable } from 'rxjs';
+import { tag } from 'rxjs-spy/operators';
+import { bufferTime, distinctUntilChanged, filter, first, map, observeOn, tap } from 'rxjs/operators';
+
 import { enterZone, leaveZone } from '../../../../leaveEnterAngularZone';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource, ListPaginationMultiFilterChange } from './list-data-source-types';

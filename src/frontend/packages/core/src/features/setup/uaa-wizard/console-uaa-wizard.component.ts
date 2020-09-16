@@ -1,14 +1,17 @@
 import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import {
+  VerifySession,
+  SetupConsoleGetScopes,
+  SetupSaveConfig,
+  AuthState,
+  UAASetupState,
+  InternalAppState,
+} from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupConsoleGetScopes, SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
-import { InternalAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';

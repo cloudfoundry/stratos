@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { RouterNav, InternalAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { InternalAppState } from '../../../store/src/app-state';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap = {};

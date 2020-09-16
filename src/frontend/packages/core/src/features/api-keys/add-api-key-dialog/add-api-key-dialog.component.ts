@@ -1,14 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
-import { ApiKey } from '../../../../../store/src/apiKey.types';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { NormalizedResponse } from '../../../../../store/src/types/api.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 
 @Component({
