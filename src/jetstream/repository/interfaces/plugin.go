@@ -54,7 +54,6 @@ func AddPlugin(name string, depends []string, init PluginInit) {
 		Init:         init,
 	}
 
-	//func AddPlugin(pluginReg PluginRegistration) {
 	if PluginInits == nil {
 		PluginInits = make(map[string]PluginRegistration)
 	}
