@@ -13,8 +13,8 @@ resources:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-    # Match any Version 3 release (alpha, beta, rc) other than the actual release
-    tag_filter: "3*-*"
+    # Match any Version 4 release (alpha, beta, rc) other than the actual release
+    tag_filter: "4*-*"
 - name: helm-repo
   type: git
   source:
