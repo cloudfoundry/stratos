@@ -1,9 +1,6 @@
 package main
 
-// Note: The ordering is important here, so don't save in VSCode
-// otherwise the order will be swapped for alphabetical
-
-// These imports bring in the plugins
+// These imports bring in the default set of plugins
 
 import (
 	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/backup"
