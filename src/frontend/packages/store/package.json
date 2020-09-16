@@ -1,8 +1,11 @@
 {
   "name": "@stratosui/store",
   "version": "0.0.1",
+  "description": "Stratos Store",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/cloudfoundry/stratos",
   "peerDependencies": {
-    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
-    "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
+    "@angular/common": "^9.1.6",
+    "@angular/core": "^9.1.6"
   }
 }

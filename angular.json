@@ -228,6 +228,46 @@
         }
       }
     },
+    "extension": {
+      "root": "src/frontend/packages/extension",
+      "sourceRoot": "src/frontend/packages/extension/src",
+      "projectType": "library",
+      "prefix": "ext",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/extension/tsconfig.lib.json",
+            "project": "src/frontend/packages/extension/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "src/frontend/packages/extension/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/extension/src/test.ts",
+            "tsConfig": "src/frontend/packages/extension/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/extension/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
+            "tslintConfig": "src/frontend/packages/extension/tslint.json",
+            "files": [
+              "src/frontend/packages/extension/src/**/*.ts"
+            ]
+          }
+        }
+      }
+    },    
     "shared": {
       "root": "src/frontend/packages/shared",
       "sourceRoot": "src/frontend/packages/shared/src",
