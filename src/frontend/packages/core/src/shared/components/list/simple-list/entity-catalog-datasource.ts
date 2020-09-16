@@ -1,10 +1,6 @@
 import { Store } from '@ngrx/store';
+import { StratosBaseCatalogEntity, EntityPipelineEntity, UserFavorite } from '@stratosui/store';
 
-import {
-  StratosBaseCatalogEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EntityPipelineEntity } from '../../../../../../store/src/entity-request-pipeline/pipeline.types';
-import { UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
 import { ListDataSource } from '../data-sources-controllers/list-data-source';
 import { createTableColumnFavorite } from '../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ListConfig, ListViewTypes } from '../list.component.types';

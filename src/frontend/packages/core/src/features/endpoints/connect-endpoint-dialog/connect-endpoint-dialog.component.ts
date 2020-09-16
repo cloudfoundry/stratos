@@ -8,7 +8,6 @@ import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
-
 @Component({
   selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',

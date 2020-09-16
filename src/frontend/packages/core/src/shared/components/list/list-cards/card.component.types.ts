@@ -2,7 +2,6 @@ import { Type } from '@angular/core';
 
 import { CardCell } from '../list.types';
 
-
 export interface ICardMultiActionComponentList {
   [schemaKey: string]: Type<CardCell<any>>;
 }

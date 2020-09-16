@@ -2,18 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import {
+  InternalEventMonitorFactory,
+  EndpointModel,
+  getPreviousRoutingState,
+  StratosStatus,
+  endpointEntityType,
+  stratosEntityCatalog,
+  InternalEventState,
+  SendClearEndpointEventsAction,
+  AppState,
+} from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { first, map, withLatestFrom } from 'rxjs/operators';
 
-import { SendClearEndpointEventsAction } from '../../../../../store/src/actions/internal-events.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { InternalEventState } from '../../../../../store/src/types/internal-events.types';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({

@@ -1,17 +1,19 @@
 import { Store } from '@ngrx/store';
+import {
+  PaginationMonitorFactory,
+  GetAllEndpoints,
+  AppState,
+  InternalEventMonitorFactory,
+  EndpointModel,
+  PaginationEntityState,
+  CreatePagination,
+  endpointEntityType,
+  EntityMonitorFactory,
+  endpointEntitiesSelector,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
-import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
-import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { DataFunction, DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { RowsState } from '../../data-sources-controllers/list-data-source-types';

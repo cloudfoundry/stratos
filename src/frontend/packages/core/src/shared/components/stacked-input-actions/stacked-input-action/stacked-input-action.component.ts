@@ -86,7 +86,6 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     }
     this.textFormControl = new FormControl('', validators);
 
-
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({

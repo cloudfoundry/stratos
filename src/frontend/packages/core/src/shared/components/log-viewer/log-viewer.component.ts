@@ -25,7 +25,6 @@ import {
 
 import { AnsiColors } from './ansi-colors';
 
-
 interface LogStreamMessage {
   message: string;
   isError?: boolean;

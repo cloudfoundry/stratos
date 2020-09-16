@@ -7,7 +7,6 @@ import { AboutRoutingModule } from './about.routing';
 import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.component';
 import { EulaPageComponent } from './eula-page/eula-page.component';
 
-
 @NgModule({
   imports: [
     CoreModule,

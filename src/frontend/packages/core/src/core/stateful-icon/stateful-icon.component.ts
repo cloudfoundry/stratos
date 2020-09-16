@@ -1,6 +1,5 @@
 import { Component, Input, TemplateRef } from '@angular/core';
-
-import { StratosStatus } from '../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
 
 interface IconDefinition {
   icon: string;

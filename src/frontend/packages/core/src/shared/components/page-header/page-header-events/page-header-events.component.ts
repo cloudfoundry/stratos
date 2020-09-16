@@ -2,12 +2,11 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
-
 
 @Component({
   selector: 'app-page-header-events',

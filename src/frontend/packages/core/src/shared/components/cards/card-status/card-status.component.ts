@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { StratosStatus } from '@stratosui/store';
 import { Observable } from 'rxjs';
-
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
-
 
 export function determineCardStatus(value: number, limit: number): StratosStatus {
   if ((limit !== 0 && !limit) || limit === -1) {

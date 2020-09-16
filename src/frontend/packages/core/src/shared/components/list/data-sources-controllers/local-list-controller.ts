@@ -1,9 +1,8 @@
+import { LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
-import { LocalPaginationHelpers } from '../../../../../../store/src/helpers/local-list.helpers';
-import { PaginationEntityState } from '../../../../../../store/src/types/pagination.types';
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
 
