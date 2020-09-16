@@ -10,6 +10,7 @@ import { ConfirmationDialogService } from '../../../../../../core/src/shared/com
 import { ThemeService } from './../../../../../../store/src/theme.service';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
+import { mergeObjects } from './merge';
 
 
 export interface ChartValuesConfig {
@@ -21,7 +22,7 @@ export interface ChartValuesConfig {
   valuesUrl: string;
 
   // Values for the current release (optional)
-  releaseValues? : string
+  releaseValues?: string;
 }
 
 // Height of the toolbar that sits above the editor conmponent
@@ -107,7 +108,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private codeOnEnter: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', {read: ElementRef}) monacoEditor: ElementRef;
+  @ViewChild('monacoEditor', { read: ElementRef }) monacoEditor: ElementRef;
 
   @ViewChild('schemaForm') schemaForm: JsonSchemaFormComponent;
 
@@ -145,11 +146,11 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     private httpClient: HttpClient,
     private themeService: ThemeService,
     private confirmDialog: ConfirmationDialogService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens
-    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe(event  => this.resize());
+    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe(event => this.resize());
   }
 
   private init() {
@@ -231,7 +232,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       // Form -> Editor
       // Only copy if there is not an error - otherwise keep the invalid yaml from the editor that needs fixing
       if (!this.yamlError) {
-        this.code = this.getDiff(this.formData);
+        const codeYaml = yaml.safeLoad(this.code || '{}');
+        const data = mergeObjects(codeYaml, this.formData);
+        this.code = this.getDiff(data);
         this.codeOnEnter = this.code;
       }
 
@@ -242,20 +245,18 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       // Try and parse the YAML - if we can't this is an error, so we can't edit this back in the form
       try {
         if (this.codeOnEnter === this.code) {
-          return
+          // Code did not change
+          return;
         }
 
         // Parse as json
         const json = yaml.safeLoad(this.code || '{}');
         // Must be an object, otherwise it was not valid
-        if (typeof(json) !== 'object') {
+        if (typeof (json) !== 'object') {
           throw new Error('Invalid YAML');
         }
         this.yamlError = false;
-        const data = {
-          ...this.formData,
-          ...json
-        };
+        const data = mergeObjects(this.formData, json);
         this.initialFormData = data;
         this.formData = data;
       } catch (e) {
@@ -296,7 +297,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     this.model = {
       language: 'yaml',
       uri: this.getSchemaUri()
-     };
+    };
   }
 
   // Delayed resize of editor to fit
@@ -357,7 +358,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     });
   }
 
-  public getValues(): any {
+  public getValues(): object {
     return (this.mode === EditorMode.JSonSchemaForm) ? this.formData : yaml.safeLoad(this.code);
   }
 
@@ -402,10 +403,12 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     }
   }
 
-  // Reset the form values
+  // Reset the form values and the code
   clearFormValues() {
     this.confirmDialog.open(this.clearValuesConfirmation, () => {
       this.initialFormData = {};
+      this.code = '';
+      this.codeOnEnter = '';
     });
   }
 
@@ -422,6 +425,6 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     if (code.trim() === '{}') {
       code = '';
     }
-    return code
+    return code;
   }
 }

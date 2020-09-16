@@ -65,7 +65,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.config = {
       valuesUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.yaml`,
       schemaUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.schema.json`,
-    }
+    };
 
     this.setupDetailsStep();
   }
@@ -222,7 +222,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     // Build the request body
     const values: HelmInstallValues = {
       ...this.details.value,
-      values: this.editor.getValues(),
+      values: JSON.stringify(this.editor.getValues()),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,
@@ -257,7 +257,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
             },
             message: !result.error ? '' : result.message
           }))
-        )
+        );
       })
     );
   }

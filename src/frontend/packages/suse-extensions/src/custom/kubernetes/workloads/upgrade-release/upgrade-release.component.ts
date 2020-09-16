@@ -85,7 +85,7 @@ export class UpgradeReleaseComponent {
   // Ensure the editor is resized when the overrides step becomes visible
   onEnterOverrides = () => {
     this.editor.resizeEditor();
-  }
+  };
 
   // Update the editor with the chosen version when the user moves to the next step
   onNext = (): Observable<StepOnNextResult> => {
@@ -103,10 +103,10 @@ export class UpgradeReleaseComponent {
         };
       }),
       map(() => {
-        return { success: true }
+        return { success: true };
       })
     );
-  }
+  };
 
   // Hide/show the advanced options step
   toggleAdvancedOptions() {
@@ -121,7 +121,7 @@ export class UpgradeReleaseComponent {
 
     // Add the chart url into the values
     const values: HelmUpgradeValues = {
-      values: this.editor.getValues(),
+      values: JSON.stringify(this.editor.getValues()),
       restartPods: false,
       chart: {
         name: this.version.relationships.chart.data.name,
