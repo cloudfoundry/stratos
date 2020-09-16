@@ -39,7 +39,7 @@ export class StratosConfig implements Logger {
 
   private loggingEnabled = true;
 
-  private packages: Packages;
+  public packages: Packages;
 
   constructor(dir: string, options?: any, loggingEnabled = true) {
     this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
@@ -169,6 +169,22 @@ export class StratosConfig implements Logger {
     });
 
     return assets;
+  }
+
+  public getBackendPlugins(): string[] {
+    const plugins = {};
+    this.packages.packages.forEach(pkg => {
+      pkg.backendPlugins.forEach(name => {
+        plugins[name] = true;
+      });
+    });
+
+    if (this.stratosConfig.backend) {
+      this.stratosConfig.backend.forEach(name => {
+        plugins[name] = true;
+      });
+    }
+    return Object.keys(plugins);
   }
 
   public getThemedPackages(): ThemingMetadata[] {

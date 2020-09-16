@@ -17,6 +17,7 @@ export interface PackageInfo {
   theme: boolean;
   theming?: ThemingMetadata;
   assets: AssetMetadata[];
+  backendPlugins: string[];
 }
 
 // Basic info for the package.json file that we need
@@ -34,6 +35,7 @@ export interface StratosPakageMetadata {
   theme?: boolean;
   theming?: string;
   assets?: { [src: string]: string };
+  backend: string[];
 }
 
 // Theming metadata
@@ -242,7 +244,8 @@ export class Packages {
       ignore: pkg.stratos ? pkg.stratos.ignore || false : false,
       theme: pkg.stratos && pkg.stratos.theme,
       theming: this.getThemingConfig(pkg, folder),
-      assets: this.getAssets(pkg, folder)
+      assets: this.getAssets(pkg, folder),
+      backendPlugins: pkg.stratos ? pkg.stratos.backend || [] : [],
     };
 
     // If this is an extension, add extension metadata

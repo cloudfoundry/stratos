@@ -1,5 +1,7 @@
 // Copy files required for developer quick start
 // Implemented as a single script here so that it works on Windows, Linux and Mac
+import './dist-devkit/backend.js';
+
 
 const path = require('path');
 const fs = require('fs');

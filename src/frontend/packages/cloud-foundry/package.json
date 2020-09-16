@@ -8,6 +8,7 @@
   "stratos": {
     "module": "CloudFoundryPackageModule",
     "routingModule": "CloudFoundryRoutingModule",
-    "theming": "sass/_all-theme#apply-theme-stratos-cloud-foundry"
+    "theming": "sass/_all-theme#apply-theme-stratos-cloud-foundry",
+    "backend": [ "cloudfoundry", "cfapppush", "cfappssh" ]
   }
 }

@@ -30,6 +30,11 @@ const (
 	defaultSessionSecret           = "wheeee!"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cloudfoundryhosting", []string{"cloudfoundry"}, Init)
+}
+
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
 	portalProxy  interfaces.PortalProxy

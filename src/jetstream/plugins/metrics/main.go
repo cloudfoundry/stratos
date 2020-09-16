@@ -16,6 +16,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("metrics", nil, Init)
+}
+
 // MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
 	portalProxy  interfaces.PortalProxy
