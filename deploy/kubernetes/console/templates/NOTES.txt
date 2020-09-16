@@ -9,14 +9,14 @@ From outside the cluster, the server URL is: http://{{ .Values.console.ingress.h
 {{- else }}
 Get the URL by running these commands in the same shell:
 {{- if contains "NodePort" .Values.console.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services console-ui-ext)
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ .Release.Name }}-ui-ext)
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo https://$NODE_IP:$NODE_PORT
 {{- else if contains "LoadBalancer" .Values.console.service.type }}
   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w console-ui-ext'
+        You can watch the status of by running 'kubectl get svc --namespace {{ .Release.Namespace }} -w {{ .Release.Name }}-ui-ext'
 
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} console-ui-ext -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ .Release.Name }}-ui-ext -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo http://$SERVICE_IP:{{ .Values.console.service.servicePort }}
 {{- else if contains "ClusterIP"  .Values.console.service.type }}
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app=stratos-0,component=ui" -o jsonpath="{.items[0].metadata.name}")
