@@ -227,6 +227,8 @@ func (m *Monocular) translateToChart(record *store.ChartStoreRecord, chartYaml *
 
 	if chartYaml != nil {
 		chart.Keywords = chartYaml.Keywords
+		// Prefer the Chart Yaml description if we have it (db one might be truncated)
+		chart.Description = chartYaml.Description
 		chart.Maintainers = make([]ChartMaintainer, len(chartYaml.Maintainers))
 		for index, maintainer := range chartYaml.Maintainers {
 			chart.Maintainers[index] = *maintainer

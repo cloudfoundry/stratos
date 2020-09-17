@@ -50,6 +50,10 @@ func NewHelmChartDBStore(dcp *sql.DB) (ChartStore, error) {
 	return &HelmChartDBStore{db: dcp}, nil
 }
 
+func truncate(in string) string {
+	return fmt.Sprintf("%.255s", in)
+}
+
 // Save a Helm Chart to the database
 func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 
@@ -67,11 +71,11 @@ func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 
 	if err == nil {
 		// The record already exists, so update it
-		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, chart.Description, chart.IconURL, chart.ChartURL, sourceURL, chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
+		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, truncate(chart.Description), truncate(chart.IconURL), truncate(chart.ChartURL), truncate(sourceURL), chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
 	}
 
-	if _, err := p.db.Exec(saveChartVersion, chart.EndpointID, chart.Name, chart.Repository, chart.Version, chart.Created, chart.AppVersion, chart.Description, chart.IconURL, chart.ChartURL, sourceURL, chart.Digest, chart.IsLatest, batchID); err != nil {
+	if _, err := p.db.Exec(saveChartVersion, chart.EndpointID, chart.Name, chart.Repository, chart.Version, chart.Created, chart.AppVersion, truncate(chart.Description), truncate(chart.IconURL), truncate(chart.ChartURL), truncate(sourceURL), chart.Digest, chart.IsLatest, batchID); err != nil {
 		return fmt.Errorf("Unable to save Helm Chart Version: %v", err)
 	}
 	return nil
