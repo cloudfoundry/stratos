@@ -111,6 +111,7 @@ const autoscalerSuite = globby.sync([
 
 const cfSummaryAndBelow = globby.sync([
   './src/test-e2e/cloud-foundry/**/*-e2e.spec.ts',
+  ...manageUsersSuite.map(file => '!' + file),
 ]);
 
 const fullMinusOtherSuites = globby.sync([
