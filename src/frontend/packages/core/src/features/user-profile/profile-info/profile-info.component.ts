@@ -1,16 +1,19 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  ThemeService,
+  SetGravatarEnabledAction,
+  SetPollingEnabledAction,
+  SetSessionTimeoutAction,
+  DashboardOnlyAppState,
+  selectDashboardState,
+  UserProfileInfo,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { SetPollingEnabledAction, SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
-import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { ThemeService } from '../../../../../store/src/theme.service';
-import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
-import { SetGravatarEnabledAction } from './../../../../../store/src/actions/dashboard-actions';
 
 @Component({
   selector: 'app-profile-info',

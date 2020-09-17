@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  IStratosEndpointDefinition,
+  RouterNav,
+  GeneralEntityAppState,
+  entityCatalog,
+  selectSessionData,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { IStratosEndpointDefinition } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';

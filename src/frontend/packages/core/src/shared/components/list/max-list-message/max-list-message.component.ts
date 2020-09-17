@@ -1,18 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import {
-  PaginationPageIteratorConfig,
-} from '../../../../../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { NoContentMessageLine } from '../../no-content-message/no-content-message.component';
 import { ITableTextMaxed } from '../list-table/table.types';
-
 
 @Component({
   selector: 'app-max-list-message',

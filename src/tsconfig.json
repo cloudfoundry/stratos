@@ -33,7 +33,9 @@
     "preserveSymlinks": true,
     "paths": {
       "@stratosui/core": ["frontend/packages/core/src/public-api.ts"],
+      "@stratosui/extension": ["frontend/packages/extension/src/public-api.ts"],
       "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
+      "@stratosui/shared": ["frontend/packages/shared/src/public-api.ts"],
       "@stratosui/store/testing": ["frontend/packages/store/testing/public-api.ts"],
       "@stratosui/cloud-foundry": ["frontend/packages/cloud-foundry/src/public_api.ts"],
       "@stratosui/cf-autoscaler": ["frontend/packages/cf-autoscaler/src/public_api.ts"],

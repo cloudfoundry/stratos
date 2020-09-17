@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import moment from 'moment';
+import { MetricQueryType, MetricQueryConfig, MetricsAction, IMetrics } from '@stratosui/store';
 
-import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types';
+
+import moment from 'moment';
 
 @Injectable()
 export class MetricsRangeSelectorService {

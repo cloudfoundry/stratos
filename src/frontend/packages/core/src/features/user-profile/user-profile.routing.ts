@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ProfileInfoComponent } from './profile-info/profile-info.component';
+
 import { EditProfileInfoComponent } from './edit-profile-info/edit-profile-info.component';
+import { ProfileInfoComponent } from './profile-info/profile-info.component';
 
 const userProfile: Routes = [{
   path: '',

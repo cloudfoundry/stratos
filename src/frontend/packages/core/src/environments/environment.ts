@@ -1,4 +1,4 @@
-import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
+import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
 
 // The file contents for the current environment will overwrite these during build.
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
+import { ThemeService } from '@stratosui/store';
 
-import { ThemeService } from '../../../../store/src/theme.service';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { DomainMismatchComponent } from './domain-mismatch/domain-mismatch.component';
@@ -8,7 +8,6 @@ import { LocalAccountWizardComponent } from './local-account-wizard/local-accoun
 import { SetupWelcomeComponent } from './setup-welcome/setup-welcome.component';
 import { ConsoleUaaWizardComponent } from './uaa-wizard/console-uaa-wizard.component';
 import { UpgradePageComponent } from './upgrade-page/upgrade-page.component';
-
 
 @NgModule({
   imports: [

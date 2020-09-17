@@ -1,15 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 import { delay, first, map, take, tap } from 'rxjs/operators';
 
-import { UserProfileInfo, UserProfileInfoUpdates } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
-
 
 @Component({
   selector: 'app-edit-profile-info',
@@ -50,7 +49,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   private lastHavePassword = false;
 
   private emailAddress: string;
-
 
   // Only allow password change if user has the 'password.write' group
   public canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);

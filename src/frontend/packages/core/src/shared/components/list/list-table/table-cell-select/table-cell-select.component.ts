@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list.types';
 
-
 @Component({
   selector: 'app-table-cell-select',
   templateUrl: './table-cell-select.component.html',

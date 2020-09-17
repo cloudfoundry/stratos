@@ -1,17 +1,15 @@
 import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
 
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { ApiKey } from '../../../../../../../store/src/apiKey.types';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
+
+import moment from 'moment';
 
 @Injectable()
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
@@ -36,7 +34,6 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     description: 'Delete API Key',
   }
   private singleActions: IListAction<ApiKey>[] = [this.deleteAction];
-
 
   public readonly columns: ITableColumn<ApiKey>[] = [
     {

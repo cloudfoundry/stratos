@@ -2,6 +2,22 @@ import { DataSource } from '@angular/cdk/table';
 import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
+  entityCatalog,
+  EntitySchema,
+  ListFilter,
+  ListSort,
+  MetricsAction,
+  AppState,
+  LocalPaginationHelpers,
+  PaginationMonitor,
+  getPaginationObservables,
+  PaginatedAction,
+  PaginationEntityState,
+  PaginationParam,
+  IgnorePaginationMaxedState,
+  SetResultCount,
+} from '@stratosui/store';
+import {
   BehaviorSubject,
   combineLatest,
   Observable,
@@ -25,16 +41,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
-import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
-import { IgnorePaginationMaxedState, SetResultCount } from '../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
-import { LocalPaginationHelpers } from '../../../../../../store/src/helpers/local-list.helpers';
-import { PaginationMonitor } from '../../../../../../store/src/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { IListDataSourceConfig, MultiActionConfig } from './list-data-source-config';
 import {
   EntitySelectConfig,
@@ -198,7 +204,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     );
 
     this.pagination$ = pagination$;
-
 
     this.sort$ = this.createSortObservable();
 

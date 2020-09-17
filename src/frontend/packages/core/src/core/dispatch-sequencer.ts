@@ -1,9 +1,7 @@
 import { Action, Store } from '@ngrx/store';
+import { GeneralEntityAppState } from '@stratosui/store';
 import { from, Observable, of as observableOf } from 'rxjs';
 import { bufferTime, concatMap, delay, filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../store/src/app-state';
-
 
 export interface DispatchSequencerAction {
   id: string;

@@ -3,11 +3,9 @@ import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
+import { EntityCatalogHelper, appReducers, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { appReducers } from '../../store/src/reducers.module';
 import { CoreModule } from '../src/core/core.module';
 import { CurrentUserPermissionsService } from '../src/core/permissions/current-user-permissions.service';
 import {
@@ -33,7 +31,6 @@ import {
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 import { SharedModule } from '../src/shared/shared.module';
 import { CoreTestingModule } from './core-test.modules';
-
 
 @NgModule({
   imports: [CoreModule],

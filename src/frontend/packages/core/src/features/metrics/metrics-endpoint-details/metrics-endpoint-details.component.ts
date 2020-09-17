@@ -1,15 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
 
-import { MetricsStratosAction } from '../../../../../store/src/actions/metrics-api.actions';
-import { AppState } from '../../../../../store/src/app-state';
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
-import { EndpointModel } from './../../../../../store/src/types/endpoint.types';
-
 
 interface MetricsDetailsInfo {
   ok: number;

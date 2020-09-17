@@ -293,7 +293,6 @@ export const arraysEqual = (a: any[], b: any[]): boolean => {
   return false;
 };
 
-
 /* tslint:disable:no-bitwise  */
 export const createGuid = (): string => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {

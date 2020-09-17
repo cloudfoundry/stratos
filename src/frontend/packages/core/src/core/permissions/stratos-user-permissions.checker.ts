@@ -1,15 +1,15 @@
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../store/src/app-state';
-import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
 import {
+  selectSessionData,
+  APIKeysEnabled,
+  GeneralEntityAppState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
   PermissionValues,
-} from '../../../../store/src/selectors/current-user-role.selectors';
-import { APIKeysEnabled } from '../../../../store/src/types/auth.types';
+} from '@stratosui/store';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+
 import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
@@ -17,7 +17,6 @@ import {
   ICurrentUserPermissionsChecker,
   IPermissionCheckCombiner,
 } from './current-user-permissions.types';
-
 
 export enum StratosCurrentUserPermissions {
   ENDPOINT_REGISTER = 'register.endpoint',
@@ -32,7 +31,6 @@ export enum StratosPermissionStrings {
   _GLOBAL_ = 'global',
   STRATOS_ADMIN = 'isAdmin'
 }
-
 
 export enum StratosScopeStrings {
   STRATOS_CHANGE_PASSWORD = 'password.write',

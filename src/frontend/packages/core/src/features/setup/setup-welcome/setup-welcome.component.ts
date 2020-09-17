@@ -1,11 +1,10 @@
-import { APP_TITLE } from './../../../core/core.types';
 import { Component, Inject } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
+import { APP_TITLE } from './../../../core/core.types';
 
 @Component({
   selector: 'app-setup-welcome',
@@ -46,6 +45,5 @@ export class SetupWelcomeComponent {
       }));
     }
   }
-
 
 }

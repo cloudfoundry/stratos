@@ -47,7 +47,6 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
 
-
   @ViewChild('inputs', { read: ViewContainerRef, static: true })
   inputs: ViewContainerRef;
 

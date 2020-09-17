@@ -1,10 +1,8 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { RouterNav, AppState, StratosStatus } from '@stratosui/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../store/src/app-state';
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { UtilsService } from '../../../../core/utils.service';
 import { determineCardStatus } from '../card-status/card-status.component';
 

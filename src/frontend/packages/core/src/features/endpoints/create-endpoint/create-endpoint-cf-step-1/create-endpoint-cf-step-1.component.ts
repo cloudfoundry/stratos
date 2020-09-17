@@ -1,16 +1,16 @@
 import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import {
+  ActionState,
+  stratosEntityCatalog,
+  entityCatalog,
+  StratosCatalogEndpointEntity,
+  getFullEndpointApiUrl,
+} from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import {
-  StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
@@ -109,7 +109,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       })
     );
   }
-
 
   ngAfterContentInit() {
     this.validate = this.form.statusChanges.pipe(

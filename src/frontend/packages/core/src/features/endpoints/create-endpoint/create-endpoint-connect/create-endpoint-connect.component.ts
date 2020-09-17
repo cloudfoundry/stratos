@@ -8,7 +8,6 @@ import { IStepperStep, StepOnNextResult } from '../../../../shared/components/st
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
 
-
 @Component({
   selector: 'app-create-endpoint-connect',
   templateUrl: './create-endpoint-connect.component.html',
