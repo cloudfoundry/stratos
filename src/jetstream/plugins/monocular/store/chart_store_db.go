@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,7 +22,7 @@ var (
 	getChartVersion    = `SELECT endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest FROM helm_charts WHERE repo_name = $1 AND name = $2 AND version = $3`
 	getChartVersions   = `SELECT endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest FROM helm_charts WHERE repo_name = $1 AND name = $2`
 	getEndpointIDs     = `SELECT DISTINCT endpoint FROM helm_charts`
-	updateChartDigest  = `UPDATE helm_charts SET is_latest=$1, update_batch=$2 WHERE endpoint=$3 AND name=$4 AND repo_name=$5 AND version=$6`
+	updateChartDigest  = `UPDATE helm_charts SET created=$1, is_latest=$2, update_batch=$3 WHERE endpoint=$4 AND name=$5 AND repo_name=$6 AND version=$7`
 )
 
 // InitRepositoryProvider - One time init for the given DB Provider
@@ -65,11 +66,13 @@ func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 	// Get the existing record - if it has the same digest, then no need to store it
 	record, err := p.GetChart(chart.Repository, chart.Name, chart.Version)
 	if err == nil && record.Digest == chart.Digest {
-		_, err := p.db.Exec(updateChartDigest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
+		log.Debugf("Chart already exists %s/%s-%s with digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
+		_, err := p.db.Exec(updateChartDigest, chart.Created, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
 	}
 
 	if err == nil {
+		log.Debugf("Chart already exists %s/%s-%s with different digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
 		// The record already exists, so update it
 		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, truncate(chart.Description), truncate(chart.IconURL), truncate(chart.ChartURL), truncate(sourceURL), chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
