@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HelmBaseTestModules } from '../../helm-testing.module';
+import { MockChartService } from '../../monocular/shared/services/chart.service.mock';
+import { ChartsService } from '../../monocular/shared/services/charts.service';
 import { CatalogTabComponent } from './catalog-tab.component';
 
 describe('CatalogTabComponent', () => {
@@ -12,7 +14,8 @@ describe('CatalogTabComponent', () => {
       imports: [
         ...HelmBaseTestModules
       ],
-      declarations: [CatalogTabComponent]
+      declarations: [CatalogTabComponent],
+      providers: [{ provide: ChartsService, useValue: new MockChartService() },]
     })
       .compileComponents();
   }));

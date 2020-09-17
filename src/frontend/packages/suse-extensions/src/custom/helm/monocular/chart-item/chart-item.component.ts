@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 
 import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
-import { getMonocularEndpoint } from '../stratos-monocular.helper';
 
 @Component({
   selector: 'app-chart-item',
@@ -27,11 +26,7 @@ export class ChartItemComponent implements OnInit {
   }
 
   goToDetailUrl(): string {
-    return `/monocular/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}/${this.chart.attributes
-      .name}`;
+    return this.chartsService.getChartSummaryRoute(this.chart.attributes.repo.name, this.chart.attributes.name, null, null, this.chart);
   }
 
-  goToRepoUrl(): string {
-    return `/monocular/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}`;
-  }
 }

@@ -59,7 +59,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     private chartsService: ChartsService,
   ) {
     const chart = this.route.snapshot.params as HelmChartReference;
-    this.cancelUrl = `/monocular/charts/${getMonocularEndpoint(this.route)}/${chart.repo}/${chart.name}/${chart.version}`;
+    this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
 
     this.config = {

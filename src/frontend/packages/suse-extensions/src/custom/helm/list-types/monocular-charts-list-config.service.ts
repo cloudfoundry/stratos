@@ -15,6 +15,7 @@ import { ListView } from '../../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
 import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
+import { ChartsService } from '../monocular/shared/services/charts.service';
 import { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
 import { MonocularChartsDataSource } from './monocular-charts-data-source';
@@ -29,7 +30,14 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     {
       columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => row.name,
+        getValue: row => row.name,
+        getLink: row => this.chartsService.getChartSummaryRoute(
+          row.attributes.repo.name,
+          row.name,
+          null,
+          null,
+          row
+        ),
       },
       sort: {
         type: 'sort',
@@ -81,6 +89,7 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     store: Store<AppState>,
     private endpointsService: EndpointsService,
     private route: ActivatedRoute,
+    private chartsService: ChartsService
   ) {
 
     this.initialised = endpointsService.endpoints$.pipe(

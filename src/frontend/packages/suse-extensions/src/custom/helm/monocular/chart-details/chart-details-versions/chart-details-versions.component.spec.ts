@@ -2,9 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { PanelComponent } from '../../panel/panel.component';
+import { MockChartService } from '../../shared/services/chart.service.mock';
+import { ChartsService } from '../../shared/services/charts.service';
 import { ChartDetailsVersionsComponent } from './chart-details-versions.component';
 
-/* tslint:disable:no-unused-variable */
 describe('ChartDetailsVersionsComponent', () => {
   let component: ChartDetailsVersionsComponent;
   let fixture: ComponentFixture<ChartDetailsVersionsComponent>;
@@ -12,7 +13,8 @@ describe('ChartDetailsVersionsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ChartDetailsVersionsComponent, PanelComponent],
-      imports: [RouterTestingModule]
+      imports: [RouterTestingModule],
+      providers: [{ provide: ChartsService, useValue: new MockChartService() },]
     })
       .compileComponents();
   }));

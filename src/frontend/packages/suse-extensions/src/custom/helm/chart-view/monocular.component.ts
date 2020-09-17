@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { ChartsService } from '../monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
-import { getMonocularEndpoint } from '../monocular/stratos-monocular.helper';
 
 
 @Component({
@@ -19,7 +19,10 @@ export class MonocularChartViewComponent implements OnInit {
 
   public title = '';
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(
+    private route: ActivatedRoute,
+    private chartService: ChartsService
+  ) { }
 
   public ngOnInit() {
 
@@ -34,7 +37,7 @@ export class MonocularChartViewComponent implements OnInit {
 
     if (!!parts.version) {
       breadcrumbs.push(
-        { value: this.title, routerLink: `/monocular/charts/${getMonocularEndpoint(this.route)}/${parts.repo}/${parts.chartName}` }
+        { value: this.title, routerLink: this.chartService.getChartSummaryRoute(parts.repo, parts.chartName, null, this.route) }
       );
       this.title = parts.version;
     }

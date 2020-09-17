@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, first, map } from 'rxjs/operators';
 
 import { IListAction } from '../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../store/src/app-state';
@@ -10,6 +10,7 @@ import {
   StratosCatalogEntity,
 } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata } from '../../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
@@ -57,7 +58,16 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         authTypes: [],
         endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
           return [{
-            action: (item: EndpointModel) => helmEntityCatalog.chart.api.synchronise(item),
+            action: (item: EndpointModel) => {
+              helmEntityCatalog.chart.api.synchronise(item).pipe(
+                catchError(() => null), // Be super safe to ensure we pass the first filter
+                first()
+              ).subscribe(res => {
+                if (res != null) {
+                  stratosEntityCatalog.endpoint.api.getAll();
+                }
+              });
+            },
             label: 'Synchronize',
             description: '',
             createVisible: row => row.pipe(

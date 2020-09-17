@@ -183,6 +183,10 @@ export class ChartsService {
     }
   }
 
+  getChartSummaryRoute(repoName: string, chartName: string, version?: string, route?: ActivatedRoute, chart?: Chart): string {
+    return `/monocular/charts/${getMonocularEndpoint(route, chart)}/${repoName}/${chartName}${version ? `/${version}` : ''}`;
+  }
+
   /**
    * Store the charts in the cache
    *
