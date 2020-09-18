@@ -109,7 +109,13 @@ fi
 
 # Now build the Helm Chart and images locally - use Minikube's docker daemon, so we don't have to push and pull images
 if [ "${BUILD}" == "true" ]; then
-  eval $(minikube docker-env)
+  # If minikube is running with driver=nonde, we don't need to do this
+  DRIVER_NONE=$(cat ~/.minikube/machines/minikube/config.json | grep '"DriverName": "none"' -c)
+  if [ ${DRIVER_NONE} -eq 0 ]; then
+    eval $(minikube docker-env)
+  else
+    echo "Minikube is dpeloyed with driver=none"
+  fi
   log "Building images and Helm Chart ..."
   set -x
   "${STRATOS}/deploy/kubernetes/build.sh" -s
