@@ -47,7 +47,7 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        endpointsPage.cards.findCardByTitle(toConnect.name)
+        endpointsPage.cards.waitForCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
           .then(actionMenu => actionMenu.getItem('Connect'))
           .then(connect => {
