@@ -10,6 +10,8 @@ RESET="\e[0m"
 MAX_AGE=86400
 ERROR=false
 
+TAG=nightly
+
 function show_time () {
     num=$1
     min=0
@@ -38,9 +40,10 @@ function show_time () {
 
 function check_image () {
   IMAGE=$1
-  URL=https://hub.docker.com/v2/repositories/$IMAGE/tags/latest
+  URL=https://hub.docker.com/v2/repositories/$IMAGE/tags/$TAG
   INFO=`curl -s -L "$URL"`  
   LAST_UPDATED=$(echo $INFO | jq -r ".last_updated")
+  echo $LAST_UPDATED
   IMAGE_DATE=$(date -d "$LAST_UPDATED" +%s)
   DIFF=`expr $CURRENT - $IMAGE_DATE`
   show_time $DIFF
