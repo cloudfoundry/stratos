@@ -45,11 +45,6 @@ function buildAndPublishImage {
 # Remove intermediate containers after a successful build
 BUILD_ARGS="--rm=true"
 
-# Squash by default
-if [ "${DOCKER_SQUASH}" != "false" ]; then
-  BUILD_ARGS="${BUILD_ARGS} --squash"
-fi
-
 RUN_ARGS=""
 if [ -n "${http_proxy:-}" -o -n "${HTTP_PROXY:-}" ]; then
   BUILD_ARGS="${BUILD_ARGS} --build-arg http_proxy=${http_proxy:-${HTTP_PROXY}}"
