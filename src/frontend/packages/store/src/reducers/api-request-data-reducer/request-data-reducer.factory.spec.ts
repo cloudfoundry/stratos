@@ -1,5 +1,3 @@
-import { domainEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { IDomain } from '../../../../core/src/core/cf-api.types';
 import { APIResource } from '../../types/api.types';
 import { EntityRequestAction, ISuccessRequestAction } from '../../types/request.types';
 import { requestDataReducerFactory } from './request-data-reducer.factory';
@@ -10,14 +8,13 @@ describe('RequestDataReducerFactory', () => {
     expect(reducer).toBeDefined();
   });
   it('should create with add new entity', () => {
-    const testEntityTypeUnused = 'test-unused';
-    const entityKey = domainEntityType;
+    const entityKey = 'entityKey';
     const guid = 'id123';
     const successType = 'SUCCESS_YO';
     const domain = {
       name: guid
-    } as IDomain;
-    const apiResource = { entity: domain, metadata: {} } as APIResource<IDomain>;
+    };
+    const apiResource: APIResource<{ name: string }> = { entity: domain, metadata: { created_at: '', guid, updated_at: '', url: '' } };
     const resEntity = {
       [guid]: apiResource
     };

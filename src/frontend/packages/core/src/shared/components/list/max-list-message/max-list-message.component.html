@@ -1,0 +1,18 @@
+<div class="maxed" *ngIf="state$ | async as state">
+  <app-no-content-message [icon]="state.icon" [iconFont]="state.iconFont" [firstLine]="state.firstLine"
+    [otherLines]="state.otherLines">
+    <span *ngIf="state.canIgnoreMaxedState">
+      <button color="primary" (click)="showAll()" mat-raised-button>
+        <ng-container *ngIf="!!count">
+          Fetch All ({{count}})
+        </ng-container>
+        <ng-container *ngIf="!count && !!maxCount">
+          Fetch All (over {{maxCount}})
+        </ng-container>
+        <ng-container *ngIf="!count && !maxCount">
+          Fetch All
+        </ng-container>
+      </button>
+    </span>
+  </app-no-content-message>
+</div>

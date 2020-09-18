@@ -67,3 +67,11 @@ tests:
           content:
             name: AUTO_REG_CF_URL
             value: https://autoreg.test.com
+  - it: should set kubernetes.io/arch if console.nodeSelector.kubernetes.io/arch is set
+    set:
+      console.nodeSelector.kubernetes.io/arch: amd64
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.kubernetes.io/arch
+          value: amd64
+        documentIndex: 0

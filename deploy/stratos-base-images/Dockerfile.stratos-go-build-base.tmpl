@@ -11,7 +11,7 @@ RUN zypper ref
 
 RUN zypper -n ref && \
     zypper -n up && \
-    zypper in -y which tar git gcc curl wget gzip xz unzip && \
+    zypper in -y which tar git gcc curl wget gzip xz unzip make && \
     zypper clean -a && \
     rm -f /var/log/zypper.log /var/log/zypp/history
 
@@ -23,14 +23,6 @@ RUN wget https://storage.googleapis.com/golang/go1.13.4.linux-amd64.tar.gz && \
     
 ENV PATH $PATH:/usr/local/go/bin:/home/stratos/go/bin
 ENV GOPATH /home/stratos/go
-
-# Install both glide and dep for now, so that this base image can use either
-
-# Install glide for backend go dependency management (legacy)
-RUN curl https://glide.sh/get | sh
-
-# Install dep for backend go dependency management
-RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 {{#IS_SLE}}
 RUN zypper rr base_ga

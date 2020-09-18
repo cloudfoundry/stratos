@@ -1,4 +1,4 @@
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { ClearPaginationOfEntity } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';

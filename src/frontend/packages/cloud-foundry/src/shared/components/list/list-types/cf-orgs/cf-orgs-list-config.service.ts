@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IOrganization } from '../../../../../../../core/src/core/cf-api.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { IOrganization } from '../../../../../cf-api.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfOrgCardComponent } from './cf-org-card/cf-org-card.component';
 import { CfOrgsDataSourceService } from './cf-orgs-data-source.service';

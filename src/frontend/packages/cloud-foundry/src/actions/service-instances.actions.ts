@@ -16,6 +16,7 @@ import {
   spaceEntityType,
 } from '../cf-entity-types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
 
 export const DELETE_SERVICE_INSTANCE_ACTIONS = getActions('Service Instances', 'Delete Service Instance');
@@ -33,7 +34,15 @@ export class GetServiceInstances
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = getServiceInstanceRelations,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, servicePlanEntityType),
+      // Ideally this should just be `createEntityRelationKey(serviceInstancesEntityType, serviceEntityType)`, however even though CF
+      // returns `si.service_url` and `si.service_guid` it does not return the actual service. This means the service is not fetched in the
+      // initial fetch SI request but in lots of separate ones.
+      createEntityRelationKey(servicePlanEntityType, serviceEntityType),
+      createEntityRelationKey(serviceInstancesEntityType, spaceEntityType),
+    ],
     public populateMissing = true
   ) {
     super();
@@ -55,6 +64,7 @@ export class GetServiceInstances
     q: []
   };
   flattenPagination = true;
+  flattenPaginationMax = true;
 }
 
 export class GetServiceInstance
@@ -108,8 +118,8 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
 }
 export class CreateServiceInstance extends CFStartAction implements ICFAction {
   constructor(
-    public endpointGuid: string,
     public guid: string,
+    public endpointGuid: string,
     public name: string,
     public servicePlanGuid: string,
     public spaceGuid: string,
@@ -153,15 +163,15 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 export class UpdateServiceInstance extends CreateServiceInstance {
   static updateServiceInstance = 'Updating-Service-Instance';
   constructor(
-    public endpointGuid: string,
     public guid: string,
+    public endpointGuid: string,
     public name: string,
     public servicePlanGuid: string,
     public spaceGuid: string,
     public params: object,
     public tags: string[],
   ) {
-    super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags, 'PUT', `service_instances/${guid}`);
+    super(guid, endpointGuid, name, servicePlanGuid, spaceGuid, params, tags, 'PUT', `service_instances/${guid}`);
     this.actions = getActions('Service Instances', 'Update Service Instance');
   }
   updatingKey = UpdateServiceInstance.updateServiceInstance;
@@ -182,8 +192,11 @@ export class ListServiceBindingsForInstance
     super();
     this.options = new HttpRequest(
       'GET',
-      `service_instances/${serviceInstanceGuid}/service_bindings`
+      `service_bindings`
     );
+    this.initialParams.q = [
+      new QParam('service_instance_guid', serviceInstanceGuid, QParamJoiners.in).toString(),
+    ]
   }
   actions = getActions('Service Instances', 'Get all service bindings for instance');
   entity = [cfEntityFactory(serviceBindingNoBindingsEntityType)];
@@ -194,6 +207,7 @@ export class ListServiceBindingsForInstance
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
+    q: []
   };
   flattenPagination = true;
 }

@@ -11,7 +11,7 @@ export class MenuItem {
   index: number;
   label: string;
   class: string;
-  click: Function;
+  click: () => {};
   disabled: boolean;
 }
 
@@ -46,9 +46,9 @@ export class PageTabsPo extends Component {
     return this.getItem(name).click();
   }
 
-  waitForItem(name: string): promise.Promise<void> {
+  waitForItem(name: string, waitDuration?: number): promise.Promise<void> {
     const item = new Component(this.getItem(name));
-    return item.waitUntilShown();
+    return item.waitUntilShown(`Waiting for tab: ${name} to be shown`, waitDuration);
   }
 
   goToItemAndWait(name: string, baseUrl: string, suffix: string): promise.Promise<any> {

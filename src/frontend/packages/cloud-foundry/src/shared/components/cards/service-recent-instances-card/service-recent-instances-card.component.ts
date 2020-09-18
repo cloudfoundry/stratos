@@ -3,8 +3,8 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
-import { IServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../cf-api-svc.types';
 
 const RECENT_ITEMS_COUNT = 10;
 

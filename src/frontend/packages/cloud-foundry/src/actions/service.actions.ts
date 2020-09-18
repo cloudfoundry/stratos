@@ -1,12 +1,13 @@
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceEntityType, servicePlanEntityType } from '../cf-entity-types';
+import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { createEntityRelationKey, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export class GetAllServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
@@ -34,6 +35,7 @@ export class GetAllServices extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'label',
   };
   flattenPagination = true;
+  flattenPaginationMax = true;
 }
 export class GetService extends CFStartAction implements EntityInlineParentAction {
   constructor(

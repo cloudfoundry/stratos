@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
-import { IService, IServiceExtra } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-service-provider',

@@ -151,6 +151,9 @@ tag_and_push_image() {
 build_and_push_image stratos-base Dockerfile.stratos-base
 
 # Base with ruby
+build_and_push_image stratos-ruby-base Dockerfile.stratos-ruby-base
+
+# Build base with ruby
 build_and_push_image stratos-ruby-build-base Dockerfile.stratos-ruby-build-base
 
 # Base with go

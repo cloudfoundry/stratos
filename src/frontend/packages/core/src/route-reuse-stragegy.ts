@@ -1,9 +1,11 @@
+import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
 
+@Injectable()
 export class CustomReuseStrategy extends RouteReuseStrategy {
   shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
   store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void { }

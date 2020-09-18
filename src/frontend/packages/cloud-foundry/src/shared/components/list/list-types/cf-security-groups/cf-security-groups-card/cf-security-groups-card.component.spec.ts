@@ -9,7 +9,7 @@ import {
   generateCfBaseTestModulesNoShared,
   generateTestCfEndpointService,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card.component';
 
 describe('CfSecurityGroupsCardComponent', () => {

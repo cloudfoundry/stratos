@@ -1,10 +1,9 @@
-import { HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 
-import { IUpdateOrganization } from '../../../core/src/core/cf-api.types';
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
+import { IUpdateOrganization } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -13,13 +12,14 @@ import {
   spaceEntityType,
   spaceWithOrgEntityType,
 } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationPaginationKey,
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { createDefaultUserRelations } from './users.actions';
+import { createDefaultCfUserRelations } from './users.actions';
 
 export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
@@ -173,9 +173,11 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
       'DELETE',
       `organizations/${guid}`,
       {
-        params: new HttpHeaders({
-          recursive: 'true',
-          async: 'false'
+        params: new HttpParams({
+          fromObject: {
+            recursive: 'true',
+            async: 'false'
+          }
         })
       }
     );
@@ -229,7 +231,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     public paginationKey: string,
     public endpointGuid: string,
     public isAdmin: boolean,
-    public includeRelations: string[] = createDefaultUserRelations()) {
+    public includeRelations: string[] = createDefaultCfUserRelations()) {
     super();
     this.options = new HttpRequest(
       'GET',
@@ -254,7 +256,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
   skipValidation: boolean;
   populateMissing: boolean;
 }

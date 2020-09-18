@@ -1,0 +1,209 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #2196f3;
+  --ifm-color-primary-dark: #0d89ec;
+  --ifm-color-primary-darker: #0c81df;
+  --ifm-color-primary-darkest: #0a6bb7;
+  --ifm-color-primary-light: #3ba2f4;
+  --ifm-color-primary-lighter: #48a9f5;
+  --ifm-color-primary-lightest: #70bbf7;
+  --ifm-code-font-size: 95%;
+  --ifm-navbar-link-color: #fff;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgb(72, 77, 91);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+img.feature-img {
+  filter: grayscale(100%);
+  height: 100px;
+  width: 100px;
+}
+
+img.cf-logo {
+  width: auto;
+}
+
+.navbar {
+  background-color: #333;
+}
+
+.navbar-sidebar .navbar-sidebar__brand {
+  background-color: #333;
+}
+
+.navbar__toggle {
+  color: #d0d0d0;
+}
+
+.navbar__brand:hover {
+  color: var(--ifm-link-hover-color);
+}
+
+.main-wrapper .hero {
+  min-height: 480px;
+}
+
+.main-wrapper .hero a.button.button--outline.button--secondary {
+  color: #fff;
+}
+
+.main-wrapper .hero a.button.button--outline.button--secondary:hover {
+  color: #2196f3;
+}
+
+.container {
+  text-align: left;
+}
+
+.container .get-started {
+  justify-content: start;
+  padding-top: 20px;
+}
+
+/* Fix for dark mode, given the backgrounds are hardcoded below */
+.hero__title,
+.hero__subtitle {
+  color: #fff;
+}
+
+.hero__subtitle {
+  font-size: 36px;
+}
+
+/* Reduce the text sizes */
+
+#__docusaurus article h1 {
+  font-size: 28px;
+}
+
+#__docusaurus article h2 {
+  font-size: 24px;
+}
+
+#__docusaurus article h3 {
+  font-size: 20px;
+}
+
+#__docusaurus article h4 {
+  font-size: 18px;
+}
+
+.menu__list,
+.menu__link {
+  font-size: 14px;
+}
+
+#__docusaurus .menu .menu__link--sublist:after {
+  background-size: 1.25rem 1.25rem;
+}
+
+#__docusaurus .docSidebarContainer_node_modules-\@docusaurus-theme-classic-src-theme-DocPage- {
+  width: 280px;
+}
+
+.home-intro {
+  /*margin-right: 150px;*/
+}
+
+.home-logo {
+  height: 300px;
+  opacity: .9;
+  position: absolute;
+  right: -150px;
+}
+
+@media screen and (max-width: 966px) {
+  .home-logo {
+    display: none;
+  }
+
+  .hero__subtitle {
+    font-size: 35px;
+  }
+
+  section .screenshot {
+    margin: 0 0;
+  }
+
+
+}
+
+@media screen and (max-width: 813px) {
+  .hero__subtitle {
+    font-size: 31px;
+  }
+
+  img.feature-img {
+    height: 64px;
+    width: auto;
+  }
+
+
+}
+
+/* Screenshot */
+
+.blue {
+  background-color: #2196f3;
+  color: #fff
+}
+
+.white {
+  background-color: #fff;
+  color: #444;
+}
+
+
+.screenshot {
+  display: flex;
+  margin: 60px 0;
+}
+
+.screenshot img {
+  width: 600px;
+  -webkit-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+  -moz-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+  box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+}
+
+.screenshot img.right {
+  margin-left: 60px;
+}
+
+.screenshot img.left {
+  margin-right: 60px;
+}
+
+.screenshot div {
+  font-size: 20px;
+}
+
+@media screen and (max-width: 966px) {
+  .screenshot img {
+    display: none;
+    margin: 0;
+  }
+}
+
+
+/* Hide versions drop down and versions link on home page */
+.stratosIsNotDocsPage .navbar__item.dropdown--right {
+  display: none;
+}
+
+/* Hide the `Versions: x` pill that appears above a doc page's title */
+article > div > .badge.badge--secondary {
+  display: none;
+}

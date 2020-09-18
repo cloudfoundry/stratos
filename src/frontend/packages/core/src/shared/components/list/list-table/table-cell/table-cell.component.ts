@@ -13,6 +13,9 @@ import { MultiActionListEntity } from '../../../../../../../store/src/monitors/p
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
+  TableCellEndpointAddressComponent,
+} from '../../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import {
   TableCellEndpointDetailsComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
 import {
@@ -21,15 +24,14 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import {
-  TableCellCommitAuthorComponent,
-} from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellExpanderComponent } from '../table-cell-expander/table-cell-expander.component';
 import { TableCellFavoriteComponent } from '../table-cell-favorite/table-cell-favorite.component';
+import { TableCellIconComponent } from '../table-cell-icon/table-cell-icon.component';
 import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import {
   TableCellRequestMonitorIconComponent,
@@ -50,11 +52,13 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
-  TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent,
   TableCellFavoriteComponent,
   TableCellEndpointDetailsComponent,
   TableCellSidePanelComponent,
+  TableCellIconComponent,
+  TableCellExpanderComponent,
+  TableCellEndpointAddressComponent,
   ...coreEndpointListDetailsComponents
 ];
 

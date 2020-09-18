@@ -1,0 +1,11 @@
+@mixin restore-endpoints-theme($theme, $app-theme) {
+  $status-colors: map-get($app-theme, status);
+  $warn-color: map-get($status-colors, warning);
+  .file-step {
+    &__error {
+      mat-icon {
+        color: $warn-color;
+      }
+    }
+  }
+}

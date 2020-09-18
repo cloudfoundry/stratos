@@ -1,17 +1,7 @@
-<b *ngIf="canDeployType$ | async"> {{ stepperText }}</b>
+<b *ngIf="stepperText$ | async as stepperText">{{ stepperText }}</b>
 <form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
   <div *ngIf="(canDeployType$ | async) === true">
     <div class="deploy-step2-form">
-      <!-- This can be flipped when we add other deploy types -->
-      <mat-form-field *ngIf="!selectedSourceType && sourceTypes.length > 1">
-        <mat-select class="reset-margin" [disabled]="isRedeploy" placeholder="Source Type" name="sourceType"
-          [(ngModel)]="sourceType" (selectionChange)="setSourceType($event.value)" required>
-          <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
-            {{ sourceType.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <p *ngIf="!selectedSourceType && sourceType && sourceType.helpText"> {{sourceType.helpText}} </p>
       <div *ngIf="(sourceType$ | async) as sourceType">
         <app-deploy-application-fs #fsChooser [hideTitle]='true'
           *ngIf="sourceType.id === DEPLOY_TYPES_IDS.FILE || sourceType.id === DEPLOY_TYPES_IDS.FOLDER"
@@ -62,7 +52,8 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <div *ngIf="isRedeploy && commitInfo" class="deploy-step2-form__project-info-group">
+            <div *ngIf="isRedeploy && commitInfo"
+              class="deploy-step2-form__project-info-group deploy-step2-form__commit">
               <div>
                 <img src="{{commitInfo.author.avatar_url}}">
               </div>

@@ -1,6 +1,4 @@
-import { HttpParams } from '@angular/common/http';
-
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
 import { JetstreamResponse, PagedJetstreamResponse } from './entity-request-pipeline.types';
 

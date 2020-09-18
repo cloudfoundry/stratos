@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
+import { AppState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { PaginationMonitor } from './pagination-monitor';
-import { AppState } from '../app-state';
 
 @Injectable()
 export class PaginationMonitorFactory {
@@ -17,7 +17,8 @@ export class PaginationMonitorFactory {
 
   public create<T = any>(
     paginationKey: string,
-    entityConfig: EntityCatalogEntityConfig
+    entityConfig: EntityCatalogEntityConfig,
+    isLocal: boolean
   ) {
     const { endpointType, entityType } = entityConfig;
     const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
@@ -31,7 +32,8 @@ export class PaginationMonitorFactory {
       const monitor = new PaginationMonitor<T>(
         this.store,
         paginationKey,
-        entityConfig
+        entityConfig,
+        isLocal
       );
       this.monitorCache[cacheKey] = monitor;
       return monitor;

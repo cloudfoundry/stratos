@@ -1,4 +1,4 @@
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog.service';
+import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 
 /**

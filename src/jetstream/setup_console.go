@@ -150,7 +150,10 @@ func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleCo
 		return err
 	}
 
-	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_PASSWORD", consoleConfig.LocalUserPassword); err != nil {
+	// Do not save the raw password - we will create the account during setup, so we don't need it beyond that
+	// We need to store a value so that console believes everything is setup - but we have created the account
+	// already, so we don't need to save the actual password
+	if err := consoleRepo.SetValue(systemGroupName, "LOCAL_USER_PASSWORD", "--"); err != nil {
 		return err
 	}
 
@@ -217,6 +220,20 @@ func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 			http.StatusInternalServerError,
 			"Failed to store Console configuration data",
 			"Console configuration data storage failed due to %s", err)
+	}
+
+	// If setting up with a local admin user, then log the user in
+	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+		consoleConfig.LocalUser = "admin"
+		if consoleConfig.IsSetupComplete() {
+			p.GetConfig().ConsoleConfig.AuthEndpointType = "local"
+			p.InitStratosAuthService(interfaces.Local)
+			c.Request().Form.Add("username", "admin")
+			c.Request().Form.Add("password", consoleConfig.LocalUserPassword)
+			c.Request().RequestURI = "/pp/v1/login"
+			setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+			return p.consoleLogin(c)
+		}
 	}
 
 	c.NoContent(http.StatusOK)
@@ -287,6 +304,11 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	consoleConfig.LocalUser = localUserName
 	consoleConfig.LocalUserPassword = localUserPassword
 
+	return setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+}
+
+func setupInitialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) error {
+
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
@@ -294,18 +316,18 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	}
 
 	userGUID := uuid.NewV4().String()
-	password := localUserPassword
+	password := consoleConfig.LocalUserPassword
 	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
 		return err
 	}
-	scope := localUserScope
+	scope := consoleConfig.LocalUserScope
 	email := ""
-	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: localUserName, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
+	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: consoleConfig.LocalUser, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
 
 	// Don't add the user if they already exist
-	_, err = localUsersRepo.FindUserGUID(localUserName)
+	_, err = localUsersRepo.FindUserGUID(consoleConfig.LocalUser)
 	if err == nil {
 		// Can't modify the user once created else we loose any updates that might have neen made
 		return nil

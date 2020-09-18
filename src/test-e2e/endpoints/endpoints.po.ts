@@ -39,7 +39,7 @@ export class EndpointCards extends ListCardComponent {
       const url = urlField.replace('content_copy', '').trim();
       return {
         name: t.substring(0, t.indexOf('\n')),
-        connected: m.find(item => item.key === 'Status').value === 'Connected\ncloud_done',
+        connected: m.find(item => item.key === 'Status').value === 'Connected\nendpoints_connected',
         type: t.substring(t.indexOf('\n') + 1, t.length),
         user,
         isAdmin,
@@ -61,7 +61,7 @@ export class EndpointsTable extends ListTableComponent {
     return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then((data: string[]) => {
       return {
         name: data[0],
-        connected: data[1] === 'cloud_done',
+        connected: data[1] === 'endpoints_connected',
         type: data[2],
         user: data[3],
         isAdmin: data[4].indexOf('Yes') !== -1,
@@ -143,6 +143,10 @@ export class EndpointsPage extends Page {
 
   isNoneConnectedSnackBar(snackBar: SnackBarPo) {
     return snackBar.hasMessage(NONE_CONNECTED_MSG);
+  }
+
+  waitForNoneConnectedSnackBar(snackBar: SnackBarPo) {
+    return snackBar.waitForMessage(NONE_CONNECTED_MSG);
   }
 
   private checkWelcomeMessageText(msg: string) {

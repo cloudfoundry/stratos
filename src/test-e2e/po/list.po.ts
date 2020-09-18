@@ -11,7 +11,11 @@ const until = protractor.ExpectedConditions;
 export interface CardMetadata {
   index: number;
   title: string;
-  click: Function;
+  click: () => void;
+}
+
+export interface TableData {
+  [columnHeader: string]: string
 }
 
 // Page Object for the List Table View
@@ -31,6 +35,11 @@ export class ListTableComponent extends Component {
 
   getCell(row, column): ElementFinder {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
+  }
+
+  waitForCellText(row: number, column: number, text: string) {
+    const component = new Component(this.getCell(row, column));
+    return component.waitForText(text);
   }
 
   findRowByCellContent(content) {
@@ -54,7 +63,7 @@ export class ListTableComponent extends Component {
     });
   }
 
-  getTableData(): promise.Promise<{ [columnHeader: string]: string }[]> {
+  getTableData(): promise.Promise<TableData[]> {
     return this.getTableDataRaw().then(tableData => {
       const table = [];
       tableData.rows.forEach((row: string[]) => {
@@ -69,13 +78,20 @@ export class ListTableComponent extends Component {
     });
   }
 
-  findRow(columnHeader: string, value: string): promise.Promise<number> {
+  findRow(columnHeader: string, value: string, expected = true): promise.Promise<number> {
     return this.getTableData().then(data => {
       const rowIndex = data.findIndex(row => row[columnHeader] === value);
       if (rowIndex >= 0) {
-        return rowIndex;
+        if (expected) {
+          return rowIndex;
+        }
+        throw new Error(`Found row with header '${columnHeader}' and value '${value}' when not expecting one`);
+      } else {
+        if (expected) {
+          throw new Error(`Could not find row with header '${columnHeader}' and value '${value}'`);
+        }
+        return -1;
       }
-      throw new Error(`Could not find row with header ${columnHeader} and value ${value}`);
     });
   }
 
@@ -86,11 +102,13 @@ export class ListTableComponent extends Component {
     });
   }
 
-  waitUntilNotBusy() {
+  waitUntilNotBusy(failMsg?: string) {
     return Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row__deletion-bar-wrapper'))
+      this.locator.element(by.css('.table-row__deletion-bar-wrapper')),
+      'Failed to wait for list busy indicator to be shown'
     ).then(() => Component.waitUntilNotShown(
-      this.locator.element(by.css('.table-row-wrapper__blocked'))
+      this.locator.element(by.css('.table-row-wrapper__blocked')),
+      'Failed to wait for list busy indicator to be not shown'
     ));
   }
 
@@ -390,7 +408,15 @@ export class ListPaginationComponent extends Component {
 
   setPageSize(pageSize, customCtrlName?: string): promise.Promise<void> {
     const name = customCtrlName || 'mat-select-2';
-    return this.getPageSizeForm().fill({ [name]: pageSize });
+    // Only try to set the page size, if the page size control is shown
+    // Pagination controls will be hidden if there are not enough items to require more than 1 page
+    return this.getPageSizeForm().isDisplayed().then(displayed => {
+      if (displayed) {
+        this.scrollToBottom();
+        this.getPageSizeForm().fill({ [name]: pageSize });
+        return this.scrollToTop();
+      }
+    });
   }
 
   getPageSizeForm(): FormComponent {
@@ -497,5 +523,17 @@ export class ListComponent extends Component {
     });
   }
 
+  /**
+   *
+   * @param count Wait until the list has the specified total number of results
+   */
+  waitForTotalResultsToBe(count: number, timeout = 5000, timeoutMsg = 'Timed out waiting for total results') {
+    const totalResultsIs = async (): Promise<boolean> => {
+      const actual = await this.getTotalResults();
+      return actual === count;
+    };
+
+    browser.wait(totalResultsIs, 10000, timeoutMsg);
+  }
 }
 

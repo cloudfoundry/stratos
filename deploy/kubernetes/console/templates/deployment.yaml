@@ -4,12 +4,13 @@ apiVersion: apps/v1
 {{- else }}
 apiVersion: apps/v1beta1
 {{- end }}
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: stratos
-{{- if .Values.console.statefulSetAnnotations }}
+{{- if .Values.console.deploymentAnnotations }}
   annotations:
-{{ toYaml .Values.console.statefulSetAnnotations | indent 4 }}
+    checksum/config: {{ default (randAlphaNum 5 | quote) .Values.console.checksum }}
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
 {{- end }}
   labels:
     app.kubernetes.io/name: "stratos"
@@ -19,12 +20,16 @@ metadata:
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     app: "{{ .Release.Name }}"
     component: stratos
-{{- if .Values.console.statefulSetExtraLabels }}
-{{ toYaml .Values.console.statefulSetExtraLabels | indent 4 }}
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
 {{- end }}
 spec:
-  serviceName: stratos
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1    
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"
@@ -47,6 +52,12 @@ spec:
 {{ toYaml .Values.console.podExtraLabels | indent 8 }}
 {{- end }}
     spec:
+{{- if .Values.console }}
+{{- if .Values.console.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.console.nodeSelector | trim | indent 8 }}
+{{- end }}
+{{- end }}
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
@@ -59,8 +70,14 @@ spec:
           name: https
           protocol: TCP
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: CONSOLE_CERT_PATH
           value: "/{{ .Release.Name }}-cert-volume"
+        - name: SSL_PROTOCOLS
+          value: "{{ .Values.console.sslProtocols }}"
+        - name: SSL_CIPHERS
+          value: "{{ .Values.console.sslCiphers }}"
         volumeMounts:
         - mountPath: "/{{ .Release.Name }}-cert-volume"
           name: "{{ .Release.Name }}-cert-volume"
@@ -69,6 +86,8 @@ spec:
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: STRATOS_HELM_RELEASE
           value: "{{ .Release.Name }}"
         - name: DB_USER
@@ -184,7 +203,15 @@ spec:
           value: stratos.admin
         {{- else }}
         # UAA
-        {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
+        # Highest priority setting to use is uaa.endpoint
+        {{- if .Values.uaa.endpoint }}
+        - name: UAA_ENDPOINT 
+          value: {{ .Values.uaa.endpoint | quote }}
+        - name: CONSOLE_ADMIN_SCOPE
+          value: {{ default "cloud_controller.admin" .Values.uaa.consoleAdminIdentifier }}
+        - name: SKIP_SSL_VALIDATION 
+          value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- else if or .Values.env.UAA_HOST .Values.env.DOMAIN }}          
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
         {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
@@ -219,7 +246,7 @@ spec:
         - name: HELM_CHART_VERSION
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
-          value: "{{ .Release.Time }}"
+          value: "seconds:{{ now | unixEpoch }} nanos:0 "        
         - name: SSO_LOGIN
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
@@ -255,6 +282,17 @@ spec:
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        - name: API_KEYS_ENABLED
+          value: {{ default "admin_only" .Values.console.apiKeysEnabled | quote }}
+        {{- if .Values.console.ui }}
+        {{- if .Values.console.ui.listMaxSize }}
+        - name: UI_LIST_MAX_SIZE
+          value: {{ .Values.console.ui.listMaxSize | quote }}
+        {{- end }}
+        - name: UI_LIST_ALLOW_LOAD_MAXED
+          value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
+        {{- end }}
+        {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:
             path: /pp/v1/ping

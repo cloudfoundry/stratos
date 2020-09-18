@@ -1,0 +1,61 @@
+@import '~@stratosui/theme/helper';
+
+// Custom Theme
+@import './sass/custom';
+@import './sass/custom/acme-colors';
+
+// Style overrides
+@import './sass/custom/acme';
+
+@function stratos-theme() {
+  $theme: stratos-theme-helper($stratos-theme);
+  @return (
+    default: create-custom-theme($stratos-theme),
+    dark: create-dark-theme()
+  );
+}
+
+@function create-custom-theme($base-theme) {
+  $theme: stratos-theme-helper($base-theme);
+
+  // Modify some of the colors
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: $acme-text,
+    header-foreground-color: $acme-dark-gray,
+    header-background-span: false,
+    stratos-title-show-text: true,
+    user-avatar-background-color: $acme-text,
+    user-avatar-foreground-color: $acme-primary-color,
+    user-avatar-header-invert-colors: false,
+    side-nav: (
+      background: $acme-dark-gray,
+      text: $acme-text-gray,
+      active: $acme-side-nav-active,
+      active-text: $acme-text-gray,
+      hover: $acme-side-nav-active,
+      hover-text: $acme-text-gray
+    )
+  ));
+
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+
+  @return $theme;
+}
+
+@function create-dark-theme() {
+  $theme: create-custom-theme($stratos-dark-theme);
+
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: $acme-dark-gray,
+    header-foreground-color: $acme-text,
+  ));
+
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+  @return $theme;
+}

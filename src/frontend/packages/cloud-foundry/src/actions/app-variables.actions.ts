@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 
-import { UpdateApplication } from './application.actions';
 import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import { UpdateApplication } from './application.actions';
 
 export const AppVariables = {
   UPDATE: '[Application Variables] Update',
@@ -11,8 +11,11 @@ export class AppVariablesUpdate implements Action {
 
   type = AppVariables.UPDATE;
   updatedApplication: UpdateApplication;
+  guid: string;
 
-  constructor(public cfGuid: string, public appGuid: string) { }
+  constructor(public cfGuid: string, public appGuid: string) {
+    this.guid = 'n/a'; // No such thing as an individual app variable guid
+  }
 
   protected createUpdateApplication(allEnvVars: ListAppEnvVar[], selectedItems: ListAppEnvVar[]): UpdateApplication {
     const updateApp: UpdateApplication = {

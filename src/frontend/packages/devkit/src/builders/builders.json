@@ -1,0 +1,10 @@
+{
+  "$schema": "@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "stratos-theme": {
+      "implementation": "./theme.builder",
+      "schema": "./theme.builder.schema.json",
+      "description": "Stratos Theme builder"
+    }
+  }
+}

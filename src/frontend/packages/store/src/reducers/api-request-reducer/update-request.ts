@@ -1,8 +1,7 @@
-import { isNullOrUndefined } from 'util';
-
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { BaseRequestState } from '../../app-state';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 import { IUpdateRequestAction } from '../../types/request.types';
+import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
 export function updateRequest(state: BaseRequestState, action: IUpdateRequestAction) {

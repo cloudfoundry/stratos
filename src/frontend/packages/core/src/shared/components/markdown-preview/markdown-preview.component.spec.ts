@@ -2,10 +2,9 @@ import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http'
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratos/store/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { LoggerService } from '../../../core/logger.service';
 import { SidepanelPreviewComponent } from '../sidepanel-preview/sidepanel-preview.component';
 import { MDAppModule } from './../../../core/md.module';
 import { SidePanelService } from './../../services/side-panel.service';
@@ -18,7 +17,7 @@ describe('MarkdownPreviewComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [MarkdownPreviewComponent, SidepanelPreviewComponent],
-      providers: [LoggerService, HttpClient, HttpHandler, SidePanelService],
+      providers: [HttpClient, HttpHandler, SidePanelService],
       imports: [
         MDAppModule,
         RouterTestingModule,

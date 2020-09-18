@@ -1,0 +1,16 @@
+.metrics-details {
+  display: flex;
+  flex-direction: column;
+
+  &__line {
+    align-items: center;
+    display: flex;
+  }
+
+  &__icon {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    margin-right: 8px;
+  }
+}

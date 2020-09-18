@@ -1,7 +1,7 @@
 import { by, element, promise, protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { TableComponent } from '../../po/table.po';
@@ -75,13 +75,16 @@ describe('Manage Quota', () => {
     });
 
     it('- should create quota', () => {
-      quotaFormPage.stepper.setName(secondQuotaName);
-      quotaFormPage.stepper.setTotalServices('1');
-      quotaFormPage.stepper.setTotalRoutes('10');
-      quotaFormPage.stepper.setMemoryLimit('1024');
-      quotaFormPage.stepper.setInstanceMemoryLimit('1');
-      quotaFormPage.stepper.setTotalReservedRoutePorts('1');
-      quotaFormPage.stepper.setAppInstanceLimit('1');
+      const obj = {};
+      obj[quotaFormPage.stepper.name] = secondQuotaName;
+      obj[quotaFormPage.stepper.totalServices] = '1';
+      obj[quotaFormPage.stepper.totalRoutes] = '10';
+      obj[quotaFormPage.stepper.memoryLimit] = '1024';
+      obj[quotaFormPage.stepper.instanceMemoryLimit] = '1';
+      obj[quotaFormPage.stepper.totalReservedRoutePorts] = '1';
+      obj[quotaFormPage.stepper.appInstanceLimit] = '1';
+      quotaFormPage.stepper.getStepperForm().fill(obj);
+      expect(quotaFormPage.stepper.canNext()).toBeTruthy();
       quotaFormPage.submit();
       quotaFormPage.stepper.waitUntilNotShown();
       cfTopLevelPage.clickOnQuota(secondQuotaName);

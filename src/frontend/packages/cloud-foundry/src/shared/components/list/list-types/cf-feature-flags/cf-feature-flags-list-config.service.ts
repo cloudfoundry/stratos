@@ -2,13 +2,16 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListFilter, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { IFeatureFlag } from '../../../../../cf-api.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
-import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-flags-data-source';
+import { CfFeatureFlagsDataSource } from './cf-feature-flags-data-source';
+import {
+  TableCellFeatureFlagDescriptionComponent,
+} from './table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 
 @Injectable()
@@ -48,9 +51,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
     {
       columnId: CfFeatureFlagsDataSource.descriptionColumnId,
       headerCell: () => 'Description',
-      cellDefinition: {
-        getValue: (row) => FeatureFlagDescriptions[row.name]
-      },
+      cellComponent: TableCellFeatureFlagDescriptionComponent,
       class: 'table-column-select',
       cellFlex: '4'
     },

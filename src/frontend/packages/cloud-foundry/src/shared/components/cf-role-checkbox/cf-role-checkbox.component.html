@@ -1,1 +1,3 @@
-<mat-checkbox [checked]="checked" (change)="roleUpdated($event.checked)" [indeterminate]="checked === null" [matTooltip]="tooltip" [matTooltipPosition]="'below'" [disabled]="disabled"></mat-checkbox>
+<mat-checkbox [checked]="checked" (change)="roleUpdated($event.checked)" [indeterminate]="checked === null"
+  [matTooltip]="tooltip" [matTooltipPosition]="'below'" [disabled]="disabled"
+  [color]="(mode$ | async) === modes.REMOVE ? 'warn' : 'primary'"></mat-checkbox>

@@ -1,6 +1,8 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
+import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { CFEntityConfig } from '../cf-types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
@@ -9,6 +11,7 @@ import {
   serviceBindingEntityType,
   serviceInstancesEntityType,
 } from '../cf-entity-types';
+import { CFEntityConfig } from '../cf-types';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -16,7 +19,6 @@ import {
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
@@ -62,7 +64,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   parentEntityConfig = new CFEntityConfig(applicationEntityType);
 }
 
-export class GetAppServiceBindings extends CFStartAction implements EntityInlineParentAction {
+export class GetAppServiceBindings extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
@@ -89,6 +91,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
   entity = [cfEntityFactory(serviceBindingEntityType)];
   entityType = serviceBindingEntityType;
   options: HttpRequest<any>;
+  flattenPagination = true;
 }
 
 export class AssignRouteToApplication extends CFStartAction

@@ -4,8 +4,6 @@ import { Action } from '@ngrx/store';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { PaginatedAction } from '../../types/pagination.types';
 import { EntityRequestAction, StartAction } from '../../types/request.types';
-import { Omit } from '../../../../core/src/core/utils.service';
-import { EntityActionDispatcherManager } from '../action-dispatcher/action-dispatcher';
 
 export interface ActionBuilderAction extends EntityRequestAction {
   actionBuilderActionType: string;
@@ -23,7 +21,7 @@ export type KnownEntityActionBuilder<
   > = (guid: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
 // createTrackingId should be unique to the thing that's being created.
 // It is used to track the status of the entity creation.
-type CreateActionBuilder<
+export type CreateActionBuilder<
   T extends Record<any, any> = Record<any, any>
   > = (createTrackingId: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
 // paginationKey could be optional, we could give it a default value.
@@ -156,14 +154,22 @@ export class BasePaginationRequestAction extends BasePipelineRequestAction imple
   }
 }
 
-
-// A list of functions that can be used get interface with the entity
-export interface OrchestratedActionBuilders {
+/**
+ * Collection of common types of actions that should be associated with an entity.
+ * Generic code will make use of get and getMultiple
+ */
+export interface OrchestratedActionCoreBuilders {
   get?: KnownEntityActionBuilder;
   remove?: KnownEntityActionBuilder;
   update?: KnownEntityActionBuilder;
   create?: CreateActionBuilder;
   getMultiple?: GetMultipleActionBuilder;
+}
+
+/**
+ * Generic interface for functions that create actions for an entity
+ */
+export interface OrchestratedActionBuilders extends OrchestratedActionCoreBuilders {
   [actionType: string]: OrchestratedActionBuilder;
 }
 
@@ -178,14 +184,8 @@ export interface OrchestratedActionBuilderConfig {
   PaginationRequestActionConfig<GetMultipleActionBuilder>;
 }
 
-export class OrchestratedActionBuildersClass implements OrchestratedActionBuilders {
-  [actionType: string]: OrchestratedActionBuilder<any[], EntityRequestAction>;
-}
 export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
 
-  public getEntityActionDispatcher(actionDispatcher?: (action: Action) => void) {
-    return new EntityActionDispatcherManager<T>(actionDispatcher, this);
-  }
   public getActionBuilder<Y extends keyof T>(actionType: Y) {
     const actionBuilderForType = this.actionBuilders[actionType];
     if (!actionBuilderForType) {

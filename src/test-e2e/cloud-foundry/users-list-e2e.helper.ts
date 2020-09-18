@@ -3,7 +3,7 @@ import { protractor } from 'protractor/built/ptor';
 
 import { e2e, E2ESetup } from '../e2e';
 import { E2EConfigCloudFoundry } from '../e2e.types';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { CFUsersListComponent, UserRoleChip } from '../po/cf-users-list.po';
@@ -64,7 +64,7 @@ export function setUpTestOrgSpaceUserRoles(
     // space
     .then(() => browser.sleep(500))
     .then(() => cfHelper.addOrgUserRole(cfGuid, orgGuid, userName))
-    // Allow time for user to be added to org before applying other roles that are depending. Again should be syncrhonous but have seen
+    // Allow time for user to be added to org before applying other roles that are depending. Again should be synchronous but have seen
     // failures
     .then(() => browser.sleep(500))
     .then(() => promise.all([

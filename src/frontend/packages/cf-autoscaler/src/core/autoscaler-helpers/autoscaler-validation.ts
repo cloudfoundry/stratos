@@ -1,5 +1,5 @@
-import * as intersect from 'intersect';
-import * as moment from 'moment-timezone';
+import intersect from 'intersect';
+import moment from 'moment-timezone';
 
 import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants } from './autoscaler-util';
@@ -132,4 +132,9 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
   } else {
     return Number.MAX_VALUE;
   }
+}
+
+export function inValidMetricType(metricType: string) {
+  const metricTypePattern = new RegExp('^[a-zA-Z0-9_]+$');
+  return !metricTypePattern.test(metricType);
 }

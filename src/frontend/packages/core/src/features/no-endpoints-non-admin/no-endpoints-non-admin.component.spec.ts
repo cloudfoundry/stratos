@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../tab-nav.service';
 import { CoreTestingModule } from '../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../core/core.module';
+import { CurrentUserPermissionsService } from '../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../shared/shared.module';
+import { TabNavService } from '../../tab-nav.service';
 import { NoEndpointsNonAdminComponent } from './no-endpoints-non-admin.component';
 
 describe('NoEndpointsNonAdminComponent', () => {
@@ -22,7 +23,10 @@ describe('NoEndpointsNonAdminComponent', () => {
         CoreTestingModule,
         createBasicStoreModule(),
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

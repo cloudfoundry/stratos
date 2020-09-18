@@ -5,8 +5,8 @@ import { Store } from '@ngrx/store';
 import { fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
-import { CFAppState } from '../../cloud-foundry/src/cf-app-state';
 import { VerifySession } from '../../store/src/actions/auth.actions';
+import { AppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
 import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
@@ -17,7 +17,7 @@ import { PageVisible } from './core/page-visible';
 export class LoggedInService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private dialog: MatDialog,
     private ngZone: NgZone
   ) {

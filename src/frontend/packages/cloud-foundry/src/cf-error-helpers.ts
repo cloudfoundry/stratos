@@ -1,4 +1,4 @@
-import { JetStreamErrorResponse, jetStreamErrorResponseToSafeString } from '../../core/src/jetstream.helpers';
+import { JetStreamErrorResponse, jetStreamErrorResponseToSafeString } from '../../store/src/jetstream';
 
 export interface CfErrorObject {
   code: number;
@@ -12,7 +12,12 @@ export interface CfErrorObject {
 export type CfErrorResponse = CfErrorObject | string | any;
 
 function isCfError(errorResponse: CfErrorResponse): CfErrorObject {
-  return !!errorResponse.code && !!errorResponse.description && !!errorResponse.error_code ? errorResponse as CfErrorObject : null;
+  return !!errorResponse &&
+    !!errorResponse.code &&
+    !!errorResponse.description &&
+    !!errorResponse.error_code ?
+    errorResponse as CfErrorObject :
+    null;
 }
 
 export function getCfError(jetStreamErrorResponse: JetStreamErrorResponse<CfErrorResponse>): string {

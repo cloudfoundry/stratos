@@ -1,6 +1,7 @@
-import { FormGroup } from '@angular/forms';
 import { Component, Input } from '@angular/core';
-import { IAuthForm } from '../../../../core/extension/extension-types';
+import { FormGroup } from '@angular/forms';
+
+import { IAuthForm } from '../../../../../../store/src/extension-types';
 
 @Component({
   selector: 'app-credentials-auth-form',

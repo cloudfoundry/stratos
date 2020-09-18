@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import { browser, promise } from 'protractor';
 import { timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { LocaleHelper } from '../locale.helper';
 import { CFPage } from '../po/cf-page.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
+import { TableData } from '../po/list.po';
 import { CREATE_APP_DEPLOY_TEST_TYPE, createApplicationDeployTests } from './application-deploy-helper';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationPageAutoscalerTab } from './po/application-page-autoscaler.po';
@@ -20,6 +21,17 @@ import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 let applicationE2eHelper: ApplicationE2eHelper;
 
 describe('Autoscaler -', () => {
+
+  const validateFormDate = (fromForm: promise.Promise<any>, toEqual: moment.Moment, label: string) => {
+    fromForm.then(fieldInput => {
+      const momentFieldInput = moment(fieldInput)
+      expect(momentFieldInput.year).toBe(toEqual.year, `Failed for '${label}'`);
+      expect(momentFieldInput.month).toBe(toEqual.month, `Failed for '${label}'`);
+      expect(momentFieldInput.day).toBe(toEqual.day, `Failed for '${label}'`);
+      expect(momentFieldInput.hour).toBe(toEqual.hour, `Failed for '${label}'`);
+      expect(momentFieldInput.minute).toBe(toEqual.minute, `Failed for '${label}'`);
+    })
+  }
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
@@ -38,6 +50,19 @@ describe('Autoscaler -', () => {
   });
 
   const { testAppName, appDetails } = createApplicationDeployTests(CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL);
+
+  // Scaling rules for the policy.
+  // Note - these should not result in scaling events during the test (we only expect one scaling event due to a schedule)
+  const memoryUtilThreshold = '90';
+  const memoryUtilOperator = '>=';
+  const memoryUtilBreach = '160';
+
+  const throughputOperator = '>=';
+  const throughputThreshold = '100'
+  const throughputAdjustment = '10';
+  const throughputAdjustmentType = '% instances';
+
+  const memoryUsedThreshold = '500';
 
   describe('Tab Tests -', () => {
     beforeAll(() => {
@@ -78,6 +103,7 @@ describe('Autoscaler -', () => {
 
     beforeAll(() => new LocaleHelper().getWindowDateTimeFormats().then(formats => {
       timeFormat = formats.timeFormat;
+      // Note - sendMultipleKeys interprets this as containing a right arrow key to skip between date and time
       dateAndTimeFormat = `${formats.dateFormat},${timeFormat}`;
     }));
 
@@ -88,7 +114,7 @@ describe('Autoscaler -', () => {
     });
 
     it('Check edit steps', () => {
-      expect(createPolicy.header.getTitleText()).toBe('Create AutoScaler Policy: ' + testAppName);
+      createPolicy.header.waitForTitleText('Create AutoScaler Policy: ' + testAppName)
       // Check the steps
       e2e.debugLog(`${loggingPrefix} Checking Steps`);
       createPolicy.stepper.getStepNames().then(steps => {
@@ -123,9 +149,9 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ metric_type: 'memoryutil' });
-      createPolicy.stepper.getStepperForm().fill({ operator: '>=' });
-      createPolicy.stepper.getStepperForm().fill({ threshold: '60' });
-      createPolicy.stepper.getStepperForm().fill({ breach_duration_secs: '60' });
+      createPolicy.stepper.getStepperForm().fill({ operator: memoryUtilOperator });
+      createPolicy.stepper.getStepperForm().fill({ threshold: memoryUtilThreshold });
+      createPolicy.stepper.getStepperForm().fill({ breach_duration_secs: memoryUtilBreach });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       // Fill in form -- invalid inputs
@@ -140,20 +166,22 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
 
+
       // Click [Add] button
       createPolicy.stepper.clickAddButton();
       expect(createPolicy.stepper.getRuleTilesCount()).toBe(2);
       expect(createPolicy.stepper.canNext()).toBeFalsy();
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ metric_type: 'throughput' });
+      createPolicy.stepper.getStepperForm().fill({ operator: throughputOperator, threshold: throughputThreshold });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       // Fill in form -- invalid inputs
-      createPolicy.stepper.getStepperForm().fill({ adjustment: '10' });
+      createPolicy.stepper.getStepperForm().fill({ adjustment: throughputAdjustment });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(1);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe('true');
       // Fill in form -- fix invalid inputs
-      createPolicy.stepper.getStepperForm().fill({ adjustment_type: '% instances' });
+      createPolicy.stepper.getStepperForm().fill({ adjustment_type: throughputAdjustmentType });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
@@ -213,7 +241,7 @@ describe('Autoscaler -', () => {
       expect(createPolicy.stepper.canNext()).toBeFalsy();
 
       // Schedule dates should not overlap
-      // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below
+      // scheduleStartDate1 should be set close to time it's entered, this is what triggers the scaling event tested below (is this true given rules are deleted in edit?)
       const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(30, 'seconds');
       scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
       scheduleStartDate2 = moment().tz('UTC').add(3, 'days');
@@ -221,13 +249,17 @@ describe('Autoscaler -', () => {
 
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate1, 'Create Policy: Schedule 1: Start Date');
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate1, 'Create Policy: Schedule 1: End Date');
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ initial_min_instance_count: '2' });
       createPolicy.stepper.getStepperForm().fill({ instance_max_count: '10' });
-      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0, 'Form errors are shown where there should be none');
       expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
+
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(1, 'There should be one specific date rules, rest of test will fail');
 
       // Bad form, have seen errors where the first schedule isn't shown in ux but is submitted. When submitted the start time is already
       // in the past and the create policy request fails. Needs a better solution
@@ -244,9 +276,13 @@ describe('Autoscaler -', () => {
       createPolicy.stepper.getStepperForm().fill({ instance_min_count: '2' });
       // Fill in form -- valid inputs
       createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate2.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate2, 'Create Policy: Schedule 2: Start Date');
       createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate2.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate2, 'Create Policy: Schedule 2: Start Date');
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
       createPolicy.stepper.clickDoneButton();
+
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(2, 'There should be two specific date rules, rest of test will fail');
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();
       createPolicy.stepper.next();
@@ -281,11 +317,11 @@ describe('Autoscaler -', () => {
 
           expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(2);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 0)).toBe('memoryutil');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe('>=60 % for 60 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 1)).toBe(`${memoryUtilOperator}${memoryUtilThreshold} % for ${memoryUtilBreach} secs.`);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(0, 2)).toBe('+2 instances');
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 0)).toBe('throughput');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe('<=10rps for 120 secs.');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 2)).toBe('-10% instances');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 1)).toBe(`${throughputOperator}${throughputThreshold}rps for 120 secs.`);
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(1, 2)).toBe(`+${throughputAdjustment}${throughputAdjustmentType}`);
 
           expect(appAutoscaler.tableSchedules.getScheduleTableTitleText()).toBe('Scheduled Limit Rules in UTC');
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(1);
@@ -349,7 +385,14 @@ describe('Autoscaler -', () => {
 
     it('Should pass ScalingRules Step', () => {
       createPolicy.stepper.clickAddButton();
+      createPolicy.stepper.getStepperForm().getControlsMap().then(map => {
+        expect(map['metric_type'].value).toBe('memoryused')
+      });
+      createPolicy.stepper.getStepperForm().fill({ threshold: memoryUsedThreshold });
+      expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
+      expect(createPolicy.stepper.getDoneButtonDisabledStatus()).toBe(null);
       createPolicy.stepper.clickDoneButton();
+
       expect(createPolicy.stepper.canNext()).toBeTruthy();
       createPolicy.stepper.next();
     });
@@ -361,26 +404,24 @@ describe('Autoscaler -', () => {
     });
 
     it('Should pass SpecificDates Step', () => {
+      expect(createPolicy.stepper.getRuleTilesCount()).toBe(2, 'There should be two specific date rules, rest of test will fail');
+
       createPolicy.stepper.clickDeleteButton(1);
       expect(createPolicy.stepper.canNext()).toBeTruthy();
 
       createPolicy.stepper.clickEditButton();
-      createPolicy.stepper.getScheduleStartTime().then((startTime: moment.Moment) => {
 
-        const now = moment();
-        const diff = moment.duration(now.diff(startTime));
+      // When setting the start time it must be after the current time. It seems like AS checks to the nearest minute, so start time needs
+      // to be at least +1m from now
 
-        console.log('Testing schedule start time. Should be at least a minute into future');
-        console.log(`Now: ${now.toString()}. StartTime: ${startTime.toString()}. Diff (ms): ${diff.asMilliseconds()}`);
-        if (diff.asMinutes() > -1) {
-          const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(15, 'seconds');
-          const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
-          console.log(`Updating schedule. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
-          createPolicy.stepper.getStepperForm().waitUntilShown();
-          createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
-          return createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
-        }
-      });
+      const scheduleStartDate1 = moment().tz('UTC').add(1, 'minutes').add(15, 'seconds');
+      const scheduleEndDate1 = moment().tz('UTC').add(2, 'days');
+      console.log(`Setting schedule. Now: ${moment().tz('UTC').toString()}. Start: ${scheduleStartDate1.toString()}. End ${scheduleEndDate1.toString()}`);
+      createPolicy.stepper.getStepperForm().waitUntilShown();
+      createPolicy.stepper.getStepperForm().fill({ start_date_time: scheduleStartDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('start_date_time'), scheduleStartDate1, 'Edit Policy: Schedule 1: Start Date');
+      createPolicy.stepper.getStepperForm().fill({ end_date_time: scheduleEndDate1.format(dateAndTimeFormat) });
+      validateFormDate(createPolicy.stepper.getStepperForm().getText('end_date_time'), scheduleEndDate1, 'Edit Policy: Schedule 1: Start Date');
       createPolicy.stepper.clickDoneButton();
 
       expect(createPolicy.stepper.canNext()).toBeTruthy();
@@ -402,7 +443,7 @@ describe('Autoscaler -', () => {
           expect(appAutoscaler.cardMetric.getMetricChartTitleText(2)).toContain('memoryused');
           expect(appAutoscaler.tableTriggers.getTableRowsCount()).toBe(3);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 0)).toBe('memoryused');
-          expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 1)).toBe('<=10MB for 120 secs.');
+          expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 1)).toBe(`<=${memoryUsedThreshold}MB for 120 secs.`);
           expect(appAutoscaler.tableTriggers.getTableRowCellContent(2, 2)).toBe('-1 instances');
 
           expect(appAutoscaler.tableSchedules.getRecurringTableRowsCount()).toBe(0);
@@ -453,7 +494,7 @@ describe('Autoscaler -', () => {
   describe('Autoscaler Event Page - ', () => {
     const loggingPrefix = 'AutoScaler Event Table:';
     let eventPageBase: PageAutoscalerEventBase;
-    describe('From autoscaler event card', () => {
+    describe('From autoscaler event card - ', () => {
       beforeAll(() => {
         const appAutoscaler = new ApplicationPageAutoscalerTab(appDetails.cfGuid, appDetails.appGuid);
         appAutoscaler.goToAutoscalerTab();
@@ -461,7 +502,7 @@ describe('Autoscaler -', () => {
       });
 
       // This depends on scheduleStartDate1
-      extendE2ETestTime(120000);
+      extendE2ETestTime(180000);
 
       /**
        * Find the required scaling event row via row count and row content
@@ -479,30 +520,45 @@ describe('Autoscaler -', () => {
             eventPageBase.list.table.getCell(0, 2).getText(),
             eventPageBase.list.table.getCell(0, 4).getText()
           ]).then(([type, action]) => {
-            e2e.debugLog('');
             return type === 'schedule' && action === '+1 instance(s) because limited by min instances 2';
           });
         });
       }
 
       function waitForRow() {
+        // Timeout after 32 attempts (each 5 seconds, which is just under 3 minutes)
+        let retries = 32;
         const sub = timer(5000, 5000).pipe(
-          switchMap(() => promise.all<boolean | number>([
+          switchMap(() => promise.all<boolean | number | TableData[]>([
             findRow(),
-            eventPageBase.list.header.isRefreshing()
+            eventPageBase.list.header.isRefreshing(),
+            eventPageBase.list.table.getTableData()
           ]))
-        ).subscribe(([foundRow, isRefreshing]) => {
-          e2e.debugLog('Waiting for event row: Checking');
+        ).subscribe(([foundRow, isRefreshing, tableData]: [boolean, number, TableData[]]) => {
+          // These console.logs help by
+          // .. Showing the actual time we're checking, which can be compared with schedule start/end times
+          // .. Showing when successful runs complete, over time this should show on average events take to show
+          const time = moment().toString()
+          console.log(`${time}: Table Data: `, tableData);
+
           if (isRefreshing) {
-            e2e.debugLog('Waiting for event row: Skip actions... list is refreshing');
+            console.log(`${time}: Waiting for event row: Skip actions... list is refreshing`);
             return;
           }
+          retries--;
           if (foundRow) {
-            e2e.debugLog('Waiting for event row: Found row!');
+            console.log(`${time}: Waiting for event row: Found row!`);
             sub.unsubscribe();
           } else {
-            e2e.debugLog('Waiting for event row: manually refreshing list');
-            eventPageBase.list.header.refresh();
+            if (retries === 0) {
+              // Fail the test if the retry count made it down to 0
+              e2e.debugLog('Timed out waiting for event row');
+              fail('Timed out waiting for event row');
+              sub.unsubscribe();
+            } else {
+              console.log(`${time}: Waiting for event row: manually refreshing list`);
+              eventPageBase.list.header.refresh();
+            }
           }
         });
         browser.wait(() => sub.closed);
@@ -528,7 +584,7 @@ describe('Autoscaler -', () => {
         browser.wait(ApplicationPageAutoscalerTab.detect()
           .then(appAutoscaler => {
             appAutoscaler.tableEvents.clickRefreshButton();
-            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1);
+            expect(appAutoscaler.tableEvents.getTableRowsCount()).toBe(1, 'Expected rows to be one, could be extremely late event reporting');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 0)).toBe('Instances scaled up from 1 to 2');
             expect(appAutoscaler.tableEvents.getTableRowCellContent(0, 1))
               .toBe('schedule starts with instance min 2, instance max 10 and instance min initial 2 limited by min instances 2');

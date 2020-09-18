@@ -1,7 +1,8 @@
-import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
-import { QParam, QParamJoiners } from '../shared/q-param';
+import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -18,8 +19,8 @@ import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
+import { QParam, QParamJoiners } from '../shared/q-param';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export const getUserProvidedServiceInstanceRelations = [
   createEntityRelationKey(userProvidedServiceInstanceEntityType, spaceWithOrgEntityType),
@@ -38,7 +39,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
   ) {
     super();
     this.paginationKey = paginationKey || (spaceGuid ? createEntityRelationPaginationKey(spaceEntityType, spaceGuid) :
-      createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid));
+      createEntityRelationPaginationKey(endpointEntityType, endpointGuid));
     this.options = new HttpRequest(
       'GET',
       `user_provided_service_instances`,
@@ -59,6 +60,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     q: []
   };
   flattenPagination = true;
+  flattenPaginationMax = true;
   paginationKey: string;
 }
 

@@ -2,7 +2,7 @@
   <div class="summary__sub-nav">
     <div class="summary__actions" *ngIf="applicationService.appSpace$ | async as space">
       <ng-container
-        *appUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
+        *appCfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
         <app-page-sub-nav-section>
           <button mat-icon-button name="edit" *ngIf="(applicationService.applicationState$ | async)"
             routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
@@ -59,6 +59,14 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
+    <app-tile-group *ngIf="appSvc.app.entity.staging_failed_description as errorMsg">
+      <app-tile>
+        <mat-card class="summary__staging-error">
+          <mat-icon class="text-warning">warning</mat-icon>
+          <div>{{ errorMsg }}</div>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
     <app-tile-group>
       <app-tile>
         <mat-card>
@@ -77,7 +85,7 @@
                 <app-metadata-item icon="access_time" label="Modified">
                   {{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}
                 </app-metadata-item>
-                <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ sshStatus$ | async }}
+                <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">{{ sshStatus$ | async }}
                 </app-metadata-item>
               </div>
               <div class="app-metadata__two-cols">
@@ -87,7 +95,7 @@
                 <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
                   {{(applicationService.appSummary$ | async)?.entity?.services?.length || '0' }}
                 </app-metadata-item>
-                <app-metadata-item icon="network_route" iconFont="stratos-icons" label="Routes">
+                <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
                   {{(applicationService.appSummary$ | async)?.entity?.routes?.length || '0' }}
                 </app-metadata-item>
               </div>
@@ -110,7 +118,7 @@
                 <a
                   [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
               </app-metadata-item>
-              <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" icon="language" label="Space">
+              <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" iconFont="stratos-icons" icon="virtual_space" label="Space">
                 <a
                   [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
               </app-metadata-item>
@@ -141,12 +149,12 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile id="app-build-tab-deployment-info">
+      <app-tile id="app-build-tab-deployment-info" *ngIf="(deploySource$ | async) as deploySource">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
           </mat-card-header>
-          <mat-card-content *ngIf="(deploySource$ | async) as deploySource; else notDeployedFromStratos">
+          <mat-card-content>
             <span [ngSwitch]="deploySource.type">
               <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
                 <div matTooltip="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
@@ -166,7 +174,7 @@
               <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
                 Deployed from local file
               </app-metadata-item>
-              <app-metadata-item *ngSwitchCase="'docker'" iconFont="stratos-icons" icon="docker" label="Docker Image">
+              <app-metadata-item *ngSwitchCase="'docker'" iconFont="stratos-icons" icon="container" label="Docker Image">
                 <a *ngIf="deploySource.dockerUrl; else noDockerUrl" href="{{ deploySource.dockerUrl }}"
                   rel="noopener noreferrer" target="_blank">
                   {{deploySource.dockerImage}}
@@ -175,9 +183,39 @@
               </app-metadata-item>
             </span>
           </mat-card-content>
-          <ng-template #notDeployedFromStratos>
-            <mat-card-content>None</mat-card-content>
-          </ng-template>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+
+    <!-- Advanced info -->
+    <app-tile-group>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Additional Application Info</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">
+              {{ appSvc.app.entity.guid }}</app-metadata-item>
+            <app-metadata-item icon="chevron_right" label="Command">
+              {{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
+            <app-metadata-item icon="power" label="Ports">{{ appSvc.app.entity.ports || '-' }}</app-metadata-item>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+      <app-tile>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Health Check Configuration</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <app-metadata-item icon="favorite_border" label="Health Check Type">
+              {{ appSvc.app.entity.health_check_type }}</app-metadata-item>
+            <app-metadata-item icon="schedule" label="Health Check Timeout">
+              {{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
+            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http"
+              label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
+          </mat-card-content>
         </mat-card>
       </app-tile>
     </app-tile-group>

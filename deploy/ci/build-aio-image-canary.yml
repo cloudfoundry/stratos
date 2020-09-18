@@ -7,12 +7,10 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 - name: stratos-git-resource
   type: docker-image
   source:
     repository: splatform/stratos-git-tag-resource
-    tag: "latest"
 
 resources:
 # Stratos Git Repository
@@ -72,9 +70,10 @@ jobs:
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
-      tag: "stratos/deploy/ci/tasks/build-images/canary-tag"
+      tag: stratos/deploy/ci/tasks/build-images/canary-tag
       tag_as_latest: false
       labels_file: image-tag/image-labels
+      squash: true
       build_args_file: image-tag/ui-build-args
       build_args:
         CANARY_BUILD: true

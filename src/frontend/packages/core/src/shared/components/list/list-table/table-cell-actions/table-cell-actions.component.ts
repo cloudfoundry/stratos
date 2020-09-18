@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../../../../../store/src/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
@@ -40,7 +40,7 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   private subjects: BehaviorSubject<T>[] = [];
 
-  constructor(private store: Store<CFAppState>, public listConfig: ListConfig<T>) {
+  constructor(private store: Store<AppState>, public listConfig: ListConfig<T>) {
     super();
     this.actions = listConfig.getSingleActions();
   }

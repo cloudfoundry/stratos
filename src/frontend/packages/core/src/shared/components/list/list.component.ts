@@ -51,10 +51,10 @@ import {
 } from '../../../../../store/src/actions/list.actions';
 import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -110,15 +110,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
-  @Input() noEntriesMaxedResults: TemplateRef<any>;
-
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
   initialEntitySelection$: Observable<number>;
   pPaginator: MatPaginator;
   private filterString: string;
 
-  @ViewChild(MatPaginator, { static: false }) set setPaginator(paginator: MatPaginator) {
+  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
       return;
     }
@@ -145,7 +143,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     });
   }
 
-  @ViewChild('filter', { static: false }) set setFilter(filterValue: NgModel) {
+  @ViewChild('filter') set setFilter(filterValue: NgModel) {
     if (!filterValue || this.filterWidgetToStore) {
       return;
     }
@@ -232,7 +230,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     private store: Store<GeneralAppState>,
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
-    private ngZone: NgZone
+    private ngZone: NgZone,
   ) { }
 
   ngOnInit() {
@@ -692,8 +690,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         return observableOf(getDefaultRowState());
       }
       const catalogEntity = entityCatalog.getEntity(entityConfig);
-      const entityMonitor = catalogEntity.getEntityMonitor(
-        this.store,
+      const entityMonitor = catalogEntity.store.getEntityMonitor(
         dataSource.getRowUniqueId(row),
         {
           schemaKey: entityConfig.schemaKey
@@ -704,7 +701,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         map(requestInfo => ({
           deleting: requestInfo.deleting.busy,
           error: requestInfo.deleting.error,
-          message: requestInfo.deleting.error ? `Sorry, deletion failed` : null
+          message: requestInfo.deleting.error ? requestInfo.deleting.message || `Sorry, deletion failed` : null
         }))
       );
     };
@@ -713,4 +710,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   private getRowStateFromRowsState = (row: T): Observable<RowState> =>
     this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
 
+  public showAllAfterMax() {
+    this.dataSource.showAllAfterMax();
+  }
 }

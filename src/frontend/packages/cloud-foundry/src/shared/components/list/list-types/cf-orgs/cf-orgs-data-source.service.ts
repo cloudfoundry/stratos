@@ -1,4 +1,5 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -8,8 +9,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 

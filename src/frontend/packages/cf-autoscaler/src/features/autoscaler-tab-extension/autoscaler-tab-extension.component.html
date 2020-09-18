@@ -10,6 +10,12 @@
         <mat-icon class="nav-button-with-text__icon">delete</mat-icon> Delete Policy
       </span>
     </button>
+    <button *ngIf="canManageCredentials$ | async" mat-button name="credential" (click)="manageCredentialPage()"
+      class="nav-button-with-text">
+      <span class="nav-button-with-text__span">
+        <mat-icon class="nav-button-with-text__icon">vpn_key</mat-icon> Manage Credentials
+      </span>
+    </button>
   </ng-container>
   <ng-template #noPolicy>
     <button mat-button name="add" (click)="updatePolicyPage(true)" class="nav-button-with-text">
@@ -33,15 +39,15 @@
           </mat-card-header>
           <mat-card-content>
             <div class="app-metadata">
-              <div class="app-metadata__two-cols" *ngFor="let metricName of appAutoscalerAppMetricNames$ | async">
-                <app-metadata-item *ngIf="appAutoscalerAppMetrics[metricName] | async as metricData"
-                  label={{metricName}}>
-                  <ngx-charts-gauge [view]="[80, 80]" [margin]="[5, 5, 0, 5]"
-                    [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
-                    [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [textValue]=""
-                    [scheme]="'cool'" [min]="0" [max]="metricData[0].entity.chartMaxValue"
-                    [units]="metricData[0].entity.unit" [angleSpan]="240" [startAngle]="-120" [showAxis]="false"
-                    [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false" (select)="select($event)">
+              <div class="app-metadata__two-cols" *ngFor="let metric of appAutoscalerAppMetricNames$ | async">
+                <app-metadata-item label={{metric.name}}>
+                  <ngx-charts-gauge *ngIf="appAutoscalerAppMetrics[metric.name] | async as metricData" [view]="[80, 80]"
+                    [margin]="[5, 5, 0, 5]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
+                    [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [scheme]="'cool'" [min]="0"
+                    [max]="metricData[0].entity.chartMaxValue"
+                    [units]="metricData[0].entity.unit || metric.unit || '__'" [angleSpan]="240" [startAngle]="-120"
+                    [showAxis]="false" [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false"
+                    (select)="select($event)">
                   </ngx-charts-gauge>
                 </app-metadata-item>
               </div>
@@ -74,7 +80,7 @@
                   <ng-container matColumnDef="condition">
                     <th mat-header-cell *matHeaderCellDef> Condition </th>
                     <td mat-cell *matCellDef="let element">
-                      {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type)}} for
+                      {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type, element.unit)}} for
                       {{element.breach_duration_secs}} secs. </td>
                   </ng-container>
                   <ng-container matColumnDef="action">
@@ -190,7 +196,7 @@
           </mat-card-header>
           <mat-card-content>
             <div class="app-metadata app-metadata-table">
-              <table mat-table [dataSource]="scalingHistory.resources">
+              <table mat-table [dataSource]="scalingHistory">
                 <ng-container matColumnDef="event">
                   <th mat-header-cell *matHeaderCellDef> Event </th>
                   <td mat-cell *matCellDef="let element"> Instances scaled
@@ -212,7 +218,7 @@
                 <tr mat-header-row *matHeaderRowDef="scalingHistoryColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: scalingHistoryColumns;"></tr>
               </table>
-              <div class="autoscaler-tab-table-no-record" *ngIf="scalingHistory.resources.length == 0">
+              <div class="autoscaler-tab-table-no-record" *ngIf="scalingHistory.length == 0">
                 No events.</div>
             </div>
           </mat-card-content>

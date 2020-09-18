@@ -76,23 +76,24 @@ rm -rf "${KUBE_FOLDER}/*.tgz"
 # Build the chart with the specific version for images
 "${STRATOS}/deploy/kubernetes/build.sh" -z -c -n -t ${DEV_IMAGE_VERSION}
 
-CHART_FILE=$(ls ${KUBE_FOLDER}/*.tgz)
-CHART_FILE=$(printf %q "${CHART_FILE}")
+CHART_FILE="${KUBE_FOLDER}/console-${DEV_IMAGE_VERSION}.tgz"
 echo "Chart file path: ${CHART_FILE}"
 
 log "Upgrading using latest Helm Chart"
-helm upgrade ${NAME} ${CHART_FILE} --recreate-pods --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
+helm upgrade ${NAME} "${CHART_FILE}" --debug --set consoleVersion=${DEV_IMAGE_VERSION} --set imagePullPolicy=Always
 
 checkVersion console-${DEV_IMAGE_VERSION}
 waitForHelmRelease
 
+ls -al "${HELM_TMP}"
+
 # Change just the chart version and try to upgrade
-sed -i.bak -e 's/version: '"${DEV_IMAGE_VERSION}"'/version: 0.2.0/g' ${HELM_TMP}/Chart.yaml
-sed -i.bak -e 's/appVersion: '"${DEV_IMAGE_VERSION}"'/appVersion: 0.2.0/g' ${HELM_TMP}/Chart.yaml
-cat ${HELM_TMP}/Chart.yaml
+sed -i.bak -e 's/version: '"${DEV_IMAGE_VERSION}"'/version: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
+sed -i.bak -e 's/appVersion: '"${DEV_IMAGE_VERSION}"'/appVersion: 0.2.0/g' "${HELM_TMP}/Chart.yaml"
+cat "${HELM_TMP}/Chart.yaml"
 
 log "Upgrading using latest Helm Chart (checking chart upgrade)"
-helm upgrade ${NAME} ${HELM_TMP} --recreate-pods --debug --set imagePullPolicy=Always
+helm upgrade ${NAME} "${HELM_TMP}" --debug --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-0.2.0
@@ -101,7 +102,7 @@ checkVersion console-0.2.0
 deleteRelease
 
 log "Installing using latest Helm Chart"
-helm install ${CHART_FILE} --name ${NAME} --namespace ${NAMESPACE} --set imagePullPolicy=Always
+helm install "${CHART_FILE}" --name ${NAME} --namespace ${NAMESPACE} --set imagePullPolicy=Always
 
 waitForHelmRelease
 checkVersion console-${DEV_IMAGE_VERSION}
@@ -119,7 +120,7 @@ helm install ${HELM_REPO_NAME}/console --name ${NAME} --namespace ${NAMESPACE}
 waitForHelmRelease
 
 log "Upgrading using --reuse-values"
-helm upgrade ${NAME} ${HELM_TMP} --recreate-pods --debug --reuse-values
+helm upgrade ${NAME} "${HELM_TMP}" --debug --reuse-values
 
 waitForHelmRelease
 # Should have used same values as before

@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { IServiceInstance } from '../../../../../../../../core/src/core/cf-api-svc.types';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-table-cell-space-name',

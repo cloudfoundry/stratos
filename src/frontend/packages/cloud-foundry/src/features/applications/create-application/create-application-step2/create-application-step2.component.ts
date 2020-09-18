@@ -7,10 +7,8 @@ import { map } from 'rxjs/operators';
 
 import { SetNewAppName } from '../../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  AppNameUniqueChecking,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { AppNameUniqueChecking } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
 @Component({
   selector: 'app-create-application-step2',

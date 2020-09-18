@@ -1,13 +1,11 @@
+import { HttpParams, HttpRequest } from '@angular/common/http';
+
 import { EntityCatalogEntityConfig } from '../../../store/src/entity-catalog/entity-catalog.types';
-import {
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../entity-relations/entity-relations.types';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
-import { RequestEntityLocation, RequestActionEntity } from '../../../store/src/types/request.types';
-import { CFStartAction } from './cf-action.types';
+import { RequestActionEntity } from '../../../store/src/types/request.types';
 import { EntityTreeRelation } from '../entity-relations/entity-relation-tree';
-import { HttpRequest, HttpParams } from '@angular/common/http';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
+import { CFStartAction } from './cf-action.types';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -97,8 +95,6 @@ export class FetchRelationSingleAction extends FetchRelationAction {
       populateMissing,
       url,
     );
-    this.entityLocation = RequestEntityLocation.OBJECT;
     this.entity = child.entity;
   }
-  entityLocation: RequestEntityLocation;
 }

@@ -1,10 +1,11 @@
+import { HttpRequest } from '@angular/common/http';
+
 import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import { serviceBrokerEntityType } from '../cf-entity-types';
 import { CFStartAction } from './cf-action.types';
-import { HttpRequest } from '@angular/common/http';
 
 export class GetServiceBrokers extends CFStartAction implements PaginatedAction {
   constructor(

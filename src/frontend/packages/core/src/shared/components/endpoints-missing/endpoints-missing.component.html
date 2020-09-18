@@ -1,4 +1,4 @@
 <app-no-content-message *ngIf="noContent$ | async as message" [icon]="'settings_ethernet'" [hidden]="!message"
   [firstLine]="message.firstLine" [secondLine]="showDirectToEndpointMessage ? message.secondLine : null"
-  [toolbarLink]="message.toolbarLink">
+  [toolbarLink]="message.toolbarLink" toolbarAlign="stratos-add-endpoint">
 </app-no-content-message>

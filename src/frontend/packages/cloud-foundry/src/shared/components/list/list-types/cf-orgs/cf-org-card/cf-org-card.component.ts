@@ -1,43 +1,38 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { createUserRoleInOrg } from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IApp, IOrganization } from '../../../../../../../../core/src/core/cf-api.types';
-import { getStartedAppInstanceCount } from '../../../../../../../../core/src/core/cf.helpers';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { getFavoriteFromCfEntity } from '../../../../../../../../core/src/core/user-favorite-helpers';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
-import {
-  MetaCardMenuItem,
-} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
+import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../core/src/shared/shared.types';
-import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
+import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
-import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { OrgQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization-quota';
-import {
-  createOrgQuotaDefinition,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
+import { getOrgRolesString } from '../../../../../../features/cf/cf.helpers';
+import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { OrgQuotaHelper } from '../../../../../../features/cf/services/cloud-foundry-organization-quota';
+import { createOrgQuotaDefinition } from '../../../../../../features/cf/services/cloud-foundry-organization.service';
+import { createUserRoleInOrg } from '../../../../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { CF_ENDPOINT_TYPE } from './../../../../../../cf-types';
 
 
 @Component({
@@ -46,7 +41,7 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   styleUrls: ['./cf-org-card.component.scss']
 })
 export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {
-  cardMenu: MetaCardMenuItem[];
+  cardMenu: MenuItem[];
   orgGuid: string;
   normalisedMemoryUsage: number;
   memoryLimit: string;
@@ -77,12 +72,12 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       {
         label: 'Edit',
         action: this.edit,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
       },
       {
         label: 'Delete',
         action: this.delete,
-        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
+        can: this.currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
   }
@@ -97,9 +92,11 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
         return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u)),
+      publishReplay(1),
+      refCount()
     );
 
-    this.favorite = getFavoriteFromCfEntity(this.row, organizationEntityType, this.favoritesConfigMapper);
+    this.favorite = getFavoriteFromEntity(this.row, organizationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

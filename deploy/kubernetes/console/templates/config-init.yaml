@@ -94,8 +94,16 @@ spec:
 {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
 {{- end }}
     spec:
+{{- if .Values.configInit }}
+{{- if .Values.configInit.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | trim  | indent 8 }}
+{{- end }}
+{{- end }}
       containers:
       - env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
         - name: "STRATOS_VOLUME_MIGRATION"
           value: "true"
         - name: "IS_UPGRADE"
@@ -110,26 +118,14 @@ spec:
           value: "{{ .Chart.AppVersion }}"
         - name: "HELM_CHART"
           value:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-        - name: ENCRYPTION_KEY_VOLUME
-          value: "/{{ .Release.Name }}-encryption-key-volume"
-        - name: ENCRYPTION_KEY_FILENAME
-          value: key
         - name: CONSOLE_TLS_SECRET_NAME
           value: "{{ default "" .Values.console.tlsSecretName }}"
-        - name: CONSOLE_PROXY_CERT_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt"
-        - name: CONSOLE_PROXY_CERT_KEY_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.key"
         image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{default "stratos-config-init" .Values.images.configInit}}:{{.Values.consoleVersion}}
         command: ["/config-init.sh"]
         imagePullPolicy: {{.Values.imagePullPolicy}}
         livenessProbe: ~
         name: "config-init"
         readinessProbe: ~
-        volumeMounts:
-          - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
-            name: "{{ .Release.Name }}-encryption-key-volume"
-            readOnly: true
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
@@ -139,10 +135,6 @@ spec:
       serviceAccountName: "config-init"
       {{- end }}
       terminationGracePeriodSeconds: 600
-      volumes:
-      - name: "{{ .Release.Name }}-encryption-key-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-encryption-key-volume"
 ---
 {{- if .Values.autoCleanup }}
 # Cleanup job will delete the created secret when the release is deleted
@@ -170,6 +162,10 @@ spec:
         app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
         helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
+{{- if .Values.configInit }}
+      nodeSelector:
+{{ toYaml .Values.configInit.nodeSelector | indent 8 }}
+{{- end }}
       containers:
       - env:
         - name: "NAMESPACE"

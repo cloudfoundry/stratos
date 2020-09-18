@@ -5,9 +5,9 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { ListFilter, ListSort } from '../../../../../../store/src/actions/list.actions';
 import { MetricsAction } from '../../../../../../store/src/actions/metrics.actions';
 import { IRequestEntityTypeState } from '../../../../../../store/src/app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 import { EntityCatalogEntityConfig } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../../../store/src/types/pagination.types';
 
 export interface IEntitySelectItem {
   page: number;
@@ -60,16 +60,33 @@ export class ListActionConfig<T> {
 
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-
   getRowState?(row: T, schemaKey?: string): Observable<RowState>;
   trackBy(index: number, item: T);
 }
 
-export interface ITableListDataSource<T> extends ICoreListDataSource<T> {
+interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
+  isTableLoading$?: Observable<boolean>;
+
+  selectAllChecked?: boolean; // Select items - remove once ng-content can exist in md-table
+  selectAllIndeterminate?: boolean; // Select all checkbox as indeterminate
+  selectedRows?: Map<string, T>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$?: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectAllFilteredRows?: () => void; // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle?: (row: T, multiMode?: boolean) => void; // Select items - remove once ng-content can exist in md-table
+  selectClear?: () => void;
+
+  editRow?: T; // Edit items - remove once ng-content can exist in md-table
+  startEdit?: (row: T) => void; // Edit items - remove once ng-content can exist in md-table
+  saveEdit?: () => void; // Edit items - remove once ng-content can exist in md-table
+  cancelEdit?: () => void; // Edit items - remove once ng-content can exist in md-table
+  getRowUniqueId?: getRowUniqueId<T>;
+}
+
+export interface ITableListDataSource<T> extends ICoreTableListDataSource<T> {
   isTableLoading$: Observable<boolean>;
 }
 
-export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalogEntityConfig {
+export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableListDataSource<T>, EntityCatalogEntityConfig {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((
@@ -91,23 +108,15 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   isLoadingPage$: Observable<boolean>;
 
   maxedResults$: Observable<boolean>;
+  maxedStateStartAt$: Observable<number>;
   filter$: Observable<ListFilter>;
   sort$: Observable<ListSort>;
 
-  editRow: T; // Edit items - remove once ng-content can exist in md-table
 
-  selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
-  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+
   getRowUniqueId: getRowUniqueId<T>;
   entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
-  selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
-  selectClear();
 
-  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
-  saveEdit(); // Edit items - remove once ng-content can exist in md-table
-  cancelEdit(); // Edit items - remove once ng-content can exist in md-table
   destroy();
   /**
    * Set's data source specific text filter param
@@ -124,7 +133,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   refresh();
 
   updateMetricsAction(newAction: MetricsAction);
-
+  /**
+   * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
+   */
+  showAllAfterMax();
 }
 
 export type getRowUniqueId<T> = (T) => string;

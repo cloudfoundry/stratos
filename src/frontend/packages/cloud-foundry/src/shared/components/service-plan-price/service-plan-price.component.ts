@@ -2,8 +2,8 @@ import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { Component, Input } from '@angular/core';
 
-import { IServicePlan, IServicePlanCost } from '../../../../../core/src/core/cf-api-svc.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 
 
 @Component({

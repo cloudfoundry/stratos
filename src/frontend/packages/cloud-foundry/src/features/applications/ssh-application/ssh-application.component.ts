@@ -1,14 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { NEVER, Observable, Subject, Subscription } from 'rxjs';
+import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { IApp } from '../../../../../core/src/core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
+import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 
 

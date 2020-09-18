@@ -14,6 +14,14 @@ export interface ActionState {
   message: string;
 }
 
+// Status of an action
+export interface ActionStatus {
+  busy: boolean;
+  error: boolean;
+  message?: string;
+  completed: boolean;
+}
+
 /**
  * Multi action lists can have different entity types per page
  * We use schemaKey to track this type
@@ -45,7 +53,7 @@ export const defaultDeletingActionState = {
 };
 
 export interface UpdatingSection {
-  _root_: ActionState;
+  [rootUpdatingKey]: ActionState;
   [key: string]: ActionState;
 }
 export interface RequestInfoState {
@@ -61,7 +69,7 @@ export interface RequestInfoState {
 const defaultRequestState = {
   fetching: false,
   updating: {
-    _root_: getDefaultActionState()
+    [rootUpdatingKey]: getDefaultActionState()
   },
   creating: false,
   error: false,

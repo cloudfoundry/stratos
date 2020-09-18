@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -6,9 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
-import { IApp, IOrganization, ISpace } from '../../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../core/src/core/current-user-permissions.service';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -17,28 +14,25 @@ import {
   StratosActionType,
   StratosTabType,
 } from '../../../../../../core/src/core/extension/extension-service';
-import { getFavoriteFromCfEntity } from '../../../../../../core/src/core/user-favorite-helpers';
+import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import {
-  ApplicationStateData,
-} from '../../../../../../core/src/shared/components/application-state/application-state.service';
-import {
-  FavoritesConfigMapper,
-} from '../../../../../../core/src/shared/components/favorites-meta-card/favorite-config-mapper';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
-import { GitSCMService, GitSCMType } from '../../../../../../core/src/shared/data-services/scm/scm.service';
-import { ENTITY_SERVICE } from '../../../../../../core/src/shared/entity.tokens';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../../../store/src/entity-service';
+import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
+import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
+import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { ApplicationStateData } from '../../../../shared/services/application-state.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
@@ -54,7 +48,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromCfEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper))
+    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
@@ -63,7 +57,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    @Inject(ENTITY_SERVICE) private entityService: EntityService<APIResource>,
     private store: Store<CFAppState>,
     private endpointsService: EndpointsService,
     private ngZone: NgZone,
@@ -93,16 +86,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
 
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
-      switchMap(space => this.currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
+      switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.metadata.guid)
       ),
-      map(can => !can)
+      map(can => !can),
     );
 
     this.tabLinks = [
-      { link: 'summary', label: 'Summary', icon: 'description' },
-      { link: 'instances', label: 'Instances', icon: 'library_books' },
-      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'network_route' },
+      { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },
+      { link: 'instances', label: 'Instances', iconFont: 'stratos-icons', icon: 'application_instance' },
+      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'route' },
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
       { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
       { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
@@ -248,7 +241,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
+    this.appSub$ = this.applicationService.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
         requestInfo.error
@@ -259,7 +252,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
-    this.isBusyUpdating$ = this.entityService.updatingSection$.pipe(
+    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);

@@ -1,7 +1,16 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetServicePlansForService } from '../actions/service.actions';
 
-export const servicePlanActionBuilders = {
+export interface ServicePlanActionBuilders extends OrchestratedActionBuilders {
+  getAllForServiceInstance: (
+    serviceGuid: string,
+    endpointGuid: string,
+    paginationKey: string,
+    includeRelations?: string[]
+  ) => GetServicePlansForService
+};
+
+export const servicePlanActionBuilders: ServicePlanActionBuilders = {
   getAllForServiceInstance: (
     serviceGuid: string,
     endpointGuid: string,
@@ -13,4 +22,4 @@ export const servicePlanActionBuilders = {
     paginationKey,
     includeRelations
   )
-} as OrchestratedActionBuilders;
+};

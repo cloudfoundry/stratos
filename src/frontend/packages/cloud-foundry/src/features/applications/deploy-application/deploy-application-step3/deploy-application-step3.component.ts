@@ -10,14 +10,12 @@ import {
 } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { appEnvVarsEntityType, applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
@@ -34,6 +32,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // Validation observable
   valid$: Observable<boolean>;
 
+  showOverlay$: Observable<boolean>;
+
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
@@ -43,9 +43,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private deploySub: Subscription;
   private errorSub: Subscription;
   private validSub: Subscription;
+  private busySub: Subscription;
 
-  private appEnvVarCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-  private appCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
+  public busy = false;
 
   constructor(
     private store: Store<CFAppState>,
@@ -79,15 +79,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.appGuid = guid;
 
       // Update the root app wall list
-      this.appCatalogEntity.actionDispatchManager.dispatchGetMultiple(
-        null,
-        CfAppsDataSource.paginationKey,
-        CfAppsDataSource.includeRelations
-      );
-      // this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+      cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
+        includeRelations: CfAppsDataSource.includeRelations,
+      });
+
       // Pre-fetch the app env vars
-      this.appEnvVarCatalogEntity.actionDispatchManager.dispatchGet(this.appGuid, this.deployer.cfGuid);
-      // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.deployer.cfGuid));
+      cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
     });
 
     this.closeable$ = observableCombineLatest(
@@ -97,10 +94,18 @@ export class DeployApplicationStep3Component implements OnDestroy {
           return validated || status.error;
         })
       );
+
+    this.busySub = this.deployer.status$.subscribe(status => this.busy = status.deploying);
+
+    this.showOverlay$ = this.deployer.status$.pipe(
+      map(status => {
+        return !status.deploying || status.deploying && !this.deployer.streamTitle;
+      })
+    );
   }
 
   private destroyDeployer() {
-    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub);
+    safeUnsubscribe(this.deploySub, this.errorSub, this.validSub, this.busySub);
   }
 
   ngOnDestroy() {
@@ -145,6 +150,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       // Ask the existing deployer to continue deploying
       this.deployer.deploy();
     }
+    this.busy = true;
   }
 
   onNext: StepOnNextFunction = () => {
@@ -158,11 +164,10 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      this.appEnvVarCatalogEntity.actionDispatchManager.dispatchGet(this.appGuid, cfGuid);
-      // this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+      cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
 
       // Ensure the application package_state is correct
-      this.appCatalogEntity.actionDispatchManager.dispatchGet(
+      cfEntityCatalog.application.api.get(
         this.appGuid,
         cfGuid,
         { includeRelations: [], populateMissing: false }

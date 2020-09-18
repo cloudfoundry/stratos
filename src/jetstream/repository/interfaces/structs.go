@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 )
@@ -20,6 +21,7 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+// V2Info is the response for the Cloud Foundry /v2/info API
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
 	TokenEndpoint            string `json:"token_endpoint"`
@@ -27,6 +29,10 @@ type V2Info struct {
 	AppSSHEndpoint           string `json:"app_ssh_endpoint"`
 	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint"`
 	AppSSHOauthCLient        string `json:"app_ssh_oauth_client"`
+	APIVersion               string `json:"api_version"`
+	RoutingEndpoint          string `json:"routing_endpoint"`
+	MinCLIVersion            string `json:"min_cli_version"`
+	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
@@ -80,13 +86,21 @@ const (
 	AuthConnectTypeNone = "none"
 )
 
-// Token record for an endpoint (includes the Endpoint GUID)
-type EndpointTokenRecord struct {
-	*TokenRecord
-	EndpointGUID    string
-	EndpointType    string
-	APIEndpint      string
-	LoggingEndpoint string
+// // Token record for an endpoint (includes the Endpoint GUID)
+// type EndpointTokenRecord struct {
+// 	*TokenRecord
+// 	EndpointGUID    string
+// 	EndpointType    string
+// 	APIEndpint      string
+// 	LoggingEndpoint string
+// }
+
+// BackupTokenRecord used when backing up tokens
+type BackupTokenRecord struct {
+	TokenRecord  TokenRecord
+	UserGUID     string
+	EndpointGUID string
+	TokenType    string
 }
 
 // TokenRecord repsrents and endpoint or uaa token
@@ -201,7 +215,10 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview bool `json:"enableTechPreview"`
+		TechPreview        bool   `json:"enableTechPreview"`
+		ListMaxSize        int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled     string `json:"APIKeysEnabled"`
 	} `json:"config"`
 }
 
@@ -339,6 +356,8 @@ type PortalConfig struct {
 	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                           string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
 	CFAdminIdentifier                  string
 	CloudFoundryInfo                   *CFInfo
 	HTTPS                              bool
@@ -352,6 +371,7 @@ type PortalConfig struct {
 	DatabaseProviderName               string
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 	CanMigrateDatabaseSchema           bool
+	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

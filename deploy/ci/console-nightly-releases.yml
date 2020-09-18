@@ -7,7 +7,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 
 resources:
 - name: midnight
@@ -107,25 +106,25 @@ jobs:
           dockerfile: stratos/deploy/Dockerfile.bk
           build: stratos/
           target_name:  prod-build
-          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+          tag: stratos/deploy/ci/tasks/build-images/nightly-tag
           build_args_file: image-tag/build-args
       - put: mariadb-image
         params:
           dockerfile: stratos/deploy/db/Dockerfile.mariadb
           build: stratos/deploy/db
-          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+          tag: stratos/deploy/ci/tasks/build-images/nightly-tag
     - do:
       - put: config-init-image
         params:
           dockerfile: stratos/deploy/Dockerfile.init
           build: stratos/
-          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+          tag: stratos/deploy/ci/tasks/build-images/nightly-tag
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
           build: stratos/
           target_name: prod-build
-          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+          tag: stratos/deploy/ci/tasks/build-images/nightly-tag
           prebuild_script: build/store-git-metadata.sh
 - name: create-chart
   plan:
@@ -154,7 +153,7 @@ jobs:
     - put: nightly-gh-release
       params:
         name: stratos/deploy/ci/tasks/dev-releases/nightly-release-name
-        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+        tag: stratos/deploy/ci/tasks/build-images/nightly-tag
         body: stratos/deploy/ci/tasks/dev-releases/nightly-release-description
         globs:
         - helm-chart-tarball/*.tgz

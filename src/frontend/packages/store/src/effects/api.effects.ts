@@ -3,13 +3,14 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { baseRequestPipelineFactory } from '../entity-request-pipeline/base-single-entity-request.pipeline';
 import { basePaginatedRequestPipeline } from '../entity-request-pipeline/entity-pagination-request-pipeline';
 import { apiRequestPipelineFactory } from '../entity-request-pipeline/entity-request-pipeline';
 import { PipelineHttpClient } from '../entity-request-pipeline/pipline-http-client.service';
 import { PaginatedAction } from '../types/pagination.types';
-import { ICFAction } from '../types/request.types';
-import { ApiActionTypes } from './../actions/request.actions';
+import { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
+import { ApiActionTypes, RequestTypes } from './../actions/request.actions';
 import { InternalAppState } from './../app-state';
 
 @Injectable()
@@ -18,9 +19,7 @@ export class APIEffect {
     private actions$: Actions,
     private store: Store<InternalAppState>,
     private httpClient: PipelineHttpClient
-  ) {
-
-  }
+  ) { }
 
   @Effect()
   apiRequest$ = this.actions$.pipe(
@@ -42,6 +41,24 @@ export class APIEffect {
         appState
       });
     }),
+  );
+
+  // Whenever we spot a delete success operation, look to see if the action
+  // fulfils the entity delete requirements and dispatch an entity delete action if it does
+  @Effect()
+  apiDeleteRequest$ = this.actions$.pipe(
+    ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
+    withLatestFrom(this.store),
+    mergeMap(([action, appState]) => {
+      if (action.requestType === 'delete') {
+        const deleteAction = EntityDeleteCompleteAction.parse(action.apiAction);
+        if (deleteAction) {
+          // Dispatch a delete action for the entity
+          this.store.dispatch(deleteAction);
+        }
+      }
+      return [];
+    })
   );
 
 }

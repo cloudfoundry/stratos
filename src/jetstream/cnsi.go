@@ -278,8 +278,8 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
-func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndointMetadata")
+func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndpointMetadata")
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -528,6 +528,109 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 		msg := "Unable to delete a CNSI Token: %v"
 		log.Errorf(msg, err)
 		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+func (p *portalProxy) updateEndpoint(c echo.Context) error {
+	log.Debug("updateEndpoint")
+
+	endpointID := c.Param("id")
+
+	// Check we have an ID
+	if len(endpointID) == 0 {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need Endpoint ID")
+	}
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	endpoint, err := cnsiRepo.Find(endpointID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return fmt.Errorf("Could not find the endpoint %s: '%v'", endpointID, err)
+	}
+
+	updates := false
+
+	// Update name
+	name := c.FormValue("name")
+	if len(name) > 0 {
+		endpoint.Name = name
+		updates = true
+	}
+
+	// Skip SSL validation
+	skipSSL := c.FormValue("skipSSL")
+	if len(skipSSL) > 0 {
+		v, err := strconv.ParseBool(skipSSL)
+		if err == nil {
+			if v != endpoint.SkipSSLValidation {
+				// SSL Validation value changed
+				endpoint.SkipSSLValidation = v
+				updates = true
+				if !v {
+					// Skip SSL validation is OFF - so check we can communicate with the endpoint
+					plugin, err := p.GetEndpointTypeSpec(endpoint.CNSIType)
+					if err != nil {
+						return fmt.Errorf("Can not get endpoint type for %s: '%v'", endpoint.CNSIType, err)
+					}
+					_, _, err = plugin.Info(endpoint.APIEndpoint.String(), endpoint.SkipSSLValidation)
+					if err != nil {
+						if ok, detail := isSSLRelatedError(err); ok {
+							return interfaces.NewHTTPShadowError(
+								http.StatusForbidden,
+								"SSL error - "+detail,
+								"There is a problem with the server Certificate - %s",
+								detail)
+						}
+						return interfaces.NewHTTPShadowError(
+							http.StatusBadRequest,
+							fmt.Sprintf("Could not validate endpoint: %v", err),
+							"Could not validate endpoint: %v",
+							err)
+					}
+				}
+			}
+		}
+	}
+
+	// Client ID and Client Secret
+	setClientInfo := c.FormValue("setClientInfo")
+	isSet, err := strconv.ParseBool(setClientInfo)
+	if err == nil && isSet {
+		clientID := c.FormValue("clientID")
+		clientSecret := c.FormValue("clientSecret")
+		endpoint.ClientId = clientID
+		endpoint.ClientSecret = clientSecret
+		updates = true
+	}
+
+	// Allow SSO
+	allowSSO := c.FormValue("allowSSO")
+	if len(allowSSO) > 0 {
+		v, err := strconv.ParseBool(allowSSO)
+		if err == nil {
+			if v != endpoint.SSOAllowed {
+				// Allow SSO value changed
+				endpoint.SSOAllowed = v
+				updates = true
+			}
+		}
+	}
+
+	// Apply updates
+	if updates {
+		err := cnsiRepo.Update(endpoint, p.Config.EncryptionKeyInBytes)
+		if err != nil {
+			return fmt.Errorf("Could not update the endpoint %s: '%v'", endpointID, err)
+		}
 	}
 
 	return nil

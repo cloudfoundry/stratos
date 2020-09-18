@@ -1,7 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { BaseTestModules } from '../../../../../../../test-framework/core-test.helper';
+import {
+  MetricsEndpointDetailsComponent,
+} from '../../../../../../features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
+import { MetricsService } from '../../../../../../features/metrics/services/metrics-service';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
 
@@ -11,11 +16,18 @@ describe('EndpointCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [],
+      declarations: [MetricsEndpointDetailsComponent],
       imports: [
         ...BaseTestModules
       ],
-      providers: [EndpointListHelper]
+      providers: [
+        EndpointListHelper,
+        MetricsService
+      ],
+    }).overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [MetricsEndpointDetailsComponent],
+      }
     })
       .compileComponents();
   }));

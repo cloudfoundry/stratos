@@ -5,10 +5,13 @@ import { tap } from 'rxjs/operators';
 
 import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { ListExpandedComponentType } from '../list.component.types';
 import { ListSort } from './../../../../../../store/src/actions/list.actions';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
+import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { TableRowExpandedService } from './table-row/table-row-expanded-service';
 import { ITableColumn } from './table.types';
 
 
@@ -18,6 +21,13 @@ const tableColumnSelect: ITableColumn<any> = {
   cellComponent: TableCellSelectComponent,
   class: 'table-column-select',
   cellFlex: '0 0 60px'
+};
+
+const tableColumnExpander: ITableColumn<any> = {
+  columnId: 'expander',
+  headerCellComponent: TableCellExpanderComponent,
+  cellComponent: TableCellExpanderComponent,
+  cellFlex: '0 0 47px',
 };
 
 const tableColumnAction: ITableColumn<any> = {
@@ -31,7 +41,10 @@ const tableColumnAction: ITableColumn<any> = {
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss']
+  styleUrls: ['./table.component.scss'],
+  providers: [
+    TableRowExpandedService
+  ]
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
 
@@ -43,18 +56,32 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() hideTable = false;
   @Input() addSelect = false;
   @Input() addActions = false;
+  @Input() expandComponent: ListExpandedComponentType<T>;
+  @Input() inExpandedRow = false;
   @Input() dataSource: ITableListDataSource<T>;
   @Input() paginationController = null as IListPaginationController<T>;
   @Input() columns: ITableColumn<T>[];
   public columnNames: string[];
 
-  @Input() fixedRowHeight = false;
+  @Input() minRowHeight: string;
+  @Input() prominentErrorBar = true;
 
   ngOnInit() {
-    if (this.addSelect || this.addActions) {
+    if (this.addSelect || this.expandComponent || this.addActions) {
       const newColumns = [...this.columns];
       if (this.addSelect) {
         newColumns.splice(0, 0, tableColumnSelect);
+      }
+      if (this.expandComponent) {
+        newColumns.splice(0, 0, {
+          ...tableColumnExpander,
+          cellConfig: (row: T) => {
+            const res: TableCellExpanderConfig = {
+              rowId: this.dataSource.trackBy(null, row)
+            };
+            return res;
+          }
+        });
       }
       if (this.addActions) {
         newColumns.push(tableColumnAction);

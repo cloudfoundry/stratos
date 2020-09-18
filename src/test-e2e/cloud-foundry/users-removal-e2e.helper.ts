@@ -1,10 +1,10 @@
 import { browser, by, element, promise } from 'protractor';
 import { protractor } from 'protractor/built/ptor';
 
-import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/user.types';
+import { CfUser } from '../../frontend/packages/cloud-foundry/src/store/types/cf-user.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e } from '../e2e';
-import { CFHelpers } from '../helpers/cf-helpers';
+import { CFHelpers } from '../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { UaaHelpers } from '../helpers/uaa-helpers';
 import { CFUsersListComponent } from '../po/cf-users-list.po';
@@ -103,10 +103,9 @@ export function setupCfUserRemovalTests(
   }, 75000);
 
   it('Clicks on remove menu option', () => {
-
     const usersTable = new CFUsersListComponent();
     usersTable.header.setSearchText(userName);
-    expect(usersTable.getTotalResults()).toBe(1, `Failed to find user in table: ${userName}`);
+    usersTable.waitForTotalResultsToBe(1, 10000, `Failed to find user in table: ${userName}`);
 
     if (removalLevel === CfRolesRemovalLevel.OrgsSpaces) {
       usersTable.table.openRowActionMenuByIndex(0).clickItem('Remove from org');
@@ -115,11 +114,12 @@ export function setupCfUserRemovalTests(
     }
 
     removeUsersStepper = removeUsersPage.stepper;
+    removeUsersStepper.waitUntilShown('Remove Users Stepper');
 
     // ... check button state
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
   });
 
   it('Confirm roles removal', () => {
@@ -140,15 +140,16 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget);
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeTruthy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeTruthy('Cancel button should be visible and enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
+
 
     // apply roles removal changes
     removeUsersStepper.next();
 
-    confirmStep.actionTable.table.waitUntilNotBusy();
+    confirmStep.actionTable.table.waitUntilNotBusy('Failed to wait for busy state');
 
     // Wait until all of the spinners have gone
     const spinners = element.all(by.tagName('mat-progress-spinner'));
@@ -163,10 +164,10 @@ export function setupCfUserRemovalTests(
       actionTableDate = createActionTableDate(orgTarget, spaceTarget, 'done');
     }
 
-    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate);
-    expect(removeUsersStepper.canPrevious()).toBeFalsy();
-    expect(removeUsersStepper.canCancel()).toBeFalsy();
-    expect(removeUsersStepper.canNext()).toBeTruthy();
+    expect(confirmStep.actionTable.table.getTableData()).toEqual(actionTableDate, 'Table data did not match expected content');
+    expect(removeUsersStepper.canPrevious()).toBeFalsy('Previous button should not be visible');
+    expect(removeUsersStepper.canCancel()).toBeFalsy('Cancel button should not be visible//enabled');
+    expect(removeUsersStepper.canNext()).toBeTruthy('Next button should be visible and enabled');
 
     // close
     removeUsersStepper.next();

@@ -1,9 +1,9 @@
-import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
-import { BaseRouteAction, RouteEvents } from '../../actions/route.actions';
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
-import { IApp } from '../../../../core/src/core/cf-api.types';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
+import { BaseRouteAction, RouteEvents } from '../../actions/route.actions';
+import { IApp } from '../../cf-api.types';
 
 export function updateApplicationRoutesReducer() {
   return (

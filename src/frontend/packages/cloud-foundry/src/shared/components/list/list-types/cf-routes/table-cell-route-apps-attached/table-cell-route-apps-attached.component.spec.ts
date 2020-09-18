@@ -4,8 +4,8 @@ import { AppChipsComponent } from '../../../../../../../../core/src/shared/compo
 import {
   generateCfBaseTestModulesNoShared,
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
-import { CloudFoundrySpaceService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { CloudFoundrySpaceService } from '../../../../../../features/cf/services/cloud-foundry-space.service';
 import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached.component';
 
 describe('TableCellRouteAppsAttachedComponent', () => {

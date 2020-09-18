@@ -1,6 +1,7 @@
-import * as moment from 'moment';
+import { Injectable, Type } from '@angular/core';
+import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -12,6 +13,7 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
+import { CardCell } from './list.types';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -79,9 +81,9 @@ export interface IListConfig<T> {
    */
   enableTextFilter?: boolean;
   /**
-   * Fix the height of a table row
+   * Set a custom value for the minimum height of a table row
    */
-  tableFixedRowHeight?: boolean;
+  minRowHeight?: string;
   /**
    * Set the align-self of each cell in the row
    */
@@ -90,6 +92,13 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: CardTypes<T>;
+  /**
+   * The component to show when expanding a row
+   */
+  expandComponent?: ListExpandedComponentType<T>;
+  /**
+   * Hide the fresh button
+   */
   hideRefresh?: boolean;
   /**
    * Allow selection regardless of number or visibility of multi actions
@@ -121,9 +130,11 @@ export interface IListMultiFilterConfig {
   key: string;
   label: string;
   allLabel?: string;
+  hideAllOption?: boolean;
   list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
   select: BehaviorSubject<any>;
+  autoSelectFirst?: boolean;
 }
 
 export interface IListFilter {
@@ -142,11 +153,12 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
+@Injectable()
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text = null;
+  text: ITableText = null;
   enableTextFilter = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
@@ -193,11 +205,12 @@ export class MultiFilterManager<T> {
   public filterIsReady$: Observable<boolean>;
   public filterItems$: Observable<IListMultiFilterConfigItem[]>;
   public hasItems$: Observable<boolean>;
-  public hasOneItem$: Observable<boolean>;
+  public hasOneOrLessItems$: Observable<boolean>;
   public value: string;
 
   public filterKey: string;
   public allLabel: string;
+  public hideAllOption = false;
 
   constructor(
     public multiFilterConfig: IListMultiFilterConfig,
@@ -205,10 +218,20 @@ export class MultiFilterManager<T> {
   ) {
     this.filterKey = this.multiFilterConfig.key;
     this.allLabel = multiFilterConfig.allLabel || 'All';
+    this.hideAllOption = multiFilterConfig.hideAllOption || false;
     this.filterItems$ = this.getItemObservable(multiFilterConfig);
-    this.hasOneItem$ = this.filterItems$.pipe(map(items => items.length === 1));
+    this.hasOneOrLessItems$ = this.filterItems$.pipe(map(items => items.length <= 1));
     this.hasItems$ = this.filterItems$.pipe(map(items => !!items.length));
     this.filterIsReady$ = this.getReadyObservable(multiFilterConfig, dataSource, this.hasItems$);
+
+    // Also select the first option if configured
+    if (multiFilterConfig.autoSelectFirst) {
+      this.filterItems$.pipe(first()).subscribe(options => {
+        if (options && options.length > 0) {
+          this.selectItem(options[0].value);
+        }
+      });
+    }
   }
 
   private getReadyObservable(
@@ -245,3 +268,5 @@ export class MultiFilterManager<T> {
     this.value = itemValue;
   }
 }
+
+export type ListExpandedComponentType<T> = Type<CardCell<T>>;

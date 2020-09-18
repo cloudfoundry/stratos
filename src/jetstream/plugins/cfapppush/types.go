@@ -50,10 +50,10 @@ type GitSCMSourceInfo struct {
 // Structure used to provide metadata about the Git Url source
 type GitUrlSourceInfo struct {
 	DeploySource
-	Project    string `json:"project"`
+	Project    string `json:"project"` // Not sent from client
 	Branch     string `json:"branch"`
 	Url        string `json:"url"`
-	CommitHash string `json:"commit"`
+	CommitHash string `json:"commit"` // Not sent from client
 }
 
 // DockerImageSourceInfo - Structure used to provide metadata about the docker source
@@ -75,36 +75,30 @@ type MessageType int
 
 // Based on manifest.rawManifestApplicaiton
 type RawManifestApplication struct {
-	Name                    string                 `yaml:"name,omitempty"`
-	Buildpack               string                 `yaml:"buildpack,omitempty"`
-	Command                 string                 `yaml:"command,omitempty"`
-	DeprecatedDomain        interface{}            `yaml:"domain,omitempty"`
-	DeprecatedDomains       interface{}            `yaml:"domains,omitempty"`
-	DeprecatedHost          interface{}            `yaml:"host,omitempty"`
-	DeprecatedHosts         interface{}            `yaml:"hosts,omitempty"`
-	DeprecatedNoHostname    interface{}            `yaml:"no-hostname,omitempty"`
-	DiskQuota               string                 `yaml:"disk_quota,omitempty"`
-	Docker                  rawDockerInfo          `yaml:"docker,omitempty"`
-	DropletPath             string                 `yaml:"droplet-path,omitempty"`
-	EnvironmentVariables    map[string]interface{} `yaml:"env,omitempty"`
-	HealthCheckHTTPEndpoint string                 `yaml:"health-check-http-endpoint,omitempty"`
-	HealthCheckType         string                 `yaml:"health-check-type,omitempty"`
-	Instances               *int                   `yaml:"instances,omitempty"`
-	Memory                  string                 `yaml:"memory,omitempty"`
-	NoRoute                 bool                   `yaml:"no-route,omitempty"`
-	Path                    string                 `yaml:"path,omitempty"`
-	RandomRoute             bool                   `yaml:"random-route,omitempty"`
-	Routes                  []rawManifestRoute     `yaml:"routes,omitempty"`
-	Services                []string               `yaml:"services,omitempty"`
-	StackName               string                 `yaml:"stack,omitempty"`
-	Timeout                 int                    `yaml:"timeout,omitempty"`
-	DockerImage             string                 `json:"docker_image,omitempty"`
-	DockerCredentials       DockerCredentials      `json:"docker_credentials,omitempty"`
-}
-
-type DockerCredentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Name                    string             `yaml:"name,omitempty"`
+	Buildpack               string             `yaml:"buildpack,omitempty"`
+	Buildpacks              []string           `yaml:"buildpacks,omitempty"`
+	Command                 string             `yaml:"command,omitempty"`
+	DeprecatedDomain        interface{}        `yaml:"domain,omitempty"`
+	DeprecatedDomains       interface{}        `yaml:"domains,omitempty"`
+	DeprecatedHost          interface{}        `yaml:"host,omitempty"`
+	DeprecatedHosts         interface{}        `yaml:"hosts,omitempty"`
+	DeprecatedNoHostname    interface{}        `yaml:"no-hostname,omitempty"`
+	DiskQuota               string             `yaml:"disk_quota,omitempty"`
+	Docker                  rawDockerInfo      `yaml:"docker,omitempty"`
+	DropletPath             string             `yaml:"droplet-path,omitempty"`
+	EnvironmentVariables    map[string]string  `yaml:"env,omitempty"`
+	HealthCheckHTTPEndpoint string             `yaml:"health-check-http-endpoint,omitempty"`
+	HealthCheckType         string             `yaml:"health-check-type,omitempty"`
+	Instances               *int               `yaml:"instances,omitempty"`
+	Memory                  string             `yaml:"memory,omitempty"`
+	NoRoute                 bool               `yaml:"no-route,omitempty"`
+	Path                    string             `yaml:"path,omitempty"`
+	RandomRoute             bool               `yaml:"random-route,omitempty"`
+	Routes                  []rawManifestRoute `yaml:"routes,omitempty"`
+	Services                []string           `yaml:"services,omitempty"`
+	StackName               string             `yaml:"stack,omitempty"`
+	Timeout                 int                `yaml:"timeout,omitempty"`
 }
 
 type rawManifestRoute struct {

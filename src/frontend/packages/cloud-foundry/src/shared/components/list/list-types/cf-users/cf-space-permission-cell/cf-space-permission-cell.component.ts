@@ -3,26 +3,24 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { RemoveUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
+import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import {
-  CfUser,
-  IUserPermissionInSpace,
-  SpaceUserRoleNames,
-} from '../../../../../../../../cloud-foundry/src/store/types/user.types';
-import { IOrganization, ISpace } from '../../../../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissions } from '../../../../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../../../../core/src/core/current-user-permissions.service';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { arrayHelper } from '../../../../../../../../core/src/core/helper-classes/array.helper';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { getSpaceRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { IOrganization, ISpace } from '../../../../../../cf-api.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
+import { getSpaceRoles } from '../../../../../../features/cf/cf.helpers';
+import { CfUser, IUserPermissionInSpace, SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
+import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -30,7 +28,7 @@ import { CfPermissionCell, ICellPermissionList } from '../cf-permission-cell';
   styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRoleNames> {
+export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 
   missingRoles$: Observable<boolean>;
 
@@ -38,7 +36,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
     public store: Store<CFAppState>,
     cfUserService: CfUserService,
     private userPerms: CurrentUserPermissionsService,
-    confirmDialog: ConfirmationDialogService
+    confirmDialog: ConfirmationDialogService,
   ) {
     super(store, confirmDialog, cfUserService);
 
@@ -50,7 +48,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       this.rowSubject.asObservable(),
       this.config$.pipe(switchMap(config => config.org$)),
       spaces$,
-      isOrgLevel$
+      isOrgLevel$,
     ).pipe(
       switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
         const permissionList = this.createPermissions(user, isOrgLevel, spaces);
@@ -85,7 +83,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
       filter(org => !!org),
       first(),
       map((orgs: APIResource<IOrganization>[]) => {
-        const orgNames: { [orgGuid: string]: string } = {};
+        const orgNames: { [orgGuid: string]: string; } = {};
         orgs.forEach(org => {
           orgNames[org.metadata.guid] = org.entity.name;
         });
@@ -116,7 +114,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
 
   private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>, isOrgLevel = true) {
     return getSpaceRoles(spacePerms.permissions).map(perm => {
-      const updatingKey = RemoveUserRole.generateUpdatingKey(
+      const updatingKey = RemoveCfUserRole.generateUpdatingKey(
         perm.key,
         row.metadata.guid
       );
@@ -128,10 +126,9 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
         ...perm,
         name: isOrgLevel ? spacePerms.name : '',
         guid: spacePerms.spaceGuid,
-        userName: row.entity.username,
+        username: row.entity.username,
         userGuid: row.metadata.guid,
-        busy: catalogEntity.getEntityMonitor(
-          this.store,
+        busy: catalogEntity.store.getEntityMonitor(
           spacePerms.spaceGuid
         )
           .getUpdatingSection(updatingKey).pipe(
@@ -145,7 +142,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   }
 
   public removePermission(cellPermission: ICellPermissionList<SpaceUserRoleNames>, updateConnectedUser: boolean) {
-    this.store.dispatch(new RemoveUserRole(
+    this.store.dispatch(new RemoveCfUserRole(
       this.cfUserService.activeRouteCfOrgSpace.cfGuid,
       cellPermission.userGuid,
       cellPermission.guid,
@@ -157,5 +154,5 @@ export class CfSpacePermissionCellComponent extends CfPermissionCell<SpaceUserRo
   }
 
   public canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string) =>
-    this.userPerms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+    this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid);
 }

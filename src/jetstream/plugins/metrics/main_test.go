@@ -23,6 +23,9 @@ func TestUrlComparision(t *testing.T) {
 		So(compareURL("http://test.com/a", "http://test.com/a"), ShouldBeTrue)
 		So(compareURL("http://test.com/a?one=two", "http://test.com/a?two=one"), ShouldBeTrue)
 
+		// Should ignore trailing slashes
+		So(compareURL("http://test.com/", "http://test.com"), ShouldBeTrue)
+
 	})
 
 }

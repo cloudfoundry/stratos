@@ -5,8 +5,9 @@ import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfCellHelper } from '../../../../../../../core/src/features/cloud-foundry/cf-cell.helpers';
-import { BooleanIndicatorType } from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import {
+  BooleanIndicatorType,
+} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import {
   TableCellBooleanIndicatorComponent,
   TableCellBooleanIndicatorComponentConfig,
@@ -17,7 +18,8 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
+import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 

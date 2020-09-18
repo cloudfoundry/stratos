@@ -247,7 +247,8 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 			// Update the endpoint to indicate that SSO Login is okay
 			repo, dbErr := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 			if dbErr == nil {
-				repo.Update(theCNSIrecord.GUID, true)
+				theCNSIrecord.SSOAllowed = true
+				repo.Update(theCNSIrecord, p.Config.EncryptionKeyInBytes)
 			}
 			// Return error from the login
 			return err
@@ -260,7 +261,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 
 func santizeInfoForSystemSharedTokenUser(cnsiUser *interfaces.ConnectedUser, isSysystemShared bool) {
 	if isSysystemShared {
-		cnsiUser.GUID = tokens.SystemSharedUserGuid
+		cnsiUser.GUID = tokens.SystemSharedUserGuid // Used by front end also
 		cnsiUser.Scopes = make([]string, 0)
 		cnsiUser.Name = "system_shared"
 	}

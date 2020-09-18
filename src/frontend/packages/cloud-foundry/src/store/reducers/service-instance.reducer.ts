@@ -1,15 +1,15 @@
+import { IRequestEntityTypeState } from '../../../../store/src/app-state';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import {
   CREATE_SERVICE_BINDING_ACTION_SUCCESS,
   CreateServiceBinding,
   DELETE_SERVICE_BINDING_ACTION_SUCCESS,
   DeleteServiceBinding,
 } from '../../actions/service-bindings.actions';
-import { serviceBindingEntityType } from '../../cf-entity-types';
+import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { getCFEntityKey } from '../../cf-entity-helpers';
-import { IServiceBinding, IServiceInstance, IUserProvidedServiceInstance } from '../../../../core/src/core/cf-api-svc.types';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { APIResource } from '../../../../store/src/types/api.types';
-import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
+import { serviceBindingEntityType } from '../../cf-entity-types';
 
 export function serviceInstanceReducer<T extends IServiceInstance | IUserProvidedServiceInstance = IServiceInstance>(
   state: IRequestEntityTypeState<APIResource<T>>,
@@ -18,25 +18,6 @@ export function serviceInstanceReducer<T extends IServiceInstance | IUserProvide
   switch (action.type) {
     case DELETE_SERVICE_BINDING_ACTION_SUCCESS:
       return handleDelete(state, action.apiAction as DeleteServiceBinding);
-    // case UPDATE_SERVICE_INSTANCE_SUCCESS:
-    //   const updateServiceInstance = (action.apiAction as UpdateServiceInstance);
-    //   const tags = updateServiceInstance.tags;
-    //   const name = updateServiceInstance.name;
-    //   const params = updateServiceInstance.params;
-    //   serviceInstanceGuid = updateServiceInstance.guid;
-    //   serviceInstanceEntity = state[serviceInstanceGuid];
-    //   return {
-    //     ...state,
-    //     [serviceInstanceGuid]: {
-    //       ...serviceInstanceEntity,
-    //       entity: {
-    //         ...serviceInstanceEntity.entity,
-    //         name,
-    //         tags,
-    //         params
-    //       }
-    //     }
-    //   };
     case CREATE_SERVICE_BINDING_ACTION_SUCCESS:
       return handleCreateBinding(state, action);
     default:

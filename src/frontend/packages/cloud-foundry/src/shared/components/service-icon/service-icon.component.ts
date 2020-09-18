@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { IService, IServiceExtra } from '../../../../../core/src/core/cf-api-svc.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
+import { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
 @Component({
   selector: 'app-service-icon',

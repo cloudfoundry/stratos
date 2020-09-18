@@ -11,6 +11,7 @@
   $side-nav-bottom-color: map-get($app-theme, subdued-color);
   $background-color:  map-get($app-theme, app-background-color);
   $darker-background-color:  darken($background-color, 4%);
+  $is-dark: map-get($theme, is-dark);
 
   .page-side-nav {
     background-color: $background-color;
@@ -27,6 +28,10 @@
       &--active {
         background-color: transparentize($primary-color, .9);
         color: $primary-color;
+        @if $is-dark == true {
+          background-color: transparentize($primary-color, .8);
+          color: mat-contrast($primary, 500);
+        }
       }
     }
     &__items-header {

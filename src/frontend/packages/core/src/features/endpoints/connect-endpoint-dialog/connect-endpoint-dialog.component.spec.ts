@@ -4,11 +4,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
+import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { MetricsModule } from '../../metrics/metrics.module';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig } from '../connect.service';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
@@ -25,8 +27,7 @@ class MatDialogDataMock implements ConnectEndpointConfig {
   ssoAllowed = false;
 }
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('ConnectEndpointDialogComponent', () => {
+describe('ConnectEndpointDialogComponent', () => {
   let component: ConnectEndpointDialogComponent;
   let fixture: ComponentFixture<ConnectEndpointDialogComponent>;
 
@@ -34,7 +35,8 @@ xdescribe('ConnectEndpointDialogComponent', () => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock }
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        SidePanelService
       ],
       declarations: [
         ConnectEndpointDialogComponent,
@@ -48,7 +50,8 @@ xdescribe('ConnectEndpointDialogComponent', () => {
         RouterTestingModule,
         NoopAnimationsModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        MetricsModule,
       ]
     }).overrideModule(BrowserDynamicTestingModule, {
       set: {

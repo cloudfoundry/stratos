@@ -6,7 +6,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 
 resources:
 - name: stratos
@@ -20,7 +19,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: splatform/stratos
+    repository: ((docker-organization))/((aio-docker-image-name))
 - name: after-midnight
   type: time
   source:
@@ -103,3 +102,4 @@ jobs:
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
+      tag_as_latest: false

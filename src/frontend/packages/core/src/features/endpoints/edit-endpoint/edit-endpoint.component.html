@@ -1,0 +1,10 @@
+<div class="edit-endpoint-stepper">
+  <app-page-header>
+    Edit Endpoint
+  </app-page-header>
+  <app-steppers [cancel]="cancelUrl">
+    <app-step title="Edit Endpoint" [valid]="step1.validate | async" [onNext]="step1.onNext" cancelButtonText="Cancel" finishButtonText="Update">
+      <app-edit-endpoint-step #step1></app-edit-endpoint-step>
+    </app-step>
+  </app-steppers>
+</div>

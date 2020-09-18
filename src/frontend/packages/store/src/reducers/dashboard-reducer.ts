@@ -1,3 +1,4 @@
+import { GRAVATAR_ENABLED, SetGravatarEnabledAction } from './../actions/dashboard-actions';
 import {
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
@@ -23,6 +24,7 @@ export interface DashboardState {
   sideNavPinned: boolean;
   themeKey: string;
   headerEventMinimized: boolean;
+  gravatarEnabled: boolean;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -34,6 +36,7 @@ export const defaultDashboardState: DashboardState = {
   sideNavPinned: true,
   themeKey: null,
   headerEventMinimized: false,
+  gravatarEnabled: false,
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -68,6 +71,12 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       return {
         ...state,
         pollingEnabled: pollingAction.enablePolling
+      };
+    case GRAVATAR_ENABLED:
+      const gravatarAction = action as SetGravatarEnabledAction;
+      return {
+        ...state,
+        gravatarEnabled: gravatarAction.enableGravatar
       };
     case HYDRATE_DASHBOARD_STATE:
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;

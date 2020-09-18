@@ -13,12 +13,12 @@ LOCAL_BUILD="true"
 # TRAVIS_COMMIT
 
 if [ -z "$TRAVIS_REPO_SLUG" ]; then
-  echo "Need to be running in Trvis"
+  echo "Need to be running in Travis"
   exit 1
 fi
 
 if [ -z "$TRAVIS_COMMIT" ]; then
-  echo "Need to be running in Trvis"
+  echo "Need to be running in Travis"
   exit 1
 fi
 
@@ -40,14 +40,17 @@ function tryGetExistingBuild() {
   if [ $? -eq 0 ]; then
     # We found an existing build, so download and unpack it
     echo "Downloading build package"
-    tar -xvf ${GZIP_NAME}
+    tar -xvf ${GZIP_NAME} > /dev/null
     if [ $? -eq 0 ]; then
       LOCAL_BUILD="false"
+    else 
+      echo "Failed to untar the build package"
     fi
     rm -rf ${GZIP_NAME}
   fi
 }
 
+# Need S3 endpoint - if we don't have it, we don't have the Travis env vars
 if [ -n "${AWS_ENDPOINT}" ]; then
   tryGetExistingBuild
 fi
@@ -66,14 +69,16 @@ else
   npm run build
   npm run build-backend
 
-  set +e
-  tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
+  # Only try to upload if we have the S3 configuration
+  if [ -n "${AWS_ENDPOINT}" ]; then
+    set +e
+    tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
-  # Upload
-  mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
+    # Upload
+    mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
 
-  # Ignore error from uploading - should not fail build if we can't upload the build archive
-  # This just means we won't be able to us this cache next build
-  exit 0
-
+    # Ignore error from uploading - should not fail build if we can't upload the build archive
+    # This just means we won't be able to us this cache next build
+    echo "Uploaded builds"
+  fi
 fi

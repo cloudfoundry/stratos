@@ -13,7 +13,7 @@
     <app-meta-card-key>Instances</app-meta-card-key>
     <app-meta-card-value>
       <app-running-instances [instances]="row.entity.instances" [cfGuid]="row.entity.cfGuid"
-        [appGuid]="row.entity.guid">
+        [appGuid]="row.metadata.guid">
       </app-running-instances>
     </app-meta-card-value>
   </app-meta-card-item>

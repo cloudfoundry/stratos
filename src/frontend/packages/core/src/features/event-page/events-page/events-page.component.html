@@ -29,7 +29,7 @@
         </app-stateful-icon>
         <span class="event-page__event-message">{{event.message}}</span>
         <button class="event-page__event-row-button" *ngIf="event.link" color="primary" mat-flat-button
-          [routerLink]="event.link">View</button>
+          [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
         <button class="event-page__event-row-button" *ngIf="event.read" color="primary" mat-flat-button
           (click)="updateReadState(event, false)">Mark as unread</button>
         <button class="event-page__event-row-button" *ngIf="!event.read" color="primary" mat-flat-button

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { AppState, GeneralEntityAppState } from '../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
+import { CurrentUserPermissionsService } from '../permissions/current-user-permissions.service';
 
 export const extensionsActionRouteKey = 'extensionsActionsKey';
 
@@ -23,7 +24,12 @@ export interface StratosTabMetadata {
   link: string;
   icon?: string;
   iconFont?: string;
-  hidden?: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => Observable<boolean>;
+  hidden?: (
+    store: Store<AppState>,
+    esf: EntityServiceFactory,
+    activatedRoute: ActivatedRoute,
+    cups: CurrentUserPermissionsService
+  ) => Observable<boolean>;
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
@@ -60,9 +66,9 @@ export interface StratosExtensionRoutes {
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[] },
-  tabs: {} as { [key: string]: IPageSideNavTab[] },
-  actions: {} as { [key: string]: StratosActionMetadata[] },
+  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
+  tabs: {} as { [key: string]: IPageSideNavTab[], },
+  actions: {} as { [key: string]: StratosActionMetadata[], },
 };
 
 /**
@@ -112,13 +118,27 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
   extensionMetadata.actions[action].push(props);
 }
 
+// Empty module used to support the registration of Extension Components
+@NgModule()
+export class ExtEmptyModule { }
+
 // Injectable Extension Service
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ExtensionService {
 
   public metadata = extensionMetadata;
 
   constructor(private router: Router) { }
+
+  // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
+  // optimize out any extension components
+  public static declare(components: any[]): ModuleWithProviders {
+    return {
+      ngModule: ExtEmptyModule
+    };
+  }
 
   /**
    * Initialize the extensions - to be invoked in the AppModule
@@ -151,7 +171,8 @@ export class ExtensionService {
 
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
+      const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
+      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
       loginRoute.component = extensionMetadata.loginComponent;
       needsReset = true;
     }
@@ -162,7 +183,7 @@ export class ExtensionService {
   }
 
   private moveExtensionRoute(routeConfig: Route[], dashboardRoute: Route): boolean {
-    const index = routeConfig.findIndex(r => !!r.data && !!r.data.stratosNavigation);
+    const index = routeConfig.findIndex(r => !!r.data && (!!r.data.stratosNavigation || r.data.stratosNavigationPage));
     if (index >= 0) {
       const removed = routeConfig.splice(index, 1);
       dashboardRoute.children = dashboardRoute.children.concat(removed);

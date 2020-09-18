@@ -23,9 +23,6 @@
     display: flex;
     flex-direction: row;
   }
-  &__warning-icon {
-    margin-right: 8px;
-  }
   &__migrations {
     padding-left: 36px;
     width: 100%;
@@ -36,5 +33,11 @@
   }
   &__two-column {
     flex: 1;
+  }
+  &__maxed {
+    &__content {
+      display: flex;
+      flex-direction: column;
+    }
   }
 }

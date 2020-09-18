@@ -1,4 +1,4 @@
-<div class="deploy-app">
+<div class="deploy-app" *ngIf="showOverlay$ | async">
   <div class="deploy-app__title">{{ deployer ? deployer.streamTitle : 'Pending' }}</div>
   <mat-progress-spinner *ngIf="deployer && deployer.deploying" diameter="20" mode="indeterminate">
   </mat-progress-spinner>

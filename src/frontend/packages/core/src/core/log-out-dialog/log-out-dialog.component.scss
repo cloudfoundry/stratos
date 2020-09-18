@@ -20,6 +20,25 @@ mat-dialog-actions {
   &__actions {
     justify-content: center;
   }
+  &__message {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+
+    > mat-icon {
+      flex: 0;
+      font-size: 48px;
+      height: 48px;
+      margin-right: 20px;
+      opacity: .7;
+      width: 48px;
+    }
+    > div {
+      flex: 1;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
 }
 
 mat-dialog-container {
