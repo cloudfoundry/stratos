@@ -26,8 +26,7 @@ describe('Create Service Instance with binding', () => {
   });
 
   beforeAll(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    createServiceInstance.softNavigateTo();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
     createMarketplaceServiceInstance.waitForPage();
