@@ -17,6 +17,10 @@ export class EndpointCards extends ListCardComponent {
     return super.findCardByTitle(`${title}\n${subtitle}`);
   }
 
+  waitForCardByTitle(title: string, subtitle = 'Cloud Foundry'): promise.Promise<MetaCard> {
+    return super.waitForCardByTitle(`${title}\n${subtitle}`);
+  }
+
   getEndpointDataForEndpoint(title: string, subtitle = 'Cloud Foundry'): promise.Promise<EndpointMetadata> {
     return this.findCardByTitle(title, subtitle).then(card => this.getEndpointData(card));
   }
