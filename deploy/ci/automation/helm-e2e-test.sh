@@ -118,7 +118,7 @@ if [ "${BUILD}" == "true" ]; then
   fi
   log "Building images and Helm Chart ..."
   set -x
-  "${STRATOS}/deploy/kubernetes/build.sh" -s
+  "${STRATOS}/deploy/kubernetes/build.sh" -t jenkins
 fi
 
 #HELM_ARGS can be used to supply additional args
