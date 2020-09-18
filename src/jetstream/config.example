@@ -58,6 +58,7 @@ INVITE_USER_CLIENT_SECRET=
 # DB_USER=stratos
 # DB_PASSWORD=strat0s
 # DB_DATABASE_NAME=stratosdb
+# DB_SSL_MODE=disable
 
 # Postgresql database for local dev
 # DATABASE_PROVIDER=pgsql
