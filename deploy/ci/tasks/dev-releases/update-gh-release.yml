@@ -17,10 +17,12 @@ run:
     - |
       # Create Github release
       ROOT_DIR=${PWD}
-      VERSION=$(cat image-tag/v2-version)
-      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
-      GIT_TAG=$(cat image-tag/v2-tag) 
       STRATOS=${ROOT_DIR}/stratos
+      source "${STRATOS}/deploy/ci/tasks/dev-releases/vars-helper.sh"
+
+      FULL_VERSION=${LATEST_TAG}
+      GIT_TAG=${RELEASE_TAG}
+
       source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
 
       # Check tagged release version is consistent with package.json version

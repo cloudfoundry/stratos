@@ -18,39 +18,12 @@ run:
     - |
       echo "Generate tag files started..."
 
+      ROOT_DIR=${PWD}
+      STRATOS=${ROOT_DIR}/stratos
+      source "${STRATOS}/deploy/ci/tasks/dev-releases/vars-helper.sh"
+
       cd stratos
 
-      # RELEASE_TAG is the full tag that started the pipleine, e.g. '2.0.0-rc.1' 
-      RELEASE_TAG=$(cat .git/ref)
-
-      VERSION=$(cat package.json | grep version | grep -Po "([0-9\.]?)*")
-      COMMIT_HASH=$(git log -1 --format="%h")
-      LATEST_TAG=$VERSION-${COMMIT_HASH}
-      SOURCE_CODE_REPO=$(git config --get remote.origin.url)
-
-      # Check that the RELEASE_TAG matches the version
-      if [[ "${RELEASE_TAG}" != ${VERSION}* ]]; then
-        echo ".git/ref is not the expected release tag - falling back to git describe"
-        RELEASE_TAG=$(git describe)
-        if [[ "${RELEASE_TAG}" != ${VERSION}* ]]; then
-          echo "Error: Can not get tag for this release - got ${RELEASE_TAG}"
-          exit 1
-        fi
-      fi
-
-      echo "Got Release tag ${RELEASE_TAG}"
-
-      echo "Got version $VERSION from package.json."
-
-      echo "Got $LATEST_TAG as the latest git tag."
-
-      if [ ! -z ${TAG_SUFFIX} ]; then
-        if [ "${TAG_SUFFIX}" != "null" ]; then
-          echo "Adding tag suffix '$TAG_SUFFIX' to the latest tag."
-          LATEST_TAG=${LATEST_TAG}-${TAG_SUFFIX}
-          echo "The latest tag is now $LATEST_TAG."
-        fi
-      fi
       echo "Running store-git-metadata.sh..."
 
       ./build/store-git-metadata.sh

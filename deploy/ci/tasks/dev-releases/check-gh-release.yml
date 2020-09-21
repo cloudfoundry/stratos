@@ -16,14 +16,13 @@ run:
     - |
       # Check that the Github release DOES NOT exist
       ROOT_DIR=${PWD}
-      VERSION=$(cat image-tag/v2-version)
-      FULL_VERSION=$(cat image-tag/v2-alpha-tag) 
-      GIT_TAG=$(cat image-tag/v2-tag) 
       STRATOS=${ROOT_DIR}/stratos
+      source "${STRATOS}/deploy/ci/tasks/dev-releases/vars-helper.sh"
+
       source ${STRATOS}/deploy/ci/tasks/dev-releases/github-helper.sh
 
       # Check tagged release version is consistent with package.json version
-      TAG_RELEASE_VERSION=$(echo ${FULL_VERSION} | cut -d"-" -f1)
+      TAG_RELEASE_VERSION=$(echo ${LATEST_TAG} | cut -d"-" -f1)
       if [ "${TAG_RELEASE_VERSION}" != "${VERSION}" ]; then
         echo "Package.json version is not consistent with tag release version! ${TAG_RELEASE_VERSION} != ${VERSION}"
         exit 1
@@ -32,7 +31,7 @@ run:
 
       # Check that the release exists
       set +e
-      github-release info -t ${GIT_TAG}
+      github-release info -t ${RELEASE_TAG}
       RETVAL=$?
       set -e
 
