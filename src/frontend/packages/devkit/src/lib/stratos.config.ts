@@ -68,7 +68,10 @@ export class StratosConfig implements Logger {
     }
 
     // Exclude the default packages... unless explicity `include`d
-    this.excludeExamples()
+    this.excludeExamples();
+
+    // Exclude packages from the STRATOS_BUILD_REMOVE environment variable
+    this.excludeFromEnvVar();
 
     this.packageJsonFile = this.findFileOrFolderInChain(this.rootDir, 'package.json');
     if (this.packageJsonFile !== null) {
@@ -140,6 +143,20 @@ export class StratosConfig implements Logger {
     if (array.indexOf(entry) < 0) {
       dest.push(entry)
     }
+  }
+
+  // Exclude any packages specified in the STRATOS_BUILD_REMOVE environment variable
+  private excludeFromEnvVar() {
+    const buildRemove = process.env.STRATOS_BUILD_REMOVE || '';
+    if (buildRemove.length === 0 ) {
+      return;
+    }
+
+    const exclude = buildRemove.split(',');
+    console.log(`Detected STRATOS_BUILD_REMOVE: ${buildRemove}`)
+
+    // Add the package to the list of excludes
+    exclude.forEach(e => this.addIfMissing(this.stratosConfig.packages.exclude, e.trim()));
   }
 
   public log(msg: any) {

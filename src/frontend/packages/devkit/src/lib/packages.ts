@@ -158,8 +158,40 @@ export class Packages {
       this.packages.push(items[0]);
     }
 
+    const excludeMap = {};
+    const excludes = this.config.stratosConfig.packages.exclude as string[];
+    excludes.forEach(e => {
+      excludeMap[e] = true;
+    });
+
+    const remove = {};
+    // We have the excludes and the set of packages - remove any that have the excludes as dependencies
+    this.packages.forEach(pkg => {
+      if (this.hasExcludedDepenedncey(pkg, excludeMap)) {
+        remove[pkg.name] = pkg;
+      }
+    });
+
+    // Filter packages to remove as needed
+    this.packages = this.packages.filter(p => !remove[p.name]);
+
     this.log('Packages:');
     this.packages.forEach(pkg => this.log(` + ${pkg.name}`));
+  }
+
+  private hasExcludedDepenedncey(pkg: any, exclude: any): boolean {
+
+    // Check peer dependencies
+    if (pkg.json.peerDependencies) {
+      for (const p of Object.keys(pkg.json.peerDependencies)) {
+        if (exclude[p]) {
+          console.log(`Removing package ${pkg.name} due to peer dependency ${p}`);
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   public addPackage(pkgName, isLocal = false) {
