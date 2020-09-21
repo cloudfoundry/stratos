@@ -32,6 +32,6 @@ This will build both the frontend and backend and run the backend in a mode wher
 
 You can open a web browser and navigate to (https://127.0.0.1:5443) and login with username `admin` and password `admin`.
 
-> To develop the frontend we recommend reading through the [frontend](/docs/developer/frontend) doc. This includes a faster way to run Stratos and see your changes.
+> To develop the frontend we recommend reading through the [frontend](./frontend) doc. This includes a faster way to run Stratos and see your changes.
 
-> Additional back end docs are available [here](/docs/developer/backend) before making any changes to the code.
+> Additional back end docs are available [here](./backend) before making any changes to the code.

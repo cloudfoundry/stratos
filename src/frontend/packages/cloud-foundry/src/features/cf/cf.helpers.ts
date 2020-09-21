@@ -358,7 +358,7 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
 
   const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string => {
     return e.entity.space ? e.entity.space.entity.organization_guid : null;
-  }
+  };
 
   // Filter by cf/org/space
   const cfGuid = paginationState.clientPagination.filter.items.cf;

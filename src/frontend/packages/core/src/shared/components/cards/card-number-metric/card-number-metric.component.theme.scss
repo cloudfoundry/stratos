@@ -1,12 +1,30 @@
 @mixin app-card-number-metric-theme($theme, $app-theme) {
   $status-colors: map-get($app-theme, status);
   $subdued: mat-color($app-theme, subdued-color);
+
+  $status-colors: map-get($app-theme, status);
+  $status-warning: map-get($status-colors, warning);
+  $status-danger: map-get($status-colors, danger);
+  $status-info: map-get($status-colors, info);
+
   .number-metric-card {
     &__icon,
     &__anchor,
     &__label,
     &__limit {
       color: $subdued;
+    }
+  }
+
+  .number-metric-card__alert-badge {
+    &-error {
+      background-color: $status-danger;
+    }
+    &-info {
+      background-color: $status-info;
+    }
+    &-warning {
+      background-color: $status-warning;
     }
   }
 }

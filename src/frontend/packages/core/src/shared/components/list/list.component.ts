@@ -701,7 +701,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         map(requestInfo => ({
           deleting: requestInfo.deleting.busy,
           error: requestInfo.deleting.error,
-          message: requestInfo.deleting.error ? `Sorry, deletion failed` : null
+          message: requestInfo.deleting.error ? requestInfo.deleting.message || `Sorry, deletion failed` : null
         }))
       );
     };

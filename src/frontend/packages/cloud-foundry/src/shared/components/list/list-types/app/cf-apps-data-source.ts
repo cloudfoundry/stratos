@@ -102,13 +102,10 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
           if (app instanceof MultiActionListEntity) {
             app = app.entity;
           }
-          const appState = app.entity.state;
-          const appGuid = app.metadata.guid;
-          const cfGuid = app.entity.cfGuid;
-          if (appState === 'STARTED') {
+          if (app.entity.state === 'STARTED') {
             actions.push({
-              id: appGuid,
-              action: cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid)
+              id: app.metadata.guid,
+              action: cfEntityCatalog.appStats.actions.getMultiple(app.metadata.guid, app.entity.cfGuid)
             });
           }
         });

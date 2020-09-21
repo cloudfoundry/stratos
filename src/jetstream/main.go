@@ -659,6 +659,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 
 	log.Infof("Session Cookie name: %s", cookieName)
 
+	// Setting default value for APIKeysEnabled
+	if pc.APIKeysEnabled == "" {
+		log.Debug(`APIKeysEnabled not set, setting to "admin_only"`)
+		pc.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
+	}
+
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,

@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 )
 
 const cfSessionCookieName = "JSESSIONID"
@@ -323,6 +324,12 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("apiKeyMiddleware")
 
+		// skipping thise middleware if API keys are disabled
+		if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.Disabled {
+			log.Debugf("apiKeyMiddleware: API keys are disabled, skipping")
+			return h(c)
+		}
+
 		apiKeySecret, err := getAPIKeyFromHeader(c)
 		if err != nil {
 			log.Debugf("apiKeyMiddleware: %v", err)
@@ -339,6 +346,20 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 
 			return h(c)
+		}
+
+		// checking if user is an admin if API keys are enabled for admins only
+		if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.AdminOnly {
+			user, err := p.StratosAuthService.GetUser(apiKey.UserGUID)
+			if err != nil {
+				log.Errorf("apiKeyMiddleware: %v", err)
+				return h(c)
+			}
+
+			if !user.Admin {
+				log.Debugf("apiKeyMiddleware: user isn't admin, skipping")
+				return h(c)
+			}
 		}
 
 		c.Set(APIKeySkipperContextKey, true)

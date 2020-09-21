@@ -134,7 +134,9 @@ export class CurrentUserPermissionsService {
   private combineChecks(
     checkCombiners: IPermissionCheckCombiner[],
   ) {
-    const reducedChecks = checkCombiners.map(combiner => BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType));
+    const reducedChecks = checkCombiners.map(combiner =>
+      BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType)
+    );
     return combineLatest(reducedChecks).pipe(
       map(checks => checks.every(check => check))
     );
@@ -170,13 +172,13 @@ export class CurrentUserPermissionsService {
     failureValue: T
   ): T {
     const res: T[] = [];
-    for (let i = 0; i < this.allCheckers.length; i++) {
-      const checkerRes = checkFn(this.allCheckers[i]);
+    for (const checker of this.allCheckers) {
+      const checkerRes = checkFn(checker);
       if (checkerRes) {
         res.push(checkerRes);
       }
     }
-    if (res.length == 0) {
+    if (res.length === 0) {
       console.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
       return failureValue;
     }

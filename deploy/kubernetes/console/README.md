@@ -22,7 +22,7 @@ Check the repository was successfully added by searching for the `console`, for 
 ```
 helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	4.0.1           4.0.1      	A Helm chart for deploying Stratos UI Console
+stratos/console    	4.1.0           4.1.0      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
@@ -75,6 +75,7 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.templatesConfigMapName|Name of config map that provides the template files for user invitation emails||
 |console.userInviteSubject|Email subject of the user invitation message||
 |console.techPreview|Enable/disable Tech Preview features|false|
+|console.apiKeysEnabled|Enable/disable API key-based access to Stratos API (disabled, admin_only, all_users)|admin_only|
 |console.ui.listMaxSize|Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched||
 |console.ui.listAllowLoadMaxed|If the maximum list size is met give the user the option to fetch all results|false|
 |console.localAdminPassword|Use local admin user instead of UAA - set to a password to enable||

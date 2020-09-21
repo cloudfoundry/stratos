@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 )
@@ -214,9 +215,10 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview        bool  `json:"enableTechPreview"`
-		ListMaxSize        int64 `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed bool  `json:"listAllowLoadMaxed,omitempty"`
+		TechPreview        bool   `json:"enableTechPreview"`
+		ListMaxSize        int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled     string `json:"APIKeysEnabled"`
 	} `json:"config"`
 }
 
@@ -369,6 +371,7 @@ type PortalConfig struct {
 	DatabaseProviderName               string
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 	CanMigrateDatabaseSchema           bool
+	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

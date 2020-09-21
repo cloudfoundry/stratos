@@ -39,7 +39,7 @@ export const cfCurrentUserPermissionsService = [
     deps: [Store]
   },
   CurrentUserPermissionsService,
-]
+];
 
 export enum CfCurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
@@ -164,7 +164,10 @@ export const cfPermissionConfigs: IPermissionConfigs = {
   [CfCurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
   [CfCurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CfCurrentUserPermissions.ORGANIZATION_DELETE),
   [CfCurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
-  [CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+  [CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(
+    CfPermissionTypes.ORGANIZATION,
+    CfPermissionStrings.ORG_MANAGER
+  ),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
@@ -219,8 +222,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   };
 
   /**
-  * @param permissionConfig Single permission to be checked
-  */
+   * @param permissionConfig Single permission to be checked
+   */
   public getSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
     const check$ = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
     if (permissionConfig.type === CfPermissionTypes.ORGANIZATION || permissionConfig.type === CfPermissionTypes.SPACE) {
@@ -329,8 +332,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   /**
- * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
- */
+   * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
+   */
   private getReadOnlyCheck(endpointGuid: string) {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(
@@ -368,8 +371,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   /**
- * If no endpoint is passed, check them all
- */
+   * If no endpoint is passed, check them all
+   */
   private getReadOnlyChecks(endpointGuid?: string) {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
@@ -434,9 +437,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     const groupedChecks = this.groupConfigs(permissionConfigs);
     return Object.keys(groupedChecks).map((permission: PermissionTypes) => {
       const configGroup = groupedChecks[permission];
-      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid)
+      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
       if (checkCombiner) {
-        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid))
+        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
       }
       return checkCombiner;
     });

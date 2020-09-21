@@ -1,5 +1,6 @@
 /*eslint-disable*/
-/*tslint:disabled*/
+/*tslint:disable*/
+
 
 export class MD5 {
 

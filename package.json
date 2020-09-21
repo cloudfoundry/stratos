@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -82,7 +82,7 @@
     "rxjs": "^6.5.5",
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~8.0.1",
-    "@cfstratos/ajsf-material": "^0.1.5",
+    "@cfstratos/ajsf-material": "^0.1.6",
     "ts-md5": "^1.2.7",
     "tslib": "^1.10.0",
     "web-animations-js": "^2.3.2",
@@ -96,7 +96,7 @@
   "devDependencies": {
     "@angular-builders/custom-webpack": "^9.1.0",
     "@angular-devkit/architect": "^0.901.7",
-    "@angular-devkit/build-angular": "~0.901.5",
+    "@angular-devkit/build-angular": "^0.901.12",
     "@angular-devkit/build-ng-packagr": "~0.901.5",
     "@angular-devkit/core": "^9.1.7",
     "@angular-devkit/schematics": "^9.1.5",

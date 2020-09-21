@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { EulaPageComponent } from './eula-page.component';
@@ -24,7 +25,10 @@ describe('EulaPageComponent', () => {
         HttpClientTestingModule,
         createBasicStoreModule(),
       ],
-      providers: [TabNavService]
+      providers: [
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

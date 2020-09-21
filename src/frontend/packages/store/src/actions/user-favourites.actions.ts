@@ -12,7 +12,7 @@ abstract class BaseUserFavoritesAction implements EntityRequestAction {
   public type: string;
   public url = '/user-favorites';
 
-  public entity = [stratosEntityFactory(userFavouritesEntityType)]
+  public entity = [stratosEntityFactory(userFavouritesEntityType)];
   public entityType = userFavouritesEntityType;
   public endpointType = STRATOS_ENDPOINT_TYPE;
 }
@@ -51,7 +51,7 @@ abstract class BaseSuccessFavouriteAction extends BaseSingleUserFavouritesAction
   }
 }
 
-// --------- 
+// ---------
 
 export class GetUserFavoritesAction extends BaseMultipleUserFavouritesAction {
   static PAGINATION_KEY = 'user_favourites';
@@ -85,7 +85,7 @@ export class GetUserFavoritesFailedAction extends BaseMultipleUserFavouritesActi
   }
 }
 
-// --------- 
+// ---------
 
 export class RemoveUserFavoriteAction extends BaseSingleUserFavouritesAction {
   static ACTION_TYPE = '[Favorite] Remove Favorite';
@@ -100,11 +100,11 @@ export class RemoveUserFavoriteAction extends BaseSingleUserFavouritesAction {
 export class RemoveUserFavoriteSuccessAction extends BaseSuccessFavouriteAction {
   static ACTION_TYPE = '[Favorite] Remove Favorite Success';
   constructor(favorite: UserFavorite<IFavoriteMetadata>) {
-    super(RemoveUserFavoriteSuccessAction.ACTION_TYPE, favorite)
+    super(RemoveUserFavoriteSuccessAction.ACTION_TYPE, favorite);
   }
 }
 
-// --------- 
+// ---------
 
 export class SaveUserFavoriteAction extends BaseSingleUserFavouritesAction {
   static ACTION_TYPE = '[Favorite] Save Favorite';
@@ -120,7 +120,7 @@ export class SaveUserFavoriteSuccessAction extends BaseSuccessFavouriteAction {
   }
 }
 
-// --------- 
+// ---------
 
 export class ToggleUserFavoriteAction extends BaseSingleUserFavouritesAction {
   static ACTION_TYPE = '[Favorite] Toggle Favorite';

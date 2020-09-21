@@ -7,6 +7,7 @@ import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/i
 import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { SharedModule } from '../../shared.module';
 import { PageHeaderComponent } from './page-header.component';
@@ -28,7 +29,8 @@ describe('PageHeaderComponent', () => {
             }
           }
         },
-        TabNavService
+        TabNavService,
+        CurrentUserPermissionsService
       ],
       imports: [
         MDAppModule,

@@ -1,7 +1,12 @@
+import { CreatePagination } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
-import { CreatePagination } from '../../actions/pagination.actions';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import {
+  PaginationEntityState,
+  PaginationEntityTypeState,
+  PaginationParam,
+  PaginationState,
+} from '../../types/pagination.types';
 import { spreadClientPagination } from './pagination-reducer.helper';
 
 function getPaginationKey(entityConfig: EntityCatalogEntityConfig) {
@@ -42,7 +47,7 @@ function mergeWithSeed(state: PaginationState, action: CreatePagination, default
   const currentPagination = state[entityKey][action.paginationKey] || defaultState;
   const seeded = action.seed && state[entityKey] && state[entityKey][action.seed];
   const seedPagination = seeded ? state[entityKey][action.seed] : defaultState;
-  const entityState = {
+  const entityState: PaginationEntityTypeState = {
     ...newState[entityKey],
     [action.paginationKey]: {
       ...seedPagination,
@@ -50,12 +55,25 @@ function mergeWithSeed(state: PaginationState, action: CreatePagination, default
       pageCount: currentPagination.pageCount,
       currentPage: currentPagination.currentPage,
       clientPagination: mergePaginationSections(currentPagination, seedPagination, defaultState),
-      seed: seeded ? action.seed : null
+      seed: seeded ? action.seed : null,
+      // Ensure any filters from seed are not carried into new list
+      // For example, sort by type on endpoints page, go to cf endpoint page and type is not shown
+      params: mergeParamsSections(currentPagination, action.initialParams)
     }
   };
   return {
     ...newState,
     [entityKey]: entityState
+  };
+}
+
+function mergeParamsSections(
+  currentPagination: PaginationEntityState,
+  initialSeedParams: PaginationParam = {},
+): PaginationParam {
+  return {
+    ...currentPagination.params,
+    ...initialSeedParams,
   };
 }
 

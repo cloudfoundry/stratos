@@ -54,11 +54,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-/* tslint:disable:max-line-length */
-
-/* tslint:enable:max-line-length */
-
-interface Org { metadata: { guid: string }; }
+interface Org { metadata: { guid: string, }; }
 interface CfUserWithWarning extends CfUser {
   showWarning: boolean;
 }
@@ -294,21 +290,21 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         this.store.dispatch(new UsersRolesFlipSetRoles());
       }
     });
-  }
+  };
 
   onLeave = (isNext: boolean) => {
     if (!isNext && this.snackBarRef) {
       this.snackBarRef.dismiss();
       this.snackBarRef = null;
     }
-  }
+  };
 
   onNext = () => {
     return combineLatest([
       this.store.select(selectCfUsersIsRemove).pipe(first()),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
-      map(([isRemove, ]) => {
+      map(([isRemove,]) => {
         if (isRemove) {
           // If we're going to eventually remove the roles flip the add to remove
           this.store.dispatch(new UsersRolesFlipSetRoles());
@@ -318,6 +314,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     ).pipe(catchError(err => {
       return observableOf({ success: false });
     }));
-  }
+  };
 
 }

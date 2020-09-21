@@ -14,6 +14,7 @@ import {
   IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
+  RESET_PAGINATION_OF_TYPE,
   SET_CLIENT_FILTER,
   SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
@@ -35,11 +36,15 @@ import { UpdatePaginationMaxedState } from './../../actions/pagination.actions';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
-import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
+import { paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { paginationIgnoreMaxed, paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
-import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
+import {
+  getDefaultPaginationEntityState,
+  paginationResetPagination,
+  resetEndpointEntities,
+} from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
@@ -121,6 +126,10 @@ function paginate(action, state = {}, updatePagination) {
     return paginationResetPagination(state, action);
   }
 
+  if (action.type === RESET_PAGINATION_OF_TYPE && !action.keepPages) {
+    return paginationResetPagination(state, action, true);
+  }
+
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearAction = action as ClearPaginationOfType;
     const clearEntityType = entityCatalog.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
@@ -132,7 +141,7 @@ function paginate(action, state = {}, updatePagination) {
   }
 
   if (isEndpointAction(action)) {
-    return clearEndpointEntities(state, action);
+    return resetEndpointEntities(state, action);
   }
 
   if (action.type === UPDATE_MAXED_STATE) {
