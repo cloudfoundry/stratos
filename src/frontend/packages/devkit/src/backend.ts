@@ -14,16 +14,21 @@ const backendPluginsFile = path.join(backendFolder, 'extra_plugins.go');
 fs.writeFileSync(backendPluginsFile, 'package main\n\n');
 fs.appendFileSync(backendPluginsFile, '// This file is auto-generated - DO NOT EDIT\n\n');
 
-console.log('Backend plugins:');
-sConfig.getBackendPlugins().forEach(pkg => {
+const backendPlugins = sConfig.getBackendPlugins();
+if (backendPlugins.length === 0) {
+  console.log('No backend plugins');
+} else {
+  console.log('Backend plugins:');
+  sConfig.getBackendPlugins().forEach(pkg => {
 
-  // Check that the plugin exists
-  if (fs.existsSync(path.join(backendFolder, 'plugins', pkg))) {
-    fs.appendFileSync(backendPluginsFile, `import _ "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/${pkg}"\n`);
-    console.log(` + ${pkg}`)
-  } else {
-    console.log(` + ${pkg} : WARNING: Backend plugin does not exist`);
-  }
-});
+    // Check that the plugin exists
+    if (fs.existsSync(path.join(backendFolder, 'plugins', pkg))) {
+      fs.appendFileSync(backendPluginsFile, `import _ "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/${pkg}"\n`);
+      console.log(` + ${pkg}`)
+    } else {
+      console.log(` + ${pkg} : WARNING: Backend plugin does not exist`);
+    }
+  });
+}
 
 console.log(`Generated: ${backendPluginsFile}`);
