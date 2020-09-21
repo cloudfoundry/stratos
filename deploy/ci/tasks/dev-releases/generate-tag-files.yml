@@ -85,17 +85,13 @@ run:
 
       echo "Created v2-alpha-tag, v2-version and build-args."
 
-      echo "Contents of build-args:"
-      cat build-args
+      echo "Contents of files to be packaged:"
 
-      echo "Contents of ui-build-args:"
-      cat ui-build-args
-
-      echo "Contents of v2-alpha-tag:"
-      cat v2-alpha-tag
-      
-      echo "Contents of image-labels:"
-      cat image-labels
+      for f in *; do
+        echo "File: $f ______________________________________________________"
+        cat $f
+        echo ""
+      done
 
       set -x
 
