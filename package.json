@@ -4,7 +4,7 @@
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
-    "build-backend": "./build/bk-build.sh",
+    "build-backend": "npm run prepare-backend && ./build/bk-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "test-backend": "./build/bk-build.sh test",
