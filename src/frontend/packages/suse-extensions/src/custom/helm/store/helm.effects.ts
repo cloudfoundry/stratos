@@ -31,7 +31,13 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
-import { getHelmVersionId, getMonocularChartId, HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-factory';
+import {
+  getHelmVersionId,
+  getMonocularChartId,
+  HELM_ENDPOINT_TYPE,
+  HELM_HUB_ENDPOINT_TYPE,
+  HELM_REPO_ENDPOINT_TYPE,
+} from '../helm-entity-factory';
 import { Chart } from '../monocular/shared/models/chart';
 import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
@@ -144,13 +150,10 @@ export class HelmEffects {
       const helmHubEndpoint = helmEndpoints.find(endpoint => endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE);
 
       // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all
-      // valid helm sub types
-      const stratosMonocular = this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`);
-      const helmHubMonocular = helmHubEndpoint ? this.createHelmHubRequest(helmHubEndpoint.guid) : of({ data: [] });
-
+      // valid helm sub types instead of making two requests here
       return combineLatest([
-        stratosMonocular,
-        helmHubMonocular
+        this.createHelmRepoRequest(helmEndpoints),
+        this.createHelmHubRequest(helmHubEndpoint)
       ]).pipe(
         map(res => mergeMonocularChartResponses(entityKey, res)),
         mergeMap((response: NormalizedResponse) => [new WrapperRequestActionSuccess(response, action)]),
@@ -352,12 +355,21 @@ export class HelmEffects {
     };
   }
 
-  private createHelmHubRequest(endpointId: string): Observable<MonocularChartsResponse> {
-    return this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`, {
-      headers: {
-        'x-cap-cnsi-list': endpointId
-      }
-    }).pipe(map(res => addMonocularId(endpointId, res)));
+  private createHelmHubRequest(helmHubEndpoint: EndpointModel): Observable<MonocularChartsResponse> {
+    return helmHubEndpoint ?
+      this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`, {
+        headers: {
+          'x-cap-cnsi-list': helmHubEndpoint.guid
+        }
+      }).pipe(map(res => addMonocularId(helmHubEndpoint.guid, res))) :
+      of({ data: [] });
+  }
+
+  private createHelmRepoRequest(helmEndpoints: EndpointModel[]): Observable<MonocularChartsResponse> {
+    const helmRepoEndpoints = helmEndpoints.find(endpoint => endpoint.sub_type === HELM_REPO_ENDPOINT_TYPE);
+    return helmRepoEndpoints ?
+      this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`) :
+      of({ data: [] });
   }
 
   private makeRequest(

@@ -3,7 +3,7 @@
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
   <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
-    <form [formGroup]="details" class="stepper-form">
+    <form [formGroup]="details" class="stepper-form helm-create-release">
       <b>Select the Kubernetes cluster to install to</b>
       <mat-form-field>
         <mat-select formControlName="endpoint" name="endpoint">
