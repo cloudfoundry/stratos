@@ -31,7 +31,7 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { CfContainerOrchestrator, cfEiriniRelationshipLabel } from '../../../shared/eirini.helper';
+import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../shared/eirini.helper';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -191,8 +191,10 @@ export class CloudFoundryEndpointService {
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
 
+    // TODO: RC This should be in eirini metrics
     this.containerOrchestrator$ = this.endpoint$.pipe(
-      map(cf => cfEiriniRelationshipLabel(cf.entity)),
+      // TODO: RC should do a better job here, mention we're assuming diego??
+      map(cf => cfEiriniRelationship(cf.entity) ? CfContainerOrchestrator.EIRINI : CfContainerOrchestrator.DIEGO),
     );
   }
 

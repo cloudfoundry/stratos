@@ -36,5 +36,6 @@ export const cfEiriniRelationship = (cf: EndpointModel) => {
 };
 
 export const cfEiriniRelationshipLabel = (cf: EndpointModel) => {
-  return cfEiriniRelationship(cf) ? CfContainerOrchestrator.EIRINI : CfContainerOrchestrator.DIEGO;
+  // TODO: RC Improve... should not default to diego... try to determine if eirini
+  return;
 };

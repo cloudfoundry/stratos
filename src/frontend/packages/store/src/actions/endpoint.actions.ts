@@ -276,6 +276,7 @@ export class SaveEndpointRelation extends SingleBaseEndpointAction {
       saveEndpointType
     );
   }
+  updatingKey = 'creating-relation';
 }
 
 export class DeleteEndpointRelation extends SingleBaseEndpointAction {
@@ -290,4 +291,5 @@ export class DeleteEndpointRelation extends SingleBaseEndpointAction {
       deleteEndpointType
     );
   }
+  updatingKey = 'deleting-relation';
 }

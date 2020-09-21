@@ -57,8 +57,8 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
-  static updateRelationKey = 'relations_update';
-  static deleteRelationKey = 'relations_delete';
+  // static updateRelationKey = 'relations_update';
+  // static deleteRelationKey = 'relations_delete';
 
   constructor(
     private http: HttpClient,

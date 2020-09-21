@@ -5,6 +5,12 @@ import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '../../core/src/shared/shared.module';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
+import {
+  ContainerOrchestratorStepComponent,
+} from './shared/components/container-orchestrator-stepper/container-orchestrator-step/container-orchestrator-step.component';
+import {
+  ContainerOrchestratorStepperComponent,
+} from './shared/components/container-orchestrator-stepper/container-orchestrator-stepper.component';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
@@ -30,6 +36,10 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
     LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService,
     GitSCMService,
+  ],
+  declarations: [
+    ContainerOrchestratorStepperComponent, // TODO: RC should be own module with route
+    ContainerOrchestratorStepComponent
   ]
 })
 export class CloudFoundryPackageModule { }

@@ -5,6 +5,6 @@
 <app-steppers [cancel]="cancelUrl">
   <app-step [title]="'Configure Container Orchestrator'" [valid]="orchestrator.validate | async"
     [blocked]="orchestrator.blocked | async" [onNext]="orchestrator.onNext">
-    <cf-container-orchestrator-step #orchestrator></cf-container-orchestrator-step>
+    <app-container-orchestrator-step #orchestrator></app-container-orchestrator-step>
   </app-step>
 </app-steppers>

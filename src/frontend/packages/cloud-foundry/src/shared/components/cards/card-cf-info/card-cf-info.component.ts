@@ -96,4 +96,8 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   deConfigureUserInvites() {
     this.userInviteConfigureService.unconfigure(this.cfEndpointService.cfGuid);
   }
+
+  configureEirini() {
+    this.eiriniMetrics.configureEirini(this.cfEndpointService.cfGuid);
+  }
 }

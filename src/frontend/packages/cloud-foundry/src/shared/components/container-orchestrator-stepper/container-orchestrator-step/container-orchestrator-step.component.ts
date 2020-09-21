@@ -6,41 +6,42 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { IStepperStep, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { DeleteEndpointRelation, SaveEndpointRelation } from '../../../../../../store/src/actions/endpoint.actions';
 import { AppState } from '../../../../../../store/src/app-state';
-import { EndpointsEffect } from '../../../../../../store/src/effects/endpoint.effects';
-import { endpointSchemaKey } from '../../../../../../store/src/helpers/entity-factory';
+import { METRICS_ENDPOINT_TYPE } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { selectEntity, selectUpdateInfo } from '../../../../../../store/src/selectors/api.selectors';
-import { endpointsRegisteredMetricsEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../../store/src/types/endpoint.types';
+import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../eirini.helper';
 
 @Component({
-  selector: 'cf-container-orchestrator-step',
+  selector: 'app-container-orchestrator-step',
   templateUrl: './container-orchestrator-step.component.html',
   styleUrls: ['./container-orchestrator-step.component.scss']
 })
 export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep {
 
   constructor(
-    private store: Store<AppState>,
+    store: Store<AppState>,
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
 
-    this.cf$ = store.select(selectEntity<EndpointModel>(endpointSchemaKey, this.cfGuid)).pipe(
-      filter(endpoint => !!endpoint),
+    this.cf$ = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid).waitForEntity$.pipe(
+      map(e => e.entity)
     );
     this.cfName$ = this.cf$.pipe(
       map(entity => entity.name)
     );
 
-    this.metricsEndpoints$ = store.select(endpointsRegisteredMetricsEntitiesSelector).pipe(
+    this.metricsEndpoints$ = stratosEntityCatalog.endpoint.store.getPaginationService().entities$.pipe(
+      filter(endpoints => !!endpoints),
+      map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === METRICS_ENDPOINT_TYPE)),
       map(registeredMetrics => Object.values(registeredMetrics)),
     );
 
+    // TODO: RC A lot of this could move to eirini service if this component was in the eirini module
     this.eiriniDefaultNamespace$ = store.select('auth').pipe(
       map((auth) => auth.sessionData &&
         auth.sessionData['plugin-config'] &&
@@ -123,15 +124,18 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
         redirect: !res.error
       }))
     );
-  }
+  };
 
   deleteExistingRelation(): Observable<ActionState> {
     if (this.existingRelation) {
-      this.store.dispatch(new DeleteEndpointRelation(this.cfGuid, this.existingRelation, 'cf'));
-      return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.deleteRelationKey)).pipe(
+      return stratosEntityCatalog.endpoint.api.deleteEndpointRelation<ActionState>(
+        this.cfGuid,
+        this.existingRelation,
+        CF_ENDPOINT_TYPE
+      ).pipe(
         pairwise(),
         filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
-        map(([oldV, newV]: [ActionState, ActionState]) => {
+        map(([, newV]: [ActionState, ActionState]) => {
           return {
             ...newV,
             message: `Failed to delete existing relation${newV.message ? `: ${newV.message}` : ''}`,
@@ -148,18 +152,20 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
 
   saveRelation(): Observable<ActionState> {
     if (this.form.controls.orchestrator.value === CfContainerOrchestrator.EIRINI) {
-      this.store.dispatch(new SaveEndpointRelation(this.cfGuid, {
-        guid: this.form.controls.eiriniMetrics.value,
-        type: EndpointRelationTypes.METRICS_EIRINI,
-        metadata: {
-          namespace: this.form.controls.eiriniNamespace.value
-        }
-      }, 'cf'));
-
-      return this.store.select(selectUpdateInfo(endpointSchemaKey, this.cfGuid, EndpointsEffect.updateRelationKey)).pipe(
+      return stratosEntityCatalog.endpoint.api.createEndpointRelation<ActionState>(
+        this.cfGuid,
+        {
+          guid: this.form.controls.eiriniMetrics.value,
+          type: EndpointRelationTypes.METRICS_EIRINI,
+          metadata: {
+            namespace: this.form.controls.eiriniNamespace.value
+          }
+        },
+        'cf'
+      ).pipe(
         pairwise(),
         filter(([oldVal, newVal]) => oldVal ? oldVal.busy : false && !newVal.busy),
-        map(([oldV, newV]: [ActionState, ActionState]) => ({
+        map(([, newV]: [ActionState, ActionState]) => ({
           ...newV,
           message: `Failed to save relation${newV.message ? `: ${newV.message}` : ''}`,
         }))

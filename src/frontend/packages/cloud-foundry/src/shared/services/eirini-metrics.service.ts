@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { METRICS_ENDPOINT_TYPE } from '../../../../store/src/helpers/stratos-entity-factory';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
@@ -60,4 +61,8 @@ export class EiriniMetricsService {
   //     map(eirini => !!eirini)
   //   );
   // }
+
+  configureEirini(cfGuid: string) {
+    this.store.dispatch(new RouterNav({ path: `${cfGuid}/eirini`, query: { cf: true } }));
+  }
 }
