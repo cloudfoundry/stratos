@@ -22,6 +22,11 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const (
+	helmEndpointType     = "helm"
+	helmRepoEndpointType = "repo"
+)
+
 // PodCreationData stores the clients and names used to create pod and secret
 type PodCreationData struct {
 	Namespace    string
@@ -123,7 +128,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	podSpec.Spec.EnableServiceLinks = &off
 	podSpec.Spec.RestartPolicy = "Never"
 	podSpec.Spec.DNSPolicy = "Default"
-	
+
 	volumeMountsSpec := make([]v1.VolumeMount, 1)
 	volumeMountsSpec[0].Name = "kubeconfig"
 	volumeMountsSpec[0].MountPath = "/home/stratos/.stratos"
@@ -139,7 +144,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	containerSpec[0].Env = make([]v1.EnvVar, 1)
 	containerSpec[0].Env[0].Name = "K8S_VERSION"
 	containerSpec[0].Env[0].Value = kubeVersion
-	
+
 	podSpec.Spec.Containers = containerSpec
 
 	volumesSpec := make([]v1.Volume, 1)
@@ -168,7 +173,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	for {
 		status, err := podClient.Get(pod.Name, statusOptions)
 		if err == nil && status.Status.Phase == "Running" {
-			break;
+			break
 		}
 
 		timeout = timeout - 1
@@ -219,8 +224,10 @@ func getHelmRepoSetupScript(portalProxy interfaces.PortalProxy) string {
 	}
 
 	for _, ep := range endpoints {
-		if ep.CNSIType == "helm" {
-			str += fmt.Sprintf("helm repo add %s %s > /dev/null\n", ep.Name, ep.APIEndpoint)
+		if ep.CNSIType == helmEndpointType && ep.SubType == helmRepoEndpointType {
+			// Remove spaces from the name
+			name := strings.ReplaceAll(ep.Name, " ", "_")
+			str += fmt.Sprintf("helm repo add %s %s > /dev/null\n", name, ep.APIEndpoint)
 		}
 	}
 
@@ -252,7 +259,7 @@ func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error)
 		// Get the version number - remove any 'v' perfix or '+' suffix
 		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
 		reg, err := regexp.Compile("[^0-9\\.]+")
-    if err == nil {
+		if err == nil {
 			version = reg.ReplaceAllString(version, "")
 		}
 		parts := strings.Split(version, ".")
