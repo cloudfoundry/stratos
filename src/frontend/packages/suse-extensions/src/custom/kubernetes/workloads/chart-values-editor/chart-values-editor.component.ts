@@ -98,6 +98,8 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Observable - are we still loading resources?
   public loading$: Observable<boolean>;
 
+  public initing = true;
+
   // Observable for tracking if the Monaco editor has loaded
   private monacoLoaded$ = new BehaviorSubject<boolean>(false);
 
@@ -191,6 +193,8 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       map(([schema, values, loaded]) => !loaded),
       startWith(true)
     );
+
+    this.initing = false;
   }
 
   ngAfterViewInit(): void {

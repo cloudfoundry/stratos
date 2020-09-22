@@ -7,6 +7,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../stratos-monocular.helper';
 import { Chart } from '../models/chart';
 import { ChartVersion } from '../models/chart-version';
+import { RepoAttributes } from '../models/repo';
 import { ConfigService } from './config.service';
 
 
@@ -22,7 +23,6 @@ export class ChartsService {
     config: ConfigService,
     private route: ActivatedRoute,
   ) {
-    this.hostname = `${config.backendHostname}/chartsvc`;
     this.cacheCharts = {};
     this.hostname = '/pp/v1/chartsvc';
   }
@@ -136,8 +136,53 @@ export class ChartsService {
    * @param version Chart version
    * @return An observable that will be the json schema
    */
-  getChartSchema(chartVersion: ChartVersion): Observable<any> {
-    return chartVersion.attributes.schema ? this.http.get(`${this.hostname}${chartVersion.attributes.schema}`) : of(null);
+  getChartSchema(chartVersion: ChartVersion, chart: Chart): Observable<any> {
+    const url = this.getChartSchemaURL(chartVersion, chart.attributes.name, chart.attributes.repo);
+    return url ? this.http.get(url) : of(null);
+  }
+
+  // Get the URL for obtaining a Chart's schema
+  getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string {
+    // Helm Hub does not give us the schema information so we have to use an additional backend API to fetch the chart and check
+    if (chartVersion.attributes.schema === undefined) {
+      let url = this.getChartURL(chartVersion, repo);
+      url = btoa(url);
+      return `/pp/v1/monocular/schema/${name}/${url}`;
+    }
+
+    // We have the schema URL, so we can fetch that directly
+    return chartVersion.attributes.schema ? `${this.hostname}${chartVersion.attributes.schema}` : null;
+  }
+
+  getChartURL(chartVersion: ChartVersion, repo?: RepoAttributes): string {
+    const firstUrl = this.getFirstChartUrl(chartVersion);
+    if (firstUrl.length > 0) {
+      // Check if url is absolute, if not assume it's a filename
+      if (!firstUrl.startsWith('http://') && !firstUrl.startsWith('https://')) {
+        const repoUrl = repo ? repo.url : '';
+        return repoUrl || this.getChartRepoUrl(chartVersion) + '/' + firstUrl;
+      }
+    }
+    return firstUrl;
+  }
+
+  private getFirstChartUrl(chart: ChartVersion): string {
+    if (chart && chart.attributes && chart.attributes.urls && chart.attributes.urls.length > 0) {
+      return chart.attributes.urls[0];
+    }
+    return '';
+  }
+
+  private getChartRepoUrl(chart: ChartVersion): string {
+    if (chart &&
+      chart.relationships &&
+      chart.relationships.chart &&
+      chart.relationships.chart.data &&
+      chart.relationships.chart.data.repo
+    ) {
+      return chart.relationships.chart.data.repo.url;
+    }
+    return '';
   }
 
   /**
@@ -163,6 +208,15 @@ export class ChartsService {
    */
   getVersion(repo: string, chartName: string, version: string): Observable<ChartVersion> {
     return this.http.get(`${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`).pipe(
+      map(this.extractData),
+      catchError(this.handleError)
+    );
+  }
+
+  getVersionFromEndpoint(endpoint: string, repo: string, chartName: string, version: string): Observable<ChartVersion> {
+    const requestArgs  = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint :'' } };
+    return this.http.get(
+      `${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`, requestArgs).pipe(
       map(this.extractData),
       catchError(this.handleError)
     );

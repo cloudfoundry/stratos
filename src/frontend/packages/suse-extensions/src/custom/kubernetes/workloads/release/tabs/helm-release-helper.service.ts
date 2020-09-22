@@ -257,21 +257,17 @@ export class HelmReleaseHelperService {
   // We don't know which Helm repository it came from, so use the name and sources to match
   private isProbablySameChart(a: ChartMetadata, b: ChartMetadata): boolean {
     // Basic properties must be the same
-    if ((a.name !== b.name) || (a.sources.length !== b.sources.length)) {
+    if (a.name !== b.name) {
       return false;
     }
 
-    // Sources must match
+    // Must have at least one source in common
     let count = 0;
     a.sources.forEach(source => {
       count += b.sources.findIndex((s) => s === source) === -1 ? 0 : 1;
     });
 
-    if (count !== a.sources.length) {
-      return false;
-    }
-
-    return true;
+    return count > 0;
   }
 
 }

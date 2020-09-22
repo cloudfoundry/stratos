@@ -171,6 +171,9 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// however cannot be done for things like img src
 	echoGroup.Any("/monocular/:guid/chartsvc/*", m.handleMonocularInstance)
 
+	echoGroup.Any("/monocular/schema/:name/:encodedChartURL", m.checkForJsonSchema)
+	echoGroup.Any("/monocular/values/:endpoint/:repo/:name/:version", m.getChartValues)
+
 	echoGroup.POST("/chartrepos/:guid", m.syncRepo)
 	echoGroup.POST("/chartrepos/status", m.getRepoStatuses)
 
@@ -290,7 +293,6 @@ func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoin
 	// by the 'authHandler' associated with the endpoint OR defaults to an OAuth request. For this case there's no auth at all so falls over.
 	// Tracked in https://github.com/SUSE/stratos/issues/466
 
-	url := monocularEndpoint.APIEndpoint
 	path := c.Request().URL.Path
 	log.Debug("URL to monocular requested: %v", path)
 	if strings.Index(path, stratosPrefix) == 0 {
@@ -308,13 +310,18 @@ func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoin
 			parts = parts[2:]
 		}
 
-		// Bring all back together
-		url.Path += "/" + strings.Join(parts, "/")
+		path = "/" + strings.Join(parts, "/")
 	}
+
+	return m.proxyToMonocularInstance(c, monocularEndpoint, path)
+}
+
+func (m *Monocular) proxyToMonocularInstance(c echo.Context, monocularEndpoint *interfaces.CNSIRecord, path string) error {
+	url := monocularEndpoint.APIEndpoint
 	log.Debugf("URL to monocular: %v", url.String())
+	url.Path += path
 
 	req, err := http.NewRequest(c.Request().Method, url.String(), nil)
-
 	removeBreakingHeaders(c.Request(), req)
 
 	client := &http.Client{Timeout: 30 * time.Second}

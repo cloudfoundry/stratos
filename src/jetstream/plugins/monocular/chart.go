@@ -51,7 +51,7 @@ type ChartVersion struct {
 	URLs       []string  `json:"urls"`
 	Readme     string    `json:"readme,omitempty"`
 	Values     string    `json:"values,omitempty"`
-	Schema     string    `json:"schema,omitempty"`
+	Schema     string    `json:"schema"`
 }
 
 //RepoCheck describes the state of a repository in terms its current checksum and last update time.

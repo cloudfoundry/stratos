@@ -19,7 +19,6 @@ import { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.
 import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubernetesNamespace } from '../../store/kube.types';
-import { getFirstChartUrl } from '../workload.utils';
 import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 
 @Component({
@@ -62,10 +61,13 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
 
-    this.config = {
-      valuesUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.yaml`,
-      schemaUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.name}/versions/${chart.version}/values.schema.json`,
-    };
+    // Fetch the Chart Version metadata so we can get the correct URL for the Chart's JSON Schema
+    this.chartsService.getVersion(this.chart.repo, this.chart.name, this.chart.version).pipe(first()).subscribe(ch => {
+      this.config = {
+        valuesUrl: `/pp/v1/monocular/values/${this.chart.endpoint}/${this.chart.repo}/${chart.name}/${this.chart.version}`,
+        schemaUrl: this.chartsService.getChartSchemaURL(ch, ch.relationships.chart.data.name, ch.relationships.chart.data.repo)
+      };
+    });
 
     this.setupDetailsStep();
   }
@@ -238,7 +240,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
           throw new Error('Could not get Chart URL');
         }
         // Add the chart url into the values
-        values.chartUrl = getFirstChartUrl(chartInfo);
+        values.chartUrl = this.chartsService.getChartURL(chartInfo);
         if (values.chartUrl.length === 0) {
           throw new Error('Could not get Chart URL');
         }

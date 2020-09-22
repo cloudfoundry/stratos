@@ -47,6 +47,7 @@ describe('CreateReleaseComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateReleaseComponent);
+    httpMock.expectOne('/pp/v1/chartsvc/v1/charts/undefined/undefined/versions/undefined');
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

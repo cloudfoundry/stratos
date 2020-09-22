@@ -46,6 +46,7 @@ export enum HelmStatus {
 }
 
 export interface HelmChartReference {
+  endpoint?: string;
   name: string;
   repo: string;
   version: string;

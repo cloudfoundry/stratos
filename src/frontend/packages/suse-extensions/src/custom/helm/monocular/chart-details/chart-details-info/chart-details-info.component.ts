@@ -26,7 +26,7 @@ export class ChartDetailsInfoComponent implements OnInit {
   @Input() set currentVersion (version: ChartVersion) {
     this._currentVersion = version;
     if (version) {
-      this.getSchema(this._currentVersion);
+      this.getSchema(this._currentVersion, this.chart);
     }
   }
 
@@ -69,8 +69,8 @@ export class ChartDetailsInfoComponent implements OnInit {
     );
   }
 
-  private getSchema(currentVersion: ChartVersion) {
-    this.chartsService.getChartSchema(currentVersion).pipe(
+  private getSchema(currentVersion: ChartVersion, chart: Chart) {
+    this.chartsService.getChartSchema(currentVersion, chart).pipe(
       first(),
       catchError(() => of(null))
     ).subscribe(schema => {

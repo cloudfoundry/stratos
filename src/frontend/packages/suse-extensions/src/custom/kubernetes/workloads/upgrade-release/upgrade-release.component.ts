@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import {
@@ -10,12 +10,13 @@ import {
   StepOnNextResult,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
+import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
+import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
 import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
-import { getFirstChartUrl } from '../workload.utils';
 import { workloadsEntityCatalog } from './../workloads-entity-catalog';
 import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config';
 
@@ -33,7 +34,8 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
       deps: [
         ActivatedRoute
       ]
-    }
+    },
+    ...createMonocularProviders()
   ]
 })
 export class UpgradeReleaseComponent {
@@ -54,7 +56,8 @@ export class UpgradeReleaseComponent {
 
   constructor(
     store: Store<any>,
-    public helper: HelmReleaseHelperService
+    public helper: HelmReleaseHelperService,
+    private chartsService: ChartsService,
   ) {
 
     this.cancelUrl = `/workloads/${this.helper.guid}`;
@@ -91,14 +94,19 @@ export class UpgradeReleaseComponent {
   onNext = (): Observable<StepOnNextResult> => {
     const chart = this.version.relationships.chart.data;
     const version = this.version.attributes.version;
+    const endpointID = this.monocularEndpointId || stratosMonocularEndpointGuid;
+
 
     // Fetch the release metadata so that we have the values used to install the current release
-    return this.helper.release$.pipe(
+    return combineLatest(
+      [this.helper.release$, this.chartsService.getVersionFromEndpoint(endpointID, chart.repo.name, chart.name, version)]
+    ).pipe(
       first(),
-      tap(release => {
+      tap(([release, chartVersionDetail]) => {
+        const schemaUrl = this.chartsService.getChartSchemaURL(chartVersionDetail, chart.name, chart.repo);
         this.config = {
-          schemaUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo.name}/${chart.name}/versions/${version}/values.schema.json`,
-          valuesUrl: `/pp/v1/chartsvc/v1/assets/${chart.repo.name}/${chart.name}/versions/${version}/values.yaml`,
+          schemaUrl,
+          valuesUrl: `/pp/v1/monocular/values/${endpointID}/${chart.repo.name}/${chart.name}/${version}`,
           releaseValues: release.config
         };
       }),
@@ -129,7 +137,7 @@ export class UpgradeReleaseComponent {
         version: this.version.attributes.version,
       },
       monocularEndpoint: this.monocularEndpointId === stratosMonocularEndpointGuid ? null : this.monocularEndpointId,
-      chartUrl: getFirstChartUrl(this.version)
+      chartUrl: this.chartsService.getChartURL(this.version)
     };
 
     // Make the request

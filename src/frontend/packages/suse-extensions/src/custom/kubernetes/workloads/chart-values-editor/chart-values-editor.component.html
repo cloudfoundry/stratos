@@ -1,5 +1,5 @@
 <mat-card class="editor-card">
-  <div *ngIf="loading$ | async" class="editor-loading">
+  <div *ngIf="initing || (loading$ | async)" class="editor-loading">
     <div>
       <div class="editor-loading__msg">Loading ...</div>
       <mat-progress-bar class="editor-loading__progress-bar" [color]="'primary'" mode="indeterminate"></mat-progress-bar>      

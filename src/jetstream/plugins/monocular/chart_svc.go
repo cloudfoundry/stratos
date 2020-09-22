@@ -1,6 +1,7 @@
 package monocular
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -195,6 +196,73 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	}
 
 	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
+}
+
+func (m *Monocular) getChartValues(c echo.Context) error {
+	endpointID := c.Param("endpoint")
+	repo := c.Param("repo")
+	chartName := c.Param("name")
+	version := c.Param("version")
+
+	// Built in Monocular
+	if endpointID == "default" {
+		filename := "values.yaml"
+		log.Debugf("Get chart file: %s", filename)
+		chart, err := m.ChartStore.GetChart(repo, chartName, version)
+		if err != nil {
+			return err
+		}
+		if m.cacheChart(*chart) == nil {
+			return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
+		}
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
+	}
+
+	// Helm Hub
+	// Change the URL and then forward on
+	p := fmt.Sprintf("/chartsvc/v1/assets/%s/%s/versions/%s/values.yaml", repo, chartName, version)
+	monocularEndpoint, err := m.validateExternalMonocularEndpoint(endpointID)
+	if monocularEndpoint == nil || err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("No monocular endpoint"))
+	}
+
+	return m.proxyToMonocularInstance(c, monocularEndpoint, p)
+}
+
+// Check to see if the given chart URL has a schema
+func (m *Monocular) checkForJsonSchema(c echo.Context) error {
+	log.Debug("checkForJsonSchema called")
+
+	chartName := c.Param("name")
+	encodedChartURL := c.Param("encodedChartURL")
+	url, err := base64.StdEncoding.DecodeString(encodedChartURL)
+	if err != nil {
+		return err
+	}
+
+	chartURL := string(url)
+
+	chartCachePath := path.Join(m.CacheFolder, "schemas", encodedChartURL)
+	if err := m.ensureFolder(chartCachePath); err != nil {
+		log.Warnf("checkForJsonSchema: Could not create folder for chart downloads: %+v", err)
+		return err
+	}
+
+	// We can delete the Chart archive - don't need it anymore
+	defer os.RemoveAll(chartCachePath)
+
+	archiveFile := path.Join(chartCachePath, "chart.tgz")
+	if err := m.downloadFile(archiveFile, chartURL); err != nil {
+		return fmt.Errorf("Could not download chart from: %s - %+v", chartURL, err)
+	}
+
+	// Now extract the files we need
+	filenames := []string{"values.schema.json"}
+	if err := extractArchiveFiles(archiveFile, chartName, chartCachePath, filenames); err != nil {
+		return fmt.Errorf("Could not extract files from chart archive: %s - %+v", archiveFile, err)
+	}
+
+	return c.File(path.Join(chartCachePath, "values.schema.json"))
 }
 
 // This is the simpler version that returns just enough data needed for the Charts list view
