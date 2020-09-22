@@ -40,4 +40,26 @@
   &__limit {
     font-size: 18px;
   }
+  &__alerts {
+    cursor: pointer;
+    display: flex;
+    flex: 0;
+    flex-direction: column;
+  }
+  &__alert-badge {
+    align-items: center;
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    font-size: 14px;
+    margin-bottom: 2px;
+    padding: 2px 4px;
+
+    &> mat-icon {
+      font-size: 16px;
+      height: 16px;
+      margin-right: 2px;
+      width: 16x;
+    }
+  }
 }

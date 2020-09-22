@@ -6,6 +6,7 @@ import { PaginationClientFilter, PaginationParam } from '../types/pagination.typ
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
+export const RESET_PAGINATION_OF_TYPE = '[Pagination] Reset pagination of type';
 export const CREATE_PAGINATION = '[Pagination] Create pagination';
 export const CLEAR_PAGES = '[Pagination] Clear pages only';
 export const SET_PAGE = '[Pagination] Set page';
@@ -57,11 +58,23 @@ export class ResetPagination extends BasePaginationAction implements Action {
   type = RESET_PAGINATION;
 }
 
+export class ResetPaginationOfType extends BasePaginationAction implements Action {
+  constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>) {
+    super(pEntityConfig);
+  }
+  type = RESET_PAGINATION_OF_TYPE;
+}
+
 export class CreatePagination extends BasePaginationAction implements Action {
   /**
    * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
    */
-  constructor(pEntityConfig: Partial<EntityCatalogEntityConfig>, public paginationKey: string, public seed?: string) {
+  constructor(
+    pEntityConfig: Partial<EntityCatalogEntityConfig>,
+    public paginationKey: string,
+    public seed?: string,
+    public initialParams?: PaginationParam
+  ) {
     super(pEntityConfig);
   }
   type = CREATE_PAGINATION;

@@ -9,17 +9,31 @@
   min-height: 0;
   min-width: 0;
 
-  @include breakpoint(tablet) {
+
+  @include breakpoint(mobileonly) {
+    // < 600
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @include breakpoint(phablet) {
+    // > 600
     grid-column-gap: $bottom-space;
     grid-row-gap: $bottom-space;
     grid-template-columns: repeat(2, 1fr);
   }
 
+  @include breakpoint(tablet) {
+    // > 900
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   @include breakpoint(laptop) {
+    // > 1200
     grid-template-columns: repeat(4, 1fr);
   }
 
   @include breakpoint(desktop) {
+    // > 1800
     grid-template-columns: repeat(5, 1fr);
   }
 }

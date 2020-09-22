@@ -7,7 +7,8 @@
       <h3>Select application source</h3>
       <p>To create an application you can either deploy from a specific source or create an application shell. An
         application shell is an empty application with no package associated with it.</p>
-      <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
+      <app-tile-selector [options]="tileSelectorConfig" [smallerTiles]="true" (selection)="selectedTile = $event">
+      </app-tile-selector>
     </div>
   </app-step>
 </app-steppers>

@@ -89,7 +89,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid, space.metadata.guid)
       ),
-      map(can => !can)
+      map(can => !can),
     );
 
     this.tabLinks = [
