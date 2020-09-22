@@ -41,6 +41,15 @@ type terminalSize struct {
 const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+
+	// Time to wait before force close on connection.
+	closeGracePeriod = 10 * time.Second
 )
 
 // Start handles web-socket request to launch a Kubernetes Terminal
@@ -60,7 +69,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	if !ok {
 		return errors.New("Could not get token")
 	}
-	
+
 	// This is the kube config for the kubernetes endpoint that we want configured in the Terminal
 	kubeConfig, err := k.Kube.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, "")
 	if err != nil {
@@ -79,7 +88,10 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	defer ws.Close()
 	defer pingTicker.Stop()
 
-	// We are now in web socket land - we don't want any middleware to change the HTTP response 
+	// At this point we aer using web sockets, so we can not return errors to the client as the connection
+	// has been upgraded to a web socket
+
+	// We are now in web socket land - we don't want any middleware to change the HTTP response
 	c.Set("Stratos-WebSocket", "true")
 
 	// Send a message to say that we are creating the pod
@@ -95,8 +107,8 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 		k.cleanupPodAndSecret(podData)
 
 		// Send error message
-		sendProgressMessage(ws, "!" + err.Error())
-		return err
+		sendProgressMessage(ws, "!"+err.Error())
+		return nil
 	}
 
 	// API Endpoint to SSH/exec into a container
@@ -131,28 +143,33 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 
 	stdoutDone := make(chan bool)
 	go pumpStdout(ws, wsConn, stdoutDone)
+	go ping(ws, stdoutDone)
 
 	// If the downstream connection is closed, close the other web socket as well
-	ws.SetCloseHandler(func (code int, text string) error {
+	ws.SetCloseHandler(func(code int, text string) error {
 		wsConn.Close()
+		// Cleanup
+		k.cleanupPodAndSecret(podData)
+		podData = nil
 		return nil
 	})
+
+	// Wait a while when reading - can take some time for the container to launch
+	ws.SetReadDeadline(time.Now().Add(pongWait))
+	ws.SetPongHandler(func(string) error { ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
 		_, r, err := ws.ReadMessage()
 		if err != nil {
-			// Check to see if this was because the web socket was closed cleanly
-			closed := false
-			select {
-			case msg := <-stdoutDone:
-					closed = msg
-			}
-			if !closed {
-				log.Errorf("Kubernetes terminal: error reading message from web socket: %+v", err)
-			}
-			log.Debug("Kube Terminal cleaning up ....")
+			// Error reading - so clean up
 			k.cleanupPodAndSecret(podData)
+			podData = nil
+
+			ws.SetWriteDeadline(time.Now().Add(writeWait))
+			ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			time.Sleep(closeGracePeriod)
+			ws.Close()
 
 			// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
 			return nil
@@ -160,7 +177,6 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 
 		res := KeyCode{}
 		json.Unmarshal(r, &res)
-
 		if res.Cols == 0 {
 			slice := make([]byte, 1)
 			slice[0] = 0
@@ -177,11 +193,6 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			wsConn.WriteMessage(websocket.TextMessage, slice)
 		}
 	}
-
-	// Cleanup
-	log.Error("Kubernetes Terminal is cleaning up")
-
-	return k.cleanupPodAndSecret(podData)
 }
 
 func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
@@ -199,6 +210,21 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn, done chan bool) {
 			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
 			ws.Close()
 			break
+		}
+	}
+}
+
+func ping(ws *websocket.Conn, done chan bool) {
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait)); err != nil {
+				log.Errorf("Web socket ping error: %+v", err)
+			}
+		case <-done:
+			return
 		}
 	}
 }

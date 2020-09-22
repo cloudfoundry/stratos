@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	helmEndpointType     = "helm"
-	helmRepoEndpointType = "repo"
+	helmEndpointType        = "helm"
+	helmRepoEndpointType    = "repo"
+	startingProgressMessage = "Waiting for Kubernetes Terminal to start up ..."
 )
 
 // PodCreationData stores the clients and names used to create pod and secret
@@ -87,6 +88,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 		Type: "Opaque",
 	}
 
+	sendProgressMessage(ws, startingProgressMessage)
+
 	setResourcMetadata(&secretSpec.ObjectMeta, sessionID)
 
 	secretSpec.Data = make(map[string][]byte)
@@ -98,6 +101,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 		secretSpec.Data["helm-setup"] = []byte(helmSetup)
 	}
 
+	sendProgressMessage(ws, startingProgressMessage)
 	_, err = secretClient.Create(secretSpec)
 	if err != nil {
 		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
@@ -154,6 +158,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	}
 	podSpec.Spec.Volumes = volumesSpec
 
+	sendProgressMessage(ws, startingProgressMessage)
+
 	// Create a new pod
 	pod, err := podClient.Create(podSpec)
 	if err != nil {
@@ -165,12 +171,12 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	result.PodClient = podClient
 	result.PodName = podName
 
-	sendProgressMessage(ws, "Waiting for Kubernetes Terminal to start up ...")
-
 	// Wait for the pod to be running
 	timeout := 60
 	statusOptions := metav1.GetOptions{}
 	for {
+		// This ensures we keep the web socket alive while the container is creating
+		sendProgressMessage(ws, startingProgressMessage)
 		status, err := podClient.Get(pod.Name, statusOptions)
 		if err == nil && status.Status.Phase == "Running" {
 			break
@@ -201,6 +207,11 @@ func setResourcMetadata(metadata *metav1.ObjectMeta, sessionID string) {
 
 // Cleanup the pod and secret
 func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
+	if podData == nil {
+		// Already been cleaned up
+		return nil
+	}
+
 	if len(podData.PodName) > 0 {
 		//captureBashHistory(podData)
 		podData.PodClient.Delete(podData.PodName, nil)
