@@ -167,7 +167,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         this.schema = schema;
         if (values !== null) {
           this.chartValuesYaml = values as string;
-          this.chartValues = yaml.safeLoad(values);
+          this.chartValues = yaml.safeLoad(values, { json: true });
           // Set the form to the chart values initially, so if the user does nothing, they get the defaults
           this.initialFormData = this.chartValues;
         }
@@ -232,7 +232,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       // Form -> Editor
       // Only copy if there is not an error - otherwise keep the invalid yaml from the editor that needs fixing
       if (!this.yamlError) {
-        const codeYaml = yaml.safeLoad(this.code || '{}');
+        const codeYaml = yaml.safeLoad(this.code || '{}', { json: true });
         const data = mergeObjects(codeYaml, this.formData);
         this.code = this.getDiff(data);
         this.codeOnEnter = this.code;
@@ -250,7 +250,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         }
 
         // Parse as json
-        const json = yaml.safeLoad(this.code || '{}');
+        const json = yaml.safeLoad(this.code || '{}', { json: true });
         // Must be an object, otherwise it was not valid
         if (typeof (json) !== 'object') {
           throw new Error('Invalid YAML');
@@ -415,7 +415,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Update the code editor to only show the YAML that contains the differences with the values.yaml
   diff() {
     this.confirmDialog.open(this.overwriteDiffValuesConfirmation, () => {
-      const userValues = yaml.safeLoad(this.code);
+      const userValues = yaml.safeLoad(this.code, { json: true });
       this.code = this.getDiff(userValues);
     });
   }
