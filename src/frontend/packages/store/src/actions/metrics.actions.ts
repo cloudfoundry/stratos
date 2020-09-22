@@ -1,3 +1,4 @@
+import { CF_ENDPOINT_TYPE } from '../../../cloud-foundry/src/cf-types';
 import { metricEntityType } from '../helpers/stratos-entity-factory';
 import { proxyAPIVersion } from '../jetstream';
 import { MetricQueryType } from '../types/metric.types';
@@ -109,7 +110,7 @@ export class FetchCfEiriniMetricsAction extends MetricsAction {
     public query: MetricQueryConfig,
     queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true) {
-    super(metricsKey, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/eirini`, null, queryType, isSeries, 'TODOCFE', false);// TODO: RC
+    super(metricsKey, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/eirini`, null, queryType, isSeries, CF_ENDPOINT_TYPE, false);// TODO: RC
   }
 }
 

@@ -378,7 +378,7 @@ const cfListCards: Type<CardCell<any>>[] = [
   providers: [
     ApplicationStateService,
     CloudFoundryUserProvidedServicesService,
-    EiriniMetricsService
+    EiriniMetricsService // TODO: RC Location
   ]
 })
 export class CloudFoundrySharedModule { }

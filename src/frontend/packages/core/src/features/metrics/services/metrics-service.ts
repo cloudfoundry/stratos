@@ -51,7 +51,7 @@ export class MetricsService {
             const targetEndpoint = endpoints.find(e => e.guid === relation.guid);
             if (targetEndpoint) {
               provider.endpoints.push(targetEndpoint);
-              targetEndpoint.metadata = targetEndpoint.metadata || {};
+              targetEndpoint.metadata = { ...targetEndpoint.metadata } || {};
               targetEndpoint.metadata.fullApiEndpoint = getFullEndpointApiUrl(targetEndpoint);
             }
           });

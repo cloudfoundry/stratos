@@ -421,8 +421,7 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
-    actionBuilders: quotaDefinitionActionBuilder,
-
+    actionBuilders: quotaDefinitionActionBuilder
   });
   return cfEntityCatalog.quotaDefinition;
 }
