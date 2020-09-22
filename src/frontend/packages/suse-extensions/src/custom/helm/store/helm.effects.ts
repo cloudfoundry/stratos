@@ -18,6 +18,7 @@ import {
 import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 import { isJetstreamError } from '../../../../../store/src/jetstream';
 import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { endpointOfTypeSelector } from '../../../../../store/src/selectors/endpoint.selectors';
@@ -31,13 +32,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
-import {
-  getHelmVersionId,
-  getMonocularChartId,
-  HELM_ENDPOINT_TYPE,
-  HELM_HUB_ENDPOINT_TYPE,
-  HELM_REPO_ENDPOINT_TYPE,
-} from '../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { Chart } from '../monocular/shared/models/chart';
 import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
@@ -58,7 +53,11 @@ type MonocularChartsResponse = {
   data: Chart[];
 };
 
-const mapMonocularChartResponse = (entityKey: string, response: MonocularChartsResponse): NormalizedResponse => {
+const mapMonocularChartResponse = (
+  entityKey: string,
+  response: MonocularChartsResponse,
+  schema: EntitySchema
+): NormalizedResponse => {
   const base: NormalizedResponse = {
     entities: { [entityKey]: {} },
     result: []
@@ -66,7 +65,7 @@ const mapMonocularChartResponse = (entityKey: string, response: MonocularChartsR
 
   const items = response.data as Array<any>;
   const processedData: NormalizedResponse = items.reduce((res, data) => {
-    const id = getMonocularChartId(data);
+    const id = schema.getId(data);
     res.entities[entityKey][id] = data;
     // Promote the name to the top-level object for simplicity
     data.name = data.attributes.name;
@@ -76,12 +75,16 @@ const mapMonocularChartResponse = (entityKey: string, response: MonocularChartsR
   return processedData;
 };
 
-const mergeMonocularChartResponses = (entityKey: string, responses: MonocularChartsResponse[]): NormalizedResponse => {
+const mergeMonocularChartResponses = (
+  entityKey: string,
+  responses: MonocularChartsResponse[],
+  schema: EntitySchema
+): NormalizedResponse => {
   const combined = responses.reduce((res, response) => {
     res.data = res.data.concat(response.data);
     return res;
   }, { data: [] });
-  return mapMonocularChartResponse(entityKey, combined);
+  return mapMonocularChartResponse(entityKey, combined, schema);
 };
 
 const addMonocularId = (endpointId: string, response: MonocularChartsResponse): MonocularChartsResponse => {
@@ -155,7 +158,7 @@ export class HelmEffects {
         this.createHelmRepoRequest(helmEndpoints),
         this.createHelmHubRequest(helmHubEndpoint)
       ]).pipe(
-        map(res => mergeMonocularChartResponses(entityKey, res)),
+        map(res => mergeMonocularChartResponses(entityKey, res, action.entity[0])),
         mergeMap((response: NormalizedResponse) => [new WrapperRequestActionSuccess(response, action)]),
         catchError(error => {
           const { status, message } = HelmEffects.createHelmError(error);
@@ -199,7 +202,7 @@ export class HelmEffects {
             endpointId: endpoint,
             ...endpointData
           };
-          processedData.entities[entityKey][getHelmVersionId(version)] = version;
+          processedData.entities[entityKey][action.entity[0].getId(version)] = version;
           processedData.result.push(endpoint);
         });
         return processedData;
@@ -221,7 +224,7 @@ export class HelmEffects {
 
           const items = response.data as Array<any>;
           const processedData = items.reduce((res, data) => {
-            const id = getMonocularChartId(data);
+            const id = action.entity[0].getId(data);
             res.entities[entityKey][id] = data;
             // Promote the name to the top-level object for simplicity
             data.name = data.attributes.name;

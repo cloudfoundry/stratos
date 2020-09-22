@@ -6,7 +6,7 @@ import { Chart } from '../shared/models/chart';
 import { ChartVersion } from '../shared/models/chart-version';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
-import { getMonocularEndpoint } from '../stratos-monocular.helper';
+import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../stratos-monocular.helper';
 
 @Component({
   selector: 'app-chart-details',
@@ -21,6 +21,7 @@ export class ChartDetailsComponent implements OnInit {
   currentVersion: ChartVersion;
   iconUrl: string;
   titleVersion: string;
+  chartSubTitle: string;
 
   loadingDelay: any;
 
@@ -43,6 +44,10 @@ export class ChartDetailsComponent implements OnInit {
           this.loading = false;
           this.initing = false;
           this.chart = chart;
+          this.chartSubTitle = chart.attributes.repo.name;
+          if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
+            this.chartSubTitle = 'Helm Hub - ' + this.chartSubTitle;
+          }
           const version = params.version || this.chart.relationships.latestChartVersion.data.version;
           this.chartsService.getVersion(repo, chartName, version).pipe(first())
             .subscribe(chartVersion => {

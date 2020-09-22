@@ -1,14 +1,12 @@
 import { Schema, schema } from 'normalizr';
 
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
+import { stratosMonocularEndpointGuid } from './monocular/stratos-monocular.helper';
 import { HelmVersion, MonocularChart } from './store/helm.types';
 
 export const helmVersionsEntityType = 'helmVersions';
 export const monocularChartsEntityType = 'monocularCharts';
 export const monocularChartVersionsEntityType = 'monocularChartVersions';
-
-export const getMonocularChartId = (entity: MonocularChart) => entity.id;
-export const getHelmVersionId = (entity: HelmVersion) => entity.endpointId;
 
 export const HELM_ENDPOINT_TYPE = 'helm';
 export const HELM_REPO_ENDPOINT_TYPE = 'repo';
@@ -39,19 +37,24 @@ export class HelmEntitySchema extends EntitySchema {
 entityCache[monocularChartsEntityType] = new HelmEntitySchema(
   monocularChartsEntityType,
   {},
-  { idAttribute: getMonocularChartId }
+  {
+    idAttribute: (entity: MonocularChart) => {
+      const monocularPrefix = entity.monocularEndpointId || stratosMonocularEndpointGuid;
+      return monocularPrefix + '/' + entity.id;
+    }
+  }
 );
 
 entityCache[helmVersionsEntityType] = new HelmEntitySchema(
   helmVersionsEntityType,
   {},
-  { idAttribute: getHelmVersionId }
+  { idAttribute: (entity: HelmVersion) => entity.endpointId }
 );
 
 entityCache[monocularChartVersionsEntityType] = new HelmEntitySchema(
   monocularChartVersionsEntityType,
   {},
-  { idAttribute: getMonocularChartId }
+  { idAttribute: (entity: MonocularChart) => entity.id }
 );
 
 export function helmEntityFactory(key: string): EntitySchema {
