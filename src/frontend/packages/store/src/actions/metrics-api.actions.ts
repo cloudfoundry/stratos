@@ -21,12 +21,12 @@ export interface MetricsAPITargets {
   activeTargets: {
     labels: {
       job: string,
-    };
+    },
   }[];
   droppedTargets: {
     discoveredLabels: {
       job: string,
-    };
+    },
   }[];
 }
 

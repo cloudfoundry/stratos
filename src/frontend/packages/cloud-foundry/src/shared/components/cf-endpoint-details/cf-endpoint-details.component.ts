@@ -6,7 +6,7 @@ import {
 
 
 @Component({
-  selector: 'cf-endpoint-details',
+  selector: 'lib-endpoint-details',
   templateUrl: './cf-endpoint-details.component.html',
   styleUrls: ['./cf-endpoint-details.component.scss']
 })

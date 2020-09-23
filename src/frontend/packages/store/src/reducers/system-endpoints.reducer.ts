@@ -52,7 +52,7 @@ function fetchingEndpointInfo(state) {
 function changeEndpointConnectionStatus(
   state: IRequestEntityTypeState<EndpointModel>,
   action: {
-    guid: string;
+    guid: string,
   },
   connectionStatus: endpointConnectionStatus
 ) {

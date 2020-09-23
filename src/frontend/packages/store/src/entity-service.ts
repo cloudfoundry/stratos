@@ -120,7 +120,6 @@ export class EntityService<T = any> {
 
   updatingSection$: Observable<UpdatingSection>;
 
-  counter = 0;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: EntityFetch<T>

@@ -50,7 +50,6 @@ describe('CurrentUserPermissionsService', () => {
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
           ]
         },
-        // metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
         sso_allowed: false
@@ -83,7 +82,6 @@ describe('CurrentUserPermissionsService', () => {
             StratosScopeStrings.SCIM_READ
           ]
         },
-        // metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
         sso_allowed: false

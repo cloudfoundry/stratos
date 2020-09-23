@@ -12,7 +12,8 @@ import { EntityServiceFactory } from '../../../../../../../store/src/entity-serv
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
-import { CellMetrics, DiegoContainerService } from '../../../../container-orchestration/services/diego-container.service';
+import { ContainerOrchestrationService } from '../../../../container-orchestration/services/container-orchestration.service';
+import { CellMetrics } from '../../../../container-orchestration/services/diego-container.service';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
 
@@ -45,7 +46,7 @@ export class CloudFoundryCellTabService {
   constructor(
     activeRouteCfCell: ActiveRouteCfCell,
     private entityServiceFactory: EntityServiceFactory,
-    cfCellService: DiegoContainerService
+    coService: ContainerOrchestrationService,
   ) {
 
     this.cellId = activeRouteCfCell.cellId;
@@ -63,7 +64,7 @@ export class CloudFoundryCellTabService {
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
     this.usageMemory$ = this.generateUsage(this.remainingMemory$, this.totalMemory$);
 
-    const action$ = cfCellService.createCellMetricAction(this.cfGuid);
+    const action$ = coService.diegoService.createCellMetricAction(this.cfGuid);
     this.cellMetric$ = action$.pipe(
       switchMap(action => {
         this.healthyMetricId = action.guid;

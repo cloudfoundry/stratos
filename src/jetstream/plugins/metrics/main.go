@@ -116,7 +116,7 @@ func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 
 	// Note: User does not need to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
-	echoContext.GET("/metrics/cf/eirini/:op", m.getCloudFoundryEiriniMetrics)
+	echoContext.GET("/metrics/cf/eirini/:op", m.getCloudFoundryEiriniMetrics) // TODO: RC shouldn't this be in the eirini plugin?
 
 	// Note: User needs to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
