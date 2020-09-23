@@ -11,11 +11,8 @@ import {
 import { METRICS_ENDPOINT_TYPE } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
-import {
-  EndpointModel,
-  EndpointRelationTypes,
-  EndpointsRelation,
-} from '../../../../../../../store/src/types/endpoint.types';
+import { EndpointModel, EndpointsRelation } from '../../../../../../../store/src/types/endpoint.types';
+import { CfRelationTypes } from '../../../../../cf-relation-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfContainerOrchestrator } from '../../../services/container-orchestration.service';
 import { cfEiriniRelationship, EiriniMetricsService } from '../../../services/eirini-metrics.service';
@@ -154,7 +151,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
         this.cfGuid,
         {
           guid: this.form.controls.eiriniMetrics.value,
-          type: EndpointRelationTypes.METRICS_EIRINI,
+          type: CfRelationTypes.METRICS_EIRINI,
           metadata: {
             namespace: this.form.controls.eiriniNamespace.value
           }

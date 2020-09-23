@@ -16,6 +16,7 @@ import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page
 import { MetricsHelpers } from '../../../../../core/src/features/metrics/metrics.helpers';
 import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import { CfRelationTypes } from '../../../cf-relation-types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -63,8 +64,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       startWith(true),
     );
 
-    const cellsHidden$ = MetricsHelpers.endpointHasMetrics(cfEndpointService.cfGuid).pipe(
-      map(hasMetrics => !hasMetrics)
+    const cellsHidden$ = MetricsHelpers.endpointHasMetrics(cfEndpointService.cfGuid, CfRelationTypes.METRICS_CF).pipe(
+      map(hasMetrics => !hasMetrics),
+      first()
     );
     // TODO: RC At the moment the cells side nave item will always show, even when eirini is configured.
     // We can change this with the below code, however that creates a flicker of cells nav item before it's removed

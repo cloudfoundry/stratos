@@ -9,14 +9,15 @@ import { AppState } from '../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { IMetricMatrixResult, IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
+import { EndpointModel, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { FetchCfEiriniMetricsAction } from '../../../actions/cf-metrics.actions';
+import { CfRelationTypes } from '../../../cf-relation-types';
 
 // TODO: RC move into service
 export const cfEiriniRelationship = (cf: EndpointModel) => {
   const relations = cf.relations ? cf.relations.receives : [];
-  return relations.find(receive => receive.type === EndpointRelationTypes.METRICS_EIRINI);
+  return relations.find(receive => receive.type === CfRelationTypes.METRICS_EIRINI);
 };
 
 // TODO: RC find where used

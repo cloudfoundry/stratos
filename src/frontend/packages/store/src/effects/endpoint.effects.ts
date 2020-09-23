@@ -53,13 +53,6 @@ import { PaginatedAction } from './../types/pagination.types';
 @Injectable()
 export class EndpointsEffect {
 
-  // TODO: RC is this the best place for them?
-  static connectingKey = 'connecting';
-  static disconnectingKey = 'disconnecting';
-  static registeringKey = 'registering';
-  // static updateRelationKey = 'relations_update';
-  // static deleteRelationKey = 'relations_delete';
-
   constructor(
     private http: HttpClient,
     private actions$: Actions,
@@ -341,16 +334,9 @@ export class EndpointsEffect {
     return message;
   }
 
-  // private getEndpointUpdateAction(guid: string, type: string, updatingKey: string) {
-  //   return {
-  //     entityKey: endpointStoreNames.type,
-  //     guid,
-  //     type,
-  //     updatingKey,
-  //   } as IRequestAction;
-  // }
-
-  // TODO: RC review
+  /**
+   * Make a http request for an endpoint relation style action
+   */
   private doRelationAction(
     apiAction: EntityRequestAction,
     url: string,
@@ -384,8 +370,8 @@ export class EndpointsEffect {
         }
 
         actions.push(new GetSystemInfo());
-
         actions.push(new WrapperRequestActionSuccess(response, apiAction, apiActionType, null, null, apiAction.guid));
+
         return actions;
       }
       ),
@@ -408,7 +394,7 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    endpointType: EndpointType,
+    endpointType: EndpointType, // The underlying endpoints type (_cf_Endpoint, not _stratos_Endpoint)
     body?: string,
     errorMessageHandler?: (e: any) => string,
   ) {
@@ -430,7 +416,7 @@ export class EndpointsEffect {
           actions.push(stratosEntityCatalog.userFavorite.actions.getAll());
         }
 
-        if (apiActionType === 'create' || apiActionType === 'update') { // TODO: RC update added, is it needed?
+        if (apiActionType === 'create' || apiActionType === 'update') {
           actions.push(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
           response = {
             entities: {

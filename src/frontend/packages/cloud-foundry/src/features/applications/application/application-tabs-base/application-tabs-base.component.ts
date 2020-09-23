@@ -30,6 +30,7 @@ import { EndpointModel } from '../../../../../../store/src/types/endpoint.types'
 import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
+import { CfRelationTypes } from '../../../../cf-relation-types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
@@ -103,7 +104,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
-    MetricsHelpers.endpointHasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+    MetricsHelpers.endpointHasMetrics(applicationService.cfGuid, CfRelationTypes.METRICS_CF).pipe(first()).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks = [
           ...this.tabLinks,

@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
-import { EndpointRelationTypes } from '../../../../store/src/types/endpoint.types';
+import { EndpointRelationType } from '../../../../store/src/types/endpoint.types';
 import { StratosStatus } from '../../../../store/src/types/shared.types';
 import { EndpointIcon } from '../endpoints/endpoint-helpers';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
@@ -23,7 +23,7 @@ export interface MetricsEndpointInfo {
   status: Observable<StratosStatus>;
 }
 
-// TODO: RC is this needed?
+// TODO: RC UPDATE/FIX. This ignores the `relations` entirely, which the other checks work on
 // Process the endpoint and Stratos marker file data to give a single list of endpoints
 // linked to this metrics endpoint, comprising those that are known in Stratos and those that are not
 export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo[] {
@@ -95,7 +95,7 @@ function compareUrl(a: string, b: string): boolean {
 }
 
 export class MetricsHelpers {
-  static endpointHasMetrics(endpointId: string, type: EndpointRelationTypes = EndpointRelationTypes.METRICS_CF): Observable<boolean> {
+  static endpointHasMetrics(endpointId: string, type: EndpointRelationType): Observable<boolean> {
     return stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
       map(endpoint => endpoint.entity),
       map(endpoint => {

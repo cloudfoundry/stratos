@@ -22,24 +22,18 @@ export interface IApiEndpointInfo {
   User: object;
 }
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
-export enum EndpointRelationTypes {
-  /**
-   * Metrics endpoint provides cf metrics to a cloud foundry endpoint
-   */
-  METRICS_CF = 'metrics-cf', // TODO: RC check where this is used, understand how effects new type. where should it live?
+
+export type EndpointRelationType = string | EndpointMetricRelationTypes;
+export enum EndpointMetricRelationTypes {
   /**
    * Metrics endpoint provides kube metrics to a kubernetes endpoint
    */
-  METRICS_KUBE = 'metrics-kube',
-  /**
-   * Metrics endpoint provides eirini (kube) metrics to a cloud foundry endpoint
-   */
-  METRICS_EIRINI = 'metrics-eirini'
+  METRICS_KUBE = 'metrics-kube', // This will be moved into the kube package when it comes upstream
 }
 export interface EndpointsRelation {
   guid: string;
   metadata: { [key: string]: any; };
-  type: EndpointRelationTypes;
+  type: EndpointRelationType;
 }
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;

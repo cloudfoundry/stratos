@@ -10,7 +10,6 @@ import {
   MetricsStratosAction,
 } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
@@ -96,19 +95,20 @@ export class MetricsComponent {
     );
   }
 
-  getKubeRelation(endpoint: EndpointModel): EndpointsRelation {
-    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_KUBE);
-  }
+  // TODO: RC Remove
+  // getKubeRelation(endpoint: EndpointModel): EndpointsRelation {
+  //   return this.getRelation(endpoint, EndpointMetricRelationTypes.METRICS_KUBE);
+  // }
 
-  getEiriniRelation(endpoint: EndpointModel): EndpointsRelation {
-    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_EIRINI);
-  }
+  // getEiriniRelation(endpoint: EndpointModel): EndpointsRelation {
+  //   return this.getRelation(endpoint, EndpointMetricRelationTypes.METRICS_EIRINI);
+  // }
 
-  getCfRelation(endpoint: EndpointModel): EndpointsRelation {
-    return this.getRelation(endpoint, EndpointRelationTypes.METRICS_CF);
-  }
+  // getCfRelation(endpoint: EndpointModel): EndpointsRelation {
+  //   return this.getRelation(endpoint, EndpointMetricRelationTypes.METRICS_CF);
+  // }
 
-  getRelation(endpoint: EndpointModel, relType: EndpointRelationTypes): EndpointsRelation {
-    return endpoint.relations ? endpoint.relations.provides.find(e => e.type === relType) : null;
-  }
+  // getRelation(endpoint: EndpointModel, relType: EndpointRelationType): EndpointsRelation {
+  //   return endpoint.relations ? endpoint.relations.provides.find(e => e.type === relType) : null;
+  // }
 }

@@ -20,19 +20,18 @@ export interface MetricAPIResponse {
 export interface MetricsAPITargets {
   activeTargets: {
     labels: {
-      job: string
-    }
+      job: string,
+    };
   }[];
   droppedTargets: {
     discoveredLabels: {
-      job: string
-    }
+      job: string,
+    };
   }[];
 }
 
 export interface MetricsStratosInfo {
   name: string;
-
 }
 
 export class MetricsAPIAction implements Action {

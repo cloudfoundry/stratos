@@ -9,9 +9,9 @@ import { AppState } from '../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { IMetrics } from '../../../../../store/src/types/base-metric.types';
-import { EndpointRelationTypes } from '../../../../../store/src/types/endpoint.types';
 import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { CfRelationTypes } from '../../../cf-relation-types';
 import { CFEntityConfig } from '../../../cf-types';
 
 export const enum CellMetrics {
@@ -82,7 +82,8 @@ export class CfCellService {
   }
 
   public hasCellMetrics(endpointId: string): Observable<boolean> {
-    return MetricsHelpers.endpointHasMetrics(endpointId, EndpointRelationTypes.METRICS_CF).pipe(
+    return MetricsHelpers.endpointHasMetrics(endpointId, CfRelationTypes.METRICS_CF).pipe(
+      first(),
       //   endpointHasMetricsByAvailable(this.store, endpointId).pipe(
       // If metrics set up for this endpoint check if we can fetch cell metrics from it.
       // If the metric is unknown an empty list is returned

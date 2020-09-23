@@ -49,13 +49,6 @@ function fetchingEndpointInfo(state) {
   return modified ? fetchingState : state;
 }
 
-// EndpointRelationTypes.METRICS_CF
-// TODO: RC move to metrics helper if needed at all???
-// export function endpointHasMetricsType(endpoint: EndpointModel, type: EndpointRelationTypes): boolean {
-//   return endpoint && endpoint.relations ?
-//     !!endpoint.relations.receives.find(relation => relation.type === type) : false;
-// }
-
 function changeEndpointConnectionStatus(
   state: IRequestEntityTypeState<EndpointModel>,
   action: {
