@@ -101,6 +101,7 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))
 - name: build-images
   plan:
   - get: stratos
@@ -170,6 +171,7 @@ jobs:
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+        TAG_SUFFIX: ((tag-suffix))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
@@ -197,3 +199,4 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))
