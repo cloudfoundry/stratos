@@ -15,11 +15,8 @@ import { IMetricApplication, MetricQueryType } from '../../../../../store/src/ty
 import { FetchCfEiriniMetricsAction } from '../../../actions/cf-metrics.actions';
 import { CfRelationTypes } from '../../../cf-relation-types';
 
-
-// TODO: RC access via container service
-// TODO: RC go through file, split between container service and here
 @Injectable()
-export class EiriniMetricsService {
+export class EiriniContainerService {
 
   public defaultEiriniNamespace$: Observable<string>;
 
@@ -27,13 +24,13 @@ export class EiriniMetricsService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
   ) {
-    this.defaultEiriniNamespace$ = EiriniMetricsService.getPluginConfig(store).pipe(
+    this.defaultEiriniNamespace$ = EiriniContainerService.getPluginConfig(store).pipe(
       map(config => config.eiriniDefaultNamespace || null)
     );
   }
 
   public static eiriniEnabled(store: Store<AppState>): Observable<boolean> {
-    return EiriniMetricsService.getPluginConfig(store).pipe(
+    return EiriniContainerService.getPluginConfig(store).pipe(
       map(config => config.eiriniEnabled === 'true'),
     );
   }
@@ -51,12 +48,12 @@ export class EiriniMetricsService {
   }
 
   public eiriniEnabled(): Observable<boolean> {
-    return EiriniMetricsService.eiriniEnabled(this.store);
+    return EiriniContainerService.eiriniEnabled(this.store);
   }
 
   public eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
     const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
-      map(em => EiriniMetricsService.cfEiriniRelationship(em.entity))
+      map(em => EiriniContainerService.cfEiriniRelationship(em.entity))
     );
     return combineLatest([
       this.eiriniEnabled(),

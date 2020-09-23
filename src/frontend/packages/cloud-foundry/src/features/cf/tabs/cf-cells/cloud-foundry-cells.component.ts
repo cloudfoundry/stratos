@@ -5,7 +5,7 @@ import { ListConfig } from '../../../../../../core/src/shared/components/list/li
 import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
-import { CfCellService } from '../../../container-orchestration/services/cf-cell.service';
+import { ContainerOrchestrationService } from '../../../container-orchestration/services/container-orchestration.service';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
@@ -27,8 +27,8 @@ export class CloudFoundryCellsComponent {
 
   constructor(
     cfEndpointService: CloudFoundryEndpointService,
-    cfCellService: CfCellService
+    containerService: ContainerOrchestrationService
   ) {
-    this.hasCellMetrics$ = cfCellService.hasCellMetrics(cfEndpointService.cfGuid);
+    this.hasCellMetrics$ = containerService.diegoService.hasCellMetrics(cfEndpointService.cfGuid);
   }
 }

@@ -12,7 +12,7 @@ import { EntityServiceFactory } from '../../../../../../../store/src/entity-serv
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
-import { CellMetrics, CfCellService } from '../../../../container-orchestration/services/cf-cell.service';
+import { CellMetrics, DiegoContainerService } from '../../../../container-orchestration/services/diego-container.service';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
 
@@ -45,7 +45,7 @@ export class CloudFoundryCellTabService {
   constructor(
     activeRouteCfCell: ActiveRouteCfCell,
     private entityServiceFactory: EntityServiceFactory,
-    cfCellService: CfCellService
+    cfCellService: DiegoContainerService
   ) {
 
     this.cellId = activeRouteCfCell.cellId;

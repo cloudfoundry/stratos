@@ -19,7 +19,9 @@ import { CFAppState } from '../../../../../cf-app-state';
 import {
   CloudFoundryCellTabService,
 } from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell-tab.service';
-import { CfCellService } from '../../../../../features/container-orchestration/services/cf-cell.service';
+import {
+  ContainerOrchestrationService,
+} from '../../../../../features/container-orchestration/services/container-orchestration.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
 
@@ -51,11 +53,11 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     private store: Store<CFAppState>,
     cloudFoundryCellService: CloudFoundryCellTabService,
     private datePipe: DatePipe,
-    cfCellService: CfCellService
+    containerService: ContainerOrchestrationService
   ) {
     super();
 
-    this.init$ = cfCellService.createCellMetricAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
+    this.init$ = containerService.diegoService.createCellMetricAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
       first(),
       tap(action => {
         this.dataSource = new CfCellHealthDataSource(this.store, this, action);

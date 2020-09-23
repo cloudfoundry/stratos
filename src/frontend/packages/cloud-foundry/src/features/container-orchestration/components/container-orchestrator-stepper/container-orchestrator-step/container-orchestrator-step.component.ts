@@ -14,8 +14,8 @@ import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-ent
 import { EndpointModel, EndpointsRelation } from '../../../../../../../store/src/types/endpoint.types';
 import { CfRelationTypes } from '../../../../../cf-relation-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { CfContainerOrchestrator } from '../../../services/container-orchestration.service';
-import { EiriniMetricsService } from '../../../services/eirini-metrics.service';
+import { CfContainerOrchestrator, ContainerOrchestrationService } from '../../../services/container-orchestration.service';
+import { EiriniContainerService } from '../../../services/eirini-container.service';
 
 @Component({
   selector: 'app-container-orchestrator-step',
@@ -27,7 +27,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
   constructor(
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
-    private eiriniMetricsService: EiriniMetricsService
+    private containerService: ContainerOrchestrationService,
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
 
@@ -46,7 +46,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
 
     this.blocked = combineLatest([
       this.metricsEndpoints$,
-      eiriniMetricsService.defaultEiriniNamespace$,
+      containerService.eiriniService.defaultEiriniNamespace$,
       this.cf$
     ]).pipe(
       map(() => false),
@@ -81,7 +81,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
     // Set the initial values
     combineLatest([
       this.metricsEndpoints$,
-      this.eiriniMetricsService.defaultEiriniNamespace$,
+      this.containerService.eiriniService.defaultEiriniNamespace$,
       this.cf$
     ]).pipe(
       first()
@@ -96,7 +96,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
         return;
       } else {
         // Is there an already bound relation?
-        this.existingRelation = EiriniMetricsService.cfEiriniRelationship(cf);
+        this.existingRelation = EiriniContainerService.cfEiriniRelationship(cf);
         if (!!this.existingRelation && !!registeredMetrics.find(registeredMetric => registeredMetric.guid === this.existingRelation.guid)) {
           // Cf is already bound to eirini metrics
           this.form.controls.eiriniMetrics.setValue(this.existingRelation.guid);

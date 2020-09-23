@@ -15,7 +15,6 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
 import {
   ContainerOrchestrationService,
 } from '../../../../features/container-orchestration/services/container-orchestration.service';
-import { EiriniMetricsService } from '../../../../features/container-orchestration/services/eirini-metrics.service';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -36,7 +35,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     public userInviteConfigureService: UserInviteConfigureService,
     private dialog: MatDialog,
     private esf: EntityServiceFactory,
-    private eiriniMetrics: EiriniMetricsService,
     public coService: ContainerOrchestrationService
   ) { }
 
@@ -62,7 +60,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
         e.entity ? e.entity.entity.build : ''),
     );
 
-    this.eiriniEnabled$ = this.eiriniMetrics.eiriniEnabled();
+    this.eiriniEnabled$ = this.coService.eiriniService.eiriniEnabled();
     this.canConfigureOrchestrator$ = this.coService.canConfigureOrchestrator();
   }
 
@@ -102,6 +100,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   }
 
   configureEirini() {
-    this.eiriniMetrics.configureEirini(this.cfEndpointService.cfGuid);
+    this.coService.eiriniService.configureEirini(this.cfEndpointService.cfGuid);
   }
 }

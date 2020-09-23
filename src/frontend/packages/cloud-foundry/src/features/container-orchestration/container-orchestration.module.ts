@@ -9,9 +9,9 @@ import {
   ContainerOrchestratorStepperComponent,
 } from './components/container-orchestrator-stepper/container-orchestrator-stepper.component';
 import { CloudFoundryContainerOrchestrationRoutingModule } from './container-orchestration-routing.module';
-import { CfCellService } from './services/cf-cell.service';
 import { ContainerOrchestrationService } from './services/container-orchestration.service';
-import { EiriniMetricsService } from './services/eirini-metrics.service';
+import { DiegoContainerService } from './services/diego-container.service';
+import { EiriniContainerService } from './services/eirini-container.service';
 
 @NgModule({
   imports: [
@@ -31,9 +31,9 @@ import { EiriniMetricsService } from './services/eirini-metrics.service';
 
   ],
   providers: [
-    CfCellService,
+    DiegoContainerService,
+    EiriniContainerService,
     ContainerOrchestrationService,
-    EiriniMetricsService
   ]
 })
 export class CloudFoundryContainerOrchestrationModule { }

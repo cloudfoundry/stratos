@@ -33,7 +33,7 @@ export const enum CellMetrics {
 }
 
 @Injectable()
-export class CfCellService {
+export class DiegoContainerService {
 
   constructor(
     private store: Store<AppState>,

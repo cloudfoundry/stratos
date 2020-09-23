@@ -27,8 +27,9 @@ import { EntityServiceFactory } from '../../../../../../../store/src/entity-serv
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfCellService } from '../../../../../features/container-orchestration/services/cf-cell.service';
-import { EiriniMetricsService } from '../../../../../features/container-orchestration/services/eirini-metrics.service';
+import {
+  ContainerOrchestrationService,
+} from '../../../../../features/container-orchestration/services/container-orchestration.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
@@ -212,14 +213,12 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private confirmDialog: ConfirmationDialogService,
     entityServiceFactory: EntityServiceFactory,
     cups: CurrentUserPermissionsService,
-    eiriniMetricsService: EiriniMetricsService,
-    cfCellService: CfCellService,
-    emService: EiriniMetricsService
+    containerService: ContainerOrchestrationService,
   ) {
 
     this.initialised$ = combineLatestObs([
-      eiriniMetricsService.eiriniMetricsProvider(appService.cfGuid),
-      cfCellService.hasCellMetrics(appService.cfGuid),
+      containerService.eiriniService.eiriniMetricsProvider(appService.cfGuid),
+      containerService.diegoService.hasCellMetrics(appService.cfGuid),
     ]).pipe(
       first(),
       map(([eiriniMetricsProvider, hasCellMetrics]) => {
@@ -233,7 +232,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         if (eiriniMetricsProvider) {
           this.columns.splice(1, 0, this.cfEiriniColumn);
           this.cfEiriniColumn.cellConfig = {
-            eiriniPodsService: emService.createEiriniPodService(this.appService.cfGuid, this.appService.appGuid, eiriniMetricsProvider)
+            eiriniPodsService: containerService.eiriniService.createEiriniPodService(
+              this.appService.cfGuid,
+              this.appService.appGuid,
+              eiriniMetricsProvider
+            )
           };
         }
         return true;
