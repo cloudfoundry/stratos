@@ -5,7 +5,7 @@ import { generateCfBaseTestModules } from '../../../../../../../test-framework/c
 import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from '../cloud-foundry-cell-tab.service';
 import { CloudFoundryCellBaseComponent } from './cloud-foundry-cell-base.component';
 
 describe('CloudFoundryCellBaseComponent', () => {
@@ -18,7 +18,7 @@ describe('CloudFoundryCellBaseComponent', () => {
       imports: generateCfBaseTestModules(),
       providers: [
         CloudFoundryEndpointService,
-        CloudFoundryCellService, {
+        CloudFoundryCellTabService, {
           provide: ActiveRouteCfOrgSpace,
           useValue: {
             cfGuid: 'cfGuid',

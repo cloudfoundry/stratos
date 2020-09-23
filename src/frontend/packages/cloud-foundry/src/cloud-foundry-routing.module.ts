@@ -1,10 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { of } from 'rxjs';
-
-import {
-  ContainerOrchestratorStepperComponent,
-} from './shared/components/container-orchestrator-stepper/container-orchestrator-stepper.component';
 
 const customRoutes: Routes = [
   {
@@ -55,19 +50,6 @@ const customRoutes: Routes = [
         matIconFont: 'stratos-icons',
         requiresEndpointType: 'cf',
         position: 50
-      }
-    },
-  },
-  // TODO: RC move into own module?
-  {
-    path: ':endpointId/eirini',
-    component: ContainerOrchestratorStepperComponent,
-    data: {
-      stratosNavigation: {
-        text: 'Applications',
-        matIcon: 'apps',
-        position: 20,
-        hidden: of(true)
       }
     },
   },

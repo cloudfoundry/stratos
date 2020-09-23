@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../../../../../store/src/app-state';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { AppState } from '../../../../../../store/src/app-state';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 
 @Component({
   selector: 'app-container-orchestrator-stepper',

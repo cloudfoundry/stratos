@@ -13,6 +13,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { MetricsHelpers } from '../../../../../core/src/features/metrics/metrics.helpers';
 import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -62,7 +63,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       startWith(true),
     );
 
-    const cellsHidden$ = EndpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
+    const cellsHidden$ = MetricsHelpers.endpointHasMetrics(cfEndpointService.cfGuid).pipe(
       map(hasMetrics => !hasMetrics)
     );
     // TODO: RC At the moment the cells side nave item will always show, even when eirini is configured.

@@ -10,8 +10,7 @@ import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-ca
 import { EndpointModel, entityCatalog } from '../../../store/src/public-api';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { EndpointRelationTypes, EndpointState } from '../../../store/src/types/endpoint.types';
+import { EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
@@ -63,18 +62,6 @@ export class EndpointsService implements CanActivate {
       return catalogEntity.builders.entityBuilder.getLink(metadata);
     }
     return '';
-  }
-
-  // TODO: RC check where this is used, understand how effects new type. where should it live?
-  static hasMetrics(endpointId: string, type: EndpointRelationTypes = EndpointRelationTypes.METRICS_CF): Observable<boolean> {
-    return stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
-      map(endpoint => endpoint.entity),
-      map(endpoint => {
-        return endpoint && endpoint.relations ?
-          !!endpoint.relations.receives.find(relation => relation.type === type) : false;
-      })
-    );
-    // return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
@@ -129,25 +116,6 @@ export class EndpointsService implements CanActivate {
         return false;
       }));
   }
-
-  // // TODO: RC cf specific code
-  // eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
-  //   const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
-  //     map(em => cfEiriniRelationship(em.entity))
-  //   );
-  //   return combineLatest([
-  //     eiriniEnabled(this.store),
-  //     eiriniProvider$
-  //   ]).pipe(
-  //     map(([eirini, eiriniProvider]) => eirini ? eiriniProvider : null)
-  //   );
-  // }
-
-  // hasEiriniMetrics(endpointId: string): Observable<boolean> {
-  //   return this.eiriniMetricsProvider(endpointId).pipe(
-  //     map(eirini => !!eirini)
-  //   );
-  // }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
     return this.connectedEndpointsOfTypes(type).pipe(

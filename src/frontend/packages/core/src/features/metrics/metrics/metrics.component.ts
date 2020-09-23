@@ -63,23 +63,6 @@ export class MetricsComponent {
     this.store.dispatch(new MetricsAPIAction(metricsGuid, 'targets'));
     this.store.dispatch(new MetricsStratosAction(metricsGuid));
 
-    // TODO: RC
-    // map(eps => eps.find((item) => item.provider.guid === metricsGuid)),
-    // map(ep => {
-    //   const metadata = {};
-
-    //   Object.values(ep.endpoints).forEach(endpoint => {
-    //     metadata[endpoint.guid] = {
-    //       type: endpoint.cnsi_type,
-    //       typeLabel: getNameForEndpointType(endpoint.cnsi_type, endpoint.sub_type),
-    //       icon: getIconForEndpoint(endpoint.cnsi_type, endpoint.sub_type),
-    //     };
-    //   });
-    //   return {
-    //     entity: ep,
-    //     metadata
-    //   };
-
     // Raw endpoint data for this metrics endpoint
     this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
       map((ep) => ep.find((item) => item.provider.guid === metricsGuid)),

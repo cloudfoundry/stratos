@@ -17,6 +17,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { MetricsHelpers } from '../../../../../../core/src/features/metrics/metrics.helpers';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
@@ -102,7 +103,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
-    EndpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+    MetricsHelpers.endpointHasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks = [
           ...this.tabLinks,

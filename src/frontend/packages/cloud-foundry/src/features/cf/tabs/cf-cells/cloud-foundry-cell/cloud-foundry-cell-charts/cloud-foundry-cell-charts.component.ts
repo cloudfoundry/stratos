@@ -6,7 +6,7 @@ import {
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from '../cloud-foundry-cell-tab.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-charts',
@@ -20,7 +20,7 @@ export class CloudFoundryCellChartsComponent {
     MetricsLineChartConfig
   ][];
 
-  constructor(public cfCellService: CloudFoundryCellService) {
+  constructor(public cfCellService: CloudFoundryCellTabService) {
     this.metricConfigs = [
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),

@@ -15,11 +15,10 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
+import { CfCellService } from '../../../../../features/container-orchestration/services/cf-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 
@@ -107,10 +106,10 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   constructor(
     store: Store<CFAppState>,
     private activeRouteCfCell: ActiveRouteCfCell,
-    paginationMonitorFactory: PaginationMonitorFactory) {
+    cfCellService: CfCellService
+  ) {
     super();
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
-    this.init$ = cellHelper.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
+    this.init$ = cfCellService.createCellMetricAction(activeRouteCfCell.cfGuid).pipe(
       first(),
       tap(action => {
         this.dataSource = new CfCellsDataSource(store, this, action);

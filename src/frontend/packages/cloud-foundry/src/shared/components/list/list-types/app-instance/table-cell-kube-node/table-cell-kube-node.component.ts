@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
@@ -26,6 +26,7 @@ export class TableCellKubeNodeComponent extends TableCellCustom<ListAppInstance>
     }
 
     this.nodeName$ = config.eiriniPodsService.waitForEntity$.pipe(
+      distinctUntilChanged(),
       filter(entityInfo => !!entityInfo.entity.data && !!entityInfo.entity.data.result),
       map((entityInfo) => {
         const metricResult = entityInfo.entity.data.result.find(res => this.getInstanceId(res.metric.pod) === this.row.index.toString());
@@ -39,7 +40,7 @@ export class TableCellKubeNodeComponent extends TableCellCustom<ListAppInstance>
         }
       }),
       filter(metric => !!metric),
-      tap(metric => {
+      tap(() => {
         // If we're polling to get metric then make sure to unsub
         if (this.fetchMetricsSub) {
           this.fetchMetricsSub.unsubscribe();

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
-import { combineLatest, map, switchMap } from 'rxjs/operators';
+import { combineLatest, first, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
@@ -22,16 +22,14 @@ import {
   IListConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { FetchCfEiriniMetricsAction, MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
+import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
-import { EndpointsRelation } from '../../../../../../../store/src/types/endpoint.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
+import { CfCellService } from '../../../../../features/container-orchestration/services/cf-cell.service';
+import { EiriniMetricsService } from '../../../../../features/container-orchestration/services/eirini-metrics.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { EiriniMetricsService } from '../../../../services/eirini-metrics.service';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
@@ -213,17 +211,17 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
     entityServiceFactory: EntityServiceFactory,
-    paginationMonitorFactory: PaginationMonitorFactory,
     cups: CurrentUserPermissionsService,
-    eiriniMetricsService: EiriniMetricsService
+    eiriniMetricsService: EiriniMetricsService,
+    cfCellService: CfCellService,
+    emService: EiriniMetricsService
   ) {
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
     this.initialised$ = combineLatestObs([
-      eiriniMetricsService.eiriniMetricsProvider(appService.cfGuid), // TODO: RC
-      // cellHelper.eiriniMetricsProvider(appService.cfGuid),
-      cellHelper.hasCellMetrics(appService.cfGuid),
+      eiriniMetricsService.eiriniMetricsProvider(appService.cfGuid),
+      cfCellService.hasCellMetrics(appService.cfGuid),
     ]).pipe(
+      first(),
       map(([eiriniMetricsProvider, hasCellMetrics]) => {
         if (hasCellMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
@@ -235,7 +233,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         if (eiriniMetricsProvider) {
           this.columns.splice(1, 0, this.cfEiriniColumn);
           this.cfEiriniColumn.cellConfig = {
-            eiriniPodsService: this.createEiriniPodService(entityServiceFactory, eiriniMetricsProvider)
+            eiriniPodsService: emService.createEiriniPodService(this.appService.cfGuid, this.appService.appGuid, eiriniMetricsProvider)
           };
         }
         return true;
@@ -275,27 +273,4 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     );
   }
 
-  // TODO: RC
-  private createEiriniPodService(entityServiceFactory: EntityServiceFactory, eiriniMetricsProvider: EndpointsRelation) {
-    const metricsKey = `${this.appService.cfGuid}:${this.appService.appGuid}:appPods`;
-    const action = new FetchCfEiriniMetricsAction(
-      metricsKey,
-      this.appService.cfGuid,
-      // tslint:disable-next-line:max-line-length
-      new MetricQueryConfig(`kube_pod_labels{label_guid="${this.appService.appGuid}",namespace="${eiriniMetricsProvider.metadata.namespace}"} / on(pod) group_right kube_pod_info`),
-      MetricQueryType.QUERY
-    );
-    return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
-      action.guid,
-      action
-    );
-    // TODO: RC this is older code
-    // return entityServiceFactory.create<IMetrics<IMetricMatrixResult<IMetricApplication>>>(
-    //   metricSchemaKey,
-    //   entityFactory(metricSchemaKey),
-    //   action.guid,
-    //   action,
-    //   false
-    // );
-  }
 }

@@ -8,7 +8,7 @@ import { metricEntityType } from '../../../../../../../../store/src/helpers/stra
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from '../cloud-foundry-cell-tab.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-base',
@@ -16,7 +16,7 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
   styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
-    CloudFoundryCellService
+    CloudFoundryCellTabService
   ]
 })
 export class CloudFoundryCellBaseComponent {
@@ -46,12 +46,11 @@ export class CloudFoundryCellBaseComponent {
   public name$: Observable<string>;
   public waitForEntityId: string;
   public waitForEntitySchema = cfEntityFactory(metricEntityType);
-  public cfCellService: CloudFoundryCellService;
 
 
   constructor(
     cfEndpointService: CloudFoundryEndpointService,
-    cfCellService: CloudFoundryCellService
+    cfCellService: CloudFoundryCellTabService
   ) {
 
     this.waitForEntityId = cfCellService.healthyMetricId;

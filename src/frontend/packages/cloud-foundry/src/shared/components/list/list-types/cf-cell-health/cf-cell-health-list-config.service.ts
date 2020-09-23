@@ -15,15 +15,14 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import {
-  CloudFoundryCellService,
-} from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+  CloudFoundryCellTabService,
+} from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell-tab.service';
+import { CfCellService } from '../../../../../features/container-orchestration/services/cf-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+
 
 // tslint:enable:max-line-length
 
@@ -50,12 +49,13 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
 
   constructor(
     private store: Store<CFAppState>,
-    cloudFoundryCellService: CloudFoundryCellService,
+    cloudFoundryCellService: CloudFoundryCellTabService,
     private datePipe: DatePipe,
-    private paginationMonitorFactory: PaginationMonitorFactory) {
+    cfCellService: CfCellService
+  ) {
     super();
 
-    this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
+    this.init$ = cfCellService.createCellMetricAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
       first(),
       tap(action => {
         this.dataSource = new CfCellHealthDataSource(this.store, this, action);
@@ -64,10 +64,6 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     this.showCustomTime = true;
   }
 
-  private createMetricsAction(cfGuid: string, cellId: string): Observable<FetchCFCellMetricsPaginatedAction> {
-    const cellHelper = new CfCellHelper(this.store, this.paginationMonitorFactory);
-    return cellHelper.createCellMetricAction(cfGuid, cellId);
-  }
 
   getInitialised = () => this.init$;
   getColumns = (): ITableColumn<CfCellHealthEntry>[] => [

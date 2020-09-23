@@ -1,18 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
-import { IStepperStep, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import { METRICS_ENDPOINT_TYPE } from '../../../../../../store/src/helpers/stratos-entity-factory';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel, EndpointRelationTypes, EndpointsRelation } from '../../../../../../store/src/types/endpoint.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../eirini.helper';
+import {
+  IStepperStep,
+  StepOnNextFunction,
+} from '../../../../../../../core/src/shared/components/stepper/step/step.component';
+import { METRICS_ENDPOINT_TYPE } from '../../../../../../../store/src/helpers/stratos-entity-factory';
+import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
+import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
+import {
+  EndpointModel,
+  EndpointRelationTypes,
+  EndpointsRelation,
+} from '../../../../../../../store/src/types/endpoint.types';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CfContainerOrchestrator } from '../../../services/container-orchestration.service';
+import { cfEiriniRelationship, EiriniMetricsService } from '../../../services/eirini-metrics.service';
 
 @Component({
   selector: 'app-container-orchestrator-step',
@@ -22,9 +28,9 @@ import { CfContainerOrchestrator, cfEiriniRelationship } from '../../../eirini.h
 export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep {
 
   constructor(
-    store: Store<AppState>,
     private fb: FormBuilder,
-    activatedRoute: ActivatedRoute
+    activatedRoute: ActivatedRoute,
+    private eiriniMetricsService: EiriniMetricsService
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
 
@@ -41,16 +47,9 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
       map(registeredMetrics => Object.values(registeredMetrics)),
     );
 
-    // TODO: RC A lot of this could move to eirini service if this component was in the eirini module
-    this.eiriniDefaultNamespace$ = store.select('auth').pipe(
-      map((auth) => auth.sessionData &&
-        auth.sessionData['plugin-config'] &&
-        auth.sessionData['plugin-config'].eiriniDefaultNamespace || null
-      ));
-
     this.blocked = combineLatest([
       this.metricsEndpoints$,
-      this.eiriniDefaultNamespace$,
+      eiriniMetricsService.defaultEiriniNamespace$,
       this.cf$
     ]).pipe(
       map(() => false),
@@ -72,7 +71,6 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
     eiriniNamespace: new FormControl('', [Validators.required])
   });
   metricsEndpoints$: Observable<EndpointModel[]>;
-  eiriniDefaultNamespace$: Observable<string>;
   cfGuid: string;
   orchestrator = CfContainerOrchestrator;
   blocked: Observable<boolean>;
@@ -86,7 +84,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
     // Set the initial values
     combineLatest([
       this.metricsEndpoints$,
-      this.eiriniDefaultNamespace$,
+      this.eiriniMetricsService.defaultEiriniNamespace$,
       this.cf$
     ]).pipe(
       first()

@@ -1,26 +1,44 @@
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../core/src/core/endpoints.service';
-import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { IMetrics } from '../../../../store/src/types/base-metric.types';
-import { EndpointRelationTypes } from '../../../../store/src/types/endpoint.types';
-import { MetricQueryType } from '../../../../store/src/types/metric.types';
-import { FetchCFCellMetricsPaginatedAction } from '../../actions/cf-metrics.actions';
-import { CFEntityConfig } from '../../cf-types';
-import { CellMetrics } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { MetricsHelpers } from '../../../../../core/src/features/metrics/metrics.helpers';
+import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { AppState } from '../../../../../store/src/app-state';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { IMetrics } from '../../../../../store/src/types/base-metric.types';
+import { EndpointRelationTypes } from '../../../../../store/src/types/endpoint.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
+import { FetchCFCellMetricsPaginatedAction } from '../../../actions/cf-metrics.actions';
+import { CFEntityConfig } from '../../../cf-types';
 
-// TODO: RC should this be injectable??
+export const enum CellMetrics {
+  /**
+   * Deprecated since Diego v2.31.0. See https://github.com/bosh-prometheus/prometheus-boshrelease/issues/333
+   */
+  HEALTHY_DEP = 'firehose_value_metric_rep_unhealthy_cell',
+  /**
+   * Available from Diego v2.31.0. See https://github.com/bosh-prometheus/prometheus-boshrelease/issues/333
+   */
+  HEALTHY = 'firehose_value_metric_rep_garden_health_check_failed',
+  REMAINING_CONTAINERS = 'firehose_value_metric_rep_capacity_remaining_containers',
+  REMAINING_DISK = 'firehose_value_metric_rep_capacity_remaining_disk',
+  REMAINING_MEMORY = 'firehose_value_metric_rep_capacity_remaining_memory',
+  TOTAL_CONTAINERS = 'firehose_value_metric_rep_capacity_total_containers',
+  TOTAL_DISK = 'firehose_value_metric_rep_capacity_total_disk',
+  TOTAL_MEMORY = 'firehose_value_metric_rep_capacity_total_memory',
+  CPUS = 'firehose_value_metric_rep_num_cpus'
+}
 
-export class CfCellHelper {
+@Injectable()
+export class CfCellService {
 
   constructor(
     private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory) {
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) {
   }
 
   public createCellMetricAction(cfId: string, cellId?: string): Observable<FetchCFCellMetricsPaginatedAction> {
@@ -64,7 +82,7 @@ export class CfCellHelper {
   }
 
   public hasCellMetrics(endpointId: string): Observable<boolean> {
-    return EndpointsService.hasMetrics(endpointId, EndpointRelationTypes.METRICS_CF).pipe(
+    return MetricsHelpers.endpointHasMetrics(endpointId, EndpointRelationTypes.METRICS_CF).pipe(
       //   endpointHasMetricsByAvailable(this.store, endpointId).pipe(
       // If metrics set up for this endpoint check if we can fetch cell metrics from it.
       // If the metric is unknown an empty list is returned

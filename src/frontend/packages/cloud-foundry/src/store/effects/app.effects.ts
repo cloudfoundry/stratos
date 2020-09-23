@@ -3,7 +3,7 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../core/src/core/endpoints.service';
+import { MetricsHelpers } from '../../../../core/src/features/metrics/metrics.helpers';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointRelationTypes } from '../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
@@ -39,8 +39,9 @@ export class AppEffects {
       const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
       if (!!updateAction.existingApplication && updateAction.newApplication.instances > updateAction.existingApplication.instances) {
         // First check that we have a metrics endpoint associated with this cf
-        // TODO: RC this could be eirini??
-        EndpointsService.hasMetrics(updateAction.endpointGuid, EndpointRelationTypes.METRICS_CF).pipe(first()).subscribe(hasMetrics => {
+        MetricsHelpers.endpointHasMetrics(updateAction.endpointGuid, EndpointRelationTypes.METRICS_CF).pipe(
+          first()
+        ).subscribe(hasMetrics => {
           if (hasMetrics) {
             this.store.dispatch(createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid));
           }

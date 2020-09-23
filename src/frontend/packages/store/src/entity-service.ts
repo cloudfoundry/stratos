@@ -56,7 +56,6 @@ const dispatcherFactory = <T>(
  * Designed to be used in a service factory provider
  */
 export class EntityService<T = any> {
-  public action: EntityRequestAction;
   constructor(
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
@@ -103,6 +102,7 @@ export class EntityService<T = any> {
       refCount()
     );
   }
+  public action: EntityRequestAction;
 
   refreshKey = 'updating';
 
@@ -119,6 +119,8 @@ export class EntityService<T = any> {
   waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
+
+  counter = 0;
   private getEntityObservable = (
     entityMonitor: EntityMonitor<T>,
     actionDispatch: EntityFetch<T>

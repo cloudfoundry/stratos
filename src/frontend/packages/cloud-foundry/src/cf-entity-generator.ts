@@ -1,10 +1,12 @@
 import { Action, Store } from '@ngrx/store';
 import moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
+import { IListAction } from '../../core/src/shared/components/list/list.component.types';
+import { RouterNav } from '../../store/src/actions/router.actions';
 import { AppState, GeneralEntityAppState } from '../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
@@ -22,6 +24,7 @@ import {
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
+import { EndpointModel } from '../../store/src/public-api';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
 import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
@@ -164,6 +167,7 @@ import { UserActionBuilders, userActionBuilders } from './entity-action-builders
 import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
 import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
+import { ContainerOrchestrationService } from './features/container-orchestration/services/container-orchestration.service';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
@@ -369,7 +373,21 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       },
     },
     userRolesFetch: cfUserRolesFetch,
-    userRolesReducer: currentCfUserRolesReducer
+    userRolesReducer: currentCfUserRolesReducer,
+    endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+      return [
+        {
+          action: (endpoint) => store.dispatch(new RouterNav({ path: `${endpoint.guid}/eirini` })),
+          label: 'Configure',
+          createVisible: (row$: Observable<EndpointModel>): Observable<boolean> => row$.pipe(
+            filter(row => row.cnsi_type === CF_ENDPOINT_TYPE),
+            first(),
+            switchMap(() => ContainerOrchestrationService.canConfigureOrchestrator(store)),
+            startWith(false)
+          )
+        }
+      ];
+    }
   };
   return [
     generateCfEndpointEntity(endpointDefinition),
@@ -1133,21 +1151,6 @@ function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDe
     endpointDefinition,
     metadata => `/cloud-foundry/${metadata.guid}`,
   );
-  // TODO: RC
-  // createActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
-  //   return [
-  //     {
-  //       action: (endpoint) => store.dispatch(new RouterNav({ path: `${endpoint.guid}/eirini` })),
-  //       label: 'Configure',
-  //       createVisible: (row$: Observable<EndpointModel>): Observable<boolean> => row$.pipe(
-  //         filter(row => row.cnsi_type === 'cf'),
-  //         first(),
-  //         switchMap(() => canConfigureOrchestrator(store)),
-  //         startWith(false)
-  //       )
-  //     }
-  //   ];
-  // }
   return cfEntityCatalog.cfEndpoint;
 }
 

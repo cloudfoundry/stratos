@@ -12,7 +12,7 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
   /**
-   * Convience property containiner unique endpoints that are related to this metric endpoint.
+   * Convenience property containing unique endpoints that are related to this metric endpoint.
    * There may be multiple relations for the same endpoint (eirini + cf)
    */
   endpoints: EndpointModel[];

@@ -7,7 +7,7 @@ import { StratosStatus } from '../../../../../../../../store/src/types/shared.ty
 import {
   CfCellHealthListConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-list-config.service';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from '../cloud-foundry-cell-tab.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-summary',
@@ -25,7 +25,7 @@ export class CloudFoundryCellSummaryComponent {
   public status$: Observable<StratosStatus>;
 
   constructor(
-    public cfCellService: CloudFoundryCellService
+    public cfCellService: CloudFoundryCellTabService
   ) {
     this.status$ = cfCellService.healthy$.pipe(
       map(health => {
