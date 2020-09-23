@@ -1,26 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { PluginConfig } from '../../../../../store/src/types/auth.types';
 import { IMetricMatrixResult, IMetrics } from '../../../../../store/src/types/base-metric.types';
 import { EndpointModel, EndpointsRelation } from '../../../../../store/src/types/endpoint.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { FetchCfEiriniMetricsAction } from '../../../actions/cf-metrics.actions';
 import { CfRelationTypes } from '../../../cf-relation-types';
 
-// TODO: RC move into service
-export const cfEiriniRelationship = (cf: EndpointModel) => {
-  const relations = cf.relations ? cf.relations.receives : [];
-  return relations.find(receive => receive.type === CfRelationTypes.METRICS_EIRINI);
-};
 
-// TODO: RC find where used
 // TODO: RC access via container service
 // TODO: RC go through file, split between container service and here
 @Injectable()
@@ -32,20 +27,27 @@ export class EiriniMetricsService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
   ) {
-    this.defaultEiriniNamespace$ = this.store.select('auth').pipe(
-      map((auth) => auth.sessionData &&
-        auth.sessionData['plugin-config'] &&
-        auth.sessionData['plugin-config'].eiriniDefaultNamespace || null
-      ));
+    this.defaultEiriniNamespace$ = EiriniMetricsService.getPluginConfig(store).pipe(
+      map(config => config.eiriniDefaultNamespace || null)
+    );
   }
 
   public static eiriniEnabled(store: Store<AppState>): Observable<boolean> {
-    return store.select('auth').pipe(
-      map(auth => auth.sessionData &&
-        auth.sessionData['plugin-config'] &&
-        auth.sessionData['plugin-config'].eiriniEnabled === 'true'
-      ),
+    return EiriniMetricsService.getPluginConfig(store).pipe(
+      map(config => config.eiriniEnabled === 'true'),
     );
+  }
+
+  private static getPluginConfig(store: Store<AppState>): Observable<PluginConfig> {
+    return store.select('auth').pipe(
+      map(auth => auth.sessionData ? auth.sessionData['plugin-config'] : null),
+      filter(config => !!config)
+    );
+  }
+
+  public static cfEiriniRelationship(cf: EndpointModel) {
+    const relations = cf.relations ? cf.relations.receives : [];
+    return relations.find(receive => receive.type === CfRelationTypes.METRICS_EIRINI);
   }
 
   public eiriniEnabled(): Observable<boolean> {
@@ -54,7 +56,7 @@ export class EiriniMetricsService {
 
   public eiriniMetricsProvider(endpointId: string): Observable<EndpointsRelation> {
     const eiriniProvider$ = stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
-      map(em => cfEiriniRelationship(em.entity))
+      map(em => EiriniMetricsService.cfEiriniRelationship(em.entity))
     );
     return combineLatest([
       this.eiriniEnabled(),

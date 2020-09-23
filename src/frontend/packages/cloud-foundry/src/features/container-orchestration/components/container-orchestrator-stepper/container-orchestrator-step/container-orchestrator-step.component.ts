@@ -15,7 +15,7 @@ import { EndpointModel, EndpointsRelation } from '../../../../../../../store/src
 import { CfRelationTypes } from '../../../../../cf-relation-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfContainerOrchestrator } from '../../../services/container-orchestration.service';
-import { cfEiriniRelationship, EiriniMetricsService } from '../../../services/eirini-metrics.service';
+import { EiriniMetricsService } from '../../../services/eirini-metrics.service';
 
 @Component({
   selector: 'app-container-orchestrator-step',
@@ -96,7 +96,7 @@ export class ContainerOrchestratorStepComponent implements OnInit, IStepperStep 
         return;
       } else {
         // Is there an already bound relation?
-        this.existingRelation = cfEiriniRelationship(cf);
+        this.existingRelation = EiriniMetricsService.cfEiriniRelationship(cf);
         if (!!this.existingRelation && !!registeredMetrics.find(registeredMetric => registeredMetric.guid === this.existingRelation.guid)) {
           // Cf is already bound to eirini metrics
           this.form.controls.eiriniMetrics.setValue(this.existingRelation.guid);

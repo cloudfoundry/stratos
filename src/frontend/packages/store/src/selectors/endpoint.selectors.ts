@@ -14,18 +14,6 @@ export const endpointStatusSelector = (state: InternalAppState): EndpointState =
 const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
 export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointEntityKey);
 
-// TODO: RC
-// export const metricsEndpointEntitiesSelector =
-//   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
-//     const metrics = {};
-//     Object.values(endpoints).forEach(endpoint => {
-//       if (endpoint.cnsi_type === METRICS_ENDPOINT_TYPES) {
-//         metrics[endpoint.guid] = endpoint;
-//       }
-//     });
-//     return metrics;
-//   };
-
 export const endpointOfType = (type: string) =>
   (endpoints: IRequestEntityTypeState<EndpointModel>): IRequestEntityTypeState<EndpointModel> => {
     return Object.values(endpoints || {}).reduce((endpointsOfType, endpoint) => {

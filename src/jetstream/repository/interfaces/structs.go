@@ -396,9 +396,3 @@ type PortalConfig struct {
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
 	// can perform migrations
 }
-
-// TODO: RC
-// // SetCanPerformMigrations updates the state that records if we can perform Database migrations
-// func (c *PortalConfig) SetCanPerformMigrations(value bool) {
-// 	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
-// }

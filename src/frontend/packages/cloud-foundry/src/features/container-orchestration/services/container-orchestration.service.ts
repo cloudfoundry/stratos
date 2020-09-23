@@ -6,7 +6,7 @@ import { filter, first, map } from 'rxjs/operators';
 import { AppState } from '../../../../../store/src/app-state';
 import { METRICS_ENDPOINT_TYPE } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { cfEiriniRelationship, EiriniMetricsService } from './eirini-metrics.service';
+import { EiriniMetricsService } from './eirini-metrics.service';
 
 export enum CfContainerOrchestrator {
   DIEGO = 'Diego',
@@ -51,7 +51,7 @@ export class ContainerOrchestrationService {
     return stratosEntityCatalog.endpoint.store.getEntityService(cfGuid).waitForEntity$.pipe(
       // TODO: RC should do a better job here, mention we're assuming diego??
       // TODO: RC Improve... should not default to diego... try to determine if eirini
-      map(cf => cfEiriniRelationship(cf.entity) ? CfContainerOrchestrator.EIRINI : CfContainerOrchestrator.DIEGO),
+      map(cf => EiriniMetricsService.cfEiriniRelationship(cf.entity) ? CfContainerOrchestrator.EIRINI : CfContainerOrchestrator.DIEGO),
     );
   }
 

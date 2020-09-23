@@ -14,19 +14,9 @@
           </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
             {{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
-          <app-metadata-item *ngIf="autoscalerVersion$ | async as autoscalerVersion" icon="meter"
-            iconFont="stratos-icons" label="Autoscaler Version">
+          <app-metadata-item *ngIf="autoscalerVersion$ | async as autoscalerVersion; else containerOrchestrator"
+            icon="meter" iconFont="stratos-icons" label="Autoscaler Version">
             {{ autoscalerVersion }}</app-metadata-item>
-          <!-- // TODO: RC does this look ok now under AS version? -->
-          <app-metadata-item *ngIf="eiriniEnabled$ | async" icon="account_balance_wallet"
-            label="Container Orchestrator">
-            <div class="user-invites">
-              {{ (cfEndpointService.containerOrchestrator$ | async) }}
-              <ng-container *ngIf="(canConfigureOrchestrator$ | async)">
-                - <button color="primary" mat-button (click)="configureEirini()">Configure</button>
-              </ng-container>
-            </div>
-          </app-metadata-item>
         </div>
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="person" label="Account Username">
@@ -52,8 +42,22 @@
               </ng-template>
             </div>
           </app-metadata-item>
+          <ng-container *ngIf="autoscalerVersion$ | async">
+            <ng-container *ngTemplateOutlet="containerOrchestrator"></ng-container>
+          </ng-container>
         </div>
       </div>
     </mat-card-content>
   </mat-card>
 </div>
+
+<ng-template #containerOrchestrator>
+  <app-metadata-item *ngIf="eiriniEnabled$ | async" icon="account_balance_wallet" label="Container Orchestrator">
+    <div class="user-invites">
+      {{ (cfEndpointService.containerOrchestrator$ | async) }}
+      <ng-container *ngIf="(canConfigureOrchestrator$ | async)">
+        - <button color="primary" mat-button (click)="configureEirini()">Configure</button>
+      </ng-container>
+    </div>
+  </app-metadata-item>
+</ng-template>

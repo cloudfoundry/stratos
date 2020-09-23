@@ -28,7 +28,6 @@ type EndpointNotificationPlugin interface {
 	OnEndpointNotification(EndpointAction, *CNSIRecord)
 }
 
-// TODO: RC understand
 type TokenNotificationPlugin interface {
 	OnConnect(*CNSIRecord, *TokenRecord, string)
 	OnDisconnect()

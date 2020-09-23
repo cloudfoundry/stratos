@@ -88,14 +88,6 @@ type PortalProxy interface {
 	RemoveRelations(providerOrTarget string) error
 	RemoveRelation(relation RelationsRecord) error
 
-	// TODO: RC Needed?
-	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-	// SetCanPerformMigrations(bool)
-
-	// TODO: RC Needed?
-	// CanPerformMigrations returns if we can perform Database migrations
-	// CanPerformMigrations() bool
-
 	// Config Table
 	GetConfigValue(group, name string) (string, error)
 	DeleteConfigValue(group, name string) error
