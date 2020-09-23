@@ -30,6 +30,43 @@ export enum EndpointMetricRelationTypes {
    */
   METRICS_KUBE = 'metrics-kube', // This will be moved into the kube package when it comes upstream
 }
+export const EndpointRelationshipTypeMetadataJob = 'job';
+export interface EndpointRelationshipTypeMetadata {
+  icon: string,
+  value: (relMetadata: any) => string;
+  label: string,
+  type?: string,
+}
+
+/**
+ * Definition of an endpoint relationship type. This can be used to render information about the metadata a relationship type has
+ */
+export interface EndpointRelationshipType {
+  metadata: EndpointRelationshipTypeMetadata[];
+}
+
+/**
+ * Information about each relationship type. This can be used to render information about the metadata a relationship type has
+ */
+export const EndpointRelationshipTypes: {
+  [key: string]: EndpointRelationshipType,
+} = {
+  [EndpointMetricRelationTypes.METRICS_KUBE]: { // This will be moved into the kube package when it comes upstream
+    metadata: [
+      {
+        icon: 'history',
+        value: (relMetadata: any) => relMetadata.metrics_job,
+        label: 'Prometheus Job',
+      },
+      {
+        icon: 'history',
+        value: (relMetadata: any) => relMetadata.metrics_environment,
+        label: 'Prometheus Environment',
+      },
+    ]
+  }
+};
+
 export interface EndpointsRelation {
   guid: string;
   metadata: { [key: string]: any; };
@@ -49,12 +86,15 @@ export interface EndpointModel {
   client_id?: string;
   user?: EndpointUser;
   metadata?: {
-    metricsTargets?: MetricsAPITargets;
-    metrics?: string; // TODO: RC Remove? Move to MetricsAPITargets
-    metrics_job?: string; // TODO: RC Remove? Move to MetricsAPITargets
-    metrics_environment?: string; // TODO: RC Remove? Move to MetricsAPITargets
-    metrics_targets?: MetricsAPITargets; // TODO: RC Remove? Move to MetricsAPITargets
-    metrics_stratos?: MetricsStratosInfo; // TODO: RC Remove? Move to MetricsAPITargets
+    /**
+     * A collection of targets that are actively collecting metrics if this is a metrics endpoint.
+     * Collected via MetricsAPIAction and MetricAPIQueryTypes.TARGETS
+     */
+    metrics_targets?: MetricsAPITargets;
+    /**
+     * A collection of stratos metric jobs if this is a metrics endpoint. Collected via MetricsStratosAction
+     */
+    metrics_stratos?: MetricsStratosInfo;
     userInviteAllowed?: 'true' | any;
     fullApiEndpoint?: string;
   };

@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
-import { EndpointRelationType } from '../../../../store/src/types/endpoint.types';
+import { EndpointRelationType, EndpointsRelation } from '../../../../store/src/types/endpoint.types';
 import { StratosStatus } from '../../../../store/src/types/shared.types';
 import { EndpointIcon } from '../endpoints/endpoint-helpers';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
@@ -14,16 +14,12 @@ export interface MetricsEndpointInfo {
   name: string;
   icon: EndpointIcon;
   type: string;
+  relations: EndpointsRelation[];
   known: boolean;
   url: string;
-  metadata: {
-    metrics_job?: string;
-    metrics_environment?: string;
-  };
   status: Observable<StratosStatus>;
 }
 
-// TODO: RC UPDATE/FIX. This ignores the `relations` entirely, which the other checks work on
 // Process the endpoint and Stratos marker file data to give a single list of endpoints
 // linked to this metrics endpoint, comprising those that are known in Stratos and those that are not
 export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo[] {
@@ -32,19 +28,15 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
   // Add all of the known endpoints first
   ep.endpoints.forEach(endpoint => {
     const catalogEndpoint = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-
     data.push({
       known: true,
       name: endpoint.name,
       url: getFullEndpointApiUrl(endpoint),
-      type: catalogEndpoint.definition.label,
+      type: endpoint.cnsi_type,
+      relations: endpoint.relations.receives,
       icon: {
         name: catalogEndpoint.definition.icon,
-        font: 'stratos-icons'
-      },
-      metadata: {
-        metrics_job: endpoint.metadata ? endpoint.metadata.metrics_job : null,
-        metrics_environment: endpoint.metadata ? endpoint.metadata.metrics_environment : null
+        font: catalogEndpoint.definition.iconFont || 'stratos-icons'
       },
       status: observableOf(StratosStatus.OK)
     });
@@ -64,12 +56,10 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
             name: '<Unregistered Endpoint>',
             url: endp.cfEndpoint || endp.url,
             type: catalogEndpoint.definition.label,
+            relations: [],
             icon: {
               name: catalogEndpoint.definition.icon,
-              font: 'stratos-icons'
-            },
-            metadata: {
-              metrics_job: endp.job
+              font: catalogEndpoint.definition.iconFont || 'stratos-icons'
             },
             status: observableOf(StratosStatus.WARNING)
           });

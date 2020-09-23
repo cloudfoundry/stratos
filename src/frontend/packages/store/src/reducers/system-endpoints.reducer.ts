@@ -81,7 +81,7 @@ function updateMetricsInfo(state: IRequestEntityTypeState<EndpointModel>, action
         ...existingEndpoint,
         metadata: {
           ...existingEndpoint.metadata,
-          metricsTargets: action.data.data
+          metrics_targets: action.data.data
         }
       },
     };
