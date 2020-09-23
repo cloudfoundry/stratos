@@ -60,10 +60,13 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @tag.name admin
+// @tag.description Endpoints that require admin permissions
+
 // @BasePath /api/v1
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name Authorization
+// @name Authentication
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
@@ -894,6 +897,26 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 
 // routes endpoint registration requests to Register functions of respective plugins
 // based on endpoint_type parameter
+
+// pluginRegisterRouter godoc
+// @Summary Register endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param endpoint_type formData string true "Endpoint type"
+// @Param cnsi_name formData string true "Endpoint name"
+// @Param api_endpoint formData string true "Endpoint URL"
+// @Param skip_ssl_validation formData bool false "Skip SSL validation"
+// @Param sso_allowed formData bool false "SSO allowed"
+// @Param cnsi_client_id formData string false "Client ID"
+// @Param cnsi_client_secret formData string false "Client secret"
+// @Param sub_type formData string false "Endpoint subtype"
+// @Success 200 {object} interfaces.CNSIRecord "Endpoint object"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints [post]
 func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
 	log.Debug("pluginRegisterRouter")
 	endpointType := c.FormValue("endpoint_type")
@@ -963,13 +986,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionGroup.GET("/api_keys", p.listAPIKeys)
 	sessionGroup.DELETE("/api_keys", p.deleteAPIKey)
 
-	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
-
-	apiKeyGroup := pp.Group("/v1")
-	apiKeyGroup.Use(p.apiKeyMiddleware)
-	apiKeyGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
-	apiKeyGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
-
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
 		if err != nil {
@@ -979,26 +995,30 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
-	sessionAuthGroup := sessionGroup.Group("/auth")
+	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
 
+	// API endpoints with Swagger documentation and accessible with an API key
 	stableAPIGroup := e.Group("/api/v1")
-	stableAPIGroup.Use(p.sessionMiddleware())
-	stableAPIGroup.Use(p.xsrfMiddleware())
+	stableAPIGroup.Use(p.apiKeyMiddleware)
+	stableAPIGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
+	stableAPIGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
 
 	// Connect to endpoint
 	stableAPIGroup.POST("/tokens", p.loginToCNSI)
 
-	// Connect to Enpoint (SSO)
-	stableAPIGroup.GET("/tokens", p.ssoLoginToCNSI)
-
 	// Disconnect endpoint
 	stableAPIGroup.DELETE("/tokens/:cnsi_guid", p.logoutOfCNSI)
 
-	// Verify Session
-	sessionAuthGroup.GET("/session/verify", p.verifySession)
-
 	// CNSI operations
 	stableAPIGroup.GET("/endpoints", p.listCNSIs)
+
+	sessionAuthGroup := sessionGroup.Group("/auth")
+
+	// Connect to Enpoint (SSO)
+	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
+
+	// Verify Session
+	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
@@ -1036,8 +1056,10 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		}
 	}
 
+	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
 	stableAdminAPIGroup.Use(p.adminMiddleware)
+
 	// route endpoint creation requests to respecive plugins
 	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 

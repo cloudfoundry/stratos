@@ -147,6 +147,18 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	return newCNSI, err
 }
 
+// unregisterCluster godoc
+// @Summary Unregister endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param id path string true "Endpoint GUID"
+// @Success 200
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints/{id} [delete]
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	cnsiGUID := c.Param("id")
@@ -192,6 +204,16 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 	return cnsiList, nil
 }
 
+// listCNSIs godoc
+// @Summary List endpoints
+// @Description
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Success 200 {array}  interfaces.CNSIRecord "List of endpoints"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints [get]
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 	log.Debug("listCNSIs")
 	cnsiList, err := p.buildCNSIList(c)
@@ -533,6 +555,24 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 	return nil
 }
 
+// updateEndpoint godoc
+// @Summary Edit endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param id path string true "Endpoint GUID"
+// @Param name formData string true "Endpoint name"
+// @Param skipSSL formData bool false "Skip SSL"
+// @Param setClientInfo formData bool false "Set client info"
+// @Param clientID formData string false "Client ID"
+// @Param clientSecret formData string false "Client secret"
+// @Param allowSSO formData bool false "Allow SSO"
+// @Success 200
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints/{id} [post]
 func (p *portalProxy) updateEndpoint(c echo.Context) error {
 	log.Debug("updateEndpoint")
 

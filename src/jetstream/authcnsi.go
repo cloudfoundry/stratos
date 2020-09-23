@@ -80,6 +80,22 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 
 // Connect to the given Endpoint
 // Note, an admin user can connect an endpoint as a system endpoint to share it with others
+
+// loginToCNSI godoc
+// @Summary Connect to the given endpoint
+// @Description An admin user can connect an endpoint as a system endpoint to share it with others.
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param cnsi_guid formData string true "Endpoint GUID"
+// @Param system_shared formData bool false "Register as a system endpoint"
+// @Param connect_type formData string false "Connection type" Enums(creds, none)
+// @Param username formData string false "Username"
+// @Param password formData string false "Password"
+// @Success 201 {object} interfaces.LoginRes "Connected endpoint object"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /tokens [post]
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
 	cnsiGUID := c.FormValue("cnsi_guid")
@@ -306,13 +322,14 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 }
 
 // logoutOfCNSI godoc
-// @Summary Remove endpoint
-// @Description Remove endpoint
-// @Accept	json
+// @Summary Disconnect from endpoint
+// @Description
+// @Accept	x-www-form-urlencoded
 // @Produce	json
 // @Param cnsi_guid path string true "Endpoint GUID"
 // @Success 200
-// @Failure 400
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /tokens/{cnsi_guid} [delete]
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
