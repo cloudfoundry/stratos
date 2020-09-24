@@ -164,7 +164,7 @@ export class EndpointsEffect {
         action.endpointsType,
         null,
         null,
-        "DELETE"
+        'DELETE'
       );
     }));
 
@@ -179,7 +179,7 @@ export class EndpointsEffect {
         action.endpointsType,
         null,
         null,
-        "DELETE"
+        'DELETE'
       );
     }));
 
@@ -211,7 +211,7 @@ export class EndpointsEffect {
         '/api/v1/endpoints',
         new HttpParams({
           fromObject: {
-            'endpoint_type': action.endpointsType
+            endpoint_type: action.endpointsType
           }
         }),
         'create',
@@ -281,13 +281,13 @@ export class EndpointsEffect {
     endpointType: EndpointType,
     body?: string,
     errorMessageHandler?: (e: any) => string,
-    method: string = "POST",
+    method: string = 'POST',
   ) {
 
     const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
     return this.http.request(method, url, {
-      params: params,
+      params,
       body: body || {}
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
