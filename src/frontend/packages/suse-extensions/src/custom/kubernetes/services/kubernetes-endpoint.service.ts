@@ -105,10 +105,13 @@ export class KubernetesEndpointService {
             return;
           }
 
-          if (!versions[nodeData.version]) {
-            versions[nodeData.version] = 0;
+          // Only has a version if it is a CaaSP node
+          if (nodeData.version) {
+            if (!versions[nodeData.version]) {
+              versions[nodeData.version] = 0;
+            }
+            versions[nodeData.version]++;
           }
-          versions[nodeData.version]++;
 
           info.updates += nodeData.updates ? 1 : 0;
           info.disruptiveUpdates += nodeData.disruptiveUpdates ? 1 : 0;

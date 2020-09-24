@@ -22,7 +22,10 @@ export class KubernetesNodeSummaryCardComponent {
     public kubeNodeService: KubernetesNodeService
   ) {
     this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
-      map(node => kubeEndpointService.getCaaspNodeData(node)),
+      map(node => {
+        const nodeData = kubeEndpointService.getCaaspNodeData(node);
+        return !!nodeData.version ? nodeData : null;
+      }),
     );
 
     this.caaspNodeUpdates$ = this.caaspNode$.pipe(
