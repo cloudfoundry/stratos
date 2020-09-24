@@ -363,7 +363,8 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   public getValues(): object {
-    return (this.mode === EditorMode.JSonSchemaForm) ? this.formData : yaml.safeLoad(this.code);
+    // Always diff the form with the Chart Values to get only the changes that the user has made
+    return (this.mode === EditorMode.JSonSchemaForm) ? diffObjects(this.formData, this.chartValues) : yaml.safeLoad(this.code);
   }
 
   public copyValues() {
