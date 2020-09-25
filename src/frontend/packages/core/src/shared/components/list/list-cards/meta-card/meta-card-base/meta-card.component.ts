@@ -1,5 +1,5 @@
 import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
@@ -13,7 +13,7 @@ import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.componen
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 
-export function createMetaCardMenuItemSeparator() {
+export function createMetaCardMenuItemSeparator(): MenuItem {
   return {
     label: '-',
     separator: true,
@@ -86,7 +86,7 @@ export class MetaCardComponent implements OnDestroy {
       this.pActionMenu = actionMenu.map(menuItem => {
         if (!menuItem.can) {
           menuItem.separator = menuItem.label === '-';
-          menuItem.can = observableOf(!menuItem.separator);
+          menuItem.can = of(true);
         }
         if (!menuItem.disabled) {
           menuItem.disabled = observableOf(false);
@@ -94,7 +94,10 @@ export class MetaCardComponent implements OnDestroy {
         return menuItem;
       });
 
-      this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
+      const nonSeparators = actionMenu
+        .filter(menuItem => !menuItem.separator)
+        .map(menuItem => menuItem.can);
+      this.showMenu$ = combineLatest(nonSeparators).pipe(
         map(cans => cans.some(can => can))
       );
     }

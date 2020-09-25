@@ -13,6 +13,9 @@ import { tap } from 'rxjs/operators';
 
 const STRATOS_XSRF_HEADER_NAME = 'X-XSRF-Token';
 
+/**
+ * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
+ */
 @Injectable()
 export class HttpXsrfHeaderExtractor implements HttpXsrfTokenExtractor {
 
