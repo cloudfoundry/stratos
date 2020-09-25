@@ -25,8 +25,7 @@ describe('Create Service Instance', () => {
   });
 
   beforeEach(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    createServiceInstance.softNavigateTo();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
     createMarketplaceServiceInstance.waitForPage();

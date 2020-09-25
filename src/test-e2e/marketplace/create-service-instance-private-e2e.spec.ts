@@ -25,8 +25,7 @@ describe('Create Service Instance of Private Service', () => {
   });
 
   beforeEach(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    createServiceInstance.softNavigateTo();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     createMarketplaceServiceInstance.waitForPage();
   });
