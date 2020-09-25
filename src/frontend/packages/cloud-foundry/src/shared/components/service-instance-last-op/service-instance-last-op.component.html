@@ -9,8 +9,5 @@
       </app-boolean-indicator>
     </ng-template>
   </div>
-  <div class="last-op--row1" *ngIf="showDescription">
-    <span class="last-op--item" *ngIf="!!lo.description">({{lo.description}}) </span>
-  </div>
   <div class="last-op--row2">{{ lo.updated_at | date:'medium' }}</div>
 </div>

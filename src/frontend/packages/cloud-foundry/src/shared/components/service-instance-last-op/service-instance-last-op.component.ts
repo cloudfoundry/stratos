@@ -11,6 +11,5 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
 export class ServiceInstanceLastOpComponent {
   @Input() serviceInstance: APIResource<IServiceInstance>;
   @Input() alignRight = false;
-  @Input() showDescription = true;
 
 }
