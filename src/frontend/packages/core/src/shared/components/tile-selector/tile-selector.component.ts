@@ -13,6 +13,7 @@ export class TileSelectorComponent {
   public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
   @Input() smallerTiles = false;
+  @Input() dynamicSmallerTiles = 0;
   @Input() set options(options: ITileConfig[]) {
     if (!options) {
       return;
@@ -30,6 +31,9 @@ export class TileSelectorComponent {
     });
     this.pOptions = groupedOptions.show;
     this.hiddenOptions = groupedOptions.hidden;
+    if (!!this.dynamicSmallerTiles) {
+      this.smallerTiles = options.length > this.dynamicSmallerTiles;
+    }
   }
 
   get options() {
