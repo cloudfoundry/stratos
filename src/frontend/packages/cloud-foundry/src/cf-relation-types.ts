@@ -14,7 +14,13 @@ export enum CfRelationTypes {
 }
 
 EndpointRelationshipTypes[CfRelationTypes.METRICS_CF] = {
+  label: 'Cloud Foundry Metrics',
   metadata: [
+    {
+      icon: 'history',
+      value: (relMetadata: any) => relMetadata.job,
+      label: 'Prometheus Job',
+    },
     {
       type: EndpointRelationshipTypeMetadataJob,
       icon: 'help_outline',
@@ -37,9 +43,11 @@ EndpointRelationshipTypes[CfRelationTypes.METRICS_CF] = {
 };
 
 EndpointRelationshipTypes[CfRelationTypes.METRICS_EIRINI] = {
+  label: 'Eirini Metrics',
   metadata: [
     {
-      icon: 'history',
+      icon: 'namespace',
+      iconFont: 'stratos-icons',
       value: (relMetadata: any) => relMetadata.namespace,
       label: 'Eirini Pod Namespace',
     },

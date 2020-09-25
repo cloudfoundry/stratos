@@ -57,6 +57,7 @@ export class MetricsComponent {
 
   // Was there an error retrieving data from the Prometheus server?
   public error = false;
+  public metadataLabels: { [key: string]: string; } = {};
   public metadataTypes: { [key: string]: EndpointRelationshipTypeMetadata[]; } = {};
   public metadataJobTypes: { [key: string]: EndpointRelationshipTypeMetadata[]; } = {};
 
@@ -95,6 +96,7 @@ export class MetricsComponent {
     // Each endpoint might be receiving different types of metrics from this endpoint. Each different type may need to show different
     // status info. Here we create lists for every relationship type that we know of.
     Object.entries(EndpointRelationshipTypes).forEach(([relationTypeLabel, relationType]) => {
+      this.metadataLabels[relationTypeLabel] = relationType.label;
       this.metadataTypes[relationTypeLabel] = relationType.metadata.filter(type => !type.type);
       this.metadataJobTypes[relationTypeLabel] = relationType.metadata.filter(type => type.type === EndpointRelationshipTypeMetadataJob);
     });

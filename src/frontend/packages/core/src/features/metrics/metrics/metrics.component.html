@@ -36,34 +36,34 @@
               <div class="metrics-info">
                 <mat-icon fontSet="{{ info.icon.font }}">{{info.icon.name }}</mat-icon>
                 <div class="metrics-metadata">
-                  <div>{{ info.name }}</div>
-                  <div>{{ info.type }}</div>
-                  <div class="metrics-metadata__cols">
-                    <div class="metrics-metadata__two-cols">
-                      <!-- Display information about all metric relations that the parent metrics endpoint is providing this endpoint -->
-                      <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}
-                      </app-metadata-item>
-                      <ng-container *ngFor="let relation of info.relations">
+                  <div>Endpoint: {{ info.name }} ({{ info.type }})</div>
+                  <app-metadata-item icon="link" label="Address" [clipboardValue]="info.url">{{ info.url }}
+                  </app-metadata-item>
+                  <ng-container *ngFor="let relation of info.relations">
+                    <div>{{ metadataLabels[relation.type] }}</div>
+                    <div class="metrics-metadata__cols">
+                      <div class="metrics-metadata__two-cols">
+                        <!-- Display information about all metric relations that the parent metrics endpoint is providing this endpoint -->
                         <app-metadata-item *ngFor="let metadataType of metadataTypes[relation.type]"
-                          [icon]="metadataType.icon" [label]="metadataType.label">
+                          [icon]="metadataType.icon" [iconFont]="metadataType.iconFont" [label]="metadataType.label">
                           {{metadataType.value(relation.metadata) ||  'N/A'}}
                         </app-metadata-item>
-                      </ng-container>
-                    </div>
-                    <div class="metrics-metadata__two-cols">
-                      <!-- Display information about all associated metric jobs provided by the parent metrics endpoint to this endpoint -->
-                      <ng-container *ngFor="let relation of info.relations">
+                      </div>
+                      <div class="metrics-metadata__two-cols">
+                        <!-- Display information about all associated metric jobs provided by the parent metrics endpoint to this endpoint -->
                         <div class="metrics-extra"
                           *ngIf="metadataJobTypes[relation.type].length && relation.metadata.job && (jobDetails$ | async) as jobDetails">
                           <div *ngIf="jobDetails[relation.metadata.job] as job">
                             <app-metadata-item *ngFor="let metadataType of metadataJobTypes[relation.type]"
-                              [icon]="metadataType.icon" [label]="metadataType.label">
+                              [icon]="metadataType.icon" [iconFont]="metadataType.iconFont"
+                              [label]="metadataType.label">
                               {{metadataType.value(job) }}</app-metadata-item>
                           </div>
                         </div>
-                      </ng-container>
+                      </div>
                     </div>
-                  </div>
+                  </ng-container>
+
                   <div *ngIf="!info.known">
                     <div class="metrics-unknown">
                       <mat-icon class="text-warning">warning</mat-icon>

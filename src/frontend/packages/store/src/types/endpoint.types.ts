@@ -33,6 +33,7 @@ export enum EndpointMetricRelationTypes {
 export const EndpointRelationshipTypeMetadataJob = 'job';
 export interface EndpointRelationshipTypeMetadata {
   icon: string,
+  iconFont?: string;
   value: (relMetadata: any) => string;
   label: string,
   type?: string,
@@ -42,6 +43,7 @@ export interface EndpointRelationshipTypeMetadata {
  * Definition of an endpoint relationship type. This can be used to render information about the metadata a relationship type has
  */
 export interface EndpointRelationshipType {
+  label: string,
   metadata: EndpointRelationshipTypeMetadata[];
 }
 
@@ -52,6 +54,7 @@ export const EndpointRelationshipTypes: {
   [key: string]: EndpointRelationshipType,
 } = {
   [EndpointMetricRelationTypes.METRICS_KUBE]: { // This will be moved into the kube package when it comes upstream
+    label: 'Kubernetes Metrics',
     metadata: [
       {
         icon: 'history',
