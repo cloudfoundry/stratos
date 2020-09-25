@@ -89,9 +89,6 @@ const storeDebugImports = environment.production ? [] : [
 })
 class AppStoreDebugModule { }
 
-/**
- * `HttpXsrfTokenExtractor` which retrieves the token from a cookie.
- */
 
 @NgModule({
   declarations: [
