@@ -60,6 +60,10 @@ if (process.env.STRATOS_E2E_LOG_TIME || browserstackHelper.isConfigured()) {
   showTimesInReport = true;
 }
 
+function safeExcludeSuite(suite) {
+  return suite.map(file => file && file[0] !== '!' ? '!' + file : file);
+}
+
 const excludeTests = [
   '!./src/test-e2e/login/*-sso-e2e.spec.ts',
   '!' + checkSuiteGlob
@@ -111,18 +115,21 @@ const autoscalerSuite = globby.sync([
 
 const cfSummaryAndBelow = globby.sync([
   './src/test-e2e/cloud-foundry/**/*-e2e.spec.ts',
-  ...manageUsersSuite.map(file => '!' + file),
+  ...safeExcludeSuite(manageUsersSuite),
+  ...safeExcludeSuite(longSuite),
 ]);
 
 const fullMinusOtherSuites = globby.sync([
   ...fullSuite,
-  ...longSuite.map(file => '!' + file),
-  ...longServicesSuite.map(file => '!' + file),
-  ...manageUsersSuite.map(file => '!' + file),
-  ...coreSuite.map(file => '!' + file),
-  ...autoscalerSuite.map(file => '!' + file),
-  ...cfSummaryAndBelow.map(file => '!' + file),
+  ...safeExcludeSuite(longSuite),
+  ...safeExcludeSuite(longServicesSuite),
+  ...safeExcludeSuite(manageUsersSuite),
+  ...safeExcludeSuite(coreSuite),
+  ...safeExcludeSuite(autoscalerSuite),
+  ...safeExcludeSuite(cfSummaryAndBelow),
 ]);
+
+console.log(fullMinusOtherSuites);
 
 const config = {
   allScriptsTimeout: timeout,
