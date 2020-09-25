@@ -1,6 +1,6 @@
 import { browser, promise, protractor } from 'protractor';
 
-import { IServiceInstance } from '../../frontend/packages/cloud-foundry/src/cf-api-svc.types';
+import { IService, IServiceInstance, IServicePlan } from '../../frontend/packages/cloud-foundry/src/cf-api-svc.types';
 import { CFResponse, createEmptyCfResponse } from '../../frontend/packages/cloud-foundry/src/store/types/cf-api.types';
 import { APIResource } from '../../frontend/packages/store/src/types/api.types';
 import { e2e, E2ESetup } from '../e2e';
@@ -15,10 +15,6 @@ const until = protractor.ExpectedConditions;
 
 export class ServicesHelperE2E {
 
-  cfRequestHelper: CFRequestHelpers;
-  cfHelper: CFHelpers;
-  createServiceInstance: CreateMarketplaceServiceInstance;
-
   constructor(public e2eSetup: E2ESetup, createServiceInstance: CreateMarketplaceServiceInstance = null, seed?: ServicesHelperE2E) {
     this.cfRequestHelper = seed ? seed.cfRequestHelper : new CFRequestHelpers(e2eSetup);
     this.cfHelper = seed ? seed.cfHelper : new CFHelpers(e2eSetup);
@@ -26,6 +22,12 @@ export class ServicesHelperE2E {
       this.createServiceInstance = createServiceInstance;
     }
   }
+
+  cfRequestHelper: CFRequestHelpers;
+  cfHelper: CFHelpers;
+  createServiceInstance: CreateMarketplaceServiceInstance;
+
+  private servicePlanCache: { [serviceName: string]: string; } = {};
 
   createServiceInstanceName(): string {
     const serviceInstanceName = E2EHelpers.createCustomName(customServiceLabel).toLowerCase();
@@ -37,7 +39,7 @@ export class ServicesHelperE2E {
     const newServiceInstanceName = `${prefix}-${serviceInstanceName}`;
     this.checkServiceInstanceName(newServiceInstanceName);
     return newServiceInstanceName;
-  }
+  };
 
   private checkServiceInstanceName(serviceInstanceName: string) {
     expect(serviceInstanceName.length)
@@ -46,14 +48,14 @@ export class ServicesHelperE2E {
 
   setCreateServiceInstance = (createServiceInstance: CreateMarketplaceServiceInstance) => {
     this.createServiceInstance = createServiceInstance;
-  }
+  };
 
   fetchServices = (cfGuid: string): promise.Promise<CFResponse> => {
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
       'services?page=1&results-per-page=100&inline-relations-depth=1&include-relations=service_plans'
     );
-  }
+  };
 
   fetchServicesInstances = (cfGuid: string, userProvided = false): promise.Promise<CFResponse> => {
     const url = userProvided ? 'user_provided_service_instances?page=1&results-per-page=100' : 'service_instances?page=1&results-per-page=100';
@@ -61,7 +63,7 @@ export class ServicesHelperE2E {
       cfGuid,
       url
     );
-  }
+  };
 
   deleteServiceInstance = (cfGuid: string, serviceGuid: string, userProvided = false): promise.Promise<CFResponse> => {
     const id = `${cfGuid}:${serviceGuid}`;
@@ -73,14 +75,50 @@ export class ServicesHelperE2E {
       e2e.log(`Deleting service instance '${id}' (cf:si guid) failed: `, err);
       throw err;
     });
-  }
+  };
 
   fetchServiceInstanceByName = (cfGuid: string, serviceInstanceName: string): promise.Promise<CFResponse> => {
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
       `service_instances?name=${serviceInstanceName}`
     );
-  }
+  };
+
+  private getServicesServicePlan = (serviceName: string): promise.Promise<string> => {
+    if (this.servicePlanCache[serviceName]) {
+      return promise.fullyResolved(this.servicePlanCache[serviceName]);
+    }
+    return this.cfRequestHelper.sendCfGet(CFHelpers.cachedDefaultCfGuid, `services`)
+      .then((res: CFResponse<IService>) => res.resources.find(service => service.entity.label === serviceName))
+      .then(service => this.cfRequestHelper.sendCfGet(
+        CFHelpers.cachedDefaultCfGuid,
+        service.entity.service_plans_url.slice(4, service.entity.service_plans_url.length)
+      ))
+      .then((servicePlans: CFResponse<IServicePlan>) => servicePlans.resources[0].metadata.guid)
+      .then(servicePlanGuid => {
+        this.servicePlanCache[serviceName] = servicePlanGuid;
+        return servicePlanGuid;
+      });
+  };
+
+  createServiceViaAPI = (serviceName: string, serviceInstanceName: string): promise.Promise<any> => {
+    return promise.all([
+      this.cfHelper.fetchDefaultCfGuid(),
+      this.cfHelper.fetchDefaultSpaceGuid()
+    ])
+      .then(() => this.getServicesServicePlan(serviceName))
+      .then((servicePlanGuids: string) => {
+        return this.cfRequestHelper.sendCfPost(
+          CFHelpers.cachedDefaultCfGuid,
+          'service_instances?accepts_incomplete=true',
+          {
+            name: serviceInstanceName,
+            service_plan_guid: servicePlanGuids,
+            space_guid: CFHelpers.cachedDefaultSpaceGuid
+          }
+        );
+      });
+  };
 
   createService = (serviceName: string, serviceInstanceName: string, marketplaceMode = false, bindApp: string = null) => {
     this.createServiceInstance.waitForPage();
@@ -111,7 +149,7 @@ export class ServicesHelperE2E {
 
       this.createInstanceAttempt(0, 8, serviceName, serviceInstanceName);
     });
-  }
+  };
 
   createUserProvidedService = (serviceName: string, serviceInstanceName: string, bindApp: string = null) => {
     this.createServiceInstance.waitForPage();
@@ -131,7 +169,7 @@ export class ServicesHelperE2E {
 
       this.createInstanceAttempt(0, 8, serviceName, serviceInstanceName);
     });
-  }
+  };
 
   createInstanceAttempt = (retryNumber: number, maxRetries: number, serviceName: string, serviceInstanceName: string) => {
     this.createServiceInstance.stepper.next();
@@ -154,13 +192,13 @@ export class ServicesHelperE2E {
         }
       }
     });
-  }
+  };
 
   canBindAppStep = (): promise.Promise<boolean> => {
     return this.cfHelper.fetchDefaultSpaceGuid(true)
       .then(spaceGuid => this.cfHelper.fetchAppsCountInSpace(CFHelpers.cachedDefaultCfGuid, spaceGuid))
       .then(totalAppsInSpace => !!totalAppsInSpace);
-  }
+  };
 
   setServiceInstanceDetail = (serviceInstanceName: string, isEditServiceInstance = false) => {
     this.createServiceInstance.stepper.waitForStep('Service Instance');
@@ -172,7 +210,7 @@ export class ServicesHelperE2E {
     }
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
     this.createServiceInstance.stepper.setServiceName(serviceInstanceName);
-  }
+  };
 
   setBindApp = (bindApp: string = null) => {
     this.createServiceInstance.stepper.waitForStep('Bind App (Optional)');
@@ -183,7 +221,7 @@ export class ServicesHelperE2E {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
-  }
+  };
 
   setServicePlan = (isEditServiceInstance = false) => {
     this.createServiceInstance.stepper.waitForStep('Select Plan');
@@ -195,7 +233,7 @@ export class ServicesHelperE2E {
     }
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
-  }
+  };
 
   setServiceSelection = (serviceName: string, expectFailure = false) => {
     expect(this.createServiceInstance.stepper.canPrevious()).toBeTruthy();
@@ -206,7 +244,7 @@ export class ServicesHelperE2E {
       expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
       expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
     }
-  }
+  };
 
   setCfOrgSpace = (orgName: string = null, spaceName: string = null, marketplaceMode = false) => {
 
@@ -217,7 +255,7 @@ export class ServicesHelperE2E {
     this.createServiceInstance.stepper.setSpace(!!spaceName ? spaceName : e2e.secrets.getDefaultCFEndpoint().testSpace);
     expect(this.createServiceInstance.stepper.canNext()).toBeTruthy();
     expect(this.createServiceInstance.stepper.canCancel()).toBeTruthy();
-  }
+  };
 
   cleanUpServiceInstance(serviceInstanceName: string): promise.Promise<any> {
     return this.cleanUpServiceInstances([serviceInstanceName]);
@@ -301,7 +339,7 @@ export class ServicesHelperE2E {
           e2e.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
         }
       });
-  }
+  };
 
   getServiceCardWithTitle(list: ListComponent, serviceName: string, filter = true) {
     if (filter) {
