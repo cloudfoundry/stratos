@@ -1,0 +1,10 @@
+
+@mixin suse-login-page-theme($theme, $app-theme) {
+  $warn: map-get($theme, warn);
+
+  .suse-login-sso {
+    .suse-login__message {
+      color: mat-color($warn);
+    }
+  }
+}
