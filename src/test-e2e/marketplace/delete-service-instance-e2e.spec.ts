@@ -1,19 +1,17 @@
+import { promise } from 'protractor';
+
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { ListComponent } from '../po/list.po';
 import { MetaCardTitleType } from '../po/meta-card.po';
-import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
-import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
 // Regression test for:
 // - Deleting a service instance in the services list will delete the service but the list incorrectly shows no services
 describe('Delete Service Instance', () => {
-  const createServiceInstance = new CreateServiceInstance();
-  let createMarketplaceServiceInstance: CreateMarketplaceServiceInstance;
   let e2eSetup;
   const servicesWall = new ServicesWallPage();
   let servicesHelperE2E: ServicesHelperE2E;
@@ -37,36 +35,27 @@ describe('Delete Service Instance', () => {
   });
 
   beforeAll(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
-    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
-    createMarketplaceServiceInstance.waitForPage();
-  });
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, null);
 
-  it('should be able to create a service instance', () => {
-    expect(createMarketplaceServiceInstance.isActivePage()).toBeTruthy();
+    const serviceInstanceName1 = servicesHelperE2E.createServiceInstanceName();
+    names.push(serviceInstanceName1);
+    const serviceInstanceName2 = servicesHelperE2E.createServiceInstanceName();
+    names.push(serviceInstanceName2);
 
-    const serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
-    names.push(serviceInstanceName);
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
-    servicesWall.waitForPage();
-    servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName);
+    return promise.all([
+      servicesHelperE2E.createServiceViaAPI(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName1),
+      servicesHelperE2E.createServiceViaAPI(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName2)
+    ])
+      .then(() => {
+        servicesWall.navigateTo();
+
+        servicesWall.serviceInstancesList.header.refresh();
+        servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName1);
+        return servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName2);
+      });
   }, timeout);
 
-  it('should be able to create a second service instance', () => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
-    createServiceInstance.selectMarketplace();
-    const serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
-    names.push(serviceInstanceName);
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
-    servicesWall.waitForPage();
-    servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName);
-  }, timeout);
-
-
-  it('should be able to detete the service instance', () => {
+  it('should be able to delete the service instance', () => {
     const cardView = new ListComponent();
     cardView.cards.waitUntilShown();
     cardView.cards.findCardByTitle(names[0], MetaCardTitleType.CUSTOM, true).then(card => {

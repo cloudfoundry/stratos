@@ -14,6 +14,9 @@ export class TileSelectorComponent {
   public showingMore = false;
   @Input() smallerTiles = false;
   @Input() set options(options: ITileConfig[]) {
+    if (!options) {
+      return;
+    }
     const groupedOptions = options.reduce((grouped, option) => {
       if (option.hidden) {
         grouped.hidden.push(option);

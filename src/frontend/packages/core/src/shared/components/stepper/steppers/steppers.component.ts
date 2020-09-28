@@ -126,7 +126,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           console.warn('Stepper failed: ', err);
           return observableOf({
             success: false,
-            message: 'Failed',
+            message: err || 'Failed',
             redirectPayload: null,
             redirect: false,
             data: {},
