@@ -121,6 +121,7 @@ describe('Application Routes -', () => {
     unmapActionMenu.waitUntilShown();
     unmapActionMenu.clickItem('Unmap');
     const confirm = new ConfirmDialogComponent();
+    confirm.waitUntilShown();
     confirm.getMessage().then(message => {
       expect(message).toBeTruthy();
       expect(message.indexOf(routeHostName)).toBeGreaterThanOrEqual(0);
@@ -188,6 +189,7 @@ describe('Application Routes -', () => {
     deleteActionMenu.waitUntilShown();
     deleteActionMenu.clickItem('Delete');
     const confirm = new ConfirmDialogComponent();
+    confirm.waitUntilShown();
     confirm.getMessage().then(message => {
       expect(message).toBeTruthy();
       expect(message.indexOf(routeHostName)).toBeGreaterThanOrEqual(0);
