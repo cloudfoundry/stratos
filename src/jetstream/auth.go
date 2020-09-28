@@ -59,13 +59,16 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 		cnsiGUID := c.QueryParam("guid")
 		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint, state, cnsiGUID)
 	} else {
-		username := c.FormValue("username")
-		password := c.FormValue("password")
+		params := new(interfaces.LoginToCNSIParams)
+		err := interfaces.BindOnce(params, c)
+		if err != nil {
+			return nil, nil, err
+		}
 
-		if len(username) == 0 || len(password) == 0 {
+		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return uaaRes, u, errors.New("Needs username and password")
 		}
-		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
+		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, params.Username, params.Password, client, clientSecret, endpoint)
 	}
 	if err != nil {
 		return uaaRes, u, err

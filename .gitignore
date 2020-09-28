@@ -96,7 +96,7 @@ src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 
 # Automatically generated OpenAPI docs
-src/jetstreams/docs
+src/jetstream/docs/
 
 # Customisations - these can be removed in the future
 # Left in for now to prevent these files being checked-in, if they are still present

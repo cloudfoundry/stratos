@@ -919,17 +919,23 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 // @Router /endpoints [post]
 func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
 	log.Debug("pluginRegisterRouter")
-	endpointType := c.FormValue("endpoint_type")
-	if endpointType == "" {
+
+	params := new(interfaces.RegisterEndpointParams)
+	err := interfaces.BindOnce(params, c)
+	if err != nil {
+		return err
+	}
+
+	if params.EndpointType == "" {
 		return errors.New("endpoint_type parameter is missing")
 	}
 
-	if val, ok := p.PluginRegisterRoutes[endpointType]; ok {
-		log.Debugf("Routing to plugin: %s.Register", endpointType)
+	if val, ok := p.PluginRegisterRoutes[params.EndpointType]; ok {
+		log.Debugf("Routing to plugin: %s.Register", params.EndpointType)
 		return val(c)
 	}
 
-	return fmt.Errorf("Unknown endpoint_type %s", endpointType)
+	return fmt.Errorf("Unknown endpoint_type %s", params.EndpointType)
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
