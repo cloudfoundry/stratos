@@ -129,8 +129,6 @@ const fullMinusOtherSuites = globby.sync([
   ...safeExcludeSuite(cfSummaryAndBelow),
 ]);
 
-console.log(fullMinusOtherSuites);
-
 const config = {
   allScriptsTimeout: timeout,
   // Exclude the dashboard tests from all suites for now
