@@ -30,12 +30,12 @@ func (a *noAuth) ShowConfig(config *interfaces.ConsoleConfig) {
 	log.Info("... !!!!! No Authentication !!!!!")
 }
 
-//Login provides Local-auth specific Stratos login
+//Login provides no-auth specific Stratos login
 func (a *noAuth) Login(c echo.Context) error {
 	return errors.New("Can not login when there is no auth")
 }
 
-//Logout provides Local-auth specific Stratos login
+//Logout provides no-auth specific Stratos login
 func (a *noAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
@@ -53,7 +53,7 @@ func (a *noAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   noAuthUserID,
-		Name:   "admin",
+		Name:   interfaces.DefaultAdminUserName,
 		Admin:  true,
 		Scopes: scopes,
 	}
@@ -86,7 +86,7 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	}
 }
 
-//VerifySession verifies the session the specified local user, currently just verifies user exists
+//VerifySession for no authentication - always passes
 func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	a.p.ensureXSRFToken(c)
 	return nil

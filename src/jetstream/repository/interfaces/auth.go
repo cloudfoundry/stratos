@@ -4,6 +4,11 @@ import (
 	"github.com/labstack/echo"
 )
 
+const (
+	// DefaultAdminUserName is the default admin user name
+	DefaultAdminUserName = "admin"
+)
+
 //StratosAuth provides common access to Stratos login/logout functionality
 type StratosAuth interface {
 	ShowConfig(config *ConsoleConfig)
