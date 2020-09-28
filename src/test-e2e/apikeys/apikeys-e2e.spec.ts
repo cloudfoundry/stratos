@@ -15,7 +15,8 @@ describe('API Keys -', () => {
 
   let helper: ApiKeyE2eHelper;
   let newKeysComment: string;
-  let page = new APIKeyListPage();
+  const page = new APIKeyListPage();
+  const endpointsPage = new EndpointsPage();
   let currentKeysCount = promise.fullyResolved(0);
 
   beforeAll(() => {
@@ -25,6 +26,9 @@ describe('API Keys -', () => {
     helper = new ApiKeyE2eHelper(setup);
 
     newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase()
+
+    // Wait for the UI to load - should go to the endpoints page
+    endpointsPage.waitForPage();
   })
 
   // Should be ran in sequence
