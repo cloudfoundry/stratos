@@ -22,8 +22,8 @@ describe('API Keys -', () => {
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .getInfo(ConsoleUserType.admin);
+    .clearAllEndpoints()
+    .getInfo(ConsoleUserType.admin);
     helper = new ApiKeyE2eHelper(setup);
 
     newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase()
@@ -33,8 +33,8 @@ describe('API Keys -', () => {
   describe('Ordered Tests - ', () => {
 
     it('Should load UI', () => {
-      // Wait for the UI to load - should go to the endpoints page
-      endpointsPage.waitForPage();
+        // Wait for the UI to load - should go to the endpoints page
+        endpointsPage.waitForPage();
     });
 
     it('Navigate to api key page', () => {

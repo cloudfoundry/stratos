@@ -46,9 +46,8 @@ describe('Endpoints', () => {
       const toConnect = e2e.secrets.getDefaultCFEndpoint();
       const connectDialog = new ConnectDialogComponent();
 
-      endpointsPage.cards.waitUntilShown();
-
       it('should open the credentials form', () => {
+        endpointsPage.cards.waitUntilShown();
         endpointsPage.cards.waitForCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
           .then(actionMenu => actionMenu.getItem('Connect'))
