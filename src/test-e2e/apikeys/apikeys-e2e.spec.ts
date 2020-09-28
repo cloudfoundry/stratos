@@ -2,6 +2,7 @@ import { promise } from 'protractor';
 
 import { MessageNoContentPo } from '../application/po/message-no-autoscaler-policy';
 import { e2e } from '../e2e';
+import { EndpointsPage } from '../endpoints/endpoints.po';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { Component } from '../po/component.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
