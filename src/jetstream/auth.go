@@ -60,9 +60,9 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint, state, cnsiGUID)
 	} else {
 		params := new(interfaces.LoginToCNSIParams)
-		err := interfaces.BindOnce(params, c)
-		if err != nil {
-			return nil, nil, err
+		bindErr := interfaces.BindOnce(params, c)
+		if bindErr != nil {
+			return nil, nil, bindErr
 		}
 
 		if len(params.Username) == 0 || len(params.Password) == 0 {
