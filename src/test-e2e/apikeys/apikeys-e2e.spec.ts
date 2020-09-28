@@ -27,13 +27,16 @@ describe('API Keys -', () => {
     helper = new ApiKeyE2eHelper(setup);
 
     newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase()
-
-    // Wait for the UI to load - should go to the endpoints page
-    endpointsPage.waitForPage();
   })
 
   // Should be ran in sequence
   describe('Ordered Tests - ', () => {
+
+    it('Should load UI', () => {
+      // Wait for the UI to load - should go to the endpoints page
+      endpointsPage.waitForPage();
+    });
+
     it('Navigate to api key page', () => {
       page.header.clickUserMenuItem('API Keys');
       page.waitForPage();
