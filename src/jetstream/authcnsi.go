@@ -87,7 +87,7 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 // @Accept	x-www-form-urlencoded
 // @Produce	json
 // @Param cnsi_guid formData string true "Endpoint GUID"
-// @Param system_shared formData bool false "Register as a system endpoint"
+// @Param system_shared formData string false "Register as a system endpoint" Enums(true, false)
 // @Param connect_type formData string false "Connection type" Enums(creds, none)
 // @Param username formData string false "Username"
 // @Param password formData string false "Password"

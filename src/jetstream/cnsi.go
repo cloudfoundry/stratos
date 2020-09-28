@@ -568,11 +568,11 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 // @Produce	json
 // @Param id path string true "Endpoint GUID"
 // @Param name formData string true "Endpoint name"
-// @Param skipSSL formData bool false "Skip SSL"
-// @Param setClientInfo formData bool false "Set client info"
+// @Param skipSSL formData string false "Skip SSL" Enums(true, false)
+// @Param setClientInfo formData string false "Set client info" Enums(true, false)
 // @Param clientID formData string false "Client ID"
 // @Param clientSecret formData string false "Client secret"
-// @Param allowSSO formData bool false "Allow SSO"
+// @Param allowSSO formData string false "Allow SSO" Enums(true, false)
 // @Success 200
 // @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
 // @Failure 401 {object} interfaces.ErrorResponseBody "Error response"

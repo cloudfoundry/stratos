@@ -907,8 +907,8 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 // @Param endpoint_type formData string true "Endpoint type"
 // @Param cnsi_name formData string true "Endpoint name"
 // @Param api_endpoint formData string true "Endpoint URL"
-// @Param skip_ssl_validation formData bool false "Skip SSL validation"
-// @Param sso_allowed formData bool false "SSO allowed"
+// @Param skip_ssl_validation formData string false "Skip SSL validation" Enums(true, false)
+// @Param sso_allowed formData string false "SSO allowed" Enums(true, false)
 // @Param cnsi_client_id formData string false "Client ID"
 // @Param cnsi_client_secret formData string false "Client secret"
 // @Param sub_type formData string false "Endpoint subtype"
