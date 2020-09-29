@@ -106,7 +106,7 @@ export class EndpointsEffect {
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +
           (window.location.port ? ':' + window.location.port : '');
-        const ssoUrl = '/pp/v1/auth/login/cnsi?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
+        const ssoUrl = '/api/v1/tokens?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
         window.location.assign(ssoUrl);
         return [];
       }
@@ -143,7 +143,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/auth/login/cnsi',
+        '/api/v1/tokens',
         params,
         null,
         action.endpointsType,
@@ -155,36 +155,31 @@ export class EndpointsEffect {
   @Effect() disconnect$ = this.actions$.pipe(
     ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
     mergeMap(action => {
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_guid: action.guid
-        }
-      });
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/auth/logout/cnsi',
-        params,
+        '/api/v1/tokens/' + action.guid,
         null,
-        action.endpointsType
+        null,
+        action.endpointsType,
+        null,
+        null,
+        'DELETE'
       );
     }));
 
   @Effect() unregister$ = this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_guid: action.guid
-        }
-      });
-
       return this.doEndpointAction(
         action,
-        '/pp/v1/unregister',
-        params,
+        '/api/v1/endpoints/' + action.guid,
+        null,
         'delete',
-        action.endpointsType
+        action.endpointsType,
+        null,
+        null,
+        'DELETE'
       );
     }));
 
@@ -213,8 +208,12 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/register/' + action.endpointsType,
-        new HttpParams({}),
+        '/api/v1/endpoints',
+        new HttpParams({
+          fromObject: {
+            endpoint_type: action.endpointsType
+          }
+        }),
         'create',
         action.endpointsType,
         body,
@@ -242,7 +241,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/endpoint/' + action.id,
+        '/api/v1/endpoints/' + action.id,
         new HttpParams({}),
         'update',
         action.endpointsType,
@@ -282,12 +281,14 @@ export class EndpointsEffect {
     endpointType: EndpointType,
     body?: string,
     errorMessageHandler?: (e: any) => string,
+    method: string = 'POST',
   ) {
 
     const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, body || {}, {
-      params
+    return this.http.request(method, url, {
+      params,
+      body: body || {}
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
         const actions = [];

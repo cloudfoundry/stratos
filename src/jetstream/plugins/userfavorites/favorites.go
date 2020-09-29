@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )

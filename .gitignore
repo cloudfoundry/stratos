@@ -95,6 +95,9 @@ src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 
+# Automatically generated OpenAPI docs
+src/jetstream/docs/
+
 # Customisations - these can be removed in the future
 # Left in for now to prevent these files being checked-in, if they are still present
 # from a previous checkout

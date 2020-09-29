@@ -21,7 +21,7 @@ export class CFRequestHelpers extends RequestHelpers {
 
   getCfInfo = (cfName?: string): promise.Promise<EndpointModel> => {
     cfName = cfName || this.e2eHelper.secrets.getDefaultCFEndpoint().name;
-    return this.sendRequestAdminSession('pp/v1/cnsis', 'GET', {})
+    return this.sendRequestAdminSession('api/v1/endpoints', 'GET', {})
       .then((response: string) => {
         const cnsis = JSON.parse(response) as EndpointModel[];
         return cnsis.find(cnsi => cnsi.name === cfName);

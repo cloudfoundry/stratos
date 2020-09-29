@@ -21,7 +21,7 @@ export class ResetsHelpers {
    * have been configured
    */
   connectAllEndpoints(req, userType: ConsoleUserType = ConsoleUserType.admin) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' })
       .then(response => {
         const cnsis = JSON.parse(response);
         const p = promise.fulfilled({});
@@ -47,7 +47,7 @@ export class ResetsHelpers {
    * have been configured
    */
   connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' })
       .then(response => {
         const cnsis = JSON.parse(response);
         const promises = [];
@@ -114,7 +114,7 @@ export class ResetsHelpers {
       endpointsOfType.forEach((ep) => {
         if (!ep.skip) {
           p.then(() => reqHelpers.sendRequest(
-            req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+            req, { method: 'POST', url: 'api/v1/endpoints?endpoint_type=' + endpointType }, null, this.makeRegisterFormData(ep)
           ));
         }
       });
@@ -124,7 +124,7 @@ export class ResetsHelpers {
 
   registerDefaultCloudFoundry(req) {
     const endpoint = e2e.secrets.getDefaultCFEndpoint();
-    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/register/cf' }, null, this.makeRegisterFormData(endpoint));
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'api/v1/endpoints?endpoint_type=cf' }, null, this.makeRegisterFormData(endpoint));
   }
 
   /**
@@ -132,7 +132,7 @@ export class ResetsHelpers {
    * @description Remove all registered endpoints
    */
   removeAllEndpoints(req) {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' }).then((data) => {
       if (!data || !data.length) {
         return;
       }
@@ -140,14 +140,14 @@ export class ResetsHelpers {
       data = JSON.parse(data);
       const p = promise.fulfilled({});
       data.forEach((c) => {
-        p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+        p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/endpoints/' + c.guid }, null, {}));
       });
       return p;
     });
   }
 
   removeEndpoint(req, endpointName): promise.Promise<any> {
-    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' }).then((data) => {
       if (!data || !data.length) {
         return;
       }
@@ -156,7 +156,7 @@ export class ResetsHelpers {
       const p = promise.fulfilled({});
       data.forEach((c) => {
         if (c.name === endpointName) {
-          p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+          p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/endpoints/' + c.guid }, null, {}));
         }
       });
       return p;
@@ -164,7 +164,7 @@ export class ResetsHelpers {
   }
 
   private doConnectEndpoint(req, cnsiGuid, username, password) {
-    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'api/v1/tokens' }, null, {
       cnsi_guid: cnsiGuid,
       username,
       password

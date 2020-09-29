@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
 func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
@@ -39,13 +39,13 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	scope    := c.FormValue("scope")
-	email    := c.FormValue("email")
+	scope := c.FormValue("scope")
+	email := c.FormValue("email")
 
 	if len(username) == 0 || len(password) == 0 || len(scope) == 0 {
 		return "", errors.New("Needs username, password and scope")
 	}
-	
+
 	//Generate a user GUID and hash the password
 	userGUID := uuid.NewV4().String()
 	passwordHash, err := crypto.HashPassword(password)
@@ -63,7 +63,7 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 		if err != nil {
 			log.Errorf("Error adding local user %v", err)
 			return "", err
-		}		
+		}
 	}
 	return userGUID, nil
 }
