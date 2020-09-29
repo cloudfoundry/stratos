@@ -144,7 +144,7 @@ describe('Endpoints', () => {
 
       it('should update row in table when disconnected', () => {
         endpointsPage.navigateTo();
-
+        endpointsPage.cards.waitUntilShown();
         endpointsPage.cards.findCardByTitle(toDisconnect.name).then(card => {
           card.openActionMenu();
           const menu = new MenuComponent();
