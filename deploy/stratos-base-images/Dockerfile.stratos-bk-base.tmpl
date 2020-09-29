@@ -12,6 +12,7 @@ RUN zypper in -y ca-certificates && \
     zypper in -y curl && \
     zypper in -y bind-utils && \
     zypper in -y hostname && \
+    zypper in -y libcap-progs && \
     mkdir -p /srv && \
     mkdir -p /root/.npm-global
 # Install latest git from devel/tools/scm repository
