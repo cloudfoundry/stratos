@@ -41,17 +41,13 @@ RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nENABLE_TECH_PREVIEW=true\n" 
 
 EXPOSE 5443
 
-# Add a vcap user for CF Eirini compatibility
-RUN useradd -M -U -u 2000 vcap
-RUN usermod -aG users vcap
+# Add a jetstream user so we don't run as root
+RUN useradd -M -U -u 2000 jetstream
+RUN usermod -aG users jetstream
 
-# Ensure that the /srv folder is in the users group so that the vcap user can write to it
+# Ensure that the /srv folder is in the users group so that the jetstream user can write to it
 RUN chgrp users /srv && chmod 775 /srv
 
-# Allow the jetstream executable to bind to 443 regardless of whether we are running as root
-#RUN setcap 'cap_net_bind_service=+ep' /srv/jetstream
-
-# Need to be root to bind to port 443 (We can remove this once validated no longer required)
-USER root
+USER jetstream
 
 ENTRYPOINT ["./jetstream"]
