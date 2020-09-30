@@ -14,7 +14,8 @@ export enum ConsoleUserType {
 export class E2EHelpers {
 
   static e2eItemPrefix = 'acceptance.e2e.';
-  static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.USER);
+  static customOrgSpaceLabel = E2EHelpers.e2eItemPrefix +
+    (process.env.CUSTOM_ORG_SPACE_LABEL || process.env.CUSTOM_APP_LABEL || process.env.USER);
 
   secrets = new SecretsHelpers();
 

@@ -7,7 +7,7 @@ import { SnackBarPo } from './snackbar.po';
 import { StackedInputActionsPo } from './stacked-input-actions.po';
 import { StepperComponent } from './stepper.po';
 
-const customUserLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_USER_LABEL || process.env.USER);
+const customUserLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_USER_LABEL || process.env.CUSTOM_APP_LABEL || process.env.USER);
 
 export class InviteUserStepperPo extends StepperComponent {
 
