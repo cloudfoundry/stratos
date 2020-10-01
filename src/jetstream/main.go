@@ -954,6 +954,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	staticDir, staticDirErr := getStaticFiles(p.Env().String("UI_PATH", "./ui"))
 
+	// Verify Session
+	e.GET("/api/v1/auth/verify", p.verifySession)
+
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
 
@@ -1022,9 +1025,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Connect to Enpoint (SSO)
 	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
-
-	// Verify Session
-	sessionAuthGroup.GET("/session/verify", p.verifySession)
 
 	// Info
 	sessionGroup.GET("/info", p.info)

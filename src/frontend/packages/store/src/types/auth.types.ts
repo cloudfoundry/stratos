@@ -54,6 +54,13 @@ export interface SessionData {
   };
   config: SessionDataConfig;
 }
+
+export interface SessionDataEnvelope {
+  status: string;
+  error?: string;
+  data?: SessionData;
+}
+
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;

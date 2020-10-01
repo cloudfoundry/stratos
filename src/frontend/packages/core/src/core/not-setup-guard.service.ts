@@ -21,7 +21,7 @@ export class NotSetupGuardService implements CanActivate {
 
   canActivate(): Observable<boolean> {
 
-    const url = `/pp/${proxyAPIVersion}/auth/session/verify`;
+    const url = `/api/${proxyAPIVersion}/auth/verify`;
     return this.http.get(url).pipe(
       map(v => {
         // If the requests succeeds, then the user has a session, so everything must be setup already
