@@ -64,6 +64,8 @@ jobs:
         - eval "$(gimme 1.13.4)"
       script:
         - npm run test-backend
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -F backend
     - name: Helm Chart Unit Tests
       script:
         - "./deploy/ci/travis/helm-chart-unit-tests.sh"

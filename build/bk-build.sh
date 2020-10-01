@@ -42,7 +42,7 @@ else
   echo "Generating OpenAPI documentation..."
   go get github.com/swaggo/swag/cmd/swag
   swag init
-  GO111MODULE=on go test ./... -v -count=1
+  GO111MODULE=on go test ./... -v -count=1 -coverprofile=coverage.txt -covermode=atomic
 fi
 
 popd > /dev/null
