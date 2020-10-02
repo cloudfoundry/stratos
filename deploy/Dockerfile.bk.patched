@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-build-base:leap15_2
+FROM docker.io/nwmac/stratos-bk-build-base:leap15_2
 RUN mkdir -p /home/stratos
 WORKDIR /home/stratos
 COPY --chown=stratos:users . /home/stratos
@@ -6,12 +6,12 @@ RUN go version
 RUN npm install
 RUN npm run build-backend
 
-FROM splatform/stratos-bk-base:leap15_2 as common-build
+FROM docker.io/nwmac/stratos-bk-base:leap15_2 as common-build
 COPY --from=builder /home/stratos/src/jetstream/jetstream /srv/
 RUN chmod +x /srv/jetstream
 
 # use --target=prod-build to build a backend image for Kubernetes
-FROM splatform/stratos-bk-base:leap15_2 as prod-build
+FROM docker.io/nwmac/stratos-bk-base:leap15_2 as prod-build
 COPY deploy/containers/proxy/entrypoint.sh /entrypoint.sh
 COPY /deploy/tools/generate_cert.sh /generate_cert.sh
 COPY --from=common-build /srv /srv

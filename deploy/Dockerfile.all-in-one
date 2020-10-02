@@ -1,5 +1,5 @@
 # Docker build for all-in-one Stratos
-FROM splatform/stratos-aio-base:leap15_1 as builder
+FROM splatform/stratos-aio-base:leap15_2 as builder
 
 # Ensure that we copy the custom-src folder
 COPY --chown=stratos:users . ./
@@ -17,7 +17,7 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh \
     && chmod +x jetstream
 
 # use --target=aio to build All-in-one image
-FROM splatform/stratos-bk-base:leap15_1
+FROM splatform/stratos-bk-base:leap15_2
 ARG CANARY_BUILD
 COPY --from=builder /home/stratos/deploy/db /src/deploy/db
 COPY --from=builder /home/stratos/dev-certs /srv/dev-certs
