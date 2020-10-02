@@ -23,17 +23,20 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/docs"
+
 	"bitbucket.org/liamstask/goose/lib/goose"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/nwmac/sqlitestore"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
@@ -46,6 +49,24 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/sessiondata"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
+
+// @title Stratos API
+// @version 1.0
+// @description Stratos backend API.
+
+// @contact.name Stratos maintainers
+// @contact.url https://github.com/cloudfoundry/stratos/issues
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @tag.name admin
+// @tag.description Endpoints that require admin permissions
+
+// @BasePath /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authentication
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
 // server to come online before we bail out.
@@ -874,8 +895,53 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 	return client
 }
 
+// routes endpoint registration requests to Register functions of respective plugins
+// based on endpoint_type parameter
+
+// pluginRegisterRouter godoc
+// @Summary Register endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param endpoint_type formData string true "Endpoint type"
+// @Param cnsi_name formData string true "Endpoint name"
+// @Param api_endpoint formData string true "Endpoint URL"
+// @Param skip_ssl_validation formData string false "Skip SSL validation" Enums(true, false)
+// @Param sso_allowed formData string false "SSO allowed" Enums(true, false)
+// @Param cnsi_client_id formData string false "Client ID"
+// @Param cnsi_client_secret formData string false "Client secret"
+// @Param sub_type formData string false "Endpoint subtype"
+// @Success 200 {object} interfaces.CNSIRecord "Endpoint object"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints [post]
+func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
+	log.Debug("pluginRegisterRouter")
+
+	params := new(interfaces.RegisterEndpointParams)
+	err := interfaces.BindOnce(params, c)
+	if err != nil {
+		return err
+	}
+
+	if params.EndpointType == "" {
+		return errors.New("endpoint_type parameter is missing")
+	}
+
+	if val, ok := p.PluginRegisterRoutes[params.EndpointType]; ok {
+		log.Debugf("Routing to plugin: %s.Register", params.EndpointType)
+		return val(c)
+	}
+
+	return fmt.Errorf("Unknown endpoint_type %s", params.EndpointType)
+}
+
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
@@ -926,13 +992,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionGroup.GET("/api_keys", p.listAPIKeys)
 	sessionGroup.DELETE("/api_keys", p.deleteAPIKey)
 
-	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
-
-	apiKeyGroup := pp.Group("/v1")
-	apiKeyGroup.Use(p.apiKeyMiddleware)
-	apiKeyGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
-	apiKeyGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
-
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()
 		if err != nil {
@@ -942,23 +1001,30 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(middlewarePlugin.SessionEchoMiddleware)
 	}
 
-	sessionAuthGroup := sessionGroup.Group("/auth")
+	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
+
+	// API endpoints with Swagger documentation and accessible with an API key
+	stableAPIGroup := e.Group("/api/v1")
+	stableAPIGroup.Use(p.apiKeyMiddleware)
+	stableAPIGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
+	stableAPIGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))
 
 	// Connect to endpoint
-	sessionAuthGroup.POST("/login/cnsi", p.loginToCNSI)
-
-	// Connect to Enpoint (SSO)
-	sessionAuthGroup.GET("/login/cnsi", p.ssoLoginToCNSI)
+	stableAPIGroup.POST("/tokens", p.loginToCNSI)
 
 	// Disconnect endpoint
-	sessionAuthGroup.POST("/logout/cnsi", p.logoutOfCNSI)
+	stableAPIGroup.DELETE("/tokens/:cnsi_guid", p.logoutOfCNSI)
+
+	// CNSI operations
+	stableAPIGroup.GET("/endpoints", p.listCNSIs)
+
+	sessionAuthGroup := sessionGroup.Group("/auth")
+
+	// Connect to Enpoint (SSO)
+	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
 
 	// Verify Session
 	sessionAuthGroup.GET("/session/verify", p.verifySession)
-
-	// CNSI operations
-	apiKeyGroup.GET("/cnsis", p.listCNSIs)
-	apiKeyGroup.GET("/cnsis/registered", p.listRegisteredCNSIs)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
@@ -981,12 +1047,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	adminGroup := sessionGroup
 	adminGroup.Use(p.adminMiddleware)
 
+	p.PluginRegisterRoutes = make(map[string]func(echo.Context) error)
+
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
 		if err == nil {
 			// Plugin supports endpoint plugin
-			endpointType := endpointPlugin.GetType()
-			adminGroup.POST("/register/"+endpointType, endpointPlugin.Register)
+			p.PluginRegisterRoutes[endpointPlugin.GetType()] = endpointPlugin.Register
 		}
 
 		routePlugin, err := plugin.GetRoutePlugin()
@@ -995,10 +1062,16 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		}
 	}
 
-	// Apply edits for the given endpoint
-	adminGroup.POST("/endpoint/:id", p.updateEndpoint)
+	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
+	stableAdminAPIGroup := stableAPIGroup
+	stableAdminAPIGroup.Use(p.adminMiddleware)
 
-	adminGroup.POST("/unregister", p.unregisterCluster)
+	// route endpoint creation requests to respecive plugins
+	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
+
+	// Apply edits for the given endpoint
+	stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
+	stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
 
 	// Serve up static resources

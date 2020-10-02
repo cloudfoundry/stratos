@@ -18,6 +18,7 @@ describe('API Keys -', () => {
   let newKeysComment: string;
   const page = new APIKeyListPage();
   const endpointsPage = new EndpointsPage();
+
   let currentKeysCount = promise.fullyResolved(0);
 
   beforeAll(() => {
@@ -33,8 +34,8 @@ describe('API Keys -', () => {
   describe('Ordered Tests - ', () => {
 
     it('Should load UI', () => {
-        // Wait for the UI to load - should go to the endpoints page
-        endpointsPage.waitForPage();
+      // Wait for the UI to load - should go to the endpoints page
+      endpointsPage.waitForPage();
     });
 
     it('Navigate to api key page', () => {
