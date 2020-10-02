@@ -376,6 +376,34 @@
           }
         }
       }
+    },
+    "kubernetes": {
+      "root": "src/frontend/packages/kubernetes",
+      "sourceRoot": "src/frontend/packages/kubernetes/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/kubernetes/src/test.ts",
+            "tsConfig": "src/frontend/packages/kubernetes/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/kubernetes/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.json"
+            ],
+            "tslintConfig": "src/frontend/packages/kubernetes/tslint.json",
+            "files": [
+              "src/frontend/packages/kubernetes/src/**/*.ts"
+            ]
+          }
+        }
+      }
     }
 
   },

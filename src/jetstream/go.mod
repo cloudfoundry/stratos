@@ -45,6 +45,7 @@ require (
 	github.com/gorilla/sessions v1.1.3
 	github.com/gorilla/websocket v1.4.2
 	github.com/govau/cf-common v0.0.7
+	github.com/helm/monocular v1.10.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12

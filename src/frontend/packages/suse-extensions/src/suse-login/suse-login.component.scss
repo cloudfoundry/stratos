@@ -1,0 +1,268 @@
+@import '../../../suse-theme/sass/colors.scss';
+
+app-suse-login {
+  background: url(/core/assets/custom/login/sign-in-bg.svg) #7AD4AA no-repeat center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.suse-login {
+  align-items: center;
+  align-self: center;
+  background-color: #fff;
+  color: $suse-gray-fg;
+  display: flex;
+  flex-direction: column;
+  &__header,
+  &__content,
+  &__footer {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__header {
+    background-color: $suse-dark-green;
+    color: $suse-text;
+    flex: 0 0 60px;
+    font-size: 24px;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+  }
+  &__content {
+    align-items: flex-start;
+    color: $suse-text;
+    flex: 1;
+    width: 1120px;
+  }
+  &__footer {
+    flex: 0 0 auto;
+    padding: 20px 0 0 0;
+  }
+  &__title {
+    font-family: "Work Sans";
+    width: 90%;
+  }
+  &__copyright {
+    flex: 1;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  &__logo {
+    img {
+      width: 128px;
+    }
+  }
+  &__footer-mobile {
+    display: none;
+  }
+  &__intro {
+    background-color: $suse-dark-green;
+    display: flex;
+    flex: 0 0 445px;
+    flex-direction: column;
+    font-family: "Work Sans";
+    padding: 32px;
+    &-img {
+      margin-bottom: 1rem;
+    }
+    &-img-left {
+      align-self: flex-start;
+      margin-bottom: 1rem;
+    }
+  }
+  &__line {
+    margin: 32px -32px;
+    overflow: hidden;
+  }
+  &__box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 75%;
+  }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    .mat-form-field {
+      margin-bottom: 12px;
+    }
+    .mat-form-field:not(.mat-form-field-invalid).mat-form-field-appearance-legacy {
+      color: $suse-gray-fg;
+      .mat-form-field-label {
+        color: $suse-gray-fg;
+      }
+      .mat-form-field-underline {
+        background-color: $suse-gray-fg;
+      }
+    }
+  }
+  &__submit.mat-raised-button {
+    &.mat-primary[disabled] {
+      color: $suse-button-gray;
+    }
+    margin-top: 24px;
+  }
+  &__right {
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    flex: 1;
+  }
+  &__logo-mobile {
+    display: none;
+  }
+  &__headline {
+    color: $suse-primary-color;
+    font-family: "Work Sans";
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1.5;
+    margin: 0;
+    margin-bottom: .5rem;    
+  }
+  &__tagline {
+    font-family: "Work Sans";
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+    margin: 0;
+  }
+  &__form-outer {
+    opacity: 1;
+    transition: opacity 250ms linear;
+  }
+  &__form-title {
+    color: $suse-primary-color;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 24px;
+    transition: opacity 250ms linear;
+  }
+  &__loading {
+    margin-top: 24px;
+    opacity: 0;
+    transition: opacity 250ms linear;
+  }
+  &__busy {
+    .suse-login__form-title {
+      opacity: 0.5;
+    }
+    .suse-login__form-outer {
+      opacity: 0.5;
+    }
+    .suse-login__loading {
+      display: block;
+      opacity: 1;
+    }
+  }
+  &__message {
+    color: $suse-gray-fg;
+    font-size: 14px;
+    height: 24px;
+    max-width: 400px;
+    padding-top: 20px;
+  }
+
+  &__sso-button.mat-button.suse-login__submit {
+    align-self: center;
+    padding: 0 60px;
+  }
+
+  .hidden {
+    visibility: hidden;
+  }
+
+}
+
+// If SSO Login change the presentation
+.suse-login-sso {
+  .suse-login__intro {
+    flex: 1;
+  };
+  .suse-login__line IMG {
+    height: 0;
+    padding: 20px;
+  }
+  .suse-login__sso-button.mat-button.suse-login__submit {
+    align-self: flex-start;
+  }
+  .suse-login__message {
+    padding-top: 0;
+  }
+}
+
+@media only screen and (max-width: 1120px) {
+
+  .suse-login {
+    align-self: unset;
+    height: 100%;
+    width: 100%;
+  }
+
+  .suse-login__content {
+    width: 100%;
+  }
+
+  .suse-login__intro {
+    flex: 0;
+    height: 100%;
+    width: 335px;
+  }
+
+  .suse-login__right {
+    align-self: unset;
+    margin-top: 120px;
+  }
+}
+
+// Mobile - login form only (unless SSO)
+@media only screen and (max-width: 768px) {
+
+  .suse-login:not(.suse-login-sso)  {
+  
+    .suse-login {
+      
+    &__intro {
+      display: none;
+    }
+
+    &__logo-mobile {
+      display: inline;
+      left: 30px;
+      position: absolute;
+      top: 30px;
+    }
+
+    &__footer-mobile {
+      align-items: flex-end;
+      background-color: #fff;
+      bottom: 0;
+      color: #000;
+      display: flex;
+      height: 60px;
+      padding: 30px;
+      position: fixed;
+      width: 100%;
+      z-index: 1;
+    }
+
+    &__right {
+      margin-bottom: 60px;
+    }
+  }
+}
+}
+
+
+// Sticky copyright footer
+@media only screen and (min-height: 580px) and (max-width: 1120px) {
+
+  .suse-login__footer {
+    position: fixed;
+    bottom: 20px;
+  }
+}
