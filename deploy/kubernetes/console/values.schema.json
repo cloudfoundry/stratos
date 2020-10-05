@@ -2,29 +2,24 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "autoCleanup": {
-            "type": "boolean"
-        },
-        "configInit": {
-            "type": "object",
-            "properties": {
-                "nodeSelector": {
-                    "type": "object"
-                }
-            }
-        },
         "console": {
             "type": "object",
             "properties": {
+                "techPreview": {
+                    "type": "boolean",
+                    "description": "Enable/disable technology preview features"
+                },
                 "apiKeysEnabled": {
                     "type": "string",
-                    "enum": ["disabled", "admin_only", "all_users"]
+                    "enum": ["disabled", "admin_only", "all_users"],
+                    "description": "Enable API keys for admins, all users or nobody"
                 },
                 "autoRegisterCF": {
                     "type": ["string", "null"]
                 },
                 "backendLogLevel": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": ["debug", "info", "warn", "error"]
                 },
                 "cookieDomain": {
                     "type": ["string", "null"]
@@ -55,7 +50,13 @@
                 },
                 "service": {
                     "type": "object",
+                    "description": "Configure the properties of the external service",
                     "properties": {
+                        "type": {
+                            "type": "string",
+                            "description": "Service type",
+                            "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+                        },
                         "annotations": {
                             "type": "object"
                         },
@@ -118,9 +119,6 @@
                         },
                         "servicePort": {
                             "type": "integer"
-                        },
-                        "type": {
-                            "type": "string"
                         }
                     }
                 },
@@ -145,9 +143,6 @@
                 "statefulSetExtraLabels": {
                     "type": "object"
                 },
-                "techPreview": {
-                    "type": "boolean"
-                },
                 "templatesConfigMapName": {
                     "type": ["string", "null"]
                 },
@@ -170,8 +165,10 @@
                 }
             }
         },
-        "consoleVersion": {
-            "type": "string"
+        "imagePullPolicy": {
+            "type": "string",
+            "enum": ["Always", "IfNotPresent", "Never"],
+            "description": "Sets the Image Pull Policy"
         },
         "dockerRegistrySecret": {
             "type": "string"
@@ -210,9 +207,6 @@
                     "type": "string"
                 }
             }
-        },
-        "imagePullPolicy": {
-            "type": "string"
         },
         "images": {
             "type": "object",
@@ -338,14 +332,6 @@
                 }
             }
         },
-        "services": {
-            "type": "object",
-            "properties": {
-                "loadbalanced": {
-                    "type": "boolean"
-                }
-            }
-        },
         "uaa": {
             "type": "object",
             "properties": {
@@ -366,8 +352,16 @@
                 }
             }
         },
-        "useLb": {
+        "autoCleanup": {
             "type": "boolean"
+        },
+        "configInit": {
+            "type": "object",
+            "properties": {
+                "nodeSelector": {
+                    "type": "object"
+                }
+            }
         }
     }
 }
