@@ -19,14 +19,19 @@ echo -e "${CYAN}${BOLD}=========================${RESET}"
 echo -e "${YELLOW}Stratos Directory: ${STRATOS_DIR}${RESET}"
 echo ""
 
-
+ERRORS=0
 
 function count_severity() {
   local IMAGE=$1
   local SEVERITY=$2
+  local ERROR=$3
 
   COUNT=$(grep -c '\"Severity\": \"'${SEVERITY}'\"' $IMAGE)
   echo -e " $SEVERITY: $COUNT"
+  if [ ${ERROR} == 1 ]; then
+    ERRORS=$(($ERRORS + $COUNT))
+  fi
+  echo $ERRORS
 }
 
 function scan_image() {
@@ -34,11 +39,14 @@ function scan_image() {
   local IMAGE=$2
   echo -e "${CYAN}${BOLD}Scanning image: ${REG}/${IMAGE}${RESET}"
   trivy image --no-progress -f json -o $IMAGE.json $REG/$IMAGE > $IMAGE.log
-  echo $?
-  count_severity $IMAGE.json "CRITICAL"
-  count_severity $IMAGE.json "HIGH"
-  count_severity $IMAGE.json "MEDIUM"
-  count_severity $IMAGE.json "LOW"
+  RETVAL=$?
+  if [ ${RETVAL} -ne 0 ]; then
+    echo -e "${YELLOW}${BOLD}Error running Trivy image scanner: ${RETVAL}${RESET}"
+  fi
+  count_severity $IMAGE.json "CRITICAL" 1
+  count_severity $IMAGE.json "HIGH" 1
+  count_severity $IMAGE.json "MEDIUM" 1
+  count_severity $IMAGE.json "LOW" 0
 }
 
 function scan_helm() {
@@ -71,18 +79,26 @@ function scan_base_images() {
   pushd ${TEMP_DIR} > /dev/null
   local REGISTRY=$1
   echo -e "${YELLOW}Registry: ${REGISTRY}${RESET}"
+  local TAG=$2
   cat ${STRATOS_DIR}/deploy/stratos-base-images/imagelist.txt
   while IFS= read -r line
   do
+    if [ -n "${TAG}" ]; then
+      line="${line/:[a-z0-9_\-\.]*/:$TAG}"
+    fi
+    echo "Scanning ${line}"
     scan_image $REGISTRY $line
   done < "${STRATOS_DIR}/deploy/stratos-base-images/imagelist.txt"
   popd > /dev/null
 }
 
-if [ "$1" == "helm" ]; then
+if [ "$1" == "image" ]; then
+  scan_image $2 $3
+elif [ "$1" == "helm" ]; then
   scan_helm $2
 elif [ "$1" == "base" ]; then
-  scan_base_images $2
+  scan_base_images $2 $3
+  echo $errors
 else
   echo "Unknown command"
 fi
