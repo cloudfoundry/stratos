@@ -12,7 +12,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 
 	"github.com/SermoDigital/jose/jws"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )

@@ -1,6 +1,6 @@
 package interfaces
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 //StratosAuth provides common access to Stratos login/logout functionality
 type StratosAuth interface {

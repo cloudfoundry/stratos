@@ -13,6 +13,7 @@ require (
 	code.cloudfoundry.org/lager v2.0.0+incompatible // indirect
 	code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d // indirect
 	github.com/Sirupsen/logrus v0.0.0-00010101000000-000000000000 // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonlindstrom/pgstore v0.0.0-20170604072116-a407030ba6d0
 	github.com/apoydence/eachers v0.0.0-20181020210610-23942921fe77 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
@@ -51,9 +52,8 @@ require (
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo/v4 v4.1.17
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
-	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/miekg/dns v1.1.4 // indirect
@@ -66,15 +66,15 @@ require (
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94 // indirect
-	github.com/sajari/fuzzy v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v1.6.4
+	github.com/swaggo/echo-swagger v1.0.0
+	github.com/swaggo/swag v1.6.7
 	github.com/tedsuo/ifrit v0.0.0-20191009134036-9a97d0632f00 // indirect
 	github.com/tedsuo/rata v1.0.0 // indirect
 	github.com/ulikunitz/xz v0.5.6 // indirect
-	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a

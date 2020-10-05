@@ -6,7 +6,7 @@ on:
 
 jobs:
   update-docs-internal-versions:
-    if: github.repository == ‘cloudfoundry/stratos’
+    if: github.repository == 'cloudfoundry/stratos'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -36,6 +36,7 @@ jobs:
           labels: |
             ready for review
           draft: false
+          base: ${{GITHUB_REF}}
       - name: Check output
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"

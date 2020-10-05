@@ -12,9 +12,14 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("metrics", nil, Init)
+}
 
 // MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
@@ -129,15 +134,21 @@ func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord interfaces.C
 func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 
-	connectType := ec.FormValue("connect_type")
+	params := new(interfaces.LoginToCNSIParams)
+	err := interfaces.BindOnce(params, ec)
+	if err != nil {
+		return nil, false, err
+	}
+
+	connectType := params.ConnectType
 	auth := &MetricsAuth{
 		Type: connectType,
 	}
 
 	switch connectType {
 	case interfaces.AuthConnectTypeCreds:
-		auth.Username = ec.FormValue("username")
-		auth.Password = ec.FormValue("password")
+		auth.Username = params.Username
+		auth.Password = params.Password
 		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
 			return nil, false, errors.New("Need username and password")
 		}

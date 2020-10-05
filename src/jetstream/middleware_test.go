@@ -12,7 +12,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/mock_interfaces"
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"

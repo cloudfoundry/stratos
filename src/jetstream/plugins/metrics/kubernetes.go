@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Metrics API endpoints - admin - for a Containers

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
@@ -80,8 +80,25 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 
 // Connect to the given Endpoint
 // Note, an admin user can connect an endpoint as a system endpoint to share it with others
+
+// loginToCNSI godoc
+// @Summary Connect to the given endpoint
+// @Description An admin user can connect an endpoint as a system endpoint to share it with others.
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param cnsi_guid formData string true "Endpoint GUID"
+// @Param system_shared formData string false "Register as a system endpoint" Enums(true, false)
+// @Param connect_type formData string false "Connection type" Enums(creds, none)
+// @Param username formData string false "Username"
+// @Param password formData string false "Password"
+// @Success 201 {object} interfaces.LoginRes "Connected endpoint object"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /tokens [post]
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
+
 	cnsiGUID := c.FormValue("cnsi_guid")
 	var systemSharedToken = false
 
@@ -305,10 +322,21 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.
 	return uaaRes, u, &cnsiRecord, nil
 }
 
+// logoutOfCNSI godoc
+// @Summary Disconnect from endpoint
+// @Description
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param cnsi_guid path string true "Endpoint GUID"
+// @Success 200
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /tokens/{cnsi_guid} [delete]
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	log.Debug("logoutOfCNSI")
 
-	cnsiGUID := c.FormValue("cnsi_guid")
+	cnsiGUID := c.Param("cnsi_guid")
 
 	if len(cnsiGUID) == 0 {
 		return interfaces.NewHTTPShadowError(

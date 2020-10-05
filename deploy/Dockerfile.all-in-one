@@ -1,13 +1,13 @@
 # Docker build for all-in-one Stratos
 # ---------------------------------------------------------------------------------------------------
-FROM splatform/stratos-bk-build-base:leap15_1 as jetstream-builder
+FROM splatform/stratos-bk-build-base:leap15_2 as jetstream-builder
 
 # Ensure that we copy the custom-src folder
 COPY --chown=stratos:users . ./
 COPY --chown=stratos:users deploy/tools/generate_cert.sh generate_cert.sh
 COPY --chown=stratos:users deploy/all-in-one/config.all-in-one.properties config.properties
 
-ARG USE_PREBUILT_UI=false
+ARG USE_PREBUILT_UI
 
 USER stratos
 RUN node --version
@@ -20,7 +20,7 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh
 # Final AIO Container
 # ---------------------------------------------------------------------------------------------------
 
-FROM splatform/stratos-bk-base:leap15_1
+FROM splatform/stratos-bk-base:leap15_2
 ARG CANARY_BUILD
 
 COPY --from=jetstream-builder /home/stratos/deploy/db /src/deploy/db
@@ -39,9 +39,15 @@ RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEA
 # Enable tech preview features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nENABLE_TECH_PREVIEW=true\n" >> /srv/config.properties ; fi
 
-EXPOSE 443
+EXPOSE 5443
 
-# Need to be root to bind to port 443
-USER root
+# Add a jetstream user so we don't run as root
+RUN useradd -M -U -u 2000 jetstream
+RUN usermod -aG users jetstream
+
+# Ensure that the /srv folder is in the users group so that the jetstream user can write to it
+RUN chgrp users /srv && chmod 775 /srv
+
+USER jetstream
 
 ENTRYPOINT ["./jetstream"]

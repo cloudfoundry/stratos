@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 const authConnectTypeKubeConfigAz = "kubeconfig-az"
@@ -99,7 +99,6 @@ func isAKSAuth(k *config.KubeConfigUser) bool {
 	return true
 }
 
-
 func (c *AzureKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
 	// Register auth type with Jetstream
 	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
@@ -107,4 +106,3 @@ func (c *AzureKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy)
 		UserInfo: c.GetUserFromToken,
 	})
 }
-

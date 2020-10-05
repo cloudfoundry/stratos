@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 

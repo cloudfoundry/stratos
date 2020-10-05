@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -43,6 +43,10 @@ type HelmHubChart struct {
 
 type HelmHubChartResponse struct {
 	Data HelmHubChart `json:"data"`
+}
+
+func init() {
+	interfaces.AddPlugin("monocular", []string{"kubernetes"}, Init)
 }
 
 // Init creates a new Monocular

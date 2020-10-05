@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -29,6 +29,11 @@ const (
 	SQLiteProviderName             = "sqlite"
 	defaultSessionSecret           = "wheeee!"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cloudfoundryhosting", nil, Init)
+}
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {

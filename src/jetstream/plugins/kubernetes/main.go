@@ -12,7 +12,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
@@ -59,6 +59,10 @@ const (
 	// kubeTerminalPluginConfigSetting is config value sent back to the client to indicate if the kube terminal is enabled
 	kubeTerminalPluginConfigSetting = "kubeTerminalEnabled"
 )
+
+func init() {
+	interfaces.AddPlugin("kubernetes", nil, Init)
+}
 
 // Init creates a new instance of the Kubernetes plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
