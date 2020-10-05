@@ -80,7 +80,7 @@ function scan_base_images() {
   local REGISTRY=$1
   echo -e "${YELLOW}Registry: ${REGISTRY}${RESET}"
   local TAG=$2
-  cat ${STRATOS_DIR}/deploy/stratos-base-images/imagelist.txt
+  cat "${STRATOS_DIR}/deploy/stratos-base-images/imagelist.txt"
   while IFS= read -r line
   do
     if [ -n "${TAG}" ]; then
