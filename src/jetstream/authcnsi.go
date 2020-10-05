@@ -99,27 +99,22 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
 
+	cnsiGUID := c.FormValue("cnsi_guid")
 	var systemSharedToken = false
 
-	params := new(interfaces.LoginToCNSIParams)
-	err := interfaces.BindOnce(params, c)
-	if err != nil {
-		return err
-	}
-
-	if len(params.CNSIGUID) == 0 {
+	if len(cnsiGUID) == 0 {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
 			"Need Endpoint GUID passed as form param")
 	}
 
-	systemSharedValue := params.SystemShared
+	systemSharedValue := c.FormValue("system_shared")
 	if len(systemSharedValue) > 0 {
 		systemSharedToken = systemSharedValue == "true"
 	}
 
-	resp, err := p.DoLoginToCNSI(c, params.CNSIGUID, systemSharedToken)
+	resp, err := p.DoLoginToCNSI(c, cnsiGUID, systemSharedToken)
 	if err != nil {
 		return err
 	}
