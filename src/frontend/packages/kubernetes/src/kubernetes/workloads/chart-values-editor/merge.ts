@@ -13,6 +13,10 @@ export function mergeObjects(src: any, ...dest: any): any {
 // merge from dest into src
 function doMergeObjects(src: any, dest: any) {
   // Go through the keys of dest an update them in src
+  if (!dest) {
+    return
+  }
+
   Object.keys(dest).forEach(key => {
     if (typeof(dest[key]) === 'object' && !Array.isArray(dest)) {
       if (!src[key]) {
