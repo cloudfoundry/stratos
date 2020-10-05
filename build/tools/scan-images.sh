@@ -51,9 +51,9 @@ function scan_image() {
 
 function scan_helm() {
   # URL of a Stratos Helm Chart
-  local TEMP_DIR=${STRATOS_DIR}/scan_tmp
-  rm -rf ${TEMP_DIR}
-  mkdir -p ${TEMP_DIR}
+  local TEMP_DIR="${STRATOS_DIR}/scan_tmp"
+  rm -rf "${TEMP_DIR}"
+  mkdir -p "${TEMP_DIR}"
   pushd "${TEMP_DIR}" > /dev/null
 
   wget -O chart.tgz $1
@@ -73,9 +73,9 @@ function scan_helm() {
 
 function scan_base_images() {
   echo "Scanning base images ..."
-  local TEMP_DIR=${STRATOS_DIR}/scan_tmp
-  rm -rf ${TEMP_DIR}
-  mkdir -p ${TEMP_DIR}
+  local TEMP_DIR="${STRATOS_DIR}/scan_tmp"
+  rm -rf "${TEMP_DIR}"
+  mkdir -p "${TEMP_DIR}"
   pushd "${TEMP_DIR}" > /dev/null
   local REGISTRY=$1
   echo -e "${YELLOW}Registry: ${REGISTRY}${RESET}"
@@ -104,7 +104,7 @@ fi
 
 echo -e "${CYAN}${BOLD}Errors: ${ERRORS}${RESET}"
 
-if [ ${ERRORS} -ne 0 ]; {
+if [ ${ERRORS} -ne 0 ]; then
   echo "Errors found scanning images (CRITICAL, HIGH or MEDIUM errors found)"
   exit 1
-}
+fi
