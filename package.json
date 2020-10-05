@@ -93,7 +93,8 @@
     "web-animations-js": "^2.3.2",
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.10.2",
+    "lodash": "^4.17.20"
   },
   "engines": {
     "node": "12.13.0"
@@ -119,7 +120,7 @@
     "browserstack-local": "^1.4.5",
     "codecov": "^3.7.1",
     "codelyzer": "^5.1.2",
-    "copy-webpack-plugin": "5.1.1",
+    "copy-webpack-plugin": "^6.2.0",
     "delete": "^1.1.0",
     "fs-extra": "^9.0.0",
     "globby": "^11.0.0",
