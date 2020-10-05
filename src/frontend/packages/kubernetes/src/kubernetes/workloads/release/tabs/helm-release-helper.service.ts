@@ -238,7 +238,9 @@ export class HelmReleaseHelperService {
         // No newer release, so return the release itself if that is what was requested and we can find the chart
         // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
         if (returnLatest) {
-          const releaseChart = charts.find(c => c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
+          // Need to check that the chart is probably the same
+          const releaseChart = charts.find(c => this.isProbablySameChart(c.attributes, release.chart.metadata) &&
+            c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
           if (releaseChart) {
             return {
               release,
