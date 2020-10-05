@@ -6,6 +6,7 @@ import { StoreModule } from '@ngrx/store';
 import { InternalEventMonitorFactory } from '../../../../../store/src/monitors/internal-event-monitor.factory';
 import { appReducers } from '../../../../../store/src/reducers.module';
 import { CoreModule } from '../../../core/core.module';
+import { EndpointsService } from '../../../core/endpoints.service';
 import { MDAppModule } from '../../../core/md.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
@@ -30,7 +31,8 @@ describe('PageHeaderComponent', () => {
           }
         },
         TabNavService,
-        CurrentUserPermissionsService
+        CurrentUserPermissionsService,
+        EndpointsService,
       ],
       imports: [
         MDAppModule,

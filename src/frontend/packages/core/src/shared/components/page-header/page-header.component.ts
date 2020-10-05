@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import moment from 'moment';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
@@ -23,6 +23,7 @@ import { TabNavService } from '../../../tab-nav.service';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
+import { EndpointsService } from './../../../core/endpoints.service';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
@@ -160,6 +161,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
     private cups: CurrentUserPermissionsService,
+    private endpointsService: EndpointsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -190,7 +192,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       map(dashboardState => dashboardState.gravatarEnabled)
     );
 
-    this.canAPIKeys$ = this.cups.can(StratosCurrentUserPermissions.API_KEYS);
+    // Must be enabled and the user must have permission
+    this.canAPIKeys$ = combineLatest([
+      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
+      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
+    ]).pipe(
+      map(([disabled, permission]) => !disabled && permission)
+    );
   }
 
   ngOnDestroy() {
