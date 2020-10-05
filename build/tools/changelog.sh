@@ -69,22 +69,22 @@ echo -e "${YELLOW}Previous version : ${BOLD}$CURRENT${RESET}"
 function search() {
   FILTER=$1
   if [ -n "${FORK_QUERY}" ]; then
-    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
+    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
   fi
-  curl -s "https://api.github.com/search/issues?q=${QUERY}${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
+  curl -s "https://api.github.com/search/issues?q=${QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- \(.title) [\\#\(.number)](\(.html_url))"' | tee -a ${CHANGELOG}
 }
 
 function breaking_changes() {
   FILTER=$1
   if [ -n "${FORK_QUERY}" ]; then
-    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
   fi
-  curl -s "https://api.github.com/search/issues?q=${QUERY}${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+  curl -s "https://api.github.com/search/issues?q=${QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
 }
 
 
 function get_banner() {
-  BANNER="Release%20Notes+in:title"
+  BANNER="label:release-notes"
   banner=""
   if [ -n "${FORK_QUERY}" ]; then
     banner=$(curl -s "https://api.github.com/search/issues?q=${BANNER}+${FORK_QUERY}" | jq -r '.items | .[] | .body')
@@ -157,6 +157,6 @@ rm -f ${CHANGELOG}.breaking
 log ""
 
 tail -n +2 CHANGELOG.old >> ${CHANGELOG}
-rm CHANGELOG.old 
+rm CHANGELOG.old
 
 sed -i.bak 's/\# Change Log.*\#\# ${CURRENT}//' ${CHANGELOG}
