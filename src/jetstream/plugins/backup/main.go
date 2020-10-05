@@ -11,6 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("backup", nil, Init)
+}
+
 // BackupRestore - Backup or restore endpoints and tokens
 type BackupRestore struct {
 	portalProxy interfaces.PortalProxy

@@ -8,6 +8,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("userfavorites", nil, Init)
+}
+
 // UserFavorites stores user favorites
 type UserFavorites struct {
 	portalProxy interfaces.PortalProxy

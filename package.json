@@ -4,7 +4,7 @@
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
-    "build-backend": "./build/bk-build.sh",
+    "build-backend": "npm run prepare-backend && ./build/bk-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "test-backend": "./build/bk-build.sh test",
@@ -38,10 +38,11 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "node build/store-git-metadata.js",
-    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata",
+    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata && npm run prepare-backend",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
     "clean-symlinks": "node build/clean-symlinks.js",
-    "dev-setup": "node build/dev-setup.js"
+    "dev-setup": "node build/dev-setup.js",
+    "prepare-backend":"node dist-devkit/backend.js"
   },
   "author": "",
   "license": "Apache-2.0",

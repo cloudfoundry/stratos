@@ -9,6 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("userinvite", []string{"cloudfoundry"}, Init)
+}
+
 // UserInvite is a plugin to allow user invitations
 type UserInvite struct {
 	portalProxy interfaces.PortalProxy

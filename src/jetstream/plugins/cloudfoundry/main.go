@@ -15,6 +15,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cloudfoundry", nil, Init)
+}
+
 // CloudFoundrySpecification - Plugin to support Cloud Foundry endpoint type
 type CloudFoundrySpecification struct {
 	portalProxy  interfaces.PortalProxy
