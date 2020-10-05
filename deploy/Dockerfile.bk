@@ -1,4 +1,5 @@
-FROM splatform/stratos-bk-build-base:leap15_2
+FROM splatform/stratos-bk-build-base:leap15_2 as builder
+ARG stratos_version
 RUN mkdir -p /home/stratos
 WORKDIR /home/stratos
 COPY --chown=stratos:users . /home/stratos
