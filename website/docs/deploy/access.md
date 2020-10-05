@@ -50,7 +50,7 @@ $ docker network create --driver=bridge dev-bridge
 
 1. Bring up the single container Console
 ```
-$ docker run -p 4443:443 --net=dev-bridge splatform/stratos --name console
+$ docker run -p 5443:5443 --net=dev-bridge splatform/stratos --name console
 ```
 
 2. Bring up the UAA
@@ -58,7 +58,7 @@ $ docker run -p 4443:443 --net=dev-bridge splatform/stratos --name console
 $ docker run --net=dev-bridge --name=uaa --rm splatform/stratos-uaa
 ```
 
-3. Access the Console at `http://localhost:4443/` and provide the following information:
+3. Access the Console at `http://localhost:5443/` and provide the following information:
 UAA Endpoint API URL:  `http://uaa:8080`
 Client ID: `console`
 Client Secret: Leave this blank

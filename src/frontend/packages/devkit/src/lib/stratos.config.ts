@@ -39,7 +39,7 @@ export class StratosConfig implements Logger {
 
   private loggingEnabled = true;
 
-  private packages: Packages;
+  public packages: Packages;
 
   constructor(dir: string, options?: any, loggingEnabled = true) {
     this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
@@ -68,7 +68,10 @@ export class StratosConfig implements Logger {
     }
 
     // Exclude the default packages... unless explicity `include`d
-    this.excludeExamples()
+    this.excludeExamples();
+
+    // Exclude packages from the STRATOS_BUILD_REMOVE environment variable
+    this.excludeFromEnvVar();
 
     this.packageJsonFile = this.findFileOrFolderInChain(this.rootDir, 'package.json');
     if (this.packageJsonFile !== null) {
@@ -142,6 +145,20 @@ export class StratosConfig implements Logger {
     }
   }
 
+  // Exclude any packages specified in the STRATOS_BUILD_REMOVE environment variable
+  private excludeFromEnvVar() {
+    const buildRemove = process.env.STRATOS_BUILD_REMOVE || '';
+    if (buildRemove.length === 0 ) {
+      return;
+    }
+
+    const exclude = buildRemove.split(',');
+    console.log(`Detected STRATOS_BUILD_REMOVE: ${buildRemove}`)
+
+    // Add the package to the list of excludes
+    exclude.forEach(e => this.addIfMissing(this.stratosConfig.packages.exclude, e.trim()));
+  }
+
   public log(msg: any) {
     if (this.loggingEnabled) {
       console.log(msg);
@@ -169,6 +186,22 @@ export class StratosConfig implements Logger {
     });
 
     return assets;
+  }
+
+  public getBackendPlugins(): string[] {
+    const plugins = {};
+    this.packages.packages.forEach(pkg => {
+      pkg.backendPlugins.forEach(name => {
+        plugins[name] = true;
+      });
+    });
+
+    if (this.stratosConfig.backend) {
+      this.stratosConfig.backend.forEach(name => {
+        plugins[name] = true;
+      });
+    }
+    return Object.keys(plugins);
   }
 
   public getThemedPackages(): ThemingMetadata[] {

@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cfappssh", []string{"cloudfoundry"}, Init)
+}
+
 // CFAppSSH - Plugin to allow SSH into an application instance
 type CFAppSSH struct {
 	portalProxy interfaces.PortalProxy
