@@ -27,6 +27,7 @@ import { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointType } from '../extension-types';
+import { httpErrorResponseToSafeString } from '../jetstream';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { NormalizedResponse } from '../types/api.types';
@@ -148,7 +149,7 @@ export class EndpointsEffect {
         null,
         action.endpointsType,
         body,
-        response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
+        response => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
       );
     }));
 
