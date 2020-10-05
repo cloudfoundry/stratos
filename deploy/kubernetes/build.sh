@@ -214,6 +214,14 @@ if [ "${CHART_ONLY}" == "false" ]; then
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 
+  # Build and push an image for the Kubernetes Terminal
+  log "-- Building/publishing Kubernetes Terminal"
+  patchAndPushImage stratos-kube-terminal Dockerfile.kubeterminal "${STRATOS_PATH}/deploy/containers/kube-terminal"
+  
+  # Analzyers container
+  log "-- Building/publishing Stratos Analyzers"
+  patchAndPushImage stratos-analyzers Dockerfile "${STRATOS_PATH}/src/jetstream/plugins/analysis/container"
+ 
   # Build any custom images added by a fork
   if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
     custom_image_build

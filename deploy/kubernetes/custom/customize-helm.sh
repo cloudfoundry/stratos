@@ -15,10 +15,11 @@ echo "Customizations folder: ${DIR}"
 echo "Chart folder         : ${CHART_PATH}"
 echo ""
 
+# Kubernetes has been upstreamed, so no customizations at this time
 # ===========================================================================================
 # Copy our customization helper over the default, empty one
 # ===========================================================================================
-cp "${DIR}/__stratos.tpl" "${CHART_PATH}/templates/__stratos.tpl"
+#cp "${DIR}/__stratos.tpl" "${CHART_PATH}/templates/__stratos.tpl"
 
 # ===========================================================================================
 # Chart.yaml changes
