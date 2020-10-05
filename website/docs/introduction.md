@@ -17,11 +17,12 @@ For Kubernetes, it provides Developers with views of their Kubernetes resources,
 To get started quickly, we recommend following the steps to deploy the Stratos Console as a Cloud Foundry Application - see [here](deploy/cloud-foundry/cloud-foundry).
 
 If you have [docker](https://www.docker.com/community-edition) installed, you can quickly deploy Stratos using the all-in-one container:
+
 ```
-$ docker run -p 4443:443 splatform/stratos:latest 
+$ docker run -p 5443:5443 splatform/stratos:stable
 ```
 
-Once that has finished, you can then access Stratos by visiting https://localhost:4443.
+Once that has finished, you can then access Stratos by visiting https://localhost:5443.
 
 ## Deploying Stratos
 
