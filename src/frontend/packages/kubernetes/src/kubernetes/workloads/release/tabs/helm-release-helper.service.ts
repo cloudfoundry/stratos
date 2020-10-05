@@ -19,18 +19,26 @@ import {
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 
 // Simple class to represent MAJOR.MINOR.REVISION version
-class Version {
+export class Version {
 
   public major: number;
   public minor: number;
   public revision: number;
+
+  public prerelease: string;
 
   public valid: boolean;
 
   constructor(v: string) {
     this.valid = false;
     if (typeof v === 'string') {
-      const parts = v.split('.');
+      let version = v;
+      const pre = v.split('-');
+      if (pre.length > 1) {
+        version = pre[0];
+        this.prerelease = pre[1];
+      }
+      const parts = version.split('.');
       if (parts.length === 3) {
         this.major = parseInt(parts[0], 10);
         this.minor = parseInt(parts[1], 10);
@@ -55,6 +63,19 @@ class Version {
         return true;
       }
       if (this.minor === other.minor) {
+        if (this.revision === other.revision) {
+          // Same version numbers
+          if (this.prerelease && !other.prerelease) {
+            return false;
+          }
+          if(!this.prerelease && other.prerelease) {
+            return true;
+          }
+          if (this.prerelease && other.prerelease) {
+            return this.prerelease > other.prerelease;
+          }
+          return false;
+        }
         return this.revision > other.revision;
       }
     }
