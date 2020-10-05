@@ -27,11 +27,10 @@ function count_severity() {
   local ERROR=$3
 
   COUNT=$(grep -c '\"Severity\": \"'${SEVERITY}'\"' $IMAGE)
-  echo -e " $SEVERITY: $COUNT"
+  echo -e "  $SEVERITY: $COUNT"
   if [ ${ERROR} == 1 ]; then
     ERRORS=$(($ERRORS + $COUNT))
   fi
-  echo $ERRORS
 }
 
 function scan_image() {
@@ -42,6 +41,7 @@ function scan_image() {
   RETVAL=$?
   if [ ${RETVAL} -ne 0 ]; then
     echo -e "${YELLOW}${BOLD}Error running Trivy image scanner: ${RETVAL}${RESET}"
+    ERRORS=$(($ERRORS + 1))
   fi
   count_severity $IMAGE.json "CRITICAL" 1
   count_severity $IMAGE.json "HIGH" 1
@@ -54,7 +54,7 @@ function scan_helm() {
   local TEMP_DIR=${STRATOS_DIR}/scan_tmp
   rm -rf ${TEMP_DIR}
   mkdir -p ${TEMP_DIR}
-  pushd ${TEMP_DIR} > /dev/null
+  pushd "${TEMP_DIR}" > /dev/null
 
   wget -O chart.tgz $1
   tar -xzvf chart.tgz
@@ -76,7 +76,7 @@ function scan_base_images() {
   local TEMP_DIR=${STRATOS_DIR}/scan_tmp
   rm -rf ${TEMP_DIR}
   mkdir -p ${TEMP_DIR}
-  pushd ${TEMP_DIR} > /dev/null
+  pushd "${TEMP_DIR}" > /dev/null
   local REGISTRY=$1
   echo -e "${YELLOW}Registry: ${REGISTRY}${RESET}"
   local TAG=$2
@@ -86,7 +86,6 @@ function scan_base_images() {
     if [ -n "${TAG}" ]; then
       line="${line/:[a-z0-9_\-\.]*/:$TAG}"
     fi
-    echo "Scanning ${line}"
     scan_image $REGISTRY $line
   done < "${STRATOS_DIR}/deploy/stratos-base-images/imagelist.txt"
   popd > /dev/null
@@ -98,7 +97,14 @@ elif [ "$1" == "helm" ]; then
   scan_helm $2
 elif [ "$1" == "base" ]; then
   scan_base_images $2 $3
-  echo $errors
 else
   echo "Unknown command"
+  exit 1
 fi
+
+echo -e "${CYAN}${BOLD}Errors: ${ERRORS}${RESET}"
+
+if [ ${ERRORS} -ne 0 ]; {
+  echo "Errors found scanning images (CRITICAL, HIGH or MEDIUM errors found)"
+  exit 1
+}
