@@ -1,0 +1,26 @@
+<div [formGroup]="formGroup" class="kube-certs-auth">
+  <div formGroupName="authValues" class="kube-certs-auth__form">
+    <mat-tab-group>
+      <mat-tab label="Certificate Files">
+        <div class="kube-certs-auth__form__file">
+          <span>Specify Certificate file:</span>
+          <app-file-input fileFormControlName="cert" placeholder="cert">
+          </app-file-input>
+          <span>Specify Certificate key file:</span>
+          <app-file-input fileFormControlName="certKey" placeholder="certKey">
+          </app-file-input>
+          <input matInput formControlName="cert" hidden=true>
+          <input matInput formControlName="certKey" hidden=true>
+        </div>
+      </mat-tab>
+      <mat-tab label="Certificate Content">
+        <div class="kube-certs-auth__form__content">
+          <span>Specify Certificate:</span>
+          <textarea matInput formControlName="cert"></textarea>
+          <span>Specify Certificate key:</span>
+          <textarea matInput formControlName="certKey"></textarea>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

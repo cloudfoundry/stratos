@@ -1,0 +1,43 @@
+<app-meta-card class="release-card" [routerLink]="row.guid">
+  <app-meta-card-title>
+    <div class="release-title">
+      <app-multiline-title>{{ row.name }}</app-multiline-title>
+      <div class="release-title--icon">
+        <img *ngIf="icon; else noIcon" [src]="icon" (error)="loadImageError()">
+        <ng-template #noIcon>
+          <mat-icon fontSet="stratos-icons">workloads</mat-icon>
+        </ng-template>
+      </div>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Cluster</app-meta-card-key>
+    <app-meta-card-value>
+      <app-table-cell-endpoint-name [row]="row"></app-table-cell-endpoint-name>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Namespace</app-meta-card-key>
+    <app-meta-card-value>
+      <a routerLink="/kubernetes/{{row.endpointId}}/namespaces/{{row.namespace}}">{{ row.namespace}}</a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Status</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.status | titlecase }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Chart Version</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.chart.metadata.version }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Last Deployed</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.info.last_deployed | date:'medium' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

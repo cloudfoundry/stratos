@@ -1,0 +1,39 @@
+<div class="chartInfo">
+
+  <app-chart-details-usage [chart]=chart *ngIf="currentVersion" [currentVersion]=currentVersion.attributes.version>
+  </app-chart-details-usage>
+
+  <mat-card class="chartInfo__properties">
+    <div class="chartInfo__versions">
+      <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
+    </div>
+    <div class="chartInfo__home" *ngIf="chart.attributes.home">
+      <h1>Home</h1>
+      <div>
+        <a class="chartInfo__link" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
+      </div>
+    </div>
+    <div class="chartInfo__maintainers" *ngIf="maintainers.length">
+      <h1>Maintainers</h1>
+      <div *ngFor="let maintainer of maintainers">
+        <a href="{{ maintainerUrl(maintainer) }}" class="chartInfo__link" target="_blank">{{ maintainer.name }}</a>
+      </div>
+    </div>
+    <div class="chartInfo__related" *ngIf="sources.length">
+      <h1>Related</h1>
+      <div *ngFor="let source of sources">
+        <a href="{{ source }}" class="chartInfo__link" target="_blank">{{ source }}</a>
+      </div>
+    </div>
+    <div class="chartInfo__related" *ngIf="schema">
+      <h1>Schema</h1>
+      <div class="chartInfo__link">This chart contains a values schema</div>
+    </div>
+    <div class="chartInfo__related" *ngIf="currentVersion">
+      <h1>Chart</h1>
+      <div *ngFor="let url of currentVersion.attributes.urls">
+        <a href="{{ url }}" class="chartInfo__link" target="_blank">{{ url }}</a>
+      </div>
+    </div>
+  </mat-card>
+</div>

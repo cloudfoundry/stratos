@@ -1,0 +1,18 @@
+
+@mixin kube-node-link-theme($theme, $app-theme) {
+
+  $status-colors: map-get($app-theme, status);
+  $error: map-get($status-colors, danger);
+  $warning: map-get($status-colors, warning);
+
+  .node-link {
+    .mat-icon {
+      &.error {
+        color: $error;
+      }
+      &.warning {
+        color: $warning;
+      }
+    }
+  }
+}

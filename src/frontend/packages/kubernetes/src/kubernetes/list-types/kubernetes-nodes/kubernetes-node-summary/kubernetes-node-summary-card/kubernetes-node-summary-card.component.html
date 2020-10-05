@@ -1,0 +1,30 @@
+<div class="kubernetes-node-summary-card">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>General Information</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="kubernetes-node-summary-card__content">
+        <app-metadata-item icon="title" label="Name">{{ (kubeNodeService.nodeEntity$ | async)?.metadata.name }}
+        </app-metadata-item>
+        <app-metadata-item icon="today" label="Created">
+          {{ (kubeNodeService.nodeEntity$ | async)?.metadata.creationTimestamp | date:'medium' }}</app-metadata-item>
+        <ng-container *ngIf="caaspNode$ | async as caaspNode">
+          <app-metadata-item icon="info_outline" label="CaaSP Version" *ngIf="caaspNode.version">
+            {{ caaspNode.version }}</app-metadata-item>
+          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspUpdates"
+            [overrideCondition$]="caaspNodeUpdates$" [paddingTop]="'0'">
+          </app-kubernetes-node-condition>
+          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspDisruptive"
+            [overrideCondition$]="caaspNodeDisruptive$" [paddingTop]="'12px'">
+          </app-kubernetes-node-condition>
+          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspSecurity"
+            [overrideCondition$]="caaspNodeSecurity$" [paddingTop]="'12px'">
+          </app-kubernetes-node-condition>
+        </ng-container>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>

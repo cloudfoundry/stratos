@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-docs:
-    if: github.event_name != 'push'
+    if: github.event_name != 'push' && github.repository == 'cloudfoundry/stratos'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -27,7 +27,7 @@ jobs:
           fi
           npm run build
   publish-docs:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.repository == 'cloudfoundry/stratos'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

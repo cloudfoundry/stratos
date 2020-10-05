@@ -29,7 +29,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 0
-      maxUnavailable: 1    
+      maxUnavailable: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"
@@ -284,6 +284,8 @@ spec:
           value: {{ default "false" .Values.console.techPreview | quote }}
         - name: API_KEYS_ENABLED
           value: {{ default "admin_only" .Values.console.apiKeysEnabled | quote }}
+        - name: HELM_CACHE_FOLDER
+          value: /helm-cache
         {{- if .Values.console.ui }}
         {{- if .Values.console.ui.listMaxSize }}
         - name: UI_LIST_MAX_SIZE
@@ -292,6 +294,14 @@ spec:
         - name: UI_LIST_ALLOW_LOAD_MAXED
           value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
         {{- end }}
+        - name: ANALYSIS_SERVICES_API
+          value: "http://{{ .Release.Name }}-analyzers:8090"
+        - name: STRATOS_KUBERNETES_NAMESPACE
+          value: "{{ .Release.Namespace }}"
+        - name: STRATOS_KUBERNETES_TERMINAL_IMAGE
+          value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
+        - name: STRATOS_KUBERNETES_DASHBOARD_IMAGE
+          value: "{{.Values.console.kubeDashboardImage}}"        
         {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:
@@ -317,9 +327,14 @@ spec:
           name: "{{ .Release.Name }}-templates"
           readOnly: true
         {{- end }}
+        - mountPath: /helm-cache
+          name: helm-cache-volume          
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "stratos"
       {{- end }}
       volumes:
       - name: "{{ .Release.Name }}-encryption-key-volume"
@@ -343,3 +358,5 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
+      - name: helm-cache-volume
+        emptyDir: {}      

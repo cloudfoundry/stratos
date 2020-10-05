@@ -562,6 +562,11 @@ describe('Autoscaler -', () => {
           }
         });
         browser.wait(() => sub.closed);
+        // Fail the test if the retry count made it down to 0
+        if (retries === 0) {
+          e2e.debugLog('Timed out waiting for event row');
+          fail('Timed out waiting for event row');
+        }
       }
 
       it('Go to events page', () => {

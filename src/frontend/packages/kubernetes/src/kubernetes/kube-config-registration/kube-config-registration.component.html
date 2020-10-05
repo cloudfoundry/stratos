@@ -1,0 +1,11 @@
+<app-steppers cancel="/endpoints">
+  <app-step title="Select Config File" [valid]="selector.valid$ | async" [onEnter]="selector.onEnter"
+    [onNext]="selector.onNext">
+    <app-kube-config-selection #selector [applyStarted]="importer.applyStarted"></app-kube-config-selection>
+  </app-step>
+  <app-step title="Review" [onEnter]="importer.onEnter" [canClose]="!importer.applyStarted"
+    [disablePrevious]="importer.busy$ | async" [destructiveStep]="!importer.applyStarted" [onNext]="importer.onNext"
+    [finishButtonText]="importer.applyStarted ? 'Close' : 'Import'">
+    <app-kube-config-import #importer></app-kube-config-import>
+  </app-step>
+</app-steppers>

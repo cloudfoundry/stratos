@@ -1,0 +1,6 @@
+<mat-progress-spinner *ngIf="!(initialValue$ | async); else haveInitialValue" diameter="20" mode="indeterminate">
+</mat-progress-spinner>
+<ng-template #haveInitialValue>
+  <mat-checkbox [checked]="(initialValue$ | async).checked" (change)="valueChanged($event.checked)" color="primary">
+  </mat-checkbox>
+</ng-template>
