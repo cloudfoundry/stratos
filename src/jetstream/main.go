@@ -1023,7 +1023,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	sessionAuthGroup := sessionGroup.Group("/auth")
 
-	// Connect to Enpoint (SSO)
+	// Connect to Endpoint (SSO)
 	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
 
 	// Verify Session
