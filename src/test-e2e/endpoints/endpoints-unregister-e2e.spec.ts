@@ -37,7 +37,6 @@ describe('Endpoints', () => {
             menu.clickItem('Unregister');
             menu.waitUntilNotShown();
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
-            endpointsPage.list.waitUntilShown();
             endpointsPage.list.waitForNoLoadingIndicator();
             // Should have removed the only row, so we should see welcome message again
             expect(endpointsPage.isWelcomeMessageAdmin(false)).toBeTruthy();
