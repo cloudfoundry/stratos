@@ -2,6 +2,13 @@
   $primary: map-get($theme, primary);
   .page-header-sub-nav {
     background-color: map-get($app-theme, app-background-color);
+
+    &__container {
+      // Default hover only effects mat-button and mat-stroked-button. Also apply it to mat-icon-button to make click action more noticable
+      .mat-icon-button:hover .mat-button-focus-overlay {
+        opacity: .08;
+      }
+    }
   }
   .dashboard__side-help-button {
     color: mat-contrast($primary, 500);
