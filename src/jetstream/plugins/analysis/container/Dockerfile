@@ -1,4 +1,4 @@
-FROM splatform/stratos-bk-build-base:leap15_1 as builder
+FROM splatform/stratos-bk-build-base:leap15_2 as builder
 
 # Build the API Server for the analysis engines
 
@@ -50,7 +50,7 @@ RUN wget https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VE
 
 # Final Container =============================================================================================================
 
-FROM splatform/stratos-bk-base:leap15_1
+FROM splatform/stratos-bk-base:leap15_2
 
 # Copy tools to the /usr/bin folder so that they are in the path
 COPY --from=builder /home/stratos/analysis /usr/bin
