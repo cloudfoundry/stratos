@@ -23,6 +23,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/custombinder"
 	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/docs"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
@@ -769,6 +770,8 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
+
+	e.Binder = new(custombinder.CustomBinder)
 
 	// Root level middleware
 	if !isUpgrade {

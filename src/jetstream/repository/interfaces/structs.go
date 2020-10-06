@@ -386,32 +386,32 @@ func (c *PortalConfig) SetCanPerformMigrations(value bool) {
 }
 
 type LoginToCNSIParams struct {
-	CNSIGUID     string `json:"cnsi_guid" form:"cnsi_guid"`
-	SystemShared string `json:"system_shared" form:"system_shared"`
-	ConnectType  string `json:"connect_type" form:"connect_type"`
-	Username     string `json:"username" form:"username"`
-	Password     string `json:"password" form:"password"`
+	CNSIGUID     string `json:"cnsi_guid" form:"cnsi_guid" query:"cnsi_guid"`
+	SystemShared string `json:"system_shared" form:"system_shared" query:"system_shared"`
+	ConnectType  string `json:"connect_type" form:"connect_type" query:"connect_type"`
+	Username     string `json:"username" form:"username" query:"username"`
+	Password     string `json:"password" form:"password" query:"password"`
 }
 
 type RegisterEndpointParams struct {
-	EndpointType      string `json:"endpoint_type" form:"endpoint_type"`
-	CNSIName          string `json:"cnsi_name" form:"cnsi_name"`
-	APIEndpoint       string `json:"api_endpoint" form:"api_endpoint"`
-	SkipSSLValidation string `json:"skip_ssl_validation" form:"skip_ssl_validation"`
-	SSOAllowed        string `json:"sso_allowed" form:"sso_allowed"`
-	CNSIClientID      string `json:"cnsi_client_id" form:"cnsi_client_id"`
-	CNSIClientSecret  string `json:"cnsi_client_secret" form:"cnsi_client_secret"`
-	SubType           string `json:"sub_type" form:"sub_type"`
+	EndpointType      string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
+	CNSIName          string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
+	APIEndpoint       string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
+	SkipSSLValidation string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
+	SSOAllowed        string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
+	CNSIClientID      string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
+	CNSIClientSecret  string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
+	SubType           string `json:"sub_type" form:"sub_type" query:"sub_type"`
 }
 
 type UpdateEndpointParams struct {
-	ID            string `json:"id" form:"id"`
-	Name          string `json:"name" form:"name"`
-	SkipSSL       string `json:"skipSSL" form:"skipSSL"`
-	SetClientInfo string `json:"setClientInfo" form:"setClientInfo"`
-	ClientID      string `json:"clientID" form:"clientID"`
-	ClientSecret  string `json:"clientSecret" form:"clientSecret"`
-	AllowSSO      string `json:"allowSSO" form:"allowSSO"`
+	ID            string `json:"id" form:"id" query:"id"`
+	Name          string `json:"name" form:"name" query:"name"`
+	SkipSSL       string `json:"skipSSL" form:"skipSSL" query:"skipSSL"`
+	SetClientInfo string `json:"setClientInfo" form:"setClientInfo" query:"setClientInfo"`
+	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
+	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
+	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
 }
 
 // BindOnce -- allows to call echo.Context.Bind() multiple times on the same request
