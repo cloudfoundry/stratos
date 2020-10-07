@@ -1,9 +1,7 @@
 <app-page-sub-nav>
   <button mat-button *ngIf="addRolesByUsernameLink$ | async as addRolesByUsernameLink"
     [routerLink]="addRolesByUsernameLink.link" [queryParams]="addRolesByUsernameLink.params">
-    <div class="sub-nav-buttons__button">
-      <mat-icon>people</mat-icon> Manage Roles
-    </div>
+    <mat-icon>people</mat-icon> Manage Roles
   </button>
 </app-page-sub-nav>
 

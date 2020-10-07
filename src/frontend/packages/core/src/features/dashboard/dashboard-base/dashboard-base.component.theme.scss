@@ -8,6 +8,20 @@
       .mat-icon-button:hover .mat-button-focus-overlay {
         opacity: .08;
       }
+
+      .mat-button-wrapper,  {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+      }
+
+      button:not(.mat-icon-button) {
+        .mat-button-wrapper {
+          mat-icon {
+            margin-right: 5px;
+          }
+        }
+      }
     }
   }
   .dashboard__side-help-button {
