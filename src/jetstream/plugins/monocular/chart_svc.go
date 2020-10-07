@@ -20,7 +20,7 @@ func (m *Monocular) listCharts(c echo.Context) error {
 	log.Debug("List Charts called")
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -52,7 +52,7 @@ func (m *Monocular) getChart(c echo.Context) error {
 	log.Debug("Get Chart called")
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -75,7 +75,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	log.Debug("Get Icon called")
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -114,7 +114,7 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 	log.Debug("getChartAndVersion called")
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -144,7 +144,7 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 func (m *Monocular) getChartVersions(c echo.Context) error {
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -175,7 +175,7 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	log.Debug("Get Chart file called")
 
 	// Check if this is a request for an external Monocular
-	if handled, err := m.ProcessMonocularRequest(c); handled {
+	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 

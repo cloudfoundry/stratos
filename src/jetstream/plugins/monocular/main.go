@@ -220,7 +220,7 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 // Check if the request if for an external Monocular instance and handle it if so
-func (m *Monocular) ProcessMonocularRequest(c echo.Context) (bool, error) {
+func (m *Monocular) processMonocularRequest(c echo.Context) (bool, error) {
 	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
 	if err != nil {
 		return true, echo.NewHTTPError(http.StatusBadRequest, err.Error())

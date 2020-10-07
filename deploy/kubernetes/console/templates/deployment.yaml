@@ -303,7 +303,7 @@ spec:
         - name: STRATOS_KUBERNETES_DASHBOARD_IMAGE
           value: "{{.Values.console.kubeDashboardImage}}"        
         - name: HELM_HUB_ENABLED
-          value: "{{.Values.console.helmHubEnabled}}"
+          value: {{ default "false" .Values.console.helmHubEnabled | quote }}
         {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:
