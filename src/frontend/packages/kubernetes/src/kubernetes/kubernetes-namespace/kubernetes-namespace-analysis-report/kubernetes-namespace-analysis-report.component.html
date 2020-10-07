@@ -1,0 +1,13 @@
+<app-page-sub-nav>
+
+  <app-analysis-report-runner [kubeId]="endpointID" [namespace]="kubeNamespaceService.namespaceName">
+  </app-analysis-report-runner>
+
+  <app-analysis-report-selector prompt="Report" [allowNone]="false" (selected)="analysisChanged($event)"
+    [autoSelect]="true" [endpoint]="endpointID" (reportCount)="onReportCount($event)" [path]="path">
+  </app-analysis-report-selector>
+</app-page-sub-nav>
+
+<app-analysis-report-viewer [report]="report$ | async"></app-analysis-report-viewer>
+<app-no-content-message *ngIf="noReportsAvailable" icon="assignment" [hidden]="false" firstLine="No reports available">
+</app-no-content-message>

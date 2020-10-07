@@ -1,0 +1,14 @@
+.alert {
+  &__info {
+    align-items: center;
+    display: flex;
+    margin: 4px 20px;
+  }
+  &__icon {
+    margin-right: 8px;
+  }
+  &__group {
+    font-weight: bold;
+    padding: 4px 0;
+  }
+}

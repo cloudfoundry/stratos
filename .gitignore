@@ -94,6 +94,9 @@ src/jetstream/jetstream
 src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
+src/jetstream/plugins/monocular/chart-repo/chartrepo
+src/jetstream/plugins/analysis/container/analyzers
+src/jetstream/.helm-cache
 
 # Automatically generated OpenAPI docs
 src/jetstream/docs/

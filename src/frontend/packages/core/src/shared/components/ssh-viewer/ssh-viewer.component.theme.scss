@@ -4,7 +4,7 @@
   $status-colors: map-get($app-theme, status);
   $ssh-error: map-get($status-colors, danger);
   $ssh-disconnected: mat-color($primary);
-  $ssh-background: map-get($foreground-colors, base);
+  $ssh-background: #000;
   $ssh-text: map-get($status-colors, text);
 
   .ssh-viewer {

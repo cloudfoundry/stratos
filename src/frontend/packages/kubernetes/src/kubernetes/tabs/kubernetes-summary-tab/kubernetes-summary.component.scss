@@ -1,0 +1,92 @@
+.kube-details {
+  margin-bottom: 0;
+  margin-left: 20px;
+  margin-top: 10px;
+  &__metrics {
+    max-width: 350px;
+
+    app-tile {
+      flex: 0;
+      &:nth-child(2) {
+        display: flex;
+        flex: 2;
+        justify-content: center;
+      }
+    }
+  }
+  &__header {
+    margin: 0;
+  }
+  &__graphs {
+    margin: 10px;
+  }
+  &__graph {
+    display: inline-block;
+    padding: 0 20px 20px 0;
+    width: 250px;
+  }
+  &__dashboard {
+    font-size: 14px;
+    margin: -24px 20px 24px 24px;
+  }
+  &__spacing {
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  &__button {
+    margin-left: 4px;
+  }
+  &__dashboard-version {
+    align-items: baseline;
+    display: flex;
+  }
+  &__dashboard-version-label {
+    margin-right: 10px;
+  }
+  &__dashboard-configure {
+    line-height: initial;
+    margin: 0;
+    min-width: auto;
+    padding: 0;    
+  }
+}
+
+.app-metadata {
+  display: flex;
+  flex-direction: row;
+  margin-left: 12px;
+
+  &__two-cols {
+    margin-right: 20px;
+
+    app-metadata-item:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .caasp-version {
+    display: flex;
+
+    mat-icon {
+      cursor: help;
+      font-size: 20px;
+      height: 20px;
+      margin-left: 12px;
+      width: 20px;
+    }
+  }
+
+  .caasp-updates {
+    align-items: center;
+    display: flex;
+
+    &__security,
+    &__disruptive {
+      border-radius: 8px;
+      font-size: 12px;
+      margin-left: 10px;
+      padding: 1px 8px;
+    }
+  }
+
+}

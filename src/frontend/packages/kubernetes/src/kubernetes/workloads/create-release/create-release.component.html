@@ -1,0 +1,41 @@
+<app-page-header>
+  Install Chart
+</app-page-header>
+<app-steppers [cancel]="cancelUrl">
+  <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
+    <form [formGroup]="details" class="stepper-form helm-create-release">
+      <b>Select the Kubernetes cluster to install to</b>
+      <mat-form-field>
+        <mat-select formControlName="endpoint" name="endpoint">
+          <mat-option *ngFor="let kube of kubeEndpoints$ | async" [value]="kube.guid">
+            <span>{{ kube.name }}</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+      <b>Specify name and namespace for the installation</b>
+      <mat-form-field>
+        <input #releaseNameInputField matInput placeholder="Name" name="releaseName" formControlName="releaseName"
+          autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input type="text" placeholder="Namespace" matInput formControlName="releaseNamespace" [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
+          <mat-option *ngFor="let namespace of namespaces$ | async" [value]="namespace">
+            {{namespace}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="details.controls.releaseNamespace.errors?.namespaceDoesNotExist">
+          Namespace does not exist
+        </mat-error>
+      </mat-form-field>
+
+      <mat-checkbox matInput formControlName="createNamespace">Create Namespace</mat-checkbox>
+
+    </form>
+  </app-step>
+  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
+    <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
+  </app-step>
+</app-steppers>

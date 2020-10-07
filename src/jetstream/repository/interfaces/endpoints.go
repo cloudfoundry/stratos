@@ -18,9 +18,14 @@ type RoutePlugin interface {
 	AddAdminGroupRoutes(echoContext *echo.Group)
 }
 
+// EndpointAction identifies the type of action for an endpoint notification
 type EndpointAction int
 
 const (
+	// EndpointRegisterAction is for when an endpoint is registered
 	EndpointRegisterAction EndpointAction = iota
+	// EndpointUnregisterAction is for when an endpoint is unregistered
 	EndpointUnregisterAction
+	// EndpointUpdateAction is for when an endpoint is updated (e.g. renamed)
+	EndpointUpdateAction
 )
