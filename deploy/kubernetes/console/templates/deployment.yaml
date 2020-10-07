@@ -302,6 +302,8 @@ spec:
           value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
         - name: STRATOS_KUBERNETES_DASHBOARD_IMAGE
           value: "{{.Values.console.kubeDashboardImage}}"        
+        - name: HELM_HUB_ENABLED
+          value: "{{.Values.console.helmHubEnabled}}"
         {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:

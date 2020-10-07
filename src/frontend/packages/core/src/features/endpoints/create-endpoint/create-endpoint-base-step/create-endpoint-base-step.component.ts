@@ -91,15 +91,16 @@ export class CreateEndpointBaseStepComponent {
       }));
     }
   }
-  constructor(public store: Store<GeneralEntityAppState>,) {
+  constructor(public store: Store<GeneralEntityAppState>, ) {
     // Need to filter the endpoint types on the tech preview flag
     this.tileSelectorConfig$ = store.select(selectSessionData()).pipe(
-      combineLatest(this.getEndpointTypesByCount()),
+      combineLatest(this.getEndpointTypesByCount(), this.helmHubEnabled()),
       first(),
-      map(([sessionData, endpointTypesByCount]) => {
+      map(([sessionData, endpointTypesByCount, helmHubEnabled]) => {
         const techPreviewIsEnabled = sessionData.config.enableTechPreview || false;
         return entityCatalog.getAllEndpointTypes(techPreviewIsEnabled)
           .filter(endpoint => this.filterByEndpointCount(endpoint, endpointTypesByCount))
+          .filter(endpoint => this.filterByHelmHub(helmHubEnabled, endpoint))
           .sort((endpointA, endpointB) => this.sortEndpointTiles(endpointA.definition, endpointB.definition))
           .map(catalogEndpoint => {
             const endpoint = catalogEndpoint.definition;
@@ -155,5 +156,15 @@ export class CreateEndpointBaseStepComponent {
     const count = endpointTypesByCount[type] || 0;
     return count < endpoint.definition.registeredLimit;
   };
+
+  private helmHubEnabled = () => {
+    return this.store.select('auth').pipe(
+      filter(auth => !!auth.sessionData['plugin-config']),
+      map(auth => auth.sessionData['plugin-config'].helmHubEnabled)
+    );
+  };
+  private filterByHelmHub(helmHubEnabled: string, endpoint: StratosCatalogEndpointEntity): boolean {
+    return helmHubEnabled === 'true' ? true : !(endpoint.definition.parentType === 'helm' && endpoint.definition.type === 'hub');
+  }
 
 }
