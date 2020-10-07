@@ -1,0 +1,18 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>Kubernetes Terminal</h1>
+  <div class="page-header-right">
+    <span>
+      <button mat-icon-button matTooltip="Disconnect" name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
+        <mat-icon>stop</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Connect" name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Back" [routerLink]="kubeSummaryLink">
+        <mat-icon>close</mat-icon>
+      </button>
+    </span>
+  </div>
+</app-page-header>
+
+<app-ssh-viewer #sshViewer [errorMessage]="errorMessage" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>

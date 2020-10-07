@@ -62,3 +62,15 @@ EIRINI=false
 # Provide the default namespace that cf applications pods are created in by eirini
 # This will be used by the ui to suggest a sensible value when configuring eirini metrics
 EIRINI_POD_NAMESPACE=eirini
+
+# Cache folder for Helm Charts
+HELM_CACHE_FOLDER=./.helm-cache
+
+# MariaDB database for local dev
+# DATABASE_PROVIDER=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_USER=stratos
+# DB_PASSWORD=strat0s
+# DB_DATABASE_NAME=stratosdb
+# DB_SSL_MODE=disable

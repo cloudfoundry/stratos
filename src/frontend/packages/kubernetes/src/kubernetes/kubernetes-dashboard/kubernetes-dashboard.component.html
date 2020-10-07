@@ -1,0 +1,22 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>Dashboard</h1>
+  <div class="page-header-right" [ngClass]="{'kube-dashboard__hidden': isLoading$ | async }">
+    <span>
+    <button mat-icon-button (click)="toggle()" *ngIf="expanded">
+        <mat-icon matTooltip="Collapse">expand_less</mat-icon>
+    </button>
+    <button mat-icon-button (click)="toggle()" *ngIf="!expanded">
+        <mat-icon matTooltip="Expand">expand_more</mat-icon>
+    </button>
+    </span>
+  </div>
+</app-page-header>
+
+<app-loading-page [isLoading]="isLoading$" text="Loading Kubernetes dashboard">
+  <iframe *ngIf="!(hasError$ | async) && source" #kubeDash (load)="iframeLoaded()" id="kubedash" [src]="source" class="kube-dashboard"></iframe>
+  <div class="kube-dashoard__error" *ngIf="hasError$ | async">
+    <app-no-content-message *ngIf="errorMsg$ | async as message" icon="warning" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine">
+    </app-no-content-message>
+    <a [routerLink]="configUrl()">Check Dashboard Configuration</a>
+  </div>
+</app-loading-page>

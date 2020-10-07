@@ -94,6 +94,12 @@ src/jetstream/jetstream
 src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
+src/jetstream/plugins/monocular/chart-repo/chartrepo
+src/jetstream/plugins/analysis/container/analyzers
+src/jetstream/.helm-cache
+
+# Automatically generated OpenAPI docs
+src/jetstream/docs/
 
 # Customisations - these can be removed in the future
 # Left in for now to prevent these files being checked-in, if they are still present
@@ -113,6 +119,9 @@ src/frontend/packages/core/src/index.html
 # Customisation - generated import module
 src/frontend/packages/core/src/_custom-import.module.ts
 
+# Backend file generated to include extra plugins
+src/jetstream/extra_plugins.go
+
 # Prebuild package
 
 stratos-frontend-prebuild.zip
@@ -128,3 +137,5 @@ website/versioned_docs
 website/versioned_sidebars
 website/versions.json
 website/versions-repo
+
+/scan_tmp

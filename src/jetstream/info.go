@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,7 +39,7 @@ func (p *portalProxy) updateEndpointsWithRelations(endpoints map[string]map[stri
 	}
 	for _, endpointsOfType := range endpoints {
 		for _, endpoint := range endpointsOfType {
-			if (endpoint.Relations == nil) {
+			if endpoint.Relations == nil {
 				endpoint.Relations = &interfaces.EndpointRelations{
 					Provides: []interfaces.EndpointRelation{},
 					Receives: []interfaces.EndpointRelation{},

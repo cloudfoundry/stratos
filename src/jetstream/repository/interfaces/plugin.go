@@ -37,3 +37,30 @@ type TokenNotificationPlugin interface {
 type StratosPluginCleanup interface {
 	Destroy()
 }
+
+type PluginInit func(portalProxy PortalProxy) (StratosPlugin, error)
+
+type PluginRegistration struct {
+	Name         string
+	Dependencies []string
+	Init         PluginInit
+}
+
+// Init functions for plugins
+var PluginInits map[string]PluginRegistration
+
+// Plugin registration
+
+func AddPlugin(name string, depends []string, init PluginInit) {
+
+	pluginReg := PluginRegistration{
+		Name:         name,
+		Dependencies: depends,
+		Init:         init,
+	}
+
+	if PluginInits == nil {
+		PluginInits = make(map[string]PluginRegistration)
+	}
+	PluginInits[pluginReg.Name] = pluginReg
+}

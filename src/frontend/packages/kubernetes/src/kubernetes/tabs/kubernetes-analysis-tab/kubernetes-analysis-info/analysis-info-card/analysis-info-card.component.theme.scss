@@ -1,0 +1,21 @@
+
+@mixin kube-analysis-card-theme($theme, $app-theme) {
+
+  .info__card {
+
+    P {
+      font-size: 14px;
+      line-height: 1.24em;
+    }
+
+    h2 {
+      font-size: 18px;
+      padding: 0;
+    }
+
+    h2 {
+      font-size: 16px;
+      padding: 0;
+    }
+  }
+}

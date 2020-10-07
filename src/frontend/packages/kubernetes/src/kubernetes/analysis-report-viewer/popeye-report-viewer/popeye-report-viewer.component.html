@@ -1,0 +1,60 @@
+<div *ngIf="processed">
+  <div class="report__report-header">
+    <div class="report__title">Report</div>
+    <div class="report__stat">
+      <div>Score</div>
+      <div class="report__score">{{processed.popeye.score }}</div>
+    </div>
+    <div class="report__stat">
+      <div>Grade</div>
+      <div class="report__grade">{{processed.popeye.grade }}</div>
+    </div>
+  </div>
+
+  <div *ngFor="let section of processed.popeye.sanitizers">
+    <div *ngIf="!section.hide">
+      <div class="report__header">
+        <div class="report__title">{{ section.sanitizer }}</div>
+        <div class="report__stat">
+          <div>OK</div>
+          <div class="report__grade">{{section.tally.ok }}</div>
+        </div>
+        <div class="report__stat">
+          <div>Info</div>
+          <div class="report__grade">{{section.tally.info }}</div>
+        </div>
+        <div class="report__stat">
+          <div>Warning</div>
+          <div class="report__grade">{{section.tally.warning }}</div>
+        </div>
+        <div class="report__stat">
+          <div>Error</div>
+          <div class="report__grade">{{section.tally.error }}</div>
+        </div>
+        <div class="report__stat">
+          <div>Score</div>
+          <div class="report__score">{{section.tally.score }}</div>
+        </div>
+      </div>
+
+      <!-- Eack key in issues is a group of issues -->
+      <table width="100%" class="report__table" cellpadding="4">
+        <tr *ngFor="let group of section.groups">
+          <td class="report__table-name" width="40%">{{ group.name }}</td>
+          <td>
+            <div *ngFor="let issue of group.issues" class="report__issue">
+              <div [ngSwitch]="issue.level" class="report__icon">
+                <mat-icon class="text-success" *ngSwitchCase="0">check_circle</mat-icon>
+                <mat-icon class="text-info" *ngSwitchCase="1">info</mat-icon>
+                <mat-icon class="text-warning" *ngSwitchCase="2">warning</mat-icon>
+                <mat-icon class="text-danger" *ngSwitchCase="3">error</mat-icon>
+                <mat-icon class="text-tentative" *ngSwitchDefault>help_outline</mat-icon>
+              </div>
+              {{ issue.message }}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

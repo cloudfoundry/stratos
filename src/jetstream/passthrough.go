@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -221,7 +221,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 }
 
 func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*interfaces.CNSIRequest, error) {
-	log.Debug("proxy")
+	log.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)

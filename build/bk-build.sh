@@ -31,11 +31,17 @@ pushd "${STRATOS}/src/jetstream" > /dev/null
 
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
+  echo "Generating OpenAPI documentation..."
+  go get github.com/swaggo/swag/cmd/swag
+  swag init
   echo "Building version: ${VERSION}"
   GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
+  echo "Generating OpenAPI documentation..."
+  go get github.com/swaggo/swag/cmd/swag
+  swag init
   GO111MODULE=on go test ./... -v -count=1
 fi
 
