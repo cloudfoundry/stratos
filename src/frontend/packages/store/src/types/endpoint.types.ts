@@ -52,23 +52,7 @@ export interface EndpointRelationshipType {
  */
 export const EndpointRelationshipTypes: {
   [key: string]: EndpointRelationshipType,
-} = {
-  [EndpointMetricRelationTypes.METRICS_KUBE]: { // This will be moved into the kube package when it comes upstream
-    label: 'Kubernetes Metrics',
-    metadata: [
-      {
-        icon: 'history',
-        value: (relMetadata: any) => relMetadata.metrics_job,
-        label: 'Prometheus Job',
-      },
-      {
-        icon: 'history',
-        value: (relMetadata: any) => relMetadata.metrics_environment,
-        label: 'Prometheus Environment',
-      },
-    ]
-  }
-};
+} = {};
 
 export interface EndpointsRelation {
   guid: string;

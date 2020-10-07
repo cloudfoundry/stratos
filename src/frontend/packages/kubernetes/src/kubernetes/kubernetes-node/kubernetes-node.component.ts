@@ -4,7 +4,9 @@ import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
+import { MetricsHelpers } from '../../../../core/src/features/metrics/metrics.helpers';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
+import { KubeRelationTypes } from '../kube-relationship-types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../services/kubernetes-node.service';
@@ -44,9 +46,9 @@ export class KubernetesNodeComponent {
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public kubeNodeService: KubernetesNodeService,
-    public endpointsService: EndpointsService
+    public endpointsService: EndpointsService,
   ) {
-    this.endpointsService.hasMetrics(this.kubeEndpointService.kubeGuid).pipe(
+    MetricsHelpers.endpointHasMetrics(this.kubeEndpointService.kubeGuid, KubeRelationTypes.METRICS_KUBE).pipe(
       first(),
       tap(haveMetrics => {
         if (!haveMetrics) {

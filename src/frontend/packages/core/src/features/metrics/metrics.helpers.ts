@@ -84,6 +84,7 @@ function compareUrl(a: string, b: string): boolean {
   return a === b;
 }
 
+// TODO: RC couldn't this just go in the service?
 export class MetricsHelpers {
   static endpointHasMetrics(endpointId: string, type: EndpointRelationType): Observable<boolean> {
     return stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(

@@ -577,7 +577,7 @@ func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
 	return mapMetadata
 }
 
-func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consoleUserID string, endpointUrl string) {
+func (m *MetricsSpecification) linkEndpointToMetrics(endpointGUID, consoleUserID, endpointURL, relationType string) {
 	// Find all metrics endpoints
 	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
 	if err != nil {
@@ -600,11 +600,11 @@ func (m *MetricsSpecification) linkEndpointToMetrics(endpointGuid string, consol
 			log.Warnf("Failed to link endpoint to metric endpoints (creating providers from token): %v", err)
 			continue
 		}
-		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointUrl); ok {
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointURL); ok {
 			relation := interfaces.RelationsRecord{
 				Provider:     metricEndpoint.GUID,
-				RelationType: MetricsCfRelation,
-				Target:       endpointGuid,
+				RelationType: "metrics-" + relationType,
+				Target:       endpointGUID,
 				Metadata: metadataToMap(MetricsRelationMetadata{
 					Job:         provider.Job,
 					Environment: provider.Environment,
@@ -645,9 +645,9 @@ func (m *MetricsSpecification) OnConnect(endpoint *interfaces.CNSIRecord, tokenR
 	case EndpointType:
 		m.linkMetricsToEndpoints(endpoint.GUID, tokenRecord.Metadata, consoleUserID)
 	case "cf":
-		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.DopplerLoggingEndpoint)
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.DopplerLoggingEndpoint, "cf")
 	case "k8s":
-		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.APIEndpoint.String())
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.APIEndpoint.String(), "kube")
 	}
 }
 

@@ -52,7 +52,7 @@
                       <div class="metrics-metadata__two-cols">
                         <!-- Display information about all associated metric jobs provided by the parent metrics endpoint to this endpoint -->
                         <div class="metrics-extra"
-                          *ngIf="metadataJobTypes[relation.type].length && relation.metadata.job && (jobDetails$ | async) as jobDetails">
+                          *ngIf="metadataJobTypes[relation.type] && metadataJobTypes[relation.type].length && relation.metadata.job && (jobDetails$ | async) as jobDetails">
                           <div *ngIf="jobDetails[relation.metadata.job] as job">
                             <app-metadata-item *ngFor="let metadataType of metadataJobTypes[relation.type]"
                               [icon]="metadataType.icon" [iconFont]="metadataType.iconFont"
