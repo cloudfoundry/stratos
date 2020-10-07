@@ -232,6 +232,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         if (eiriniMetricsProvider) {
           this.columns.splice(1, 0, this.cfEiriniColumn);
           this.cfEiriniColumn.cellConfig = {
+            eiriniRelationship: eiriniMetricsProvider,
             eiriniPodsService: containerService.eiriniService.createEiriniPodService(
               this.appService.cfGuid,
               this.appService.appGuid,

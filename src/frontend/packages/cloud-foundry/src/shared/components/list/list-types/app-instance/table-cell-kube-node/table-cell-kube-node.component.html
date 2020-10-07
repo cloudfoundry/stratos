@@ -1,5 +1,6 @@
 <ng-container *ngIf="(nodeName$ | async) as name; else loading">
-  {{name}}
+  <ng-container *ngIf="(nodeUrl$ | async) as url; else text"><a [routerLink]="url">{{name}}</a></ng-container>
+  <ng-template #text>{{name}}</ng-template>
 </ng-container>
 <ng-template #loading>
   <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>

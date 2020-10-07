@@ -10,7 +10,12 @@ export enum CfRelationTypes {
   /**
    * Metrics endpoint provides eirini (kube) metrics to a cloud foundry endpoint
    */
-  METRICS_EIRINI = 'metrics-eirini'
+  METRICS_EIRINI = 'metrics-eirini',
+  /*
+   * // TODO: RC
+   * Should match KubeRelationTypes.METRICS_KUBE. Not used directly to avoid cf -- kube package connection
+   */
+  METRICS_KUBE = 'metrics-kube'
 }
 
 EndpointRelationshipTypes[CfRelationTypes.METRICS_CF] = {

@@ -67,7 +67,7 @@ export class EiriniContainerService {
     this.store.dispatch(new RouterNav({ path: `${cfGuid}/eirini`, query: { cf: true } }));
   }
 
-  createEiriniPodService(cfGuid: string, appGuid, eiriniMetricsProvider: EndpointsRelation) {
+  createEiriniPodService(cfGuid: string, appGuid: string, eiriniMetricsProvider: EndpointsRelation) {
     const metricsKey = `${cfGuid}:${appGuid}:appPods`;
     const action = new FetchCfEiriniMetricsAction(
       metricsKey,
