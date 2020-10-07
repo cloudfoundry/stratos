@@ -11,6 +11,7 @@ import (
 func init() {
 	datastore.RegisterMigration(20200819184800, "HelmChartStore", func(txn *sql.Tx, conf *goose.DBConf) error {
 
+		// This is a dupe of 20190307115301. After the kube upstreaming process it was skipped during upstream upgrades
 		createChartsTable := "CREATE TABLE IF NOT EXISTS helm_charts ("
 		createChartsTable += "endpoint            VARCHAR(64)  NOT NULL,"
 		createChartsTable += "name                VARCHAR(255) NOT NULL,"
