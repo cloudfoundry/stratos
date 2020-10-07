@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { combineLatest, filter, first, map } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
@@ -21,9 +21,13 @@ interface ICreateEndpointTilesData extends ITileData {
   parentType: string;
 }
 
-type EndpointsByType = {
-  [endpointType: string]: number,
+type ExpandedEndpoint<T = number> = {
+  current: number,
+  limit: T;
+  definition: IStratosEndpointDefinition;
 };
+
+type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
 
 @Component({
   selector: 'app-create-endpoint-base-step',
@@ -94,16 +98,21 @@ export class CreateEndpointBaseStepComponent {
   constructor(public store: Store<GeneralEntityAppState>, ) {
     // Need to filter the endpoint types on the tech preview flag
     this.tileSelectorConfig$ = store.select(selectSessionData()).pipe(
-      combineLatest(this.getEndpointTypesByCount(), this.helmHubEnabled()),
+      // Get a list of all known endpoint types
+      map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false)),
+      // Add additional metadata to each endpoint type
+      switchMap(endpointTypes => this.expandEndpointTypes(endpointTypes)),
       first(),
-      map(([sessionData, endpointTypesByCount, helmHubEnabled]) => {
-        const techPreviewIsEnabled = sessionData.config.enableTechPreview || false;
-        return entityCatalog.getAllEndpointTypes(techPreviewIsEnabled)
-          .filter(endpoint => this.filterByEndpointCount(endpoint, endpointTypesByCount))
-          .filter(endpoint => this.filterByHelmHub(helmHubEnabled, endpoint))
+      map(expandedEndpointTypes => {
+        // For each endpoint type...
+        return expandedEndpointTypes
+          // .. remove any that are over the types limit
+          .filter(expandedEndpointType => this.filterByEndpointCount(expandedEndpointType))
+          // .. sort
           .sort((endpointA, endpointB) => this.sortEndpointTiles(endpointA.definition, endpointB.definition))
-          .map(catalogEndpoint => {
-            const endpoint = catalogEndpoint.definition;
+          // .. map into tile format
+          .map(expandedEndpointType => {
+            const endpoint = expandedEndpointType.definition;
             return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
               endpoint.label,
               endpoint.logoUrl ? {
@@ -119,52 +128,47 @@ export class CreateEndpointBaseStepComponent {
               }
             );
           });
-      })
+      }),
     );
   }
 
-  private getEndpointDefinitionKey = (type: string, subType: string): string => type + '_sep_' + subType;
-  private getEndpointTypesByCount = (): Observable<EndpointsByType> =>
+  private expandEndpointTypes = (endpointEntities: StratosCatalogEndpointEntity[]): Observable<ExpandedEndpoints> =>
     stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(endpoints => !!endpoints),
       map(endpoints => {
-        const endpointsByType: { [endpointType: string]: number; } = {};
-        return endpoints.reduce((res, endpoint) => {
-          const type = this.getEndpointDefinitionKey(endpoint.cnsi_type, endpoint.sub_type);
-          if (!res[type]) {
-            res[type] = 0;
-          }
-          res[type]++;
+        const endpointsByType: ExpandedEndpoints<Observable<number>> = [];
+        return endpointEntities.reduce((res, endpointEntity) => {
+          const { type: endpointType, subType: endpointSubType } = endpointEntity.getTypeAndSubtype();
+          res.push({
+            current: endpoints.filter(em => em.cnsi_type === endpointType && em.sub_type === endpointSubType).length,
+            limit: this.getEndpointRegisteredLimit(endpointEntity),
+            definition: endpointEntity.definition
+          });
           return res;
         }, endpointsByType);
       }),
+      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map(type => type.limit.pipe(
+        map(limit => ({
+          ...type,
+          limit
+        }))
+      )))),
     );
-  private filterByEndpointCount = (endpoint: StratosCatalogEndpointEntity, endpointTypesByCount: EndpointsByType) => {
-    // No limit applied, always show endpoint
-    if (typeof endpoint.definition.registeredLimit !== 'number') {
-      return true;
-    }
-    // Zero limit, never show endpoint
-    if (endpoint.definition.registeredLimit === 0) {
-      return false;
-    }
 
-    // Check that the limit is not exceeded by endpoints already registered
-    const type = endpoint.definition.parentType ?
-      this.getEndpointDefinitionKey(endpoint.definition.parentType, endpoint.definition.type) :
-      this.getEndpointDefinitionKey(endpoint.definition.type, '');
-    const count = endpointTypesByCount[type] || 0;
-    return count < endpoint.definition.registeredLimit;
-  };
-
-  private helmHubEnabled = () => {
-    return this.store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].helmHubEnabled)
-    );
-  };
-  private filterByHelmHub(helmHubEnabled: string, endpoint: StratosCatalogEndpointEntity): boolean {
-    return helmHubEnabled === 'true' ? true : !(endpoint.definition.parentType === 'helm' && endpoint.definition.type === 'hub');
+  private getEndpointRegisteredLimit(endpoint: StratosCatalogEndpointEntity): Observable<number> {
+    const registeredLimit = endpoint.definition.registeredLimit;
+    if (!registeredLimit) {
+      return of(Number.MAX_SAFE_INTEGER);
+    }
+    if (typeof registeredLimit === 'number') {
+      return of(registeredLimit);
+    }
+    const res = registeredLimit(this.store);
+    return typeof res === 'number' ? of(res) : res;
   }
+  private filterByEndpointCount = (endpointType: ExpandedEndpoint): boolean => {
+    // Check that the limit is not exceeded by endpoints already registered
+    return endpointType.current < endpointType.limit;
+  };
 
 }
