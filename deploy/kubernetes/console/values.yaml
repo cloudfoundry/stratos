@@ -129,6 +129,9 @@ console:
   sslProtocols:
   sslCiphers:
   
+  # Number of replicas to deploy
+  replicaCount: 1
+
 images:
   console: stratos-console
   proxy: stratos-jetstream

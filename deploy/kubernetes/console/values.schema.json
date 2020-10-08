@@ -162,6 +162,9 @@
         },
         "userInviteSubject": {
           "type": ["string", "null"]
+        },
+        "replicaCount": {
+          "type": ["integer", "null"]
         }
       }
     },
