@@ -24,11 +24,6 @@ func (m *Monocular) listCharts(c echo.Context) error {
 		return err
 	}
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
-	}
-
 	charts, err := m.ChartStore.GetLatestCharts()
 	if err != nil {
 		return err
@@ -61,11 +56,6 @@ func (m *Monocular) getChart(c echo.Context) error {
 		return err
 	}
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
-	}
-
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 
@@ -86,11 +76,6 @@ func (m *Monocular) getIcon(c echo.Context) error {
 
 	// Process ArtifactHub request
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetIconHandler); handled {
-		return err
-	}
-
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
 		return err
 	}
 
@@ -196,11 +181,6 @@ func (m *Monocular) getChartVersions(c echo.Context) error {
 // Get a file such as the README or valyes for a given chart version
 func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	log.Debug("Get Chart file called")
-
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
-	}
 
 	repo := c.Param("repo")
 	chartName := c.Param("name")
