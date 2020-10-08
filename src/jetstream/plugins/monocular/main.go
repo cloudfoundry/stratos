@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -170,10 +171,13 @@ func (m *Monocular) AddAdminGroupRoutes(echoGroup *echo.Group) {
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
+	// ArtifactHub Icon - always get a specific version
+	echoGroup.Any("/monocular/:guid/chartsvc/v1/hub/assets/:repo/:name/:version/logo", m.artifactHubGetIcon)
+
 	// API for Helm Chart Repositories - sync and sync status
 	// Reach out to a monocular instance other than Stratos (like helm hub). This is usually done via `x-cap-cnsi-list`
 	// however cannot be done for things like img src
-	echoGroup.Any("/monocular/:guid/chartsvc/*", m.handleMonocularInstance)
+	echoGroup.Any("/monocular/:guid/chartsvc/", m.handleMonocularInstance)
 
 	echoGroup.Any("/monocular/schema/:name/:encodedChartURL", m.checkForJsonSchema)
 	echoGroup.Any("/monocular/values/:endpoint/:repo/:name/:version", m.getChartValues)
@@ -209,6 +213,10 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// Get the chart icon
 	chartSvcGroup.GET("/v1/assets/:repo/:chartName/logo", m.getIcon)
+
+	// ArtifactHub
+	chartSvcGroup.Any("/v1/hub/:endpoint/:repo/:name/:version/:file", m.artifactHubGetChartFile)
+
 }
 
 // Check if the request if for an external Monocular instance and handle it if so
@@ -297,7 +305,10 @@ func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoin
 	// by the 'authHandler' associated with the endpoint OR defaults to an OAuth request. For this case there's no auth at all so falls over.
 	// Tracked in https://github.com/SUSE/stratos/issues/466
 
+	// Helm Hub has been replaced with ArtifactHub
+
 	path := c.Request().URL.Path
+	destURL := monocularEndpoint.APIEndpoint
 	log.Debug("URL to monocular requested: %v", path)
 	if strings.Index(path, stratosPrefix) == 0 {
 		// drop stratos pp/v1
@@ -317,15 +328,14 @@ func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoin
 		path = "/" + strings.Join(parts, "/")
 	}
 
-	return m.proxyToMonocularInstance(c, monocularEndpoint, path)
+	return m.proxyToMonocularInstance(c, destURL, path)
 }
 
-func (m *Monocular) proxyToMonocularInstance(c echo.Context, monocularEndpoint *interfaces.CNSIRecord, path string) error {
-	url := monocularEndpoint.APIEndpoint
-	log.Debugf("URL to monocular: %v", url.String())
-	url.Path += path
+func (m *Monocular) proxyToMonocularInstance(c echo.Context, dest *url.URL, path string) error {
+	log.Debugf("URL to monocular: %v", dest.String())
+	dest.Path += path
 
-	req, err := http.NewRequest(c.Request().Method, url.String(), nil)
+	req, err := http.NewRequest(c.Request().Method, dest.String(), nil)
 	removeBreakingHeaders(c.Request(), req)
 
 	client := &http.Client{Timeout: 30 * time.Second}

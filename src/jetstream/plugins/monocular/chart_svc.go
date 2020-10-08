@@ -19,6 +19,11 @@ import (
 func (m *Monocular) listCharts(c echo.Context) error {
 	log.Debug("List Charts called")
 
+	// Check if this is a request for Artifact Hub
+	if handled, err := m.handleArtifactRequest(c, m.fetchChartsFromArtifactHub); handled {
+		return err
+	}
+
 	// Check if this is a request for an external Monocular
 	if handled, err := m.processMonocularRequest(c); handled {
 		return err
@@ -51,6 +56,11 @@ func (m *Monocular) listCharts(c echo.Context) error {
 func (m *Monocular) getChart(c echo.Context) error {
 	log.Debug("Get Chart called")
 
+	// Check if this is a request for Artifact Hub
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChart); handled {
+		return err
+	}
+
 	// Check if this is a request for an external Monocular
 	if handled, err := m.processMonocularRequest(c); handled {
 		return err
@@ -73,6 +83,11 @@ func (m *Monocular) getChart(c echo.Context) error {
 
 func (m *Monocular) getIcon(c echo.Context) error {
 	log.Debug("Get Icon called")
+
+	// Process ArtifactHub request
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetIconHandler); handled {
+		return err
+	}
 
 	// Check if this is a request for an external Monocular
 	if handled, err := m.processMonocularRequest(c); handled {
@@ -113,8 +128,8 @@ func (m *Monocular) getIcon(c echo.Context) error {
 func (m *Monocular) getChartVersion(c echo.Context) error {
 	log.Debug("getChartAndVersion called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
+	// Process ArtifactHub request
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChartVersion); handled {
 		return err
 	}
 
@@ -143,16 +158,24 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 // Get all chart versions for a given chart
 func (m *Monocular) getChartVersions(c echo.Context) error {
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
+	// Check if this is a request for Artifact Hub
+	var err error
+	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 
-	// Get all versions for a given chart
-	charts, err := m.ChartStore.GetChartVersions(repo, chartName)
+	var charts []*store.ChartStoreRecord
+	if externalMonocularEndpoint != nil {
+		charts, err = m.artifactHubGetChartVersions(c, externalMonocularEndpoint.GUID, repo, chartName)
+	} else {
+		// Get all versions for a given chart
+		charts, err = m.ChartStore.GetChartVersions(repo, chartName)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -183,6 +206,10 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	chartName := c.Param("name")
 	version := c.Param("version")
 	filename := c.Param("filename")
+
+	if !isPermittedFile(filename) {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
+	}
 
 	log.Debugf("Get chart file: %s", filename)
 
@@ -218,15 +245,8 @@ func (m *Monocular) getChartValues(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}
 
-	// Helm Hub
-	// Change the URL and then forward on
-	p := fmt.Sprintf("/chartsvc/v1/assets/%s/%s/versions/%s/values.yaml", repo, chartName, version)
-	monocularEndpoint, err := m.validateExternalMonocularEndpoint(endpointID)
-	if monocularEndpoint == nil || err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("No monocular endpoint"))
-	}
-
-	return m.proxyToMonocularInstance(c, monocularEndpoint, p)
+	// Artifact Hub
+	return m.artifactHubGetChartFileNamed(c, "values.yaml")
 }
 
 // Check to see if the given chart URL has a schema

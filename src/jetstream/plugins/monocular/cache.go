@@ -121,11 +121,13 @@ func writeDigestFile(chartCachePath, digest string) error {
 }
 
 func (m *Monocular) getChartYaml(chart store.ChartStoreRecord) *ChartMetadata {
-
 	// Cache the Chart if we don't have it already
 	m.cacheChart(chart)
+	return readChartYaml(m.getChartCacheFolder(chart))
+}
 
-	chartCacheYamlPath := path.Join(m.getChartCacheFolder(chart), "Chart.yaml")
+func readChartYaml(cacheFolder string) *ChartMetadata {
+	chartCacheYamlPath := path.Join(cacheFolder, "Chart.yaml")
 	if _, err := os.Stat(chartCacheYamlPath); os.IsNotExist(err) {
 		return nil
 	}
@@ -184,15 +186,19 @@ func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
 		return err
 	}
 
+	return m.cacheChartFromURL(chartCachePath, chart.Digest, chart.Name, chart.ChartURL)
+}
+
+func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL string) error {
 	// Check to see if we have the same digest
-	if ok := hasDigestFile(chartCachePath, chart.Digest); ok {
+	if ok := hasDigestFile(chartCachePath, digest); ok {
 		log.Debug("Skipping download - already have archive with the same digest")
 		return nil
 	}
 
 	archiveFile := path.Join(chartCachePath, "chart.tgz")
-	if err := m.downloadFile(archiveFile, chart.ChartURL); err != nil {
-		return fmt.Errorf("Could not download chart from: %s - %+v", chart.ChartURL, err)
+	if err := m.downloadFile(archiveFile, chartURL); err != nil {
+		return fmt.Errorf("Could not download chart from: %s - %+v", chartURL, err)
 	}
 
 	sum, err := getFileChecksum(archiveFile)
@@ -206,7 +212,7 @@ func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
 
 	// Now extract the files we need
 	filenames := []string{"Chart.yaml", "README.md", "values.schema.json", "values.yaml"}
-	if err := extractArchiveFiles(archiveFile, chart.Name, chartCachePath, filenames); err != nil {
+	if err := extractArchiveFiles(archiveFile, name, chartCachePath, filenames); err != nil {
 		return fmt.Errorf("Could not extract files from chart archive: %s - %+v", archiveFile, err)
 	}
 
@@ -237,7 +243,7 @@ func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error)
 	return "", nil
 }
 
-// download a file form the given url sand save to the file path
+// download a file from the given url and save to the file path
 func (m *Monocular) downloadFile(filepath string, url string) error {
 	// Get the data
 	httpClient := m.portalProxy.GetHttpClient(false)
@@ -338,4 +344,16 @@ func getFileChecksum(file string) (string, error) {
 	}
 
 	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+// Is the specified file name one for the files we permit to be served up
+func isPermittedFile(name string) bool {
+	filenames := []string{"Chart.yaml", "README.md", "values.schema.json", "values.yaml"}
+	for _, f := range filenames {
+		if f == name {
+			return true
+		}
+	}
+
+	return false
 }
