@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { catchError, first, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, filter, first, map } from 'rxjs/operators';
 
 import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../store/src/app-state';
@@ -41,7 +41,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
     type: HELM_ENDPOINT_TYPE,
     logoUrl: '/core/assets/custom/helm.svg',
     authTypes: [],
-    registeredLimit: 0,
+    registeredLimit: () => 0,
     icon: 'helm',
     iconFont: 'stratos-icons',
     label: 'Helm',
@@ -77,7 +77,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           }];
         },
         renderPriority: helmRepoRenderPriority,
-        registeredLimit: null,
+        registeredLimit: null, // Ensure this is null, otherwise inherits parent's value
       },
       {
         type: HELM_HUB_ENDPOINT_TYPE,
@@ -88,7 +88,10 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/core/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
-        registeredLimit: 1,
+        registeredLimit: (store: Store<AppState>): Observable<number> => store.select('auth').pipe(
+          filter(auth => !!auth.sessionData['plugin-config']),
+          map(auth => auth.sessionData['plugin-config'].helmHubEnabled === 'true' ? 1 : 0),
+        )
       },
     ],
   };

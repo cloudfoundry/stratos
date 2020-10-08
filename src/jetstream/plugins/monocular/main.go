@@ -23,6 +23,8 @@ const (
 	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
 	cacheFolderEnvVar     = "HELM_CACHE_FOLDER"
 	defaultCacheFolder    = "./.helm-cache"
+	helmHubEnabledEnvVar  = "HELM_HUB_ENABLED"
+	helmHubEnabled        = "helmHubEnabled"
 )
 
 // Monocular is a plugin for Monocular
@@ -58,6 +60,12 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 	log.Debug("Monocular init .... ")
+
+	if val, ok := m.portalProxy.Env().Lookup(helmHubEnabledEnvVar); ok {
+		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = val
+	} else {
+		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "false"
+	}
 
 	m.CacheFolder = m.portalProxy.Env().String(cacheFolderEnvVar, defaultCacheFolder)
 	folder, err := filepath.Abs(m.CacheFolder)
@@ -287,6 +295,11 @@ func removeBreakingHeaders(oldRequest, emptyRequest *http.Request) {
 func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoint *interfaces.CNSIRecord) error {
 	log.Debug("baseHandleMonocularInstance")
 	// Generic proxy is handled last, after plugins.
+
+	if m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] != "true" {
+		err := errors.New("Monocular forwarding is disabled")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	if monocularEndpoint == nil {
 		err := errors.New("No monocular endpoint")

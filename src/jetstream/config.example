@@ -77,3 +77,6 @@ INVITE_USER_CLIENT_SECRET=
 
 # Cache folder for Helm Charts
 # HELM_CACHE_FOLDER=./helm-cache
+
+# Enabled Helm Hub
+HELM_HUB_ENABLED=false

@@ -23,6 +23,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/custombinder"
 	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/docs"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
@@ -770,6 +771,8 @@ func start(config interfaces.PortalConfig, p *portalProxy, needSetupMiddleware b
 	e.HideBanner = true
 	e.HidePort = true
 
+	e.Binder = new(custombinder.CustomBinder)
+
 	// Root level middleware
 	if !isUpgrade {
 		e.Use(sessionCleanupMiddleware)
@@ -1020,7 +1023,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	sessionAuthGroup := sessionGroup.Group("/auth")
 
-	// Connect to Enpoint (SSO)
+	// Connect to Endpoint (SSO)
 	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
 
 	// Verify Session

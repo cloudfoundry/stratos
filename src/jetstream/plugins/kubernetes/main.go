@@ -149,8 +149,8 @@ func (c *KubernetesSpecification) Init() error {
 	// Kube dashboard is enabled by Tech Preview mode
 	c.portalProxy.GetConfig().PluginConfig[kubeDashboardPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
 
-	// Kube terminal is enabled by Tech Preview mode
-	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview)
+	// Kube terminal is enabled by Tech Preview mode AND the configuration being complete
+	c.portalProxy.GetConfig().PluginConfig[kubeTerminalPluginConfigSetting] = strconv.FormatBool(c.portalProxy.GetConfig().EnableTechPreview && c.kubeTerminal != nil)
 
 	// Kick off the cleanup of any old kube terminal pods
 	if c.kubeTerminal != nil {

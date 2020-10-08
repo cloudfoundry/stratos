@@ -1,15 +1,17 @@
-FROM splatform/stratos-bk-build-base:leap15_1 as terminal-builder
+FROM splatform/stratos-bk-build-base:leap15_2 as terminal-builder
 USER root
 WORKDIR /root
 
 # Kubectl versions
-RUN curl -L -o kubectl_1.18 https://storage.googleapis.com/kubernetes-release/release/v1.18.2/bin/linux/amd64/kubectl
-RUN curl -L -o kubectl_1.17 https://storage.googleapis.com/kubernetes-release/release/v1.17.5/bin/linux/amd64/kubectl
-RUN curl -L -o kubectl_1.16 https://storage.googleapis.com/kubernetes-release/release/v1.16.9/bin/linux/amd64/kubectl
-RUN curl -L -o kubectl_1.15 https://storage.googleapis.com/kubernetes-release/release/v1.15.11/bin/linux/amd64/kubectl
+RUN curl -L -o kubectl_1.19 https://storage.googleapis.com/kubernetes-release/release/v1.19.2/bin/linux/amd64/kubectl
+RUN curl -L -o kubectl_1.18 https://storage.googleapis.com/kubernetes-release/release/v1.18.9/bin/linux/amd64/kubectl
+RUN curl -L -o kubectl_1.17 https://storage.googleapis.com/kubernetes-release/release/v1.17.12/bin/linux/amd64/kubectl
+RUN curl -L -o kubectl_1.16 https://storage.googleapis.com/kubernetes-release/release/v1.16.15/bin/linux/amd64/kubectl
+RUN curl -L -o kubectl_1.15 https://storage.googleapis.com/kubernetes-release/release/v1.15.12/bin/linux/amd64/kubectl
 RUN curl -L -o kubectl_1.14 https://storage.googleapis.com/kubernetes-release/release/v1.14.10/bin/linux/amd64/kubectl
 
 # Tar each one up, to save space in the image
+RUN gzip kubectl_1.19
 RUN gzip kubectl_1.18
 RUN gzip kubectl_1.17
 RUN gzip kubectl_1.16
@@ -17,14 +19,14 @@ RUN gzip kubectl_1.15
 RUN gzip kubectl_1.14
 
 # Fetch Helm 3 package
-RUN curl -L -o helm.tar.gz https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz && \
+RUN curl -L -o helm.tar.gz https://get.helm.sh/helm-v3.3.4-linux-amd64.tar.gz && \
     tar -xvf helm.tar.gz --strip-components=1 && \
     gzip helm
 
 RUN ls -al
 
 # Use small base image with very little in it
-FROM splatform/stratos-base:leap15_1
+FROM splatform/stratos-base:leap15_2
 
 # Use gzip from the builder image
 COPY --from=terminal-builder /usr/bin/gunzip /usr/bin/

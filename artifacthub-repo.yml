@@ -1,0 +1,7 @@
+# Artifact Hub repository metadata file
+repositoryID: f8d2e0a4-c944-4882-905f-ba97ffbbffda
+owners: # (optional, used to claim repository ownership)
+  - name: Neil MacDougall
+    email: nwmac
+  - name: Richard Cox
+    email: richard-cox

@@ -58,26 +58,26 @@ export class KubernetesAnalysisService {
         name: 'PopEye',
         id: 'popeye',
         namespaceAware: true,
-        // iconUrl: '/core/assets/custom/popeye.png',
+        // iconUrl: '/core/assets/custom/analysis/popeye.png',
         // iconWidth: '80',
-        descriptionUrl: '/core/assets/custom/popeye.md'
+        descriptionUrl: '/core/assets/custom/analysis/popeye.md'
       },
       'kube-score':
       {
         name: 'Kube Score',
         id: 'kube-score',
         namespaceAware: true,
-        // iconUrl: '/core/assets/custom/kubescore.png',
+        // iconUrl: '/core/assets/custom/analysis/kubescore.png',
         // iconWidth: '120',
-        descriptionUrl: '/core/assets/custom/kubescore.md'
+        descriptionUrl: '/core/assets/custom/analysis/kubescore.md'
       }
       // {
       //   name: 'Sonobuoy',
       //   id: 'sonobuoy',
       //   namespaceAware: false,
-      //   iconUrl: '/core/assets/custom/sonobuoy.png',
+      //   iconUrl: '/core/assets/custom/analysis/sonobuoy.png',
       //   iconWidth: '70',
-      //   descriptionUrl: '/core/assets/custom/sonobuoy.md'
+      //   descriptionUrl: '/core/assets/custom/analysis/sonobuoy.md'
       // }
     };
 
