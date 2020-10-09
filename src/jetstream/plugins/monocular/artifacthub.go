@@ -546,7 +546,18 @@ func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 		for _, v := range chart {
 			if v.Version == version {
 				if len(v.URLs) > 0 {
-					return v.URLs[0], nil
+					chartURL := v.URLs[0]
+					// Check for relative URL
+					if !strings.HasPrefix(chartURL, "http://") && !strings.HasPrefix(chartURL, "https://") {
+						// Avoid double slashes
+						sep := "/"
+						if strings.HasSuffix(repoURL, "/") {
+							sep = ""
+						}
+						// Relative to the download URL
+						chartURL = fmt.Sprintf("%s%s%s", repoURL, sep, chartURL)
+					}
+					return chartURL, nil
 				}
 			}
 		}
