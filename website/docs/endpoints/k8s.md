@@ -1,4 +1,30 @@
-# Connecting Different Kinds of Kubernetes Clusters
+---
+title: Kubernetes Endpoints
+sidebar_label: Kubernetes
+---
+
+[Kubernetes](https://kubernetes.io/) (K8s) is an open-source system for automating deployment, scaling, and management of containerized applications
+
+Stratos provides easy access to Kubernetes features such as
+
+1. Browsing Kubernetes resources and their state
+1. Terminal with kubectl (and helm) CLI tools (Tech Preview)
+1. Run Security Observability Tools (Tech Preview)
+1. Browsing Kubernetes Workloads
+1. The Kubernetes Dashboard (Tech Preview)
+
+Adding a Stratos Helm Endpoint alongside a Kubernetes endpoint unlocks additional features
+
+1. Install a Helm chart into the kubernetes
+1. Upgrade new or existing Helm charts
+
+## Registering a Helm Endpoint
+Stratos Administrator's can register endpoints via the Endpoints page.
+
+Usually all that's needed is the Kubernetes API address, as well as a friendly name to identify the endpoint in Stratos
+
+
+## Connecting Different Kinds of Kubernetes Clusters
 
 Currently the Stratos Kubernetes plugin supports the following four types of clusters:
 
@@ -6,10 +32,11 @@ Currently the Stratos Kubernetes plugin supports the following four types of clu
 2. AWS EKS (AWS IAM auth)
 2. Azure AKS 
 4. Certificate based Kubernetes authentication
+1. // TODO: RC username/password. k3s. kubeconfig import
 
 The following details, how to find the endpoint URL required to register the cluster in Stratos and what credentials are required to connect.
 
-## CAASP (OIDC)
+### CAASP (OIDC)
 To connect a CAASP cluster to Stratos, download a `kubeconfig` from Velum.
 
 1. To find the endpoint URL, inspect the file. The `server` property details the endpoint URL
@@ -26,7 +53,7 @@ clusters:
 2. Specify the Endpoint URL when adding the endpoint to Stratos.
 3. To connect to Kubernetes, select the `CAASP (OIDC)` option, and upload the `kubeconfig` file downloaded from Velum.
 
-## Amazon EKS
+### Amazon EKS
 The following details are required to connect to an EKS system:
 - EKS Cluster endpoint URL. (To register the endpoint).
 
@@ -36,7 +63,7 @@ To Connect the following details are required:
 - AWS Access Key
 - AWS Secret Key
 
-### EKS Endpoint URL And Cluster Name
+#### EKS Endpoint URL And Cluster Name
 You can locate the EKS cluster endpoint URL and the cluster name, by inspecting the generated cluster configuration in your local `kubeconfig`. 
 
 ```
@@ -49,12 +76,12 @@ You can locate the EKS cluster endpoint URL and the cluster name, by inspecting 
 ```
 The endpoint URL is specified in the `server` property (i.e. `https://40BCD34B7E297903DA2EAF19B6164521.sk1.us-east-1.eks.amazonaws.com`), while the cluster name is the last part of the `name` property (i.e `BRSSCF`).
 
-## Azure AKS 
+### Azure AKS 
 To connect an AKS kubernetes instance, the following is required:
 1. AKS Endpoint URL, which can be found from the AKS console or the generated kubernetes configuration.
 2. To connect to the cluster, provide the `kubeconfig` file.
 
-## Certificate based authentication (Minikube)
+### Certificate based authentication (Minikube)
 
 Minikube by default uses TLS certificates for authentication. To find the Minikube endpoint URL, locate the `minikube` entry in your local `kubeconfig` file. In the following example, the `minikube` endpoint URL is `https://192.168.99.100:8443`.
 
