@@ -182,8 +182,6 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// ArtifactHub Icon - always get a specific version
 	echoGroup.Any("/monocular/:guid/chartsvc/v1/hub/assets/:repo/:name/:version/logo", m.artifactHubGetIcon)
 
-	// TODO: Is this still needed?
-	echoGroup.Any("/monocular/schema/:name/:encodedChartURL", m.checkForJsonSchema)
 	echoGroup.Any("/monocular/values/:endpoint/:repo/:name/:version", m.getChartValues)
 
 	// API for Helm Chart Repositories - sync and sync status
