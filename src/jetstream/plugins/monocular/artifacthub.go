@@ -116,7 +116,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 	results := ahData{}
 	decoder := json.NewDecoder(resp.Body)
 	if err := decoder.Decode(&results); err != nil {
-		return fmt.Errorf("Error marhalling Helm Chart list from ArtifactHub - %d:%s", resp.StatusCode, resp.Status)
+		return fmt.Errorf("Error marshalling Helm Chart list from ArtifactHub - %d:%s", resp.StatusCode, resp.Status)
 	}
 
 	// Translate response into a Monocular response
