@@ -1,7 +1,6 @@
 package monocular
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -227,42 +226,6 @@ func (m *Monocular) getChartValues(c echo.Context) error {
 
 	// Artifact Hub
 	return m.artifactHubGetChartFileNamed(c, "values.yaml")
-}
-
-// Check to see if the given chart URL has a schema
-func (m *Monocular) checkForJsonSchema(c echo.Context) error {
-	log.Debug("checkForJsonSchema called")
-
-	chartName := c.Param("name")
-	encodedChartURL := c.Param("encodedChartURL")
-	url, err := base64.StdEncoding.DecodeString(encodedChartURL)
-	if err != nil {
-		return err
-	}
-
-	chartURL := string(url)
-
-	chartCachePath := path.Join(m.CacheFolder, "schemas", encodedChartURL)
-	if err := m.ensureFolder(chartCachePath); err != nil {
-		log.Warnf("checkForJsonSchema: Could not create folder for chart downloads: %+v", err)
-		return err
-	}
-
-	// We can delete the Chart archive - don't need it anymore
-	defer os.RemoveAll(chartCachePath)
-
-	archiveFile := path.Join(chartCachePath, "chart.tgz")
-	if err := m.downloadFile(archiveFile, chartURL); err != nil {
-		return fmt.Errorf("Could not download chart from: %s - %+v", chartURL, err)
-	}
-
-	// Now extract the files we need
-	filenames := []string{"values.schema.json"}
-	if err := extractArchiveFiles(archiveFile, chartName, chartCachePath, filenames); err != nil {
-		return fmt.Errorf("Could not extract files from chart archive: %s - %+v", archiveFile, err)
-	}
-
-	return c.File(path.Join(chartCachePath, "values.schema.json"))
 }
 
 // This is the simpler version that returns just enough data needed for the Charts list view
