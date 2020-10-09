@@ -1,5 +1,5 @@
 <ng-container *ngIf="canShow$ | async">
-  <div *ngIf="analyzers$ | async as analyzers">
+  <div *ngIf="analyzers$ | async as analyzers" class="report-runner">
     <mat-menu #appMenu="matMenu">
       <button (click)="runAnalysis(analyzer.id)" mat-menu-item
         *ngFor="let analyzer of analyzers">{{ analyzer.name }}</button>
