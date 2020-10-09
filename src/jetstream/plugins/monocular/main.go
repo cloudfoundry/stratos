@@ -2,12 +2,10 @@ package monocular
 
 import (
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -23,7 +21,7 @@ const (
 	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
 	cacheFolderEnvVar     = "HELM_CACHE_FOLDER"
 	defaultCacheFolder    = "./.helm-cache"
-	helmHubEnabledEnvVar  = "HELM_HUB_ENABLED"
+	helmHubEnabledEnvVar  = "ARTIFACT_HUB_ENABLED"
 	helmHubEnabled        = "helmHubEnabled"
 )
 
@@ -64,7 +62,7 @@ func (m *Monocular) Init() error {
 	if val, ok := m.portalProxy.Env().Lookup(helmHubEnabledEnvVar); ok {
 		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = val
 	} else {
-		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "false"
+		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "true"
 	}
 
 	m.CacheFolder = m.portalProxy.Env().String(cacheFolderEnvVar, defaultCacheFolder)
@@ -152,6 +150,9 @@ func arrayContainsString(a []string, x string) bool {
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmRepoEndpointType {
 		m.Sync(action, endpoint)
+	} else if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmHubEndpointType && action == 1 {
+		log.Debugf("Deleting Artifact Hub Cache: %s", endpoint.Name)
+		m.deleteCacheForEndpoint(endpoint.GUID)
 	}
 }
 
@@ -178,14 +179,12 @@ func (m *Monocular) AddAdminGroupRoutes(echoGroup *echo.Group) {
 // AddSessionGroupRoutes adds the session routes for this plugin to the Echo server
 func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
-	// API for Helm Chart Repositories - sync and sync status
-	// Reach out to a monocular instance other than Stratos (like helm hub). This is usually done via `x-cap-cnsi-list`
-	// however cannot be done for things like img src
-	echoGroup.Any("/monocular/:guid/chartsvc/*", m.handleMonocularInstance)
+	// ArtifactHub Icon - always get a specific version
+	echoGroup.Any("/monocular/:guid/chartsvc/v1/hub/assets/:repo/:name/:version/logo", m.artifactHubGetIcon)
 
-	echoGroup.Any("/monocular/schema/:name/:encodedChartURL", m.checkForJsonSchema)
 	echoGroup.Any("/monocular/values/:endpoint/:repo/:name/:version", m.getChartValues)
 
+	// API for Helm Chart Repositories - sync and sync status
 	echoGroup.POST("/chartrepos/:guid", m.syncRepo)
 	echoGroup.POST("/chartrepos/status", m.getRepoStatuses)
 
@@ -217,20 +216,10 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 	// Get the chart icon
 	chartSvcGroup.GET("/v1/assets/:repo/:chartName/logo", m.getIcon)
-}
 
-// Check if the request if for an external Monocular instance and handle it if so
-func (m *Monocular) processMonocularRequest(c echo.Context) (bool, error) {
-	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
-	if err != nil {
-		return true, echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+	// ArtifactHub
+	chartSvcGroup.Any("/v1/hub/:endpoint/:repo/:name/:version/:file", m.artifactHubGetChartFile)
 
-	// If this request is associated with an external monocular instance forward the request on to it
-	if externalMonocularEndpoint != nil {
-		return true, m.baseHandleMonocularInstance(c, externalMonocularEndpoint)
-	}
-	return false, nil
 }
 
 // isExternalMonocularRequest .. Should this request go out to an external monocular instance? IF so returns external monocular endpoint
@@ -257,105 +246,9 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*interfaces.
 		return &endpoint, nil
 	}
 
-	return nil, nil
-}
-
-func (m *Monocular) handleMonocularInstance(c echo.Context) error {
-	log.Debug("handleMonocularInstance")
-	guid := c.Param("guid")
-	monocularEndpoint, err := m.validateExternalMonocularEndpoint(guid)
-	if monocularEndpoint == nil || err != nil {
-		err := errors.New("No monocular endpoint")
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return m.baseHandleMonocularInstance(c, monocularEndpoint)
-}
-
-func removeBreakingHeaders(oldRequest, emptyRequest *http.Request) {
-	for k, v := range oldRequest.Header {
-		switch {
-		// Skip these
-		//  - "Referer" causes CF to fail with a 403
-		//  - "Connection", "X-Cap-*" and "Cookie" are consumed by us
-		//  - "Accept-Encoding" must be excluded otherwise the transport will expect us to handle the encoding/compression
-		//  - X-Forwarded-* headers - these will confuse Cloud Foundry in some cases (e.g. load balancers)
-		case k == "Connection", k == "Cookie", k == "Referer", k == "Accept-Encoding",
-			strings.HasPrefix(strings.ToLower(k), "x-cap-"),
-			strings.HasPrefix(strings.ToLower(k), "x-forwarded-"):
-
-		// Forwarding everything else
-		default:
-			emptyRequest.Header[k] = v
-		}
-	}
-}
-
-// baseHandleMonocularInstance ..  Forward request to monocular of endpoint
-func (m *Monocular) baseHandleMonocularInstance(c echo.Context, monocularEndpoint *interfaces.CNSIRecord) error {
-	log.Debug("baseHandleMonocularInstance")
-	// Generic proxy is handled last, after plugins.
-
 	if m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] != "true" {
-		err := errors.New("Monocular forwarding is disabled")
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, errors.New("Artifact Hub is disabled"))
 	}
 
-	if monocularEndpoint == nil {
-		err := errors.New("No monocular endpoint")
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// We should be able to use `DoProxySingleRequest`, which goes through to `doRequest`, however the actual forwarded request is handled
-	// by the 'authHandler' associated with the endpoint OR defaults to an OAuth request. For this case there's no auth at all so falls over.
-	// Tracked in https://github.com/SUSE/stratos/issues/466
-
-	path := c.Request().URL.Path
-	log.Debug("URL to monocular requested: %v", path)
-	if strings.Index(path, stratosPrefix) == 0 {
-		// drop stratos pp/v1
-		path = path[len(stratosPrefix)-1:]
-
-		// drop leading slash
-		if path[0] == '/' {
-			path = path[1:]
-		}
-
-		// drop monocular/:guid
-		parts := strings.Split(path, "/")
-		if parts[0] == "monocular" {
-			parts = parts[2:]
-		}
-
-		path = "/" + strings.Join(parts, "/")
-	}
-
-	return m.proxyToMonocularInstance(c, monocularEndpoint, path)
-}
-
-func (m *Monocular) proxyToMonocularInstance(c echo.Context, monocularEndpoint *interfaces.CNSIRecord, path string) error {
-	url := monocularEndpoint.APIEndpoint
-	log.Debugf("URL to monocular: %v", url.String())
-	url.Path += path
-
-	req, err := http.NewRequest(c.Request().Method, url.String(), nil)
-	removeBreakingHeaders(c.Request(), req)
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	res, err := client.Do(req)
-
-	if err != nil {
-		c.Response().Status = 500
-		c.Response().Write([]byte(err.Error()))
-	} else if res.Body != nil {
-		c.Response().Status = res.StatusCode
-		c.Response().Header().Set("Content-Type", res.Header.Get("Content-Type"))
-		body, _ := ioutil.ReadAll(res.Body)
-		c.Response().Write(body)
-		defer res.Body.Close()
-	} else {
-		c.Response().Status = 200
-	}
-
-	return nil
+	return nil, nil
 }

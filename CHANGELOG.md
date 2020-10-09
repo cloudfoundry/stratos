@@ -1,5 +1,37 @@
 # Change Log
 
+## 4.2.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.1.0...4.2.0)
+
+This release includes the new Kubernetes and Helm extensions. These have been donated to the Cloud Foundry Foundation by SUSE and with this release are now part of upstream Stratos.
+
+Find out more about them on the Stratos web site: https://stratos.app.
+
+Improvements and fixes in this release:
+
+**Improvements:**
+
+- Add Stratos Helm Repo to Artifact Hub [\#4645](https://github.com/cloudfoundry/stratos/issues/4645)
+- Kubernetes and Helm extensions added from downstream SUSE version [\#4619](https://github.com/cloudfoundry/stratos/issues/4619)
+- "Manage Roles By Username" icon isn't obviously the right place to add users to a space [\#4590](https://github.com/cloudfoundry/stratos/issues/4590)
+
+**Fixes:**
+
+- API Keys should not be shown when persistence is disabled [\#4615](https://github.com/cloudfoundry/stratos/issues/4615)
+- Home Page CF App Favouriete card clips text [\#4613](https://github.com/cloudfoundry/stratos/issues/4613)
+- Can not push All-in-one docker image to Eirini [\#4612](https://github.com/cloudfoundry/stratos/issues/4612)
+- CF Service Instances Last Operation is bunched up [\#4605](https://github.com/cloudfoundry/stratos/issues/4605)
+- Cf Events List: Details Column Bugs [\#4600](https://github.com/cloudfoundry/stratos/issues/4600)
+- Service names aren't showing in an app's service screen [\#4577](https://github.com/cloudfoundry/stratos/issues/4577)
+
+**Breaking Changes:**
+
+- **All-in-one Docker image no longer runs as the root user**
+
+  The port used in the Docker All-in-one container image has been changed from 443 to 5443. If you run the container in Docker, you will need to change the port-forwarding option to forward port 5443 and not 443. The documentation has been updated to reflect this. If you push the image to Cloud Foundry, no change is required.
+
+
 ## 4.1.0
 
 [Full Changelog](https://github.com/SUSE/stratos/compare/4.0.1...4.1.0)

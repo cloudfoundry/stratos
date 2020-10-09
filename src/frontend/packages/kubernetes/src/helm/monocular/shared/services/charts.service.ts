@@ -143,13 +143,6 @@ export class ChartsService {
 
   // Get the URL for obtaining a Chart's schema
   getChartSchemaURL(chartVersion: ChartVersion, name: string, repo: RepoAttributes): string {
-    // Helm Hub does not give us the schema information so we have to use an additional backend API to fetch the chart and check
-    if (chartVersion.attributes.schema === undefined) {
-      let url = this.getChartURL(chartVersion, repo);
-      url = btoa(url);
-      return `/pp/v1/monocular/schema/${name}/${url}`;
-    }
-
     // We have the schema URL, so we can fetch that directly
     return chartVersion.attributes.schema ? `${this.hostname}${chartVersion.attributes.schema}` : null;
   }
