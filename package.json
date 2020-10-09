@@ -1,11 +1,10 @@
 {
   "name": "stratos",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
     "build-backend": "./build/bk-build.sh",
-    "build-chartsync": "./build/chartsync-build.sh",
     "full-build-dev": "npm run build-dev; npm run build-backend",
     "fetch-backend-deps": "./build/bk-fetch-deps.sh",
     "test-backend": "./build/bk-build.sh test",
@@ -41,10 +40,11 @@
     "climate": "codeclimate analyze $(git diff --name-only master)",
     "gate-check": "npm run lint && npm run test-headless",
     "store-git-metadata": "node build/store-git-metadata.js",
-    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata",
+    "postinstall": "npm run dev-setup && npm run build-devkit && npm run clean-symlinks && npm run store-git-metadata && npm run prepare-backend",
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
     "clean-symlinks": "node build/clean-symlinks.js",
-    "dev-setup": "node build/dev-setup.js"
+    "dev-setup": "node build/dev-setup.js",
+    "prepare-backend": "node dist-devkit/backend.js"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -94,7 +94,8 @@
     "web-animations-js": "^2.3.2",
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.10.2",
+    "lodash": "^4.17.20"
   },
   "engines": {
     "node": "12.13.0"
@@ -120,7 +121,7 @@
     "browserstack-local": "^1.4.5",
     "codecov": "^3.7.1",
     "codelyzer": "^5.1.2",
-    "copy-webpack-plugin": "5.1.1",
+    "copy-webpack-plugin": "^6.2.0",
     "delete": "^1.1.0",
     "fs-extra": "^9.0.0",
     "globby": "^11.0.0",

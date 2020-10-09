@@ -9,7 +9,7 @@ import (
 	"path"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 

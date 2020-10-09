@@ -8,7 +8,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // KubeAuthProvider is the interface for Kubernetes Authentication Providers

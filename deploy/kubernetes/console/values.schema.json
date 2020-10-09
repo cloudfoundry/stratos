@@ -1,367 +1,367 @@
 {
-    "$schema": "http://json-schema.org/schema#",
-    "type": "object",
-    "properties": {
-        "console": {
-            "type": "object",
-            "properties": {
-                "techPreview": {
-                    "type": "boolean",
-                    "description": "Enable/disable technology preview features"
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "console": {
+      "type": "object",
+      "properties": {
+        "techPreview": {
+          "type": "boolean",
+          "description": "Enable/disable technology preview features"
+        },
+        "apiKeysEnabled": {
+          "type": "string",
+          "enum": ["disabled", "admin_only", "all_users"],
+          "description": "Enable API keys for admins, all users or nobody"
+        },
+        "autoRegisterCF": {
+          "type": ["string", "null"]
+        },
+        "backendLogLevel": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"]
+        },
+        "cookieDomain": {
+          "type": ["string", "null"]
+        },
+        "deploymentAnnotations": {
+          "type": "object"
+        },
+        "deploymentExtraLabels": {
+          "type": "object"
+        },
+        "jobAnnotations": {
+          "type": "object"
+        },
+        "jobExtraLabels": {
+          "type": "object"
+        },
+        "localAdminPassword": {
+          "type": ["string", "null"]
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "podAnnotations": {
+          "type": "object"
+        },
+        "podExtraLabels": {
+          "type": "object"
+        },
+        "service": {
+          "type": "object",
+          "description": "Configure the properties of the external service",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Service type",
+              "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
+            },
+            "annotations": {
+              "type": "object"
+            },
+            "externalIPs": {
+              "type": "array"
+            },
+            "externalName": {
+              "type": ["string", "null"]
+            },
+            "extraLabels": {
+              "type": "object"
+            },
+            "http": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
                 },
-                "apiKeysEnabled": {
-                    "type": "string",
-                    "enum": ["disabled", "admin_only", "all_users"],
-                    "description": "Enable API keys for admins, all users or nobody"
-                },
-                "autoRegisterCF": {
-                    "type": ["string", "null"]
-                },
-                "backendLogLevel": {
-                    "type": "string",
-                    "enum": ["debug", "info", "warn", "error"]
-                },
-                "cookieDomain": {
-                    "type": ["string", "null"]
-                },
-                "deploymentAnnotations": {
-                    "type": "object"
-                },
-                "deploymentExtraLabels": {
-                    "type": "object"
-                },
-                "jobAnnotations": {
-                    "type": "object"
-                },
-                "jobExtraLabels": {
-                    "type": "object"
-                },
-                "localAdminPassword": {
-                    "type": ["string", "null"]
-                },
-                "nodeSelector": {
-                    "type": "object"
-                },
-                "podAnnotations": {
-                    "type": "object"
-                },
-                "podExtraLabels": {
-                    "type": "object"
-                },
-                "service": {
-                    "type": "object",
-                    "description": "Configure the properties of the external service",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "description": "Service type",
-                            "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"]
-                        },
-                        "annotations": {
-                            "type": "object"
-                        },
-                        "externalIPs": {
-                            "type": "array"
-                        },
-                        "externalName": {
-                            "type": ["string", "null"]
-                        },
-                        "extraLabels": {
-                            "type": "object"
-                        },
-                        "http": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                },
-                                "servicePort": {
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "ingress": {
-                            "type": "object",
-                            "properties": {
-                                "annotations": {
-                                    "type": "object"
-                                },
-                                "enabled": {
-                                    "type": "boolean"
-                                },
-                                "extraLabels": {
-                                    "type": "object"
-                                },
-                                "host": {
-                                    "type": ["string", "null"]
-                                },
-                                "secretName": {
-                                    "type": ["string", "null"]
-                                },
-                                "tls": {
-                                    "type": "object",
-                                    "properties": {
-                                        "crt": {
-                                            "type": ["string", "null"]
-                                        },
-                                        "key": {
-                                            "type": ["string", "null"]
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "loadBalancerIP": {
-                            "type": ["string", "null"]
-                        },
-                        "loadBalancerSourceRanges": {
-                            "type": "array"
-                        },
-                        "servicePort": {
-                            "type": "integer"
-                        }
-                    }
-                },
-                "sessionStoreSecret": {
-                    "type": ["string", "null"]
-                },
-                "sslCiphers": {
-                    "type": ["string", "null"]
-                },
-                "sslProtocols": {
-                    "type": ["string", "null"]
-                },
-                "ssoLogin": {
-                    "type": "boolean"
-                },
-                "ssoOptions": {
-                    "type": ["string", "null"]
-                },
-                "statefulSetAnnotations": {
-                    "type": "object"
-                },
-                "statefulSetExtraLabels": {
-                    "type": "object"
-                },
-                "templatesConfigMapName": {
-                    "type": ["string", "null"]
-                },
-                "tlsSecretName": {
-                    "type": ["string", "null"]
-                },
-                "ui": {
-                    "type": "object",
-                    "properties": {
-                        "listAllowLoadMaxed": {
-                            "type": "boolean"
-                        },
-                        "listMaxSize": {
-                            "type": ["integer", "null"]
-                        }
-                    }
-                },
-                "userInviteSubject": {
-                    "type": ["string", "null"]
+                "servicePort": {
+                  "type": "integer"
                 }
-            }
-        },
-        "imagePullPolicy": {
-            "type": "string",
-            "enum": ["Always", "IfNotPresent", "Never"],
-            "description": "Sets the Image Pull Policy"
-        },
-        "dockerRegistrySecret": {
-            "type": "string"
-        },
-        "env": {
-            "type": "object",
-            "properties": {
-                "DOMAIN": {
-                    "type": ["string", "null"]
+              }
+            },
+            "ingress": {
+              "type": "object",
+              "properties": {
+                "annotations": {
+                  "type": "object"
                 },
-                "SMTP_AUTH": {
-                    "type": "string"
+                "enabled": {
+                  "type": "boolean"
                 },
-                "SMTP_FROM_ADDRESS": {
-                    "type": ["string", "null"]
-                },
-                "SMTP_HOST": {
-                    "type": ["string", "null"]
-                },
-                "SMTP_PASSWORD": {
-                    "type": ["string", "null"]
-                },
-                "SMTP_PORT": {
-                    "type": "string"
-                },
-                "SMTP_USER": {
-                    "type": ["string", "null"]
-                },
-                "UAA_HOST": {
-                    "type": ["string", "null"]
-                },
-                "UAA_PORT": {
-                    "type": "integer"
-                },
-                "UAA_ZONE": {
-                    "type": "string"
-                }
-            }
-        },
-        "images": {
-            "type": "object",
-            "properties": {
-                "configInit": {
-                    "type": "string"
-                },
-                "console": {
-                    "type": "string"
-                },
-                "mariadb": {
-                    "type": "string"
-                },
-                "proxy": {
-                    "type": "string"
-                }
-            }
-        },
-        "kube": {
-            "type": "object",
-            "properties": {
-                "auth": {
-                    "type": "string"
-                },
-                "external_console_https_port": {
-                    "type": "integer"
-                },
-                "organization": {
-                    "type": "string"
-                },
-                "registry": {
-                    "type": "object",
-                    "properties": {
-                        "email": {
-                            "type": "string"
-                        },
-                        "hostname": {
-                            "type": ["string", "null"]
-                        },
-                        "password": {
-                            "type": ["string", "null"]
-                        },
-                        "username": {
-                            "type": ["string", "null"]
-                        }
-                    }
-                },
-                "storage_class": {
-                    "type": "object",
-                    "properties": {
-                        "persistent": {
-                            "type": ["string", "null"]
-                        }
-                    }
-                }
-            }
-        },
-        "mariadb": {
-            "type": "object",
-            "properties": {
-                "database": {
-                    "type": "string"
-                },
-                "external": {
-                    "type": "boolean"
+                "extraLabels": {
+                  "type": "object"
                 },
                 "host": {
-                    "type": ["string", "null"]
+                  "type": ["string", "null"]
                 },
-                "nodeSelector": {
-                    "type": "object"
-                },
-                "persistence": {
-                    "type": "object",
-                    "properties": {
-                        "accessMode": {
-                            "type": "string"
-                        },
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "size": {
-                            "type": "string"
-                        },
-                        "storageClass": {
-                            "type": ["string", "null"]
-                        }
-                    }
-                },
-                "port": {
-                    "type": "null"
-                },
-                "resources": {
-                    "type": "object",
-                    "properties": {
-                        "requests": {
-                            "type": "object",
-                            "properties": {
-                                "cpu": {
-                                    "type": "string"
-                                },
-                                "memory": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                },
-                "rootPassword": {
-                    "type": ["string", "null"]
+                "secretName": {
+                  "type": ["string", "null"]
                 },
                 "tls": {
-                    "type": ["string", "null"]
-                },
-                "type": {
-                    "type": ["string", "null"]
-                },
-                "user": {
-                    "type": "string"
-                },
-                "userPassword": {
-                    "type": ["string", "null"]
+                  "type": "object",
+                  "properties": {
+                    "crt": {
+                      "type": ["string", "null"]
+                    },
+                    "key": {
+                      "type": ["string", "null"]
+                    }
+                  }
                 }
+              }
+            },
+            "loadBalancerIP": {
+              "type": ["string", "null"]
+            },
+            "loadBalancerSourceRanges": {
+              "type": "array"
+            },
+            "servicePort": {
+              "type": "integer"
             }
+          }
         },
-        "uaa": {
-            "type": "object",
-            "properties": {
-                "consoleAdminIdentifier": {
-                    "type": ["string", "null"]
-                },
-                "consoleClient": {
-                    "type": ["string", "null"]
-                },
-                "consoleClientSecret": {
-                    "type": ["string", "null"]
-                },
-                "endpoint": {
-                    "type": ["string", "null"]
-                },
-                "skipSSLValidation": {
-                    "type": "boolean"
-                }
+        "sessionStoreSecret": {
+          "type": ["string", "null"]
+        },
+        "sslCiphers": {
+          "type": ["string", "null"]
+        },
+        "sslProtocols": {
+          "type": ["string", "null"]
+        },
+        "ssoLogin": {
+          "type": "boolean"
+        },
+        "ssoOptions": {
+          "type": ["string", "null"]
+        },
+        "statefulSetAnnotations": {
+          "type": "object"
+        },
+        "statefulSetExtraLabels": {
+          "type": "object"
+        },
+        "templatesConfigMapName": {
+          "type": ["string", "null"]
+        },
+        "tlsSecretName": {
+          "type": ["string", "null"]
+        },
+        "ui": {
+          "type": "object",
+          "properties": {
+            "listAllowLoadMaxed": {
+              "type": "boolean"
+            },
+            "listMaxSize": {
+              "type": ["integer", "null"]
             }
+          }
         },
-        "autoCleanup": {
-            "type": "boolean"
-        },
-        "configInit": {
-            "type": "object",
-            "properties": {
-                "nodeSelector": {
-                    "type": "object"
-                }
-            }
+        "userInviteSubject": {
+          "type": ["string", "null"]
         }
+      }
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"],
+      "description": "Sets the Image Pull Policy"
+    },
+    "dockerRegistrySecret": {
+      "type": "string"
+    },
+    "env": {
+      "type": "object",
+      "properties": {
+        "DOMAIN": {
+          "type": ["string", "null"]
+        },
+        "SMTP_AUTH": {
+          "type": "string"
+        },
+        "SMTP_FROM_ADDRESS": {
+          "type": ["string", "null"]
+        },
+        "SMTP_HOST": {
+          "type": ["string", "null"]
+        },
+        "SMTP_PASSWORD": {
+          "type": ["string", "null"]
+        },
+        "SMTP_PORT": {
+          "type": "string"
+        },
+        "SMTP_USER": {
+          "type": ["string", "null"]
+        },
+        "UAA_HOST": {
+          "type": ["string", "null"]
+        },
+        "UAA_PORT": {
+          "type": "integer"
+        },
+        "UAA_ZONE": {
+          "type": "string"
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "properties": {
+        "configInit": {
+          "type": "string"
+        },
+        "console": {
+          "type": "string"
+        },
+        "mariadb": {
+          "type": "string"
+        },
+        "proxy": {
+          "type": "string"
+        }
+      }
+    },
+    "kube": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "string"
+        },
+        "external_console_https_port": {
+          "type": "integer"
+        },
+        "organization": {
+          "type": "string"
+        },
+        "registry": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "hostname": {
+              "type": ["string", "null"]
+            },
+            "password": {
+              "type": ["string", "null"]
+            },
+            "username": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "storage_class": {
+          "type": "object",
+          "properties": {
+            "persistent": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      }
+    },
+    "mariadb": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "string"
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "host": {
+          "type": ["string", "null"]
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "accessMode": {
+              "type": "string"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "size": {
+              "type": "string"
+            },
+            "storageClass": {
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "port": {
+          "type": "null"
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "type": "string"
+                },
+                "memory": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "rootPassword": {
+          "type": ["string", "null"]
+        },
+        "tls": {
+          "type": ["string", "null"]
+        },
+        "type": {
+          "type": ["string", "null"]
+        },
+        "user": {
+          "type": "string"
+        },
+        "userPassword": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "uaa": {
+      "type": "object",
+      "properties": {
+        "consoleAdminIdentifier": {
+          "type": ["string", "null"]
+        },
+        "consoleClient": {
+          "type": ["string", "null"]
+        },
+        "consoleClientSecret": {
+          "type": ["string", "null"]
+        },
+        "endpoint": {
+          "type": ["string", "null"]
+        },
+        "skipSSLValidation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "autoCleanup": {
+      "type": "boolean"
+    },
+    "configInit": {
+      "type": "object",
+      "properties": {
+        "nodeSelector": {
+          "type": "object"
+        }
+      }
     }
+  }
 }

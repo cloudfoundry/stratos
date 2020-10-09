@@ -9,7 +9,7 @@ import (
 
 	// "github.com/SermoDigital/jose/jws"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
@@ -144,11 +144,11 @@ func (c *AWSKubeAuth) getTokenIAM(info AWSIAMUserInfo) (string, error) {
 }
 
 func (c *AWSKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
-		// Register auth type with Jetstream
-		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
-			Handler:  c.DoFlowRequest,
-			UserInfo: c.GetUserFromToken,
-		})
+	// Register auth type with Jetstream
+	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		Handler:  c.DoFlowRequest,
+		UserInfo: c.GetUserFromToken,
+	})
 }
 
 func (c *AWSKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {

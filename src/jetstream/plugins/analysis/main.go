@@ -10,7 +10,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/analysis/store"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,6 +31,10 @@ const (
 type Analysis struct {
 	portalProxy    interfaces.PortalProxy
 	analysisServer string
+}
+
+func init() {
+	interfaces.AddPlugin("analysis", []string{"kubernetes"}, Init)
 }
 
 // Init creates a new Analysis

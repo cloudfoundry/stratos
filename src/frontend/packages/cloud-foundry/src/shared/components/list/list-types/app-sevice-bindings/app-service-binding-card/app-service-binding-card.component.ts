@@ -68,10 +68,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
-  }
+  };
   brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.SCOPE,
-  }
+  };
 
   constructor(
     private dialog: MatDialog,
@@ -167,10 +167,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.serviceInstance$ = userProvidedServiceInstance$;
     this.service$ = of(null);
     this.listData = [{
-      label: null,
-      data$: of('User Provided Service Instance'),
-      customStyle: 'long-text'
-    }, {
       label: 'Route Service URL',
       data$: userProvidedServiceInstance$.pipe(
         map(service => service.entity.entity.route_service_url)
@@ -209,7 +205,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       data: envVarData,
       disableClose: false
     });
-  }
+  };
 
   private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -219,7 +215,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       false,
       this.isUserProvidedServiceInstance
     );
-  }
+  };
 
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.row.entity.service_instance_guid,
@@ -229,5 +225,5 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
     },
     this.isUserProvidedServiceInstance
-  )
+  );
 }

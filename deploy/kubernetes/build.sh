@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=leap15_1
+BASE_IMAGE_TAG=leap15_2
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -169,7 +169,7 @@ function patchDockerfile {
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
     sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/leap15_1/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
+  sed -i.bak "s/leap15_2/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
 

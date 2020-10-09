@@ -26,8 +26,9 @@ TAG_LATEST="false"
 NO_PUSH="true"
 DOCKER_REG_DEFAULTS="true"
 HAS_CUSTOM_BUILD="false"
+EXTRA_BUILD_ARGS=""
 
-while getopts ":ho:r:t:Tlb:Opc" opt; do
+while getopts ":ho:r:t:Tlb:Opu" opt; do
   case $opt in
     h)
       echo
@@ -60,6 +61,9 @@ while getopts ":ho:r:t:Tlb:Opc" opt; do
       ;;
     p)
       NO_PUSH="false"
+      ;;      
+    u)
+      EXTRA_BUILD_ARGS="--build-arg USE_PREBUILT_UI=true"
       ;;      
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -128,7 +132,7 @@ function patchAndPushImage {
   PATCHED_DOCKER_FILE="${DOCKER_FILE}.patched"
 
   patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" ${FOLDER} ${TARGET}
+  buildAndPublishImage ${NAME} "${PATCHED_DOCKER_FILE}" ${FOLDER} ${TARGET} "${EXTRA_BUILD_ARGS}"
 
   rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}
   rm -rf ${FOLDER}/${PATCHED_DOCKER_FILE}.bak

@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
@@ -138,7 +138,6 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 		CFAdminIdentifier:    CFAdminIdentifier,
 		AuthEndpointType:     "remote",
 	}
-
 
 	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)

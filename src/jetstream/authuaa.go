@@ -13,7 +13,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -463,7 +463,6 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
 
-
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
 
@@ -535,7 +534,7 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	if !safeSSORedirectState(state,whiteListStr) {
+	if !safeSSORedirectState(state, whiteListStr) {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: Disallowed redirect state",

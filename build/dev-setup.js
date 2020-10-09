@@ -3,18 +3,34 @@
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // __dirname is the folder where build.js is located
 const STRATOS_DIR= path.resolve(__dirname, '..');
+const LOCALDEV_PATH = path.join(__dirname, 'proxy.conf.localdev.js')
+const OLD_TEMPLATE_DIGEST = '8ee6fa35784909f985f1a00daacadc08'
 
 // Only copy files if they are not already there - just make sure initial versions are in place for developer
 
 // Proxy config file
 const PROXY_CONF = path.join(STRATOS_DIR, 'proxy.conf.js');
 if (!fs.existsSync(PROXY_CONF)) {
-  let err = fs.copyFileSync(path.join(__dirname, 'proxy.conf.localdev.js'), PROXY_CONF);
+  let err = fs.copyFileSync(LOCALDEV_PATH, PROXY_CONF);
   if (err) {
     console.log(err);
+  }
+} else {
+  let fileContents = fs.readFileSync(PROXY_CONF, 'utf8');
+  let digest = crypto.createHash('md5').update(fileContents).digest("hex");
+
+  if (digest == OLD_TEMPLATE_DIGEST) {
+    // overwriting the file with a new template if it is identical to the old template
+    let err = fs.copyFileSync(LOCALDEV_PATH, PROXY_CONF);
+    if (err) {
+      console.log(err);
+    }
+  } else if (!fileContents.includes('"/api"')) {
+    console.warn('"/api" section is missing in proxy.conf.js, please add it manually (see proxy.conf.localdev.js)');
   }
 }
 

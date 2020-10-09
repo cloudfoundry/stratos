@@ -324,7 +324,7 @@ export class CFHelpers {
     return this.fetchDefaultCfGuid(false)
       .then(() => this.fetchDefaultOrgGuid(false))
       .then(() => this.fetchDefaultSpaceGuid(false));
-  }
+  };
 
 
   fetchDefaultCfGuid = (fromCache = true): promise.Promise<string> => {
@@ -334,7 +334,7 @@ export class CFHelpers {
         CFHelpers.cachedDefaultCfGuid = guid;
         return CFHelpers.cachedDefaultCfGuid;
       });
-  }
+  };
 
   fetchDefaultOrgGuid = (fromCache = true): promise.Promise<string> => {
     return fromCache && CFHelpers.cachedDefaultOrgGuid ?
@@ -349,7 +349,7 @@ export class CFHelpers {
           CFHelpers.cachedDefaultOrgGuid = org.metadata.guid;
           return CFHelpers.cachedDefaultOrgGuid;
         });
-  }
+  };
 
   fetchDefaultSpaceGuid = (fromCache = true): promise.Promise<string> => {
     return fromCache && CFHelpers.cachedDefaultSpaceGuid ?
@@ -367,7 +367,7 @@ export class CFHelpers {
           CFHelpers.cachedDefaultSpaceGuid = space.metadata.guid;
           return CFHelpers.cachedDefaultSpaceGuid;
         });
-  }
+  };
 
   addOrgUserRole(cfGuid, orgGuid, userName) {
     return this.cfRequestHelper.sendCfPut<APIResource<CfUser>>(cfGuid, 'organizations/' + orgGuid + '/users', {
@@ -515,7 +515,7 @@ export class CFHelpers {
 
   createTestAppAndNav(appName: string, nav = true): promise.Promise<{
     cfGuid: string,
-    app: APIResource<IApp>
+    app: APIResource<IApp>,
   }> {
     // It's advised to run cfHelper.updateDefaultCfOrgSpace first
     return this.basicCreateApp(

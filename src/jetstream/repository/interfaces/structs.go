@@ -1,12 +1,14 @@
 package interfaces
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
@@ -381,4 +383,60 @@ type PortalConfig struct {
 // SetCanPerformMigrations updates the state that records if we can perform Database migrations
 func (c *PortalConfig) SetCanPerformMigrations(value bool) {
 	c.CanMigrateDatabaseSchema = c.CanMigrateDatabaseSchema && value
+}
+
+type LoginToCNSIParams struct {
+	CNSIGUID     string `json:"cnsi_guid" form:"cnsi_guid" query:"cnsi_guid"`
+	SystemShared string `json:"system_shared" form:"system_shared" query:"system_shared"`
+	ConnectType  string `json:"connect_type" form:"connect_type" query:"connect_type"`
+	Username     string `json:"username" form:"username" query:"username"`
+	Password     string `json:"password" form:"password" query:"password"`
+}
+
+type RegisterEndpointParams struct {
+	EndpointType      string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
+	CNSIName          string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
+	APIEndpoint       string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
+	SkipSSLValidation string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
+	SSOAllowed        string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
+	CNSIClientID      string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
+	CNSIClientSecret  string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
+	SubType           string `json:"sub_type" form:"sub_type" query:"sub_type"`
+}
+
+type UpdateEndpointParams struct {
+	ID            string `json:"id" form:"id" query:"id"`
+	Name          string `json:"name" form:"name" query:"name"`
+	SkipSSL       string `json:"skipSSL" form:"skipSSL" query:"skipSSL"`
+	SetClientInfo string `json:"setClientInfo" form:"setClientInfo" query:"setClientInfo"`
+	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
+	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
+	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
+}
+
+// BindOnce -- allows to call echo.Context.Bind() multiple times on the same request
+// After calling Bind(), request body stream is closed and the context can't be bound again.
+// Bound struct is stored in the context store after the first call and retrieved from store
+// on subsequent calls.
+func BindOnce(params interface{}, c echo.Context) error {
+	typeStr := reflect.TypeOf(params).String()
+	ctxType := c.Get("magicBindType")
+	if ctxType != nil && ctxType != typeStr {
+		// Prevent calling c.Bind() multiple times with different params interfaces.
+		panic(fmt.Sprintf("Calling BindOnce on %v after it was called on %v", typeStr, ctxType))
+	}
+
+	ctxVal := c.Get("magicBindVal")
+	if ctxVal == nil {
+		if err := c.Bind(params); err != nil {
+			return err
+		}
+
+		c.Set("magicBindType", typeStr)
+		c.Set("magicBindVal", params)
+	} else {
+		reflect.ValueOf(params).Elem().Set(reflect.ValueOf(ctxVal).Elem())
+	}
+
+	return nil
 }

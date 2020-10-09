@@ -5,8 +5,13 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("userfavorites", nil, Init)
+}
 
 // UserFavorites stores user favorites
 type UserFavorites struct {

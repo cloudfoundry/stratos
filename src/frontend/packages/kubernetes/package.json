@@ -11,6 +11,7 @@
     "theming": "sass/_all-theme#apply-theme-kubernetes",
     "assets": {
       "assets": "core/assets"
-    }
+    },
+    "backend": ["analysis", "kubernetes", "monocular"]
   }
 }

@@ -1,15 +1,22 @@
 <app-meta-card class="app-service-card" [actionMenu]="cardMenu" [entityConfig]="entityConfig">
   <app-meta-card-title>
     <div class="app-service-card__title">
-      {{ (serviceInstance$ | async)?.entity.name}}
+      {{ (serviceInstance$ | async)?.entity.entity.name}}
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
   <app-meta-card-item [customStyle]="'long-text'">
     <app-meta-card-key></app-meta-card-key>
-    <app-meta-card-value>{{ serviceDescription$ | async }} </app-meta-card-value>
+    <app-meta-card-value>
+      <span *ngIf="isUserProvidedServiceInstance; else service">
+        User Provided Service Instance
+      </span>
+      <ng-template #service>
+        {{serviceDescription$ | async}}
+      </ng-template>
+    </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
+  <app-meta-card-item *ngIf="!isUserProvidedServiceInstance">
     <app-meta-card-key>Service</app-meta-card-key>
     <app-meta-card-value><a [routerLink]="serviceUrl$ | async">{{ serviceName$ | async }}</a>
     </app-meta-card-value>

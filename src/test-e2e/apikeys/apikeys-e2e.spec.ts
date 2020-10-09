@@ -2,6 +2,7 @@ import { promise } from 'protractor';
 
 import { MessageNoContentPo } from '../application/po/message-no-autoscaler-policy';
 import { e2e } from '../e2e';
+import { EndpointsPage } from '../endpoints/endpoints.po';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
 import { Component } from '../po/component.po';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
@@ -15,7 +16,9 @@ describe('API Keys -', () => {
 
   let helper: ApiKeyE2eHelper;
   let newKeysComment: string;
-  let page = new APIKeyListPage();
+  const page = new APIKeyListPage();
+  const endpointsPage = new EndpointsPage();
+
   let currentKeysCount = promise.fullyResolved(0);
 
   beforeAll(() => {
@@ -24,15 +27,21 @@ describe('API Keys -', () => {
       .getInfo(ConsoleUserType.admin);
     helper = new ApiKeyE2eHelper(setup);
 
-    newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase()
-  })
+    newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase();
+  });
 
   // Should be ran in sequence
   describe('Ordered Tests - ', () => {
+
+    it('Should load UI', () => {
+      // Wait for the UI to load - should go to the endpoints page
+      endpointsPage.waitForPage();
+    });
+
     it('Navigate to api key page', () => {
       page.header.clickUserMenuItem('API Keys');
       page.waitForPage();
-    })
+    });
 
     it('New key does not exist', () => {
       // Validation check
@@ -42,9 +51,9 @@ describe('API Keys -', () => {
           currentKeysCount = page.list.table.getRowCount();
         } else {
           const noContentComponent = new MessageNoContentPo();
-          expect(noContentComponent.isDisplayed()).toBeTruthy()
+          expect(noContentComponent.isDisplayed()).toBeTruthy();
         }
-      })
+      });
     });
 
     describe('Add Dialog - ', () => {
@@ -75,7 +84,7 @@ describe('API Keys -', () => {
 
         dialog.form.fill({
           comment: newKeysComment
-        })
+        });
 
         expect(dialog.canClose()).toBeTruthy();
         expect(dialog.canCreate()).toBeTruthy();
@@ -83,19 +92,19 @@ describe('API Keys -', () => {
         dialog.create();
         dialog.waitUntilNotShown();
       });
-    })
+    });
 
     it('New key has a secret', () => {
       const secret = new Component(page.getKeySecret());
       secret.waitUntilShown();
       expect(secret.getComponent().getText()).toBeDefined();
       page.closeKeySecret();
-      secret.waitUntilNotShown()
-    })
+      secret.waitUntilNotShown();
+    });
 
     it('New key is in updated table', () => {
       expect(page.list.table.findRow('description', newKeysComment, true)).toBeGreaterThanOrEqual(0);
-    })
+    });
 
     it('Delete new key', () => {
       return page.list.table.findRow('description', newKeysComment, true)
@@ -110,10 +119,10 @@ describe('API Keys -', () => {
             page.list.waitForNoLoadingIndicator();
             expect(page.list.table.getRowCount()).toEqual(currentKeysCount);
           } else {
-            expect(0).toEqual(currentKeysCount)
+            expect(0).toEqual(currentKeysCount);
           }
-        })
-    })
-  })
+        });
+    });
+  });
 
 });
