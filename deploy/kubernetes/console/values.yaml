@@ -116,6 +116,9 @@ console:
   # Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
   kubeDashboardImage:
 
+  # Enable Helm Hub
+  helmHubEnabled: false
+
   # Size for analysis reports volume
   reportsVolumeSize: 1Gi
 

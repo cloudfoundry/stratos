@@ -123,7 +123,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   /**
    * How many endpoints of this type can be registered, 0 - many
    */
-  readonly registeredLimit?: number;
+  readonly registeredLimit?: (store: Store<AppState>) => Observable<number> | number;
   /**
    * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
    */
