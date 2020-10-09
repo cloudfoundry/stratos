@@ -21,7 +21,7 @@ const (
 	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
 	cacheFolderEnvVar     = "HELM_CACHE_FOLDER"
 	defaultCacheFolder    = "./.helm-cache"
-	helmHubEnabledEnvVar  = "HELM_HUB_ENABLED"
+	helmHubEnabledEnvVar  = "ARTIFACT_HUB_ENABLED"
 	helmHubEnabled        = "helmHubEnabled"
 )
 
@@ -62,7 +62,7 @@ func (m *Monocular) Init() error {
 	if val, ok := m.portalProxy.Env().Lookup(helmHubEnabledEnvVar); ok {
 		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = val
 	} else {
-		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "false"
+		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "true"
 	}
 
 	m.CacheFolder = m.portalProxy.Env().String(cacheFolderEnvVar, defaultCacheFolder)
