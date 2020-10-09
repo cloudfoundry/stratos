@@ -142,6 +142,9 @@ func arrayContainsString(a []string, x string) bool {
 func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmRepoEndpointType {
 		m.Sync(action, endpoint)
+	} else if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmHubEndpointType && action == 1 {
+		log.Debugf("Deleting Artifact Hub Cache: %s", endpoint.Name)
+		m.deleteCacheForEndpoint(endpoint.GUID)
 	}
 }
 
