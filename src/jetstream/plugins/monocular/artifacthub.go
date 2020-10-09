@@ -348,8 +348,11 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 	chartName := c.Param("name")
 	version := c.Param("version")
 
+	var contentType string
+
 	// Look to see if we have the icon cached - fetch it if not
 	iconFilePath := path.Join(m.CacheFolder, endpoint, fmt.Sprintf("%s_%s_%s", repo, chartName, version), "icon")
+	iconTypeFilePath := path.Join(m.CacheFolder, endpoint, fmt.Sprintf("%s_%s_%s", repo, chartName, version), "icon.type")
 	stats, err := os.Stat(iconFilePath)
 	if os.IsNotExist(err) {
 		// Not cached, so need to get chart info from ArtifactHub, cache icon and send
@@ -373,7 +376,7 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 
 		// Now download the icon
 		iconURL := fmt.Sprintf("https://artifacthub.io/image/%s", hubInfo.IconID)
-		err = m.downloadFile(iconFilePath, iconURL)
+		contentType, err = m.downloadFile(iconFilePath, iconURL)
 		if err != nil {
 			return sendPlaceHolderIcon(c)
 		}
@@ -381,6 +384,9 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 		if err != nil {
 			return sendPlaceHolderIcon(c)
 		}
+
+		// Write out the content type
+		ioutil.WriteFile(iconTypeFilePath, []byte(contentType), 0644)
 	}
 
 	// If the file is 0 length
@@ -388,7 +394,21 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 		return sendPlaceHolderIcon(c)
 	}
 
-	c.File(iconFilePath)
+	// Read the content type
+	if len(contentType) == 0 {
+		if data, err := ioutil.ReadFile(iconTypeFilePath); err == nil {
+			contentType = string(data)
+		}
+	}
+
+	iconFile, err := ioutil.ReadFile(iconFilePath)
+	if err != nil {
+		return sendPlaceHolderIcon(c)
+	}
+	c.Response().Header().Set("Content-Type", contentType)
+	c.Response().Status = 200
+	c.Response().Write(iconFile)
+
 	return nil
 }
 
@@ -512,10 +532,22 @@ func filterSourceLinks(links []Repo) []string {
 	return sources
 }
 
+func joinURL(base, name string) string {
+	// Avoid double slashes
+	sep := "/"
+	if strings.HasSuffix(base, "/") {
+		sep = ""
+	}
+	return fmt.Sprintf("%s%s%s", base, sep, name)
+}
+
 // Download the Helm Repository index and look for the specified chart and version and return the download URL for the chart
 func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 	httpClient := m.portalProxy.GetHttpClient(true)
-	resp, err := httpClient.Get(fmt.Sprintf("%s/index.yaml", repoURL))
+
+	helmIndexURL := joinURL(repoURL, "index.yaml")
+	resp, err := httpClient.Get(helmIndexURL)
+
 	if err != nil {
 		return "", fmt.Errorf("Could not download Helm Repository Index: %s", err)
 	}
@@ -541,13 +573,8 @@ func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 					chartURL := v.URLs[0]
 					// Check for relative URL
 					if !strings.HasPrefix(chartURL, "http://") && !strings.HasPrefix(chartURL, "https://") {
-						// Avoid double slashes
-						sep := "/"
-						if strings.HasSuffix(repoURL, "/") {
-							sep = ""
-						}
 						// Relative to the download URL
-						chartURL = fmt.Sprintf("%s%s%s", repoURL, sep, chartURL)
+						chartURL = joinURL(repoURL, chartURL)
 					}
 					return chartURL, nil
 				}

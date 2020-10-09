@@ -197,7 +197,7 @@ func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL str
 	}
 
 	archiveFile := path.Join(chartCachePath, "chart.tgz")
-	if err := m.downloadFile(archiveFile, chartURL); err != nil {
+	if _, err := m.downloadFile(archiveFile, chartURL); err != nil {
 		return fmt.Errorf("Could not download chart from: %s - %+v", chartURL, err)
 	}
 
@@ -232,7 +232,7 @@ func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error)
 		if _, err := os.Stat(iconFilePath); os.IsNotExist(err) {
 			if err := m.ensureFolder(path.Dir(iconFilePath)); err != nil {
 				log.Error(err)
-			} else if err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
+			} else if _, err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
 				log.Errorf("Could not download chart icon: %+v", err)
 				return "", fmt.Errorf("Could not download Chart icon: %+v", err)
 			}
@@ -244,29 +244,29 @@ func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error)
 }
 
 // download a file from the given url and save to the file path
-func (m *Monocular) downloadFile(filepath string, url string) error {
+func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	// Get the data
 	httpClient := m.portalProxy.GetHttpClient(false)
 	resp, err := httpClient.Get(url)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Error downloading icon: %s - %d:%s", url, resp.StatusCode, resp.Status)
+		return "", fmt.Errorf("Error downloading icon: %s - %d:%s", url, resp.StatusCode, resp.Status)
 	}
 
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer out.Close()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
-	return err
+	return resp.Header.Get("Content-Type"), err
 }
 
 func extractArchiveFiles(archivePath, chartName, downloadFolder string, filenames []string) error {
