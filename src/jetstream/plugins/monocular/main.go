@@ -248,11 +248,9 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*interfaces.
 		return &endpoint, nil
 	}
 
+	if m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] != "true" {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, errors.New("Artifact Hub is disabled"))
+	}
+
 	return nil, nil
 }
-
-
-	if m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] != "true" {
-		err := errors.New("Monocular forwarding is disabled")
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
