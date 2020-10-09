@@ -18,6 +18,8 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Artifact Hub support
+
 type artifactHubHandler func(c echo.Context, endpointID string) error
 
 const (
