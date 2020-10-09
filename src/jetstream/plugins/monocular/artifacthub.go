@@ -225,7 +225,7 @@ func (m *Monocular) artifactHubGetChartVersion(c echo.Context, endpointID string
 	}
 
 	// Download the chart and cache required files
-	cacheFolder, err := m.artifactHubCacheChartFiles(endpointID, info.Repository.URL, chartName, version, info.Digest)
+	cacheFolder, err := m.artifactHubCacheChartFiles(endpointID, repo, info.Repository.URL, chartName, version, info.Digest)
 	if err != nil {
 		return err
 	}
@@ -301,7 +301,7 @@ func (m *Monocular) artifactHubGetChartFileNamed(c echo.Context, file string) er
 		return err
 	}
 
-	cacheFolder, err := m.artifactHubCacheChartFiles(endpointID, info.Repository.URL, chartName, version, info.Digest)
+	cacheFolder, err := m.artifactHubCacheChartFiles(endpointID, repo, info.Repository.URL, chartName, version, info.Digest)
 	if err != nil {
 		return err
 	}
@@ -348,16 +348,8 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 	chartName := c.Param("name")
 	version := c.Param("version")
 
-	// Fake chart store record to use with Cache
-	chartInfo := store.ChartStoreRecord{
-		EndpointID: endpoint,
-		Version:    version,
-		Repository: repo,
-		Name:       chartName,
-	}
-
 	// Look to see if we have the icon cached - fetch it if not
-	iconFilePath := m.getIconCacheFile(chartInfo)
+	iconFilePath := path.Join(m.CacheFolder, endpoint, fmt.Sprintf("%s_%s_%s", repo, chartName, version), "icon")
 	stats, err := os.Stat(iconFilePath)
 	if os.IsNotExist(err) {
 		// Not cached, so need to get chart info from ArtifactHub, cache icon and send
@@ -467,10 +459,10 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 }
 
 // Cache the chart files if needed - in the same way we do for our built-in Monocular cache
-func (m *Monocular) artifactHubCacheChartFiles(endpointID, repoURL, name, version, digest string) (string, error) {
+func (m *Monocular) artifactHubCacheChartFiles(endpointID, repoName, repoURL, name, version, digest string) (string, error) {
 
 	// First look to see if there is a digest file
-	cacheFolder := path.Join(m.CacheFolder, endpointID, fmt.Sprintf("%s_%s", name, version))
+	cacheFolder := path.Join(m.CacheFolder, endpointID, fmt.Sprintf("%s_%s_%s", repoName, name, version))
 	if hasDigestFile(cacheFolder, digest) {
 		return cacheFolder, nil
 	}
