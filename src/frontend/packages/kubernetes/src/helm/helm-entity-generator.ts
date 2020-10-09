@@ -81,8 +81,8 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
       },
       {
         type: HELM_HUB_ENDPOINT_TYPE,
-        label: 'Helm Hub',
-        labelPlural: 'Helm Hubs',
+        label: 'Artifact Hub',
+        labelPlural: 'Artifact Hubs',
         authTypes: [],
         unConnectable: true,
         logoUrl: '/core/assets/custom/helm.svg',

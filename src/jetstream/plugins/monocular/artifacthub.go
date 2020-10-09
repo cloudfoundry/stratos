@@ -26,6 +26,7 @@ const (
 	hubCacheExpiry = 15 * time.Minute
 )
 
+// Structs for data coming back from the ArtifactHub API
 type ahData struct {
 	Data []ahChart `json:"data"`
 }
@@ -65,7 +66,7 @@ type ahInfo struct {
 	AppVersion        string            `json:"app_version"`
 	IconID            string            `json:"logo_image_id"`
 	Repository        Repo              `json:"repository"`
-	AvailableVersions ahVersions        `json:"available_versions"`
+	AvailableVersions []ahVersion       `json:"available_versions"`
 	Readme            string            `json:"readme"`
 	Links             []Repo            `json:"links"`
 	Maintainers       []ChartMaintainer `json:"maintainers"`
@@ -73,21 +74,7 @@ type ahInfo struct {
 
 type ahVersions []ahVersion
 
-func (r ahVersions) Len() int {
-	return len(r)
-}
-
-func (r ahVersions) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
-}
-
-func (r ahVersions) Less(i, j int) bool {
-	ci := r[i].SemVer
-	cj := r[j].SemVer
-
-	return ci.LessThan(&cj)
-}
-
+// Look to see if the request is for ArtifactHub - if it is, invoke the specified request handler
 func (m *Monocular) handleArtifactRequest(c echo.Context, handler artifactHubHandler) (bool, error) {
 	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
 	if err != nil {
@@ -101,8 +88,9 @@ func (m *Monocular) handleArtifactRequest(c echo.Context, handler artifactHubHan
 	return false, nil
 }
 
+// Fetch all charts from ArtifactHub using the Monocular-compatible search API
+// We cache the results of the search on disk for the configfured cache period
 func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string) error {
-
 	cacheFolder := path.Join(m.CacheFolder, endpointID)
 	indexFile := path.Join(cacheFolder, "hub_index.json")
 	if ok := useCachedFile(indexFile); ok {
@@ -110,8 +98,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 		return c.File(indexFile)
 	}
 
-	// Fetch index
-	// Get the data
+	// Fetch index of charts usign the search API
 	httpClient := m.portalProxy.GetHttpClient(true)
 	resp, err := httpClient.Get(searchURL)
 	if err != nil {
@@ -130,7 +117,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 		return fmt.Errorf("Error marhalling Helm Chart list from ArtifactHub - %d:%s", resp.StatusCode, resp.Status)
 	}
 
-	// Decode the response
+	// Translate response into a Monocular response
 	charts := make(APIListResponse, len(results.Data))
 	for index, info := range results.Data {
 		ids := strings.Split(info.ID, "/")
@@ -171,6 +158,8 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 	return c.JSON(200, response)
 }
 
+// Get a specific Chart from ArtifactHub
+// We cache metadata on disk in the artifactHubGetPackageInfo function
 func (m *Monocular) artifactHubGetChart(c echo.Context, endpointID string) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -219,16 +208,21 @@ func (m *Monocular) artifactHubGetChart(c echo.Context, endpointID string) error
 }
 
 // Get the metadata for a specific version of a chart
+// We need to download the Chart archive and unpack it in order to get the chart URL and information
+// about whether the Chart has a schema
 func (m *Monocular) artifactHubGetChartVersion(c echo.Context, endpointID string) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
 
+	// Get the package info - this allows us to determine the URL of the Helm Repository
+	// which we need in order to get the Chart URL and download
 	info, err := m.artifactHubGetPackageInfo(endpointID, repo, chartName, version)
 	if err != nil {
 		return err
 	}
 
+	// Download the chart and cache required files
 	cacheFolder, err := m.artifactHubCacheChartFiles(endpointID, info.Repository.URL, chartName, version, info.Digest)
 	if err != nil {
 		return err
@@ -274,6 +268,7 @@ func (m *Monocular) artifactHubGetChartVersion(c echo.Context, endpointID string
 	return c.JSON(200, response)
 }
 
+// Return an asset URL if teh asset is available in the cache
 func ahGetFileAssetURL(endpointID, repo, name, version, folder, filename string) string {
 	cachePath := path.Join(folder, filename)
 	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
@@ -282,13 +277,14 @@ func ahGetFileAssetURL(endpointID, repo, name, version, folder, filename string)
 	return fmt.Sprintf("/v1/hub/%s/%s/%s/%s/%s", endpointID, repo, name, version, filename)
 }
 
+// Get a file for the given chart (readme, valuees, schema)
 func (m *Monocular) artifactHubGetChartFile(c echo.Context) error {
 	file := c.Param("file")
 	return m.artifactHubGetChartFileNamed(c, file)
 }
 
+// Same as abuve, but allow name to be passed in, so we can use this internally too
 func (m *Monocular) artifactHubGetChartFileNamed(c echo.Context, file string) error {
-
 	endpointID := c.Param("endpoint")
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -312,6 +308,7 @@ func (m *Monocular) artifactHubGetChartFileNamed(c echo.Context, file string) er
 	return c.File(fp)
 }
 
+// Get available versions for a Chart
 func (m *Monocular) artifactHubGetChartVersions(c echo.Context, endpointID, repo, chartName string) ([]*store.ChartStoreRecord, error) {
 	var versions store.ChartStoreRecordList
 	info, err := m.artifactHubGetPackageInfo(endpointID, repo, chartName, "")
@@ -321,6 +318,7 @@ func (m *Monocular) artifactHubGetChartVersions(c echo.Context, endpointID, repo
 	return m.artifactHubGetChartVersionsFromInfo(info, repo, chartName), nil
 }
 
+// Get available versions for a Chart from ArtifactHub info
 func (m *Monocular) artifactHubGetChartVersionsFromInfo(info *ahInfo, repo, chartName string) []*store.ChartStoreRecord {
 	var versions store.ChartStoreRecordList
 	// Translate to the bear miniumum version metadata
@@ -337,12 +335,12 @@ func (m *Monocular) artifactHubGetChartVersionsFromInfo(info *ahInfo, repo, char
 	return versions
 }
 
+// Get the icon for a Chart
 func (m *Monocular) artifactHubGetIconHandler(c echo.Context, endpointID string) error {
 	return m.artifactHubGetIcon(c)
 }
 
 func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
-
 	endpoint := c.Param("guid")
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -405,8 +403,8 @@ func sendPlaceHolderIcon(c echo.Context) error {
 	return nil
 }
 
+// Download package infor from ArtifactHub or use the cached version
 func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version string) (*ahInfo, error) {
-
 	// Make sure we handle an empty version correctly
 	var cacheName string
 	var versionPart = ""
@@ -466,7 +464,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 	return &result, nil
 }
 
-// Cache the chart files if needed - in the same way we do for our built-in Monocular
+// Cache the chart files if needed - in the same way we do for our built-in Monocular cache
 func (m *Monocular) artifactHubCacheChartFiles(endpointID, repoURL, name, version, digest string) (string, error) {
 
 	// First look to see if there is a digest file
@@ -520,6 +518,7 @@ func filterSourceLinks(links []Repo) []string {
 	return sources
 }
 
+// Download the Helm Repository index and look for the specified chart and version and return the download URL for the chart
 func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 	httpClient := m.portalProxy.GetHttpClient(true)
 	resp, err := httpClient.Get(fmt.Sprintf("%s/index.yaml", repoURL))
