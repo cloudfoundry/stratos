@@ -240,13 +240,17 @@ export class HelmReleaseHelperService {
     const updates = combineLatest(this.getCharts(), this.release$);
     return updates.pipe(
       map(([charts, release]) => {
+        let score = -1;
+        let match;
         for (const c of charts) {
-          if (this.isProbablySameChart(c.attributes, release.chart.metadata)) {
+          const matchScore = this.compareCharts(c.attributes, release.chart.metadata);
+          if (matchScore > score) {
+            score = matchScore;
             if (c.relationships && c.relationships.latestChartVersion && c.relationships.latestChartVersion.data) {
               const latest = new Version(c.relationships.latestChartVersion.data.version);
               const current = new Version(release.chart.metadata.version);
               if (latest.isNewer(current)) {
-                return {
+                match = {
                   release,
                   upgrade: c.attributes,
                   version: c.relationships.latestChartVersion.data.version,
@@ -256,11 +260,15 @@ export class HelmReleaseHelperService {
             }
           }
         }
+        // Did we find a matching chart? If so, return it
+        if (match) {
+          return match;
+        }
         // No newer release, so return the release itself if that is what was requested and we can find the chart
         // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
         if (returnLatest) {
           // Need to check that the chart is probably the same
-          const releaseChart = charts.find(c => this.isProbablySameChart(c.attributes, release.chart.metadata) &&
+          const releaseChart = charts.find(c => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
             c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
           if (releaseChart) {
             return {
@@ -278,10 +286,32 @@ export class HelmReleaseHelperService {
 
   // We might have a chart with the same name in multiple repositories - we only have chart metadata
   // We don't know which Helm repository it came from, so use the name and sources to match
-  private isProbablySameChart(a: ChartMetadata, b: ChartMetadata): boolean {
+  // Also uses the common words in the description and returns a weight
+  private compareCharts(a: ChartMetadata, b: ChartMetadata): number {
     // Basic properties must be the same
     if (a.name !== b.name) {
-      return false;
+      return -1;
+    }
+
+    // Find common words in the descriptions
+    const words = {};
+    for (let w of a.description.split(' ')) {
+      w = w.toLowerCase();
+      if (w.length > 3 && w !== 'helm' && w !== 'chart') {
+        words[w] = true
+      }
+    }
+
+    let common = 0;
+    for (let w of b.description.split(' ')) {
+      w = w.toLowerCase();
+      if(words[w]) {
+        common++;
+      }
+    }
+
+    if (!a.sources || !b.sources) {
+      return common;
     }
 
     // Must have at least one source in common
@@ -290,7 +320,7 @@ export class HelmReleaseHelperService {
       count += b.sources.findIndex((s) => s === source) === -1 ? 0 : 1;
     });
 
-    return count > 0;
+    return common + count * 100;
   }
 
 }
