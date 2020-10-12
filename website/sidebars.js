@@ -1,6 +1,10 @@
 module.exports = {
   docs: {
-    Documentation: ['introduction', 'overview', 'license'],
+    'Stratos': [
+      'introduction',
+      'overview',
+      'license'
+    ],
     'Deploy': [
       'deploy/overview',
       {

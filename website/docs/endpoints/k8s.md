@@ -18,23 +18,57 @@ Adding a Stratos Helm Endpoint alongside a Kubernetes endpoint unlocks additiona
 1. Install a Helm chart into the kubernetes
 1. Upgrade new or existing Helm charts
 
-## Registering a Helm Endpoint
+## Registering a Kubernetes Endpoint
 Stratos Administrator's can register endpoints via the Endpoints page.
 
-Usually all that's needed is the Kubernetes API address, as well as a friendly name to identify the endpoint in Stratos
+Usually all that's needed is the Kubernetes API address, as well as a friendly name to identify the endpoint in Stratos.
+
+Some basic information for finding the endpoint address for specific kubernetes clusters can be found bellow in the connecting section.
 
 
-## Connecting Different Kinds of Kubernetes Clusters
+## Connecting a Kubernetes Endpoint
 
-Currently the Stratos Kubernetes plugin supports the following four types of clusters:
+Stratos supports a number of different ways to authenticate with your Kubernetes cluster. There are a few generic ways that cover many types of clusters, but also authentication methods specific to some providers.
 
-1. CAASP (OIDC)
-2. AWS EKS (AWS IAM auth)
-2. Azure AKS 
-4. Certificate based Kubernetes authentication
-1. // TODO: RC username/password. k3s. kubeconfig import
+The currently supported connection methods and types of cluster are:
 
-The following details, how to find the endpoint URL required to register the cluster in Stratos and what credentials are required to connect.
+1. Certificate based Kubernetes authentication
+1. Username and password based Kubernetes authentication
+1. [SUSE CaaSP](https://www.suse.com/products/caas-platform/) (OIDC)
+1. [AWS EKS](https://aws.amazon.com/eks/) (AWS IAM auth)
+1. [Azure AKS](https://azure.microsoft.com/en-gb/services/kubernetes-service/)
+1. [K3S](https://k3s.io/)
+
+
+### Certificate based authentication
+
+Some kubernetes clusters use TLS certificates for authentication. The following example shows how to register and connect to one of these called [Minikube](https://minikube.sigs.k8s.io/docs/).
+
+To find the Minikube endpoint URL, locate the `minikube` entry in your local `kubeconfig` file. In the following example, the `minikube` endpoint URL is `https://192.168.99.100:8443`.
+
+```
+- cluster:
+    certificate-authority: /home/user/.minikube/ca.crt
+    server: https://192.168.99.100:8443
+  name: minikube
+```
+
+To connect to the cluster, locate the relevant entry in the `users` section in your kubernetes config file.
+
+```
+users:
+- name: minikube
+  user:
+    client-certificate: /home/user/.minikube/client.crt
+    client-key: /home/user/.minikube/client.key
+
+```
+The two files specified under `client-certificate` and `client-key` are required to connect to the cluster.
+Select the `Kubernetes Cert Auth` option as the Auth Type in the connect dialog and select the two files to connect.
+
+### Username and password based authentication
+To connect using a username and password simply select the `Username and Password` option as the Auth Type in the connect dialog.
+
 
 ### CAASP (OIDC)
 To connect a CAASP cluster to Stratos, download a `kubeconfig` from Velum.
@@ -51,13 +85,9 @@ clusters:
     certificate-authority-data: 1c1MFpYSnVZV3dnUTBFd0hoY05NVGd4TURBMU1USXhNalU1V2hjTk1qZ3hNREF5TVRJeE1qVTVXakNCb1RFTApNQWtHQTFVRUJoTUNSRVV4RURBT0JnTlZCQWdNQjBKaGRtRnlhV0V4RWpBUUJnTlZCQWNNQ1U1MWNtVnRZbVZ5Clp6RWJNQmtHQTFVRUNnd1NVMVZUUlNCQmRYUnZaMl...
 ```
 2. Specify the Endpoint URL when adding the endpoint to Stratos.
-3. To connect to Kubernetes, select the `CAASP (OIDC)` option, and upload the `kubeconfig` file downloaded from Velum.
+3. To connect to Kubernetes, select the `CAASP (OIDC)` option as the Auth Type, and upload the `kubeconfig` file downloaded from Velum.
 
 ### Amazon EKS
-The following details are required to connect to an EKS system:
-- EKS Cluster endpoint URL. (To register the endpoint).
-
- This can be located in the generated configuration. See the following example.
 To Connect the following details are required:
 - Cluster Name (See the following example)
 - AWS Access Key
@@ -81,26 +111,6 @@ To connect an AKS kubernetes instance, the following is required:
 1. AKS Endpoint URL, which can be found from the AKS console or the generated kubernetes configuration.
 2. To connect to the cluster, provide the `kubeconfig` file.
 
-### Certificate based authentication (Minikube)
-
-Minikube by default uses TLS certificates for authentication. To find the Minikube endpoint URL, locate the `minikube` entry in your local `kubeconfig` file. In the following example, the `minikube` endpoint URL is `https://192.168.99.100:8443`.
-
-```
-- cluster:
-    certificate-authority: /home/user/.minikube/ca.crt
-    server: https://192.168.99.100:8443
-  name: minikube
-```
-
-To connect to the cluster, locate the relevant entry in the `users` section in your kubernetes config file.
-
-```
-users:
-- name: minikube
-  user:
-    client-certificate: /home/user/.minikube/client.crt
-    client-key: /home/user/.minikube/client.key
-
-```
-The two files specified under `client-certificate` and `client-key` are required to connect to the cluster.
-Select the `Kubernetes Cert Auth` option in the connect dialog and select the two files to connect.
+## For a quick way to registered all endpoints
+For a quick way to register kubernetes endpoints and in some cases also connect, the user can select `Import Kubeconfig` instead of the 
+endpoint types listed above. Once the user has provided the file they can then select which contexts to register and, if applicable, how to connect to it. Not all connection types are supported this way, for instance where files are reference in config. These can still be registered, and via the Endpoints page connected to, just not connected at that time.
