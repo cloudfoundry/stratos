@@ -22,6 +22,7 @@ module.exports = {
         ],
       },
       'deploy/all-in-one',
+      `deploy/tech-preview`,
       'deploy/access',
       'deploy/troubleshooting',
     ],
@@ -71,6 +72,7 @@ module.exports = {
     ],
     'Extend': [
       'extensions/introduction',
+      `extensions/disable-packages`,
       'extensions/v4-migration',
       'extensions/theming',
       'extensions/frontend',
