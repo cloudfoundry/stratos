@@ -78,7 +78,7 @@ applications:
 
 This will set the the UAA client and UAA secret used to invite users for the default CF only.
 
-See the [invite users guide](../../advanced/invite-user-guide) for more information about user invites in Stratos.
+See the [invite users guide](../../endpoints/cf/invite-user-guide) for more information about user invites in Stratos.
 
 #### Use of the Default Embedded SQLite Database
 
