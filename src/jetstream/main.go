@@ -26,7 +26,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/custombinder"
 	_ "github.com/cloudfoundry-incubator/stratos/src/jetstream/docs"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
@@ -204,7 +203,7 @@ func main() {
 	apikeys.InitRepositoryProvider(dc.DatabaseProvider)
 
 	// Establish a Postgresql connection pool
-	databaseConnectionPool, migratorConf, err := initConnPool(dc, envLookup)
+	databaseConnectionPool, err := initConnPool(dc, envLookup)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -234,7 +233,7 @@ func main() {
 	// Config plugins get to determine if we should run migrations on this instance
 	if portalConfig.CanMigrateDatabaseSchema {
 		// Create the database schema otherwise wait for the datbase schema
-		err = datastore.ApplyMigrations(migratorConf, databaseConnectionPool)
+		err = datastore.ApplyMigrations(databaseConnectionPool)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -486,13 +485,13 @@ func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
 	return key, nil
 }
 
-func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
+func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("initConnPool")
 
 	// initialize the database connection pool
-	pool, conf, err := datastore.GetConnection(dc, env)
+	pool, err := datastore.GetConnection(dc, env)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Ensure that the database is responsive
@@ -510,7 +509,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, *goose
 
 		// If our timeout boundary has been exceeded, bail out
 		if timeout.Sub(time.Now()) < 0 {
-			return nil, nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
+			return nil, fmt.Errorf("timeout boundary of %d minutes has been exceeded. Exiting", TimeoutBoundary)
 		}
 
 		// Circle back and try again
@@ -518,7 +517,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, *goose
 		time.Sleep(time.Second)
 	}
 
-	return pool, conf, nil
+	return pool, nil
 }
 
 func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
