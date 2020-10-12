@@ -46,6 +46,35 @@ func (m *Monocular) listCharts(c echo.Context) error {
 	return c.JSON(200, body)
 }
 
+func (m *Monocular) getHelmRepositoryURL(chart *store.ChartStoreRecord) (string, error) {
+
+	endpoint, err := m.portalProxy.GetCNSIRecord(chart.EndpointID)
+	if err != nil {
+		return "", nil
+	}
+
+	return endpoint.APIEndpoint.String(), nil
+}
+
+// Get chart and ensure the chart URL is an absolute URL with scheme
+func (m *Monocular) getChartFromStore(repo, name, version string) (*store.ChartStoreRecord, error) {
+	chart, err := m.ChartStore.GetChart(repo, name, version)
+	if err != nil {
+		return nil, err
+	}
+
+	if urlDoesNotContainSchema(chart.ChartURL) {
+		// Relative URL
+		repoURL, err := m.getHelmRepositoryURL(chart)
+		if err != nil {
+			return chart, err
+		}
+		chart.ChartURL = joinURL(repoURL, chart.ChartURL)
+	}
+
+	return chart, nil
+}
+
 // Get the latest version of a given chart
 func (m *Monocular) getChart(c echo.Context) error {
 	log.Debug("Get Chart called")
@@ -58,7 +87,7 @@ func (m *Monocular) getChart(c echo.Context) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, "")
+	chart, err := m.getChartFromStore(repo, chartName, "")
 	if err != nil {
 		return err
 	}
@@ -88,7 +117,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 		log.Debugf("Get icon for %s/%s-%s", repo, chartName, version)
 	}
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, version)
+	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
 		log.Error("Can not find chart")
 		return errors.New("Error")
@@ -192,7 +221,7 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 
 	log.Debugf("Get chart file: %s", filename)
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, version)
+	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
 		return err
 	}
@@ -214,10 +243,11 @@ func (m *Monocular) getChartValues(c echo.Context) error {
 	if endpointID == "default" {
 		filename := "values.yaml"
 		log.Debugf("Get chart file: %s", filename)
-		chart, err := m.ChartStore.GetChart(repo, chartName, version)
+		chart, err := m.getChartFromStore(repo, chartName, version)
 		if err != nil {
 			return err
 		}
+
 		if m.cacheChart(*chart) == nil {
 			return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
 		}

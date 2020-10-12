@@ -532,15 +532,6 @@ func filterSourceLinks(links []Repo) []string {
 	return sources
 }
 
-func joinURL(base, name string) string {
-	// Avoid double slashes
-	sep := "/"
-	if strings.HasSuffix(base, "/") {
-		sep = ""
-	}
-	return fmt.Sprintf("%s%s%s", base, sep, name)
-}
-
 // Download the Helm Repository index and look for the specified chart and version and return the download URL for the chart
 func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 	httpClient := m.portalProxy.GetHttpClient(true)
@@ -571,12 +562,7 @@ func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 			if v.Version == version {
 				if len(v.URLs) > 0 {
 					chartURL := v.URLs[0]
-					// Check for relative URL
-					if !strings.HasPrefix(chartURL, "http://") && !strings.HasPrefix(chartURL, "https://") {
-						// Relative to the download URL
-						chartURL = joinURL(repoURL, chartURL)
-					}
-					return chartURL, nil
+					return makeAbsoluteChartURL(chartURL, repoURL), nil
 				}
 			}
 		}

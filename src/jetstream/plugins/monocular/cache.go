@@ -42,7 +42,6 @@ func (m *Monocular) deleteCacheForEndpoint(endpointID string) error {
 
 // cacheCharts will cache charts in the local folder cache
 func (m *Monocular) cacheCharts(charts []store.ChartStoreRecord) error {
-
 	var errorCount = 0
 	log.Debug("Cacheing charts")
 	for _, chart := range charts {
@@ -356,4 +355,26 @@ func isPermittedFile(name string) bool {
 	}
 
 	return false
+}
+
+func joinURL(base, name string) string {
+	// Avoid double slashes
+	sep := "/"
+	if strings.HasSuffix(base, "/") {
+		sep = ""
+	}
+	return fmt.Sprintf("%s%s%s", base, sep, name)
+}
+
+func makeAbsoluteChartURL(chartURL, repoURL string) string {
+	// Check for relative URL
+	if !strings.HasPrefix(chartURL, "http://") && !strings.HasPrefix(chartURL, "https://") {
+		// Relative to the download URL
+		chartURL = joinURL(repoURL, chartURL)
+	}
+	return chartURL
+}
+
+func urlDoesNotContainSchema(chartURL string) bool {
+	return !strings.HasPrefix(chartURL, "http://") && !strings.HasPrefix(chartURL, "https://")
 }

@@ -59,7 +59,7 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	// Iterate over each chart in the index
 	for name, chartVersions := range index.Entries {
 		log.Debugf("Helm Repository Sync: Processing chart: %s", name)
-		syncRsult := m.procesChartVersions(endpointID, repoName, name, chartVersions)
+		syncRsult := m.procesChartVersions(endpointID, url, repoName, name, chartVersions)
 		latestCharts = append(latestCharts, syncRsult.Latest)
 		allCharts = append(allCharts, syncRsult.Charts...)
 	}
@@ -80,7 +80,7 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	return nil
 }
 
-func (m *Monocular) procesChartVersions(endpoint, repoName, name string, chartVersions []IndexFileMetadata) syncResult {
+func (m *Monocular) procesChartVersions(endpoint, repoURL, repoName, name string, chartVersions []IndexFileMetadata) syncResult {
 
 	result := syncResult{}
 
@@ -122,6 +122,11 @@ func (m *Monocular) procesChartVersions(endpoint, repoName, name string, chartVe
 				Created:     chartVersion.Created,
 				Digest:      chartVersion.Digest,
 				IsLatest:    chartVersion.Version == latestVersion,
+			}
+
+			// Make sure Chart URL is absolute
+			if urlDoesNotContainSchema(record.ChartURL) {
+				record.ChartURL = joinURL(repoURL, record.ChartURL)
 			}
 
 			result.Charts = append(result.Charts, record)
