@@ -90,7 +90,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         registrationComponent: HelmHubRegistrationComponent,
         registeredLimit: (store: Store<AppState>): Observable<number> => store.select('auth').pipe(
           filter(auth => !!auth.sessionData['plugin-config']),
-          map(auth => auth.sessionData['plugin-config'].helmHubEnabled === 'true' ? 1 : 0),
+          map(auth => auth.sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
         )
       },
     ],
