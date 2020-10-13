@@ -34,6 +34,9 @@ if [ "${ACTION}" == "build" ]; then
   echo "Generating OpenAPI documentation..."
   go get github.com/swaggo/swag/cmd/swag
   swag init
+  if [ $? -ne 0 ]; then
+    echo "ERROR Running OpenAPI documentation generation"
+  fi
   echo "Building version: ${VERSION}"
   GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
