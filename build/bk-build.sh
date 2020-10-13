@@ -35,7 +35,7 @@ if [ "${ACTION}" == "build" ]; then
 
   set +e
   swag --version > /dev/null
-  RETVAl=$?
+  RETVAL=$?
   set -e
   if [ $RETVAL -ne 0 ]; then
     echo "Installing OpenAPI swag tool"
