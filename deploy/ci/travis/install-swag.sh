@@ -6,7 +6,7 @@ mkdir ./swag_tmp
 pushd swag_tmp > /dev/null
 wget https://github.com/swaggo/swag/releases/download/v${VERSION}/swag_${VERSION}_Linux_x86_64.tar.gz
 tar -xvf swag_${VERSION}_Linux_x86_64.tar.gz
-mv swag /usr/bin
+sudo mv swag ~/bin
 swag --version
 
 popd > /dev/null
