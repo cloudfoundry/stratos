@@ -10,7 +10,50 @@
       xdescribe: global.xdescribe
     };
 
+    const suitesToSkip = {};
+
+    // Read the config file of specifics suites to exlucde
+    if (process.env.E2E_SKIPFILE) {
+      var lines = require('fs').readFileSync(process.env.E2E_SKIPFILE, 'utf-8')
+      .split('\n')
+      .filter(Boolean);
+
+      console.log('Read e2e config file: ' + process.env.E2E_SKIPFILE);
+      lines.forEach(line => {
+        if (!line.startsWith('#')) {
+          suitesToSkip[line.trim()] = true;
+        }
+      });
+    }
+
+    function tidyName(name) {
+      let v = name.trim();
+      if (v.endsWith('-')) {
+        v = v.substr(0, v.length -1).trim();
+      }
+      return v;
+    }
+
+    function getName(suite) {
+      if (!suite || suite.description == 'Jasmine__TopLevel__Suite') {
+        return '';
+      }
+      const p = getName(suite.parentSuite)
+      if (p.length == 0) {
+        return tidyName(suite.description)
+      }
+      return p + '/' + tidyName(suite.description);
+    }
+
     function checkSuiteSkipped(suite, skipFn) {
+      // Should we skip this test suite?
+      const testName = getName(suite);
+      if (suitesToSkip[testName]) {
+        console.log('Skipping test suite: ' + testName);
+        markDisabled(suite);
+        return suite;
+      }
+
       if (!skipFn) {
         return;
       }

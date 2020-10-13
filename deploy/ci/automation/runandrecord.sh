@@ -32,6 +32,9 @@ if [ $? -ne 0 ]; then
   echo "Warning: Video capture code not be started.. ffmpeg may not be installed or configured"
 fi
 
+# Skip the test suites in the skiptests.txt file
+export E2E_SKIPFILE="${DIRPATH}/skiptests.txt"
+
 # Need to set base URL via env var
 export STRATOS_E2E_BASE_URL=${URL}
 
