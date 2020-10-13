@@ -63,7 +63,7 @@ else
   # Get go
   source "${DIRNAME}/install-go.sh"
 
-  #npm run build
+  npm run build
   npm run build-backend
 
   # Only try to upload if we have the S3 configuration
