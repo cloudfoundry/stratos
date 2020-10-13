@@ -52,7 +52,7 @@ jobs:
         - mkdir -p /tmp/gopath
         - export GOPATH=/tmp/gopath
         - export PATH=$GOPATH/bin:$PATH
-        - echo  "GO PATH; %GOPATH"
+        - echo "GO PATH; $GOPATH"
         - "./deploy/ci/travis/e2e-build-script.sh build"
     - stage: Test
       name: Frontend Unit Tests
