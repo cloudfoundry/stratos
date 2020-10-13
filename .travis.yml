@@ -53,6 +53,7 @@ jobs:
         - export GOPATH=/tmp/gopath
         - export PATH=$GOPATH/bin:$PATH
         - echo "GO PATH; $GOPATH"
+        - "./deploy/ci/travis/install-swag.sh"
         - "./deploy/ci/travis/e2e-build-script.sh build"
     - stage: Test
       name: Frontend Unit Tests

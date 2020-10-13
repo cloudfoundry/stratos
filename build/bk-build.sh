@@ -32,7 +32,13 @@ pushd "${STRATOS}/src/jetstream" > /dev/null
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
   echo "Generating OpenAPI documentation..."
-  go get github.com/swaggo/swag/cmd/swag
+
+  swag --version > /dev/null
+  if [ $? -ne 0 ]; then
+    echo "Installing OpenAPI swag tool"
+    go get github.com/swaggo/swag/cmd/swag
+  fi
+
   swag init
   if [ $? -ne 0 ]; then
     echo "ERROR Running OpenAPI documentation generation"
