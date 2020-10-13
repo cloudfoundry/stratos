@@ -219,6 +219,11 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
     plural: string,
   };
   /**
+   * Checks if the given entity is stil valid (e.g. has not been deleted)
+   * @param entityMetadata Entity metadata
+   */
+  getIsValid?(entityMetadata: T): Observable<boolean>;
+  /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions
    */

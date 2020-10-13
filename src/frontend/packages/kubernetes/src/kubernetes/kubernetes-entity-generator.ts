@@ -1,4 +1,5 @@
 import { Validators } from '@angular/forms';
+import { of } from 'rxjs';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -7,12 +8,14 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
+import { FavoritesConfigMapper } from '../../../store/src/favorite-config-mapper';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -62,6 +65,13 @@ import {
   KubeService,
 } from './store/kube.types';
 import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
+
+
+export interface IKubeResourceFavMetadata extends IFavoriteMetadata {
+  guid: string;
+  kubeGuid: string;
+  name: string;
+}
 
 const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
@@ -137,6 +147,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
       kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG],
       BaseEndpointAuth.UsernamePassword
     ],
+    favoriteFromEntity: getFavoriteFromKubeEntity,
     renderPriority: 4,
     subTypes: [
       {
@@ -261,11 +272,35 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
   const definition: IStratosEntityDefinition = {
     type: kubernetesNamespacesEntityType,
     schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Namespace',
+    icon: 'namespace',
+    iconFont: 'stratos-icons',
   };
-  kubeEntityCatalog.namespace = new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
-    actionBuilders: kubeNamespaceActionBuilders
-  });
+  kubeEntityCatalog.namespace = new StratosCatalogEntity<IKubeResourceFavMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
+    actionBuilders: kubeNamespaceActionBuilders,
+    entityBuilder: {
+      getIsValid: (favourite) => {
+        console.log('get is Valid for a namespace');
+        console.log(favourite);
+        return of(false)
+      },
+      getMetadata: (namespace: any) => {
+        return {
+          endpointId: namespace.kubeGuid,
+          guid: namespace.metadata.uid,
+          kubeGuid: namespace.kubeGuid,
+  //        createdAt: moment(app.metadata.created_at).format('LLL'),
+          name: namespace.metadata.name,
+        };
+      },
+      getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
+      getGuid: metadata => metadata.guid,
+      getLines: () => ([
+//        ['Hello', (meta) => 'World!']
+//        ['Created', (meta) => meta.createdAt]
+      ])
+    },  });
   return kubeEntityCatalog.namespace;
 }
 
@@ -315,3 +350,33 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
   };
   return new StratosCatalogEntity(definition);
 }
+
+function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
+  entity,
+  entityType: string,
+  favoritesConfigMapper: FavoritesConfigMapper
+): UserFavorite<T> {
+  console.log('Hello');
+  console.log(entity);
+  return favoritesConfigMapper.getFavoriteFromEntity<T>(
+    entityType,
+    KUBERNETES_ENDPOINT_TYPE,
+    entity.kubeGuid,
+    entity
+  );
+
+
+  // if (isCfEntity(entity as CfAPIResource)) {
+  //   return favoritesConfigMapper.getFavoriteFromEntity<T>(
+  //     entityType,
+  //     'cf',
+  //     entity.entity.cfGuid,
+  //     entity
+  //   );
+  // }
+}
+
+// function isCfEntity(entity: CfAPIResource) {
+//   return entity && entity.entity.cfGuid && entity.metadata && entity.metadata.guid;
+// }
+

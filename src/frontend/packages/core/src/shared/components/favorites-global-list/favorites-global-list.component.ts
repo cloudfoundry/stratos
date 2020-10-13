@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { getFavoriteInfoObservable } from '../../../../../store/src/helpers/store-helpers';
@@ -31,6 +31,29 @@ export class FavoritesGlobalListComponent implements OnInit {
     );
 
     this.favInfo$ = getFavoriteInfoObservable(this.store);
+
+    this.validate();
+  }
+
+  // Validate all of the entities one by one and update if they are no longer valid
+  validate() {
+    this.favoriteGroups$.pipe(first()).subscribe(f => {
+      console.log('Validating favourites');
+      console.log(f);
+
+      f.forEach(group => {
+        console.log(group);
+        // Maybe we need to check the enpoint via the health check first?
+        // Check each entity in turn
+        group.entities.forEach(entity => {
+          console.log(entity);
+
+        });
+      })
+
+    });
+
+
   }
 
   private sortFavoriteGroups(entityGroups: IGroupedFavorites[]) {
