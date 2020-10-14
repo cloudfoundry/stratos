@@ -5,6 +5,19 @@ import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
 
+function disableCSSAnimation() {
+  const css = '* { ' +
+    '-webkit-transition-duration: 0s !important;' +
+    'transition-duration: 0s !important;' +
+    '-webkit-animation-duration: 0s !important;' +
+    'animation-duration: 0s !important;' +
+    '}';
+  const head = document.head || document.getElementsByTagName('head')[0];
+  const style = document.createElement('style');
+  style.type = 'text/css';
+  style.appendChild(document.createTextNode(css));
+  head.appendChild(style);
+}
 
 export enum ConsoleUserType {
   admin = 1,
@@ -33,6 +46,8 @@ export class E2EHelpers {
     return browser.forkNewDriverInstance(true);
   }
 
+
+
   setupApp(loginUser?: ConsoleUserType, keepCookies?: boolean): promise.Promise<any> {
 
     this.setBrowserNormal();
@@ -47,7 +62,10 @@ export class E2EHelpers {
       if (gitHubUrl) {
         browser.executeScript('window.sessionStorage.setItem("STRATOS_GITHUB_API_URL", "' + gitHubUrl + '");');
       }
+      browser.driver.executeScript(disableCSSAnimation);
     });
+
+    // Disable animations
 
     if (loginUser) {
       // When required we should check that the PP is setup correctly (contains correct endpoints with correct state) before running
