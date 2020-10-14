@@ -58,6 +58,7 @@ jobs:
         - npm run codecov
     - name: Backend Unit Tests
       before_script:
+        - "./deploy/ci/travis/install-swag.sh"
         - "./deploy/ci/travis/install-go.sh"
       script:
         - npm run test-backend

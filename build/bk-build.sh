@@ -29,31 +29,30 @@ fi
 # Build backend or run tests
 pushd "${STRATOS}/src/jetstream" > /dev/null
 
+# Need to install swag in both cases
+echo "Generating OpenAPI documentation..."
+
+set +e
+swag --version > /dev/null
+RETVAL=$?
+set -e
+if [ $RETVAL -ne 0 ]; then
+  echo "Installing OpenAPI swag tool"
+  go get github.com/swaggo/swag/cmd/swag
+fi
+
+swag init
+if [ $? -ne 0 ]; then
+  echo "ERROR Running OpenAPI documentation generation"
+fi
+
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
-  echo "Generating OpenAPI documentation..."
-
-  set +e
-  swag --version > /dev/null
-  RETVAL=$?
-  set -e
-  if [ $RETVAL -ne 0 ]; then
-    echo "Installing OpenAPI swag tool"
-    go get github.com/swaggo/swag/cmd/swag
-  fi
-
-  swag init
-  if [ $? -ne 0 ]; then
-    echo "ERROR Running OpenAPI documentation generation"
-  fi
   echo "Building version: ${VERSION}"
   GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
-  echo "Generating OpenAPI documentation..."
-  go get github.com/swaggo/swag/cmd/swag
-  swag init
   GO111MODULE=on go test ./... -v -count=1
 fi
 
