@@ -63,8 +63,10 @@ else
   # Get go
   curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
   chmod +x ~/bin/gimme
-  eval "$(gimme 1.12.4)"
+  eval "$(gimme 1.13.4)"
   go version
+  unset GOPROXY
+  go env
 
   npm run build
   npm run build-backend
