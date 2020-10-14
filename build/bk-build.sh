@@ -52,6 +52,10 @@ if [ "${ACTION}" == "build" ]; then
   GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
+  echo "Building backend ..."
+  GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
+  echo "Installing test packages ..."
+  GO111MODULE=on go test ./... -v -count=1 -i
   echo "Running backend tests ..."
   GO111MODULE=on go test ./... -v -count=1
 fi
