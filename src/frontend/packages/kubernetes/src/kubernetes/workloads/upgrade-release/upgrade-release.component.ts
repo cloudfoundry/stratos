@@ -54,6 +54,8 @@ export class UpgradeReleaseComponent {
   // Future
   public showAdvancedOptions = false;
 
+  private chartUrl: string;
+
   constructor(
     store: Store<any>,
     public helper: HelmReleaseHelperService,
@@ -103,6 +105,7 @@ export class UpgradeReleaseComponent {
     ).pipe(
       first(),
       tap(([release, chartVersionDetail]) => {
+        this.chartUrl = this.chartsService.getChartURL(chartVersionDetail);
         const schemaUrl = this.chartsService.getChartSchemaURL(chartVersionDetail, chart.name, chart.repo);
         this.config = {
           schemaUrl,
@@ -137,7 +140,7 @@ export class UpgradeReleaseComponent {
         version: this.version.attributes.version,
       },
       monocularEndpoint: this.monocularEndpointId === stratosMonocularEndpointGuid ? null : this.monocularEndpointId,
-      chartUrl: this.chartsService.getChartURL(this.version)
+      chartUrl: this.chartUrl
     };
 
     // Make the request

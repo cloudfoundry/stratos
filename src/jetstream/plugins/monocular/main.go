@@ -14,15 +14,15 @@ import (
 )
 
 const (
-	helmEndpointType      = "helm"
-	helmHubEndpointType   = "hub"
-	helmRepoEndpointType  = "repo"
-	stratosPrefix         = "/pp/v1/"
-	kubeReleaseNameEnvVar = "STRATOS_HELM_RELEASE"
-	cacheFolderEnvVar     = "HELM_CACHE_FOLDER"
-	defaultCacheFolder    = "./.helm-cache"
-	helmHubEnabledEnvVar  = "ARTIFACT_HUB_ENABLED"
-	helmHubEnabled        = "helmHubEnabled"
+	helmEndpointType          = "helm"
+	helmHubEndpointType       = "hub"
+	helmRepoEndpointType      = "repo"
+	stratosPrefix             = "/pp/v1/"
+	kubeReleaseNameEnvVar     = "STRATOS_HELM_RELEASE"
+	cacheFolderEnvVar         = "HELM_CACHE_FOLDER"
+	defaultCacheFolder        = "./.helm-cache"
+	artifactHubDisabledEnvVar = "ARTIFACT_HUB_DISABLED"
+	artifactHubDisabled       = "artifactHubDisabled"
 )
 
 // Monocular is a plugin for Monocular
@@ -59,10 +59,10 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 func (m *Monocular) Init() error {
 	log.Debug("Monocular init .... ")
 
-	if val, ok := m.portalProxy.Env().Lookup(helmHubEnabledEnvVar); ok {
-		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = val
+	if val, ok := m.portalProxy.Env().Lookup(artifactHubDisabledEnvVar); ok {
+		m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] = val
 	} else {
-		m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] = "true"
+		m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] = "false"
 	}
 
 	m.CacheFolder = m.portalProxy.Env().String(cacheFolderEnvVar, defaultCacheFolder)
@@ -246,7 +246,7 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*interfaces.
 		return &endpoint, nil
 	}
 
-	if m.portalProxy.GetConfig().PluginConfig[helmHubEnabled] != "true" {
+	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] != "true" {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, errors.New("Artifact Hub is disabled"))
 	}
 
