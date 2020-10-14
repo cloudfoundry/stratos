@@ -29,6 +29,9 @@ fi
 # Build backend or run tests
 pushd "${STRATOS}/src/jetstream" > /dev/null
 
+# Show go env
+go env
+
 # Need to install swag in both cases
 echo "Generating OpenAPI documentation..."
 
