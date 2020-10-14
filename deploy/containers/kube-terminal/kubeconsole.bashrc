@@ -36,7 +36,13 @@ fi
 
 export PATH=/stratos:$PATH
 
-export KUBECONFIG=${HOME}/.stratos/kubeconfig
+# Need file permissions to be 500 on Kube Config
+# Copy it to the default location ~/.kube/config and change them
+export KUBECONFIG=${HOME}/.kube/config
+mkdir -p ${HOME}/.kube
+cp ${HOME}/.stratos/kubeconfig ${HOME}/.kube/config
+chmod 500 ${KUBECONFIG}
+
 export PS1="\033[92mstratos>\033[0m"
 alias k=kubectl
 
