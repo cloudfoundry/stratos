@@ -2,7 +2,7 @@
 
 ## 4.2.0
 
-[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.1.0...4.2.0)
+[Full Changelog](https://github.com/SUSE/stratos/compare/4.1.0...4.2.0)
 
 This release includes the new Kubernetes and Helm extensions. These have been donated to the Cloud Foundry Foundation by SUSE and with this release are now part of upstream Stratos.
 
@@ -12,12 +12,18 @@ Improvements and fixes in this release:
 
 **Improvements:**
 
+- Add support for ArtifactHub (the replacement for Helm Hub) [\#523](https://github.com/SUSE/stratos/issues/523)
 - Add Stratos Helm Repo to Artifact Hub [\#4645](https://github.com/cloudfoundry/stratos/issues/4645)
 - Kubernetes and Helm extensions added from downstream SUSE version [\#4619](https://github.com/cloudfoundry/stratos/issues/4619)
 - "Manage Roles By Username" icon isn't obviously the right place to add users to a space [\#4590](https://github.com/cloudfoundry/stratos/issues/4590)
 
 **Fixes:**
 
+- Helm Install: YAML editor does not load when installing Stratos chart [\#516](https://github.com/SUSE/stratos/issues/516)
+- Workload shows upgrade when chart has been removed [\#514](https://github.com/SUSE/stratos/issues/514)
+- Workloads does not show upgrade available for an installed RC [\#512](https://github.com/SUSE/stratos/issues/512)
+- Helm Chart List: Filter is ignored when endpoint repo name matches repo name in helm hub collection [\#494](https://github.com/SUSE/stratos/issues/494)
+- Error filtering applications by org [\#4658](https://github.com/cloudfoundry/stratos/issues/4658)
 - API Keys should not be shown when persistence is disabled [\#4615](https://github.com/cloudfoundry/stratos/issues/4615)
 - Home Page CF App Favouriete card clips text [\#4613](https://github.com/cloudfoundry/stratos/issues/4613)
 - Can not push All-in-one docker image to Eirini [\#4612](https://github.com/cloudfoundry/stratos/issues/4612)
@@ -27,6 +33,9 @@ Improvements and fixes in this release:
 
 **Breaking Changes:**
 
+- **Helm Hub has been removed and replaced with ArtifactHub**
+
+  When upgrading from Stratos 4.1.0, if you had added a Helm Hub endpoint, this will be removed and you will need to manually add the ArtifactHub endpoint to get the equivalent functionality.
 - **All-in-one Docker image no longer runs as the root user**
 
   The port used in the Docker All-in-one container image has been changed from 443 to 5443. If you run the container in Docker, you will need to change the port-forwarding option to forward port 5443 and not 443. The documentation has been updated to reflect this. If you push the image to Cloud Foundry, no change is required.

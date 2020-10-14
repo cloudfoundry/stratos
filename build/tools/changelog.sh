@@ -77,9 +77,11 @@ function search() {
 function breaking_changes() {
   FILTER=$1
   if [ -n "${FORK_QUERY}" ]; then
-    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+
+  touch ${CHANGELOG}.breaking
+    curl -s "https://api.github.com/search/issues?q=${FORK_QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' >> ${CHANGELOG}.breaking
   fi
-  curl -s "https://api.github.com/search/issues?q=${QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' > ${CHANGELOG}.breaking
+  curl -s "https://api.github.com/search/issues?q=${QUERY}+-label:release-notes${FILTER}" | jq -r '.items | .[] | "- **\(.title)**\n\n  \(.body)"' >> ${CHANGELOG}.breaking
 }
 
 
