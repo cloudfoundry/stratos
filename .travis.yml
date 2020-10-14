@@ -37,9 +37,7 @@ jobs:
         - npm run lint
     - name: Backend Lint
       before_script:
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.13.4)"
+        - "./deploy/ci/travis/install-go.sh"
         - go get -u golang.org/x/lint/golint
       script:
         - golint src/jetstream/...
@@ -49,6 +47,7 @@ jobs:
       env:
         - CI_ENV=true
       script:
+        - "./deploy/ci/travis/install-swag.sh"
         - "./deploy/ci/travis/e2e-build-script.sh build"
     - stage: Test
       name: Frontend Unit Tests
@@ -59,9 +58,8 @@ jobs:
         - npm run codecov
     - name: Backend Unit Tests
       before_script:
-        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-        - chmod +x ~/bin/gimme
-        - eval "$(gimme 1.13.4)"
+        - "./deploy/ci/travis/install-swag.sh"
+        - "./deploy/ci/travis/install-go.sh"
       script:
         - npm run test-backend
     - name: Helm Chart Unit Tests
