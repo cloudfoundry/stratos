@@ -50,10 +50,11 @@ describe('Endpoints', () => {
         endpointsPage.cards.waitUntilShown();
         endpointsPage.cards.waitForCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
-          .then(actionMenu => actionMenu.getItem('Connect'))
-          .then(connect => {
+          .then(actionMenu => {
+            const connect = actionMenu.getItem('Connect');
             expect(connect).toBeDefined();
             connect.click();
+            actionMenu.waitUntilNotShown();
             connectDialog.waitUntilShown();
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
