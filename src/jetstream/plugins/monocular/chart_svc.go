@@ -1,7 +1,6 @@
 package monocular
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -19,8 +18,8 @@ import (
 func (m *Monocular) listCharts(c echo.Context) error {
 	log.Debug("List Charts called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
+	// Check if this is a request for Artifact Hub
+	if handled, err := m.handleArtifactRequest(c, m.fetchChartsFromArtifactHub); handled {
 		return err
 	}
 
@@ -47,19 +46,48 @@ func (m *Monocular) listCharts(c echo.Context) error {
 	return c.JSON(200, body)
 }
 
+func (m *Monocular) getHelmRepositoryURL(chart *store.ChartStoreRecord) (string, error) {
+
+	endpoint, err := m.portalProxy.GetCNSIRecord(chart.EndpointID)
+	if err != nil {
+		return "", nil
+	}
+
+	return endpoint.APIEndpoint.String(), nil
+}
+
+// Get chart and ensure the chart URL is an absolute URL with scheme
+func (m *Monocular) getChartFromStore(repo, name, version string) (*store.ChartStoreRecord, error) {
+	chart, err := m.ChartStore.GetChart(repo, name, version)
+	if err != nil {
+		return nil, err
+	}
+
+	if urlDoesNotContainSchema(chart.ChartURL) {
+		// Relative URL
+		repoURL, err := m.getHelmRepositoryURL(chart)
+		if err != nil {
+			return chart, err
+		}
+		chart.ChartURL = joinURL(repoURL, chart.ChartURL)
+	}
+
+	return chart, nil
+}
+
 // Get the latest version of a given chart
 func (m *Monocular) getChart(c echo.Context) error {
 	log.Debug("Get Chart called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
+	// Check if this is a request for Artifact Hub
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChart); handled {
 		return err
 	}
 
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, "")
+	chart, err := m.getChartFromStore(repo, chartName, "")
 	if err != nil {
 		return err
 	}
@@ -74,8 +102,8 @@ func (m *Monocular) getChart(c echo.Context) error {
 func (m *Monocular) getIcon(c echo.Context) error {
 	log.Debug("Get Icon called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
+	// Process ArtifactHub request
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetIconHandler); handled {
 		return err
 	}
 
@@ -89,7 +117,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 		log.Debugf("Get icon for %s/%s-%s", repo, chartName, version)
 	}
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, version)
+	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
 		log.Error("Can not find chart")
 		return errors.New("Error")
@@ -113,8 +141,8 @@ func (m *Monocular) getIcon(c echo.Context) error {
 func (m *Monocular) getChartVersion(c echo.Context) error {
 	log.Debug("getChartAndVersion called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
+	// Process ArtifactHub request
+	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChartVersion); handled {
 		return err
 	}
 
@@ -143,16 +171,24 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 // Get all chart versions for a given chart
 func (m *Monocular) getChartVersions(c echo.Context) error {
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
+	// Check if this is a request for Artifact Hub
+	var err error
+	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 
-	// Get all versions for a given chart
-	charts, err := m.ChartStore.GetChartVersions(repo, chartName)
+	var charts []*store.ChartStoreRecord
+	if externalMonocularEndpoint != nil {
+		charts, err = m.artifactHubGetChartVersions(c, externalMonocularEndpoint.GUID, repo, chartName)
+	} else {
+		// Get all versions for a given chart
+		charts, err = m.ChartStore.GetChartVersions(repo, chartName)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -174,19 +210,18 @@ func (m *Monocular) getChartVersions(c echo.Context) error {
 func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	log.Debug("Get Chart file called")
 
-	// Check if this is a request for an external Monocular
-	if handled, err := m.processMonocularRequest(c); handled {
-		return err
-	}
-
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
 	filename := c.Param("filename")
 
+	if !isPermittedFile(filename) {
+		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
+	}
+
 	log.Debugf("Get chart file: %s", filename)
 
-	chart, err := m.ChartStore.GetChart(repo, chartName, version)
+	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
 		return err
 	}
@@ -208,61 +243,19 @@ func (m *Monocular) getChartValues(c echo.Context) error {
 	if endpointID == "default" {
 		filename := "values.yaml"
 		log.Debugf("Get chart file: %s", filename)
-		chart, err := m.ChartStore.GetChart(repo, chartName, version)
+		chart, err := m.getChartFromStore(repo, chartName, version)
 		if err != nil {
 			return err
 		}
+
 		if m.cacheChart(*chart) == nil {
 			return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
 		}
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}
 
-	// Helm Hub
-	// Change the URL and then forward on
-	p := fmt.Sprintf("/chartsvc/v1/assets/%s/%s/versions/%s/values.yaml", repo, chartName, version)
-	monocularEndpoint, err := m.validateExternalMonocularEndpoint(endpointID)
-	if monocularEndpoint == nil || err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("No monocular endpoint"))
-	}
-
-	return m.proxyToMonocularInstance(c, monocularEndpoint, p)
-}
-
-// Check to see if the given chart URL has a schema
-func (m *Monocular) checkForJsonSchema(c echo.Context) error {
-	log.Debug("checkForJsonSchema called")
-
-	chartName := c.Param("name")
-	encodedChartURL := c.Param("encodedChartURL")
-	url, err := base64.StdEncoding.DecodeString(encodedChartURL)
-	if err != nil {
-		return err
-	}
-
-	chartURL := string(url)
-
-	chartCachePath := path.Join(m.CacheFolder, "schemas", encodedChartURL)
-	if err := m.ensureFolder(chartCachePath); err != nil {
-		log.Warnf("checkForJsonSchema: Could not create folder for chart downloads: %+v", err)
-		return err
-	}
-
-	// We can delete the Chart archive - don't need it anymore
-	defer os.RemoveAll(chartCachePath)
-
-	archiveFile := path.Join(chartCachePath, "chart.tgz")
-	if err := m.downloadFile(archiveFile, chartURL); err != nil {
-		return fmt.Errorf("Could not download chart from: %s - %+v", chartURL, err)
-	}
-
-	// Now extract the files we need
-	filenames := []string{"values.schema.json"}
-	if err := extractArchiveFiles(archiveFile, chartName, chartCachePath, filenames); err != nil {
-		return fmt.Errorf("Could not extract files from chart archive: %s - %+v", archiveFile, err)
-	}
-
-	return c.File(path.Join(chartCachePath, "values.schema.json"))
+	// Artifact Hub
+	return m.artifactHubGetChartFileNamed(c, "values.yaml")
 }
 
 // This is the simpler version that returns just enough data needed for the Charts list view
