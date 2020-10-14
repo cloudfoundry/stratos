@@ -127,7 +127,7 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   },
   [KubeEndpointAuthTypes.TOKEN]: {
     value: KubeEndpointAuthTypes.TOKEN,
-    name: 'Service Accont Token',
+    name: 'Service Account Token',
     form: {
       token: ['', Validators.required],
     },
