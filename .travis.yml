@@ -56,10 +56,8 @@ jobs:
         - npm run test
         - npm run codecov
     - name: Backend Unit Tests
-      before_script:
-        - "./deploy/ci/travis/install-go.sh"
       script:
-        - npm run test-backend
+        - "./deploy/ci/travis/run-backend-tests.sh"
     - name: Helm Chart Unit Tests
       script:
         - "./deploy/ci/travis/helm-chart-unit-tests.sh"
