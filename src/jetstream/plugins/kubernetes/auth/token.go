@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -9,7 +10,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-const AuthConnectTypeKubeToken = "k8sToken"
+const AuthConnectTypeKubeToken = "k8s-token"
 
 // KubeTokenAuth uses a token (e.g. service account token)
 type KubeTokenAuth struct {
@@ -34,9 +35,7 @@ func (c *KubeTokenAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interf
 
 func (c *KubeTokenAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 	log.Debug("FetchToken (KubeTokenAuth)")
-
 	token := ec.FormValue("token")
-
 	tokenRecord := NewKubeTokenAuthTokenRecord(c.portalProxy, token)
 	return tokenRecord, &cnsiRecord, nil
 }
@@ -44,14 +43,25 @@ func (c *KubeTokenAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 func NewKubeTokenAuthTokenRecord(portalProxy interfaces.PortalProxy, token string) *interfaces.TokenRecord {
 	tokenRecord := portalProxy.InitEndpointTokenRecord(getLargeExpiryTime(), token, "__NONE__", false)
 	tokenRecord.AuthType = AuthConnectTypeKubeToken
-
 	return &tokenRecord
+}
+
+func (c *KubeTokenAuth) doTokenFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+	log.Debug("K8S Token auth: doTokenFlowRequest")
+
+	authHandler := func(tokenRec interfaces.TokenRecord, cnsi interfaces.CNSIRecord) (*http.Response, error) {
+		// Token auth has no token refresh or expiry - so much simpler than the OAuth flow
+		req.Header.Set("Authorization", "bearer "+tokenRec.AuthToken)
+		client := c.portalProxy.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
+		return client.Do(req)
+	}
+	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (c *KubeTokenAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
 	// Register auth type with Jetstream
 	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
-		Handler:  c.portalProxy.DoOidcFlowRequest,
+		Handler:  c.doTokenFlowRequest,
 		UserInfo: c.GetUserFromToken,
 	})
 }
