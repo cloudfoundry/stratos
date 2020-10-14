@@ -79,4 +79,4 @@ INVITE_USER_CLIENT_SECRET=
 # HELM_CACHE_FOLDER=./helm-cache
 
 # Enabled Artifact Hub
-# ARTIFACT_HUB_ENABLED=false
+# ARTIFACT_HUB_DISABLED=false
