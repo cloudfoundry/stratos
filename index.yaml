@@ -3,9 +3,9 @@ entries:
   console:
   - apiVersion: v1
     appVersion: 4.2.0
-    created: "2020-10-15T08:35:37.193538107Z"
+    created: "2020-10-15T12:39:46.69172063Z"
     description: A Helm chart for deploying Stratos
-    digest: 0444f603d59186c77072033c9bba00f7d14733a9e398feefe25cc621a0cfb8c5
+    digest: 9c8e68a1b4918ddd5eb952fb200c001ffe52aacceab373a2d7ea903a0b99c631
     home: https://stratos.app
     icon: https://raw.githubusercontent.com/cloudfoundry/stratos/master/deploy/kubernetes/console/icon.png
     keywords:
@@ -20,7 +20,7 @@ entries:
     sources:
     - https://github.com/cloudfoundry/stratos
     urls:
-    - https://github.com/cloudfoundry/stratos/releases/download/4.2.0-rc.6/console-helm-chart-4.2.0-rc.6-665a8c5b7.tgz
+    - https://github.com/cloudfoundry/stratos/releases/download/4.2.0-rc.6/console-helm-chart-4.2.0-rc.6-86b663363.tgz
     version: 4.2.0-rc.6
   - apiVersion: v1
     appVersion: 4.2.0
@@ -703,4 +703,4 @@ entries:
     urls:
     - https://github.com/cloudfoundry-incubator/stratos/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: "2020-10-15T08:35:37.189164733Z"
+generated: "2020-10-15T12:39:46.68723634Z"
