@@ -17,8 +17,8 @@ export class HelmHubRegistrationComponent {
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       HELM_ENDPOINT_TYPE,
       HELM_HUB_ENDPOINT_TYPE,
-      'Helm Hub',
-      'https://hub.helm.sh/api',
+      'Artifact Hub',
+      'https://artifacthub.io',
       false
     ).pipe(
       pairwise(),

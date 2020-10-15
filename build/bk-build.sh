@@ -29,19 +29,21 @@ fi
 # Build backend or run tests
 pushd "${STRATOS}/src/jetstream" > /dev/null
 
+# Show go env
+go env
+
+# Need to install swag in both cases
+echo "Generating OpenAPI documentation..."
+go get github.com/swaggo/swag/cmd/swag@v1.6.7
+swag init
+
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
-  echo "Generating OpenAPI documentation..."
-  go get github.com/swaggo/swag/cmd/swag
-  swag init
   echo "Building version: ${VERSION}"
   GO111MODULE=on go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
-  echo "Generating OpenAPI documentation..."
-  go get github.com/swaggo/swag/cmd/swag
-  swag init
   GO111MODULE=on go test ./... -v -count=1
 fi
 

@@ -3,7 +3,7 @@ function buildAndPublishImage {
   DOCKER_FILE=${2}
   FOLDER=${3}
   TARGET=${4:-none}
-  EXTRA_BUILD_ARGS=${5}
+  EXTRA_BUILD_ARGS=${5:-}
 
   if [ ! -d "${FOLDER}" ]; then
     echo "Project ${FOLDER} hasn't been checked out";

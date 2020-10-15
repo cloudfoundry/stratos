@@ -46,7 +46,7 @@ export class ChartDetailsComponent implements OnInit {
           this.chart = chart;
           this.chartSubTitle = chart.attributes.repo.name;
           if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
-            this.chartSubTitle = 'Helm Hub - ' + this.chartSubTitle;
+            this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
           }
           const version = params.version || this.chart.relationships.latestChartVersion.data.version;
           this.chartsService.getVersion(repo, chartName, version).pipe(first())
