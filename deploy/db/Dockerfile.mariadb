@@ -1,4 +1,4 @@
-FROM splatform/stratos-db-base:leap15_2
+FROM splatform/stratos-db-base:leap15_1
 
 # See: https://github.com/docker-library/mariadb/blob/master/10.2/Dockerfile
 RUN \
