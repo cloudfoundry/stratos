@@ -12,6 +12,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("userinfo", nil, Init)
+}
+
 // UserInfo is a plugin to fetch user info from the UAA
 type UserInfo struct {
 	portalProxy interfaces.PortalProxy

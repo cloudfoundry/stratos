@@ -80,3 +80,4 @@ jobs:
         HELM_RELEASE_REPO_FOLDER: ((release-helm-stable-folder))
         HELM_RELEASE_REGISTRY_HOST: ((release-repository))
         HELM_RELEASE_REGISTRY_ORG: ((release-repository-organization))
+        TAG_SUFFIX: ((tag-suffix))

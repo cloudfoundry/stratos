@@ -57,6 +57,7 @@ console:
       servicePort: 80
       # nodePort: 30001
 
+
   # Name of config map that provides the template files for user invitation emails
   templatesConfigMapName:
 
@@ -112,6 +113,18 @@ console:
   # Node Selector for console Pod
   nodeSelector: {}
 
+  # Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
+  kubeDashboardImage:
+
+  # Enable Artifact Hub
+  artifactHubEnabled: true
+
+  # Size for analysis reports volume
+  reportsVolumeSize: 1Gi
+
+  # Do not use a persistent volume for analysis reports
+  reportsVolumeDisabled: false
+
   # ssl protocols and ciphers overrides - leave empty for defaults
   sslProtocols:
   sslCiphers:
@@ -121,6 +134,7 @@ images:
   proxy: stratos-jetstream
   mariadb: stratos-mariadb
   configInit: stratos-config-init
+  analyzers: stratos-analyzers
 
 # Specify which storage class should be used for PVCs
 #storageClass: default

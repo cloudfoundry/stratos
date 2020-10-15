@@ -3,6 +3,7 @@ function buildAndPublishImage {
   DOCKER_FILE=${2}
   FOLDER=${3}
   TARGET=${4:-none}
+  EXTRA_BUILD_ARGS=${5:-}
 
   if [ ! -d "${FOLDER}" ]; then
     echo "Project ${FOLDER} hasn't been checked out";
@@ -20,7 +21,7 @@ function buildAndPublishImage {
     SET_TARGET="--target=${TARGET}"
   fi
 
-  docker build ${BUILD_ARGS} ${SET_TARGET} -t $NAME -f $DOCKER_FILE .
+  docker build ${BUILD_ARGS} ${EXTRA_BUILD_ARGS} ${SET_TARGET} -t $NAME -f $DOCKER_FILE .
   docker tag ${NAME} ${IMAGE_URL}
 
   if [ "${NO_PUSH}" = "false" ]; then

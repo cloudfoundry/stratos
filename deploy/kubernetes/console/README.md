@@ -22,7 +22,7 @@ Check the repository was successfully added by searching for the `console`, for 
 ```
 helm search repo console
 NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	4.1.0           4.1.0      	A Helm chart for deploying Stratos UI Console
+stratos/console    	4.2.0           4.2.0      	A Helm chart for deploying Stratos UI Console
 ```
 
 > Note: Version numbers will depend on the version of Stratos available from the Helm repository
@@ -313,7 +313,7 @@ helm install my-console stratos/console --namespace=console --set console.localA
 
 In some scenarios it is useful to be able to add custom annotations and/or labels to the Kubernetes resources that the Stratos Helm chart creates.
 
-The Stratos Helm chart exposes a number of Helm chart values that cabe specified in order to do this - they are:
+The Stratos Helm chart exposes a number of Helm chart values that can be specified in order to do this - they are:
 
 |Parameter|Description|Default|
 |----|---|---|

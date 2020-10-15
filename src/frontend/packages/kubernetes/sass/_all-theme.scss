@@ -1,0 +1,26 @@
+// Theming for the copmponents in the Kubernetes package
+
+@import '../src/kubernetes/tabs/kubernetes-summary-tab/kubernetes-summary.component.theme';
+@import '../src/kubernetes/tabs/kubernetes-analysis-tab/kubernetes-analysis-report/kubernetes-analysis-report.component.theme';
+@import '../src/kubernetes/tabs/kubernetes-analysis-tab/kubernetes-analysis-info/analysis-info-card/analysis-info-card.component.theme';
+@import '../src/helm/list-types/monocular-chart-card/monocular-chart-card.component.theme';
+@import '../src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.theme';
+@import '../src/kubernetes/list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component.theme';
+@import '../src/kubernetes/workloads/chart-values-editor/chart-values-editor.component.theme';
+@import '../src/kubernetes/auth-forms/kubernetes-serviceaccount-auth-form/kubernetes-serviceaccount-auth-form.component.theme';
+
+@mixin apply-theme-kubernetes($stratos-theme) {
+
+  $theme: map-get($stratos-theme, theme);
+  $app-theme: map-get($stratos-theme, app-theme);
+
+  @include kube-summary-theme($theme, $app-theme);
+  @include kube-analysis-report-theme($theme, $app-theme);
+  @include kube-analysis-card-theme($theme, $app-theme);
+  @include monocular-chart-card($theme, $app-theme);
+  @include helm-release-summary-tab-theme($theme, $app-theme);
+  @include kube-node-link-theme($theme, $app-theme);
+  @include app-chart-values-editor-theme($theme, $app-theme);
+  @include app-kube-token-auth-form-theme($theme, $app-theme);
+
+}

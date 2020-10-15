@@ -1,0 +1,13 @@
+<div [formGroup]="formGroup" class="kube-aws-auth">
+  <div formGroupName="authValues" class="kube-aws-auth__form">
+    <mat-form-field>
+      <input matInput placeholder="Cluster" formControlName="cluster">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Access Key ID" formControlName="access_key">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Secret Access Key" type="password" formControlName="secret_key">
+    </mat-form-field>
+  </div>
+</div>

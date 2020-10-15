@@ -27,8 +27,8 @@ describe('API Keys -', () => {
       .getInfo(ConsoleUserType.admin);
     helper = new ApiKeyE2eHelper(setup);
 
-    newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase()
-  })
+    newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase();
+  });
 
   // Should be ran in sequence
   describe('Ordered Tests - ', () => {
@@ -41,7 +41,7 @@ describe('API Keys -', () => {
     it('Navigate to api key page', () => {
       page.header.clickUserMenuItem('API Keys');
       page.waitForPage();
-    })
+    });
 
     it('New key does not exist', () => {
       // Validation check
@@ -51,9 +51,9 @@ describe('API Keys -', () => {
           currentKeysCount = page.list.table.getRowCount();
         } else {
           const noContentComponent = new MessageNoContentPo();
-          expect(noContentComponent.isDisplayed()).toBeTruthy()
+          expect(noContentComponent.isDisplayed()).toBeTruthy();
         }
-      })
+      });
     });
 
     describe('Add Dialog - ', () => {
@@ -84,7 +84,7 @@ describe('API Keys -', () => {
 
         dialog.form.fill({
           comment: newKeysComment
-        })
+        });
 
         expect(dialog.canClose()).toBeTruthy();
         expect(dialog.canCreate()).toBeTruthy();
@@ -92,19 +92,19 @@ describe('API Keys -', () => {
         dialog.create();
         dialog.waitUntilNotShown();
       });
-    })
+    });
 
     it('New key has a secret', () => {
       const secret = new Component(page.getKeySecret());
       secret.waitUntilShown();
       expect(secret.getComponent().getText()).toBeDefined();
       page.closeKeySecret();
-      secret.waitUntilNotShown()
-    })
+      secret.waitUntilNotShown();
+    });
 
     it('New key is in updated table', () => {
       expect(page.list.table.findRow('description', newKeysComment, true)).toBeGreaterThanOrEqual(0);
-    })
+    });
 
     it('Delete new key', () => {
       return page.list.table.findRow('description', newKeysComment, true)
@@ -119,10 +119,10 @@ describe('API Keys -', () => {
             page.list.waitForNoLoadingIndicator();
             expect(page.list.table.getRowCount()).toEqual(currentKeysCount);
           } else {
-            expect(0).toEqual(currentKeysCount)
+            expect(0).toEqual(currentKeysCount);
           }
-        })
-    })
-  })
+        });
+    });
+  });
 
 });

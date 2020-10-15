@@ -1,0 +1,22 @@
+.status {
+  &__running {
+    align-items: center;
+    display: flex;
+
+    &> mat-progress-spinner {
+      margin-right: 8px;
+    }
+  }
+  &__error {
+    align-items: center;
+    display: flex;
+
+    mat-icon {
+      cursor: help;
+      font-size: 20px;
+      height: 20px;
+      margin-left: 8px;
+      width: 20px;
+    }
+  }
+}

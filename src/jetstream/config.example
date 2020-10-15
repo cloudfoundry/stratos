@@ -58,6 +58,7 @@ INVITE_USER_CLIENT_SECRET=
 # DB_USER=stratos
 # DB_PASSWORD=strat0s
 # DB_DATABASE_NAME=stratosdb
+# DB_SSL_MODE=disable
 
 # Postgresql database for local dev
 # DATABASE_PROVIDER=pgsql
@@ -67,3 +68,15 @@ INVITE_USER_CLIENT_SECRET=
 # DB_PASSWORD=strat0s
 # DB_DATABASE_NAME=stratosdb
 # DB_SSL_MODE=disable
+
+# Analysis services API
+#ANALYSIS_SERVICES_API=
+
+# Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
+# STRATOS_KUBERNETES_DASHBOARD_IMAGE=
+
+# Cache folder for Helm Charts
+# HELM_CACHE_FOLDER=./helm-cache
+
+# Enabled Artifact Hub
+# ARTIFACT_HUB_DISABLED=false

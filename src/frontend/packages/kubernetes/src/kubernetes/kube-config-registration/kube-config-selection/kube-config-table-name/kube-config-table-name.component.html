@@ -1,0 +1,9 @@
+<div class="name">
+  <mat-form-field class="cell-edit-variable"
+    *ngIf="dataSource.getRowUniqueId(row) === dataSource.getRowUniqueId(dataSource.editRow) else value">
+    <input matInput name="envVarValue" [value]="dataSource.editRow?.name"
+      (input)="dataSource.editRowName = $event.target.value" />
+  </mat-form-field>
+  <ng-template #value><span class="cell-value-variable">{{row.name}}</span></ng-template>
+  <app-table-cell-edit [row]="row" [dataSource]="dataSource" subtle="true"></app-table-cell-edit>
+</div>

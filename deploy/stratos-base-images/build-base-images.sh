@@ -7,13 +7,14 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-BASE_IMAGE=opensuse/leap:15.1
+BASE_IMAGE=opensuse/leap:15.2
 REGISTRY=docker.io
 ORGANIZATION=splatform
-TAG=leap15_1
+TAG=leap15_2
 PROG=$(basename ${BASH_SOURCE[0]})
 SQUASH_ARGS="--squash"
 NO_SQUASH="stratos-base"
+DIR=$(dirname $PROG)
 
 function usage {
     echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
@@ -129,6 +130,8 @@ build_and_push_image() {
     if [ ! -z ${PUSH_IMAGES} ]; then
         docker push ${REGISTRY}/${ORGANIZATION}/${image_name}:${TAG}
     fi
+
+    echo "${image_name}:${TAG}" >> $__DIRNAME/imagelist.txt
 }
 
 tag_and_push_image() {
@@ -146,6 +149,10 @@ tag_and_push_image() {
         docker push ${REGISTRY}/${ORGANIZATION}/${TAG_TO}:${TAG}
     fi
 }
+
+# Create a manifest of all og the base images
+rm -f $__DIRNAME/imagelist.txt
+touch $__DIRNAME/imagelist.txt
 
 # Plain OS image
 build_and_push_image stratos-base Dockerfile.stratos-base

@@ -1,0 +1,8 @@
+<app-page-header [tabs]="tabLinks" [favorite]="favorite$ | async" tabsHeader="Kubernetes" [endpointIds$]="endpointIds$">
+  <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}</h1>
+  <div class="page-header-right">
+  </div>
+</app-page-header>
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Kubernetes details'">
+  <router-outlet></router-outlet>
+</app-loading-page>

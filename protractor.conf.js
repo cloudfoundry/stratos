@@ -12,7 +12,9 @@ const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
 const https = require('https');
-const { ProtractorBrowserLogReporter } = require('jasmine-protractor-browser-log-reporter');
+const {
+  ProtractorBrowserLogReporter
+} = require('jasmine-protractor-browser-log-reporter');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
