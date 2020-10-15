@@ -1,4 +1,7 @@
-# Stratos on EKS
+---
+title: Stratos on EKS
+sidebar_label: Stratos on EKS
+---
 
 ## EKS Setup
 
@@ -10,7 +13,7 @@ If you plan to deploy SCF in the cluster, make the following modifications when 
 
 ## Helm Setup
 
-Download the latest Helm release (atleast 2.9 is required for RBAC support) from https://github.com/helm/helm/releases
+Download the latest Helm release (at least 2.9 is required for RBAC support) from https://github.com/helm/helm/releases
 
 Save the following to a file caleld `helm-rbac.yaml`
 ```
