@@ -3,6 +3,7 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { KubeResourceActionBuilders } from './store/action-builders/kube-resource.action-builder';
 import {
   AnalysisReportsActionBuilders,
   KubeDashboardActionBuilders,
@@ -15,6 +16,7 @@ import {
 } from './store/action-builders/kube.action-builders';
 import {
   AnalysisReport,
+  KubernetesConfigMap,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -37,6 +39,7 @@ export class KubeEntityCatalog {
   public service: StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>;
   public dashboard: StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>;
   public analysisReport: StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>;
+  public configMap: StratosCatalogEntity<IFavoriteMetadata, KubernetesConfigMap, KubeResourceActionBuilders>;
 }
 
 /**

@@ -1,3 +1,5 @@
+import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
 
 export interface KubernetesInfo {
@@ -21,6 +23,28 @@ export interface KubeAPIResource extends BasicKubeAPIResource {
   metadata: Metadata;
   status: BaseStatus;
   spec: any;
+}
+
+export interface IKubeResourceEntityDefinition extends IStratosEntityDefinition {
+  apiVersion: string;
+  apiName: string;
+  apiNamespaced: boolean;
+}
+
+export interface KubeResourceEntityDefinition {
+  apiVersion: string;
+  apiName: string;
+  apiNamespaced?: boolean;
+  label: string;
+  labelPlural?: string;
+  labelTab?: string;
+  icon: string;
+  iconFont?: string;
+  type: string;
+  kubeCatalogEntity: string;
+  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity,
+  route?: string;
+  listColumns?: SimpleKubeListColumn[];
 }
 
 export interface KubeService extends BasicKubeAPIResource {
@@ -516,4 +540,16 @@ export interface AnalysisReport {
   duration: number;
   report?: any;
   title?: string;
+}
+
+
+export interface KubernetesConfigMap extends BasicKubeAPIResource {
+  test?: string;
+}
+
+export interface SimpleKubeListColumn {
+  field: string;
+  header: string;
+  flex?: string;
+  sort?: boolean;
 }

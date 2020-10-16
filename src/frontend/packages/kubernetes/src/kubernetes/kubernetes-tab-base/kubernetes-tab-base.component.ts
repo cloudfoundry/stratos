@@ -9,6 +9,8 @@ import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { KubeResourceEntityDefinition } from '../store/kube.types';
+import { kubeEntityCatalog } from './../kubernetes-entity-catalog';
 
 @Component({
   selector: 'app-kubernetes-tab-base',
@@ -43,6 +45,7 @@ export class KubernetesTabBaseComponent implements OnInit {
     public kubeEndpointService: KubernetesEndpointService,
     public favoritesConfigMapper: FavoritesConfigMapper,
     public analysisService: KubernetesAnalysisService,
+    private route: ActivatedRoute,
   ) {
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
@@ -50,9 +53,64 @@ export class KubernetesTabBaseComponent implements OnInit {
       { link: '-', label: 'Cluster' },
       { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
       { link: 'namespaces', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
+      ...this.getTabsFromEntityConfig(false),
       { link: '-', label: 'Resources' },
-      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
+      ...this.getTabsFromEntityConfig(true)
     ];
+  }
+
+
+  private getTabsFromEntityConfig(namespaced: boolean = true) {
+    const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
+    const tabsFromRouterConfig = [];
+
+    // Get the tabs from the router configuration
+    entityNames.forEach(key => {
+      // See if we can find an entity for the key
+      const catalogEntity = kubeEntityCatalog[key];
+      if (catalogEntity) {
+        const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+        if (defn.apiNamespaced === namespaced) {
+          tabsFromRouterConfig.push({
+            link: defn.route || `resource/${key}`,
+            label: defn.labelTab || defn.labelPlural,
+            icon: defn.icon,
+            iconFont: defn.iconFont,
+          });
+        }
+      }
+    })
+
+    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    return tabsFromRouterConfig;
+  }
+
+  private getTabsFromRouterConfig(namespaced: boolean = true) {
+    const childRoutes = this.route.snapshot.routeConfig.children;
+    const tabsFromRouterConfig = [];
+
+    // Get the tabs from the router configuration
+    childRoutes.forEach( r => {
+      if (r.path.length > 0) {
+        // See if we can find an entity for the key
+        const key = r.data ? (r.data.entityCatalogKey ? r.data.entityCatalogKey : r.path) : r.path;
+        const catalogEntity = kubeEntityCatalog[key];
+        if (catalogEntity) {
+          const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+          if (defn.apiNamespaced === namespaced) {
+            tabsFromRouterConfig.push({
+              link: defn.route ? defn.route: `resource/${r.path}`,
+              label: defn.labelTab || defn.labelPlural,
+              icon: defn.icon,
+              iconFont: defn.iconFont,
+            });
+          }
+        }
+      }
+    })
+
+    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    return tabsFromRouterConfig;
   }
 
   ngOnInit() {
@@ -68,5 +126,4 @@ export class KubernetesTabBaseComponent implements OnInit {
       map(endpoint => [endpoint.entity.guid])
     );
   }
-
 }

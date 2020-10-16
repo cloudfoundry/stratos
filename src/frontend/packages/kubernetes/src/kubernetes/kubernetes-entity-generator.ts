@@ -27,17 +27,24 @@ import {
 import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
+  addKubernetesEntitySchema,
   analysisReportEntityType,
   KUBERNETES_ENDPOINT_TYPE,
+  kubernetesConfigMapEntityType,
   kubernetesDashboardEntityType,
   kubernetesDeploymentsEntityType,
   kubernetesEntityFactory,
+  KubernetesEntitySchema,
   kubernetesNamespacesEntityType,
   kubernetesNodesEntityType,
   kubernetesPodsEntityType,
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
+import {
+  createKubeResourceActionBuilder,
+  KubeResourceActionBuilders,
+} from './store/action-builders/kube-resource.action-builder';
 import {
   AnalysisReportsActionBuilders,
   analysisReportsActionBuilders,
@@ -56,7 +63,11 @@ import {
   KubeStatefulSetsActionBuilders,
   kubeStatefulSetsActionBuilders,
 } from './store/action-builders/kube.action-builders';
+import { getGuidFromKubePodObj } from './store/kube.getIds';
 import {
+  KubeAPIResource,
+  KubeResourceEntityDefinition,
+  KubernetesConfigMap,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -136,6 +147,45 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   }
 };
 
+class KubeResourceEntityHelper {
+
+  constructor(private endpointDefinition: StratosEndpointExtensionDefinition) { }
+
+  public entities: any[] = [];
+
+  public add<T>(defn: KubeResourceEntityDefinition): KubeResourceEntityHelper {
+
+    // Simplify registration by registrtering the schema in the entity cache
+    addKubernetesEntitySchema(defn.type, new KubernetesEntitySchema(defn.type, {}, { idAttribute: getGuidFromKubePodObj }));
+
+    defn.labelTab = defn.labelTab || defn.labelPlural || `${defn.label}s`;
+
+    if (defn.apiNamespaced !== false) {
+      defn.apiNamespaced = true;
+    }
+
+    const d: IStratosEntityDefinition = {
+      ...defn,
+      endpoint: this.endpointDefinition,
+      schema: kubernetesEntityFactory(defn.type),
+      iconFont: defn.iconFont || 'stratos-icons',
+      labelPlural: defn.labelPlural || `${defn.label}s`
+    }
+
+    if (defn.getKubeCatalogEntity) {
+      console.log(defn);
+      kubeEntityCatalog[defn.kubeCatalogEntity] = defn.getKubeCatalogEntity(d);
+    } else {
+      kubeEntityCatalog[defn.kubeCatalogEntity] = new StratosCatalogEntity<IFavoriteMetadata, T, KubeResourceActionBuilders>(d, {
+        actionBuilders: createKubeResourceActionBuilder(d.type)
+      });
+    }
+
+    this.entities.push(kubeEntityCatalog[defn.kubeCatalogEntity]);
+    return this;
+  }
+}
+
 export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: KUBERNETES_ENDPOINT_TYPE,
@@ -201,7 +251,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   return [
     generateEndpointEntity(endpointDefinition),
     generateStatefulSetsEntity(endpointDefinition),
-    generatePodsEntity(endpointDefinition),
+    ...generateKubeResourceEntities(endpointDefinition),
     generateDeploymentsEntity(endpointDefinition),
     generateNodesEntity(endpointDefinition),
     generateNamespacesEntity(endpointDefinition),
@@ -232,18 +282,6 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
     actionBuilders: kubeStatefulSetsActionBuilders
   });
   return kubeEntityCatalog.statefulSet;
-}
-
-function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: kubernetesPodsEntityType,
-    schema: kubernetesEntityFactory(kubernetesPodsEntityType),
-    endpoint: endpointDefinition
-  };
-  kubeEntityCatalog.pod = new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(definition, {
-    actionBuilders: kubePodActionBuilders
-  });
-  return kubeEntityCatalog.pod;
 }
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -328,4 +366,143 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
     endpoint: endpointDefinition,
   };
   return new StratosCatalogEntity(definition);
+}
+
+// =============================================================================================================
+// Kubernetes Resources using generic resource pattern
+// =============================================================================================================
+
+function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensionDefinition) {
+
+  const entities = new KubeResourceEntityHelper(endpointDefinition);
+
+  entities.add<KubernetesPod>({
+    type: kubernetesPodsEntityType,
+    icon: 'pod',
+    label: 'Pod',
+    apiVersion: '/api/v1',
+    apiName: 'pods',
+    apiNamespaced: true,
+    kubeCatalogEntity: 'pod',
+    route: 'pods',
+    getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(
+      definition, { actionBuilders: kubePodActionBuilders }
+    )
+  });
+
+  entities.add<KubernetesConfigMap>({
+    type: kubernetesConfigMapEntityType,
+    icon: 'config_maps',
+    label: 'Config Map',
+    apiVersion: '/api/v1',
+    apiName: 'configmaps',
+    kubeCatalogEntity: 'configMap'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesSecrets',
+    icon: 'config_maps',
+    label: 'Secret',
+    apiVersion: '/api/v1',
+    apiName: 'secrets',
+    kubeCatalogEntity: 'secrets'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesPersistentVolumeClaims',
+    icon: 'job',
+    label: 'Persistent Volume Claim',
+    labelTab: 'PVCs',
+    apiVersion: '/api/v1',
+    apiName: 'persistentvolumeclaims',
+    kubeCatalogEntity: 'pvcs',
+    listColumns: [
+      {
+        header: 'Phase',
+        field: 'status.phase',
+        sort: true
+      },
+      {
+        header: 'Capacity',
+        field: 'status.capacity.storage',
+      }
+    ]
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesStorageClass',
+    icon: 'storage_class',
+    label: 'Storage Class',
+    labelPlural: 'Storage Classes',
+    apiVersion: '/apis/storage.k8s.io/v1',
+    apiName: 'storageclasses',
+    apiNamespaced: false,
+    kubeCatalogEntity: 'storageClass',
+    listColumns: [
+      {
+        header: 'Provisioner',
+        field: 'provisioner',
+        sort: true
+      },
+      {
+        header: 'Reclaim Policy',
+        field: 'reclaimPolicy',
+        sort: true
+      },
+      {
+        header: 'Binding Mode',
+        field: 'volumeBindingMode',
+        sort: true
+      }
+    ]
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesPersistentVolume',
+    icon: 'persistent_volume',
+    label: 'Persistent Volume',
+    apiVersion: '/api/v1',
+    apiName: 'persistentvolumes',
+    apiNamespaced: false,
+    kubeCatalogEntity: 'persistentVolumes'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesReplicaSet',
+    icon: 'replica_set',
+    label: 'Replica Set',
+    apiVersion: '/apis/apps/v1',
+    apiName: 'replicasets',
+    kubeCatalogEntity: 'replicaSets'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesClusterRole',
+    icon: 'cluster_role',
+    label: 'Cluster Role',
+    apiVersion: '/apis/rbac.authorization.k8s.io/v1',
+    apiName: 'clusterroles',
+    apiNamespaced: false,
+    kubeCatalogEntity: 'clusterroles'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesServiceAccount',
+    icon: 'replica_set',
+    label: 'Service Account',
+    apiVersion: '/api/v1',
+    apiName: 'serviceaccounts',
+    kubeCatalogEntity: 'serviceaccounts'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesRole',
+    icon: 'role_binding',
+    label: 'Role',
+    apiVersion: '/apis/rbac.authorization.k8s.io/v1',
+    apiName: 'roles',
+    kubeCatalogEntity: 'role'
+  });
+
+  return entities.entities;
 }

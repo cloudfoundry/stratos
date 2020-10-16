@@ -17,7 +17,7 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
-import { getGuidFromKubeDashboard, getGuidFromKubeNamespace, getGuidFromKubeNode, getGuidFromKubePod } from './kube.getIds';
+import { getGuidFromKubeNamespace, getGuidFromKubeNode, getGuidFromKubePod } from './kube.getIds';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -325,7 +325,7 @@ export class GeKubernetesDeployments implements KubePaginationAction {
 
 export class GetKubernetesDashboard implements KubeSingleEntityAction {
   constructor(public kubeGuid: string) {
-    this.guid = getGuidFromKubeDashboard(kubeGuid);
+    this.guid = kubeGuid;
   }
   type = GET_KUBE_DASHBOARD;
   entityType = kubernetesDashboardEntityType;

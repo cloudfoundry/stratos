@@ -4,13 +4,13 @@ import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/a
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import {
-  getGuidFromKubeDashboardObj,
   getGuidFromKubeDeploymentObj,
   getGuidFromKubeNamespaceObj,
   getGuidFromKubeNodeObj,
   getGuidFromKubePodObj,
   getGuidFromKubeServiceObj,
   getGuidFromKubeStatefulSetObj,
+  getGuidFromResource,
 } from './store/kube.getIds';
 import { KubernetesApp } from './store/kube.types';
 
@@ -23,6 +23,7 @@ export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
 export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
 export const kubernetesDashboardEntityType = 'kubernetesDashboard';
 export const analysisReportEntityType = 'analysisReport';
+export const kubernetesConfigMapEntityType = 'kubernetesConfigMap';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
 
@@ -102,7 +103,7 @@ entityCache[kubernetesServicesEntityType] = new KubernetesEntitySchema(
 entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
   kubernetesDashboardEntityType,
   {},
-  { idAttribute: getGuidFromKubeDashboardObj }
+  { idAttribute: getGuidFromResource }
 );
 
 // Analysis Reports - should not be bound to an endpoint
