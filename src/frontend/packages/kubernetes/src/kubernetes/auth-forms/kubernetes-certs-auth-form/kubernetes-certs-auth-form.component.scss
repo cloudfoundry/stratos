@@ -1,0 +1,25 @@
+.kube-certs-auth {
+  &__form {
+    display: flex;
+    flex-direction: column;
+    height: 250px;
+    width: 450px;
+
+    &__file,
+    &__content {
+      display: flex;
+      flex-direction: column;
+      padding-top: 15px;
+    }
+
+    &__content {
+      & > * {
+        margin-bottom: 10px;
+      }
+      textarea {
+        max-height: 75px;
+        min-height: 60px;
+      }
+    }
+  }
+}

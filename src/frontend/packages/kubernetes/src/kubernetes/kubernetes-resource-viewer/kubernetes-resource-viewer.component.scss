@@ -1,0 +1,35 @@
+.resource-preview {
+
+  &__labels {
+    display: table;
+  }
+
+  &__label {
+    display: table-row;
+  }
+
+  &__label-name {
+    display: table-cell;
+    opacity: .8;
+    padding: 2px 20px 2px 2px;
+  }
+
+  &__label-value {
+    display: table-cell;
+  }
+
+  &__side-by-side {
+    display: flex;
+
+    app-metadata-item {
+      margin-right: 40px;
+    }
+
+  }
+
+  &__metrics {
+    align-items: center;
+    display: flex;
+  }
+
+}

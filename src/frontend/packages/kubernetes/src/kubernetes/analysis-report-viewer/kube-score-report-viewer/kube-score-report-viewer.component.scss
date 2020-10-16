@@ -1,0 +1,23 @@
+.report {
+  &__group {
+    margin-bottom: 10px;
+  }
+  &__group-name {
+    font-weight: bold;
+    padding: 4px 0;
+  }
+  &__check {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+  }
+  &__icon {
+    margin-right: 4px;
+  }
+  &__comment {
+    display: list-item;
+    list-style: square;
+    margin-left: 58px;
+  }
+}

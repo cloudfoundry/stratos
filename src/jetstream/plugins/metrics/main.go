@@ -16,6 +16,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("metrics", nil, Init)
+}
+
 // MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
 	portalProxy  interfaces.PortalProxy
@@ -354,9 +359,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	for _, values := range info.Endpoints {
 		for _, endpoint := range values {
 			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint)
 			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
-
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job

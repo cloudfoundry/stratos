@@ -15,10 +15,10 @@ You will need to have installed Docker, see [Docker Installation Documentation](
 Run Stratos in Docker locally:
 
 ```
-$ docker run -p 4443:443 splatform/stratos:latest 
+$ docker run -p 5443:5443 splatform/stratos:stable 
 ```
 
-Once that has finished, you can then access Stratos by visiting [https://localhost:4443](https://localhost:4443).
+Once that has finished, you can then access Stratos by visiting [https://localhost:5443](https://localhost:5443).
 
 You can configure a local admin account and set the password for future logins.
 
@@ -60,12 +60,12 @@ docker build -f deploy/Dockerfile.all-in-one . -t stratos-aio
 Bring up the container with:
 
 ```
-docker run -p 4443:443 stratos-aio
+docker run -p 5443:5443 stratos-aio
 ```
 
 Stratos should now be accessible at the following URL:
 
-https://localhost:4443
+https://localhost:5443
 
 If using a UAA, you will be presented with the Stratos Setup welcome screen - you will need to enter your UAA information to configure Stratos. Once complete, you will be able to login with your credentials. If you have configured the container to use a local user account instead of a UAA, log in with the credentials specified in the configuration file.
 
@@ -84,7 +84,7 @@ mkdir -p ~/stratos-db
 When starting the Docker container, mount a volume for this folder and pass this via the `SQLITE_DB_DIR` environment variable, e.g.
 
 ```
-docker run -p 4443:443 -v ~/stratos-db:/var/stratos-db -e SQLITE_DB_DIR=/var/stratos-db stratos-aio
+docker run -p 54443:5443 -v ~/stratos-db:/var/stratos-db -e SQLITE_DB_DIR=/var/stratos-db stratos-aio
 ```
 
 Now each time you stop and start the container, Stratos will maintain the database file.

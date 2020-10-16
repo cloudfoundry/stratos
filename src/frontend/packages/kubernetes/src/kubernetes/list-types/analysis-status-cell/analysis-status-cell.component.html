@@ -1,0 +1,8 @@
+<div *ngIf="row.status === 'running'" class="status__running">
+  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner> Running
+</div>
+<div *ngIf="row.status === 'completed'">Completed</div>
+<div *ngIf="row.status === 'error'" class="status__error">
+  <div>Error</div>
+   <mat-icon class="text-warning" *ngIf="row.error" matTooltip="{{ row.error }}">warning</mat-icon>
+</div>

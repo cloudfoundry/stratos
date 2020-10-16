@@ -1,7 +1,11 @@
 module.exports = {
   docs: {
-    Documentation: ['introduction', 'overview', 'license'],
-    'Deploying Stratos': [
+    'Stratos': [
+      'introduction',
+      'overview',
+      'license'
+    ],
+    'Deploy': [
       'deploy/overview',
       {
         "Cloud Foundry": [
@@ -13,19 +17,35 @@ module.exports = {
       {
         Kubernetes: [
           'deploy/kubernetes',
-          'deploy/kubernetes/helm-installation'
+          'deploy/kubernetes/helm-installation',
+          'deploy/kubernetes/eksdeployment',
         ],
       },
       'deploy/all-in-one',
       'deploy/access',
       'deploy/troubleshooting',
     ],
-    'Advanced Topics': [
-      'advanced/invite-user-guide',
-      'advanced/sso',
-      'advanced/bosh-metrics'
+    'Endpoints': [
+      'endpoints/introduction',
+      {
+        'Cloud Foundry': [
+          'endpoints/cf/cf',
+          'endpoints/cf/invite-user-guide'
+        ]
+      },
+      'endpoints/k8s',
+      {
+        'Metrics': [
+          'endpoints/metrics/metrics',
+          'endpoints/metrics/bosh-metrics'
+        ]
+      },
+      'endpoints/helm',
     ],
-    'Development': [
+    'Advanced Topics': [
+      'advanced/sso',
+    ],
+    'Develop': [
       'developer/contributing',
       'developer/introduction',
       {
@@ -45,10 +65,11 @@ module.exports = {
           'developer/developers-guide-helm'
         ]
       },
+      'developer/developers-guide-kube-local-dev',
       'developer/developers-guide-e2e-tests',
       'developer/developers-guide-env-tech',
     ],
-    'Extending Stratos': [
+    'Extend': [
       'extensions/introduction',
       'extensions/v4-migration',
       'extensions/theming',

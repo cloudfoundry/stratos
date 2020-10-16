@@ -38,7 +38,7 @@
         </div>
       </ng-container>
     </div>
-    <a class="app-page-header__anchor" mat-icon-button
+    <a class="summary__anchor" mat-icon-button
       [disabled]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
       href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
       <mat-icon>launch</mat-icon>
@@ -85,7 +85,8 @@
                 <app-metadata-item icon="access_time" label="Modified">
                   {{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}
                 </app-metadata-item>
-                <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">{{ sshStatus$ | async }}
+                <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
+                  {{ sshStatus$ | async }}
                 </app-metadata-item>
               </div>
               <div class="app-metadata__two-cols">
@@ -118,7 +119,8 @@
                 <a
                   [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
               </app-metadata-item>
-              <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" iconFont="stratos-icons" icon="virtual_space" label="Space">
+              <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" iconFont="stratos-icons"
+                icon="virtual_space" label="Space">
                 <a
                   [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
               </app-metadata-item>
@@ -174,7 +176,8 @@
               <app-metadata-item *ngSwitchCase="'archive'" icon="insert_drive_file" label="File">
                 Deployed from local file
               </app-metadata-item>
-              <app-metadata-item *ngSwitchCase="'docker'" iconFont="stratos-icons" icon="container" label="Docker Image">
+              <app-metadata-item *ngSwitchCase="'docker'" iconFont="stratos-icons" icon="container"
+                label="Docker Image">
                 <a *ngIf="deploySource.dockerUrl; else noDockerUrl" href="{{ deploySource.dockerUrl }}"
                   rel="noopener noreferrer" target="_blank">
                   {{deploySource.dockerImage}}

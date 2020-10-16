@@ -1,0 +1,4 @@
+<div class="info__card">
+  <div class="info__card-icon" *ngIf="analyzer.iconUrl"><img [width]="analyzer.iconWidth" [src]="analyzer.iconUrl" /></div>
+  <div class="info__card-text" [innerHTML]="content$ | async" class="markdown-body"></div>
+</div>

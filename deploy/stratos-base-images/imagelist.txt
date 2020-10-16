@@ -1,0 +1,10 @@
+stratos-base:leap15_2
+stratos-ruby-base:leap15_2
+stratos-ruby-build-base:leap15_2
+stratos-go-build-base:leap15_2
+stratos-ui-build-base:leap15_2
+stratos-bk-base:leap15_2
+stratos-nginx-base:leap15_2
+stratos-bk-build-base:leap15_2
+stratos-db-base:leap15_2
+stratos-bk-init-base:leap15_2
