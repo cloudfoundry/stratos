@@ -183,6 +183,8 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
 	ufe.RemoveFavorites()
 
+	p.RemoveRelations(cnsiGUID)
+
 	return nil
 }
 
@@ -198,7 +200,7 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
+		return cnsiList, fmt.Errorf("ListEndpoints: %s", err)
 	}
 
 	cnsiList, err = cnsiRepo.List(p.Config.EncryptionKeyInBytes)
@@ -467,9 +469,19 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 
 	return tr, true
 }
-
 func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
 	log.Debug("ListCEndpointsByUser")
+	return p.listEndpointsByUserAndShared(userGUID, false)
+}
+
+
+func (p *portalProxy) ListEndpointsByUserAndShared(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
+	log.Debug("ListEndpointsByUserAndShared")
+	return p.listEndpointsByUserAndShared(userGUID, true)
+}
+
+func (p *portalProxy) listEndpointsByUserAndShared(userGUID string, includeShared bool) ([]*interfaces.ConnectedEndpoint, error) {
+	log.Debug("listEndpointsByUserAndShared")
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		log.Errorf(dbReferenceError, err)
@@ -478,14 +490,24 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.Connec
 
 	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
-		log.Debugf("Error was: %+v", err)
+		log.Debugf("Error during list by user was: %+v", err)
 		return nil, err
+	}
+
+	if includeShared {
+		// Get Endpoints that are shared in the system
+		systemSharedCNSiList, err := cnsiRepo.ListByUser(tokens.SystemSharedUserGuid)
+		if err != nil {
+			log.Debugf("Error during list by shared user was: %+v", err)
+			return nil, err
+		}
+		cnsiList = append(cnsiList, systemSharedCNSiList...)
 	}
 
 	return cnsiList, nil
 }
 
-// Uopdate the Access Token, Refresh Token and Token Expiry for a token
+// Update the Access Token, Refresh Token and Token Expiry for a token
 func (p *portalProxy) updateTokenAuth(userGUID string, t interfaces.TokenRecord) error {
 	log.Debug("updateTokenAuth")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)

@@ -1,14 +1,11 @@
 import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../../store/src/app-state';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   CfCellsListConfigService,
 } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-list-config.service';
-import { CfCellHelper } from '../../cf-cell.helpers';
+import { ContainerOrchestrationService } from '../../../container-orchestration/services/container-orchestration.service';
 import { getActiveRouteCfCellProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
@@ -30,10 +27,8 @@ export class CloudFoundryCellsComponent {
 
   constructor(
     cfEndpointService: CloudFoundryEndpointService,
-    store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory
+    containerService: ContainerOrchestrationService
   ) {
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
-    this.hasCellMetrics$ = cellHelper.hasCellMetrics(cfEndpointService.cfGuid);
+    this.hasCellMetrics$ = containerService.diegoService.hasCellMetrics(cfEndpointService.cfGuid);
   }
 }

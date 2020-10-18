@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,9 +28,19 @@ type MetricsSpecification struct {
 }
 
 const (
-	EndpointType  = "metrics"
-	CLIENT_ID_KEY = "METRICS_CLIENT"
+	EndpointType               = "metrics"
+	CLIENT_ID_KEY              = "METRICS_CLIENT"
+	MetricsCfRelation          = "metrics-cf"
+	MetricsKubeRelation        = "metrics-kube"
+	MetricsEiriniRelation      = "metrics-eirini"
+	relationsSetupNeededMarker = "__RELATIONS_MIGRATION_NEEDED"
+	systemGroupName            = "system"
 )
+
+type MetricsRelationMetadata struct {
+	Job         string `json:"job,omitempty"`
+	Environment string `json:"environment,omitempty"`
+}
 
 type MetricsProviderMetadata struct {
 	Type        string `json:"type"`
@@ -109,8 +119,11 @@ func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 
-	// Note: User needs to be an admin of the given Cloud Foundry to retrieve metrics
+	// Note: User does not need to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/cells/:op", m.getCloudFoundryCellMetrics)
+	echoContext.GET("/metrics/cf/eirini/:op", m.getCloudFoundryEiriniMetrics) // TODO: RC shouldn't this be in the eirini plugin?
+
+	// Note: User needs to be an admin of the given Cloud Foundry for the following endpoints
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 }
 
@@ -299,6 +312,13 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 
 // Init performs plugin initialization
 func (m *MetricsSpecification) Init() error {
+	setupNeeded, err := m.portalProxy.GetConfigValue(systemGroupName, relationsSetupNeededMarker)
+	if err != nil {
+		log.Warnf("Unable to determine if relations setup is required: %+v", err)
+	}
+	if setupNeeded == "true" {
+		m.CreateInitialRelations()
+	}
 	return nil
 }
 
@@ -332,47 +352,26 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 }
 
 func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+}
 
+func createMetricsMetadataFromTokenMetadata(tokenMetadata string, endpointGuid string) ([]MetricsMetadata, error) {
 	metricsProviders := make([]MetricsMetadata, 0)
-	// Go through the metrics endpoints and get the corresponding services from the token metadata
-	if metrics, ok := info.Endpoints[EndpointType]; ok {
-		for _, endpoint := range metrics {
-			// Parse out the metadata
-			var m []MetricsProviderMetadata
-			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
-			if err == nil {
-				for _, item := range m {
-					info := MetricsMetadata{}
-					info.EndpointGUID = endpoint.GUID
-					info.Type = item.Type
-					info.URL = item.URL
-					info.Job = item.Job
-					info.Environment = item.Environment
-					log.Debugf("Metrics provider: %+v", info)
-					metricsProviders = append(metricsProviders, info)
-				}
-			}
+	// Parse out the metadata
+	var m []MetricsProviderMetadata
+	err := json.Unmarshal([]byte(tokenMetadata), &m)
+	if err == nil {
+		for _, item := range m {
+			info := MetricsMetadata{}
+			info.EndpointGUID = endpointGuid
+			info.Type = item.Type
+			info.URL = item.URL
+			info.Job = item.Job
+			info.Environment = item.Environment
+			log.Debugf("Metrics provider: %+v", info)
+			metricsProviders = append(metricsProviders, info)
 		}
 	}
-
-	// Go through again, annotate this time with which have metrics
-	for _, values := range info.Endpoints {
-		for _, endpoint := range values {
-			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
-			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
-				endpoint.Metadata["metrics"] = provider.EndpointGUID
-				endpoint.Metadata["metrics_job"] = provider.Job
-				endpoint.Metadata["metrics_environment"] = provider.Environment
-			}
-			// For K8S
-			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.APIEndpoint.String()); ok {
-				endpoint.Metadata["metrics"] = provider.EndpointGUID
-				endpoint.Metadata["metrics_job"] = provider.Job
-				endpoint.Metadata["metrics_environment"] = ""
-			}
-		}
-	}
+	return metricsProviders, err
 }
 
 func hasMetricsProvider(providers []MetricsMetadata, url string) (*MetricsMetadata, bool) {
@@ -431,38 +430,20 @@ func trimPath(path string) string {
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {
 
-	metricsProviders := make([]MetricsMetadata, 0)
+	metricsMetadatas := make(map[string]MetricsMetadata)
 	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
 	results := make(map[string]EndpointMetricsRelation)
 
 	// Get Endpoints the user is connected to
-	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID)
+	userEndpoints, err := m.portalProxy.ListEndpointsByUserAndShared(userGUID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	allUserAccessibleEndpoints := userEndpoints
-
-	// Get Endpoints that are shared in the system
-	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(tokens.SystemSharedUserGuid)
-
-	if err != nil {
-		return nil, err
-	}
-	for _, endpoint := range systemSharedEndpoints {
-		allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, endpoint)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, endpoint := range allUserAccessibleEndpoints {
-		if stringInSlice(endpoint.GUID, cnsiList) {
-			// Found the Endpoint, so add it to our list
-			endpointsMap[endpoint.GUID] = endpoint
-		} else if endpoint.CNSIType == "metrics" {
+	for _, endpoint := range userEndpoints {
+		endpointsMap[endpoint.GUID] = endpoint
+		if endpoint.CNSIType == "metrics" {
 			// Parse out the metadata
 			var m []MetricsProviderMetadata
 			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
@@ -474,45 +455,57 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 					info.URL = item.URL
 					info.Job = item.Job
 					info.Environment = item.Environment
-					metricsProviders = append(metricsProviders, info)
+					metricsMetadatas[endpoint.GUID+item.Type] = info
 				}
 			}
 		}
 	}
 
-	for _, metricProviderInfo := range metricsProviders {
-		for guid, info := range endpointsMap {
-			// Depends on the type
-			if info.CNSIType == metricProviderInfo.Type && compareURL(info.DopplerLoggingEndpoint, metricProviderInfo.URL) {
-				relate := EndpointMetricsRelation{}
-				relate.endpoint = info
-				// Make a copy
-				relate.metrics = &MetricsMetadata{}
-				*relate.metrics = metricProviderInfo
-				results[guid] = relate
-				delete(endpointsMap, guid)
-				break
-			}
-			// K8s
-			log.Debugf("Processing endpoint: %+v", info)
-			log.Debugf("Processing endpoint Metrics provider: %+v", metricProviderInfo)
-			if compareURL(info.APIEndpoint.String(), metricProviderInfo.URL) {
-				relate := EndpointMetricsRelation{}
-				relate.endpoint = info
-				// Make a copy
-				relate.metrics = &MetricsMetadata{}
-				*relate.metrics = metricProviderInfo
-				results[guid] = relate
-				delete(endpointsMap, guid)
-				break
-			}
+	for _, cnsiGuid := range cnsiList {
+		// Fetch a list of all relations with a provider for this endpoint
+		providers, err := m.portalProxy.ListRelationsByTarget(cnsiGuid)
+		if err != nil {
+			return nil, errors.New("Can not fetch list of targets for cnsi")
 		}
+
+		// Filter list down to either cf or kube metrics providers
+		metricsProviders := filterRelations(providers, func(v *interfaces.RelationsRecord) bool {
+			return v.RelationType == MetricsCfRelation || v.RelationType == MetricsKubeRelation
+		})
+
+		if len(metricsProviders) == 0 {
+			return nil, fmt.Errorf("Can not find a metric provider for endpoint %v", cnsiGuid)
+		}
+
+		// Create the results (list of unique <cf/kube endpoint and metrics relation>)
+		length := len(results)
+		for _, provider := range metricsProviders {
+			relate := EndpointMetricsRelation{}
+			relate.endpoint = endpointsMap[provider.Target]
+			if relate.endpoint == nil {
+				continue
+			}
+			var relationMap = ""
+			if provider.RelationType == MetricsCfRelation {
+				relationMap = "cf"
+			} else if provider.RelationType == MetricsCfRelation {
+				relationMap = "k8s"
+			}
+			if len(relationMap) == 0 {
+				return nil, fmt.Errorf("Unknown relation type %v", provider.RelationType)
+			}
+			// Make a copy
+			relate.metrics = &MetricsMetadata{}
+			*relate.metrics = metricsMetadatas[provider.Provider+relationMap]
+			results[provider.Provider] = relate
+		}
+
+		if length == len(results) {
+			return nil, fmt.Errorf("Can not find a connected metrics endpoint for endpoint %v", cnsiGuid)
+		}
+
 	}
 
-	// Did we find a metric provider for each endpoint?
-	if len(endpointsMap) != 0 {
-		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
-	}
 	return results, nil
 }
 
@@ -523,4 +516,173 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func (m *MetricsSpecification) linkMetricsToEndpoints(endpointGuid string, tokenMetadata string, consoleUserID string) {
+	// Metrics has been connected. Determine if it provides metrics to any existing endpoint
+	metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(tokenMetadata, endpointGuid)
+
+	if err != nil {
+		log.Warnf("Failed to link metric endpoint to other endpoints (creating providers from token): %v", err)
+		return
+	}
+
+	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
+	if err != nil {
+		log.Warnf("Failed to link metric endpoint to other endpoints (listing connected endpoints): %v", err)
+		return
+	}
+	for _, endpoint := range endpoints {
+		// Look to see if we can find the metrics provider for this URL
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpoint.DopplerLoggingEndpoint); ok {
+			// log.Infof("found cf. provider: %v", provider)
+			relation := interfaces.RelationsRecord{
+				Provider:     provider.EndpointGUID,
+				RelationType: MetricsCfRelation,
+				Target:       endpoint.GUID,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: provider.Environment,
+				}),
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				log.Warnf("Failed to link metric endpoint to other endpoints (could not save relation): %v", err)
+			}
+		}
+		// For K8S
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpoint.APIEndpoint.String()); ok {
+			// log.Infof("found kb. provider: %v", provider)
+			relation := interfaces.RelationsRecord{
+				Provider:     provider.EndpointGUID,
+				RelationType: MetricsKubeRelation,
+				Target:       endpoint.GUID,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: "",
+				}),
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				log.Warnf("Failed to link metric endpoint to other endpoints (could not save relation): %v", err)
+			}
+		}
+	}
+}
+
+func metadataToMap(metadata MetricsRelationMetadata) map[string]interface{} {
+	var mapMetadata map[string]interface{}
+	inrec, _ := json.Marshal(metadata)
+	json.Unmarshal(inrec, &mapMetadata)
+	return mapMetadata
+}
+
+func (m *MetricsSpecification) linkEndpointToMetrics(endpointGUID, consoleUserID, endpointURL, relationType string) {
+	// Find all metrics endpoints
+	endpoints, err := m.portalProxy.ListEndpointsByUserAndShared(consoleUserID)
+	if err != nil {
+		log.Warnf("Failed to link endpoint to metric endpoints (listing connected endpoints): %v", err)
+		return
+	}
+	metricsEndpoints := filterEndpoints(endpoints, func(v *interfaces.ConnectedEndpoint) bool {
+		return v.CNSIType == EndpointType
+	})
+
+	// Try to match up endpoint to metric
+	for _, metricEndpoint := range metricsEndpoints {
+		metricsTokenRecord, found := m.portalProxy.GetCNSITokenRecord(metricEndpoint.GUID, consoleUserID)
+		if found == false {
+			// Console user has not connected to endpoint
+			continue
+		}
+		metricsProvidersForEndpoint, err := createMetricsMetadataFromTokenMetadata(metricsTokenRecord.Metadata, metricEndpoint.GUID)
+		if err != nil {
+			log.Warnf("Failed to link endpoint to metric endpoints (creating providers from token): %v", err)
+			continue
+		}
+		if provider, ok := hasMetricsProvider(metricsProvidersForEndpoint, endpointURL); ok {
+			relation := interfaces.RelationsRecord{
+				Provider:     metricEndpoint.GUID,
+				RelationType: "metrics-" + relationType,
+				Target:       endpointGUID,
+				Metadata: metadataToMap(MetricsRelationMetadata{
+					Job:         provider.Job,
+					Environment: provider.Environment,
+				}),
+			}
+			_, err := m.portalProxy.SaveRelation(relation)
+			if err != nil {
+				log.Warnf("Failed to link endpoint to metric endpoints (could not save relation): %v", err)
+			}
+		}
+	}
+}
+
+func filterEndpoints(vs []*interfaces.ConnectedEndpoint, f func(*interfaces.ConnectedEndpoint) bool) []*interfaces.ConnectedEndpoint {
+	vsf := make([]*interfaces.ConnectedEndpoint, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+	return vsf
+}
+
+func filterRelations(vs []*interfaces.RelationsRecord, f func(*interfaces.RelationsRecord) bool) []*interfaces.RelationsRecord {
+	vsf := make([]*interfaces.RelationsRecord, 0)
+	for _, v := range vs {
+		if f(v) {
+			vsf = append(vsf, v)
+		}
+	}
+	return vsf
+}
+
+// , user *interfaces.ConnectedUser
+func (m *MetricsSpecification) OnConnect(endpoint *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord, consoleUserID string) {
+	log.Warnf("Metrics OnConnect")
+	switch endpointType := endpoint.CNSIType; endpointType {
+	case EndpointType:
+		m.linkMetricsToEndpoints(endpoint.GUID, tokenRecord.Metadata, consoleUserID)
+	case "cf":
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.DopplerLoggingEndpoint, "cf")
+	case "k8s":
+		m.linkEndpointToMetrics(endpoint.GUID, consoleUserID, endpoint.APIEndpoint.String(), "kube")
+	}
+}
+
+func (m *MetricsSpecification) OnDisconnect() {
+	// Empty method required such that TokenNotificationPlugin interface is met
+}
+
+func (m *MetricsSpecification) CreateInitialRelations() {
+	log.Info("Creating initial set of relations")
+
+	// For each user, find the endpoints that they're connected to and thus their token metadata
+	users, err := m.portalProxy.GetCNSIUsers()
+	if err != nil {
+		log.Errorf("Unable to setup relations, failed to list users: %+v", err)
+		return
+	}
+
+	for _, userGuid := range users {
+		connectedEndpoints, err := m.portalProxy.ListEndpointsByUserAndShared(userGuid)
+		if err != nil {
+			log.Warnf("Unable to fetch connected endpoints for a user, they might not see the correct relations: %+v", err)
+			continue
+		}
+		for _, connectedEndpoint := range connectedEndpoints {
+			if connectedEndpoint.CNSIType != EndpointType {
+				// Skip anything that's not a metrics endpoint
+				continue
+			}
+			m.linkMetricsToEndpoints(connectedEndpoint.GUID, connectedEndpoint.TokenMetadata, userGuid)
+		}
+	}
+
+	// Delete the setup marker
+	err = m.portalProxy.DeleteConfigValue(systemGroupName, relationsSetupNeededMarker)
+	if err != nil {
+		log.Warnf("Unable to delete setup config relations marker: %+v", err)
+	}
 }

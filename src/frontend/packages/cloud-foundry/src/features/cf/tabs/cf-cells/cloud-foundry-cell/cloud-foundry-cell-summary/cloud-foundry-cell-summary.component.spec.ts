@@ -15,7 +15,7 @@ import { MetricQueryType } from '../../../../../../../../store/src/types/metric.
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
-import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from '../cloud-foundry-cell-tab.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
 
 class MockCloudFoundryCellService {
@@ -48,13 +48,13 @@ class MockCloudFoundryCellService {
       new MetricQueryConfig(queryString, {}),
       queryRange
     ),
-  })
+  });
   buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({
     chartType: MetricsChartTypes.LINE,
     xAxisLabel: 'Time',
     yAxisLabel,
     autoScale: true
-  })
+  });
 
 }
 
@@ -70,7 +70,7 @@ describe('CloudFoundryCellSummaryComponent', () => {
       imports: generateCfBaseTestModules(),
       providers: [
         {
-          provide: CloudFoundryCellService,
+          provide: CloudFoundryCellTabService,
           useValue: new MockCloudFoundryCellService()
         },
         ActiveRouteCfCell,

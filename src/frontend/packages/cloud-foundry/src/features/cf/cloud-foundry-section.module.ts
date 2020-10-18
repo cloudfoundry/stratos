@@ -54,7 +54,7 @@ import {
 import {
   CloudFoundryCellSummaryComponent,
 } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
-import { CloudFoundryCellService } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+import { CloudFoundryCellTabService } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell-tab.service';
 import { CloudFoundryCellsComponent } from './tabs/cf-cells/cloud-foundry-cells.component';
 import { CloudFoundryEventsComponent } from './tabs/cf-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cf-feature-flags/cloud-foundry-feature-flags.component';
@@ -223,7 +223,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundryOrganizationService,
     CloudFoundryEndpointService,
     // CfRolesService,
-    CloudFoundryCellService,
+    CloudFoundryCellTabService,
     UserInviteService,
     UserInviteConfigureService,
     DatePipe

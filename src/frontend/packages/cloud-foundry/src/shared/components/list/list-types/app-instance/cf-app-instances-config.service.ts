@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
-import { combineLatest, map, switchMap } from 'rxjs/operators';
+import { combineLatest, first, map, switchMap } from 'rxjs/operators';
 
 import { DeleteApplicationInstance } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { FetchApplicationMetricsAction } from '../../../../../../../cloud-foundry/src/actions/cf-metrics.actions';
@@ -24,15 +24,17 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
+import {
+  ContainerOrchestrationService,
+} from '../../../../../features/container-orchestration/services/container-orchestration.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ListAppInstance } from './app-instance-types';
 import { CfAppInstancesDataSource } from './cf-app-instances-data-source';
 import { TableCellCfCellComponent } from './table-cell-cf-cell/table-cell-cf-cell.component';
+import { TableCellKubeNodeComponent } from './table-cell-kube-node/table-cell-kube-node.component';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
 export function createAppInstancesMetricAction(appGuid: string, cfGuid: string): FetchApplicationMetricsAction {
@@ -136,6 +138,13 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     cellComponent: TableCellCfCellComponent,
     cellFlex: '2'
   };
+  cfEiriniColumn: ITableColumn<ListAppInstance> = {
+    columnId: 'eirini',
+    headerCell: () => 'Kube Node',
+    cellConfig: {},
+    cellComponent: TableCellKubeNodeComponent,
+    cellFlex: '2'
+  };
 
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
@@ -203,18 +212,32 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private router: Router,
     private confirmDialog: ConfirmationDialogService,
     entityServiceFactory: EntityServiceFactory,
-    paginationMonitorFactory: PaginationMonitorFactory,
-    cups: CurrentUserPermissionsService
+    cups: CurrentUserPermissionsService,
+    containerService: ContainerOrchestrationService,
   ) {
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
 
-    this.initialised$ = cellHelper.hasCellMetrics(appService.cfGuid).pipe(
-      map(hasMetrics => {
-        if (hasMetrics) {
+    this.initialised$ = combineLatestObs([
+      containerService.eiriniService.eiriniMetricsProvider(appService.cfGuid),
+      containerService.diegoService.hasCellMetrics(appService.cfGuid),
+    ]).pipe(
+      first(),
+      map(([eiriniMetricsProvider, hasCellMetrics]) => {
+        if (hasCellMetrics) {
           this.columns.splice(1, 0, this.cfCellColumn);
           this.cfCellColumn.cellConfig = {
             metricEntityService: this.createMetricsResults(entityServiceFactory),
             cfGuid: this.appService.cfGuid
+          };
+        }
+        if (eiriniMetricsProvider) {
+          this.columns.splice(1, 0, this.cfEiriniColumn);
+          this.cfEiriniColumn.cellConfig = {
+            eiriniRelationship: eiriniMetricsProvider,
+            eiriniPodsService: containerService.eiriniService.createEiriniPodService(
+              this.appService.cfGuid,
+              this.appService.appGuid,
+              eiriniMetricsProvider
+            )
           };
         }
         return true;
@@ -235,7 +258,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       switchMap(([org, space]) =>
         cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
       )
-    )
+    );
   }
 
   getGlobalActions = () => null;
@@ -253,4 +276,5 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       metricsAction
     );
   }
+
 }

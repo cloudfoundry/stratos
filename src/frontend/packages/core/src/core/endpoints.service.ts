@@ -1,17 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { EndpointModel, entityCatalog } from '../../../store/src/public-api';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { EndpointState } from '../../../store/src/types/endpoint.types';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
@@ -19,23 +18,6 @@ import { UserService } from './user.service';
 
 @Injectable()
 export class EndpointsService implements CanActivate {
-
-  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
-  haveRegistered$: Observable<boolean>;
-  haveConnected$: Observable<boolean>;
-  disablePersistenceFeatures$: Observable<boolean>;
-
-  static getLinkForEndpoint(endpoint: EndpointModel): string {
-    if (!endpoint) {
-      return '';
-    }
-    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
-    if (catalogEntity) {
-      return catalogEntity.builders.entityBuilder.getLink(metadata);
-    }
-    return '';
-  }
 
   constructor(
     private store: Store<EndpointOnlyAppState>,
@@ -65,6 +47,23 @@ export class EndpointsService implements CanActivate {
     );
   }
 
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
+  haveRegistered$: Observable<boolean>;
+  haveConnected$: Observable<boolean>;
+  disablePersistenceFeatures$: Observable<boolean>;
+
+  static getLinkForEndpoint(endpoint: EndpointModel): string {
+    if (!endpoint) {
+      return '';
+    }
+    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
+    if (catalogEntity) {
+      return catalogEntity.builders.entityBuilder.getLink(metadata);
+    }
+    return '';
+  }
+
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
     this.endpointHealthChecks.registerHealthCheck(healthCheck);
   }
@@ -79,7 +78,7 @@ export class EndpointsService implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
     // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-    return observableCombineLatest(
+    return combineLatest(
       this.store.select('auth'),
       this.store.select(endpointStatusSelector)
     ).pipe(
@@ -116,10 +115,6 @@ export class EndpointsService implements CanActivate {
 
         return false;
       }));
-  }
-
-  hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {

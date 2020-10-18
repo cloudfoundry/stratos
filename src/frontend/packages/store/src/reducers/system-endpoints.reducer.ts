@@ -1,4 +1,4 @@
-import { SESSION_VERIFIED, VERIFY_SESSION } from '../actions/auth.actions';
+import { VERIFY_SESSION } from '../actions/auth.actions';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -10,16 +10,13 @@ import {
 import { METRIC_API_SUCCESS, MetricAPIQueryTypes, MetricsAPIActionSuccess } from '../actions/metrics-api.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
-import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
+import { GET_SYSTEM_INFO } from './../actions/system.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
     case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
       return fetchingEndpointInfo(state);
-    case SESSION_VERIFIED:
-    case GET_SYSTEM_INFO_SUCCESS:
-      return succeedEndpointInfo(state, action);
     case CONNECT_ENDPOINTS_FAILED:
     case DISCONNECT_ENDPOINTS_SUCCESS:
       return changeEndpointConnectionStatus(state, action, 'disconnected');
@@ -52,33 +49,10 @@ function fetchingEndpointInfo(state) {
   return modified ? fetchingState : state;
 }
 
-function succeedEndpointInfo(state, action) {
-  const newState = { ...state };
-  const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-  Object.keys(payload.endpoints).forEach(type => {
-    getAllEndpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
-      const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
-      newState[guid] = {
-        ...newState[guid],
-        ...endpointInfo,
-        metricsAvailable: endpointHasMetrics(endpointInfo)
-      };
-    });
-  });
-  return newState;
-}
-
-function endpointHasMetrics(endpoint: EndpointModel) {
-  if (!endpoint || !endpoint.metadata) {
-    return false;
-  }
-  return !!endpoint.metadata.metrics;
-}
-
 function changeEndpointConnectionStatus(
   state: IRequestEntityTypeState<EndpointModel>,
   action: {
-    guid: string
+    guid: string,
   },
   connectionStatus: endpointConnectionStatus
 ) {

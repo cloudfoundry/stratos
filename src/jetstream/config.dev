@@ -57,6 +57,12 @@ LOCAL_USER_SCOPE=stratos.admin
 # Enable/disable API key-based access to Stratos API (disabled, admin_only, all_users). Default is admin_only
 #API_KEYS_ENABLED=admin_only
 
+# Enable or Disable the eirini plugin
+EIRINI=false
+# Provide the default namespace that cf applications pods are created in by eirini
+# This will be used by the ui to suggest a sensible value when configuring eirini metrics
+EIRINI_POD_NAMESPACE=eirini
+
 # Cache folder for Helm Charts
 HELM_CACHE_FOLDER=./.helm-cache
 

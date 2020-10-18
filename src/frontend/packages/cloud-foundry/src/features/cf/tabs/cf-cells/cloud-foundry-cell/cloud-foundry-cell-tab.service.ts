@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -9,40 +8,20 @@ import {
   MetricsChartHelpers,
 } from '../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
-import { CfCellHelper } from '../../../cf-cell.helpers';
+import { ContainerOrchestrationService } from '../../../../container-orchestration/services/container-orchestration.service';
+import { CellMetrics } from '../../../../container-orchestration/services/diego-container.service';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
-
-
-export const enum CellMetrics {
-  /**
-   * Deprecated since Diego v2.31.0. See https://github.com/bosh-prometheus/prometheus-boshrelease/issues/333
-   */
-  HEALTHY_DEP = 'firehose_value_metric_rep_unhealthy_cell',
-  /**
-   * Available from Diego v2.31.0. See https://github.com/bosh-prometheus/prometheus-boshrelease/issues/333
-   */
-  HEALTHY = 'firehose_value_metric_rep_garden_health_check_failed',
-  REMAINING_CONTAINERS = 'firehose_value_metric_rep_capacity_remaining_containers',
-  REMAINING_DISK = 'firehose_value_metric_rep_capacity_remaining_disk',
-  REMAINING_MEMORY = 'firehose_value_metric_rep_capacity_remaining_memory',
-  TOTAL_CONTAINERS = 'firehose_value_metric_rep_capacity_total_containers',
-  TOTAL_DISK = 'firehose_value_metric_rep_capacity_total_disk',
-  TOTAL_MEMORY = 'firehose_value_metric_rep_capacity_total_memory',
-  CPUS = 'firehose_value_metric_rep_num_cpus'
-}
 
 
 /**
  * Designed to be used once drilled down to a cell (see ActiveRouteCfCell)
  */
 @Injectable()
-export class CloudFoundryCellService {
+export class CloudFoundryCellTabService {
 
   cfGuid: string;
   cellId: string;
@@ -67,8 +46,8 @@ export class CloudFoundryCellService {
   constructor(
     activeRouteCfCell: ActiveRouteCfCell,
     private entityServiceFactory: EntityServiceFactory,
-    store: Store<AppState>,
-    paginationMonitorFactory: PaginationMonitorFactory) {
+    coService: ContainerOrchestrationService,
+  ) {
 
     this.cellId = activeRouteCfCell.cellId;
     this.cfGuid = activeRouteCfCell.cfGuid;
@@ -85,8 +64,7 @@ export class CloudFoundryCellService {
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
     this.usageMemory$ = this.generateUsage(this.remainingMemory$, this.totalMemory$);
 
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
-    const action$ = cellHelper.createCellMetricAction(this.cfGuid);
+    const action$ = coService.diegoService.createCellMetricAction(this.cfGuid);
     this.cellMetric$ = action$.pipe(
       switchMap(action => {
         this.healthyMetricId = action.guid;

@@ -12,6 +12,6 @@
     "assets": {
       "assets": "core/assets"
     },
-    "backend": ["analysis", "kubernetes", "monocular"]
+    "backend": ["analysis", "kubernetes", "monocular", "eirini"]
   }
 }

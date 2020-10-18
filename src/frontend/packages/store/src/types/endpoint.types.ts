@@ -22,6 +22,43 @@ export interface IApiEndpointInfo {
   User: object;
 }
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
+
+export type EndpointRelationType = string | EndpointMetricRelationTypes;
+export enum EndpointMetricRelationTypes {
+  /**
+   * Metrics endpoint provides kube metrics to a kubernetes endpoint
+   */
+  METRICS_KUBE = 'metrics-kube', // This will be moved into the kube package when it comes upstream
+}
+export const EndpointRelationshipTypeMetadataJob = 'job';
+export interface EndpointRelationshipTypeMetadata {
+  icon: string,
+  iconFont?: string;
+  value: (relMetadata: any) => string;
+  label: string,
+  type?: string,
+}
+
+/**
+ * Definition of an endpoint relationship type. This can be used to render information about the metadata a relationship type has
+ */
+export interface EndpointRelationshipType {
+  label: string,
+  metadata: EndpointRelationshipTypeMetadata[];
+}
+
+/**
+ * Information about each relationship type. This can be used to render information about the metadata a relationship type has
+ */
+export const EndpointRelationshipTypes: {
+  [key: string]: EndpointRelationshipType,
+} = {};
+
+export interface EndpointsRelation {
+  guid: string;
+  metadata: { [key: string]: any; };
+  type: EndpointRelationType;
+}
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
@@ -36,18 +73,26 @@ export interface EndpointModel {
   client_id?: string;
   user?: EndpointUser;
   metadata?: {
-    metrics?: string;
-    metrics_job?: string;
-    metrics_environment?: string;
+    /**
+     * A collection of targets that are actively collecting metrics if this is a metrics endpoint.
+     * Collected via MetricsAPIAction and MetricAPIQueryTypes.TARGETS
+     */
     metrics_targets?: MetricsAPITargets;
+    /**
+     * A collection of stratos metric jobs if this is a metrics endpoint. Collected via MetricsStratosAction
+     */
     metrics_stratos?: MetricsStratosInfo;
     userInviteAllowed?: 'true' | any;
+    fullApiEndpoint?: string;
+  };
+  relations?: {
+    provides: EndpointsRelation[];
+    receives: EndpointsRelation[];
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
-  metricsAvailable: boolean;
 }
 
 export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';

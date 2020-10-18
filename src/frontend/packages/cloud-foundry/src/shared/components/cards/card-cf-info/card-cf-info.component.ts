@@ -12,6 +12,9 @@ import {
   UserInviteConfigurationDialogComponent,
 } from '../../../../features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
 import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
+import {
+  ContainerOrchestrationService,
+} from '../../../../features/container-orchestration/services/container-orchestration.service';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -23,12 +26,16 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
   public autoscalerVersion$: Observable<string>;
 
+  eiriniEnabled$: Observable<boolean>;
+  canConfigureOrchestrator$: Observable<boolean>;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
     public userInviteConfigureService: UserInviteConfigureService,
     private dialog: MatDialog,
-    private esf: EntityServiceFactory
+    private esf: EntityServiceFactory,
+    public coService: ContainerOrchestrationService
   ) { }
 
   description$: Observable<string>;
@@ -52,6 +59,9 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
         null :
         e.entity ? e.entity.entity.build : ''),
     );
+
+    this.eiriniEnabled$ = this.coService.eiriniService.eiriniEnabled();
+    this.canConfigureOrchestrator$ = this.coService.canConfigureOrchestrator();
   }
 
   getApiEndpointUrl(apiEndpoint) {
@@ -87,5 +97,9 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
 
   deConfigureUserInvites() {
     this.userInviteConfigureService.unconfigure(this.cfEndpointService.cfGuid);
+  }
+
+  configureEirini() {
+    this.coService.eiriniService.configureEirini(this.cfEndpointService.cfGuid);
   }
 }

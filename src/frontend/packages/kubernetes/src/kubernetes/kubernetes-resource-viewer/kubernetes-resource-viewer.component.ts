@@ -4,7 +4,9 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
+import { MetricsHelpers } from '../../../../core/src/features/metrics/metrics.helpers';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
+import { KubeRelationTypes } from '../kube-relationship-types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BasicKubeAPIResource, KubeAPIResource, KubeStatus } from '../store/kube.types';
 
@@ -110,7 +112,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
 
     this.hasPodMetrics$ = props.resourceKind === 'pod' ?
       this.resource$.pipe(
-        switchMap(resource => this.endpointsService.hasMetrics(this.getEndpointId(resource.raw))),
+        switchMap(resource => MetricsHelpers.endpointHasMetrics(
+          this.getEndpointId(resource.raw),
+          KubeRelationTypes.METRICS_KUBE
+        )),
         first(),
       ) :
       of(false);

@@ -13,8 +13,10 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { MetricsHelpers } from '../../../../../core/src/features/metrics/metrics.helpers';
 import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import { CfRelationTypes } from '../../../cf-relation-types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -62,9 +64,17 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
       startWith(true),
     );
 
-    const cellsHidden$ = endpointsService.hasMetrics(cfEndpointService.cfGuid).pipe(
-      map(hasMetrics => !hasMetrics)
+    const cellsHidden$ = MetricsHelpers.endpointHasMetrics(cfEndpointService.cfGuid, CfRelationTypes.METRICS_CF).pipe(
+      map(hasMetrics => !hasMetrics),
+      first()
     );
+    // TODO: RC At the moment the cells side nave item will always show, even when eirini is configured.
+    // We can change this with the below code, however that creates a flicker of cells nav item before it's removed
+    // We can change this to not show at first... which would then move the flicker on to the diego cell's use case
+    // const cellsHidden$ = endpointsService.eiriniMetricsProvider(cfEndpointService.cfGuid).pipe(
+    //   switchMap(eiriniMetricsProvider => eiriniMetricsProvider ? of(false) : endpointsService.hasCellMetrics(cfEndpointService.cfGuid)),
+    //   map(hasMetrics => !hasMetrics)
+    // );
 
     // Default tabs + add any tabs from extensions
     this.tabLinks = [

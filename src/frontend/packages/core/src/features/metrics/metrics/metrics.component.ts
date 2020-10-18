@@ -5,11 +5,17 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import {
+  MetricAPIQueryTypes,
   MetricsAPIAction,
   MetricsAPITargets,
   MetricsStratosAction,
 } from '../../../../../store/src/actions/metrics-api.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import {
+  EndpointRelationshipTypeMetadata,
+  EndpointRelationshipTypeMetadataJob,
+  EndpointRelationshipTypes,
+} from '../../../../../store/src/types/endpoint.types';
 import { getIdFromRoute } from '../../../core/utils.service';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
@@ -51,6 +57,9 @@ export class MetricsComponent {
 
   // Was there an error retrieving data from the Prometheus server?
   public error = false;
+  public metadataLabels: { [key: string]: string; } = {};
+  public metadataTypes: { [key: string]: EndpointRelationshipTypeMetadata[]; } = {};
+  public metadataJobTypes: { [key: string]: EndpointRelationshipTypeMetadata[]; } = {};
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -59,7 +68,9 @@ export class MetricsComponent {
   ) {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
-    this.store.dispatch(new MetricsAPIAction(metricsGuid, 'targets'));
+    // This will call the backend and fetch a collection of targets that are actively collecting metrics
+    this.store.dispatch(new MetricsAPIAction(metricsGuid, MetricAPIQueryTypes.TARGETS));
+    // This will call the backend and fetch a collection of stratos metric jobs from the metrics endpoint
     this.store.dispatch(new MetricsStratosAction(metricsGuid));
 
     // Raw endpoint data for this metrics endpoint
@@ -82,7 +93,15 @@ export class MetricsComponent {
       first()
     );
 
-    // Job details obtained from the Prometheus server
+    // Each endpoint might be receiving different types of metrics from this endpoint. Each different type may need to show different
+    // status info. Here we create lists for every relationship type that we know of.
+    Object.entries(EndpointRelationshipTypes).forEach(([relationTypeLabel, relationType]) => {
+      this.metadataLabels[relationTypeLabel] = relationType.label;
+      this.metadataTypes[relationTypeLabel] = relationType.metadata.filter(type => !type.type);
+      this.metadataJobTypes[relationTypeLabel] = relationType.metadata.filter(type => type.type === EndpointRelationshipTypeMetadataJob);
+    });
+
+    // Job details will provide info on the status of the metrics being pulled
     this.jobDetails$ = this.metricsEndpoint$.pipe(
       filter(mi => !!mi && !!mi.provider && !!mi.provider.metadata && !!mi.provider.metadata.metrics_targets),
       map(mi => mi.provider.metadata.metrics_targets),
@@ -94,4 +113,5 @@ export class MetricsComponent {
       }, {}))
     );
   }
+
 }

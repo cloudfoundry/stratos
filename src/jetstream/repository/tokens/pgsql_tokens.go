@@ -66,6 +66,8 @@ var updateToken = `UPDATE tokens
 										SET auth_token = $1, refresh_token = $2, token_expiry = $3
 										WHERE token_guid = $4 AND user_guid = $5`
 
+var listUsers = `SELECT DISTINCT user_guid from tokens;`
+
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
 type PgsqlTokenRepository struct {
 	db *sql.DB
@@ -639,4 +641,33 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr interfaces.To
 	log.Debug("Token UPDATE complete")
 
 	return nil
+}
+
+func (p *PgsqlTokenRepository) ListUsers() ([]string, error) {
+	log.Debug("ListUsers")
+	rows, err := p.db.Query(listUsers)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to retrieve user records: %v", err)
+	}
+	defer rows.Close()
+
+	var userList []string
+	userList = make([]string, 0)
+
+	for rows.Next() {
+		var (
+			userGuid string
+		)
+		err := rows.Scan(&userGuid)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to scan token records: %v", err)
+		}
+		userList = append(userList, userGuid)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Unable to List User records: %v", err)
+	}
+
+	return userList, nil
 }

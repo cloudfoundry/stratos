@@ -40,9 +40,11 @@ type PortalProxy interface {
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
+	GetCNSIUsers() ([]string, error)
 	GetConfig() *PortalConfig
 	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
+	ListEndpointsByUserAndShared(userGUID string) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
 	UpdateEndpointMetadata(guid string, metadata string) error
 
@@ -78,4 +80,15 @@ type PortalProxy interface {
 
 	// Plugins
 	GetPlugin(name string) interface{}
+
+	// Relations
+	SaveRelation(relation RelationsRecord) (*RelationsRecord, error)
+	ListRelations() ([]*RelationsRecord, error)
+	ListRelationsByTarget(target string) ([]*RelationsRecord, error)
+	RemoveRelations(providerOrTarget string) error
+	RemoveRelation(relation RelationsRecord) error
+
+	// Config Table
+	GetConfigValue(group, name string) (string, error)
+	DeleteConfigValue(group, name string) error
 }

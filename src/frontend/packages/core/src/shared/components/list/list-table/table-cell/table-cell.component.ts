@@ -9,6 +9,9 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
+import {
+  TableCellKubeNodeComponent,
+} from '../../../../../../../cloud-foundry/src/shared/components/list/list-types/app-instance/table-cell-kube-node/table-cell-kube-node.component';
 import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -59,7 +62,8 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellIconComponent,
   TableCellExpanderComponent,
   TableCellEndpointAddressComponent,
-  ...coreEndpointListDetailsComponents
+  ...coreEndpointListDetailsComponents,
+  TableCellKubeNodeComponent
 ];
 
 @Component({

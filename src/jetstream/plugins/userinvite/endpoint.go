@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// GetType - return empty string as we don't introduce a new enpoint type
+// GetType - return empty string as we don't introduce a new endpoint type
 func (invite *UserInvite) GetType() string {
 	return ""
 }

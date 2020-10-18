@@ -1,6 +1,9 @@
 import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
+import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+import { EndpointRelationType, EndpointsRelation } from '../../../../store/src/types/endpoint.types';
 import { StratosStatus } from '../../../../store/src/types/shared.types';
 import { EndpointIcon } from '../endpoints/endpoint-helpers';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
@@ -11,16 +14,13 @@ export interface MetricsEndpointInfo {
   name: string;
   icon: EndpointIcon;
   type: string;
+  relations: EndpointsRelation[];
   known: boolean;
   url: string;
-  metadata: {
-    metrics_job?: string;
-    metrics_environment?: string;
-  };
   status: Observable<StratosStatus>;
 }
 
-// Process the endpoint and Stratos marker file data to give a single list of endpoitns
+// Process the endpoint and Stratos marker file data to give a single list of endpoints
 // linked to this metrics endpoint, comprising those that are known in Stratos and those that are not
 export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo[] {
   const data: MetricsEndpointInfo[] = [];
@@ -28,19 +28,15 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
   // Add all of the known endpoints first
   ep.endpoints.forEach(endpoint => {
     const catalogEndpoint = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-
     data.push({
       known: true,
       name: endpoint.name,
       url: getFullEndpointApiUrl(endpoint),
-      type: catalogEndpoint.definition.label,
+      type: endpoint.cnsi_type,
+      relations: endpoint.relations.receives,
       icon: {
         name: catalogEndpoint.definition.icon,
-        font: 'stratos-icons'
-      },
-      metadata: {
-        metrics_job: endpoint.metadata ? endpoint.metadata.metrics_job : null,
-        metrics_environment: endpoint.metadata ? endpoint.metadata.metrics_environment : null
+        font: catalogEndpoint.definition.iconFont || 'stratos-icons'
       },
       status: observableOf(StratosStatus.OK)
     });
@@ -60,12 +56,10 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
             name: '<Unregistered Endpoint>',
             url: endp.cfEndpoint || endp.url,
             type: catalogEndpoint.definition.label,
+            relations: [],
             icon: {
               name: catalogEndpoint.definition.icon,
-              font: 'stratos-icons'
-            },
-            metadata: {
-              metrics_job: endp.job
+              font: catalogEndpoint.definition.iconFont || 'stratos-icons'
             },
             status: observableOf(StratosStatus.WARNING)
           });
@@ -80,12 +74,25 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
 // Simple URL compare that ignores tailing forward slashes
 function compareUrl(a: string, b: string): boolean {
   if (a && a.endsWith('/')) {
-    a = a.substr(0, a.length -1);
+    a = a.substr(0, a.length - 1);
   }
 
   if (b && b.endsWith('/')) {
-    b = b.substr(0, b.length -1);
+    b = b.substr(0, b.length - 1);
   }
 
   return a === b;
+}
+
+// TODO: RC couldn't this just go in the service?
+export class MetricsHelpers {
+  static endpointHasMetrics(endpointId: string, type: EndpointRelationType): Observable<boolean> {
+    return stratosEntityCatalog.endpoint.store.getEntityService(endpointId).waitForEntity$.pipe(
+      map(endpoint => endpoint.entity),
+      map(endpoint => {
+        return endpoint && endpoint.relations ?
+          !!endpoint.relations.receives.find(relation => relation.type === type) : false;
+      })
+    );
+  }
 }

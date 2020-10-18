@@ -1,0 +1,10 @@
+<app-page-header>
+  <h1>Configure {{cfName$ | async}}</h1>
+</app-page-header>
+
+<app-steppers [cancel]="cancelUrl">
+  <app-step [title]="'Configure Container Orchestrator'" [valid]="orchestrator.validate | async"
+    [blocked]="orchestrator.blocked | async" [onNext]="orchestrator.onNext">
+    <app-container-orchestrator-step #orchestrator></app-container-orchestrator-step>
+  </app-step>
+</app-steppers>

@@ -47,6 +47,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/relations"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/sessiondata"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
@@ -199,6 +200,7 @@ func main() {
 	cnsis.InitRepositoryProvider(dc.DatabaseProvider)
 	tokens.InitRepositoryProvider(dc.DatabaseProvider)
 	console_config.InitRepositoryProvider(dc.DatabaseProvider)
+	relations.InitRepositoryProvider(dc.DatabaseProvider)
 	localusers.InitRepositoryProvider(dc.DatabaseProvider)
 	sessiondata.InitRepositoryProvider(dc.DatabaseProvider)
 	apikeys.InitRepositoryProvider(dc.DatabaseProvider)
@@ -997,6 +999,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	sessionGroup.POST("/api_keys", p.addAPIKey)
 	sessionGroup.GET("/api_keys", p.listAPIKeys)
 	sessionGroup.DELETE("/api_keys", p.deleteAPIKey)
+
+	// Relations operations
+	sessionGroup.GET("/relations", p.listRelations)
+	// sessionGroup.GET("/relation", p.getRelation)
+	sessionGroup.POST("/relation", p.saveRelation)
+	sessionGroup.DELETE("/relation", p.removeRelation)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()

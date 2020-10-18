@@ -2,10 +2,12 @@ import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions
 import {
   AuthParams,
   ConnectEndpoint,
+  DeleteEndpointRelation,
   DisconnectEndpoint,
   GetAllEndpoints,
   GetEndpoint,
   RegisterEndpoint,
+  SaveEndpointRelation,
   UnregisterEndpoint,
   UpdateEndpoint,
 } from './actions/endpoint.actions';
@@ -20,6 +22,7 @@ import {
 import { FetchUserProfileAction, UpdateUserPasswordAction, UpdateUserProfileAction } from './actions/user-profile.actions';
 import { OrchestratedActionBuilders } from './entity-catalog/action-orchestrator/action-orchestrator';
 import { EndpointType } from './extension-types';
+import { EndpointsRelation } from './types/endpoint.types';
 import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile.types';
 
@@ -75,6 +78,16 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
       allowSSO: boolean,
     }
   ) => UpdateEndpoint,
+  createEndpointRelation: (
+    guid: string,
+    relation: EndpointsRelation,
+    saveEndpointType: string
+  ) => SaveEndpointRelation,
+  deleteEndpointRelation: (
+    guid: string,
+    relation: EndpointsRelation,
+    deleteEndpointType: string
+  ) => DeleteEndpointRelation;
 }
 
 export const endpointActionBuilder: EndpointActionBuilder = {
@@ -137,6 +150,16 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     args.clientSecret,
     args.allowSSO
   ),
+  createEndpointRelation: (
+    guid: string,
+    relation: EndpointsRelation,
+    saveEndpointType: string
+  ) => new SaveEndpointRelation(guid, relation, saveEndpointType),
+  deleteEndpointRelation: (
+    guid: string,
+    relation: EndpointsRelation,
+    deleteEndpointType: string
+  ) => new DeleteEndpointRelation(guid, relation, deleteEndpointType)
 };
 
 export interface SystemInfoActionBuilder extends OrchestratedActionBuilders {

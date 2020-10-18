@@ -38,16 +38,16 @@ export class MetricQueryConfig {
 // FIXME: Final solution for Metrics - STRAT-152
 export class MetricsAction implements EntityRequestAction {
   constructor(
-    // FIXME: This is ignored in all cases - STRAT-152
-    guid: string,
+    guid: string, // FIXME: This is ignored in all cases - STRAT-152
     public endpointGuid: string,
     public query: MetricQueryConfig,
     public url: string,
     public windowValue: string = null,
     public queryType: MetricQueryType = MetricQueryType.QUERY,
     isSeries = true,
-    public endpointType: string) {
-    this.guid = MetricsAction.buildMetricKey(guid, query, isSeries, queryType, windowValue);
+    public endpointType: string,
+    buildMetricsKey = true) {
+    this.guid = buildMetricsKey ? MetricsAction.buildMetricKey(guid, query, isSeries, queryType, windowValue) : guid;
   }
   public guid: string;
 
@@ -85,4 +85,3 @@ export class MetricsChartAction extends MetricsAction {
     );
   }
 }
-

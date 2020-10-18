@@ -3,7 +3,7 @@ import { Action } from '@ngrx/store';
 import { EndpointType } from '../extension-types';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointListKey, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { endpointListKey, EndpointModel, EndpointsRelation, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 
@@ -31,6 +31,14 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
+export const UPDATE_ENDPOINT_RELATION = '[Endpoints] Update relation';
+export const UPDATE_ENDPOINT_RELATION_SUCCESS = '[Endpoints] Update relation success';
+export const UPDATE_ENDPOINT_RELATION_FAILED = '[Endpoints] Update relation failed';
+
+export const DELETE_ENDPOINT_RELATION = '[Endpoints] Delete relation';
+export const DELETE_ENDPOINT_RELATION_SUCCESS = '[Endpoints] Delete relation success';
+export const DELETE_ENDPOINT_RELATION_FAILED = '[Endpoints] Delete relation failed';
+
 export const UPDATE_ENDPOINT = '[Endpoints] Update';
 export const UPDATE_ENDPOINT_SUCCESS = '[Endpoints] Update succeed';
 export const UPDATE_ENDPOINT_FAILED = '[Endpoints] Update failed';
@@ -51,7 +59,7 @@ export abstract class BaseEndpointAction implements EntityRequestAction {
   public entityType = endpointEntityType;
   public endpointType = STRATOS_ENDPOINT_TYPE;
   public subType = '';
-  public entity = [stratosEntityFactory(endpointEntityType)]
+  public entity = [stratosEntityFactory(endpointEntityType)];
   constructor(public type: string) { }
   actions: string[];
 }
@@ -100,7 +108,7 @@ export class GetEndpoint extends SingleBaseEndpointAction {
     super(
       GET_ENDPOINT,
       guid
-    )
+    );
   }
   actions = [
     GET_ENDPOINT,
@@ -117,7 +125,7 @@ export class GetAllEndpoints extends MultipleBaseEndpointAction {
     super(
       GET_ENDPOINTS,
       GetAllEndpoints.storeKey
-    )
+    );
   }
   actions = [
     GET_ENDPOINTS,
@@ -134,13 +142,13 @@ export class GetAllEndpoints extends MultipleBaseEndpointAction {
 
 export class GetAllEndpointsSuccess extends GetAllEndpoints {
   constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) {
-    super(login)
+    super(login);
   }
   type = GET_ENDPOINTS_SUCCESS;
 }
 
 export class ConnectEndpoint extends SingleBaseEndpointAction {
-  static UpdatingKey = 'connectingKey'
+  static UpdatingKey = 'connectingKey';
   constructor(
     guid: string,
     // Note - should not be called endpointType
@@ -161,11 +169,11 @@ export class ConnectEndpoint extends SingleBaseEndpointAction {
     CONNECT_ENDPOINTS,
     CONNECT_ENDPOINTS_SUCCESS,
     CONNECT_ENDPOINTS_FAILED
-  ]
+  ];
 }
 
 export class DisconnectEndpoint extends SingleBaseEndpointAction {
-  static UpdatingKey = 'disconnecting'
+  static UpdatingKey = 'disconnecting';
   constructor(
     guid: string,
     // Note - should not be called endpointType
@@ -222,7 +230,7 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
       registerEndpointType
     );
   }
-  updatingKey = 'registering'
+  updatingKey = 'registering';
   actions = [
     REGISTER_ENDPOINTS,
     REGISTER_ENDPOINTS_SUCCESS,
@@ -248,10 +256,40 @@ export class UpdateEndpoint extends SingleBaseEndpointAction {
       updateEndpointType
     );
   }
-  updatingKey = 'updating'
+  updatingKey = 'updating';
   actions = [
     UPDATE_ENDPOINT,
     UPDATE_ENDPOINT_SUCCESS,
     UPDATE_ENDPOINT_FAILED
   ];
+}
+
+export class SaveEndpointRelation extends SingleBaseEndpointAction {
+  constructor(
+    guid: string,
+    public relation: EndpointsRelation,
+    saveEndpointType = 'cf'
+  ) {
+    super(
+      UPDATE_ENDPOINT_RELATION,
+      guid,
+      saveEndpointType
+    );
+  }
+  updatingKey = 'creating-relation';
+}
+
+export class DeleteEndpointRelation extends SingleBaseEndpointAction {
+  constructor(
+    guid: string,
+    public relation: EndpointsRelation,
+    deleteEndpointType = 'cf'
+  ) {
+    super(
+      DELETE_ENDPOINT_RELATION,
+      guid,
+      deleteEndpointType
+    );
+  }
+  updatingKey = 'deleting-relation';
 }

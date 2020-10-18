@@ -12,6 +12,7 @@ class CfMetricsAction extends MetricsAction {
     windowValue: string = null,
     queryType: MetricQueryType,
     isSeries = true,
+    buildMetricsKey = true
   ) {
     super(
       guid,
@@ -21,7 +22,8 @@ class CfMetricsAction extends MetricsAction {
       windowValue,
       queryType,
       isSeries,
-      CF_ENDPOINT_TYPE
+      CF_ENDPOINT_TYPE,
+      buildMetricsKey
     );
   }
 
@@ -38,6 +40,9 @@ export class FetchCFMetricsAction extends CfMetricsAction {
   }
 }
 
+/**
+ *  Fetch cf cell metrics
+ */
 export class FetchCFCellMetricsAction extends CfMetricsAction {
   constructor(
     cfGuid: string,
@@ -48,6 +53,30 @@ export class FetchCFCellMetricsAction extends CfMetricsAction {
     super(cfGuid + '-' + cellId, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/cells`, null, queryType, isSeries);
   }
 }
+
+/**
+ * Fetch cf eirini metrics
+ */
+export class FetchCfEiriniMetricsAction extends CfMetricsAction {
+  constructor(
+    metricsKey: string,
+    cfGuid: string,
+    public query: MetricQueryConfig,
+    queryType: MetricQueryType = MetricQueryType.QUERY,
+    isSeries = true) {
+    super(
+      metricsKey,
+      cfGuid,
+      query,
+      `${MetricsAction.getBaseMetricsURL()}/cf/eirini`,
+      null,
+      queryType,
+      isSeries,
+      false
+    );
+  }
+}
+
 
 export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implements PaginatedAction {
   constructor(
@@ -94,7 +123,7 @@ export class FetchApplicationChartMetricsAction extends MetricsChartAction {
   constructor(
     guid: string,
     cfGuid: string,
-    query: MetricQueryConfig, ) {
+    query: MetricQueryConfig,) {
     super(guid, cfGuid, query, `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`, CF_ENDPOINT_TYPE);
   }
 

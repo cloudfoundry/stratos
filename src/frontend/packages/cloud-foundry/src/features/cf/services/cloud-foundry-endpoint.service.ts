@@ -33,6 +33,10 @@ import {
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
+import {
+  CfContainerOrchestrator,
+  ContainerOrchestrationService,
+} from '../../container-orchestration/services/container-orchestration.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { fetchTotalResults } from '../cf.helpers';
 
@@ -65,6 +69,7 @@ export class CloudFoundryEndpointService {
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
   cfGuid: string;
+  containerOrchestrator$: Observable<CfContainerOrchestrator>;
 
   static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
@@ -139,12 +144,13 @@ export class CloudFoundryEndpointService {
     private store: Store<CFAppState>,
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
+    private coService: ContainerOrchestrationService
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 
-    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid)
+    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid);
     this.constructCoreObservables();
     this.constructSecondaryObservable();
   }
@@ -188,6 +194,8 @@ export class CloudFoundryEndpointService {
     );
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
+
+    this.containerOrchestrator$ = this.coService.getContainerOrchestrator(this.cfGuid);
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {

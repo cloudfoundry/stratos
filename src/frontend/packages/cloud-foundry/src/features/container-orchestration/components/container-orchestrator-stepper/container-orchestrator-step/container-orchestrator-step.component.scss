@@ -1,0 +1,15 @@
+:host {
+  flex: 1;
+}
+
+.orchestrator {
+  mat-radio-button {
+    padding-right: 10px;
+  }
+  & > * {
+    padding-bottom: 20px;
+  }
+  &__eirini-disabled {
+    display: none;
+  }
+}

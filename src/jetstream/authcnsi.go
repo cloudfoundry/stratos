@@ -146,6 +146,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 
 	// Get the User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, err := p.GetSessionStringValue(c, "user_id")
+	consoleUserID := userID
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
@@ -226,6 +227,13 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 					Name:   "Unknown",
 					Scopes: []string{"read"},
 					Admin:  true,
+				}
+			}
+
+			// Notify plugins if they support the notification interface
+			for _, plugin := range p.Plugins {
+				if notifier, ok := plugin.(interfaces.TokenNotificationPlugin); ok {
+					notifier.OnConnect(&cnsiRecord, tokenRecord, consoleUserID)
 				}
 			}
 
@@ -413,6 +421,21 @@ func (p *portalProxy) ClearCNSIToken(cnsiRecord interfaces.CNSIRecord, userGUID 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
 	user, _, ok := p.GetCNSIUserAndToken(cnsiGUID, userGUID)
 	return user, ok
+}
+
+func (p *portalProxy) GetCNSIUsers() ([]string, error) {
+	log.Debug("GetCNSIUsers")
+	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := tokenRepo.ListUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {

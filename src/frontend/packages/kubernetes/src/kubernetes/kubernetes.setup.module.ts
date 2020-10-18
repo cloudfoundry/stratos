@@ -40,6 +40,7 @@ import {
 import {
   KubeConfigTableUserSelectComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
+import { KubeRelationTypes } from './kube-relationship-types';
 import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
 import { generateKubernetesEntities } from './kubernetes-entity-generator';
@@ -91,6 +92,9 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
   ]
 })
 export class KubernetesSetupModule {
+  // Ensure that the kube relations file is not left out of build
+  private unused = KubeRelationTypes.METRICS_KUBE;
+
   constructor(
     endpointService: EndpointsService,
     @Optional() @SkipSelf() parentModule: KubernetesSetupModule

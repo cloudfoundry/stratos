@@ -53,7 +53,7 @@ const customRoutes: Routes = [
       }
     },
   },
-]
+];
 
 @NgModule({
   imports: [

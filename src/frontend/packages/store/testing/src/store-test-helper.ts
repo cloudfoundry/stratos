@@ -46,7 +46,6 @@ export const testSCFEndpoint: EndpointModel = {
   cnsi_type: 'cf',
   system_shared_token: false,
   sso_allowed: false,
-  metricsAvailable: false
 };
 
 export const testSessionData: SessionData = {
@@ -298,7 +297,6 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
           },
           connectionStatus: 'connected',
           system_shared_token: false,
-          metricsAvailable: false
         },
       },
       metrics: {},

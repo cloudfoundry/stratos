@@ -17,6 +17,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { MetricsHelpers } from '../../../../../../core/src/features/metrics/metrics.helpers';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
@@ -29,6 +30,7 @@ import { EndpointModel } from '../../../../../../store/src/types/endpoint.types'
 import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
+import { CfRelationTypes } from '../../../../cf-relation-types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
@@ -51,7 +53,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
-  isBusyUpdating$: Observable<{ updating: boolean }>;
+  isBusyUpdating$: Observable<{ updating: boolean; }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
@@ -102,7 +104,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'events', label: 'Events', icon: 'watch_later' }
     ];
 
-    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+    MetricsHelpers.endpointHasMetrics(applicationService.cfGuid, CfRelationTypes.METRICS_CF).pipe(first()).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks = [
           ...this.tabLinks,

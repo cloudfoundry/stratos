@@ -376,7 +376,7 @@ const cfListCards: Type<CardCell<any>>[] = [
   ],
   providers: [
     ApplicationStateService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
   ]
 })
 export class CloudFoundrySharedModule { }

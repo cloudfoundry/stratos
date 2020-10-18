@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 // Endpoint - This represents the CNSI endpoint
@@ -27,6 +29,42 @@ func (p *portalProxy) info(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, s)
+}
+
+// Add a set of endpoint relations to each endpoint via the relations table
+func (p *portalProxy) updateEndpointsWithRelations(endpoints map[string]map[string]*interfaces.EndpointDetail) error {
+	relations, err := p.ListRelations()
+	if err != nil {
+		return fmt.Errorf("Failed to fetch relations: %v", err)
+	}
+	for _, endpointsOfType := range endpoints {
+		for _, endpoint := range endpointsOfType {
+			if endpoint.Relations == nil {
+				endpoint.Relations = &interfaces.EndpointRelations{
+					Provides: []interfaces.EndpointRelation{},
+					Receives: []interfaces.EndpointRelation{},
+				}
+			}
+			for _, relation := range relations {
+				// Add relation to appropriate Provider/Target collection
+				if relation.Provider == endpoint.GUID {
+					endpoint.Relations.Provides = append(endpoint.Relations.Provides, interfaces.EndpointRelation{
+						Guid:         relation.Target,
+						RelationType: relation.RelationType,
+						Metadata:     relation.Metadata,
+					})
+				} else if relation.Target == endpoint.GUID {
+					endpoint.Relations.Receives = append(endpoint.Relations.Receives, interfaces.EndpointRelation{
+						Guid:         relation.Provider,
+						RelationType: relation.RelationType,
+						Metadata:     relation.Metadata,
+					})
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
@@ -89,6 +127,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			Metadata:          make(map[string]string),
 			SystemSharedToken: false,
 		}
+
 		// try to get the user info for this cnsi for the user
 		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
@@ -98,6 +137,11 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		}
 		cnsiType := cnsi.CNSIType
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
+	}
+
+	err = p.updateEndpointsWithRelations(s.Endpoints)
+	if err != nil {
+		log.Warnf("Failed to add relations data to endpoints during info request: %v", err)
 	}
 
 	// Allow plugin to modify the info data
