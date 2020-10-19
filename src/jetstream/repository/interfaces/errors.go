@@ -21,9 +21,9 @@ type ErrHTTPRequest struct {
 	Response   string
 }
 
-// ErrorResponseBody -- struct for generating bodies of error responses
 type ErrorResponseBody struct {
-	Error string `json:"error"`
+	Status string `json:"status"`
+	Error  string `json:"error"`
 }
 
 func (e ErrHTTPShadow) Error() string {
@@ -38,7 +38,7 @@ func NewHTTPShadowError(status int, userFacingError string, fmtString string, ar
 	//Only set the HTTPError field of the ErrHTTPShadow struct if we have been passed an error message intended for logging
 	httpErrorMsg := ""
 	if len(userFacingError) > 0 {
-		errBody := ErrorResponseBody{Error: userFacingError}
+		errBody := ErrorResponseBody{Status: "error", Error: userFacingError}
 		bytes, _ := json.Marshal(errBody)
 		httpErrorMsg = string(bytes)
 	}

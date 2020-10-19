@@ -18,6 +18,7 @@ Improvements and fixes in this release:
 
 **Fixes:**
 
+- Error filtering applications by org [\#4658](https://github.com/cloudfoundry/stratos/issues/4658)
 - API Keys should not be shown when persistence is disabled [\#4615](https://github.com/cloudfoundry/stratos/issues/4615)
 - Home Page CF App Favouriete card clips text [\#4613](https://github.com/cloudfoundry/stratos/issues/4613)
 - Can not push All-in-one docker image to Eirini [\#4612](https://github.com/cloudfoundry/stratos/issues/4612)

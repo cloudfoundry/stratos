@@ -24,12 +24,12 @@ metadata:
 {{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
 {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.console.replicaCount | default 1 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"
@@ -302,8 +302,8 @@ spec:
           value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
         - name: STRATOS_KUBERNETES_DASHBOARD_IMAGE
           value: "{{.Values.console.kubeDashboardImage}}"        
-        - name: ARTIFACT_HUB_ENABLED
-          value: {{ default "true" .Values.console.artifactHubEnabled | quote }}
+        - name: ARTIFACT_HUB_DISABLED
+          value: {{ default "false" .Values.console.artifactHubDisabled | quote }}
         {{- include "stratosJetstreamEnv" . | indent 8 }}
         readinessProbe:
           httpGet:

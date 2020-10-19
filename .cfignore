@@ -2,6 +2,7 @@
 node_modules/
 bower_components/
 dist/
+dist-devkit/
 dev-certs/
 out/
 outputs/
@@ -23,3 +24,4 @@ build/dev_config.json
 e2e-reports/
 website/
 .helm-cache/
+coverage/
