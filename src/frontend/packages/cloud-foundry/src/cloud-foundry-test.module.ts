@@ -2,7 +2,6 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
-import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../core/src/core/github.helpers';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog';
@@ -28,7 +27,7 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
             return [
               ...generateCFEntities(),
               ...generateStratosEntities(),
-              ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
+              //...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
             ];
           }
         }
@@ -49,4 +48,9 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
     }
   ]
 })
-export class CloudFoundryTestingModule { }
+export class CloudFoundryTestingModule {
+
+  constructor() {
+    console.log('CloudFoundryTestingModule');
+  }
+ }

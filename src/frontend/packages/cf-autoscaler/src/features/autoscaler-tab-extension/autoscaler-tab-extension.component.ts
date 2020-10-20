@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
 
+import { fetchAutoscalerInfo } from '../../../../cloud-foundry/src/autoscaler-available';
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
@@ -25,7 +26,6 @@ import {
 } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { fetchAutoscalerInfo } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -116,7 +116,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
   ) { }
 
   ngOnInit() {
@@ -125,7 +125,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.applicationService.cfGuid,
       this.entityServiceFactory
     ).pipe(
-      filter(info => !!info && !!info.entity && !!info.entity.entity),
+      filter((info:any) => !!info && !!info.entity && !!info.entity.entity),
       map(info => {
         const build = info.entity.entity.build;
         const buildParts = build.split('.');

@@ -5,6 +5,7 @@ import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
+import { AutoscalerInfoEffects } from './effects/autoscaler-info.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
@@ -29,7 +30,8 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
       AppEffects,
       UpdateAppEffects,
       CfValidateEffects,
-      UsersRolesEffects
+      UsersRolesEffects,
+      AutoscalerInfoEffects,
     ])
   ],
   providers: [

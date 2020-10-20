@@ -4,7 +4,6 @@ import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/a
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 
-export const appAutoscalerInfoEntityType = 'autoscalerInfo';
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
@@ -35,12 +34,6 @@ export class AutoscalerEntitySchema extends EntitySchema {
     super(entityKey, AUTOSCALER_ENDPOINT_TYPE, definition, options, relationKey);
   }
 }
-
-entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
-  appAutoscalerInfoEntityType,
-  {},
-  { idAttribute: getAPIResourceGuid }
-);
 
 entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
   appAutoscalerCredentialEntityType,

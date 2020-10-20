@@ -34,7 +34,6 @@ import {
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
-  AUTOSCALER_INFO,
   AutoscalerPaginationParams,
   AutoscalerQuery,
   CREATE_APP_AUTOSCALER_POLICY,
@@ -45,7 +44,6 @@ import {
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
   GetAppAutoscalerHealthAction,
-  GetAppAutoscalerInfoAction,
   GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
@@ -88,32 +86,6 @@ export class AutoscalerEffects {
     private actions$: Actions,
     private store: Store<AppState>,
   ) { }
-
-  @Effect()
-  fetchAutoscalerInfo$ = this.actions$.pipe(
-    ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
-    mergeMap(action => {
-      const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http
-        .get(`${commonPrefix}/info`, {
-          headers: this.addHeaders(action.endpointGuid)
-        }).pipe(
-          mergeMap(autoscalerInfo => {
-            const entityKey = entityCatalog.getEntityKey(action);
-            const mappedData = {
-              entities: { [entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entityKey, mappedData, action.endpointGuid, autoscalerInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
-          ]));
-    }));
 
   @Effect()
   fetchAppAutoscalerHealth$ = this.actions$.pipe(

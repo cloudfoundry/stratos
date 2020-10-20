@@ -5,19 +5,29 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { isAutoscalerEnabled } from '../../cloud-foundry/src/autoscaler-available';
 import { cfEntityCatalog } from '../../cloud-foundry/src/cf-entity-catalog';
 import { applicationEntityType, organizationEntityType, spaceEntityType } from '../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { getGuids } from '../../cloud-foundry/src/features/applications/application/application-base.component';
 import { CfCurrentUserPermissions } from '../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { CurrentUserPermissionsService } from '../../core/src/core/permissions/current-user-permissions.service';
 import { StratosTab, StratosTabType } from '../../core/src/public-api';
 import { AppState } from '../../store/src/app-state';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
-import { isAutoscalerEnabled } from './core/autoscaler-helpers/autoscaler-available';
 import { generateASEntities } from './store/autoscaler-entity-generator';
 import { AutoscalerEffects } from './store/autoscaler.effects';
+
+
+export function getGuids(type?: string) {
+  return (activatedRoute: ActivatedRoute) => {
+    const { id, endpointId } = activatedRoute.snapshot.params;
+    if (type) {
+      return endpointId;
+    }
+    return id;
+  };
+}
 
 @StratosTab({
   type: StratosTabType.Application,
