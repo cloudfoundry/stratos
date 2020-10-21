@@ -1,4 +1,4 @@
-@mixin app-kube-token-auth-form-theme($theme, $app-theme) {
+@mixin app-text-area($theme, $app-theme) {
 
   $is-dark: map-get($theme, is-dark);
   $app-background: map-get($app-theme, app-background-color);
@@ -8,12 +8,7 @@
     $textarea-color: lighten($app-background, 5%);
   }
 
-  .kube-sa-auth {
-    &__form {
-      textarea {
-        background-color: $textarea-color;
-      }
-    }
+  textarea {
+    background-color: $textarea-color;
   }
-
 }
