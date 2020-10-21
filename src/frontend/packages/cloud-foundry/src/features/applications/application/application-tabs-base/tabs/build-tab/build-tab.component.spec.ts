@@ -14,7 +14,7 @@ import { ApplicationServiceMock } from '../../../../../../../test-framework/appl
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySharedModule } from '../../../../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { ApplicationPollingService } from '../../application-polling.service';
 import { ApplicationEnvVarsHelper } from './application-env-vars.service';

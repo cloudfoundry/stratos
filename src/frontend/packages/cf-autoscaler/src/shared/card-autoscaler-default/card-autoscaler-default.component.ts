@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../store/src/types/api.types';

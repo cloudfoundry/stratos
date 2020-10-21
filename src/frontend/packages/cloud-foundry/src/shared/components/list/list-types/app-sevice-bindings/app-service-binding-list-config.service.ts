@@ -20,10 +20,10 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { isServiceInstance, isUserProvidedServiceInstance } from '../../../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
+import { ApplicationService } from '../../../../services/application.service';
 import { CSI_CANCEL_URL } from '../../../add-service-instance/csi-mode.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import {

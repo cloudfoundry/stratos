@@ -2,10 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import {
-  ApplicationMonitorService,
-} from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationMonitorService } from '../../../services/application-monitor.service';
+import { ApplicationService } from '../../../services/application.service';
 
 @Component({
   selector: 'app-card-app-uptime',

@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { BREADCRUMB_URL_PARAM } from '../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
 import { StratosStatus } from '../../../../../../../store/src/types/shared.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { ApplicationStateData, ApplicationStateService } from '../../../../services/application-state.service';
+import { ApplicationService } from '../../../../services/application.service';
 
 
 @Component({

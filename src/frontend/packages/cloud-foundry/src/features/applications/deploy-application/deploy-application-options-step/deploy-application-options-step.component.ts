@@ -18,9 +18,7 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import {
-  ApplicationEnvVarsHelper,
-} from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsHelper } from '../../../../shared/services/application-env-vars.service';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({

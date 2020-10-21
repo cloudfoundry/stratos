@@ -7,12 +7,12 @@ import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/t
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { IApp, IAppSummary, IDomain, ISpace } from '../src/cf-api.types';
 import { CFAppState } from '../src/cf-app-state';
-import { ApplicationData, ApplicationService } from '../src/features/applications/application.service';
 import {
   ApplicationEnvVarsHelper,
   EnvVarStratosProject,
 } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData, ApplicationStateService } from '../src/shared/services/application-state.service';
+import { ApplicationData, ApplicationService } from '../src/shared/services/application.service';
 import { AppStat } from '../src/store/types/app-metadata.types';
 
 function createEntity<T>(entity: T): APIResource<T> {

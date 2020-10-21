@@ -8,7 +8,7 @@ import { catchError, debounceTime, first, map, share, startWith, switchMap } fro
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { AnsiColorizer } from '../../../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 
 
 export interface LogItem {

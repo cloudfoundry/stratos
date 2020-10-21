@@ -10,5 +10,8 @@
   ],
   "include": [
     "src/frontend/packages/**/*.d.ts"
+  ],
+  "exclude": [
+    "**/*.mock.ts",
   ]
 }

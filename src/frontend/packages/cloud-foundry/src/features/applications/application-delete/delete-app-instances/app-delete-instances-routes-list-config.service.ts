@@ -21,8 +21,8 @@ import {
   AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 import { fetchTotalResults } from '../../../cf/cf.helpers';
-import { ApplicationService } from '../../application.service';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {

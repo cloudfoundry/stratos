@@ -32,8 +32,8 @@ import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
-import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
 @Component({

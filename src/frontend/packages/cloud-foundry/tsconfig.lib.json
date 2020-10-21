@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "../../../../out-tsc"
   },
-  "exclude": ["./src/test.ts", "**/*.spec.ts"]
+  "exclude": ["./src/test.ts", "**/*.spec.ts", "**/*.mock.ts"]
 }

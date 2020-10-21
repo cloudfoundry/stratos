@@ -3,11 +3,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
 import { ApplicationStateService } from '../../../../cloud-foundry/src/shared/services/application-state.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import {

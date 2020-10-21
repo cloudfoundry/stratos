@@ -8,7 +8,7 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { IRoute } from '../../../../../cf-api.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ApplicationService } from '../../../../services/application.service';
 import { CfRoutesDataSourceBase } from '../cf-routes/cf-routes-data-source-base';
 
 

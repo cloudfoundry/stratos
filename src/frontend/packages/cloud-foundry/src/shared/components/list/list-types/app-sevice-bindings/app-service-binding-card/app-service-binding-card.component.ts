@@ -20,7 +20,6 @@ import {
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { serviceBindingEntityType } from '../../../../../../cf-entity-types';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { isUserProvidedServiceInstance } from '../../../../../../features/cf/cf.helpers';
 import {
   getServiceName,
@@ -30,6 +29,7 @@ import {
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ApplicationService } from '../../../../../services/application.service';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import {

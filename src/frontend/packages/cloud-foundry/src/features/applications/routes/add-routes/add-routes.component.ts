@@ -17,7 +17,7 @@ import { ActionState, RequestInfoState } from '../../../../../../store/src/reduc
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;

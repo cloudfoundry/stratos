@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';

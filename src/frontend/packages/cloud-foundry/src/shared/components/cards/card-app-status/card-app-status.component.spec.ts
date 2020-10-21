@@ -12,7 +12,7 @@ import {
 } from '../../../../../../core/src/shared/components/application-state/application-state.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
-import { ApplicationService } from '../../../../features/applications/application.service';
+import { ApplicationService } from '../../../services/application.service';
 import { CardAppStatusComponent } from './card-app-status.component';
 
 describe('CardAppStatusComponent', () => {

@@ -4,7 +4,7 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { ActivatedRoute } from '@angular/router';
 import moment from 'moment-timezone';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/shared/services/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateIsAfter,

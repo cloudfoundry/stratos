@@ -1,5 +1,5 @@
 /*
- * Public API Surface of cloud-foundry
+ * Public API Surface of cloud-foundry autoscaler
  */
 
 export * from './cf-autoscaler-package.module';

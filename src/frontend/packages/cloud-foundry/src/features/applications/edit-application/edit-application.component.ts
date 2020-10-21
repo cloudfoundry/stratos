@@ -14,7 +14,7 @@ import {
   AppNameUniqueChecking,
   AppNameUniqueDirective,
 } from '../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../shared/services/application.service';
 
 
 @Component({

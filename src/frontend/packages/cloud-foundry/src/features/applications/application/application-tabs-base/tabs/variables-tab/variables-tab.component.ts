@@ -15,7 +15,7 @@ import {
 import {
   CfAppVariablesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 
 export interface VariableTabAllEnvVarType {
   name: string;

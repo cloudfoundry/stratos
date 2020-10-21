@@ -7,8 +7,8 @@ import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refC
 import { fetchAutoscalerInfo } from '../../../../cloud-foundry/src/autoscaler-available';
 import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationMonitorService } from '../../../../cloud-foundry/src/shared/services/application-monitor.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';

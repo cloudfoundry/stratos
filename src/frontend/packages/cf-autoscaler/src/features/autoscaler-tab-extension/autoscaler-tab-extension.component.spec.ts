@@ -5,7 +5,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import {
   CardAppInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/cards/card-app-instances/card-app-instances.component';
@@ -15,6 +14,7 @@ import {
 import {
   RunningInstancesComponent,
 } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import {
   cfCurrentUserPermissionsService,
 } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';

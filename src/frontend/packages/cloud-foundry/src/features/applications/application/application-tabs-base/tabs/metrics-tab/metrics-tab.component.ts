@@ -12,7 +12,7 @@ import { MetricQueryConfig } from '../../../../../../../../store/src/actions/met
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../../store/src/types/metric.types';
 import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf-metrics.actions';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 
 @Component({
   selector: 'app-metrics-tab',

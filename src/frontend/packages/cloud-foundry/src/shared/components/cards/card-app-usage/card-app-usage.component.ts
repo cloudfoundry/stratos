@@ -2,12 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { map, share, startWith } from 'rxjs/operators';
 
-import {
-  ApplicationMonitorService,
-} from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { pathGet } from '../../../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { ApplicationMonitorService } from '../../../services/application-monitor.service';
+import { ApplicationService } from '../../../services/application.service';
 
 @Component({
   selector: 'app-card-app-usage',

@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/shared/services/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';

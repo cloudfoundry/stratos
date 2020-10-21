@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../cloud-foundry/src/shared/services/application.service';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Component({

@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 
-import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../cloud-foundry/src/shared/services/application.service';
 import { ApplicationServiceMock } from '../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { SharedModule } from '../../../core/src/shared/shared.module';

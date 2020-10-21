@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/shared/services/application.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
   AutoscalerConstants,

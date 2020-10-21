@@ -7,7 +7,7 @@ import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { AppState } from '../../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../../store/src/selectors/dashboard.selectors';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 
 @Injectable()
 export class ApplicationPollingService {

@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { OverrideAppDetails } from '../../../../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import {
-  PaginationObservables,
-} from '../../../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../../../../../store/src/types/api.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
+import { PaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { APIResource } from '../../../../store/src/types/api.types';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
+import { OverrideAppDetails } from '../../store/types/deploy-application.types';
 
 
 export interface EnvVarStratosProject {

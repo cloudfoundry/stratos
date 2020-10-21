@@ -4,18 +4,16 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
+import { ApplicationMonitorService } from '../../shared/services/application-monitor.service';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import {
   DeleteAppServiceInstancesComponent,
 } from './application-delete/delete-app-instances/delete-app-instances.component';
 import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
-import { ApplicationMonitorService } from './application-monitor.service';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
-import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
 import { ApplicationPollComponent } from './application/application-tabs-base/application-poll/application-poll.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
-import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import {
   ViewBuildpackComponent,
@@ -73,8 +71,6 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ApplicationPollComponent
   ],
   providers: [
-    ApplicationService,
-    ApplicationEnvVarsHelper,
     ApplicationMonitorService,
     DatePipe,
     ApplicationDeploySourceTypes,

@@ -20,4 +20,10 @@ const customRoutes: Routes = [
     RouterModule.forRoot(customRoutes),
   ],
 })
-export class CfAutoscalerRoutingModule { }
+export class CfAutoscalerRoutingModule {
+
+  constructor() {
+    console.log('CfAutoscalerRoutingModule');
+  }
+
+ }

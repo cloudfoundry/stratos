@@ -13,7 +13,7 @@ import {
 } from '../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../shared/services/application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
 

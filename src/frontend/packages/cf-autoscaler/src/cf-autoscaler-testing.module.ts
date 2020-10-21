@@ -22,4 +22,7 @@ import { generateASEntities } from './store/autoscaler-entity-generator';
     ]
   }]
 })
-export class CfAutoscalerTestingModule { }
+export class CfAutoscalerTestingModule {   constructor() {
+  console.log('CfAutoscalerTestingModule');
+}
+}

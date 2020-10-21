@@ -13,8 +13,8 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
+import { ApplicationService } from '../../../../services/application.service';
 import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 

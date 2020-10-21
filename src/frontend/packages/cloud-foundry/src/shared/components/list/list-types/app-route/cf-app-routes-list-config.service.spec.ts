@@ -12,7 +12,7 @@ import { SharedModule } from '../../../../../../../core/src/shared/shared.module
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CFAppState } from '../../../../../cf-app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ApplicationService } from '../../../../services/application.service';
 import { CfAppRoutesListConfigService } from './cf-app-routes-list-config.service';
 
 

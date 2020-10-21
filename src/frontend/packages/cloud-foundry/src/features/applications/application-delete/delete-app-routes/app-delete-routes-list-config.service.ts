@@ -13,7 +13,7 @@ import { IRoute } from '../../../../cf-api.types';
 import {
   CfAppRoutesListConfigServiceBase,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 
 @Injectable()
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {

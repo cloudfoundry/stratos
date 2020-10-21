@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
-import { getGuids } from '../../../cloud-foundry/src/features/applications/application/application-base.component';
+import { ApplicationService } from '../../../cloud-foundry/src/shared/services/application.service';
+import { getGuids } from '../../../cloud-foundry/src/shared/utils';
 import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
 
 @Component({

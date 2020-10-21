@@ -10,7 +10,7 @@ import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../core/sr
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import {
   GithubCommitAuthorComponent,
 } from './../../../../../../shared/components/github-commit-author/github-commit-author.component';

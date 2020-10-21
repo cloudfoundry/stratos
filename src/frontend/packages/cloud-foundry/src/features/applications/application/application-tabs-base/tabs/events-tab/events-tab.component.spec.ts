@@ -19,7 +19,7 @@ import {
   CloudFoundryEventsListComponent,
 } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { EventsTabComponent } from './events-tab.component';
 

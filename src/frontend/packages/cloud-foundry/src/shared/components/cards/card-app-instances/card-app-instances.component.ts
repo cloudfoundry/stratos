@@ -4,12 +4,12 @@ import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { ApplicationService } from '../../../services/application.service';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);

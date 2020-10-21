@@ -8,7 +8,7 @@ import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 import { AddRoutesComponent } from '../add-routes/add-routes.component';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
 import { AddRouteStepperComponent } from './add-route-stepper.component';

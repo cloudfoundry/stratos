@@ -5,8 +5,8 @@ import { startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
+import { ApplicationService } from '../../../../../services/application.service';
 
 @Component({
   selector: 'app-table-cell-app-status',

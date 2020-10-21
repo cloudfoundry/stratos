@@ -14,7 +14,7 @@ import {
 } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySharedModule } from '../../../../../../shared/cf-shared.module';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { InstancesTabComponent } from './instances-tab.component';
 

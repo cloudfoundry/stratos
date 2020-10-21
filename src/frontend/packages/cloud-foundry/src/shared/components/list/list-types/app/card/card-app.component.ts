@@ -15,8 +15,8 @@ import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-fa
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
+import { ApplicationService } from '../../../../../services/application.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({

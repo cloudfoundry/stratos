@@ -207,7 +207,9 @@ import { ServicePlanPriceComponent } from './components/service-plan-price/servi
 import { ServicePlanPublicComponent } from './components/service-plan-public/service-plan-public.component';
 import { AppNameUniqueDirective } from './directives/app-name-unique.directive/app-name-unique.directive';
 import { CfUserPermissionDirective } from './directives/cf-user-permission/cf-user-permission.directive';
+import { ApplicationEnvVarsHelper } from './services/application-env-vars.service';
 import { ApplicationStateService } from './services/application-state.service';
+import { ApplicationService } from './services/application.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 
 const cfListTableCells: Type<TableCellCustom<any>>[] = [
@@ -376,7 +378,9 @@ const cfListCards: Type<CardCell<any>>[] = [
   ],
   providers: [
     ApplicationStateService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
+    ApplicationService,
+    ApplicationEnvVarsHelper,
   ]
 })
 export class CloudFoundrySharedModule { }

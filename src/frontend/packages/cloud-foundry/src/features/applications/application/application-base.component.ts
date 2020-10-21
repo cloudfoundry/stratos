@@ -4,9 +4,10 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { APP_GUID, CF_GUID } from '../../../../../core/src/shared/entity.tokens';
+import { ApplicationEnvVarsHelper } from '../../../shared/services/application-env-vars.service';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
-import { ApplicationService } from '../application.service';
-import { ApplicationEnvVarsHelper } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationService } from '../../../shared/services/application.service';
+import { getGuids } from '../../../shared/utils';
 
 export function applicationServiceFactory(
   cfId: string,
@@ -22,16 +23,6 @@ export function applicationServiceFactory(
     appStateService,
     appEnvVarsService,
   );
-}
-
-export function getGuids(type?: string) {
-  return (activatedRoute: ActivatedRoute) => {
-    const { id, endpointId } = activatedRoute.snapshot.params;
-    if (type) {
-      return endpointId;
-    }
-    return id;
-  };
 }
 
 @Component({

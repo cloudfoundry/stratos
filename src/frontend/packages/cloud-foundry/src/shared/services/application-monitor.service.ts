@@ -1,8 +1,9 @@
-
-import { share, map } from 'rxjs/operators';
-import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map, share } from 'rxjs/operators';
+
+import { ApplicationService } from './application.service';
+
 
 export class AppMonitorState {
 

@@ -9,7 +9,7 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { IApp } from '../../../cf-api.types';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../shared/services/application.service';
 
 
 @Component({

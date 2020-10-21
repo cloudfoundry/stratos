@@ -7,7 +7,7 @@ import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
+import { ApplicationService } from '../../../../../cloud-foundry/src/shared/services/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityService } from '../../../../../store/src/entity-service';

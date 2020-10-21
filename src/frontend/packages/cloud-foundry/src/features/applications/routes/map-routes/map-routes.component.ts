@@ -8,7 +8,7 @@ import {
   CfAppMapRoutesListConfigService,
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
-import { ApplicationService } from '../../application.service';
+import { ApplicationService } from '../../../../shared/services/application.service';
 
 @Component({
   selector: 'app-map-routes',

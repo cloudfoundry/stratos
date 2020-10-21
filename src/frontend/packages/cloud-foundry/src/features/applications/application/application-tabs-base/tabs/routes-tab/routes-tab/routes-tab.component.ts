@@ -16,7 +16,7 @@ import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationService } from '../../../../../application.service';
+import { ApplicationService } from '../../../../../../../shared/services/application.service';
 
 @Component({
   selector: 'app-routes-tab',

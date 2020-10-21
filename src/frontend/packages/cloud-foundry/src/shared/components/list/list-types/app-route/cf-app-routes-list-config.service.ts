@@ -12,8 +12,8 @@ import { ConfirmationDialogService } from '../../../../../../../core/src/shared/
 import { IGlobalListAction, IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
+import { ApplicationService } from '../../../../services/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 

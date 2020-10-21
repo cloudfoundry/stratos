@@ -8,7 +8,7 @@ import { SharedModule } from '../../../../../../../../core/src/shared/shared.mod
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationStateService } from '../../../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../../application.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import { ApplicationEnvVarsHelper } from '../build-tab/application-env-vars.service';
 import { VariablesTabComponent } from './variables-tab.component';
 

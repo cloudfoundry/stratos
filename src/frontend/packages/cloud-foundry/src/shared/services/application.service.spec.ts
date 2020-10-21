@@ -9,9 +9,9 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 import { AppStoreModule } from '../../../../store/src/store.module';
 import { generateTestApplicationServiceProvider } from '../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { LongRunningCfOperationsService } from '../../shared/data-services/long-running-cf-op.service';
-import { GitSCMService } from '../../shared/data-services/scm/scm.service';
-import { ApplicationStateService } from '../../shared/services/application-state.service';
+import { LongRunningCfOperationsService } from '../data-services/long-running-cf-op.service';
+import { GitSCMService } from '../data-services/scm/scm.service';
+import { ApplicationStateService } from './application-state.service';
 import { ApplicationService } from './application.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 

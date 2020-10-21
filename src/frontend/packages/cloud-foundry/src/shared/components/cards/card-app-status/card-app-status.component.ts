@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { ApplicationService } from '../../../services/application.service';
 
 @Component({
   selector: 'app-card-app-status',

@@ -13,7 +13,6 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -22,6 +21,7 @@ import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { ApplicationService } from '../../../../services/application.service';
 
 export class AppServiceBindingDataSource extends ListDataSource<APIResource<IServiceBinding>> {
   static createGetAllServiceBindings(appGuid: string, cfGuid: string) {

@@ -14,9 +14,9 @@ import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
+import { EnvVarStratosProject } from '../../../../../../shared/services/application-env-vars.service';
+import { ApplicationService } from '../../../../../../shared/services/application.service';
 import { GitBranch, GitCommit, GitRepo } from '../../../../../../store/types/git.types';
-import { ApplicationService } from '../../../../application.service';
-import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 
 @Component({
   selector: 'app-gitscm-tab',

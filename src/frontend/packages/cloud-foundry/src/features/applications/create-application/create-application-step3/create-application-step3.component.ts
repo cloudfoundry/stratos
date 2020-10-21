@@ -20,7 +20,7 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import { createGetApplicationAction } from '../../application.service';
+import { createGetApplicationAction } from '../../../../shared/services/application.service';
 
 
 @Component({

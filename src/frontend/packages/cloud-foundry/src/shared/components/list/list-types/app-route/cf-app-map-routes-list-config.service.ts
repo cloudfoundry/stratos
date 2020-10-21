@@ -18,7 +18,7 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
-import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ApplicationService } from '../../../../services/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 @Injectable()

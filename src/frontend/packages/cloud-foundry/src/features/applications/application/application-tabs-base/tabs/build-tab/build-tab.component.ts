@@ -19,9 +19,9 @@ import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
+import { ApplicationMonitorService } from '../../../../../../shared/services/application-monitor.service';
+import { ApplicationData, ApplicationService } from '../../../../../../shared/services/application.service';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;

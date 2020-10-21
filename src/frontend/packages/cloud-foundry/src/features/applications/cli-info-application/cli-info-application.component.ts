@@ -8,7 +8,7 @@ import { EntityService } from '../../../../../store/src/entity-service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
-import { ApplicationService } from '../application.service';
+import { ApplicationService } from '../../../shared/services/application.service';
 
 @Component({
   selector: 'app-cli-info-application',
