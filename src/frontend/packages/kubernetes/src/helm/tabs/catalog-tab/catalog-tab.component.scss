@@ -1,0 +1,24 @@
+.charts {
+  display: flex;
+  flex-direction: row;
+  &__repos {
+    overflow-y: auto;
+    max-height: 90vh;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    &__stratos,
+    &__artifact {
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      cursor: pointer;
+    }
+  }
+  app-list {
+    flex: 4;
+  }
+}

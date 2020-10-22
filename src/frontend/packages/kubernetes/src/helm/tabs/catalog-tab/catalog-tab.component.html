@@ -1,1 +1,19 @@
-<app-list></app-list>
+<div class="charts">
+  <div class="charts__repos" *ngIf="repos$ | async as repos">
+    <h3>Filter By Repository</h3>
+    <!-- // TODO: RC handle case when only one repo? -->
+    <mat-form-field>
+      <input matInput placeholder="Filter Helm Repositories" [ngModel]="bar" (ngModelChange)="filterRepo($event)">
+    </mat-form-field>
+    <a (click)="filterCharts()">All Repositories</a>
+    <div class="charts__repos__stratos" *ngIf="repos.stratosRepos.length">
+      <h4>Helm Repositories</h4>
+      <a *ngFor="let repo of repos.stratosRepos" (click)="filterCharts(repo)">{{repo}}</a>
+    </div>
+    <div class="charts__repos__artifact" *ngIf="repos.artifactHubRepos.length">
+      <h4>Artifact Hub Repositories</h4>
+      <a *ngFor="let repo of repos.artifactHubRepos" (click)="filterCharts(repo)">{{repo}}</a>
+    </div>
+  </div>
+  <app-list></app-list>
+</div>
