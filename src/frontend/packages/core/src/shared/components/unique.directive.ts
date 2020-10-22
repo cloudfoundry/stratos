@@ -10,7 +10,7 @@ export class UniqueDirective implements Validator {
 
   @Input() appUnique: any[];
 
-  validate(c: AbstractControl): { [key: string]: any; } {
+  validate(c: AbstractControl): { [key: string]: any, } {
     const found = this.appUnique ? this.appUnique.indexOf(c.value) >= 0 : false;
     return found ? {
       appUnique: {

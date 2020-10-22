@@ -17,10 +17,20 @@
             <form class="local-setup-wizard__form" [formGroup]="passwordForm" class="stepper-form">
               <div class="local-setup-wizard__form-block">
                 <mat-form-field>
-                  <input matInput formControlName="adminPassword" placeholder="Password" type="password">
+                  <input matInput formControlName="adminPassword" placeholder="Password" name="password" required
+                    [type]="!showPassword[1] ? 'password' : 'text'">
+                  <button mat-icon-button matSuffix (click)="showPassword[1] = !showPassword[1]"
+                    [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[1]">
+                    <mat-icon>{{!showPassword[1] ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
                 </mat-form-field>
                 <mat-form-field>
-                  <input matInput formControlName="adminPasswordConfirm" placeholder="Confirm Password" type="password">
+                  <input matInput formControlName="adminPasswordConfirm" placeholder="Confirm Password"
+                    name="adminPasswordConfirm" required [type]="!showPassword[2] ? 'password' : 'text'">
+                  <button mat-icon-button matSuffix (click)="showPassword[2] = !showPassword[2]"
+                    [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[2]">
+                    <mat-icon>{{!showPassword[2] ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
                 </mat-form-field>
               </div>
             </form>
