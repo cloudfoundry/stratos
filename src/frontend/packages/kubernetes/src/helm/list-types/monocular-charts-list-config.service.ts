@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListConfig,
@@ -14,7 +11,6 @@ import {
 import { ListView } from '../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../store/src/public-api';
 import { defaultHelmKubeListPageSize } from '../../kubernetes/list-types/kube-helm-list-types';
-import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { ChartsService } from '../monocular/shared/services/charts.service';
 import { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
@@ -83,22 +79,12 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     noEntries: 'There are no charts'
   };
 
-  private initialised: Observable<boolean>;
 
   constructor(
     store: Store<AppState>,
-    private endpointsService: EndpointsService,
-    private route: ActivatedRoute,
     private chartsService: ChartsService
   ) {
-
-    this.initialised = endpointsService.endpoints$.pipe(
-      filter(endpoints => !!endpoints),
-      map(endpoints => {
-        this.dataSource = new MonocularChartsDataSource(store, this, endpoints);
-        return true;
-      }),
-    );
+    this.dataSource = new MonocularChartsDataSource(store, this);
   }
 
   getGlobalActions = () => [];
@@ -106,32 +92,6 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;
-  // getMultiFiltersConfigs = () => [this.createRepositoryFilterConfig()]; // TODO: RC remove associated bits n bobs
   getMultiFiltersConfigs = () => [];
-  getInitialised = () => this.initialised;
 
-  private createRepositoryFilterConfig(): IListMultiFilterConfig {
-    return {
-      key: 'repository',
-      label: 'Source',
-      allLabel: 'All Sources',
-      list$: this.helmRepositories(),
-      loading$: observableOf(false),
-      select: new BehaviorSubject(this.route.snapshot.params.repo)
-    };
-  }
-
-  private helmRepositories(): Observable<any> {
-    return this.endpointsService.endpoints$.pipe(
-      map(endpoints => {
-        const repos = [];
-        Object.values(endpoints).forEach(ep => {
-          if (ep.cnsi_type === HELM_ENDPOINT_TYPE) {
-            repos.push({ label: ep.name, item: ep.name, value: ep.name });
-          }
-        });
-        return repos;
-      })
-    );
-  }
 }

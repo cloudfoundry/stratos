@@ -1,19 +1,38 @@
+<ng-template #listRepoButton>
+  <div class="list-header" *ngIf="!hide">
+    <button mat-raised-button (click)="collapsed = !collapsed">
+      <mat-icon>filter_list</mat-icon>
+      <mat-icon *ngIf="collapsed">chevron_right</mat-icon>
+      <mat-icon *ngIf="!collapsed">chevron_left</mat-icon>
+    </button>
+    <mat-chip-list>
+      <mat-chip *ngIf="filteredRepo">
+        {{filteredRepo}} <mat-icon (click)="filterCharts()" matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </mat-chip-list>
+  </div>
+</ng-template>
+
 <div class="charts">
-  <div class="charts__repos" *ngIf="repos$ | async as repos">
+  <div class="charts__repos" *ngIf="!hide && repos$ | async as repos"
+    [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
     <h3>Filter By Repository</h3>
-    <!-- // TODO: RC handle case when only one repo? -->
     <mat-form-field>
-      <input matInput placeholder="Filter Helm Repositories" [ngModel]="bar" (ngModelChange)="filterRepo($event)">
+      <input matInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
+        (ngModelChange)="searchRepos($event)">
     </mat-form-field>
-    <a (click)="filterCharts()">All Repositories</a>
-    <div class="charts__repos__stratos" *ngIf="repos.stratosRepos.length">
-      <h4>Helm Repositories</h4>
-      <a *ngFor="let repo of repos.stratosRepos" (click)="filterCharts(repo)">{{repo}}</a>
-    </div>
-    <div class="charts__repos__artifact" *ngIf="repos.artifactHubRepos.length">
-      <h4>Artifact Hub Repositories</h4>
-      <a *ngFor="let repo of repos.artifactHubRepos" (click)="filterCharts(repo)">{{repo}}</a>
+    <div class="charts__repos__lists">
+      <div class="charts__repos__stratos" *ngIf="repos.stratosRepos.length">
+        <h4>Helm Repositories</h4>
+        <a *ngFor="let repo of repos.stratosRepos" (click)="filterCharts(repo)"
+          [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+      </div>
+      <div class="charts__repos__artifact" *ngIf="repos.artifactHubRepos.length">
+        <h4>Artifact Hub Repositories</h4>
+        <a *ngFor="let repo of repos.artifactHubRepos" (click)="filterCharts(repo)"
+          [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+      </div>
     </div>
   </div>
-  <app-list></app-list>
+  <app-list [customFilters]="listRepoButton"></app-list>
 </div>

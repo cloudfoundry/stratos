@@ -1,21 +1,69 @@
+.list-header {
+  align-items: flex-end;
+  display: flex;
+  margin: 5px 0;
+
+  button {
+    margin-right: 10px;
+  }
+}
+
 .charts {
   display: flex;
   flex-direction: row;
+  max-height: 100%;
   &__repos {
-    overflow-y: auto;
-    max-height: 90vh;
     display: flex;
-    flex: 1;
     flex-direction: column;
+    max-height: 100%;
+    overflow: auto;
+    &--collapse {
+      flex: 0;
+      margin-right: 0;
+      padding-right: 0;
+      width: 0;
+    }
+    &--expand {
+      flex: 1;
+      margin-right: 10px;
+      padding-right: 10px;
+      transition: all .75s ease-out;
+      width: initial;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin: 6px 0;
+    }
+
+    &__lists {
+      max-height: 100%;
+      overflow: auto;
+    }
 
     &__stratos,
     &__artifact {
       display: flex;
       flex-direction: column;
+      a {
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      h4 {
+        font-size: 15px;
+        margin: 8px 0;
+      }
     }
 
-    a {
-      cursor: pointer;
+    &__stratos {
+      h4 {
+        margin-top: 0;
+      }
+    }
+
+    &__selected {
+      font-weight: bold;
     }
   }
   app-list {
