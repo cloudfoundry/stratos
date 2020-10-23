@@ -24,12 +24,12 @@ metadata:
 {{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
 {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.console.replicaCount | default 1 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"
@@ -345,7 +345,7 @@ spec:
       - name: "{{ .Release.Name }}-cert-volume"
         secret:
           {{- if .Values.console.tlsSecretName }}
-          secretName: "{{ .values.console.tlsSecretName }}"
+          secretName: "{{ .Values.console.tlsSecretName }}"
           {{- else }}
           secretName: "{{ .Release.Name }}-cert"
           {{- end }}

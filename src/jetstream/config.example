@@ -72,7 +72,7 @@ INVITE_USER_CLIENT_SECRET=
 # Analysis services API
 #ANALYSIS_SERVICES_API=
 
-# Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
+# Download link when installing the Kubernetes Dashboard in a targeted Kube Endpoint
 # STRATOS_KUBERNETES_DASHBOARD_IMAGE=
 
 # Cache folder for Helm Charts
