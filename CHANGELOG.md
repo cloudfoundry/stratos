@@ -1,5 +1,16 @@
 # Change Log
 
+## 4.2.1
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.2.0...4.2.1)
+
+This release contains a single fix relating to Single Sign On:
+
+**Fixes:**
+- SSO Auth Doesn't Work for Endpoints [\#4716](https://github.com/cloudfoundry/stratos/issues/4716)
+
+
+
 ## 4.2.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.1.0...4.2.0)
