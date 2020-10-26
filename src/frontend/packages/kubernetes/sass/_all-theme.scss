@@ -7,7 +7,6 @@
 @import '../src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.theme';
 @import '../src/kubernetes/list-types/kubernetes-nodes/kubernetes-node-link/kubernetes-node-link.component.theme';
 @import '../src/kubernetes/workloads/chart-values-editor/chart-values-editor.component.theme';
-@import '../src/kubernetes/auth-forms/kubernetes-serviceaccount-auth-form/kubernetes-serviceaccount-auth-form.component.theme';
 @import '../src/helm/tabs/catalog-tab/catalog-tab.component.theme';
 
 @mixin apply-theme-kubernetes($stratos-theme) {
@@ -22,7 +21,6 @@
   @include helm-release-summary-tab-theme($theme, $app-theme);
   @include kube-node-link-theme($theme, $app-theme);
   @include app-chart-values-editor-theme($theme, $app-theme);
-  @include app-kube-token-auth-form-theme($theme, $app-theme);
   @include app-catalog-tab-theme($theme, $app-theme);
 
 }
