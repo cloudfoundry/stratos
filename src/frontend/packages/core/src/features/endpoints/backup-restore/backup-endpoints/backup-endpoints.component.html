@@ -30,10 +30,9 @@
           <mat-label>Password</mat-label>
           <input matInput formControlName="password" name="password" required
             [type]="!showPassword[1] ? 'password' : 'text'">
-          <button mat-icon-button matSuffix (click)="showPassword[1] = !showPassword[1]"
-            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[1]">
-            <mat-icon>{{!showPassword[1] ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
+          <span matSuffix>
+            <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
+          </span>
           <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
             Password is required</mat-error>
           <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
@@ -44,10 +43,9 @@
           <mat-label>Confirm Password</mat-label>
           <input matInput formControlName="password2" name="password2" required
             [type]="!showPassword[2] ? 'password' : 'text'" [pattern]="passwordForm.controls.password2.value">
-          <button mat-icon-button matSuffix (click)="showPassword[2] = !showPassword[2]"
-            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[2]">
-            <mat-icon>{{!showPassword[2] ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
+          <span matSuffix>
+            <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+          </span>
           <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.required">
             Password is required</mat-error>
           <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.pattern">

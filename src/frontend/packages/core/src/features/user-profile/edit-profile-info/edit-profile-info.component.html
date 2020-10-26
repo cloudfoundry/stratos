@@ -27,36 +27,32 @@
         <mat-form-field *ngIf="needsPasswordForEmailChange">
           <input matInput placeholder="Current Password" [type]="!showPassword[1] ? 'password' : 'text'"
             formControlName="currentPassword" [required]="passwordRequired">
-          <button mat-icon-button matSuffix (click)="showPassword[1] = !showPassword[1]"
-            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[1]">
-            <mat-icon>{{!showPassword[1] ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
+          <span matSuffix>
+            <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
+          </span>
         </mat-form-field>
         <div *ngIf="(canChangePassword | async)" class="edit-profile__group">
           <p>Change Password (Leave blank to keep current password)</p>
           <mat-form-field *ngIf="!needsPasswordForEmailChange">
             <input matInput placeholder="Current Password" [type]="!showPassword[2] ? 'password' : 'text'"
               formControlName="currentPassword" [required]="passwordRequired">
-            <button mat-icon-button matSuffix (click)="showPassword[2] = !showPassword[2]"
-              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[2]">
-              <mat-icon>{{!showPassword[2] ? 'visibility_off' : 'visibility'}}</mat-icon>
-            </button>
+            <span matSuffix>
+              <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+            </span>
           </mat-form-field>
           <mat-form-field>
             <input matInput placeholder="New Password" [type]="!showPassword[3] ? 'password' : 'text'"
               formControlName="newPassword">
-            <button mat-icon-button matSuffix (click)="showPassword[3] = !showPassword[3]"
-              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[3]">
-              <mat-icon>{{!showPassword[3] ? 'visibility_off' : 'visibility'}}</mat-icon>
-            </button>
+            <span matSuffix>
+              <app-show-hide-button (changed)="showPassword[3] = $event"></app-show-hide-button>
+            </span>
           </mat-form-field>
           <mat-form-field>
             <input matInput placeholder="Confirm New Password" [type]="!showPassword[4] ? 'password' : 'text'"
               formControlName="confirmPassword">
-            <button mat-icon-button matSuffix (click)="showPassword[4] = !showPassword[4]"
-              [attr.aria-label]="'Hide password'" [attr.aria-pressed]="!showPassword[4]">
-              <mat-icon>{{!showPassword[4] ? 'visibility_off' : 'visibility'}}</mat-icon>
-            </button>
+            <span matSuffix>
+              <app-show-hide-button (changed)="showPassword[4] = $event"></app-show-hide-button>
+            </span>
           </mat-form-field>
         </div>
       </form>
