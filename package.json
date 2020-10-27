@@ -67,7 +67,7 @@
     "@ngrx/router-store": "^10.0.1",
     "@ngrx/store": "^10.0.1",
     "@ngrx/store-devtools": "^10.0.1",
-    "@swimlane/ngx-charts": "^13.0.3",
+    "@swimlane/ngx-charts": "^16.0.0",
     "@swimlane/ngx-graph": "^7.0.1",
     "@types/marked": "^0.7.4",
     "@types/moment-timezone": "^0.5.13",
