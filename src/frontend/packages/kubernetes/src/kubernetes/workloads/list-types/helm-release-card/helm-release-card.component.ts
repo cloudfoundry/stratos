@@ -30,9 +30,9 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
       // yaml url `/pp/v1/chartsvc/v1/assets/${chart.repo}/${chart.chartName}/versions/${chart.version}/values.yaml`;
     }
   }
-  // get row(): HelmRelease {
-  //   return this.pRow;
-  // }
+  get row(): HelmRelease {
+    return this.pRow;
+  }
 
 
   constructor(private datePipe: DatePipe) {

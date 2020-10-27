@@ -48,9 +48,9 @@ export class KubeConfigTableCertComponent extends TableCellCustomComponent<KubeC
       }
     }
   }
-  // get row(): KubeConfigFileCluster {
-  //   return this.pRow;
-  // }
+  get row(): KubeConfigFileCluster {
+    return this.pRow;
+  }
 
   constructor(
     private helper: KubeConfigHelper,

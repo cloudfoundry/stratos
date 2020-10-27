@@ -23,7 +23,9 @@ export interface TableCellServiceBrokerComponentConfig {
   templateUrl: './table-cell-service-broker.component.html',
   styleUrls: ['./table-cell-service-broker.component.scss']
 })
-export class TableCellServiceBrokerComponent extends TableCellCustomComponent<APIResource<IService>, TableCellServiceBrokerComponentConfig> {
+export class TableCellServiceBrokerComponent extends
+  TableCellCustomComponent<APIResource<IService>,
+  TableCellServiceBrokerComponentConfig> {
 
   @Input()
   set row(row: APIResource<IService>) {
@@ -59,9 +61,9 @@ export class TableCellServiceBrokerComponent extends TableCellCustomComponent<AP
       );
     }
   }
-  // get row(): APIResource<IService> {
-  //   return this.pRow;
-  // }
+  get row(): APIResource<IService> {
+    return this.pRow;
+  }
 
   public spaceLink$: Observable<{
     name: string,

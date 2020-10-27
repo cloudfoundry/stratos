@@ -20,7 +20,7 @@ export class TableCellActionsComponent<T> extends TableCellCustomComponent<T> im
   rowState: Observable<RowState>;
 
   @Input('row')
-  // get row() { return this.pRow; }
+  get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (row) {

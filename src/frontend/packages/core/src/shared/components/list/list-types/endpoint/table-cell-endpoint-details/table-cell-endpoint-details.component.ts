@@ -39,7 +39,6 @@ export class TableCellEndpointDetailsComponent extends TableCellCustomComponent<
     super();
   }
 
-  // private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
     this.pRow = row;
@@ -60,10 +59,9 @@ export class TableCellEndpointDetailsComponent extends TableCellCustomComponent<
       this.cell.isTable = true;
     }
   }
-
-  // get row(): EndpointModel {
-  //   return this.pRow;
-  // }
+  get row(): EndpointModel {
+    return this.pRow;
+  }
 
   ngOnDestroy(): void {
     this.endpointListHelper.destroyEndpointDetails({

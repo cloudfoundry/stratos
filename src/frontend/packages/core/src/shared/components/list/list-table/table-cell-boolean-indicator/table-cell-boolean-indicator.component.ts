@@ -17,7 +17,7 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustomComponent<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
   @Input('row')
-  // get row() { return this.pRow; }
+  get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (this.config) {
@@ -26,7 +26,7 @@ export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom
   }
 
   @Input('config')
-  // get config() { return this.pConfig; }
+  get config() { return this.pConfig; }
   set config(config: TableCellBooleanIndicatorComponentConfig<T>) {
     this.pConfig = config;
     if (!config) {

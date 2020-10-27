@@ -16,7 +16,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustomComponent<T,
 
 
   @Input('row')
-  // get row() { return this.pRow; }
+  get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (this.config) {
@@ -25,7 +25,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustomComponent<T,
   }
 
   @Input('config')
-  // get config() { return this.pConfig; }
+  get config() { return this.pConfig; }
   set config(config: TableCellIconComponentConfig<T>) {
     this.pConfig = config;
     if (!config) {

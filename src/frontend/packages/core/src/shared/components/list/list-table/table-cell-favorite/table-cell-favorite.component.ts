@@ -14,7 +14,8 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
   templateUrl: './table-cell-favorite.component.html',
   styleUrls: ['./table-cell-favorite.component.scss']
 })
-export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustomComponent<T, TableCellFavoriteComponentConfig<T, Y>> {
+export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
+  TableCellCustomComponent<T, TableCellFavoriteComponentConfig<T, Y>> {
 
   constructor(private favoritesConfigMapper: FavoritesConfigMapper) {
     super();
