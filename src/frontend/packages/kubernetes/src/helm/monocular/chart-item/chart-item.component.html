@@ -2,7 +2,6 @@
   <img class="list-item-logo chart-item-logo" alt="{{ chart.attributes.name }}'s logo" src="{{ iconUrl }}" />
   <div class="list-item-info chart-item-info">
     <h2 class="chart-item-info__title">
-      <!-- TODO: RC add helm repo / artifact hub -->
       <a [href]="goToDetailUrl()"
         [routerLink]="goToDetailUrl()">{{ chart.attributes.repo.name }}/{{ chart.attributes.name }}</a>
     </h2>
