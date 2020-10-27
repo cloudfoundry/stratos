@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { IMetricMatrixResult, IMetrics } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../../store/src/types/metric.types';
@@ -13,7 +13,7 @@ import { ListAppInstance } from '../app-instance-types';
   templateUrl: './table-cell-cf-cell.component.html',
   styleUrls: ['./table-cell-cf-cell.component.scss']
 })
-export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
+export class TableCellCfCellComponent extends TableCellCustomComponent<ListAppInstance> implements OnDestroy {
 
   cellMetric$: Observable<IMetricCell>;
   cellLink: string;
@@ -21,8 +21,8 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
 
   @Input('config')
   set config(config: {
-    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>
-    cfGuid: string
+    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>;
+    cfGuid: string;
   }) {
     if (!config) {
       return;

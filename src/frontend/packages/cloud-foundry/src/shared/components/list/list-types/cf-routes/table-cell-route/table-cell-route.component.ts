@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { ListCfRoute } from '../cf-routes-data-source-base';
@@ -10,7 +10,7 @@ import { ListCfRoute } from '../cf-routes-data-source-base';
   templateUrl: './table-cell-route.component.html',
   styleUrls: ['./table-cell-route.component.scss']
 })
-export class TableCellRouteComponent extends TableCellCustom<APIResource<ListCfRoute>> implements OnInit {
+export class TableCellRouteComponent extends TableCellCustomComponent<APIResource<ListCfRoute>> implements OnInit {
   routeUrl: string;
   isRouteTCP: boolean;
 

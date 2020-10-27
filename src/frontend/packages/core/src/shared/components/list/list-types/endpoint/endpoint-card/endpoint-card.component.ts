@@ -65,7 +65,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @ViewChild('copyToClipboard') copyToClipboard: CopyToClipboardComponent;
 
-  private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
     if (!row) {
@@ -89,10 +88,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return this.pRow;
   }
 
-  private pDs: BaseEndpointsDataSource;
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
-    this.pDs = ds;
+    this.pDataSource = ds;
 
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
     if (ds && !ds.dsEndpointType && !this.cardMenu) {
@@ -117,9 +115,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
     this.updateCardStatus();
   }
-  get dataSource() {
-    return this.pDs;
-  }
+  // get dataSource() {
+  //   return this.pDataSource;
+  // }
 
   constructor(
     private store: Store<AppState>,

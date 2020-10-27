@@ -20,7 +20,7 @@ import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { createMetaCardMenuItemSeparator } from '../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { IListAction } from '../../list.component.types';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;
@@ -28,7 +28,7 @@ interface EndpointDetailsContainerRefs {
   endpointDetails: ViewContainerRef;
 }
 
-export abstract class EndpointListDetailsComponent extends TableCellCustom<EndpointModel> {
+export abstract class EndpointListDetailsComponent extends TableCellCustomComponent<EndpointModel> {
   isEndpointListDetailsComponent = true;
   isTable = true;
 }

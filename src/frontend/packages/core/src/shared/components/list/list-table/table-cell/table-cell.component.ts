@@ -24,7 +24,7 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
@@ -42,7 +42,7 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 
 
-export const listTableCells: Type<TableCellCustom<any>>[] = [
+export const listTableCells: Type<TableCellCustomComponent<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
@@ -98,7 +98,7 @@ export class TableCellComponent<T> implements OnInit {
 
   @Input() config: any;
 
-  private cellComponent: TableCellCustom<T>;
+  private cellComponent: TableCellCustomComponent<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -134,7 +134,7 @@ export class TableCellComponent<T> implements OnInit {
     if (component) {
 
       // Add to target to ensure ngcontent is correct in new component
-      this.cellComponent = component.instance as TableCellCustom<T>;
+      this.cellComponent = component.instance as TableCellCustomComponent<T>;
       const { rowValue, entityKey } = this.getRowData(this.row);
       this.cellComponent.row = rowValue;
       this.cellComponent.entityKey = entityKey;

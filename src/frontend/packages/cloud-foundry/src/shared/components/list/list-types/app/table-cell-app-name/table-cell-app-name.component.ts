@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { BREADCRUMB_URL_PARAM } from '../../../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
 
 @Component({
@@ -13,7 +13,7 @@ import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../st
   templateUrl: './table-cell-app-name.component.html',
   styleUrls: ['./table-cell-app-name.component.scss']
 })
-export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellAppNameComponent<T> extends TableCellCustomComponent<T> implements OnInit {
   public appLinkUrlParam$: Observable<any>;
 
   constructor(private store: Store<CFAppState>) {

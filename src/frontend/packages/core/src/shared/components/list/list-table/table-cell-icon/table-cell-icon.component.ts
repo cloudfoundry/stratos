@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 
 export interface TableCellIconComponentConfig<T> {
-  getIcon: (row: T) => { icon: string, font?: string, tooltip?: string };
+  getIcon: (row: T) => { icon: string, font?: string, tooltip?: string; };
   size?: string;
 }
 
@@ -12,12 +12,11 @@ export interface TableCellIconComponentConfig<T> {
   templateUrl: './table-cell-icon.component.html',
   styleUrls: ['./table-cell-icon.component.scss']
 })
-export class TableCellIconComponent<T = any> extends TableCellCustom<T> {
+export class TableCellIconComponent<T = any> extends TableCellCustomComponent<T, TableCellIconComponentConfig<T>> {
 
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  // get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (this.config) {
@@ -25,9 +24,8 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T> {
     }
   }
 
-  private pConfig: TableCellIconComponentConfig<T>;
   @Input('config')
-  get config() { return this.pConfig; }
+  // get config() { return this.pConfig; }
   set config(config: TableCellIconComponentConfig<T>) {
     this.pConfig = config;
     if (!config) {
@@ -37,7 +35,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T> {
     this.size = config.size;
   }
 
-  icon: { icon: string, font?: string, tooltip?: string };
+  icon: { icon: string, font?: string, tooltip?: string; };
   size = '24px';
   tooltip = '';
 

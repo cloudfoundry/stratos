@@ -1,7 +1,7 @@
 import { Component, ComponentFactoryResolver, Input } from '@angular/core';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 import { CellConfigFunction } from '../table.types';
 
 export interface TableCellSidePanelConfig<T> {
@@ -15,21 +15,19 @@ export interface TableCellSidePanelConfig<T> {
   templateUrl: './table-cell-side-panel.component.html',
   styleUrls: ['./table-cell-side-panel.component.scss']
 })
-export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T> {
+export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustomComponent<T, object | CellConfigFunction<T>> {
 
   public actualConfig: TableCellSidePanelConfig<A>;
 
-  private pRow: T;
   @Input('row')
-  get row(): T { return this.pRow; }
+  // get row(): T { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     this.updateConfig();
   }
 
-  private pConfig: object | CellConfigFunction<T>;
   @Input('config')
-  get config() { return this.pConfig; }
+  // get config() { return this.pConfig; }
   set config(config: object | CellConfigFunction<T>) {
     this.pConfig = config;
     this.updateConfig();

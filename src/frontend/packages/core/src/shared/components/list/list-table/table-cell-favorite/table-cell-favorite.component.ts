@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 
 import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 import { ITableColumn } from '../table.types';
 
 export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata> {
@@ -14,7 +14,7 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
   templateUrl: './table-cell-favorite.component.html',
   styleUrls: ['./table-cell-favorite.component.scss']
 })
-export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustom<T> {
+export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustomComponent<T, TableCellFavoriteComponentConfig<T, Y>> {
 
   constructor(private favoritesConfigMapper: FavoritesConfigMapper) {
     super();
@@ -23,17 +23,16 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends 
   public favorite: UserFavorite<Y>;
   public canFavorite = false;
 
-  private pC: TableCellFavoriteComponentConfig<T, Y>;
   @Input('config')
-  get config() { return this.pC; }
+  // get config() { return this.pConfig; }
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
-    this.pC = config;
+    this.pConfig = config;
     this.createUserFavorite();
   }
 
-  private pRow: T;
+  // private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  // get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     this.createUserFavorite();

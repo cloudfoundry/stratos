@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
@@ -23,12 +23,8 @@ export interface TableCellServiceBrokerComponentConfig {
   templateUrl: './table-cell-service-broker.component.html',
   styleUrls: ['./table-cell-service-broker.component.scss']
 })
-export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource<IService>> {
+export class TableCellServiceBrokerComponent extends TableCellCustomComponent<APIResource<IService>, TableCellServiceBrokerComponentConfig> {
 
-  @Input()
-  config: TableCellServiceBrokerComponentConfig;
-
-  pRow: APIResource<IService>;
   @Input()
   set row(row: APIResource<IService>) {
     this.pRow = row;
@@ -63,18 +59,14 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
       );
     }
   }
-  get row(): APIResource<IService> {
-    return this.pRow;
-  }
+  // get row(): APIResource<IService> {
+  //   return this.pRow;
+  // }
 
   public spaceLink$: Observable<{
     name: string,
     link: string[],
   }>;
   public broker$: Observable<APIResource<IServiceBroker>>;
-
-  constructor() {
-    super();
-  }
 
 }

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { of as observableOf } from 'rxjs';
 
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 
@@ -16,7 +16,7 @@ interface Tag {
   styleUrls: ['./table-cell-service-instance-tags.component.scss']
 })
 export class TableCellServiceInstanceTagsComponent
-  extends TableCellCustom<APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>> {
+  extends TableCellCustomComponent<APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>> {
 
   tags: AppChip<Tag>[] = [];
   @Input('row')

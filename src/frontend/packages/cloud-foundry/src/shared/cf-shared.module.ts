@@ -3,7 +3,7 @@ import { ApplicationModule, NgModule, Type } from '@angular/core';
 import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
 
 import { CoreModule } from '../../../core/src/core/core.module';
-import { CardCell, TableCellCustom } from '../../../core/src/shared/components/list/list.types';
+import { CardCell, TableCellCustomComponent } from '../../../core/src/shared/components/list/list.types';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import {
   AddServiceInstanceBaseStepComponent,
@@ -210,7 +210,7 @@ import { CfUserPermissionDirective } from './directives/cf-user-permission/cf-us
 import { ApplicationStateService } from './services/application-state.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
 
-const cfListTableCells: Type<TableCellCustom<any>>[] = [
+const cfListTableCells: Type<TableCellCustomComponent<any>>[] = [
   TableCellServiceInstanceAppsAttachedComponent,
   TableCellServiceComponent,
   TableCellServiceLastOpComponent,

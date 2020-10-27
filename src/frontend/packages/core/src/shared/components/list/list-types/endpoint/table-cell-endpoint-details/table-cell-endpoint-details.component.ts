@@ -11,7 +11,7 @@ import {
 
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { TableCellCustom } from '../../../list.types';
+import { TableCellCustomComponent } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 
 @Component({
@@ -19,7 +19,7 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
   templateUrl: './table-cell-endpoint-details.component.html',
   styleUrls: ['./table-cell-endpoint-details.component.scss']
 })
-export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
+export class TableCellEndpointDetailsComponent extends TableCellCustomComponent<EndpointModel> implements OnDestroy {
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
   @Input() component: Type<EndpointListDetailsComponent>;
@@ -39,7 +39,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     super();
   }
 
-  private pRow: EndpointModel;
+  // private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
     this.pRow = row;
@@ -61,9 +61,9 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     }
   }
 
-  get row(): EndpointModel {
-    return this.pRow;
-  }
+  // get row(): EndpointModel {
+  //   return this.pRow;
+  // }
 
   ngOnDestroy(): void {
     this.endpointListHelper.destroyEndpointDetails({

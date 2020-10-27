@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 
 
 @Component({
@@ -9,7 +9,7 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
   styleUrls: ['./kubernetes-node-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
+export class KubernetesNodeCapacityComponent<T> extends TableCellCustomComponent<T> {
 
   constructor() {
     super();

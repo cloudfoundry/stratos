@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { TableCellCustom } from '../../../list.types';
+import { TableCellCustomComponent } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 @Component({
@@ -13,7 +13,7 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
   templateUrl: './table-cell-endpoint-address.component.html',
   styleUrls: ['./table-cell-endpoint-address.component.scss']
 })
-export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
+export class TableCellEndpointAddressComponent extends TableCellCustomComponent<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;
 
   @Input('row')

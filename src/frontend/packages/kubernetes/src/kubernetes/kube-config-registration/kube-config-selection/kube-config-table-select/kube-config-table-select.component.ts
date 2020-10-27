@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -9,7 +9,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
   templateUrl: './kube-config-table-select.component.html',
   styleUrls: ['./kube-config-table-select.component.scss']
 })
-export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFileCluster> {
+export class KubeConfigTableSelectComponent extends TableCellCustomComponent<KubeConfigFileCluster> {
 
   constructor(private helper: KubeConfigHelper) {
     super();

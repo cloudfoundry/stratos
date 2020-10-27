@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
 
 @Component({
@@ -9,7 +9,7 @@ import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
   templateUrl: './kubernetes-pod-tags.component.html',
   styleUrls: ['./kubernetes-pod-tags.component.scss']
 })
-export class KubernetesPodTagsComponent<T> extends TableCellCustom<KubeAPIResource> implements OnInit {
+export class KubernetesPodTagsComponent<T> extends TableCellCustomComponent<KubeAPIResource> implements OnInit {
 
   tags: AppChip<PodLabel>[] = [];
 

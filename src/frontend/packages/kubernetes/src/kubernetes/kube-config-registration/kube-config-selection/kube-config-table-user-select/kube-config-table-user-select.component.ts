@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -9,7 +9,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
   templateUrl: './kube-config-table-user-select.component.html',
   styleUrls: ['./kube-config-table-user-select.component.scss']
 })
-export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
+export class KubeConfigTableUserSelectComponent extends TableCellCustomComponent<KubeConfigFileCluster> implements OnInit {
 
   hasUser = false;
   selected: string;

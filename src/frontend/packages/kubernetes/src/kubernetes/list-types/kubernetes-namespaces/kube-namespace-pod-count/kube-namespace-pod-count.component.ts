@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesNamespace } from '../../../store/kube.types';
 
@@ -11,7 +11,7 @@ import { KubernetesNamespace } from '../../../store/kube.types';
   templateUrl: './kube-namespace-pod-count.component.html',
   styleUrls: ['./kube-namespace-pod-count.component.scss']
 })
-export class KubeNamespacePodCountComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
+export class KubeNamespacePodCountComponent extends TableCellCustomComponent<KubernetesNamespace> implements OnInit {
   podCount$: Observable<number>;
 
   constructor(

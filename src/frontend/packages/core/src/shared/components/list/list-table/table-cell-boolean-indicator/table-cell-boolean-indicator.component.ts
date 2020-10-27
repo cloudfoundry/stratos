@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 
 export interface TableCellBooleanIndicatorComponentConfig<T> {
   isEnabled: (row: T) => boolean;
@@ -14,11 +14,10 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
   templateUrl: './table-cell-boolean-indicator.component.html',
   styleUrls: ['./table-cell-boolean-indicator.component.scss']
 })
-export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T> {
+export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustomComponent<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  // get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (this.config) {
@@ -26,9 +25,8 @@ export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom
     }
   }
 
-  private pConfig: TableCellBooleanIndicatorComponentConfig<T>;
   @Input('config')
-  get config() { return this.pConfig; }
+  // get config() { return this.pConfig; }
   set config(config: TableCellBooleanIndicatorComponentConfig<T>) {
     this.pConfig = config;
     if (!config) {

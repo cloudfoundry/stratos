@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../cf-api-svc.types';
 
@@ -9,4 +9,4 @@ import { IServicePlan } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-plan-public.component.html',
   styleUrls: ['./table-cell-service-plan-public.component.scss'],
 })
-export class TableCellAServicePlanPublicComponent extends TableCellCustom<APIResource<IServicePlan>> { }
+export class TableCellAServicePlanPublicComponent extends TableCellCustomComponent<APIResource<IServicePlan>> { }

@@ -7,7 +7,7 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { TableCellCustom } from '../../../list.types';
+import { TableCellCustomComponent } from '../../../list.types';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -18,7 +18,7 @@ export interface RowWithEndpointId {
   templateUrl: './table-cell-endpoint-name.component.html',
   styleUrls: ['./table-cell-endpoint-name.component.scss']
 })
-export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
+export class TableCellEndpointNameComponent extends TableCellCustomComponent<EndpointModel | RowWithEndpointId>  {
 
   public endpoint$: Observable<any>;
 

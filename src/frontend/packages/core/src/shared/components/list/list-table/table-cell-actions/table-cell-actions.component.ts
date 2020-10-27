@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 
 
 @Component({
@@ -14,14 +14,13 @@ import { TableCellCustom } from '../../list.types';
   templateUrl: './table-cell-actions.component.html',
   styleUrls: ['./table-cell-actions.component.scss']
 })
-export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellActionsComponent<T> extends TableCellCustomComponent<T> implements OnInit {
 
   @Input()
   rowState: Observable<RowState>;
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  // get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     if (row) {
@@ -34,8 +33,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   actions: IListAction<T>[];
   obs: {
-    visible: { [action: string]: Observable<boolean> },
-    enabled: { [action: string]: Observable<boolean> }
+    visible: { [action: string]: Observable<boolean>; },
+    enabled: { [action: string]: Observable<boolean>; };
   };
 
   private subjects: BehaviorSubject<T>[] = [];

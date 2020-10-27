@@ -8,7 +8,7 @@ import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/typ
 import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../../core/src/shared/components/list/list.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IUserRole } from '../../../../../features/cf/cf.helpers';
@@ -28,7 +28,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
 }
 
 @Directive()
-export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
+export abstract class CfPermissionCellDirective<T> extends TableCellCustomComponent<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
   @Input('row')

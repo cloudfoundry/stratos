@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel, SystemSharedUserGuid } from '../../../../../../store/src/types/endpoint.types';
-import { TableCellCustom } from '../../../../shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-restore.types';
 
@@ -11,7 +11,7 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
   templateUrl: './backup-connection-cell.component.html',
   styleUrls: ['./backup-connection-cell.component.scss']
 })
-export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {
+export class BackupConnectionCellComponent extends TableCellCustomComponent<EndpointModel> implements OnInit {
 
   connectable = false;
   backupType = BackupEndpointTypes;

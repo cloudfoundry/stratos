@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -19,14 +19,13 @@ type CertResponse = {
   templateUrl: './kube-config-table-cert.component.html',
   styleUrls: ['./kube-config-table-cert.component.scss']
 })
-export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {
+export class KubeConfigTableCertComponent extends TableCellCustomComponent<KubeConfigFileCluster> {
 
   initialValue = new BehaviorSubject<{
     checked: boolean;
   }>(null);
   initialValue$ = this.initialValue.asObservable();
 
-  private pRow: KubeConfigFileCluster;
   @Input()
   set row(row: KubeConfigFileCluster) {
     if (!this.pRow) {
@@ -49,9 +48,9 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
       }
     }
   }
-  get row(): KubeConfigFileCluster {
-    return this.pRow;
-  }
+  // get row(): KubeConfigFileCluster {
+  //   return this.pRow;
+  // }
 
   constructor(
     private helper: KubeConfigHelper,

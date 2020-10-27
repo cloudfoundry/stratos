@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AppChip } from '../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../core/src/shared/components/list/list.types';
 import { KubeAPIResource } from '../../store/kube.types';
 
 
@@ -10,7 +10,7 @@ import { KubeAPIResource } from '../../store/kube.types';
   templateUrl: './kubernetes-labels-cell.component.html',
   styleUrls: ['./kubernetes-labels-cell.component.scss']
 })
-export class KubernetesLabelsCellComponent extends TableCellCustom<KubeAPIResource> implements OnInit {
+export class KubernetesLabelsCellComponent extends TableCellCustomComponent<KubeAPIResource> implements OnInit {
 
   chipsConfig: AppChip<KubeAPIResource>[];
 

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesPodExpandedStatusTypes } from '../../../services/kubernetes-expanded-state';
 import { KubernetesPod } from '../../../store/kube.types';
 
@@ -9,13 +9,12 @@ import { KubernetesPod } from '../../../store/kube.types';
   templateUrl: './kubernetes-pod-status.component.html',
   styleUrls: ['./kubernetes-pod-status.component.scss']
 })
-export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod> {
+export class KubernetesPodStatusComponent extends TableCellCustomComponent<KubernetesPod> {
 
   public style = 'border-success';
 
-  private pRow: KubernetesPod;
   @Input('row')
-  get row(): KubernetesPod { return this.pRow; }
+  // get row(): KubernetesPod { return this.pRow; }
   set row(row: KubernetesPod) {
     this.pRow = row;
     if (row) {

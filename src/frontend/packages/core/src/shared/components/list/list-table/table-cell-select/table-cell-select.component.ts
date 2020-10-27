@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
-import { TableCellCustom } from '../../list.types';
+import { TableCellCustomComponent } from '../../list.types';
 
 
 @Component({
@@ -11,7 +11,7 @@ import { TableCellCustom } from '../../list.types';
   templateUrl: './table-cell-select.component.html',
   styleUrls: ['./table-cell-select.component.scss']
 })
-export class TableCellSelectComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellSelectComponent<T> extends TableCellCustomComponent<T> implements OnInit {
 
   disable$: Observable<boolean>;
   tooltip$: Observable<string>;
