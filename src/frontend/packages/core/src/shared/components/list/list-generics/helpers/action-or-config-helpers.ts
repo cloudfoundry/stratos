@@ -1,8 +1,10 @@
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogEntity } from 'frontend/packages/store/src/entity-catalog/entity-catalog-entity';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog.service';
 import { EntityCatalogEntityConfig } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 
+import {
+  StratosBaseCatalogEntity,
+} from '../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { entityCatalog } from '../../../../../../../store/src/public-api';
 import { isPaginatedAction, PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
@@ -31,10 +33,12 @@ function actionFromConfig(config: ListEntityConfig): PaginatedAction {
 
 /* tslint:disable:no-use-before-declare  */
 export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A> {
-  constructor(actionOrConfig: ListActionOrConfig,
+  constructor(
+    actionOrConfig: ListActionOrConfig,
     listConfig: IListConfig<T>,
     store: Store<any>,
-    dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>, ) {
+    dataSourceConfig?: Partial<IListDataSourceConfig<A, T>>
+  ) {
     const { action, catalogEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
     super({
       store,
@@ -53,7 +57,7 @@ export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A>
 export class ListActionOrConfigHelpers {
   static createListAction(actionOrConfig: ListActionOrConfig): {
     action: PaginatedAction,
-    catalogEntity: StratosBaseCatalogEntity
+    catalogEntity: StratosBaseCatalogEntity;
   } {
     const action = isPaginatedAction(actionOrConfig) || actionFromConfig(actionOrConfig as ListEntityConfig);
     const catalogEntity = entityCatalog.getEntity(action);

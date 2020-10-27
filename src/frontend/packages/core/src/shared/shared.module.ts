@@ -70,7 +70,6 @@ import {
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
-import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -216,7 +215,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     JsonViewerComponent,
-    SimpleListComponent,
     ListHostDirective,
     ListViewComponent,
     EntityListViewComponent,
@@ -312,7 +310,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     ListViewComponent,
     EntityListViewComponent,
     JsonViewerComponent,
-    SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,

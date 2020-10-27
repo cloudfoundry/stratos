@@ -1,6 +1,8 @@
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogEntity } from 'frontend/packages/store/src/entity-catalog/entity-catalog-entity';
 
+import {
+  StratosBaseCatalogEntity,
+} from '../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityPipelineEntity } from '../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';

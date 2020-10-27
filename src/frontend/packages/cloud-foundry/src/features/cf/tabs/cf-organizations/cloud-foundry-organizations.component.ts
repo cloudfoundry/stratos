@@ -4,12 +4,9 @@ import { Observable } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
-  IListDataSourceConfig,
-} from '../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-config';
-import {
   ActionListConfigProvider,
 } from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
-import { IListConfig, ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../cf-api.types';
@@ -38,7 +35,10 @@ export class CloudFoundryOrganizationsComponent {
   }
 
   private createProvider(cfGuid: string): ActionListConfigProvider<APIResource<IOrganization>> {
-    const ls: Partial<IListConfig<APIResource<IOrganization<unknown>>>> = {
+    const action = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
+    const provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+
+    provider.updateListConfig({
       cardComponent: CfOrgCardComponent,
       viewType: ListViewTypes.CARD_ONLY,
       defaultView: 'cards' as ListView,
@@ -64,15 +64,11 @@ export class CloudFoundryOrganizationsComponent {
         filter: 'Search by name',
         noEntries: 'There are no organizations'
       },
-    };
-    const dsc: Partial<IListDataSourceConfig<APIResource<IOrganization>, APIResource<IOrganization>>> = {
-      transformEntities: [{ type: 'filter', field: 'entity.name' }] // Note - this will go away once fixed in default case
-    };
+    });
 
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
-    const provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
-    provider.updateListConfig(ls);
-    provider.updateDataSourceConfig(dsc);
+    provider.updateDataSourceConfig({
+      transformEntities: [{ type: 'filter', field: 'entity.name' }] // Note - this will go away once fixed in default case
+    });
 
     return provider;
   }

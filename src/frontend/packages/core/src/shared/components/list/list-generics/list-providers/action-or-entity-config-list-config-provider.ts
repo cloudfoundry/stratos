@@ -7,6 +7,8 @@ import { CatalogEntityDrivenListConfig } from '../helpers/entity-catalogue-list-
 import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from '../list-config-provider.types';
 
 
+// TODO: RC add doc
+
 export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigProvider<T, A> {
   private listConfig: IListConfig<T>;
   private overrideListConfig: Partial<IListConfig<T>>;
