@@ -1,4 +1,4 @@
-import { OnInit } from '@angular/core';
+import { OnInit, Directive } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { StepOnNextFunction } from '../../../../core/src/shared/components/stepp
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
+@Directive()
 export abstract class EditAutoscalerPolicy implements OnInit {
   public currentPolicy: AppAutoscalerPolicyLocal;
   public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
