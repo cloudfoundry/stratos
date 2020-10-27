@@ -88,6 +88,7 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |console.mariadb.host|Hostname of the database when using an external db||
 |console.mariadb.port|Port of the database when using an external db|3306|
 |console.mariadb.tls|TLS mode when connecting to database (true, false, skip-verify, preferred)|false|
+|console.artifactHubDisabled|Disable the Helm Artifact Hub Endpoint|false|
 |uaa.endpoint|URL of the UAA endpoint to authenticate with ||
 |uaa.consoleClient|Client to use when authenticating with the UAA|cf|
 |uaa.consoleClientSecret|Client secret to use when authenticating with the UAA||
