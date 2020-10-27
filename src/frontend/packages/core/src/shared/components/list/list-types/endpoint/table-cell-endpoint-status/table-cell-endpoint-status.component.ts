@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
@@ -13,7 +13,13 @@ export class TableCellEndpointStatusComponent extends TableCellCustomComponent<E
 
   public connectable = true;
 
-  // @Input() row: EndpointModel;
+  @Input()
+  get row(): EndpointModel {
+    return this.pRow;
+  }
+  set row(row: EndpointModel) {
+    this.pRow = row;
+  }
   // @Input() config: { showLabel: boolean } = {
   //   showLabel: true
   // };

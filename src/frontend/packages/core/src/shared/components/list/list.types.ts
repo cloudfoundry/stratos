@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
@@ -6,7 +6,6 @@ import { IListDataSource, RowState } from './data-sources-controllers/list-data-
 // @Component({})
 export abstract class TableCellCustomComponent<T, C = any> {
   protected pDataSource: IListDataSource<T>;
-  @Input()
   set dataSource(dataSource: IListDataSource<T>) {
     this.pDataSource = dataSource;
   }
@@ -15,7 +14,6 @@ export abstract class TableCellCustomComponent<T, C = any> {
   }
 
   protected pRow: T;
-  @Input()
   get row(): T {
     return this.pRow;
   }
@@ -24,7 +22,6 @@ export abstract class TableCellCustomComponent<T, C = any> {
   }
 
   protected pEntityKey: string;
-  @Input()
   set entityKey(entityKey: string) {
     this.pEntityKey = entityKey;
   }
@@ -33,7 +30,6 @@ export abstract class TableCellCustomComponent<T, C = any> {
   }
 
   protected pConfig: C;
-  @Input()
   set config(config: C) {
     this.pConfig = config;
   }

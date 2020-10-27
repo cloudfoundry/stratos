@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustomComponent } from '../../list.types';
 
 @Component({
@@ -9,11 +10,22 @@ import { TableCellCustomComponent } from '../../list.types';
 })
 export class TableCellEditComponent<T> extends TableCellCustomComponent<T> {
 
-  // @Input()
-  // row: T;
+  @Input()
+  get row(): T {
+    return this.pRow;
+  }
+  set row(row: T) {
+    this.pRow = row;
+  }
 
-  // @Input()
-  // dataSource: IListDataSource<T>;
+  @Input()
+  set dataSource(dataSource: IListDataSource<T>) {
+    this.pDataSource = dataSource;
+  }
+  get dataSource(): IListDataSource<T> {
+    return this.pDataSource;
+  }
+
 
   @Input()
   subtle: boolean;
