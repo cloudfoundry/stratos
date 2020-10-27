@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';

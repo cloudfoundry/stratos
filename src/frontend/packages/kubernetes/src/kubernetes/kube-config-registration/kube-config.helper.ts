@@ -50,7 +50,7 @@ export class KubeConfigHelper {
     const clusters: { [name: string]: KubeConfigFileCluster, } = {};
 
     try {
-      doc = yaml.safeLoad(config);
+      doc = yaml.safeLoad(config) as KubeConfigFile; // TODO: RC
     } catch (e) {
       return of(`${e}`);
     }

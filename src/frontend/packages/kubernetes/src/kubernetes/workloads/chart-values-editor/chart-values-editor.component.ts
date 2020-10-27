@@ -158,7 +158,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private init() {
     // Observabled for loading schema and values for the Chart
     const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError(e => of(null)));
-    const values$: Observable<string | unknown> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
+    const values$: Observable<string> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
       catchError(e => of(null))
     );
 
@@ -168,7 +168,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       tap(([schema, values, loaded]) => {
         this.schema = schema;
         if (values !== null) {
-          this.chartValuesYaml = values as string;
+          this.chartValuesYaml = values;
           this.chartValues = yaml.safeLoad(values, { json: true });
           // Set the form to the chart values initially, so if the user does nothing, they get the defaults
           this.initialFormData = this.chartValues;
