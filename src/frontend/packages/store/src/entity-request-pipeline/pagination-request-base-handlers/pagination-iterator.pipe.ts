@@ -1,16 +1,13 @@
 import { HttpRequest } from '@angular/common/http';
+import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, range } from 'rxjs';
-import { map, mergeMap, reduce } from 'rxjs/operators';
+import { first, map, mergeMap, reduce, switchMap } from 'rxjs/operators';
 
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
 import { UpdatePaginationMaxedState } from '../../actions/pagination.actions';
-import { PaginatedAction } from '../../types/pagination.types';
-import {
-  ActionDispatcher,
-  JetstreamResponse,
-  PagedJetstreamResponse,
-  SuccessfulApiResponseDataMapper,
-} from '../entity-request-pipeline.types';
+import { AppState } from '../../app-state';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { PaginatedAction, PaginationMaxedState } from '../../types/pagination.types';
+import { ActionDispatcher, JetstreamResponse, PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PipelineHttpClient } from '../pipline-http-client.service';
 
 
@@ -20,16 +17,27 @@ export interface PaginationPageIteratorConfig<R = any, E = any> {
   getTotalPages: (initialResponses: JetstreamResponse<R>) => number;
   getTotalEntities: (initialResponses: JetstreamResponse<R>) => number;
   getEntitiesFromResponse: (responses: R) => E[];
+  /**
+   * After fetching the first page check that the total number of entities does not exceed this number.
+   * If so do not fetch other pages and enter 'maxed' error mode
+   * Only applicable to 'local' collections (everything is fetch up front and paginated locally)
+   */
+  maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => Observable<number>;
+  /**
+   * If the collection has entered 'maxed' error mode, can the user ignore and fetch all results regardless (see `maxedStateStartAt`)?
+   */
+  canIgnoreMaxedState: (store: Store<AppState>) => Observable<boolean>;
 }
 
 export class PaginationPageIterator<R = any, E = any> {
   constructor(
+    private store: Store<AppState>,
     private httpClient: PipelineHttpClient,
     public baseHttpRequest: HttpRequest<JetstreamResponse<R>>,
     public action: PaginatedAction,
     public actionDispatcher: ActionDispatcher,
     public config: PaginationPageIteratorConfig<R, E>,
-    public postSuccessDataMapper?: SuccessfulApiResponseDataMapper<E>
+    private paginationMaxedState?: PaginationMaxedState
   ) { }
 
   private makeRequest(httpRequest: HttpRequest<JetstreamResponse<R>>) {
@@ -48,7 +56,7 @@ export class PaginationPageIterator<R = any, E = any> {
       return of([]);
     }
     return range(2, count + 1).pipe(
-      mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 5),
+      mergeMap(currentPage => this.makeRequest(this.addPageToRequest(currentPage)), 10),
       reduce((acc, res: JetstreamResponse<R>) => {
         acc.push(res);
         return acc;
@@ -84,20 +92,30 @@ export class PaginationPageIterator<R = any, E = any> {
     }, {} as PagedJetstreamResponse);
   }
 
-  private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number) {
-    if (totalResults > 0) {
-      const maxCount = action.flattenPaginationMax;
-      // We're maxed so only respond with the first page of results.
-      if (maxCount < totalResults) {
-        const { entityType, endpointType, paginationKey, __forcedPageEntityConfig__ } = action;
-        const forcedEntityKey = entityCatalog.getEntityKey(__forcedPageEntityConfig__);
-        this.actionDispatcher(
-          new UpdatePaginationMaxedState(maxCount, totalResults, entityType, endpointType, paginationKey, forcedEntityKey)
-        );
-        of([initialResponse]);
-      }
+  private handleRequests(initialResponse: JetstreamResponse<R>, action: PaginatedAction, totalPages: number, totalResults: number):
+    Observable<[JetstreamResponse<R>, JetstreamResponse<R>[]]> {
+
+    const createAllResults = () => combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
+    if (totalResults === 0 || (this.paginationMaxedState && this.paginationMaxedState.ignoreMaxed)) {
+      return createAllResults();
     }
-    return combineLatest(of(initialResponse), this.getAllOtherPageRequests(totalPages));
+
+    return this.config.maxedStateStartAt(this.store, action).pipe(
+      switchMap(maxEntities => {
+        if (maxEntities && maxEntities <= totalResults) {
+          // We've entered 'maxed' mode. Only respond with the first page of results.
+          const { entityType, endpointType, paginationKey } = action;
+          const entityKey = entityCatalog.getEntityKey(action);
+          // The entity type should always match the pagination key. If in a multi-action list this means that of the action rather than
+          // the forced entity
+          this.actionDispatcher(
+            new UpdatePaginationMaxedState(maxEntities, totalResults, entityType, endpointType, paginationKey, entityKey)
+          );
+          return combineLatest([of(initialResponse), of([])]);
+        }
+        return createAllResults();
+      })
+    );
   }
 
   private getValidNumber(num: number) {
@@ -107,7 +125,7 @@ export class PaginationPageIterator<R = any, E = any> {
   public mergeAllPagesEntities(): Observable<PagedJetstreamResponse> {
     const initialRequest = this.addPageToRequest(1);
     return this.makeRequest(initialRequest).pipe(
-      mergeMap(initialResponse => {
+      switchMap(initialResponse => {
         const totalPages = this.config.getTotalPages(initialResponse);
         const totalResults = this.config.getTotalEntities(initialResponse);
         return this.handleRequests(
@@ -116,7 +134,8 @@ export class PaginationPageIterator<R = any, E = any> {
           this.getValidNumber(totalPages),
           this.getValidNumber(totalResults)
         ).pipe(
-          map(([initialRequestResponse]) => [initialRequestResponse]),
+          first(),
+          map(([initialRequestResponse, othersResponse]) => [initialRequestResponse, ...othersResponse]),
           map(responsePages => this.reducePages(responsePages)),
         );
       })

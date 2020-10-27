@@ -37,11 +37,11 @@ import {
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { IServicePlan } from '../../../../../../core/src/core/cf-api-svc.types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { StratosStatus } from '../../../../../../core/src/shared/shared.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { IServicePlan } from '../../../../cf-api-svc.types';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
@@ -119,7 +119,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         tap(selectedServicePlan => {
           getServicePlanAccessibilityCardStatus(
             selectedServicePlan,
-            this.cSIHelperService.getServicePlanVisibilities(),
+            this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
               first()
             ).subscribe(cardStatus => this.selectedPlanAccessibility$.next(cardStatus));
@@ -143,7 +143,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         if (this.modeService.isEditServiceInstanceMode()) {
           this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid);
         } else {
-          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].entity.guid);
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].metadata.guid);
         }
         this.stepperForm.updateValueAndValidity();
         this.validate.next(this.stepperForm.valid);

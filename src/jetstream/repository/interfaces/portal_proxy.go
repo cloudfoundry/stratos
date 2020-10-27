@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type PortalProxy interface {
@@ -28,6 +28,7 @@ type PortalProxy interface {
 	GetSessionInt64Value(c echo.Context, key string) (int64, error)
 	GetSessionStringValue(c echo.Context, key string) (string, error)
 	SaveSession(c echo.Context, session *sessions.Session) error
+	GetSessionDataStore() SessionDataStore
 
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
@@ -43,7 +44,7 @@ type PortalProxy interface {
 	Env() *env.VarSet
 	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 	ListEndpoints() ([]*CNSIRecord, error)
-	UpdateEndointMetadata(guid string, metadata string) error
+	UpdateEndpointMetadata(guid string, metadata string) error
 
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
@@ -59,10 +60,15 @@ type PortalProxy interface {
 
 	// Database Connection
 	GetDatabaseConnection() *sql.DB
+
 	AddAuthProvider(name string, provider AuthProvider)
 	GetAuthProvider(name string) AuthProvider
+	HasAuthProvider(name string) bool
 	DoAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request, authHandler AuthHandlerFunc) (*http.Response, error)
 	OAuthHandlerFunc(cnsiRequest *CNSIRequest, req *http.Request, refreshOAuthTokenFunc RefreshOAuthTokenFunc) AuthHandlerFunc
+	DoOAuthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+	DoOidcFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error)
+	GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *TokenRecord) (*ConnectedUser, bool)
 
 	// Tokens - lower-level access
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
@@ -72,10 +78,4 @@ type PortalProxy interface {
 
 	// Plugins
 	GetPlugin(name string) interface{}
-
-	// SetCanPerformMigrations updates the state that records if we can perform Database migrations
-	SetCanPerformMigrations(bool)
-
-	// CanPerformMigrations returns if we can perform Database migrations
-	CanPerformMigrations() bool
 }

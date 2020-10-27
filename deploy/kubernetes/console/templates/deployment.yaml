@@ -4,18 +4,42 @@ apiVersion: apps/v1
 {{- else }}
 apiVersion: apps/v1beta1
 {{- end }}
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: stratos
+{{- if .Values.console.deploymentAnnotations }}
+  annotations:
+    checksum/config: {{ default (randAlphaNum 5 | quote) .Values.console.checksum }}
+{{ toYaml .Values.console.deploymentAnnotations | indent 4 }}
+{{- end }}
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app: "{{ .Release.Name }}"
+    component: stratos
+{{- if .Values.console.deploymentExtraLabels }}
+{{ toYaml .Values.console.deploymentExtraLabels | indent 4 }}
+{{- end }}
 spec:
-  serviceName: stratos
-  replicas: 1
+  replicas: {{ .Values.console.replicaCount | default 1 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: "stratos"
       app.kubernetes.io/component: "stratos"
   template:
     metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
       labels:
         app.kubernetes.io/name: "stratos"
         app.kubernetes.io/instance: "{{ .Release.Name }}"
@@ -24,21 +48,20 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         app: "{{ .Release.Name }}"
         component: stratos
+{{- if .Values.console.podExtraLabels}}
+{{ toYaml .Values.console.podExtraLabels | indent 8 }}
+{{- end }}
     spec:
+{{- if .Values.console }}
+{{- if .Values.console.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.console.nodeSelector | trim | indent 8 }}
+{{- end }}
+{{- end }}
       containers:
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: ui
-        env:
-        - name: ENCRYPTION_KEY_VOLUME
-          value: "{{ .Release.Name }}-encryption-key-volume"
-        volumeMounts:
-        - mountPath: /etc/secrets/
-          name: "{{ .Release.Name }}-secret"
-          readOnly: true
-        - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
-          name: "{{ .Release.Name }}-encryption-key-volume"
-          readOnly: true
         ports:
         - containerPort: 80
           name: http
@@ -46,77 +69,54 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
-        imagePullPolicy: {{.Values.imagePullPolicy}}
-        name: "postflight"
         env:
-        - name: DB_HOST
-          value: "{{ .Release.Name }}-mariadb"
-        - name: DB_PORT
-          value: "3306"
-        - name: DB_ADMIN_USER
-          value:  "{{ .Values.mariadb.adminUser }}"
-        - name: DB_ADMIN_PASSWORD
-          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
-        - name: DATABASE_PROVIDER
-          value: "{{ .Values.dbProvider }}"
-        - name: DB_PASSWORD
-          value: "{{ .Values.mariadb.mariadbPassword }}"
-        - name: DB_USER
-          value: "{{ .Values.mariadb.mariadbUser }}"
-        - name: DB_DATABASE_NAME
-          value: "{{ .Values.mariadb.mariadbDatabase }}"
-        - name: DO_NOT_QUIT
-          value: "true"
-        - name: UPGRADE_VOLUME
-          value: "{{ .Release.Name }}-upgrade-volume"
-        - name: UPGRADE_LOCK_FILENAME
-          value: upgrade.lock
-        - name: HTTP_PROXY
-        {{- if .Values.httpProxy }}
-          value: {{.Values.httpProxy}}
-        {{- end }}
-        - name: HTTPS_PROXY
-        {{- if .Values.httpsProxy }}
-          value: {{.Values.httpsProxy}}
-        {{- end }}
-        - name: NO_PROXY
-        {{- if .Values.noProxy }}
-          value: {{.Values.noProxy}}
-        {{- end }}
-        - name: FTP_PROXY
-        {{- if .Values.ftpProxy }}
-          value: {{.Values.ftpProxy}}
-        {{- end }}
-        - name: SOCKS_PROXY
-        {{- if .Values.socksProxy }}  
-          value: {{.Values.socksProxy}}
-        {{- end }}
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
+        - name: CONSOLE_CERT_PATH
+          value: "/{{ .Release.Name }}-cert-volume"
+        - name: SSL_PROTOCOLS
+          value: "{{ .Values.console.sslProtocols }}"
+        - name: SSL_CIPHERS
+          value: "{{ .Values.console.sslCiphers }}"
         volumeMounts:
-          - mountPath: "/{{ .Release.Name }}-upgrade-volume"
-            name: "{{ .Release.Name }}-upgrade-volume"
-          - mountPath: /etc/secrets/
-            name: "{{ .Release.Name }}-secret"
+        - mountPath: "/{{ .Release.Name }}-cert-volume"
+          name: "{{ .Release.Name }}-cert-volume"
+          readOnly: true
       - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         name: proxy
         env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
+        - name: STRATOS_HELM_RELEASE
+          value: "{{ .Release.Name }}"
         - name: DB_USER
-          value: "{{ .Values.mariadb.mariadbUser }}"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: user
         - name: DB_PASSWORD
-          value: "{{ .Values.mariadb.mariadbPassword }}"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: password
         - name: DB_DATABASE_NAME
-          value: "{{ .Values.mariadb.mariadbDatabase }}"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: database
         - name: DB_HOST
+          {{- if not .Values.mariadb.external }}
           value: "{{ .Release.Name }}-mariadb"
+          {{- else }}
+          value: {{ .Values.mariadb.host | quote }}
+          {{- end }}
         - name: DB_PORT
-          value: "3306"
+          value: {{ default "3306" .Values.mariadb.port | quote }}
         - name: DATABASE_PROVIDER
-          value: "{{ .Values.dbProvider }}"
-        - name: DB_ADMIN_USER
-          value:  "{{ .Values.mariadb.adminUser }}"
-        - name: DB_ADMIN_PASSWORD
-          value:  "{{ .Values.mariadb.mariadbRootPassword }}"
+          value: {{ default "mysql" .Values.mariadb.type | quote }}
+        - name: DB_SSL_MODE
+          value: {{ default "false" .Values.mariadb.tls | quote }}
         - name: HTTP_CONNECTION_TIMEOUT_IN_SECS
           value: "10"
         - name: HTTP_CLIENT_TIMEOUT_IN_SECS
@@ -131,10 +131,6 @@ spec:
           value: :3003
         - name: CF_CLIENT
           value: cf
-        - name: UPGRADE_VOLUME
-          value: "{{ .Release.Name }}-upgrade-volume"
-        - name: UPGRADE_LOCK_FILENAME
-          value: upgrade.lock
         - name: ALLOWED_ORIGINS
           value: https://localhost
         - name: ENCRYPTION_KEY_VOLUME
@@ -142,27 +138,14 @@ spec:
         - name: ENCRYPTION_KEY_FILENAME
           value: key
         - name: SESSION_STORE_SECRET
-          {{- if .Values.console.sessionStoreSecret }}
-          value: {{ .Values.console.sessionStoreSecret | quote }}
-          {{- else }}
-          value: {{ randAlphaNum 64 | quote }}
-          {{- end }}          
-        {{- if .Values.consoleCert }}
-        - name: CONSOLE_CERT
-          value: | 
-{{ .Values.consoleCert | indent 12 }}
-        {{- end }}
-        {{- if .Values.consoleCertKey }}
-        - name: CONSOLE_CERT_KEY
-          value: |
-{{ .Values.consoleCertKey | indent 12 }}
-        {{- end }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-db-secret"
+              key: sessionStoreSecret
         - name: CONSOLE_PROXY_CERT_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
+          value: "/{{ .Release.Name }}-cert-volume/tls.crt"
         - name: CONSOLE_PROXY_CERT_KEY_PATH
-          value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
-        - name: NO_SHARED_MODE
-          value: "true"
+          value: "/{{ .Release.Name }}-cert-volume/tls.key"
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
@@ -187,10 +170,22 @@ spec:
         - name: LOG_LEVEL
           value: {{.Values.console.backendLogLevel}}
         {{- end }}
+        - name: CONSOLE_CLIENT 
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: client
+        - name: CONSOLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: clientSecret
+        {{- if .Values.console.autoRegisterCF }}
+        - name: AUTO_REG_CF_URL
+          value: {{ .Values.console.autoRegisterCF }}
+        {{- end }}
         # Local admin user
         {{- if .Values.console.localAdminPassword }}
-        - name: CONSOLE_CLIENT 
-          value: cf
         - name: CONSOLE_ADMIN_SCOPE 
           value: stratos.admin
         - name: SKIP_SSL_VALIDATION 
@@ -200,19 +195,26 @@ spec:
         - name: LOCAL_USER 
           value: admin
         - name: LOCAL_USER_PASSWORD 
-          value: "{{.Values.console.localAdminPassword}}"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: localAdminPassword
         - name: LOCAL_USER_SCOPE 
           value: stratos.admin
         {{- else }}
         # UAA
-        {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
+        # Highest priority setting to use is uaa.endpoint
+        {{- if .Values.uaa.endpoint }}
+        - name: UAA_ENDPOINT 
+          value: {{ .Values.uaa.endpoint | quote }}
+        - name: CONSOLE_ADMIN_SCOPE
+          value: {{ default "cloud_controller.admin" .Values.uaa.consoleAdminIdentifier }}
+        - name: SKIP_SSL_VALIDATION 
+          value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
+        {{- else if or .Values.env.UAA_HOST .Values.env.DOMAIN }}          
         - name: UAA_ENDPOINT 
           value: {{ template "scfUaaEndpoint" . }}
-        - name: CONSOLE_CLIENT 
-          value: cf
-        - name: CONSOLE_CLIENT_SECRET
-          value:
-        {{- if .Values.env.DOMAIN }}  
+        {{- if and .Values.env.DOMAIN (not .Values.console.autoRegisterCF) }}
         - name: AUTO_REG_CF_URL
           value: https://api.{{.Values.env.DOMAIN}}
         {{- end }}
@@ -223,10 +225,6 @@ spec:
         {{- else if .Values.uaa.host }}  
         - name: UAA_ENDPOINT 
           value: {{default "https://" .Values.uaa.protocol}}{{.Values.uaa.host}}:{{.Values.uaa.port}}
-        - name: CONSOLE_CLIENT 
-          value: {{.Values.uaa.consoleClient}}
-        - name: CONSOLE_CLIENT_SECRET 
-          value: {{.Values.uaa.consoleClientSecret}}
         - name: CONSOLE_ADMIN_SCOPE 
           value: {{.Values.uaa.consoleAdminIdentifier}}
         - name: SKIP_SSL_VALIDATION 
@@ -248,7 +246,7 @@ spec:
         - name: HELM_CHART_VERSION
           value: "{{ .Chart.Version }}"
         - name: HELM_LAST_MODIFIED
-          value: "{{ .Release.Time }}"
+          value: "seconds:{{ now | unixEpoch }} nanos:0 "        
         - name: SSO_LOGIN
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
@@ -271,41 +269,89 @@ spec:
         - name: SMTP_PORT
           value: {{ default "" .Values.env.SMTP_PORT | quote }}
         - name: SMTP_USER
-          value: {{ default "" .Values.env.SMTP_USER | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: smtpUser
         - name: SMTP_PASSWORD
-          value: {{ default "" .Values.env.SMTP_PASSWORD | quote }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Release.Name }}-secret"
+              key: smtpPassword
         - name: INVITE_USER_SUBJECT
           value: {{ default "" .Values.console.userInviteSubject | quote }}
         - name: ENABLE_TECH_PREVIEW
           value: {{ default "false" .Values.console.techPreview | quote }}
+        - name: API_KEYS_ENABLED
+          value: {{ default "admin_only" .Values.console.apiKeysEnabled | quote }}
+        - name: HELM_CACHE_FOLDER
+          value: /helm-cache
+        {{- if .Values.console.ui }}
+        {{- if .Values.console.ui.listMaxSize }}
+        - name: UI_LIST_MAX_SIZE
+          value: {{ .Values.console.ui.listMaxSize | quote }}
+        {{- end }}
+        - name: UI_LIST_ALLOW_LOAD_MAXED
+          value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
+        {{- end }}
+        - name: ANALYSIS_SERVICES_API
+          value: "http://{{ .Release.Name }}-analyzers:8090"
+        - name: STRATOS_KUBERNETES_NAMESPACE
+          value: "{{ .Release.Namespace }}"
+        - name: STRATOS_KUBERNETES_TERMINAL_IMAGE
+          value: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-kube-terminal:{{.Values.consoleVersion}}"
+        - name: STRATOS_KUBERNETES_DASHBOARD_IMAGE
+          value: "{{.Values.console.kubeDashboardImage}}"        
+        - name: ARTIFACT_HUB_DISABLED
+          value: {{ default "false" .Values.console.artifactHubDisabled | quote }}
+        {{- include "stratosJetstreamEnv" . | indent 8 }}
+        readinessProbe:
+          httpGet:
+            path: /pp/v1/ping
+            scheme: HTTPS
+            port: 3003
         ports:
         - containerPort: 3003
           name: proxy
           protocol: TCP
         volumeMounts:
-        - mountPath: "/{{ .Release.Name }}-upgrade-volume"
-          name: "{{ .Release.Name }}-upgrade-volume"
         - mountPath: "/{{ .Release.Name }}-encryption-key-volume"
           name: "{{ .Release.Name }}-encryption-key-volume"
+          readOnly: true
+        - mountPath: "/{{ .Release.Name }}-cert-volume"
+          name: "{{ .Release.Name }}-cert-volume"
+          readOnly: true
         - mountPath: /etc/secrets/
-          name: "{{ .Release.Name }}-secret"
+          name: "{{ .Release.Name }}-db-secret"
           readOnly: true
         {{- if .Values.console.templatesConfigMapName }}
         - mountPath: /etc/templates/
           name: "{{ .Release.Name }}-templates"
           readOnly: true
         {{- end }}
+        - mountPath: /helm-cache
+          name: helm-cache-volume          
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") }}
+      serviceAccountName: "stratos"
+      {{- end }}
       volumes:
-      - name: "{{ .Release.Name }}-upgrade-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-upgrade-volume"
       - name: "{{ .Release.Name }}-encryption-key-volume"
-        persistentVolumeClaim:
-          claimName: "{{ .Release.Name }}-encryption-key-volume"
+        secret:
+          secretName: "{{ .Release.Name }}-key"
+      - name: "{{ .Release.Name }}-cert-volume"
+        secret:
+          {{- if .Values.console.tlsSecretName }}
+          secretName: "{{ .Values.console.tlsSecretName }}"
+          {{- else }}
+          secretName: "{{ .Release.Name }}-cert"
+          {{- end }}
+      - name: "{{ .Release.Name }}-db-secret"
+        secret:
+          secretName: "{{ .Release.Name }}-db-secret"
       - name: "{{ .Release.Name }}-secret"
         secret:
           secretName: "{{ .Release.Name }}-secret"
@@ -314,91 +360,5 @@ spec:
         configMap:
           name: {{ .Values.console.templatesConfigMapName }}
       {{- end }}
----
-{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
-apiVersion: apps/v1
-{{- else }}
-apiVersion: extensions/v1beta1
-{{- end }}
-kind: Deployment
-metadata:
-  name: stratos-db
-  labels:
-    app.kubernetes.io/name: "stratos"
-    app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-    app.kubernetes.io/component: "stratos-db"
-    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: "stratos"
-      app.kubernetes.io/component: "stratos-db"
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: "stratos"
-        app.kubernetes.io/instance: "{{ .Release.Name }}"
-        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-        app.kubernetes.io/component: "stratos-db"
-        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-        app: "{{ .Release.Name }}"
-    spec:
-      containers:
-      - name: mariadb
-        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
-        imagePullPolicy: {{.Values.imagePullPolicy}}
-        env:
-        {{- if .Values.mariadb.usePassword }}
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Release.Name }}-mariadb-secret"
-              key: mariadb-root-password
-        {{- if .Values.mariadb.mariadbUser }}
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Release.Name }}-mariadb-secret"
-              key: mariadb-password
-        {{- end }}
-        {{- else }}
-        - name: MYSQL_ALLOW_EMPTY_PASSWORD
-          value: "yes"
-        {{- end }}
-        - name: MYSQL_USER
-          value: {{ default "" .Values.mariadb.mariadbUser | quote }}
-        - name: MYSQL_DATABASE
-          value: {{ default "" .Values.mariadb.mariadbDatabase | quote }}
-        ports:
-        - name: mysql
-          containerPort: 3306
-        livenessProbe:
-          exec:
-            command:
-            - /dbping.sh
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
-        readinessProbe:
-          exec:
-            command:
-            - /dbping.sh
-          initialDelaySeconds: 5
-          timeoutSeconds: 1
-        resources:
-{{ toYaml .Values.mariadb.resources | indent 10 }}
-        volumeMounts:
-        - name: data
-          mountPath: /var/lib/mysql
-      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
-      imagePullSecrets:
-      - name: {{.Values.dockerRegistrySecret}}
-      {{- end }}
-      volumes:
-      - name: data
-      {{- if .Values.mariadb.persistence.enabled }}
-        persistentVolumeClaim:
-          claimName: {{ .Values.mariadb.persistence.existingClaim | default "console-mariadb" }}
-      {{- else }}
-        emptyDir: {}
-      {{- end -}}
+      - name: helm-cache-volume
+        emptyDir: {}      

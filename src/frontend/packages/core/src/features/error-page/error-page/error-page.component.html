@@ -3,7 +3,7 @@
     <h1>Recent Endpoint Errors</h1>
     <div class="page-header-right">
       <span>
-        <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
+        <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
           <mat-icon>close</mat-icon>
         </button>
       </span>
@@ -39,7 +39,7 @@
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <app-metadata-item label="Endpoint Response">
+          <app-metadata-item label="Endpoint Response" *ngIf="error.metadata?.errorResponse?.errorResponse">
             <div matLine class="error-page__json-response 1error-page__event-value error-page__event-message">
               <pre>{{ (error.metadata.errorResponse.errorResponse || '-') | json }}</pre>
             </div>
@@ -47,7 +47,7 @@
           <app-metadata-item label="Jetstream Response">{{ error.message }}</app-metadata-item>
           <app-metadata-item label="URL">{{ error.metadata.url || '-' }}</app-metadata-item>
           <div class="app-metadata">
-            <div class="app-metadata__two-cols">
+            <div class="app-metadata__two-cols" *ngIf="error.metadata.httpMethod">
               <app-metadata-item label="HTTP Method">{{ error.metadata.httpMethod }}</app-metadata-item>
             </div>
             <div class="app-metadata__two-cols">

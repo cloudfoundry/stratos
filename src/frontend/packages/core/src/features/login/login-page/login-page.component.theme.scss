@@ -1,5 +1,6 @@
 @mixin login-page-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+
   .login {
     background-color: map-get($app-theme, app-background-color);
     &__title {
@@ -9,4 +10,5 @@
       color: mat-contrast($primary, 500);
     }
   }
+
 }

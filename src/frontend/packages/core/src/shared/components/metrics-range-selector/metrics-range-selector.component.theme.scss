@@ -1,10 +1,18 @@
 @import '~@angular/material/theming';
 @mixin metrics-range-selector-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
+  $background-color: map-get($app-theme, app-background-color);
+  $foreground: map-get($theme, foreground);
+
   .metrics-range-selector {
     &__overlay {
+      background-color: $background-color;
+      &-show {
+        background-color: rgba($background-color, .6);
+      }
       &-inner {
-        background-color: mat-contrast($primary, 500);
+        background-color: $background-color;
+        box-shadow: -4px 3px 41px -1px rgba(0, 0, 0, .36);
       }
     }
   }

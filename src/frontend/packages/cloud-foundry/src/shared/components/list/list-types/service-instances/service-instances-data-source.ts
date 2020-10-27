@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratosui/store';
 
-import { GetServiceInstances } from '../../../../../../../cloud-foundry/src/actions/service-instances.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   serviceInstancesEntityType,
@@ -15,17 +15,13 @@ import {
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 
 export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceGuid: string, store: Store<CFAppState>, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, cfGuid);
-    const serviceInstanceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceInstancesEntityType);
-    const actionBuilder = serviceInstanceEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const action = actionBuilder(cfGuid, paginationKey);
+    const action = cfEntityCatalog.serviceInstance.actions.getMultiple(cfGuid, paginationKey);
 
     super({
       store,
@@ -35,6 +31,7 @@ export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
       paginationKey,
       isLocal: true,
       transformEntities: [
+        { type: 'filter', field: 'entity.name' },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           return entities.filter(e => e.entity.service_guid === serviceGuid);
         }

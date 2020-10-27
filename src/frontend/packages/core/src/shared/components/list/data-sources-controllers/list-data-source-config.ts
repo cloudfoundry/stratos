@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { AppState } from '../../../../../../store/src/app-state';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { PaginatedAction } from '../../../../../../store/src/types/pagination.types';
 import { IListConfig } from '../list.component.types';
@@ -41,7 +41,7 @@ export class ActionSchemaConfig {
 }
 
 export interface IListDataSourceConfig<A, T> {
-  store: Store<CFAppState>;
+  store: Store<AppState>;
   /**
    * An action that, when called, will populate the entries required to show the current state of the list. For example, this action will
    * be dispatched when the page number changes in a non-local list.

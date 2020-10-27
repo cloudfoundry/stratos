@@ -1,5 +1,5 @@
-import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { MultiActionListEntity } from '../../../../../../store/src/monitors/pagination-monitor';
+import { DataFunction, DataFunctionDefinition } from './list-data-source';
 
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]): DataFunction<any>[] {
   return entityFunctions.map(functionOrDef => {
@@ -24,7 +24,7 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
     const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
-    if (upperCaseFilter && upperCaseFilter.length === 0) {
+    if (!upperCaseFilter) {
       return entities;
     }
     return entities.filter(e => {

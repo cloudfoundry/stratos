@@ -1,6 +1,6 @@
 .connection-dialog {
   $dialog-padding: 24px;
-  width: 300px;
+  max-width: 450px;
   &__content {
     display: flex;
     flex-direction: column;

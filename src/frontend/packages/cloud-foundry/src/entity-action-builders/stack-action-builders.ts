@@ -1,7 +1,7 @@
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllStacks, GetStack } from '../actions/stack.action';
-import { CFOrchestratedActionBuilders } from './cf.action-builder.types';
 
-export interface StackActionBuilders extends CFOrchestratedActionBuilders {
+export interface StackActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,

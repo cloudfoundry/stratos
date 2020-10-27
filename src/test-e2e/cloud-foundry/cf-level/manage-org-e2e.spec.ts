@@ -1,7 +1,7 @@
 import { by, element, promise, protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
 import { CfTopLevelPage } from './cf-top-level-page.po';
@@ -58,6 +58,7 @@ describe('Manage Organization', () => {
 
       // should go to organizations when cancelled
       orgFormPage.stepper.cancel();
+      orgFormPage.stepper.waitUntilNotShown();
       expect(cfTopLevelPage.subHeader.getTitleText()).toBe('Organizations');
     });
 
@@ -94,11 +95,13 @@ describe('Manage Organization', () => {
     it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
+      cfTopLevelPage.waitForChildPage('/summary');
       cfTopLevelPage.goToOrgTab();
     });
 
     it('- should delete org', () => {
       cfTopLevelPage.deleteOrg(secondOrgName);
+
       expect(element(by.tagName('app-cards')).getText()).not.toContain(secondOrgName);
     });
   });
@@ -107,6 +110,7 @@ describe('Manage Organization', () => {
     it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
+      cfTopLevelPage.waitForChildPage('/summary');
       cfTopLevelPage.goToOrgTab();
       cfTopLevelPage.clickOnCard(orgName);
 
@@ -128,6 +132,7 @@ describe('Manage Organization', () => {
     it('- Go To Org', () => {
       cfTopLevelPage = CfTopLevelPage.forEndpoint(cfGuid);
       cfTopLevelPage.navigateTo();
+      cfTopLevelPage.waitForChildPage('/summary');
       cfTopLevelPage.goToOrgTab();
       cfTopLevelPage.clickOnCard(orgName);
 
@@ -140,6 +145,7 @@ describe('Manage Organization', () => {
       orgFormPage.stepper.setOrg(secondOrgName);
       orgFormPage.stepper.setQuotaDefinition(secondQuotaName);
       orgFormPage.submit();
+      orgFormPage.stepper.waitUntilNotShown();
 
       expect(cfOrgLevelPage.header.getTitleText()).toBe(secondOrgName);
       expect(element(by.tagName('app-card-cf-org-user-details')).getText()).toContain(secondQuotaName);

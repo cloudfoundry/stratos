@@ -1,10 +1,10 @@
+import { Observable } from 'rxjs';
+
 import { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
-import { TableCellDefaultComponent } from './app-table-cell-default/app-table-cell-default.component';
 import { TableCellStatusDirective } from './table-cell-status.directive';
 import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableComponent } from './table.component';
-import { Observable } from 'rxjs';
 
 export interface ICellAsyncValue {
   pathToObs: string;
@@ -39,24 +39,42 @@ export interface ITableColumn<T> {
   cellConfig?: object | CellConfigFunction<T>;   // Config for a custom cell component
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
+  /**
+   * Has to be a known class in table.component.scss
+   */
   class?: string;
+  /**
+   * Has to be a known class in table.component.scss
+   */
+  headerClass?: string;
+  /**
+   * Has to be a known class in table.component.scss
+   */
+  cellClass?: string;
   sort?: boolean | DataFunctionDefinition | DataFunction<T>;
   cellFlex?: string;
   cellAlignSelf?: string;
+}
+
+export interface ITableTextMaxed {
+  icon: string;
+  iconFont?: string;
+  canIgnoreMaxFirstLine: string;
+  cannotIgnoreMaxFirstLine: string;
+  filterLine?: string;
 }
 
 export interface ITableText {
   title?: string;
   filter?: string;
   noEntries?: string;
-  maxedResults?: string;
+  maxedResults?: ITableTextMaxed;
 }
 
 export const listTableComponents = [
   TableComponent,
   TableCellComponent,
   TableRowComponent,
-  TableCellDefaultComponent,
   ...listTableCells,
-  TableCellStatusDirective
+  TableCellStatusDirective,
 ];

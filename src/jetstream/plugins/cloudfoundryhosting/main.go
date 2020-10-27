@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -29,6 +29,11 @@ const (
 	SQLiteProviderName             = "sqlite"
 	defaultSessionSecret           = "wheeee!"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cloudfoundryhosting", nil, Init)
+}
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
@@ -74,22 +79,19 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 		}
 	}
 
+	// Update Database migration status depending on app instance index and SQLite
+	if !isSQLite && envLookup.IsSet("CF_INSTANCE_INDEX") {
+		if appInstanceIndex, ok := envLookup.Lookup("CF_INSTANCE_INDEX"); ok {
+			if index, err := strconv.Atoi(appInstanceIndex); err == nil {
+				jetstreamConfig.CanMigrateDatabaseSchema = (index == 0)
+				log.Infof("Skipping DB migration => not index 0 (%d)", index)
+			}
+		}
+	}
 }
 
 // Init creates a new CFHosting plugin
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-
-	// Update Database migration status depending on app instance index and SQLite
-	if portalProxy.Env().IsSet(VCapApplication) {
-		isSQLite := portalProxy.GetConfig().DatabaseProviderName == SQLiteProviderName
-		if !isSQLite && portalProxy.Env().IsSet("CF_INSTANCE_INDEX") {
-			if appInstanceIndex, ok := portalProxy.Env().Lookup("CF_INSTANCE_INDEX"); ok {
-				if index, err := strconv.Atoi(appInstanceIndex); err == nil {
-					portalProxy.SetCanPerformMigrations(index == 0)
-				}
-			}
-		}
-	}
 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }

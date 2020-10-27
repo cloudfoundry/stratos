@@ -1,8 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  ServiceInstanceLastOpComponent,
-} from '../../../../../../../../core/src/shared/components/service-instance-last-op/service-instance-last-op.component';
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -10,6 +7,7 @@ import { generateCfBaseTestModules } from '../../../../../../../test-framework/c
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
   TableCellServiceBindableComponent,
 } from '../../cf-services/table-cell-service-bindable/table-cell-service-bindable.component';
@@ -77,7 +75,7 @@ describe('ServiceInstanceCardComponent', () => {
         dashboard_url: '',
         type: '',
         tags: [],
-        service_guid: '',
+        service_guid: 'service_guid',
         service_plan_url: '',
         service_bindings: [],
         service_bindings_url: '',
@@ -88,23 +86,6 @@ describe('ServiceInstanceCardComponent', () => {
           description: '',
           updated_at: '',
           created_at: ''
-        },
-        service: {
-          entity: {
-            label: '',
-            description: '',
-            active: 1,
-            bindable: 1,
-            unique_id: '',
-            extra: '',
-            tags: [''],
-            requires: [''],
-            service_broker_guid: '',
-            plan_updateable: 1,
-            service_plans_url: '',
-            service_plans: [],
-          },
-          metadata: null
         },
         service_plan: {
           entity: {
@@ -128,12 +109,17 @@ describe('ServiceInstanceCardComponent', () => {
                 extra: '',
                 tags: [''],
                 requires: [''],
-                service_broker_guid: '',
+                service_broker_guid: 'service_broker_guid',
                 plan_updateable: 1,
                 service_plans_url: '',
                 service_plans: [],
               },
-              metadata: null
+              metadata: {
+                guid: '',
+                created_at: '',
+                updated_at: '',
+                url: ''
+              }
             },
             service_instances_url: '',
           },

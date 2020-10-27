@@ -12,7 +12,8 @@
           </mat-card-header>
           <mat-card-content class="autoscaler-policy-edit-trigger-item">
             <div *ngIf="editIndex!=index" class="autoscaler-policy-edit-trigger-item-desc">
-              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}} {{getMetricUnit(rule.metric_type)}}
+              If average {{rule.metric_type}} {{rule.operator}} {{rule.threshold}}
+              {{getMetricUnit(rule.metric_type, rule.unit)}}
               for {{rule.breach_duration_secs}} seconds, then {{rule.adjustment}} instances. Cooldown:
               {{rule.cool_down_secs}} seconds.
             </div>
@@ -20,12 +21,12 @@
               <form [formGroup]="editTriggerForm" validate>
                 If average
                 <mat-form-field *ngIf="metricTypes.length > 1">
-                  <mat-select class="reset-margin" placeholder="Metric Type" name="metric_type"
-                    formControlName="metric_type" required>
-                    <mat-option *ngFor="let metricType of metricTypes" [value]="metricType">
-                      {{ metricType }}
-                    </mat-option>
-                  </mat-select>
+                  <input matInput placeholder="Metric Type" type="text" name="metric_type" formControlName="metric_type"
+                    [matAutocomplete]="metricTypeAuto" required>
+                  <mat-autocomplete #metricTypeAuto="matAutocomplete">
+                    <mat-option *ngFor="let metricType of filteredMetricTypes$ | async" [value]="metricType">
+                      {{metricType}}</mat-option>
+                  </mat-autocomplete>
                 </mat-form-field>
                 <mat-form-field *ngIf="metricTypes.length > 1">
                   <mat-select class="reset-margin" placeholder="Operator" name="operator" formControlName="operator"
@@ -39,10 +40,10 @@
                   <input matInput placeholder="Threshold" type="number" name="threshold" formControlName="threshold"
                     required>
                 </mat-form-field>
-                <span class="autoscaler-policy-edit-trigger-item__unit">
-                  {{metricUnit$ | async}}
-                </span>
-                for
+                <mat-form-field *ngIf="getMetricUnit(editMetricType) == ''">
+                  <input matInput placeholder="Unit" type="text" name="unit" formControlName="unit">
+                </mat-form-field>
+                {{getMetricUnit(editMetricType)}} for
                 <mat-form-field>
                   <input matInput placeholder="Breach Duration" type="number" name="breach_duration_secs"
                     formControlName="breach_duration_secs">
@@ -66,6 +67,12 @@
                 </mat-form-field>
                 seconds.
               </form>
+              <mat-error *ngIf="editTriggerForm.get('metric_type').hasError('required')">
+                Metric type is required
+              </mat-error>
+              <mat-error *ngIf="editTriggerForm.get('metric_type').hasError('alertInvalidPolicyTriggerMetricName')">
+                {{policyAlert.alertInvalidPolicyTriggerMetricName}}
+              </mat-error>
               <mat-error *ngIf="editTriggerForm.get('threshold').hasError('required')">
                 Threshold is required
               </mat-error>

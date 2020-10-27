@@ -1,0 +1,4 @@
+<p>Please confirm that you would like to make the following user role changes to organization {{orgName$ | async}}</p>
+<app-action-monitor [columns]="columns" [data$]="changes$" [entityKey]="userCatalogEntity.entityKey"
+  [schema]="userCatalogEntity.getSchema()" [monitorState]="monitorState" [getCellConfig]="getCellConfig">
+</app-action-monitor>

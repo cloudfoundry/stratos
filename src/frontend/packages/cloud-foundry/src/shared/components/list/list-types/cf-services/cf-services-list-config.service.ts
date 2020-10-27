@@ -1,26 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { endpointsRegisteredEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
+import { connectedEndpointsOfTypesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
-import { haveMultiConnectedCfs } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
 import { TableCellServiceActiveComponent } from './table-cell-service-active/table-cell-service-active.component';
 import { TableCellServiceBindableComponent } from './table-cell-service-bindable/table-cell-service-bindable.component';
+import {
+  TableCellServiceBrokerComponent,
+  TableCellServiceBrokerComponentMode,
+} from './table-cell-service-broker/table-cell-service-broker.component';
 import {
   TableCellServiceCfBreadcrumbsComponent,
 } from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
@@ -39,13 +43,10 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   ) {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
-      list$: this.store
-        .select(endpointsRegisteredEntitiesSelector).pipe(
-          first(),
-          map(endpoints => {
-            return Object.values(endpoints)
-              .filter((endpoint: EndpointModel) => endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf');
-          })),
+      list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
+        first(),
+        map(endpoints => Object.values(endpoints))
+      ),
       loading$: observableOf(false),
       select: new BehaviorSubject(undefined)
     };
@@ -74,10 +75,15 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   cardComponent = CfServiceCardComponent;
   defaultView = 'cards' as ListView;
   multiFilterConfigs: IListMultiFilterConfig[] = [];
-  text = {
+  text: ITableText = {
     title: null,
     filter: 'Search by name',
-    noEntries: 'There are no services'
+    noEntries: 'There are no services',
+    maxedResults: {
+      icon: 'store',
+      canIgnoreMaxFirstLine: 'Fetching all services might take a long time',
+      cannotIgnoreMaxFirstLine: 'There are too many services to fetch',
+    }
   };
 
   columns: ITableColumn<APIResource>[] = [{
@@ -103,10 +109,19 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   }, {
     columnId: 'broker',
     headerCell: () => 'Broker',
-    cellDefinition: {
-      valuePath: 'entity.label',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.NAME
     },
-    cellFlex: '1'
+    cellFlex: '2'
+  }, {
+    columnId: 'brokerScope',
+    headerCell: () => 'Scope',
+    cellComponent: TableCellServiceBrokerComponent,
+    cellConfig: {
+      mode: TableCellServiceBrokerComponentMode.SCOPE
+    },
+    cellFlex: '2'
   }, {
     columnId: 'plans',
     headerCell: () => 'Plans',

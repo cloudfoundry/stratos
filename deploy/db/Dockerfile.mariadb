@@ -1,4 +1,4 @@
-FROM splatform/stratos-db-base:leap15_1
+FROM splatform/stratos-db-base:leap15_2
 
 # See: https://github.com/docker-library/mariadb/blob/master/10.2/Dockerfile
 RUN \
@@ -8,6 +8,9 @@ RUN \
 
 COPY mariadb-entrypoint.sh /docker-entrypoint.sh
 COPY mariadb-ping.sh /dbping.sh
+
+RUN chmod 777 /docker-entrypoint.sh && \
+		chmod 777 /dbping.sh
 
 # ENTRYPOINT
 ENTRYPOINT ["/docker-entrypoint.sh"]

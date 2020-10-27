@@ -1,1 +1,2 @@
-<a [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [queryParams]="appLinkUrlParam$ | async">{{row.entity.name}}</a>
+<a [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]"
+  [queryParams]="appLinkUrlParam$ | async">{{row.entity.name}}</a>

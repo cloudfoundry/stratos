@@ -1,23 +1,34 @@
 import { Component, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { combineLatest, filter, first } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { canUpdateOrgSpaceRoles } from '../../../features/cf/cf.helpers';
+import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
+import {
+  selectCfUsersIsRemove,
+  selectCfUsersIsSetByUsername,
+  selectCfUsersRolesPicked,
+} from '../../../store/selectors/cf-users-roles.selector';
 import {
   CfUser,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
   SpaceUserRoleNames,
-} from '../../../../../cloud-foundry/src/store/types/user.types';
-import { CfUserRolesSelected } from '../../../../../cloud-foundry/src/store/types/users-roles.types';
-import { CurrentUserPermissions } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { selectUsersRolesPicked } from '../../../../../store/src/selectors/users-roles.selector';
-import { canUpdateOrgSpaceRoles } from '../../../features/cloud-foundry/cf.helpers';
-import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+} from '../../../store/types/cf-user.types';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+
+
+enum CfRoleCheckboxMode {
+  DEFAULT,
+  ADD,
+  REMOVE
+}
 
 /**
  * Component to manage the display and change of a specific org or space role. Will be checked if all users have role or user has selected
@@ -35,18 +46,21 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
 
   @Input() cfGuid: string;
+  @Input() orgGuid: string;
   @Input() spaceGuid: string;
   @Input() orgName: string;
   @Input() spaceName: string;
   @Input() role: string;
   @Output() changed = new BehaviorSubject(false);
 
+  mode$: Observable<CfRoleCheckboxMode>;
+  modes = CfRoleCheckboxMode;
+
   checked = false;
   tooltip = '';
   sub: Subscription;
   isOrgRole = false;
   disabled = false;
-  orgGuid: string;
 
   private static hasExistingRole(role: string, roles: CfUserRolesSelected, userGuid: string, orgGuid: string, spaceGuid: string): boolean {
     if (roles && roles[userGuid] && roles[userGuid][orgGuid]) {
@@ -208,8 +222,13 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
-    checked: boolean): boolean {
+    checked: boolean,
+    isSetByUsername: boolean): boolean {
     if (isOrgRole && role === OrgUserRoleNames.USER) {
+      // If this is in username mode never disable the user checkbox
+      if (isSetByUsername) {
+        return false;
+      }
       // Never disable the org user checkbox if it's not enabled/semi enabled (covers odd cases when cf creates orgs/spaces without the
       // permissions)
       const isChecked = checked === true || checked === null;
@@ -231,28 +250,50 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isOrgRole = !this.spaceGuid;
-    const users$ = this.store.select(selectUsersRolesPicked);
-    // Org? Org manager. Space? Org manager or space manager
+    const users$ = this.store.select(selectCfUsersRolesPicked);
+    // If setting an org role user must be admin or org manager.
+    // If setting a space role user must be admin, org manager or space manager
     const canEditRole$ = this.isOrgRole ?
-      this.userPerms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
+      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, this.orgGuid) :
       canUpdateOrgSpaceRoles(
         this.userPerms,
         this.cfGuid,
         this.orgGuid,
         this.spaceGuid);
+    const selectUsersIsSetByUsername$ = this.store.select(selectCfUsersIsSetByUsername);
 
     this.sub = this.cfRolesService.existingRoles$.pipe(
-      combineLatest(this.cfRolesService.newRoles$, users$, canEditRole$),
-      filter(([existingRoles, newRoles, users, canEditRole]) => !!users.length && !!newRoles.orgGuid)
-    ).subscribe(([existingRoles, newRoles, users, canEditRole]) => {
-      this.orgGuid = newRoles.orgGuid;
+      combineLatestOp(this.cfRolesService.newRoles$, users$, canEditRole$, selectUsersIsSetByUsername$),
+      filter(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => !!users.length && !!newRoles.orgGuid)
+    ).subscribe(([existingRoles, newRoles, users, canEditRole, isSetByUsername]) => {
       const { checked, tooltip } = CfRoleCheckboxComponent.getCheckedState(
         this.role, users, existingRoles, newRoles, this.orgGuid, this.spaceGuid);
       this.checked = checked;
       this.tooltip = tooltip;
       this.disabled = !canEditRole ||
-        CfRoleCheckboxComponent.isDisabled(this.isOrgRole, this.role, users, existingRoles, newRoles, this.orgGuid, checked);
+        CfRoleCheckboxComponent.isDisabled(
+          this.isOrgRole,
+          this.role,
+          users,
+          existingRoles,
+          newRoles,
+          this.orgGuid,
+          checked,
+          isSetByUsername
+        );
     });
+
+    this.mode$ = combineLatest([
+      this.store.select(selectCfUsersIsSetByUsername),
+      this.store.select(selectCfUsersIsRemove)
+    ]).pipe(
+      map(([isSetByUsername, isRemove]) => {
+        if (!isSetByUsername) {
+          return CfRoleCheckboxMode.DEFAULT;
+        }
+        return isRemove ? CfRoleCheckboxMode.REMOVE : CfRoleCheckboxMode.ADD;
+      })
+    );
   }
 
   ngOnDestroy() {

@@ -8,7 +8,7 @@ tests:
       env.DOMAIN: test.com
     asserts:
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: AUTO_REG_CF_URL
             value: https://api.test.com
@@ -17,13 +17,61 @@ tests:
       env.UAA_HOST: scf.test.com
     asserts:
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: UAA_ENDPOINT
             value: https://scf.scf.test.com:2793
       - notContains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: AUTO_REG_CF_URL
             value: https://api.test.com
-            
+  - it: should set UAA_ENDPOINT correctly when zone is empty
+    set:
+      env.UAA_HOST: scf.test.com
+      env.UAA_ZONE: ~
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: UAA_ENDPOINT
+            value: https://scf.test.com:2793
+  - it: should set UAA_ENDPOINT correctly when zone is empty with env.DOMAIN
+    set:
+      env.DOMAIN: scf.test.com
+      env.UAA_ZONE: ~
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: UAA_ENDPOINT
+            value: https://uaa.scf.test.com:2793
+  - it: should allow AUTO_REG_CF_URL to be set
+    set:
+      console.autoRegisterCF: https://autoreg.test.com
+      env.UAA_ZONE: ~
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: AUTO_REG_CF_URL
+            value: https://autoreg.test.com
+  - it: should allow AUTO_REG_CF_URL to be set when env.DOMAIN is also set
+    set:
+      console.autoRegisterCF: https://autoreg.test.com
+      env.UAA_ZONE: ~
+      env.DOMAIN: domain.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: AUTO_REG_CF_URL
+            value: https://autoreg.test.com
+  - it: should set kubernetes.io/arch if console.nodeSelector.kubernetes.io/arch is set
+    set:
+      console.nodeSelector.kubernetes.io/arch: amd64
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.kubernetes.io/arch
+          value: amd64
+        documentIndex: 0

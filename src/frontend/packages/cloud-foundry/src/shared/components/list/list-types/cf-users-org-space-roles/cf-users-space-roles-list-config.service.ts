@@ -3,14 +3,16 @@ import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { SpaceUserRoleNames } from '../../../../../../../cloud-foundry/src/store/types/user.types';
-import { ISpace } from '../../../../../../../core/src/core/cf-api.types';
-import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/current-user-permissions.service';
+import {
+  CurrentUserPermissionsService,
+} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { selectUsersRolesRoles } from '../../../../../../../store/src/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { ISpace } from '../../../../../cf-api.types';
+import { selectCfUsersRolesRoles } from '../../../../../store/selectors/cf-users-roles.selector';
+import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
 
@@ -42,6 +44,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'manager',
     headerCell: () => 'Manager',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.MANAGER,
       isSpace: true
@@ -50,6 +53,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'auditor',
     headerCell: () => 'Auditor',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.AUDITOR,
       isSpace: true
@@ -58,6 +62,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'developer',
     headerCell: () => 'Developer',
     cellComponent: TableCellRoleOrgSpaceComponent,
+    class: 'app-table__cell--table-column-additional-padding',
     cellConfig: {
       role: SpaceUserRoleNames.DEVELOPER,
       isSpace: true
@@ -72,7 +77,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   initialised = new BehaviorSubject<boolean>(false);
 
   constructor(private store: Store<CFAppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
-    this.store.select(selectUsersRolesRoles).pipe(
+    this.store.select(selectCfUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {
       this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, userPerms, this);

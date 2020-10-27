@@ -1,8 +1,8 @@
 import { HttpRequest } from '@angular/common/http';
 
 import { getActions } from '../../../store/src/actions/action.helper';
-import { endpointSchemaKey } from '../../../store/src/helpers/entity-factory';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { endpointEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
 import { cfEntityFactory } from '../cf-entity-factory';
@@ -12,29 +12,23 @@ import {
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
 } from '../entity-relations/entity-relations.types';
-import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/user.types';
+import { CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/cf-user.types';
 import { CFStartAction } from './cf-action.types';
 
-export const GET_ALL = '[Users] Get all';
-export const GET_ALL_SUCCESS = '[Users] Get all success';
-export const GET_ALL_FAILED = '[Users] Get all failed';
+export const GET_ALL_CF_USERS = '[Users] Get all';
+export const GET_ALL_CF_USERS_SUCCESS = '[Users] Get all success';
+export const GET_ALL_CF_USERS_FAILED = '[Users] Get all failed';
 
-export const REMOVE_ROLE = '[Users] Remove role';
-export const REMOVE_ROLE_SUCCESS = '[Users]  Remove role success';
-export const REMOVE_ROLE_FAILED = '[Users]  Remove role failed';
+export const REMOVE_CF_ROLE = '[Users] Remove role';
+export const REMOVE_CF_ROLE_SUCCESS = '[Users]  Remove role success';
+export const REMOVE_CF_ROLE_FAILED = '[Users]  Remove role failed';
 
-export const ADD_ROLE = '[Users] Add role';
-export const ADD_ROLE_SUCCESS = '[Users]  Add role success';
-export const ADD_ROLE_FAILED = '[Users]  Add role failed';
+export const ADD_CF_ROLE = '[Users] Add role';
+export const ADD_CF_ROLE_SUCCESS = '[Users]  Add role success';
+export const ADD_CF_ROLE_FAILED = '[Users]  Add role failed';
 
-export const GET_CF_USER = '[Users] Get cf user ';
-export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
-export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
-export const GET_CF_USERS_AS_NON_ADMIN = '[Users] Get cf users by org ';
-export const GET_CF_USERS_AS_NON_ADMIN_SUCCESS = '[Users] Get cf users by org success';
-
-export function createDefaultUserRelations() {
+export function createDefaultCfUserRelations() {
   return [
     createEntityRelationKey(cfUserEntityType, CfUserRoleParams.ORGANIZATIONS),
     createEntityRelationKey(cfUserEntityType, CfUserRoleParams.AUDITED_ORGS),
@@ -47,23 +41,23 @@ export function createDefaultUserRelations() {
 }
 
 
-export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   isGetAllUsersAsAdmin = true;
   paginationKey: string;
   constructor(
     public endpointGuid: string,
-    public includeRelations: string[] = createDefaultUserRelations(),
+    public includeRelations: string[] = createDefaultCfUserRelations(),
     public populateMissing = true,
     paginationKey?: string
   ) {
     super();
-    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
+    this.paginationKey = paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
     this.options = new HttpRequest(
       'GET',
       'users'
     );
   }
-  actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
+  actions = [GET_ALL_CF_USERS, GET_ALL_CF_USERS_SUCCESS, GET_ALL_CF_USERS_FAILED];
   entity = [cfEntityFactory(cfUserEntityType)];
   entityType = cfUserEntityType;
   options: HttpRequest<any>;
@@ -74,39 +68,58 @@ export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction
     'order-direction-field': 'username',
   };
   flattenPagination = true;
-  flattenPaginationMax = 600;
+  flattenPaginationMax = true;
   static is(action: any): boolean {
     return !!action.isGetAllUsersAsAdmin;
   }
 }
+
+interface HttpParamsPayload {
+  [param: string]: string;
+}
+interface ChangeUserRoleByUsernameParams extends HttpParamsPayload {
+  username: string;
+  origin?: string;
+}
+enum ChangeUserRoleType {
+  ADD,
+  REMOVE
+}
+
+
 // FIXME: These actions are user related however return either an org or space entity. These responses can be ignored and not stored, need
 // a flag somewhere to handle that - https://jira.capbristol.com/browse/STRAT-119
-export class ChangeUserRole extends CFStartAction implements EntityRequestAction {
+/**
+ *  Add or remove a user's role, either by user guid or name
+ */
+export class ChangeCfUserRole extends CFStartAction implements EntityRequestAction {
   public endpointType = 'cf';
   constructor(
     public endpointGuid: string,
     public userGuid: string,
-    public method: 'PUT' | 'DELETE',
+    public changeRoleType: ChangeUserRoleType,
     public actions: string[],
     public permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     public entityGuid: string,
     public isSpace = false,
     public updateConnectedUser = false,
-    public orgGuid?: string
+    public orgGuid?: string,
+    public username = '',
+    public usernameOrigin = '',
   ) {
     super();
     this.guid = entityGuid;
-    this.updatingKey = ChangeUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
+    this.updatingKey = ChangeCfUserRole.generateUpdatingKey(permissionTypeKey, userGuid);
     this.options = new HttpRequest(
-      method,
-      `${isSpace ? 'spaces' : 'organizations'}/${this.guid}/${this.updatingKey}`,
-      {}
+      this.createMethod(),
+      this.createUrl(),
+      this.createParams()
     );
     this.entityType = isSpace ? spaceEntityType : organizationEntityType;
     this.entity = cfEntityFactory(this.entityType);
   }
 
-  guid: string; you
+  guid: string;
   entity: EntitySchema;
   entityType: string;
   options: HttpRequest<any>;
@@ -115,9 +128,39 @@ export class ChangeUserRole extends CFStartAction implements EntityRequestAction
   static generateUpdatingKey<T>(permissionType: OrgUserRoleNames | SpaceUserRoleNames, userGuid: string) {
     return `${permissionType}/${userGuid}`;
   }
+
+  createMethod(): string {
+    if (this.changeRoleType === ChangeUserRoleType.ADD) {
+      return 'PUT';
+    }
+    return this.username ? 'POST' : 'DELETE';
+  }
+
+  createUrl(): string {
+    const spaceOrOrg = this.isSpace ? 'spaces' : 'organizations';
+    if (this.username) {
+      // Change role via the username url
+      return `${spaceOrOrg}/${this.guid}/${this.permissionTypeKey}${this.changeRoleType === ChangeUserRoleType.REMOVE ? '/remove' : ''}`;
+    } else {
+      return `${spaceOrOrg}/${this.guid}/${this.updatingKey}`;
+    }
+  }
+
+  createParams(): object {
+    if (this.username) {
+      const payload: ChangeUserRoleByUsernameParams = {
+        username: this.username,
+      };
+      if (this.usernameOrigin) {
+        payload.origin = this.usernameOrigin;
+      }
+      return payload;
+    }
+    return null;
+  }
 }
 
-export class AddUserRole extends ChangeUserRole {
+export class AddCfUserRole extends ChangeCfUserRole {
   constructor(
     endpointGuid: string,
     userGuid: string,
@@ -125,23 +168,27 @@ export class AddUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
       userGuid,
-      'PUT',
-      [ADD_ROLE, ADD_ROLE_SUCCESS, ADD_ROLE_FAILED],
+      ChangeUserRoleType.ADD,
+      [ADD_CF_ROLE, ADD_CF_ROLE_SUCCESS, ADD_CF_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }
 
-export class RemoveUserRole extends ChangeUserRole {
+export class RemoveCfUserRole extends ChangeCfUserRole {
   constructor(
     endpointGuid: string,
     userGuid: string,
@@ -149,27 +196,31 @@ export class RemoveUserRole extends ChangeUserRole {
     permissionTypeKey: OrgUserRoleNames | SpaceUserRoleNames,
     isSpace = false,
     updateConnectedUser = false,
-    orgGuid?: string
+    orgGuid?: string,
+    username = '',
+    usernameOrigin = '',
   ) {
     super(
       endpointGuid,
       userGuid,
-      'DELETE',
-      [REMOVE_ROLE, REMOVE_ROLE_SUCCESS, REMOVE_ROLE_FAILED],
+      ChangeUserRoleType.REMOVE,
+      [REMOVE_CF_ROLE, REMOVE_CF_ROLE_SUCCESS, REMOVE_CF_ROLE_FAILED],
       permissionTypeKey,
       entityGuid,
       isSpace,
       updateConnectedUser,
-      orgGuid
+      orgGuid,
+      username,
+      usernameOrigin
     );
   }
 }
 
-export class GetUser extends CFStartAction {
+export class GetCfUser extends CFStartAction {
   constructor(
     public endpointGuid: string,
     public guid: string,
-    public includeRelations: string[] = createDefaultUserRelations(),
+    public includeRelations: string[] = createDefaultCfUserRelations(),
     public populateMissing = true) {
     super();
     this.options = new HttpRequest(

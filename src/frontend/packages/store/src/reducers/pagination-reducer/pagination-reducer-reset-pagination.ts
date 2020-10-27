@@ -1,5 +1,6 @@
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
+import { EndpointActionComplete } from '../../actions/endpoint.actions';
 import { ResetPagination } from '../../actions/pagination.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 
 export const defaultClientPaginationPageSize = 9;
@@ -21,35 +22,100 @@ const defaultPaginationEntityState: PaginationEntityState = {
       items: {}
     },
     totalResults: 0
+  },
+  maxedState: {
+    isMaxedMode: false
   }
 };
 
-export function getDefaultPaginationEntityState(): PaginationEntityState {
+export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {
   return {
-    ...defaultPaginationEntityState
+    ...defaultPaginationEntityState,
+    maxedState: {
+      ...defaultPaginationEntityState.maxedState,
+      ignoreMaxed
+    }
   };
 }
 
-export function paginationResetPagination(state: PaginationState, action: ResetPagination): PaginationState {
+
+export function paginationResetPagination(state: PaginationState, action: ResetPagination, allTypes = false): PaginationState {
   const entityKey = entityCatalog.getEntityKey(action.entityConfig);
-  if (!state[entityKey] || !state[entityKey][action.paginationKey]) {
+
+  if (!state[entityKey]) {
     return state;
   }
-  const { ids, pageRequests, pageCount, currentPage, totalResults } = getDefaultPaginationEntityState();
+
+  const entityState = allTypes ?
+    paginationResetAllPaginationSections(state, entityKey) :
+    paginationResetPaginationSection(state, action.paginationKey, entityKey);
+
+  if (!entityState) {
+    return state;
+  }
+
   const newState = { ...state };
-  const entityState = {
-    ...newState[entityKey],
-    [action.paginationKey]: {
-      ...newState[entityKey][action.paginationKey],
-      ids,
-      pageRequests,
-      pageCount,
-      currentPage,
-      totalResults,
-    }
-  } as PaginationEntityTypeState;
   return {
     ...newState,
     [entityKey]: entityState
   };
+}
+
+/**
+ * Reset all pagination sections of an entity type
+ */
+function paginationResetAllPaginationSections(state: PaginationState, entityKey: string): PaginationEntityTypeState {
+  return Object.entries(state[entityKey]).reduce((res, [paginationKey, paginationSection]) => {
+    res[paginationKey] = paginationResetPaginationState(paginationSection);
+    return res;
+  }, {} as PaginationEntityTypeState);
+}
+
+/**
+ * Reset a single pagination section of an entity type
+ */
+function paginationResetPaginationSection(state: PaginationState, paginationKey: string, entityKey: string): PaginationEntityTypeState {
+
+  const paginationSection = state[entityKey][paginationKey]
+  if (!paginationSection) {
+    return;
+  }
+
+  const entityState: PaginationEntityTypeState = {
+    ...state[entityKey],
+    [paginationKey]: paginationResetPaginationState(paginationSection)
+  };
+  return entityState;
+}
+
+/**
+ * Reset a pagination section (retain initial/user sort/filter/etc)
+ */
+function paginationResetPaginationState(oldEntityState: PaginationEntityState) {
+  const { ids, pageRequests, pageCount, currentPage, totalResults } = getDefaultPaginationEntityState();
+  const entityState: PaginationEntityState = {
+    ...oldEntityState,
+    ids,
+    pageRequests,
+    pageCount,
+    currentPage,
+    totalResults,
+  }
+  return entityState;
+}
+
+export function resetEndpointEntities(state: PaginationState, action: EndpointActionComplete) {
+  const entityKeys = entityCatalog.getAllEntitiesForEndpointType(action.endpointType).map(entity => entity.entityKey);
+  if (entityKeys.length > 0) {
+    return entityKeys.reduce((prevState, entityKey) => {
+      if (prevState[entityKey]) {
+        return {
+          ...prevState,
+          [entityKey]: paginationResetAllPaginationSections(prevState, entityKey)
+        }
+      }
+      return prevState;
+    }, state);
+  }
+  return state;
 }

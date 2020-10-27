@@ -4,13 +4,11 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
 
-import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
-import { environment } from '../../../core/src/environments/environment';
 import { InternalAppState } from '../app-state';
-import { connectedEndpointsOfTypesSelector, registeredEndpointsOfTypesSelector } from '../selectors/endpoint.selectors';
-
-const { proxyAPIVersion, cfAPIVersion } = environment;
+import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
+import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
+import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
 
 @Injectable()
 export class PipelineHttpClient {
@@ -44,7 +42,7 @@ export class PipelineHttpClient {
       return this.httpClient.request<R>(hr.clone({ headers, url }));
     } else {
       const selector = endpointConfig.unConnectable ?
-        registeredEndpointsOfTypesSelector(endpointConfig.type) :
+        endpointOfTypeSelector(endpointConfig.type) :
         connectedEndpointsOfTypesSelector(endpointConfig.type);
 
       return this.store.select(selector).pipe(

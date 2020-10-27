@@ -10,7 +10,6 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { combineLatest, Subscription } from 'rxjs';
 import { delay, first, map, tap } from 'rxjs/operators';
@@ -18,7 +17,6 @@ import { delay, first, map, tap } from 'rxjs/operators';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
@@ -26,12 +24,14 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { SnackBarService } from '../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -43,13 +43,12 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = CurrentUserPermissions.ENDPOINT_REGISTER;
+  public canRegisterEndpoint = StratosCurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
 
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
@@ -62,7 +61,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     public store: Store<EndpointOnlyAppState>,
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
-    private snackBar: MatSnackBar,
+    private snackBarService: SnackBarService,
     cs: CustomizationService
   ) {
     this.customizations = cs.get();
@@ -103,10 +102,10 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   private showSnackBar(show: boolean) {
-    if (!this.snackBarRef && show) {
-      this.snackBarRef = this.snackBar.open(this.snackBarText.message, this.snackBarText.action, {});
-    } else if (this.snackBarRef && !show) {
-      this.snackBarRef.dismiss();
+    if (show) {
+      this.snackBarService.show(this.snackBarText.message, this.snackBarText.action, 20000);
+    } else {
+      this.snackBarService.hide();
     }
   }
 

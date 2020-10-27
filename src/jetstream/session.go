@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 const (
@@ -36,6 +38,13 @@ const (
 // SessionValueNotFound - Error returned when a requested key was not found in the session
 type SessionValueNotFound struct {
 	msg string
+}
+
+// SessionInfoEnvelope -- contains response status, data and/or errors
+type SessionInfoEnvelope struct {
+	Status string           `json:"status"`
+	Error  string           `json:"error"`
+	Data   *interfaces.Info `json:"data"`
 }
 
 func (e *SessionValueNotFound) Error() string {
@@ -122,7 +131,11 @@ func (p *portalProxy) writeSessionHook(c echo.Context) func() {
 		sessionIntf := c.Get(jetStreamSessionContextKey)
 		if sessionModifed != nil && sessionIntf != nil {
 			if session, ok := sessionIntf.(*sessions.Session); ok {
-				p.SessionStore.Save(c.Request(), c.Response().Writer, session)
+				err := p.SessionStore.Save(c.Request(), c.Response().Writer, session)
+				if err != nil {
+					log.Error("Failed to save session")
+					log.Error(err)
+				}
 			}
 		}
 	}
@@ -225,52 +238,68 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
 
-	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
-	if err != nil {
-		msg := "Could not find session date"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
+	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
+		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
+		if err != nil {
+			return nil, errors.New("Could not find session date")
+		}
 
-	sessionUser, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		msg := "Could not find user_id in Session"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
+		sessionUser, err := p.GetSessionStringValue(c, "user_id")
+		if err != nil {
+			return nil, errors.New("Could not find user_id in Session")
+		}
 
-	err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
-
-	// Could not verify session
-	if err != nil {
-		log.Error(err)
-		err = echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
-
-	} else {
+		err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
+		if err != nil {
+			return nil, errors.New("Could not verify user")
+		}
 
 		// Still need to extend the expires_on of the Session (set session will save session, in save we update `expires_on`)
 		if err = p.setSessionValues(c, nil); err != nil {
-			return err
+			return nil, err
 		}
 
-		err = p.handleSessionExpiryHeader(c)
-		if err != nil {
-			return err
+		if err = p.handleSessionExpiryHeader(c); err != nil {
+			return nil, err
 		}
 
 		info, err := p.getInfo(c)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return nil, err
 		}
 
 		// Add XSRF Token
 		p.ensureXSRFToken(c)
 
-		err = c.JSON(http.StatusOK, info)
-		if err != nil {
-			return err
-		}
+		return info, err
 	}
 
-	return err
+	var jsonErr error
+
+	info, sessionVerifyErr := collectErrors(p, c)
+	if sessionVerifyErr != nil {
+		p.clearSessionCookie(c, true)
+
+		jsonErr = c.JSON(
+			http.StatusOK,
+			SessionInfoEnvelope{
+				Status: "error",
+				Error:  sessionVerifyErr.Error(),
+			},
+		)
+	} else {
+		jsonErr = c.JSON(
+			http.StatusOK,
+			SessionInfoEnvelope{
+				Status: "ok",
+				Data:   info,
+			},
+		)
+	}
+
+	if jsonErr != nil {
+		return jsonErr
+	}
+
+	return nil
 }

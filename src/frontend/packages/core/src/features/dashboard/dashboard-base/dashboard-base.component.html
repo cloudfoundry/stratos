@@ -16,10 +16,18 @@
           </div>
           <div class="dashboard__main">
             <div *ngIf="subNavData$ | async as data">
-              <div class="page-header-sub-nav" *ngIf="data[0] || data[1]">
+              <div class="page-header-sub-nav" *ngIf="data[0] || data[1] || data[3]">
                 <div class="page-header-sub-nav__container">
-                  <div *ngIf="data[0] as activeTabLabel" class="page-header-sub-nav__title">
-                    {{ activeTabLabel }}
+                  <div *ngIf="data[0] && !data[3]" class="page-header-sub-nav__title">
+                    {{ data[0] }}
+                  </div>
+                  <div *ngIf="data[3] as breadcrumbs" class="page-header-sub-nav__breadcrumbs">
+                    <ng-container *ngFor="let breadcrumbDef of breadcrumbs; last as isLast">
+                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
+                        [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-nolink" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <mat-icon *ngIf="!isLast" class="page-header-sub-nav__breadcrumb-separator">chevron_right</mat-icon>
+                    </ng-container>
                   </div>
                   <ng-container *ngIf="data[1] as portal" [cdkPortalOutlet]="portal"></ng-container>
                 </div>
@@ -33,13 +41,11 @@
       </div>
     </mat-drawer-content>
   </mat-drawer-container>
-  <mat-drawer class="dashboard__side-help-outer" #sideHelp *ngIf="rightNavState$ | async as rightNavState"
-    [autoFocus]="false" mode="over" position="end" [opened]="rightNavState.opened" (closedStart)="sideHelpClosed()">
+  <mat-drawer class="dashboard__side-help-outer" #sideHelp
+    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async)}" [autoFocus]="false" mode="over"
+    position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
     <div class="dashboard__side-help">
-      <button class="dashboard__side-help-button" mat-icon-button (click)="rightNavState.opened = false">
-        <mat-icon>close</mat-icon>
-      </button>
-      <app-markdown-preview [documentUrl]="rightNavState.documentUrl"></app-markdown-preview>
+      <template #previewPanelContainer></template>
     </div>
   </mat-drawer>
 </div>

@@ -1,0 +1,8 @@
+
+@mixin add-life-update-style {
+  app-workload-live-reload {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+  }
+}

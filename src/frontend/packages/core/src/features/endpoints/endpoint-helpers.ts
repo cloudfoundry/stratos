@@ -11,10 +11,6 @@ import {
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 
-export function getFullEndpointApiUrl(endpoint: EndpointModel) {
-  return endpoint && endpoint.api_endpoint ?
-    `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}${endpoint.api_endpoint.Path}` : 'Unknown';
-}
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
@@ -25,12 +21,6 @@ export const DEFAULT_ENDPOINT_TYPE = 'cf';
 export interface EndpointIcon {
   name: string;
   font: string;
-}
-
-export enum EndpointAuthTypeNames {
-  CREDS = 'creds',
-  SSO = 'sso',
-  NONE = 'none'
 }
 
 // Any initial endpointTypes listDetailsComponent should be added here
@@ -50,4 +40,10 @@ export function endpointHasMetricsByAvailable(store: Store<AppState>, endpointId
     map(endpoint => endpoint.metricsAvailable),
     first()
   );
+}
+
+// Client Redirect URI for SSO
+export function getSSOClientRedirectURI(): string {
+  return window.location.protocol + '//' + window.location.hostname +
+    (window.location.port ? ':' + window.location.port : '') + '/pp/v1/auth/sso_login_callback';
 }

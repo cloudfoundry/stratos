@@ -2,29 +2,43 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { applicationEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
+import { cfEntityCatalog } from '../../../../cloud-foundry/src/cf-entity-catalog';
+import {
+  applicationEntityType,
+  organizationEntityType,
+  spaceEntityType,
+} from '../../../../cloud-foundry/src/cf-entity-types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { ApplicationMonitorService } from '../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { getGuids } from '../../../../cloud-foundry/src/features/applications/application/application-base.component';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { CfCurrentUserPermissions } from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { StratosTab, StratosTabType } from '../../../../core/src/core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/app-state';
+import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
+import { EntityService } from '../../../../store/src/entity-service';
+import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  PaginationObservables,
+} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
-import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
 import {
   AutoscalerPaginationParams,
@@ -34,9 +48,10 @@ import {
   GetAppAutoscalerScalingHistoryAction,
 } from '../../store/app-autoscaler.actions';
 import {
+  AppAutoscaleMetricChart,
+  AppAutoscalerEvent,
   AppAutoscalerMetricData,
   AppAutoscalerPolicyLocal,
-  AppAutoscalerScalingHistory,
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
@@ -47,9 +62,32 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute) => {
+  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
-    return isAutoscalerEnabled(endpointGuid, esf).pipe(map(enabled => !enabled));
+    const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
+    const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
+      includeRelations: [
+        createEntityRelationKey(applicationEntityType, spaceEntityType),
+        createEntityRelationKey(spaceEntityType, organizationEntityType),
+      ],
+      populateMissing: true
+    });
+
+    const canEditApp$ = appEntService.waitForEntity$.pipe(
+      switchMap(app => cups.can(
+        CfCurrentUserPermissions.APPLICATION_EDIT,
+        endpointGuid,
+        app.entity.entity.space.entity.organization_guid,
+        app.entity.entity.space.metadata.guid
+      )),
+    );
+
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
+
+    return canEditApp$.pipe(
+      switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
+      map(can => !can)
+    );
   }
 })
 @Component({
@@ -62,6 +100,8 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
+  canManageCredentials$: Observable<boolean>;
+
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
   recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max'];
@@ -69,11 +109,11 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService: EntityService<APIResource<AppAutoscalerScalingHistory>>;
+  public appAutoscalerScalingHistoryService: PaginationObservables<APIResource<AppAutoscalerEvent>>;
   appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerScalingHistory$: Observable<AppAutoscalerScalingHistory>;
-  appAutoscalerAppMetricNames$: Observable<string[]>;
+  appAutoscalerScalingHistory$: Observable<AppAutoscalerEvent[]>;
+  appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$: Observable<boolean>;
   public showAutoscalerHistory$: Observable<boolean>;
@@ -123,10 +163,26 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private appAutoscalerPolicySnackBar: MatSnackBar,
     private appAutoscalerScalingHistorySnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
+    private confirmDialog: ConfirmationDialogService
   ) { }
 
   ngOnInit() {
+
+    this.canManageCredentials$ = fetchAutoscalerInfo(
+      this.applicationService.cfGuid,
+      this.entityServiceFactory
+    ).pipe(
+      filter(info => !!info && !!info.entity && !!info.entity.entity),
+      map(info => {
+        const build = info.entity.entity.build;
+        const buildParts = build.split('.');
+        if (buildParts.length < 0) {
+          return false;
+        }
+        return Number.parseInt(buildParts[0], 10) >= 3;
+      })
+    );
+
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
       new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
@@ -146,22 +202,34 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.loadLatestMetricsUponPolicy();
 
     this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
-      map(entity => Object.keys(entity.scaling_rules_map)),
+      map(entity => Object.keys(entity.scaling_rules_map).map((name) => {
+        const unit = entity.scaling_rules_map[name].upper[0] && entity.scaling_rules_map[name].upper[0].unit
+          || entity.scaling_rules_map[name].lower[0] && entity.scaling_rules_map[name].lower[0].unit;
+        return {
+          name,
+          unit,
+        };
+      })),
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
       createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
       this.applicationService.appGuid,
       this.applicationService.cfGuid,
-      true,
+      false,
       this.paramsHistory
     );
-    this.appAutoscalerScalingHistoryService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      this.scalingHistoryAction
-    );
-    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entityObs$.pipe(
-      map(({ entity }) => entity && entity.entity),
+    this.appAutoscalerScalingHistoryService = getPaginationObservables({
+      store: this.store,
+      action: this.scalingHistoryAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.scalingHistoryAction.paginationKey,
+        this.scalingHistoryAction,
+        true
+      ),
+    }, true);
+    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
+      map(entities => entities.map(entity => entity.entity)),
       publishReplay(1),
       refCount()
     );
@@ -171,7 +239,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !!policy || (!!history && history.total_results > 0)),
+      map(([policy, history]) => !!policy || (!!history && history.length > 0)),
       publishReplay(1),
       refCount()
     );
@@ -180,7 +248,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicy$,
       this.appAutoscalerScalingHistory$
     ]).pipe(
-      map(([policy, history]) => !policy && (!history || history.total_results === 0)),
+      map(([policy, history]) => !policy && (!history || history.length === 0)),
       publishReplay(1),
       refCount()
     );
@@ -195,9 +263,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        autoscalerEntityFactory(appAutoscalerAppMetricEntityType)
+        autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
+        true
       )
-    }, false).entities$;
+    }, true).entities$;
   }
 
   loadLatestMetricsUponPolicy() {
@@ -234,7 +303,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistoryErrorSub) {
       this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
     }
-    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.entityMonitor.entityRequest$.pipe(
+    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
+      map(pagination => getCurrentPageRequestInfo(pagination)),
       filter(request => !!request.error),
       map(request => request.message),
       distinctUntilChanged(),
@@ -290,7 +360,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       ],
       query
     }));
-  }
+  };
 
   metricChartPage() {
     this.store.dispatch(new RouterNav({
@@ -319,8 +389,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.store.dispatch(this.scalingHistoryAction);
   }
 
-  getMetricUnit(metricType: string) {
-    return AutoscalerConstants.getMetricUnit(metricType);
+  getMetricUnit(metricType: string, unit?: string) {
+    return AutoscalerConstants.getMetricUnit(metricType, unit);
   }
+
+  manageCredentialPage = () => {
+    this.store.dispatch(new RouterNav({
+      path: [
+        'autoscaler',
+        this.applicationService.cfGuid,
+        this.applicationService.appGuid,
+        'edit-autoscaler-credential'
+      ]
+    }));
+  };
 
 }

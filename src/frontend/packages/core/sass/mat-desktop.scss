@@ -1,0 +1,146 @@
+// Desktop overrides fo popup menu
+// See: https://material.io/guidelines/components/menus.html#menus-specs
+
+$desktop-font-size: 14px;
+$desktop-menu-item-height: 32px;
+$desktop-menu-vertical-padding: 8px;
+$desktop-page-header-height: 48px;
+
+// Remove 1px border
+$desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
+
+.mat-desktop {
+
+  .mat-menu-item {
+    font-size: $desktop-font-size;
+    height: $desktop-menu-item-height;
+    line-height: $desktop-menu-item-height;
+    min-width: 128px;
+    padding: 0 24px;
+
+    &.hasIcon {
+      padding-left: 16px;
+      .mat-icon {
+        margin-right: 12px;
+      }
+    }
+  }
+
+  .mat-menu-panel {
+    // 32px + 2 * 8px top and bottom borders
+    min-height: $desktop-menu-item-height + 2 * $desktop-menu-vertical-padding;
+  }
+
+  // Toggle buttons - make them not look so massive
+  .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+    font-size: $desktop-font-size;
+    line-height: $desktop-toggle-button-item-height;
+  }
+
+  // Option items
+  .mat-select-panel .mat-option {
+    font-size: $desktop-font-size;
+    height: $desktop-menu-item-height;
+    line-height: $desktop-menu-item-height;
+  }
+
+  // Fix buttons too close to bottom border of dialogs
+  .mat-dialog-actions {
+    margin-bottom: -10px;
+  }
+
+  // Fix input field font size
+  .mat-form-field {
+    font-size: $desktop-font-size;
+  }
+
+  .mat-form-field-appearance-legacy.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label {
+    // need to make font size bigger so that it is scaled back down to reasonable size by the exiting css transform
+    font-size: 16px;
+  }
+
+  .mat-checkbox-label {
+    font-size: $desktop-font-size;
+  }
+
+  .mat-slide-toggle-label {
+    font-size: $desktop-font-size;
+  }
+
+  // Allow a slightly-wider snackbar on desktop
+  .mat-snack-bar-container {
+    max-width: 40vw;
+  }
+  
+  // Drop down options
+  .mat-option {
+    font-size: $desktop-font-size;
+    height: $desktop-menu-item-height;
+    line-height: $desktop-menu-item-height;
+  }
+
+  // Stepper control
+  .steppers__headers {
+    flex: 0 0 56px;
+    font-size: $desktop-font-size;
+    height: 56px;
+  }
+
+  // Smaller icons in the Toolbars in the page sub-nav
+  .page-header-sub-nav {
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+
+    .mat-icon-button {
+      line-height: 34px;
+      height: 34px;
+      width: 34px;
+      mat-icon {
+        // Also stops the wobble on the refresh icon
+        line-height: normal;
+      }
+    }
+
+  }
+
+  // Smaller page header
+  .page-header .page-header__toolbar {
+    height: $desktop-page-header-height;
+  }
+
+  .dashboard .dashboard__inner {
+    height: calc(100% - #{$desktop-page-header-height});
+  }
+
+  .side-nav .side-nav__top {
+    flex: 0 0 $desktop-page-header-height;
+    height: $desktop-page-header-height;
+  }
+
+  mat-drawer.dashboard__side_preview {
+    top: $desktop-page-header-height;
+    height: calc(100vw - #{$desktop-page-header-height} - 1px);
+  }
+
+  app-profile-info .user-profile {
+    top: $desktop-page-header-height;
+  }
+
+  // Smaller dialog titles & content
+  .mat-dialog-title {
+    font-size: 18px;
+  }
+  .mat-dialog-content {
+    font-size: 16px;
+  }
+
+  // Reduced padding on steppers - the stepper already had padding applied because they are included in the dashboard, which
+  // has padding via the '.dashboard__content` class - so we end up with double padding - this removes the extra level of padding
+  .steppers__inner {
+    padding: 0;
+  }
+
+}

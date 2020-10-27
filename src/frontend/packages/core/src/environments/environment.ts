@@ -1,4 +1,4 @@
-import { LogLevel } from '../../../store/src/actions/log.actions';
+import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
 
 // The file contents for the current environment will overwrite these during build.
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do
@@ -7,11 +7,8 @@ import { LogLevel } from '../../../store/src/actions/log.actions';
 
 export const environment = {
   production: false,
-  proxyAPIVersion: 'v1',
-  cfAPIVersion: 'v2',
-  logLevel: LogLevel.DEBUG,
-  logToConsole: true,
-  logEnableConsoleActions: false,
+  proxyAPIVersion,
+  cfAPIVersion,
   showObsDebug: false,
   disablePolling: false
 };

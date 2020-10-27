@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "SchematicsTheme",
+  "title": "Theme Options Schema",
+  "type": "object",
+  "description": "Creates a new generic Stratos Theme project in the current workspace.",
+  "long-description": "./theme-long.md",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the theme.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use for the theme?"
+    },
+    "includeAssets": {
+      "description": "When true, a default set of assets will be included in the theme.",
+      "type": "boolean",
+      "default": false,
+      "x-prompt": "Include default set of assets?"
+    },
+    "includeLoader": {
+      "description": "When true, a default loading indicator will be included in the theme.",
+      "type": "boolean",
+      "default": false,
+      "x-prompt": "Include a default application loading screen?"
+    }
+  },
+  "required": []
+}

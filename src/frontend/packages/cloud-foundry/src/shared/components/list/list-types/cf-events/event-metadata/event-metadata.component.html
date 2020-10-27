@@ -1,18 +1,27 @@
-<mat-dialog-content class="connection-dialog__content">
+<ng-container *ngIf="isPopup; else notPopup">
+  <mat-dialog-content class="details__popup">
+    <ng-container *ngTemplateOutlet="showValues">
+    </ng-container>
+  </mat-dialog-content>
+  <mat-dialog-actions class="dialog__actions">
+    <button [mat-dialog-close]="true" mat-button>Close</button>
+  </mat-dialog-actions>
+</ng-container>
+
+
+<ng-template #notPopup>
   <div *ngIf="showPopup; else showValues">
-    <button mat-button (click)="doShowPopup()">
+    <button mat-stroked-button color="primary" (click)="doShowPopup()">
       Show Details
     </button>
   </div>
-  <ng-template #showValues>
-    <div class="details">
-      <div class="details__section" *ngFor="let metadata of (metadata) | values">
-        <div class="details__section__key">{{metadata.key}}: </div>
-        <div>{{metadata.value | json}}</div>
-      </div>
+</ng-template>
+
+<ng-template #showValues>
+  <div class="details">
+    <div class="details__section" *ngFor="let metadata of (metadata) | keyvalue">
+      <div class="details__section__key">{{metadata.key}}: </div>
+      <div>{{metadata.value | json}}</div>
     </div>
-  </ng-template>
-</mat-dialog-content>
-<mat-dialog-actions class="dialog__actions" *ngIf="isPopup">
-  <button [mat-dialog-close]="true" mat-button>Close</button>
-</mat-dialog-actions>
+  </div>
+</ng-template>

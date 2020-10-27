@@ -13,13 +13,12 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog.service';
-import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../core/extension/extension-types';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
+import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
+import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { BaseEndpointAuth } from '../endpoint-auth';
 
 @Component({
   selector: 'app-connect-endpoint',
@@ -114,11 +113,14 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     // Template container reference is not available at construction
     this.createComponent(this.autoSelected.component);
 
-    this.subs.push(this.endpointForm.valueChanges.pipe(
-      map(() => this.endpointForm.valid)
-    ).subscribe(res => {
-      this.setData();
-      this.valid.next(res);
+    this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
+      const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
+      let valid = false;
+      if (authType.component === this.authFormComponentRef.componentType) {
+        this.setData();
+        valid = this.endpointForm.valid;
+      }
+      this.valid.next(valid);
     }));
 
     // Set initial valid status
@@ -160,6 +162,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (this.authFormComponentRef) {
       this.authFormComponentRef.destroy();
     }
+
     const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;

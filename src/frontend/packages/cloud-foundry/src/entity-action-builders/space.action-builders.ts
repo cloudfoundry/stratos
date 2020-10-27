@@ -1,11 +1,19 @@
-import { IUpdateSpace } from '../../../core/src/core/cf-api.types';
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrganizationSpaces } from '../actions/organization.actions';
 import { CreateSpace, DeleteSpace, GetAllSpaces, GetSpace, UpdateSpace } from '../actions/space.actions';
+import { IUpdateSpace } from '../cf-api.types';
+import { cfEntityFactory } from '../cf-entity-factory';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
+import { organizationEntityType, spaceEntityType, spaceWithOrgEntityType } from '../cf-entity-types';
+import { createEntityRelationKey } from '../entity-relations/entity-relations.types';
 
 export interface SpaceActionBuilders extends OrchestratedActionBuilders {
   get: (
+    guid: string,
+    endpointGuid: string,
+    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+  ) => GetSpace;
+  getWithOrganization: (
     guid: string,
     endpointGuid: string,
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
@@ -49,6 +57,24 @@ export const spaceActionBuilders: SpaceActionBuilders = {
     includeRelations,
     populateMissing
   ),
+  getWithOrganization: (
+    guid: string,
+    endpointGuid: string,
+    {
+      includeRelations = [createEntityRelationKey(spaceEntityType, organizationEntityType)],
+      populateMissing
+    }: CFBasePipelineRequestActionMeta = {}
+  ) => {
+    const action = new GetSpace(
+      guid,
+      endpointGuid,
+      includeRelations || [],
+      populateMissing
+    )
+    action.entity = [cfEntityFactory(spaceWithOrgEntityType)];
+    action.schemaKey = spaceWithOrgEntityType
+    return action;
+  },
   remove: (
     guid,
     endpointGuid,

@@ -1,21 +1,33 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest, of } from 'rxjs';
+import { debounceTime, filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
+import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { FavoritesConfigMapper } from '../../../favorites-meta-card/favorite-config-mapper';
+import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  IListAction,
+  IListConfig,
+  IListMultiFilterConfig,
+  IListMultiFilterConfigItem,
+  ListViewTypes,
+} from '../../list.component.types';
+import { BaseEndpointsDataSource } from './base-endpoints-data-source';
 import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
+import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -27,8 +39,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   cardComponent = EndpointCardComponent;
 
   private singleActions: IListAction<EndpointModel>[];
-
-  private globalActions = [];
 
   public readonly columns: ITableColumn<EndpointModel>[] = [
     {
@@ -72,9 +82,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     {
       columnId: 'address',
       headerCell: () => 'Address',
-      cellDefinition: {
-        getValue: getFullEndpointApiUrl
-      },
+      cellComponent: TableCellEndpointAddressComponent,
       sort: {
         type: 'sort',
         orderKey: 'address',
@@ -90,7 +98,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     }
   ];
 
-
   isLocal = true;
   dataSource: EndpointsDataSource;
   viewType = ListViewTypes.BOTH;
@@ -100,39 +107,98 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     filter: 'Filter Endpoints'
   };
   enableTextFilter = true;
-  tableFixedRowHeight = true;
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
     favoritesConfigMapper: FavoritesConfigMapper,
-
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => favoritesConfigMapper.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
+
     this.dataSource = new EndpointsDataSource(
       this.store,
       this,
       paginationMonitorFactory,
       entityMonitorFactory,
-      internalEventMonitorFactory
+      internalEventMonitorFactory,
+      true
     );
   }
 
-  public getGlobalActions = () => this.globalActions;
+  public getGlobalActions = () => [];
   public getMultiActions = () => [];
   public getSingleActions = () => this.singleActions;
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
-  public getMultiFiltersConfigs = () => [];
+
+  public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [this.createEndpointTypeFilter()];
 
   private getEndpointTypeString(endpoint: EndpointModel): string {
     return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
+  }
+
+  private createEndpointTypeFilter(): IListMultiFilterConfig {
+    return {
+      key: BaseEndpointsDataSource.typeFilterKey,
+      label: 'Endpoint Type',
+      list$: combineLatest([
+        stratosEntityCatalog.endpoint.store.getPaginationMonitor().currentPage$,
+        stratosEntityCatalog.endpoint.store.getPaginationMonitor().pagination$
+      ]).pipe(
+        debounceTime(100),// This can get pretty spammy, to help protect resetEndpointTypeFilter allow a pause
+        filter(([endpoints, pagination]) => !!endpoints),
+        map(([endpoints, pagination]) => {
+          // Provide a list of endpoint types only if there are more than two registered endpoint types
+          const types: { [type: string]: boolean; } = {};
+          for (const endpoint of endpoints) {
+            types[endpoint.cnsi_type] = true;
+          }
+          if (Object.values(types).filter(type => type).length < 2) {
+            // If we're going to hid the endpoint filter ensure any existing filter value is reset
+            this.resetEndpointTypeFilter(pagination);
+            return [];
+          }
+          return entityCatalog.getAllBaseEndpointTypes()
+            .sort((a, b) => a.definition.renderPriority - b.definition.renderPriority)
+            .filter(et => types[et.type])
+            .map(et => {
+              const res: IListMultiFilterConfigItem = {
+                label: et.definition.label,
+                item: et,
+                value: et.type
+              };
+              return res;
+            });
+        })
+      ),
+      loading$: of(false),
+      select: new BehaviorSubject(undefined)
+    };
+  }
+
+  private resetEndpointTypeFilter(pagination: PaginationEntityState) {
+    if (
+      pagination.clientPagination &&
+      pagination.clientPagination.filter &&
+      pagination.clientPagination.filter.items[BaseEndpointsDataSource.typeFilterKey]
+    ) {
+      const clientPaginationFilter = {
+        ...pagination.clientPagination.filter,
+        items: {
+          ...pagination.clientPagination.filter.items,
+          [BaseEndpointsDataSource.typeFilterKey]: null
+        }
+      };
+      this.store.dispatch(
+        new SetClientFilter(this.dataSource.masterAction, this.dataSource.paginationKey, clientPaginationFilter)
+      );
+    }
   }
 }

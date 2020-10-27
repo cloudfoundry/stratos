@@ -1,6 +1,8 @@
-import { handleJetstreamResponsePipeFactory, JetstreamError } from './handle-multi-endpoints.pipe';
+import { of } from 'rxjs';
+
+import { JetStreamErrorResponse } from '../../jetstream';
 import { JetstreamResponse } from '../entity-request-pipeline.types';
-import { JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
+import { handleJetstreamResponsePipeFactory, JetstreamError } from './handle-multi-endpoints.pipe';
 
 describe('handle-multi-endpoint-pipe', () => {
   it(' should handle error and success', () => {
@@ -73,7 +75,9 @@ describe('handle-multi-endpoint-pipe', () => {
         return total + pages[0].total;
       }, 0),
       getPaginationParameters: () => ({ page: '1' }),
-      getTotalPages: () => 4
+      getTotalPages: () => 4,
+      canIgnoreMaxedState: () => of(false),
+      maxedStateStartAt: () => null
     })(resData);
     expect(handled.successes.length).toBe(2);
     expect(handled.successes[0].entities[0].data1).toBe(endpoint2Res.entities[0].data1);

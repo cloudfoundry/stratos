@@ -17,8 +17,14 @@ source "${DIRPATH}/cfutils.sh"
 # We should be running in the Stratos GitHub folder
 
 # Optionally bring up a database and create a user provided service for the database
-ETH_DEVICE=$(ip -o link show | awk '{print $2,$9}' | grep UP | grep eth | sed -n 1p | cut -d: -f1)
-HOST=$(ip -4 addr show $ETH_DEVICE | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+if [ -z "${DATABASE_HOST}" ]; then
+  ETH_DEVICE=$(ip -o link show | awk '{print $2,$9}' | grep UP | grep eth | sed -n 1p | cut -d: -f1)
+  HOST=$(ip -4 addr show $ETH_DEVICE | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+else
+  HOST=${DATABASE_HOST}
+  echo "Database host is ${HOST}"
+fi
+
 USERNAME=stratos_mysql
 PASSWORD=stratos_mysql_passw0rd
 DB_NAME=stratos_db

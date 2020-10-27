@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store';
-import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
-import { pathGet } from '../../../../core/src/core/utils.service';
+
 import { APIResponse } from '../../actions/request.actions';
 import { BaseRequestState, GeneralAppState } from '../../app-state';
+import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { mergeState } from '../../helpers/reducer.helper';
 import { NormalizedResponse } from '../../types/api.types';
 import { PaginatedAction } from '../../types/pagination.types';
@@ -17,7 +18,6 @@ import {
   WrapperRequestActionSuccess,
 } from '../../types/request.types';
 import { defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
-import { BaseEntityRequestAction } from '../../entity-catalog/action-orchestrator/action-orchestrator';
 
 export function getEntityRequestState(
   state: BaseRequestState,
@@ -81,7 +81,7 @@ export function createRequestStateFromResponse(
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 export function getRequestTypeFromMethod(action: EntityRequestAction): ApiRequestTypes {
-  let method = pathGet('options.method', action);
+  let method = action.options ? action.options.method : undefined;
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
     if (method === 'post') {

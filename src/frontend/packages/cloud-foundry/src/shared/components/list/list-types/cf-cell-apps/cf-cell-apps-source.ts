@@ -2,29 +2,25 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { GetApplication } from '../../../../../../../cloud-foundry/src/actions/application.actions';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   applicationEntityType,
   organizationEntityType,
   spaceEntityType,
 } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IApp } from '../../../../../../../core/src/core/cf-api.types';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { MetricQueryType } from '../../../../../../../core/src/shared/services/metrics-range-selector.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../../store/src/types/metric.types';
+import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
+import { IApp } from '../../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
-
-// TODO: Move file to CF package (#3769)
 
 export interface CfCellApp {
   metric: IMetricApplication;
@@ -43,7 +39,6 @@ export class CfCellAppsDataSource
     cfGuid: string,
     cellId: string,
     listConfig: IListConfig<CfCellApp>,
-    entityServiceFactory: EntityServiceFactory
   ) {
     const action = new FetchCFMetricsPaginatedAction(
       cellId,
@@ -66,7 +61,7 @@ export class CfCellAppsDataSource
         return response[0].data.result.map(res => ({
           metric: res.metric,
           appGuid: res.metric.application_id,
-          appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid, entityServiceFactory)
+          appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid)
         }));
       }),
       listConfig
@@ -76,15 +71,18 @@ export class CfCellAppsDataSource
 
   private createAppEntityService(
     appGuid: string,
-    cfGuid: string,
-    entityServiceFactory: EntityServiceFactory): Observable<APIResource<IApp>> {
+    cfGuid: string
+  ): Observable<APIResource<IApp>> {
     if (!this.appEntityServices[appGuid]) {
-      this.appEntityServices[appGuid] = entityServiceFactory.create<APIResource<IApp>>(
+      this.appEntityServices[appGuid] = cfEntityCatalog.application.store.getEntityService(
         appGuid,
-        new GetApplication(appGuid, cfGuid, [
+        cfGuid, {
+        includeRelations: [
           createEntityRelationKey(applicationEntityType, spaceEntityType),
           createEntityRelationKey(spaceEntityType, organizationEntityType)
-        ])
+        ],
+        populateMissing: true
+      }
       ).waitForEntity$.pipe(
         map(entityInfo => entityInfo.entity)
       );

@@ -14,10 +14,9 @@ import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { catchError, first, map, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { IRouterNavPayload, RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
 import { getPreviousRoutingState } from '../../../../../../store/src/types/routing.type';
-import { LoggerService } from '../../../../core/logger.service';
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
@@ -61,9 +60,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }>;
   constructor(
     private steppersService: SteppersService,
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    private logger: LoggerService,
     private route: ActivatedRoute
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
@@ -117,7 +115,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      const obs$ = step.onNext();
+      const obs$ = step.onNext(this.currentIndex, step);
       if (!(obs$ instanceof Observable)) {
         return;
       }
@@ -125,10 +123,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.nextSub = obs$.pipe(
         first(),
         catchError(err => {
-          this.logger.warn('Stepper failed: ', err);
+          console.warn('Stepper failed: ', err);
           return observableOf({
             success: false,
-            message: 'Failed',
+            message: err || 'Failed',
             redirectPayload: null,
             redirect: false,
             data: {},

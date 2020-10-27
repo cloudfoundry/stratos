@@ -1,0 +1,31 @@
+{{- if (not .Values.mariadb.external) }}
+{{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim) }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: console-mariadb
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "console-mariadb-volume"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+  annotations:
+  {{- if .Values.mariadb.persistence.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.mariadb.persistence.storageClass | quote }}
+  {{- else if .Values.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
+  {{- else if .Values.kube.storage_class.persistent }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.kube.storage_class.persistent | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.mariadb.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.mariadb.persistence.size | quote }}
+{{- end }}
+{{- end }}

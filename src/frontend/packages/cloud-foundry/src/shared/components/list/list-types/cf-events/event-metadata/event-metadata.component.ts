@@ -1,5 +1,5 @@
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-event-metadata',
@@ -8,10 +8,10 @@ import { MAT_DIALOG_DATA, MatDialog } from '@angular/material';
 })
 export class EventMetadataComponent implements OnInit {
 
-  static maxValuesLength = 1000;
+  static maxValuesLength = 500;
   static maxKeys = 5;
 
-  @Input() metadata: { [name: string]: any };
+  @Input() metadata: { [name: string]: any, };
   @Input() canShowPopup = true;
   showPopup = false;
   isPopup = false;
@@ -19,7 +19,7 @@ export class EventMetadataComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     @Optional() @Inject(MAT_DIALOG_DATA) public data?: {
-      metadata: { [name: string]: string },
+      metadata: { [name: string]: string, },
     },
   ) {
 
@@ -38,7 +38,7 @@ export class EventMetadataComponent implements OnInit {
           if (count > EventMetadataComponent.maxValuesLength) {
             return count;
           }
-          return count + (value ? value.toString().length : 0);
+          return count + (value ? JSON.stringify(value).length : 0);
         }, 0) > EventMetadataComponent.maxValuesLength;
     }
   }

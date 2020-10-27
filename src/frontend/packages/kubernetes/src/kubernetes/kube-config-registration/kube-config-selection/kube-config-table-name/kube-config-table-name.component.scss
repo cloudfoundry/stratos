@@ -1,0 +1,12 @@
+.name {
+  align-items: center;
+  display: flex;
+
+  .cell-edit-variable {
+    flex: 1;
+  }
+
+  app-table-cell-edit {
+    margin-bottom: 3px;
+  }
+}

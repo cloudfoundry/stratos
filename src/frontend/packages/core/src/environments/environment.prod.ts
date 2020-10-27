@@ -1,12 +1,9 @@
-import { LogLevel } from './../../../store/src/actions/log.actions';
+import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
 
 export const environment = {
   production: true,
-  logLevel: LogLevel.WARN,
-  proxyAPIVersion: 'v1',
-  cfAPIVersion: 'v2',
-  logToConsole: true,
-  logEnableConsoleActions: false,
+  proxyAPIVersion,
+  cfAPIVersion,
   showObsDebug: false,
   disablePolling: false
 };

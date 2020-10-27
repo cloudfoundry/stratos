@@ -9,11 +9,11 @@ import { filter, map, take } from 'rxjs/operators';
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import {
   AppNameUniqueChecking,
   AppNameUniqueDirective,
-} from '../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+} from '../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
 
 

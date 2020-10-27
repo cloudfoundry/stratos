@@ -1,20 +1,20 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAllOrgUsers } from '../actions/organization.actions';
 import { GetAllSpaceUsers } from '../actions/space.actions';
-import { GetAllUsersAsAdmin, GetUser } from '../actions/users.actions';
+import { GetAllCfUsersAsAdmin, GetCfUser } from '../actions/users.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
-export interface UserActionBuilder extends OrchestratedActionBuilders {
+export interface UserActionBuilders extends OrchestratedActionBuilders {
   get: (
-    guid,
-    endpointGuid
-  ) => GetUser;
+    guid: string,
+    endpointGuid: string
+  ) => GetCfUser;
   // Must be admin user for this to succeed.
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
-  ) => GetAllUsersAsAdmin;
+  ) => GetAllCfUsersAsAdmin;
   getAllInOrganization: (
     guid: string,
     endpointGuid: string,
@@ -31,17 +31,17 @@ export interface UserActionBuilder extends OrchestratedActionBuilders {
   ) => GetAllSpaceUsers;
 }
 
-export const userActionBuilders: UserActionBuilder = {
+export const userActionBuilders: UserActionBuilders = {
   get: (
     guid,
     endpointGuid
-  ) => new GetUser(endpointGuid, guid),
+  ) => new GetCfUser(endpointGuid, guid),
   // Must be admin user for this to succeed.
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
-  ) => new GetAllUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
+  ) => new GetAllCfUsersAsAdmin(endpointGuid, includeRelations, populateMissing, paginationKey),
   getAllInOrganization: (
     guid: string,
     endpointGuid: string,

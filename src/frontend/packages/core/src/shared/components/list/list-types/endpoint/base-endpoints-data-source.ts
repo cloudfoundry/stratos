@@ -2,17 +2,18 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { CreatePagination } from '../../../../../../../store/src/actions/pagination.actions';
-import { endpointSchemaKey } from '../../../../../../../store/src/helpers/entity-factory';
-import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { endpointEntitySchema } from '../../../../../base-entity-schemas';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { endpointEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { endpointEntitiesSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
+import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
+import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { DataFunction, DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
@@ -20,19 +21,23 @@ import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
 export function syncPaginationSection(
-  store: Store<CFAppState>,
+  store: Store<AppState>,
   action: GetAllEndpoints,
   paginationKey: string
 ) {
   store.dispatch(new CreatePagination(
     action,
     paginationKey,
-    action.paginationKey
+    action.paginationKey,
+    action.initialParams
   ));
 }
 
 export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
-  store: Store<CFAppState>;
+
+  public static typeFilterKey = 'endpointType';
+
+  store: Store<AppState>;
   /**
    * Used to distinguish between data sources providing all endpoints or those that only provide endpoints matching this value.
    * Value should match those of an endpoint's `cnsi_type`.
@@ -42,22 +47,24 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   dsEndpointType: string;
 
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
     action: GetAllEndpoints,
     dsEndpointType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
-    onlyConnected = true
+    onlyConnected = true,
+    filterByType = false
   ) {
     const rowStateHelper = new ListRowSateHelper();
     const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      GetAllEndpoints.storeKey,
+      action.paginationKey,
       action,
-      EndpointRowStateSetUpManager
+      EndpointRowStateSetUpManager,
+      false
     );
     const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
     const config = BaseEndpointsDataSource.getEndpointConfig(
@@ -72,52 +79,59 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       () => this.store.dispatch(action)
     );
 
+    const transformEntities: (DataFunctionDefinition | DataFunction<EndpointModel>)[] = [{
+      type: 'filter',
+      field: 'name'
+    }];
+    if (dsEndpointType || onlyConnected) {
+      transformEntities.push((entities: EndpointModel[]) => {
+        return dsEndpointType || onlyConnected ? entities.filter(endpoint => {
+          return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
+            (!dsEndpointType || endpoint.cnsi_type === dsEndpointType);
+        }) : entities;
+      });
+    }
+    if (filterByType) {
+      transformEntities.push((entities: EndpointModel[], paginationState: PaginationEntityState) =>
+        BaseEndpointsDataSource.endpointTypeFilter(entities, paginationState)
+      );
+    }
+
     super({
       ...config,
       paginationKey: action.paginationKey,
-      transformEntities: [
-        (entities: EndpointModel[]) => {
-          return dsEndpointType || onlyConnected ? entities.filter(endpoint => {
-            return (!onlyConnected || endpoint.connectionStatus === 'connected') &&
-              (!dsEndpointType || endpoint.cnsi_type === dsEndpointType);
-          }) : entities;
-        },
-        {
-          type: 'filter',
-          field: 'name'
-        },
-      ],
+      transformEntities,
     });
     this.dsEndpointType = dsEndpointType;
   }
 
   static getEndpointConfig(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     action: GetAllEndpoints,
     listConfig: IListConfig<EndpointModel>,
     rowsState: Observable<RowsState>,
     destroy: () => void,
     refresh: () => void
-  ) {
+  ): IListDataSourceConfig<EndpointModel, EndpointModel> {
     return {
       store,
       action,
-      schema: endpointEntitySchema,
-      getRowUniqueId: object => object.guid,
+      schema: action.entity[0],
+      getRowUniqueId: (object) => action.entity[0].getId(object),
       getEmptyType: () => ({
         name: '',
         system_shared_token: false,
         metricsAvailable: false,
         sso_allowed: false,
       }),
-      paginationKey: GetAllEndpoints.storeKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [
         {
           type: 'filter',
           field: 'name'
         },
-      ] as DataFunctionDefinition[],
+      ],
       listConfig,
       rowsState,
       destroy,
@@ -127,9 +141,9 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   static monitorEvents(
     internalEventMonitorFactory: InternalEventMonitorFactory,
     rowStateManager: TableRowStateManager,
-    store: Store<CFAppState>
+    store: Store<AppState>
   ) {
-    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointEntityType);
     return eventMonitor.hasErroredOverTime().pipe(
       withLatestFrom(store.select(endpointEntitiesSelector)),
       tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {
@@ -153,4 +167,18 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       })),
     ).subscribe();
   }
+
+  static endpointTypeFilter: DataFunction<EndpointModel> = (entities: EndpointModel[], paginationState: PaginationEntityState) => {
+    if (
+      !paginationState.clientPagination ||
+      !paginationState.clientPagination.filter ||
+      !paginationState.clientPagination.filter.items[BaseEndpointsDataSource.typeFilterKey]
+    ) {
+      return entities;
+    }
+    const searchTerm = paginationState.clientPagination.filter.items[BaseEndpointsDataSource.typeFilterKey];
+    return searchTerm ?
+      entities.filter(endpoint => endpoint.cnsi_type === searchTerm) :
+      entities;
+  };
 }

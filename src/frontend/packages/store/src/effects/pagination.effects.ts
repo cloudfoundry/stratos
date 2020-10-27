@@ -3,7 +3,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../cloud-foundry/src/cf-app-state';
 import {
   ADD_PARAMS,
   AddParams,
@@ -13,13 +12,14 @@ import {
   SET_PARAMS,
   SetParams,
 } from '../actions/pagination.actions';
+import { AppState } from '../app-state';
 
 @Injectable()
 export class PaginationEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<AppState>
   ) { }
 
   @Effect({ dispatch: false }) clearPaginationOnParamChange$ = this.actions$.pipe(

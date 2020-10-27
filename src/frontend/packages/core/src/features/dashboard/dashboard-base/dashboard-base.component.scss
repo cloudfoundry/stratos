@@ -1,7 +1,8 @@
-@import '../../../../sass/colors';
 @import '../../../../sass/mixins';
 
 $app-sub-header-height: 48px;
+$app-header-height: 56px;
+
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -15,12 +16,17 @@ $app-sub-header-height: 48px;
   }
   &__side-help-outer {
     z-index: 9999;
+
+    @include breakpoint(mobileonly) {
+      left: 0;
+    }
   }
-  &__side-help-button {
-    position: absolute;
-    right: 5px;
-    top: 7px;
+
+  &__side_preview {
+    top: $app-header-height;
+    height: calc(100vw - #{$app-header-height} - 1px);
   }
+
   &__page-tabs {
     background-color: rgba(146, 146, 146, .1);
   }
@@ -51,6 +57,11 @@ $app-sub-header-height: 48px;
   }
   &__side-help {
     max-width: 600px;
+    min-width: 600px;
+
+    @include breakpoint(mobileonly) {
+      min-width: auto;
+    }
   }
 }
 
@@ -68,20 +79,23 @@ $app-sub-header-height: 48px;
 }
 
 .page-header-sub-nav {
+  $breadcrumb-opacity: .7;
+  $breadcrumb-hover-opacity: 1;
+  $breadcrumb-padding: 3px;
+  $font-size: 20px;
+
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, .1);
   display: flex;
   height: $app-sub-header-height;
   margin-left: 200px;
   padding: 0;
-  width: 100%;
   @include breakpoint(tablet) {
     margin: 0;
     padding: 0 20px;
   }
   &__title {
     display: none;
-    $font-size: 20px;
     font-size: $font-size;
     font-weight: bold;
     line-height: $font-size;
@@ -96,4 +110,34 @@ $app-sub-header-height: 48px;
     opacity: .6;
     width: 100%;
   }
+  &__breadcrumb {
+    font-size: $font-size;
+    font-weight: bold;
+    line-height: $font-size;
+  }
+  &__breadcrumb,
+  &__breadcrumb-separator {
+    opacity: $breadcrumb-opacity;
+  }
+  &__breadcrumb-separator {
+    font-size: 24px;
+    margin: 0 $breadcrumb-padding;
+    user-select: none;
+  }
+  &__breadcrumbs {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+  &__breadcrumb-nolink {
+    opacity: $breadcrumb-hover-opacity;
+  }
+  &__breadcrumb-link {
+    cursor: pointer;
+    outline: none;
+    &:hover {
+      opacity: $breadcrumb-hover-opacity;
+    }
+  }
+
 }

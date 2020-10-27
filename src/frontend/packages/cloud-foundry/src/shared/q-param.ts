@@ -20,11 +20,14 @@ export class QParam {
       }
     }, null as []);
     if (qParamComponents && qParamComponents.length === 3) {
-      return new QParam(
-        qParamComponents[0],
-        qParamComponents[1],
-        qParamComponents[2]
-      );
+      const legitJoiner = Object.values(QParamJoiners).find(joiner => joiner === qParamComponents[2]);
+      if (legitJoiner) {
+        return new QParam(
+          qParamComponents[0],
+          qParamComponents[1],
+          legitJoiner
+        );
+      }
     }
     return null;
   }

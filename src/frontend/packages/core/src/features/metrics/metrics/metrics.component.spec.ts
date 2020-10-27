@@ -2,17 +2,17 @@ import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
-import { TabNavService } from '../../../../tab-nav.service';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
-import { createBasicStoreModule } from '@stratos/store/testing';
 import { CoreModule } from '../../../core/core.module';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TabNavService } from '../../../tab-nav.service';
 import { MetricsService } from '../services/metrics-service';
 import { MetricsComponent } from './metrics.component';
 
-// TODO: Fix after metrics has been sorted - STRAT-152
-xdescribe('MetricsComponent', () => {
+describe('MetricsComponent', () => {
   let component: MetricsComponent;
   let fixture: ComponentFixture<MetricsComponent>;
 
@@ -28,7 +28,11 @@ xdescribe('MetricsComponent', () => {
         createBasicStoreModule(),
       ],
       declarations: [MetricsComponent],
-      providers: [MetricsService, TabNavService]
+      providers: [
+        MetricsService,
+        TabNavService,
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

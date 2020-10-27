@@ -2,14 +2,14 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { featureFlagEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IFeatureFlag } from '../../../../../../../core/src/core/cf-api.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { IFeatureFlag } from '../../../../../cf-api.types';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { createCfFeatureFlagFetchAction } from './cf-feature-flags-data-source.helpers';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',
@@ -22,18 +22,20 @@ export const FeatureFlagDescriptions = {
   set_roles_by_username: 'Org Managers and Space Managers can add roles by username',
   unset_roles_by_username: 'Org Managers and Space Managers can remove roles by username',
   task_creation: 'Space Developers can create tasks on their application. This feature is under development',
-  env_var_visibility: ' All users can view environment variables',
+  env_var_visibility: 'All users can view environment variables',
   space_scoped_private_broker_creation: 'Space Developers can create space-scoped private service brokers',
   space_developer_env_var_visibility:
     'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables',
-  service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
+  service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.',
+  hide_marketplace_from_unauthenticated_users: 'Service offerings available in the marketplace will be hidden from unauthenticated users',
+  resource_matching: 'Any user can create resource matches'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
   static nameColumnId = 'name';
   static descriptionColumnId = 'description';
 
   constructor(store: Store<CFAppState>, cfGuid: string, listConfig?: IListConfig<IFeatureFlag>) {
-    const action = createCfFeatureFlagFetchAction(cfGuid);
+    const action = cfEntityCatalog.featureFlag.actions.getMultiple(cfGuid);
     super({
       store,
       action,

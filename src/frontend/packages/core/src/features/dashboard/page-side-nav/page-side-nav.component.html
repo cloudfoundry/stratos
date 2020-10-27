@@ -9,8 +9,9 @@
   </div>
   <ul class="page-side-nav__items">
     <li tabindex="1" *ngFor="let tab of tabs">
-      <a *ngIf="!tab.hidden$ || !(tab.hidden$ | async)" class="page-side-nav__item" [routerLink]="[tab.link]"
-        [routerLinkActive]="['page-side-nav__item--active']">
+      <div *ngIf="!tab.link" class="page-side-nav__item-sep">{{ tab.label }}</div>
+      <a *ngIf="tab.link && (!tab.hidden$ || !(tab.hidden$ | async))" class="page-side-nav__item"
+        [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
         <mat-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
         </mat-icon>
         <mat-icon class="page-side-nav__icon" *ngIf="!tab.icon"></mat-icon>

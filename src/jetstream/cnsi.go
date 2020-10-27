@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"crypto/sha1"
@@ -40,31 +40,36 @@ func isSSLRelatedError(err error) (bool, string) {
 
 func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.InfoFunc) error {
 	log.Debug("registerEndpoint")
-	cnsiName := c.FormValue("cnsi_name")
-	apiEndpoint := c.FormValue("api_endpoint")
-	skipSSLValidation, err := strconv.ParseBool(c.FormValue("skip_ssl_validation"))
+
+	params := new(interfaces.RegisterEndpointParams)
+	err := interfaces.BindOnce(params, c)
+	if err != nil {
+		return err
+	}
+
+	skipSSLValidation, err := strconv.ParseBool(params.SkipSSLValidation)
 	if err != nil {
 		log.Errorf("Failed to parse skip_ssl_validation value: %s", err)
 		// default to false
 		skipSSLValidation = false
 	}
 
-	ssoAllowed, err := strconv.ParseBool(c.FormValue("sso_allowed"))
+	ssoAllowed, err := strconv.ParseBool(params.SSOAllowed)
 	if err != nil {
 		// default to false
 		ssoAllowed = false
 	}
 
-	cnsiClientId := c.FormValue("cnsi_client_id")
-	cnsiClientSecret := c.FormValue("cnsi_client_secret")
-	subType := c.FormValue("sub_type")
+	cnsiClientId := params.CNSIClientID
+	cnsiClientSecret := params.CNSIClientSecret
+	subType := params.SubType
 
 	if cnsiClientId == "" {
 		cnsiClientId = p.GetConfig().CFClient
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(cnsiName, apiEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, subType, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, subType, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -147,9 +152,21 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	return newCNSI, err
 }
 
+// unregisterCluster godoc
+// @Summary Unregister endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param id path string true "Endpoint GUID"
+// @Success 200
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints/{id} [delete]
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
 func (p *portalProxy) unregisterCluster(c echo.Context) error {
-	cnsiGUID := c.FormValue("cnsi_guid")
+	cnsiGUID := c.Param("id")
 	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")
 
 	if len(cnsiGUID) == 0 {
@@ -192,6 +209,16 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 	return cnsiList, nil
 }
 
+// listCNSIs godoc
+// @Summary List endpoints
+// @Description
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Success 200 {array}  interfaces.CNSIRecord "List of endpoints"
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints [get]
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 	log.Debug("listCNSIs")
 	cnsiList, err := p.buildCNSIList(c)
@@ -278,8 +305,8 @@ func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, er
 	return jsonString, nil
 }
 
-func (p *portalProxy) UpdateEndointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndointMetadata")
+func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
+	log.Debug("UpdateEndpointMetadata")
 
 	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -528,6 +555,137 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 		msg := "Unable to delete a CNSI Token: %v"
 		log.Errorf(msg, err)
 		return fmt.Errorf(msg, err)
+	}
+
+	return nil
+}
+
+// updateEndpoint godoc
+// @Summary Edit endpoint
+// @Description
+// @Tags admin
+// @Accept	x-www-form-urlencoded
+// @Produce	json
+// @Param id path string true "Endpoint GUID"
+// @Param name formData string true "Endpoint name"
+// @Param skipSSL formData string false "Skip SSL" Enums(true, false)
+// @Param setClientInfo formData string false "Set client info" Enums(true, false)
+// @Param clientID formData string false "Client ID"
+// @Param clientSecret formData string false "Client secret"
+// @Param allowSSO formData string false "Allow SSO" Enums(true, false)
+// @Success 200
+// @Failure 400 {object} interfaces.ErrorResponseBody "Error response"
+// @Failure 401 {object} interfaces.ErrorResponseBody "Error response"
+// @Security ApiKeyAuth
+// @Router /endpoints/{id} [post]
+func (p *portalProxy) updateEndpoint(ec echo.Context) error {
+	log.Debug("updateEndpoint")
+
+	params := new(interfaces.UpdateEndpointParams)
+	if err := ec.Bind(params); err != nil {
+		return err
+	}
+
+	// Check we have an ID
+	if len(params.ID) == 0 {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need Endpoint ID")
+	}
+
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return fmt.Errorf(dbReferenceError, err)
+	}
+
+	endpoint, err := cnsiRepo.Find(params.ID, p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return fmt.Errorf("Could not find the endpoint %s: '%v'", params.ID, err)
+	}
+
+	updates := false
+
+	// Update name
+	name := params.Name
+	if len(name) > 0 {
+		endpoint.Name = name
+		updates = true
+	}
+
+	// Skip SSL validation
+	skipSSL := params.SkipSSL
+	if len(skipSSL) > 0 {
+		v, err := strconv.ParseBool(skipSSL)
+		if err == nil {
+			if v != endpoint.SkipSSLValidation {
+				// SSL Validation value changed
+				endpoint.SkipSSLValidation = v
+				updates = true
+				if !v {
+					// Skip SSL validation is OFF - so check we can communicate with the endpoint
+					plugin, err := p.GetEndpointTypeSpec(endpoint.CNSIType)
+					if err != nil {
+						return fmt.Errorf("Can not get endpoint type for %s: '%v'", endpoint.CNSIType, err)
+					}
+					_, _, err = plugin.Info(endpoint.APIEndpoint.String(), endpoint.SkipSSLValidation)
+					if err != nil {
+						if ok, detail := isSSLRelatedError(err); ok {
+							return interfaces.NewHTTPShadowError(
+								http.StatusForbidden,
+								"SSL error - "+detail,
+								"There is a problem with the server Certificate - %s",
+								detail)
+						}
+						return interfaces.NewHTTPShadowError(
+							http.StatusBadRequest,
+							fmt.Sprintf("Could not validate endpoint: %v", err),
+							"Could not validate endpoint: %v",
+							err)
+					}
+				}
+			}
+		}
+	}
+
+	// Client ID and Client Secret
+	setClientInfo := params.SetClientInfo
+	isSet, err := strconv.ParseBool(setClientInfo)
+	if err == nil && isSet {
+		clientID := params.ClientID
+		clientSecret := params.ClientSecret
+		endpoint.ClientId = clientID
+		endpoint.ClientSecret = clientSecret
+		updates = true
+	}
+
+	// Allow SSO
+	allowSSO := params.AllowSSO
+	if len(allowSSO) > 0 {
+		v, err := strconv.ParseBool(allowSSO)
+		if err == nil {
+			if v != endpoint.SSOAllowed {
+				// Allow SSO value changed
+				endpoint.SSOAllowed = v
+				updates = true
+			}
+		}
+	}
+
+	// Apply updates
+	if updates {
+		err := cnsiRepo.Update(endpoint, p.Config.EncryptionKeyInBytes)
+		if err != nil {
+			return fmt.Errorf("Could not update the endpoint %s: '%v'", params.ID, err)
+		}
+	}
+
+	// Notify plugins if they support the notification interface
+	for _, plugin := range p.Plugins {
+		if notifier, ok := plugin.(interfaces.EndpointNotificationPlugin); ok {
+			notifier.OnEndpointNotification(interfaces.EndpointUpdateAction, &endpoint)
+		}
 	}
 
 	return nil

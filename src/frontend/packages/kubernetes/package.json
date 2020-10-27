@@ -1,0 +1,17 @@
+{
+  "name": "@stratosui/kubernetes",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
+    "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
+  },
+  "stratos": {
+    "module": "KubePackageModule",
+    "routingModule": "KubePackageModuleRoutingModule",
+    "theming": "sass/_all-theme#apply-theme-kubernetes",
+    "assets": {
+      "assets": "core/assets"
+    },
+    "backend": ["analysis", "kubernetes", "monocular"]
+  }
+}

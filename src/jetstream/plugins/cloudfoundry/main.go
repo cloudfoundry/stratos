@@ -11,9 +11,14 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cloudfoundry", nil, Init)
+}
 
 // CloudFoundrySpecification - Plugin to support Cloud Foundry endpoint type
 type CloudFoundrySpecification struct {
@@ -62,7 +67,13 @@ func (c *CloudFoundrySpecification) Validate(userGUID string, cnsiRecord interfa
 func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Info("CloudFoundry Connect...")
 
-	connectType := ec.FormValue("connect_type")
+	params := new(interfaces.LoginToCNSIParams)
+	err := interfaces.BindOnce(params, ec)
+	if err != nil {
+		return nil, false, err
+	}
+
+	connectType := params.ConnectType
 	if len(connectType) == 0 {
 		connectType = interfaces.AuthConnectTypeCreds
 	}

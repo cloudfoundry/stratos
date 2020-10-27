@@ -8,13 +8,9 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
-import {
-  IUserProvidedServiceInstanceData,
-  UpdateUserProvidedServiceInstance,
-} from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
+import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
-  appEnvVarsEntityType,
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType,
 } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -22,20 +18,16 @@ import { createEntityRelationKey } from '../../../../../../cloud-foundry/src/ent
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
-import { IUserProvidedServiceInstance } from '../../../../../../core/src/core/cf-api-svc.types';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe, urlValidationExpression } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment';
-import {
-  AppNameUniqueChecking,
-} from '../../../../../../core/src/shared/app-name-unique.directive/app-name-unique.directive';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { isValidJsonValidator } from '../../../../../../core/src/shared/form-validators';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../../core/src/shared/services/cloud-foundry-user-provided-services.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
+import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
+import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
+import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { AppServiceBindingDataSource } from '../../list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
@@ -47,7 +39,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   constructor(
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private upsService: CloudFoundryUserProvidedServicesService,
     public modeService: CsiModeService,
     private store: Store<CFAppState>,
@@ -124,6 +116,17 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       ),
       map(valid => this.validAndChanged(valid)),
     );
+    this.subscriptions.push(this.tagsChanged.subscribe(() => {
+      if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
+        this.createEditServiceInstance.markAsTouched();
+        this.createEditServiceInstance.markAsDirty();
+        this.createEditServiceInstance.updateValueAndValidity();
+      } else {
+        this.bindExistingInstance.markAsTouched();
+        this.bindExistingInstance.markAsDirty();
+        this.bindExistingInstance.updateValueAndValidity();
+      }
+    }));
     this.subscriptions.push(obs.subscribe(valid => this.valid.next(valid)));
   }
 
@@ -252,10 +255,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     ).pipe(
       combineLatest(this.store.select(selectCreateServiceInstance)),
       switchMap(([request, state]) => {
-        const newGuid = request.response.result[0];
         const success = !request.error;
         const redirect = !request.error;
         if (!!state.bindAppGuid && success) {
+          const newGuid = request.response.result[0];
           return this.createApplicationServiceBinding(newGuid, state);
         }
         return observableOf({
@@ -281,29 +284,38 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
-            const appEnvVarsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appEnvVarsEntityType);
-            const actionBuilder = appEnvVarsEntity.actionOrchestrator.getActionBuilder('get');
-            const getAppEnvVarsAction = actionBuilder(data.bindAppGuid, data.cfGuid);
-            this.store.dispatch(
-              getAppEnvVarsAction
-            );
+            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid)
             return { success: true, redirect: true };
           }
         })
       );
   }
 
-  private onNextUpdate() {
+  private onNextUpdate(): Observable<StepOnNextResult> {
     const updateData = this.getServiceData();
     return this.upsService.updateUserProvidedService(
       this.cfGuid,
       this.serviceInstanceId,
       updateData
     ).pipe(
-      map(er => ({
-        success: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error,
-        redirect: !er.updating[UpdateUserProvidedServiceInstance.updateServiceInstance].error
-      }))
+      map(er => {
+        if (!er.error) {
+          // Update the application binding list
+          const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+          if (appId) {
+            this.store.dispatch(AppServiceBindingDataSource.createGetAllServiceBindings(appId, this.cfGuid));
+          }
+          return {
+            success: true,
+            redirect: true,
+          };
+        }
+        return {
+          success: false,
+          redirect: false,
+          message: `Failed to update service instance: ${er.message}`
+        };
+      })
     );
   }
 

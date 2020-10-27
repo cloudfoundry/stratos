@@ -2,25 +2,29 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import moment from 'moment';
+import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
+import { AppState } from '../../../../../store/src/app-state';
+import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
+import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
+import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { TabNavService } from '../../../../tab-nav.service';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
-import { StratosStatus } from '../../shared.types';
-import { FavoritesConfigMapper } from '../favorites-meta-card/favorite-config-mapper';
-import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
-import { TabNavItem } from '../../../../tab-nav.types';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
+import { TabNavService } from '../../../tab-nav.service';
+import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
+import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
+import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
+import { EndpointsService } from './../../../core/endpoints.service';
+import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
   selector: 'app-page-header',
@@ -28,6 +32,7 @@ import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-
   styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
+  public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
@@ -52,9 +57,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     if (tabs) {
       this.pTabs = tabs.map(tab => ({
         ...tab,
-        link: this.router.createUrlTree([tab.link], {
-          relativeTo: this.route
-        }).toString()
+        link: tab.link === '-' ?
+          TabNavService.TabsNoLinkValue :
+          this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
       }));
       this.tabNavService.setTabs(this.pTabs);
     }
@@ -66,7 +71,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       this.tabNavService.setHeader(header);
     }
   }
-
 
   @Input() showUnderFlow = false;
 
@@ -96,6 +100,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         const { name, routerLink } = mapperFunction(favorite.metadata);
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
+          date: moment().valueOf(),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,
@@ -109,8 +114,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  public userNameFirstLetter$: Observable<string>;
   public username$: Observable<string>;
+  public user$: Observable<UserProfileInfo>;
+  public allowGravatar$: Observable<boolean>;
+
   public actionsKey: string;
 
   @Input()
@@ -138,7 +145,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   logout() {
-    this.store.dispatch(new Logout());
+    this.router.navigate(['/login/logout']);
   }
 
   public toggleSidenav() {
@@ -146,12 +153,15 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private store: Store<CFAppState>,
+    private store: Store<AppState>,
     private route: ActivatedRoute,
     private tabNavService: TabNavService,
     private router: Router,
     eventService: GlobalEventService,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userProfileService: UserProfileService,
+    private cups: CurrentUserPermissionsService,
+    private endpointsService: EndpointsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -164,11 +174,30 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
     this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
-    this.username$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth && auth.sessionData && auth.sessionData.user ? auth.sessionData.user.name : 'Unknown')
+
+    this.user$ = this.userProfileService.userProfile$;
+
+    this.username$ = this.user$.pipe(
+      map(profile => {
+        let name = profile.userName;
+        if (profile.name) {
+          name = profile.name.givenName + ' ' + profile.name.familyName;
+          name = name.trim();
+        }
+        return name ? name : profile.userName;
+      })
     );
-    this.userNameFirstLetter$ = this.username$.pipe(
-      map(name => name[0].toLocaleUpperCase())
+
+    this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.gravatarEnabled)
+    );
+
+    // Must be enabled and the user must have permission
+    this.canAPIKeys$ = combineLatest([
+      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
+      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
+    ]).pipe(
+      map(([disabled, permission]) => !disabled && permission)
     );
   }
 

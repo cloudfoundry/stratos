@@ -9,10 +9,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -171,7 +172,8 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 
 	cnsiRequest.URL = new(url.URL)
 	*cnsiRequest.URL = *cnsiRec.APIEndpoint
-	cnsiRequest.URL.Path = uri.Path
+	// The APIEndpoint might have a path already - so join the request URI to it
+	cnsiRequest.URL.Path = path.Join(cnsiRequest.URL.Path, uri.Path)
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
 	return cnsiRequest, nil
@@ -219,7 +221,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 }
 
 func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*interfaces.CNSIRequest, error) {
-	log.Debug("proxy")
+	log.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)
@@ -433,7 +435,7 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 }
 
 func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<- *interfaces.CNSIRequest) {
-	log.Debug("doRequest")
+	log.Debugf("doRequest for URL: %s", cnsiRequest.URL.String())
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request
@@ -476,7 +478,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if authHandler.Handler != nil {
 		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
-		res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {

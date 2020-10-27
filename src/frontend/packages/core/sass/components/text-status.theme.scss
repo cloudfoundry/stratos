@@ -6,6 +6,7 @@
   $status-warning: map-get($status-colors, warning);
   $status-danger: map-get($status-colors, danger);
   $status-tentative: map-get($status-colors, tentative);
+  $status-info: map-get($status-colors, info);
 
   .text-success {
     color: $status-success;
@@ -22,5 +23,31 @@
   .text-tentative {
     color: $status-tentative;
   }
+
+  .text-info {
+    color: $status-info;
+  }
+
+  // Border colors
+
+  .border-success {
+    border-color: $status-success;
+  }
+
+  .border-warning {
+    border-color: $status-warning;
+  }
+
+  .border-danger {
+    border-color: $status-danger;
+  }
+
+  .border-tentative {
+    border-color: $status-tentative;
+  }
+
+  .border-info {
+    border-color: $status-info;
+  }  
 
 }

@@ -1,11 +1,11 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
-import { EnvVarViewComponent } from '../../../../../../../../core/src/shared/components/env-var-view/env-var-view.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-table-cell-edit-variable',
   templateUrl: './table-cell-edit-variable.component.html',

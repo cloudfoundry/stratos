@@ -1,9 +1,9 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, scan, startWith } from 'rxjs/operators';
 
-import { IFavoriteEntity } from '../../../core/user-favorite-manager';
-import { FavoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/favorite-config-mapper';
+import { FavoritesConfigMapper, IFavoriteTypes } from '../../../../../store/src/favorite-config-mapper';
+import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
 
 
 @Component({
@@ -13,7 +13,7 @@ import { FavoritesConfigMapper, IFavoriteTypes } from '../favorites-meta-card/fa
 })
 export class FavoritesEntityListComponent implements OnInit {
 
-  constructor(private favoritesConfigMapper: FavoritesConfigMapper) { }
+  constructor(private favoritesConfigMapper: FavoritesConfigMapper) {}
 
   @Input()
   set entities(favoriteEntities: IFavoriteEntity[]) {
@@ -29,6 +29,9 @@ export class FavoritesEntityListComponent implements OnInit {
 
   @Input()
   public endpointDisconnected = false;
+
+  @Input()
+  public autoExpand = false;
 
   @Input()
   set endpointTypes(types: string[] | string) {
@@ -144,5 +147,9 @@ export class FavoritesEntityListComponent implements OnInit {
       map(([nameSearch, type, entities]) => entities.length === 0 && (!!nameSearch || !!type)),
       startWith(false)
     );
+
+    if (this.autoExpand) {
+      this.toggleExpand();
+    }
   }
 }

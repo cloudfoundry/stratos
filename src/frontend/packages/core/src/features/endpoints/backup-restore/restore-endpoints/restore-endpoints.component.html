@@ -1,0 +1,59 @@
+<app-page-header>
+  <h1>Restore Endpoints</h1>
+</app-page-header>
+
+<app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
+  <app-step title="File" [valid]="service.validFileContent$ | async">
+    <div class="file-step">
+      <div class="file-step__chunk">
+        <p>Provide the backup file to restore from.</p>
+        <div class="file-step__input">
+          <input #localPathSelectFile fileread="localPathFile" type="file" class="file-step__input--input"
+            name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />Choose
+          <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>File</button>
+          <ng-container *ngIf="service.file$ | async as file">{{file.name}}</ng-container>
+        </div>
+      </div>
+      <ng-container *ngIf="service.file$ | async as file">
+        <div *ngIf="!!service.unparsableFileContent || !(service.validDb$ | async)" class="file-step__error">
+          <div *ngIf="!service.unparsableFileContent && !(service.validDb$ | async)" class="file-step__chunk">
+            <p>
+              <mat-icon>warning</mat-icon> The database version of Stratos
+              (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
+              (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
+            </p>
+            <mat-checkbox (change)="onIgnoreDbChange($event)">
+              Ignore different database versions
+            </mat-checkbox>
+          </div>
+          <div *ngIf="!!service.unparsableFileContent">
+            <p>
+              <mat-icon>warning</mat-icon>Unable to parse file contents. Reason:&nbsp;
+              <code>{{service.unparsableFileContent}}</code>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </app-step>
+  <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">
+    <div class="password-step">
+      <p>Provide the password that was given at the time the backup was created</p>
+      <form [formGroup]="passwordForm" class="stepper-form">
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" required [type]="!show ? 'password' : 'text'">
+          <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="!show">
+            <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
+            Password is required</mat-error>
+          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
+            Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>

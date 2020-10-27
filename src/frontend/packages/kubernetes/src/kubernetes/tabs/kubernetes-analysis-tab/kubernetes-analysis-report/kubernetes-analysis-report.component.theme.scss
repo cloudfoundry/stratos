@@ -1,0 +1,13 @@
+
+@mixin kube-analysis-report-theme($theme, $app-theme) {
+  $backgrounds: map-get($theme, background);
+  $background: mat-color($backgrounds, card);
+  $background-color:  map-get($app-theme, app-background-color);
+  $darker-background-color:  darken($background-color, 4%);
+  .report__header {
+    background-color: $darker-background-color;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    padding-left: 10px;
+  }
+}

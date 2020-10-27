@@ -1,7 +1,6 @@
 // @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import '../sass/fonts';
 @import '../sass/icons';
-@import '../sass/colors';
 @import '../sass/theme';
 @import '../sass/mixins';
 @import '../sass/scroll-bar-measure';
@@ -10,6 +9,9 @@
 @import '../sass/components/mat-popup';
 @import '../sass/components/mat-tabs';
 @import '../sass/components/mat-table';
+@import '../sass/components/mat-button-toggle-group';
+@import '../sass/components/json-schema-form';
+
 body {
   font-family: Lato, sans-serif; // font-size: 13px;
   margin: 0;

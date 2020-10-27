@@ -1,7 +1,7 @@
 <app-page-header-events class="endpoint-warning" [endpointIds$]="endpointIds$" [simpleErrorMessage]="true">
 </app-page-header-events>
 <app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
-  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': row.connectionStatus === 'disconnected', 'endpoint-card--checking': row.connectionStatus === 'checking'}"
+  [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': connectionStatus === 'disconnected', 'endpoint-card--checking': connectionStatus === 'checking'}"
   [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
@@ -19,7 +19,8 @@
           -->
         </div>
       </div>
-      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false"></app-copy-to-clipboard>
+      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard"
+        [showSuccessText]="false"></app-copy-to-clipboard>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>
@@ -43,7 +44,7 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="hasDetails">
+  <app-meta-card-item [hidden]="!hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>
       <div #endpointDetails></div>

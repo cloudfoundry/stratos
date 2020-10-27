@@ -4,21 +4,15 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { GetApplication } from '../../../../../cloud-foundry/src/actions/application.actions';
-import { cfEntityFactory } from '../../../../../cloud-foundry/src/cf-entity-factory';
 import { CoreModule } from '../../../../../core/src/core/core.module';
-import {
-  ApplicationStateService,
-} from '../../../../../core/src/shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import {
   ApplicationServiceMock,
   generateTestApplicationServiceProvider,
-} from '../../../../../core/test-framework/application-service-helper';
-import { generateTestEntityServiceProvider } from '../../../../../core/test-framework/entity-service.helper';
+} from '../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { applicationEntityType } from '../../../cf-entity-types';
+import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationService } from '../application.service';
 import { ApplicationEnvVarsHelper } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EditApplicationComponent } from './edit-application.component';
@@ -44,11 +38,6 @@ describe('EditApplicationComponent', () => {
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
-        generateTestEntityServiceProvider(
-          appId,
-          cfEntityFactory(applicationEntityType),
-          new GetApplication(appId, cfId)
-        ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,

@@ -1,0 +1,51 @@
+@import '../../../theme.scss';
+
+.versions {
+
+  h1 {
+    font-size: 16px;
+    margin-top: 0;
+  }
+  .more-link {
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: .5em;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.version__cell {
+
+  &.creation-date {
+    color: lighten($layout-base, 20%);
+  }
+
+  &.number.selected {
+    font-weight: bold;
+  }
+}
+
+.version {
+  font-size: 14px;
+
+  &__table {
+    display: table;
+    width: 100%;
+  }
+  &__row {
+    display: table-row;
+  }
+  &__cell {
+    display: table-cell;
+    font-size: 14px;
+  }
+}
+
+.app-version {
+  h1 {
+    font-size: 16px;
+  }
+}

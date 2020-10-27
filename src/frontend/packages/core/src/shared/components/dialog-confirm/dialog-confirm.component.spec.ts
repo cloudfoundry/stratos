@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { CoreModule } from '../../../core/core.module';
 import { DialogConfirmComponent } from './dialog-confirm.component';
@@ -74,16 +75,44 @@ describe('DialogConfirmComponent', () => {
     expect(confirm.disabled).toBeFalsy();
   });
 
-  it('should show warning icon if is critical', () => {
-    expect(element.querySelector('mat-icon')).toBeFalsy();
-
+  it('should not show warning icon if critical', () => {
     component.data = {
       ...component.data,
+      message: {
+        textToMatch: '',
+      },
       critical: true,
     };
     fixture.detectChanges();
 
     expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+  });
+
+  it('should show warning icon if text to match', () => {
+    component.data = {
+      ...component.data,
+      message: {
+        textToMatch: 'text',
+      },
+      critical: false,
+    };
+    fixture.detectChanges();
+
+    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+  });
+
+  it('should show warning icon if is critical', () => {
+    component.data = {
+      ...component.data,
+      message: {
+        textToMatch: '',
+      },
+      critical: true,
+    };
+    fixture.detectChanges();
+
+    expect(element.querySelector('mat-icon').textContent).toEqual('warning');
+
   });
 
   it('should disable confirm button if not matching text', () => {

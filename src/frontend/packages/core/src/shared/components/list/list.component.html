@@ -45,11 +45,12 @@
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
-              <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneItem$ | async)" [floatLabel]="'never'">
+              <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)"
+                [floatLabel]="'never'">
                 <mat-select id="{{multiFilterManager.filterKey}}" matInput [(value)]="multiFilterManager.value"
                   [disabled]="!(multiFilterManager.filterIsReady$ | async)"
                   (selectionChange)="multiFilterManager.selectItem($event.value)">
-                  <mat-option>{{ multiFilterManager.allLabel }}</mat-option>
+                  <mat-option *ngIf="!multiFilterManager.hideAllOption">{{ multiFilterManager.allLabel }}</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterManager.filterItems$ | async"
                     [value]="selectItem.value">
                     {{selectItem.label}}
@@ -61,7 +62,7 @@
           </div>
         </div>
         <div class="list-component__header__right">
-          <div class="filter" *ngIf="entitySelectConfig">
+          <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
             <mat-form-field [floatLabel]="'never'">
               <mat-select matInput [value]="initialEntitySelection$ | async"
                 (selectionChange)="setEntityPage($event.value)">
@@ -176,8 +177,8 @@
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
         <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
           [addSelect]="config.allowSelection || (haveMultiActions | async)"
-          [paginationController]="paginationController" [columns]="columns"
-          [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+          [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
+          [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
         </app-table>
       </div>
       <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
@@ -193,19 +194,14 @@
         </mat-card-content>
       </mat-card>
     </ng-template>
-    <ng-template #defaultNoEntriesMaxedResults>
-      <mat-card class="list-component__default-no-entries">
-        <mat-card-content>
-          <div class="no-rows">{{config.text?.maxedResults || 'There are too many results. Please use the filters to
-            reduce the number of results.'}}</div>
-        </mat-card-content>
-      </mat-card>
-    </ng-template>
     <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)"
       class="list-component__no-entries">
       <ng-container *ngIf="dataSource.maxedResults$ | async">
-        <ng-container *ngTemplateOutlet="noEntriesMaxedResults ? noEntriesMaxedResults : defaultNoEntriesMaxedResults">
-        </ng-container>
+        <app-max-list-message (showAllAfterMax)="showAllAfterMax()"
+          [count]="entitySelectConfig ? null : paginatorSettings.length"
+          [maxCount]="dataSource.maxedStateStartAt$ | async" [config]="config.text?.maxedResults"
+          [catalogueEntity]="config.getDataSource().masterAction">
+        </app-max-list-message>
       </ng-container>
       <ng-container *ngIf="(noRowsNotFiltering$ | async)">
         <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">

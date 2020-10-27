@@ -1,5 +1,5 @@
-import { hasJetStreamError, JetStreamErrorResponse } from '../../../../core/src/jetstream.helpers';
 import { NonJetstreamRequestHandler } from '../../entity-catalog/entity-catalog.types';
+import { hasJetStreamError, JetStreamErrorResponse } from '../../jetstream';
 import { PagedJetstreamResponse } from '../entity-request-pipeline.types';
 import { PaginationPageIteratorConfig } from '../pagination-request-base-handlers/pagination-iterator.pipe';
 import { stratosEndpointGuidKey } from '../pipeline.types';

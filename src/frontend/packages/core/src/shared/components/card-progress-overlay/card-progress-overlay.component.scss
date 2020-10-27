@@ -1,0 +1,22 @@
+.mat-card {
+  &__progress-overlay {
+    align-items: center;
+    background-color: rgba(0,0,0,0.5);
+    bottom: 0;
+    color: white;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    &-inner {
+      width: 25%;
+    }
+  }
+
+  &__progress-text {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+}

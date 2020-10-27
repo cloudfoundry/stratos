@@ -1,12 +1,20 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
+import { AppState } from '../../../../../../store/src/app-state';
+import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { UtilsService } from '../../../../core/utils.service';
-import { StratosStatus } from '../../../shared.types';
 import { determineCardStatus } from '../card-status/card-status.component';
+
+enum AlertLevel {
+  OK = 0,
+  Info,
+  Warning,
+  Error,
+  Unknown,
+}
 
 @Component({
   selector: 'app-card-number-metric',
@@ -26,6 +34,16 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() textOnly = false;
   @Input() labelAtTop = false;
   @Input() link: () => void | string;
+  @Output() showAlerts = new EventEmitter<any>();
+
+  @Input('alerts')
+  set alerts(alerts) {
+    if (alerts) {
+      this.processAlerts(alerts);
+    }
+  }
+
+  alertInfo: any;
 
   formattedValue: string;
   formattedLimit: string;
@@ -34,7 +52,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
   isUnlimited: boolean;
 
-  constructor(private utils: UtilsService, private store: Store<CFAppState>) { }
+  constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
   ngOnInit() {
     this.format();
@@ -102,4 +120,31 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       this.link();
     }
   }
+
+  processAlerts(alerts) {
+    this.alertInfo = {
+      info: 0,
+      warning: 0,
+      error: 0
+    };
+
+    alerts.forEach((alert) => {
+      switch (alert.level as AlertLevel) {
+        case AlertLevel.Warning:
+          this.alertInfo.warning++;
+          break;
+        case AlertLevel.Error:
+          this.alertInfo.error++;
+          break;
+        case AlertLevel.Info:
+          this.alertInfo.info++;
+          break;
+      }
+    });
+  }
+
+  public alertsClicked() {
+    this.showAlerts.emit(this.alertInfo);
+  }
+
 }

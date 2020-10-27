@@ -1,6 +1,3 @@
-import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
-import { entityCatalog } from '../../entity-catalog/entity-catalog.service';
-import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import {
   CONNECT_ENDPOINTS_SUCCESS,
   DISCONNECT_ENDPOINTS_SUCCESS,
@@ -13,8 +10,11 @@ import {
   CLEAR_PAGINATION_OF_TYPE,
   ClearPaginationOfType,
   CREATE_PAGINATION,
+  IGNORE_MAXED_STATE,
+  IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
+  RESET_PAGINATION_OF_TYPE,
   SET_CLIENT_FILTER,
   SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
@@ -27,17 +27,24 @@ import {
   UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
+import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
+import { entityCatalog } from '../../entity-catalog/entity-catalog';
+import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { mergeState } from '../../helpers/reducer.helper';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { UpdatePaginationMaxedState } from './../../actions/pagination.actions';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
-import { clearEndpointEntities, paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
+import { paginationClearAllTypes } from './pagination-reducer-clear-pagination-type';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
-import { paginationMaxReached } from './pagination-reducer-max-reached';
+import { paginationIgnoreMaxed, paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
-import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
+import {
+  getDefaultPaginationEntityState,
+  paginationResetPagination,
+  resetEndpointEntities,
+} from './pagination-reducer-reset-pagination';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
@@ -119,10 +126,14 @@ function paginate(action, state = {}, updatePagination) {
     return paginationResetPagination(state, action);
   }
 
+  if (action.type === RESET_PAGINATION_OF_TYPE && !action.keepPages) {
+    return paginationResetPagination(state, action, true);
+  }
+
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearAction = action as ClearPaginationOfType;
     const clearEntityType = entityCatalog.getEntityKey(clearAction.entityConfig.endpointType, clearAction.entityConfig.entityType);
-    return paginationClearAllTypes(state, [clearEntityType], getDefaultPaginationEntityState());
+    return paginationClearAllTypes(state, [clearEntityType]);
   }
 
   if (action.type === CLEAR_PAGINATION_OF_ENTITY) {
@@ -130,11 +141,15 @@ function paginate(action, state = {}, updatePagination) {
   }
 
   if (isEndpointAction(action)) {
-    return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
+    return resetEndpointEntities(state, action);
   }
 
   if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action as UpdatePaginationMaxedState);
+  }
+
+  if (action.type === IGNORE_MAXED_STATE) {
+    return paginationIgnoreMaxed(state, action as IgnorePaginationMaxedState);
   }
 
   return enterPaginationReducer(state, action, updatePagination);

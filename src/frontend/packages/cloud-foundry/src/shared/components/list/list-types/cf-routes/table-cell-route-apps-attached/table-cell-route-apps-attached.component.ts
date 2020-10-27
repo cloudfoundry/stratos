@@ -4,6 +4,7 @@ import { first, map } from 'rxjs/operators';
 
 import { CfRoute } from '../../../../../../../../cloud-foundry/src/store/types/route.types';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
@@ -11,7 +12,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   templateUrl: './table-cell-route-apps-attached.component.html',
   styleUrls: ['./table-cell-route-apps-attached.component.scss']
 })
-export class TableCellRouteAppsAttachedComponent implements OnInit {
+export class TableCellRouteAppsAttachedComponent extends TableCellCustom<any> implements OnInit {
   boundApps$: Observable<AppChip[]>;
   config$ = new BehaviorSubject(null);
   row$ = new BehaviorSubject(null);
@@ -24,6 +25,10 @@ export class TableCellRouteAppsAttachedComponent implements OnInit {
   @Input('row')
   set row(route: APIResource<CfRoute>) {
     this.row$.next(route);
+  }
+
+  constructor() {
+    super();
   }
 
   ngOnInit(): void {

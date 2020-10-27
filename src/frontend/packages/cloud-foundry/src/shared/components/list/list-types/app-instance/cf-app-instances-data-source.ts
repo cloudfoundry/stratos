@@ -2,14 +2,12 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../cf-app-state';
+import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { applicationEntityType, appStatsEntityType } from '../../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
@@ -24,9 +22,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
     listConfig: IListConfig<ListAppInstance>
   ) {
     const paginationKey = createEntityRelationPaginationKey(applicationEntityType, appGuid);
-    const appStatsEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, appStatsEntityType);
-    const actionBuilder = appStatsEntity.actionOrchestrator.getActionBuilder('get');
-    const action = actionBuilder(appGuid, cfGuid) as PaginatedAction;
+    const action = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid)
 
     super(
       {

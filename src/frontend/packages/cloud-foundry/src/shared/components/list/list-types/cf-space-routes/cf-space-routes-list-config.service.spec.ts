@@ -2,8 +2,8 @@ import { DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundrySpaceServiceMock } from '../../../../../../../core/test-framework/cloud-foundry-space.service.mock';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfSpaceRoutesListConfigService } from './cf-space-routes-list-config.service';
 
 describe('CfSpaceRoutesListConfigService', () => {

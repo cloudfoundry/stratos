@@ -1,0 +1,79 @@
+# Nightly AIO image build pipeline
+# This pipeline builds the canary Docker image for the AIO when the canary branch is updated
+---
+resource_types:
+- name: docker-image
+  type: docker-image
+  privileged: true
+  source:
+    repository: ((docker-resource-image))
+- name: stratos-git-resource
+  type: docker-image
+  source:
+    repository: splatform/stratos-git-tag-resource
+
+resources:
+# Stratos Git Repository
+- name: stratos
+  type: stratos-git-resource
+  source:
+    uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
+    branch: ((stratos-repository-branch))
+    private_key: ((github-private-key))
+
+# Artifacts
+- name: image-tag
+  type: s3
+  source:
+    bucket: ((minio-bucket))
+    endpoint: ((minio-server-endpoint))
+    regexp: temp-artifacts/release-(.*).tar
+    access_key_id: ((minio-access-key))
+    secret_access_key: ((minio-secret-access-key))
+    region_name: eu-central-1
+
+# Docker Images
+- name: aio-docker-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-organization))/((aio-docker-image-name))
+    tag: "nightly"
+
+jobs:
+- name: generate-tag-files
+  plan:
+  - get: stratos
+    trigger: true
+  - do:
+    - task: generate-tag
+      file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
+      params:
+        TAG_SUFFIX: ((tag-suffix))
+        NIGHTLY_BUILD: nightly
+    - put: image-tag
+      params:
+        file: image-tag/*.tar
+        acl: public-read
+- name: build-aio-image
+  public: true
+  serial: true
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - get: image-tag
+    passed: [generate-tag-files]
+    params:
+     unpack: true
+  - put: aio-docker-image
+    params:
+      build: stratos
+      dockerfile: stratos/deploy/Dockerfile.all-in-one
+      tag: stratos/deploy/ci/tasks/build-images/nightly-tag
+      tag_as_latest: false
+      labels_file: image-tag/image-labels
+      build_args_file: image-tag/ui-build-args
+      build_args:
+        CANARY_BUILD: true

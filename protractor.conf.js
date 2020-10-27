@@ -12,6 +12,9 @@ const globby = require('globby');
 const timeReporterPlugin = require('./src/test-e2e/time-reporter-plugin.js');
 const browserReporterPlugin = require('./src/test-e2e/browser-reporter-plugin.js');
 const https = require('https');
+const {
+  ProtractorBrowserLogReporter
+} = require('jasmine-protractor-browser-log-reporter');
 
 // Test report folder name
 var timestamp = moment().format('YYYYDDMM-hh.mm.ss');
@@ -26,7 +29,7 @@ var path = require('path');
 var yaml = require('js-yaml');
 var browserstackHelper = require('./src/test-e2e/browserstack-helper.js');
 
-const secretsPath = path.join(__dirname, SECRETS_FILE)
+const secretsPath = path.join(__dirname, SECRETS_FILE);
 if (!fs.existsSync(secretsPath)) {
   console.log('No secrets.yaml found at ... ', secretsPath);
   console.log('Please provide a secrets.yaml, see `src/test-e2e/secrets.yaml.example` as reference.');
@@ -59,24 +62,31 @@ if (process.env.STRATOS_E2E_LOG_TIME || browserstackHelper.isConfigured()) {
   showTimesInReport = true;
 }
 
+function safeExcludeSuite(suite) {
+  return suite.map(file => file && file[0] !== '!' ? '!' + file : file);
+}
+
 const excludeTests = [
   '!./src/test-e2e/login/*-sso-e2e.spec.ts',
   '!' + checkSuiteGlob
-]
+];
 
 const fullSuite = globby.sync([
   './src/test-e2e/**/*-e2e.spec.ts',
-])
+]);
 
 const longSuite = globby.sync([
   './src/test-e2e/application/application-delete-e2e.spec.ts',
   './src/test-e2e/application/application-deploy-e2e.spec.ts',
   './src/test-e2e/application/application-deploy-local-e2e.spec.ts',
-  './src/test-e2e/marketplace/**/*-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-users-list-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/space-level/space-users-list-e2e.spec.ts'
-])
+]);
+
+const longServicesSuite = globby.sync([
+  './src/test-e2e/marketplace/**/*-e2e.spec.ts',
+]);
 
 const manageUsersSuite = globby.sync([
   './src/test-e2e/cloud-foundry/manage-users-stepper-e2e.spec.ts',
@@ -85,8 +95,9 @@ const manageUsersSuite = globby.sync([
   './src/test-e2e/cloud-foundry/space-level/space-users-removal-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/cf-level/cf-invite-config-e2e.spec.ts',
   './src/test-e2e/cloud-foundry/org-level/org-invite-user-e2e.spec.ts',
-  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts'
-])
+  './src/test-e2e/cloud-foundry/space-level/space-invite-user-e2e.spec.ts',
+  './src/test-e2e/cloud-foundry/manage-users-by-username-stepper-e2e.spec.ts'
+]);
 
 const coreSuite = globby.sync([
   './src/test-e2e/check/check-login-e2e.spec.ts',
@@ -98,19 +109,27 @@ const coreSuite = globby.sync([
   './src/test-e2e/login/login-e2e.spec.ts',
   './src/test-e2e/login/login-sso-e2e.spec.ts',
   './src/test-e2e/metrics/metrics-registration-e2e.spec.ts',
-])
+]);
 
 const autoscalerSuite = globby.sync([
   './src/test-e2e/application/application-autoscaler-e2e.spec.ts',
-])
+]);
+
+const cfSummaryAndBelow = globby.sync([
+  './src/test-e2e/cloud-foundry/**/*-e2e.spec.ts',
+  ...safeExcludeSuite(manageUsersSuite),
+  ...safeExcludeSuite(longSuite),
+]);
 
 const fullMinusOtherSuites = globby.sync([
   ...fullSuite,
-  ...longSuite.map(file => '!' + file),
-  ...manageUsersSuite.map(file => '!' + file),
-  ...coreSuite.map(file => '!' + file),
-  ...autoscalerSuite.map(file => '!' + file),
-])
+  ...safeExcludeSuite(longSuite),
+  ...safeExcludeSuite(longServicesSuite),
+  ...safeExcludeSuite(manageUsersSuite),
+  ...safeExcludeSuite(coreSuite),
+  ...safeExcludeSuite(autoscalerSuite),
+  ...safeExcludeSuite(cfSummaryAndBelow),
+]);
 
 const config = {
   allScriptsTimeout: timeout,
@@ -128,6 +147,10 @@ const config = {
       ...longSuite,
       ...excludeTests
     ]),
+    longServicesSuite: globby.sync([
+      ...longServicesSuite,
+      ...excludeTests
+    ]),
     manageUsers: globby.sync([
       ...manageUsersSuite,
       ...excludeTests
@@ -138,6 +161,10 @@ const config = {
     ]),
     autoscaler: globby.sync([
       ...autoscalerSuite,
+      ...excludeTests
+    ]),
+    cfSummaryAndBelow: globby.sync([
+      ...cfSummaryAndBelow,
       ...excludeTests
     ]),
     fullMinusOtherSuites: globby.sync([
@@ -166,9 +193,10 @@ const config = {
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: timeout,
-    print: function () {}
+    print: function () { }
   },
   params: secrets,
+  plugins: [],
   onPrepare() {
     // https://webdriver.io/docs/api/chromium.html#setnetworkconditions
     // browser.driver.setNetworkConditions({
@@ -177,6 +205,13 @@ const config = {
     //   download_throughput: 500 * 1024 * 1024, // Maximal aggregated download throughput.
     //   upload_throughput: 500 * 1024 * 1024 // Maximal aggregated upload throughput.
     // });
+
+    // Ensuer base URL does NOT end with a /
+    if (browser.baseUrl.endsWith('/')) {
+      browser.baseUrl = browser.baseUrl.substr(0, browser.baseUrl.length - 1);
+    }
+
+    jasmine.getEnv().addReporter(new ProtractorBrowserLogReporter());
 
     skipPlugin.install(jasmine);
     require('ts-node').register({
@@ -193,7 +228,10 @@ const config = {
     }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
-        displayStacktrace: true,
+        displayStacktrace: 'raw',
+      },
+      summary: {
+        displayStacktrace: 'raw',
       },
       customProcessors: specReporterCustomProcessors
     }));
@@ -205,12 +243,12 @@ const config = {
 
     // Validate that the Github API url that the client will use during e2e tests is responding
     const githubApiUrl = secrets.stratosGitHubApiUrl || 'https://api.github.com';
-    const path = '/repos/nwmac/cf-quick-app'
-    console.log(`Validating Github API Url Using: '${githubApiUrl + path}'`)
+    const path = '/repos/nwmac/cf-quick-app';
+    console.log(`Validating Github API Url Using: '${githubApiUrl + path}'`);
 
     // This chunk can disappear when we update node to include the version of http that accepts `get(url, option, callback)`
     const hasHttps = githubApiUrl.indexOf('https://') === 0;
-    const tempHost = hasHttps ? githubApiUrl.substring(8, githubApiUrl.length) : githubApiUrl
+    const tempHost = hasHttps ? githubApiUrl.substring(8, githubApiUrl.length) : githubApiUrl;
     const hasPort = tempHost.indexOf(':') >= 0;
     const port = hasPort ? parseInt(tempHost.substring(tempHost.indexOf(':') + 1, tempHost.length)) : hasHttps ? 443 : null;
     const host = hasPort ? tempHost.replace(':' + port, '') : tempHost;
@@ -226,7 +264,7 @@ const config = {
         'User-Agent': 'request'
       },
       rejectUnauthorized: false
-    }
+    };
 
     var defer = protractor.promise.defer();
     https
@@ -234,7 +272,7 @@ const config = {
         if (resp.statusCode >= 400) {
           defer.reject('Failed to validate Github API Url. Status Code: ' + resp.statusCode);
         } else {
-          defer.fulfill('Github API Url responding');
+          defer.fulfill('Validated Github API Url successfully');
         }
       })
       .on("error", (err) => {
@@ -248,7 +286,8 @@ const config = {
 if (process.env['STRATOS_E2E_BASE_URL']) {
   config.baseUrl = process.env['STRATOS_E2E_BASE_URL'];
 }
-exports.config = config
+
+exports.config = config;
 // Should we run e2e tests in headless Chrome?
 const headless = secrets.headless || process.env['STRATOS_E2E_HEADLESS'];
 if (headless) {

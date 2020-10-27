@@ -6,7 +6,6 @@ resource_types:
   privileged: true
   source:
     repository: ((docker-resource-image))
-    tag: ((docker-resource-image-tag))
 
 resources:
 - name: stratos
@@ -20,7 +19,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: splatform/stratos
+    repository: ((docker-organization))/((aio-docker-image-name))
 - name: after-midnight
   type: time
   source:
@@ -28,30 +27,6 @@ resources:
     stop: 2:00 AM
     location: UTC
     # Docker Images
-- name: jetstream-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-jetstream
-- name: dc-db-migrator-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-db-migrator
-- name: mariadb-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-mariadb
-- name: ui-dc-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-organization))/stratos-dc-console
 - name: jetstream-helm-image
   type: docker-image
   source:
@@ -81,7 +56,6 @@ groups:
 - name: tests
   jobs:
   - build-helm-images
-  - build-dc-images
   - build-aio-image
 
 jobs:
@@ -117,38 +91,6 @@ jobs:
           tag_as_latest: true
       timeout: 2h30m
 
-- name: build-dc-images
-  plan:
-  - get: stratos
-  - get: after-midnight
-    trigger: true
-  - aggregate:
-    - do:
-      - put: jetstream-dc-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  dev-build
-          tag_as_latest: true
-      - put: dc-db-migrator-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.bk
-          build: stratos/
-          target_name:  db-migrator
-          tag_as_latest: true
-      - put: mariadb-dc-image
-        params:
-          dockerfile: stratos/deploy/db/Dockerfile.mariadb
-          build: stratos/deploy/db
-          tag_as_latest: true
-      - put: ui-dc-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.ui
-          build: stratos/
-          target_name: prod-build
-          tag_as_latest: true
-      timeout: 2h30m
-
 - name: build-aio-image
   public: true
   serial: true
@@ -160,3 +102,4 @@ jobs:
     params:
       build: stratos
       dockerfile: stratos/deploy/Dockerfile.all-in-one
+      tag_as_latest: false

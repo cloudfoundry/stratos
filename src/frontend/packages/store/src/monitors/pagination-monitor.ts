@@ -1,29 +1,30 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { asapScheduler, combineLatest, Observable } from 'rxjs';
+import { asapScheduler, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   combineLatest as combineLatestOperator,
   distinctUntilChanged,
   filter,
   map,
+  multicast,
   observeOn,
-  publishReplay,
   refCount,
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
 
 import { AppState, GeneralEntityAppState, GeneralRequestDataState } from '../app-state';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntitySchema } from '../helpers/entity-schema';
+import { LocalPaginationHelpers } from '../helpers/local-list.helpers';
 import { ActionState, ListActionState } from '../reducers/api-request-reducer/types';
+import { getCurrentPageRequestInfo } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getAPIRequestDataState, selectEntities } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginationEntityState } from '../types/pagination.types';
-import { StratosBaseCatalogEntity } from '../entity-catalog/entity-catalog-entity';
-import { entityCatalog } from '../entity-catalog/entity-catalog.service';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { LocalPaginationHelpers } from '../../../core/src/shared/components/list/data-sources-controllers/local-list.helpers';
 
 export class MultiActionListEntity {
   static getEntity(entity: MultiActionListEntity | any) {
@@ -46,6 +47,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
    * Emits the current page of entities.
    */
   public currentPage$: Observable<T[]>;
+  public currentPageState$: Observable<ListActionState>;
   /**
    * Emits a boolean stating if the current page is fetching or not.
    */
@@ -81,11 +83,12 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     return new PaginationMonitor(store, paginationKey, schema, isLocal);
   }
 
+
   constructor(
     private store: Store<Y>,
     public paginationKey: string,
     public entityConfig: EntityCatalogEntityConfig,
-    public isLocal = false
+    public isLocal: boolean = false
   ) {
     const { endpointType, entityType, schemaKey } = entityConfig;
     const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
@@ -118,19 +121,14 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   private getCurrentPageRequestInfo(
     pagination: PaginationEntityState,
   ): ActionState {
-    if (
-      !pagination ||
-      !pagination.pageRequests ||
-      !pagination.pageRequests[pagination.currentPage]
-    ) {
-      return {
+    return getCurrentPageRequestInfo(
+      pagination,
+      {
         busy: true,
         error: false,
         message: '',
-      };
-    } else {
-      return pagination.pageRequests[pagination.currentPage];
-    }
+      }
+    );
   }
 
   // ### Initialization methods.
@@ -155,6 +153,9 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       this.currentPage$ = this.createPageObservable(this.pagination$, schema);
     }
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
+    this.currentPageState$ = this.pagination$.pipe(
+      map(pagination => this.getCurrentPageRequestInfo(pagination))
+    );
   }
 
   private createPaginationObservable(
@@ -197,7 +198,8 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         return this.denormalizePage(page, pageSchema, allEntities);
       }),
       tag('de-norming ' + schema.key),
-      publishReplay(1),
+      // See comment in createLocalPageObservable
+      multicast(() => new ReplaySubject<any>(1)),
       refCount(),
     );
   }
@@ -228,12 +230,14 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       schema
     );
 
+
     const allEntitiesObservable$ = this.store.select(getAPIRequestDataState);
 
     const entities$ = pagination$.pipe(
       distinctUntilChanged(),
       // Improve efficiency
       observeOn(asapScheduler),
+      filter(pagination => this.hasPage(pagination) && !LocalPaginationHelpers.isPaginationMaxed(pagination)),
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
@@ -262,7 +266,15 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       entities$: fetching$.pipe(
         filter(busy => !busy),
         switchMap(() => entities$),
-        publishReplay(1),
+        // Use this instead of publishReplay(1).
+        // These are cached in the pagination monitor factory, so at times there are no subscribers. During this time changes in data occur.
+        // With publishReplay(1) these changes are ignored and new subscribers will get the last entities emitted whilst there were
+        // subscribers. The replacement line allows the obs to go `cold` when there are no subscribers but return to `hot` with the latest
+        // data on new subscribers. For more info see
+        // https://stackoverflow.com/questions/53798142/rxjs-unexpected-publishreplay-refcount-behaviour-after-refcount-goes-to-0
+        // and https://stackoverflow.com/questions/42370097/how-to-force-publishreplay-to-resubscribe
+        multicast(() => new ReplaySubject<any>(1)),
+        // publishReplay(1),
         refCount(),
       ),
       isMultiAction$

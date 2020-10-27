@@ -6,9 +6,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../core/src/core/github.helpers';
-import { GitSCMService } from '../../../../../../core/src/shared/data-services/scm/scm.service';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
 import { generateCfStoreModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { GitSCMService } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';

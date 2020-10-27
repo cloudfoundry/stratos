@@ -1,0 +1,20 @@
+:host {
+  flex: 1;
+}
+
+mat-checkbox {
+  padding-top: 40px;
+}
+
+.edit-endpoint {
+  &__section {
+    margin-top: 40px;
+
+    &-title {
+      font-size: 16px;
+    }
+  }
+  &__sso {
+    margin-top: 40px;
+  }
+}

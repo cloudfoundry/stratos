@@ -1,26 +1,27 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
+import { testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../core/src/core/core.module';
+import { SharedModule } from '../../core/src/shared/shared.module';
+import { AppTestModule } from '../../core/test-framework/core-test.helper';
 import { EntityServiceFactory } from '../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../store/src/monitors/pagination-monitor.factory';
-import { SharedModule } from '../../core/src/shared/shared.module';
-import { testSCFEndpointGuid } from '@stratos/store/testing';
-import { CfUserServiceTestProvider } from '../../core/test-framework/user-service-helper';
 import { appReducers } from '../../store/src/reducers.module';
 import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
-import { ActiveRouteCfOrgSpace } from '../src/features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { UserInviteService } from '../src/features/cloud-foundry/user-invites/user-invite.service';
+import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
+import { CloudFoundryEndpointService } from '../src/features/cf/services/cloud-foundry-endpoint.service';
+import { UserInviteConfigureService, UserInviteService } from '../src/features/cf/user-invites/user-invite.service';
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/user.types';
-
+import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
+import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -43,15 +44,38 @@ export class BaseCfOrgSpaceRouteMock {
     this.orgGuid = guid;
   }
 }
+
+export function generateCfActiveRouteMock(guid = testSCFEndpointGuid) {
+  return {
+    provide: ActivatedRoute,
+    useValue: {
+      snapshot: {
+        params: {
+          endpointId: guid,
+          orgId: guid,
+          spaceId: guid,
+        },
+        queryParams: {}
+      }
+    }
+  };
+}
+
+export function generateActiveRouteCfOrgSpaceMock(guid = testSCFEndpointGuid) {
+  return {
+    provide: ActiveRouteCfOrgSpace,
+    useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
+  };
+}
+
 export function generateTestCfEndpointServiceProvider(guid = testSCFEndpointGuid) {
   return [
-    {
-      provide: ActiveRouteCfOrgSpace,
-      useFactory: () => new BaseCfOrgSpaceRouteMock(guid)
-    },
+    generateActiveRouteCfOrgSpaceMock(guid),
+    generateCfActiveRouteMock(guid),
     CfUserServiceTestProvider,
     CloudFoundryEndpointService,
     UserInviteService,
+    UserInviteConfigureService,
     HttpClient,
     HttpHandler
   ];
@@ -70,16 +94,14 @@ export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
     useFactory: (
       store: Store<CFAppState>,
       paginationMonitorFactory: PaginationMonitorFactory,
-      entityServiceFactory: EntityServiceFactory
     ) => {
       return new CfUserService(
         store,
         paginationMonitorFactory,
         { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
-        entityServiceFactory,
       );
     },
-    deps: [Store, PaginationMonitorFactory, EntityServiceFactory, HttpClient]
+    deps: [Store, PaginationMonitorFactory, HttpClient]
   };
 }
 
@@ -89,7 +111,7 @@ export function generateTestCfServiceProvider() {
     useFactory: (
       store: Store<CFAppState>,
     ) => {
-      const appService = new CloudFoundryService(store);
+      const appService = new CloudFoundryService();
       return appService;
     },
     deps: [Store]
@@ -154,7 +176,8 @@ export function generateCfStoreModules() {
     StoreModule.forRoot(
       appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } },
       // Do not include initial store here, it's properties will be ignored as they won't have corresponding reducers in appReducers
-    )
+    ),
+    AppTestModule
   ];
 }
 
@@ -171,6 +194,6 @@ export function generateCfBaseTestModulesNoShared() {
 export function generateCfBaseTestModules() {
   return [
     ...generateCfBaseTestModulesNoShared(),
-    SharedModule
+    SharedModule,
   ];
 }

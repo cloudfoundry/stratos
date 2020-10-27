@@ -17,10 +17,10 @@
     </ng-template>
     <app-tile-group>
       <app-tile>
-        <app-card-number-metric [link]="serviceInstancesLink" icon="library_books" label="Instances" labelSingular="Instance" value="{{ (instances$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="serviceInstancesLink" icon="service_instance" iconFont="stratos-icons" label="Instances" labelSingular="Instance" value="{{ (instances$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric [link]="servicePlansLink" icon="products" iconFont="stratos-icons" label="Service Plans" labelSingular="Service Plan" value="{{ ( servicePlans$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="servicePlansLink" icon="service_plan" iconFont="stratos-icons" label="Service Plans" labelSingular="Service Plan" value="{{ ( servicePlans$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
     <app-tile-group>

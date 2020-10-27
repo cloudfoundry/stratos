@@ -1,9 +1,8 @@
-import { SetupModule } from './../../../features/setup/setup.module';
-import { Component, OnInit, Output, OnDestroy, Input, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import * as moment from 'moment';
-import { tap, map, filter, shareReplay, debounceTime } from 'rxjs/operators';
-import { combineLatest, Subscription, Observable } from 'rxjs';
+import moment from 'moment';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-date-time',

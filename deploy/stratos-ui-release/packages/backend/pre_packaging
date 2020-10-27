@@ -10,9 +10,8 @@ curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # Build backend
 npm install
-npm run customize
 export PATH=$PATH:$PWD/node_modules/.bin
-npm run bosh-build-backend
+npm run build-backend
 
 find ../stratos/deploy -type d   ! -path '../stratos/deploy' ! -path '*/db' -maxdepth 1 |  xargs rm -rf
 

@@ -5,16 +5,12 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
-import { IFeatureFlag } from '../../../../../core/src/core/cf-api.types';
-import { PermissionConfig, PermissionTypes } from '../../../../../core/src/core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/current-user-permissions.service';
-import { CFFeatureFlagTypes } from '../../../../../core/src/shared/components/cf-auth/cf-auth.types';
-import { PaginationMonitor } from '../../../../../store/src/monitors/pagination-monitor';
-import { getPaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
-import {
-  createCfFeatureFlagFetchAction,
-} from '../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
 export enum DEPLOY_TYPES_IDS {
   GITLAB = 'gitlab',
@@ -38,7 +34,8 @@ export class ApplicationDeploySourceTypes {
       helpText: 'Please select the public GitHub project and branch you would like to deploy from.',
       graphic: {
         // TODO: Move cf assets to CF package (#3769)
-        location: '/core/assets/endpoint-icons/github-logo.png'
+        location: '/core/assets/endpoint-icons/github-logo.png',
+        transform: 'scale(0.7)'
       }
     },
     {
@@ -55,7 +52,8 @@ export class ApplicationDeploySourceTypes {
       id: DEPLOY_TYPES_IDS.GIT_URL,
       helpText: 'Please enter the public git url and branch or tag you would like to deploy from.',
       graphic: {
-        location: '/core/assets/endpoint-icons/Git-logo.png'
+        location: '/core/assets/endpoint-icons/Git-logo.png',
+        transform: 'scale(0.7)'
       }
     },
     {
@@ -63,12 +61,13 @@ export class ApplicationDeploySourceTypes {
       id: DEPLOY_TYPES_IDS.DOCKER_IMG,
       helpText: 'Please specify an application name and the Docker image to be used (registry/org/image-name).',
       graphic: {
-        location: '/core/assets/endpoint-icons/docker.png'
+        location: '/core/assets/endpoint-icons/docker.png',
+        transform: 'scale(0.8)'
       },
       disabledText: 'The selected Cloud Foundry cannot deploy Docker images. Please check that the Diego Docker feature flag is enabled'
     },
     {
-      name: 'Application Archive File',
+      name: 'Application Archive',
       id: DEPLOY_TYPES_IDS.FILE,
       helpText: 'Please select the archive file that contains the application you would like to deploy.',
       graphic: { matIcon: 'unarchive' }
@@ -95,7 +94,7 @@ export class ApplicationDeploySourceTypes {
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): SourceType {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
-    return this.getTypes().find(source => source.id === typeId);
+    return typeId ? this.getTypes().find(source => source.id === typeId) : null;
   }
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
@@ -103,20 +102,7 @@ export class ApplicationDeploySourceTypes {
       // We don't want to return until we have a trusted response (there's a `startsWith(false)` in the `.can`), otherwise we return false
       // then, if different, send the actual response (this leads to flashing misleading info in ux)
       // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
-      const action = createCfFeatureFlagFetchAction(cfId);
-      const fetchedFeatureFlags$ = getPaginationObservables<IFeatureFlag>(
-        {
-          store: this.store,
-          action,
-          paginationMonitor: new PaginationMonitor<IFeatureFlag>(
-            this.store,
-            action.paginationKey,
-            action,
-            true
-          )
-        },
-        true
-      ).entities$.pipe(
+      const fetchedFeatureFlags$ = cfEntityCatalog.featureFlag.store.getPaginationService(cfId).entities$.pipe(
         map(entities => !!entities),
         filter(hasEntities => hasEntities),
         first(),
@@ -125,7 +111,7 @@ export class ApplicationDeploySourceTypes {
       );
 
       const canDeployWithDocker$ = this.perms.can(
-        new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
+        new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
       ).pipe(
         publishReplay(1),
         refCount(),

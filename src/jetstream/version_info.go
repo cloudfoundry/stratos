@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
+	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 

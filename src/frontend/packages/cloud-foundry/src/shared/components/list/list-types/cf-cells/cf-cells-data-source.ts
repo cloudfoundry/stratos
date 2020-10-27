@@ -11,8 +11,6 @@ import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-met
 import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
-
-// TODO: Move file to CF package (#3769)
 export class CfCellsDataSource
   extends ListDataSource<IMetricVectorResult<IMetricCell>, IMetrics<IMetricVectorResult<IMetricCell>>> {
 

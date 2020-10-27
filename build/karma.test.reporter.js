@@ -1,4 +1,3 @@
-
 (function () {
   'use strict';
 
@@ -75,7 +74,7 @@
         fs.unlinkSync(this.summaryFile);
       }
 
-      const all =  this.runningTotals;
+      const all = this.runningTotals;
 
       this.writeSummaryFile(`${this.bold}${this.cyan}================================================================================${this.reset}`);
       this.writeSummaryFile(`${this.bold}${this.cyan}Test Summary${this.reset}`);
@@ -106,47 +105,47 @@
 
       try {
 
-      this.writeFile(`${this.bold}${this.cyan}Test results for package ${this.bluebg} ${process.env.NG_TEST_SUITE} ${this.reset}`);
-      this.writeFile(`Total    : ${this.bold}${this.cyan}${this.total}${this.reset}`)
-      this.writeFile(`Passed   : ${this.bold}${this.cyan}${passed}${this.reset}`)
-      this.writeFile(`Failed   : ${this.bold}${this.red}${this.failed.length}${this.reset}`)
-      this.writeFile(`Skipped  : ${this.bold}${this.yellow}${this.skipped}${this.reset}`)
+        this.writeFile(`${this.bold}${this.cyan}Test results for package ${this.bluebg} ${process.env.NG_TEST_SUITE} ${this.reset}`);
+        this.writeFile(`Total    : ${this.bold}${this.cyan}${this.total}${this.reset}`)
+        this.writeFile(`Passed   : ${this.bold}${this.cyan}${passed}${this.reset}`)
+        this.writeFile(`Failed   : ${this.bold}${this.red}${this.failed.length}${this.reset}`)
+        this.writeFile(`Skipped  : ${this.bold}${this.yellow}${this.skipped}${this.reset}`)
 
-      if (this.failed.length === 0) {
-        fs.appendFileSync(this.file, 'All tests passed\n')
-      } else {
-        this.writeFile('Test failures:');
-        this.failed.forEach(f => {
-          this.writeFile(`${this.red}${this.bold} - ${f.fullName}${this.reset}`);
-          const logs = f.log || [];
-          logs.forEach(l => fs.appendFileSync(this.file, `${this.grey}    ${l}${this.reset}`));
-          // Add empty line
-          this.writeFile('');
-        });
-      }
+        if (this.failed.length === 0) {
+          fs.appendFileSync(this.file, 'All tests passed\n')
+        } else {
+          this.writeFile('Test failures:');
+          this.failed.forEach(f => {
+            this.writeFile(`${this.red}${this.bold} - ${f.fullName}${this.reset}`);
+            const logs = f.log || [];
+            logs.forEach(l => fs.appendFileSync(this.file, `${this.grey}    ${l}${this.reset}`));
+            // Add empty line
+            this.writeFile('');
+          });
+        }
 
-      // Update running totals JSON
-      this.runningTotals.total += this.total;
-      this.runningTotals.passed += passed;
-      this.runningTotals.failed += this.failed.length;
-      this.runningTotals.skipped += this.skipped;
-      fs.writeFileSync(this.jsonFile, JSON.stringify(this.runningTotals));
+        // Update running totals JSON
+        this.runningTotals.total += this.total;
+        this.runningTotals.passed += passed;
+        this.runningTotals.failed += this.failed.length;
+        this.runningTotals.skipped += this.skipped;
+        fs.writeFileSync(this.jsonFile, JSON.stringify(this.runningTotals));
 
-      this.generateSummary();
+        this.generateSummary();
 
-      // Write exit code
-      let newExitCode = this.exitCode;
-      if (result.exitCode > 0) {
-        newExitCode = result.exitCode
-      }
+        // Write exit code
+        let newExitCode = this.exitCode;
+        if (result.exitCode > 0) {
+          newExitCode = result.exitCode
+        }
 
-      fs.writeFileSync(this.exitCodeFile, newExitCode.toString());
+        fs.writeFileSync(this.exitCodeFile, newExitCode.toString());
 
-      // Dump the summary for this test suite
-      var contents = fs.readFileSync(this.file, 'utf8');
-      console.log(contents);
+        // Dump the summary for this test suite
+        var contents = fs.readFileSync(this.file, 'utf8');
+        console.log(contents);
 
-      } catch(e) {
+      } catch (e) {
         console.log('ERROR while reporting test result');
         console.log(e);
       }

@@ -1,8 +1,12 @@
+import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
-import { CloudFoundryComponentsModule } from '../../../cloud-foundry/src/shared/components/components.module';
+import {
+  ApplicationEnvVarsHelper,
+} from '../../../cloud-foundry/src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CloudFoundrySharedModule } from '../../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '../../../core/src/core/core.module';
 import { SharedModule } from '../../../core/src/shared/shared.module';
 import { AutoscalerBaseComponent } from '../features/autoscaler-base.component';
@@ -10,6 +14,9 @@ import { AutoscalerMetricPageComponent } from '../features/autoscaler-metric-pag
 import {
   AutoscalerScaleHistoryPageComponent,
 } from '../features/autoscaler-scale-history-page/autoscaler-scale-history-page.component';
+import {
+  EditAutoscalerCredentialComponent,
+} from '../features/edit-autoscaler-credential/edit-autoscaler-credential.component';
 import {
   EditAutoscalerPolicyStep1Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
@@ -23,7 +30,6 @@ import {
   EditAutoscalerPolicyStep4Component,
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
-import { CardAutoscalerDefaultComponent } from '../shared/card-autoscaler-default/card-autoscaler-default.component';
 import {
   TableCellAutoscalerEventChangeIconPipe,
 } from '../shared/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change-icon.pipe';
@@ -54,7 +60,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     SharedModule,
     AutoscalerRoutingModule,
     NgxChartsModule,
-    CloudFoundryComponentsModule,
+    CloudFoundrySharedModule,
   ],
   declarations: [
     AutoscalerBaseComponent,
@@ -65,7 +71,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     EditAutoscalerPolicyStep2Component,
     EditAutoscalerPolicyStep3Component,
     EditAutoscalerPolicyStep4Component,
-    CardAutoscalerDefaultComponent,
+    EditAutoscalerCredentialComponent,
     AppAutoscalerMetricChartCardComponent,
     AppAutoscalerComboChartComponent,
     AppAutoscalerComboSeriesVerticalComponent,
@@ -74,18 +80,10 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     TableCellAutoscalerEventStatusIconPipe,
     TableCellAutoscalerEventChangeIconPipe,
   ],
-  exports: [
-    CardAutoscalerDefaultComponent
-  ],
   providers: [
-    ApplicationService
-  ],
-  entryComponents: [
-    AppAutoscalerMetricChartCardComponent,
-    AppAutoscalerComboChartComponent,
-    AppAutoscalerComboSeriesVerticalComponent,
-    TableCellAutoscalerEventChangeComponent,
-    TableCellAutoscalerEventStatusComponent
+    ApplicationService,
+    ApplicationEnvVarsHelper,
+    DatePipe
   ]
 })
 export class AutoscalerModule { }

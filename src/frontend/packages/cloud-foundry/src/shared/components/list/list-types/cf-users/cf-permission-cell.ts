@@ -1,10 +1,9 @@
-import { Input } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { CfUser } from '../../../../../../../cloud-foundry/src/store/types/user.types';
 import { UserRoleLabels } from '../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -12,7 +11,8 @@ import { ConfirmationDialogService } from '../../../../../../../core/src/shared/
 import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
+import { IUserRole } from '../../../../../features/cf/cf.helpers';
+import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 
 
@@ -21,13 +21,14 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
   name: string;
   guid: string;
   userGuid: string;
-  userName?: string;
+  username?: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid?: string;
 }
 
-export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
+@Directive()
+export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
   @Input('row')
@@ -92,7 +93,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
     const confirmation = new ConfirmationDialogConfig(
       'Remove Permission',
       `Are you sure you want to remove permission '${this.permissionString(cellPermission)}'` +
-      ` from user '${cellPermission.userName}'?`,
+      ` from user '${cellPermission.username}'?`,
       'Delete',
       true
     );

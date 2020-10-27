@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}
 
 export const urlValidationExpression =
   '^' +
@@ -261,13 +269,6 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
 export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
 
-export const sortStringify = (obj: { [key: string]: string | string[] | number }): string => {
-  const keys = Object.keys(obj).sort();
-  return keys.reduce((res, key) => {
-    return res += `${key}-${obj[key]},`;
-  }, '');
-};
-
 /**
  * Real basic, shallow check
  */
@@ -291,3 +292,14 @@ export const arraysEqual = (a: any[], b: any[]): boolean => {
   // Falsy/Truthy
   return false;
 };
+
+
+/* tslint:disable:no-bitwise  */
+export const createGuid = (): string => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+/* tslint:enable */

@@ -56,8 +56,7 @@ func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) err
 	}
 
 	// If we got a value, then we should migrate
-
-	if !portal.CanPerformMigrations() {
+	if !portal.GetConfig().CanMigrateDatabaseSchema {
 		log.Info("Will not migrate setup data on this instance")
 		return nil
 	}

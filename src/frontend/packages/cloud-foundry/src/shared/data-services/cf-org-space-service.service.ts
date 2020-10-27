@@ -16,8 +16,6 @@ import {
 import { CFAppState } from '../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
 import { createEntityRelationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
-import { IOrganization, ISpace } from '../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -25,20 +23,20 @@ import {
 import {
   valueOrCommonFalsy,
 } from '../../../../core/src/shared/components/list/data-sources-controllers/list-pagination-controller';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { ResetPagination, SetParams } from '../../../../store/src/actions/pagination.actions';
-import { QParam, QParamJoiners } from '../q-param';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-} from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointsRegisteredEntitiesSelector } from '../../../../store/src/selectors/endpoint.selectors';
+import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
+import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
+import { getCurrentPageRequestInfo } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { connectedEndpointsOfTypesSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { IOrganization, ISpace } from '../../cf-api.types';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { QParam, QParamJoiners } from '../q-param';
 
 export function spreadPaginationParams(params: PaginationParam): PaginationParam {
   return {
@@ -106,7 +104,8 @@ export const initCfOrgSpaceService = (
 export const createCfOrSpaceMultipleFilterFn = (
   store: Store<CFAppState>,
   action: PaginatedAction,
-  setQParam: (setQ: QParam, qs: QParam[]) => boolean
+  setQParam: (setQ: QParam, qs: QParam[]) => boolean,
+  preResetUpdate?: () => void
 ) => {
   return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
     if (!changes.length) {
@@ -139,6 +138,10 @@ export const createCfOrSpaceMultipleFilterFn = (
     const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
     const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
     const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
+
+    if (preResetUpdate) {
+      preResetUpdate();
+    }
 
     // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
@@ -212,13 +215,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
       action: this.paginationAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.paginationAction.paginationKey,
-        cfEntityFactory(this.paginationAction.entityType)
+        cfEntityFactory(this.paginationAction.entityType),
+        this.paginationAction.flattenPagination
       )
-    }, true);
+    }, this.paginationAction.flattenPagination);
   }
 
   private createCf() {
-    const list$ = this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+    const list$ = this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
       // Ensure we have endpoints
       filter(endpoints => endpoints && !!Object.keys(endpoints).length),
       publishReplay(1),
@@ -298,15 +302,12 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createPaginationAction() {
-    const organizationEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-    const actionBuilder = organizationEntity.actionOrchestrator.getActionBuilder('getMultiple');
-    const getAllOrganizationsAction = actionBuilder(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
+    return cfEntityCatalog.org.actions.getMultiple(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
       includeRelations: [
         createEntityRelationKey(organizationEntityType, spaceEntityType),
       ],
       populateMissing: true
     });
-    return getAllOrganizationsAction;
   }
 
   public getEndpointOrgs(endpointGuid: string) {

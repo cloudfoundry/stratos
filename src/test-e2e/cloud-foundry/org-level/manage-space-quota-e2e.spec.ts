@@ -1,7 +1,7 @@
 import { by, element, promise, protractor } from 'protractor';
 
 import { e2e } from '../../e2e';
-import { CFHelpers } from '../../helpers/cf-helpers';
+import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { extendE2ETestTime } from '../../helpers/extend-test-helpers';
 import { CfOrgLevelPage } from '../org-level/cf-org-level-page.po';
@@ -57,6 +57,7 @@ describe('Manage Space Quota', () => {
 
       // should go to quotas when cancelled
       quotaFormPage.stepper.cancel();
+      quotaFormPage.stepper.waitUntilNotShown();
       expect(cfOrgLevelPage.subHeader.getTitleText()).toBe('Space Quotas');
     });
 
@@ -69,13 +70,17 @@ describe('Manage Space Quota', () => {
       quotaFormPage.stepper.setName(quotaName);
       expect(element(by.css('.add-space-quota-stepper')).getText()).toContain('A space quota with this name already exists.');
 
-      quotaFormPage.stepper.setName(secondQuotaName);
-      quotaFormPage.stepper.setTotalServices('1');
-      quotaFormPage.stepper.setTotalRoutes('10');
-      quotaFormPage.stepper.setMemoryLimit('1024');
-      quotaFormPage.stepper.setInstanceMemoryLimit('1');
-      quotaFormPage.stepper.setTotalReservedRoutePorts('0');
-      quotaFormPage.stepper.setAppInstanceLimit('1');
+      const obj = {};
+      obj[quotaFormPage.stepper.name] = secondQuotaName;
+      obj[quotaFormPage.stepper.totalServices] = '1';
+      obj[quotaFormPage.stepper.totalRoutes] = '10';
+      obj[quotaFormPage.stepper.memoryLimit] = '1024';
+      obj[quotaFormPage.stepper.instanceMemoryLimit] = '1';
+      obj[quotaFormPage.stepper.totalReservedRoutePorts] = '0';
+      obj[quotaFormPage.stepper.appInstanceLimit] = '1';
+
+      quotaFormPage.stepper.getStepperForm().fill(obj);
+      expect(quotaFormPage.stepper.canNext()).toBeTruthy();
       quotaFormPage.submit();
       quotaFormPage.stepper.waitUntilNotShown();
       cfOrgLevelPage.clickOnSpaceQuota(secondQuotaName);
@@ -111,6 +116,7 @@ describe('Manage Space Quota', () => {
       quotaFormPage = new SpaceQuotaFormPage();
       quotaFormPage.stepper.setName(secondQuotaName);
       quotaFormPage.submit();
+      quotaFormPage.stepper.waitUntilNotShown();
 
       expect(cfOrgLevelPage.header.getTitleText()).toBe(secondQuotaName);
     });

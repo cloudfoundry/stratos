@@ -1,6 +1,6 @@
 import { ITileGraphic } from '../../../../core/src/shared/components/tile/tile-selector.types';
 import { NewAppCFDetails } from './create-application.types';
-import { GitBranch, GitCommit } from './git.types';
+import { GitBranch } from './git.types';
 
 export interface SourceType {
   name: string;
@@ -35,6 +35,7 @@ export enum SocketEventTypes {
   CLOSE_NO_SESSION = 40006,
   CLOSE_NO_CNSI = 40007,
   CLOSE_NO_CNSI_USERTOKEN = 40008,
+  CLOSE_ACK = 40009,
   EVENT_CLONED = 10000,
   EVENT_FETCHED_MANIFEST = 10001,
   EVENT_PUSH_STARTED = 10002,
@@ -67,7 +68,7 @@ export interface DockerAppDetails {
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
-  commit?: GitCommit;
+  commit?: string;
   branchName?: string;
   url?: string;
 }

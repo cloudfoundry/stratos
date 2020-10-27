@@ -8,48 +8,9 @@ echo $STRATOS_PATH
 docker stop stratos-db
 docker rm stratos-db
 
-ID=$(docker run --name stratos-db -d -e MYSQL_ROOT_PASSWORD=dbroot -p 3306:3306 splatform/stratos-mariadb)
-echo $ID
+IMAGE=mariadb:10.2.33
 
-rm -f dbsetup.sql init.sh
-cat <<EOF > dbsetup.sql
-CREATE DATABASE stratosdb;
-CREATE USER stratos IDENTIFIED BY 'strat0s';
-GRANT ALL PRIVILEGES ON stratosdb.* to 'stratos'@'%';
-EOF
-
-cat <<EOF > init.sh
-#!/usr/bin/env bash
-mysql -uroot -pdbroot < /dbsetup.sql
-EOF
-
-chmod +x init.sh
-docker cp ./dbsetup.sql ${ID}:/dbsetup.sql
-docker cp ./init.sh ${ID}:/init.sh
-rm dbsetup.sql init.sh
-
-#Fetch dockerize tool
-wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz
-tar -xzvf dockerize-linux-amd64-v0.6.1.tar.gz
-rm dockerize-linux-amd64-v0.6.1.tar.gz
-
-chmod +x ./dockerize
-docker cp ./dockerize ${ID}:/dockerize
-rm dockerize
-
-#We us wait for the internal socket to come up before running init script
-echo "Just waiting a few seconds for the DB to come online ..."
-docker exec -t ${ID} /dockerize -wait file:///var/run/mysql/mysql.sock -timeout 1m
-
-echo "Database ready"
-docker exec -t ${ID} /init.sh
-
-mkdir -p ${STRATOS_PATH}/src/jetstream/db
-cp ${STRATOS_PATH}/deploy/db/dbconf.yml ${STRATOS_PATH}/src/jetstream/db
-
-if [ -f ${STRATOS_PATH}/src/jetstream/jetstream ]; then
-  ${STRATOS_PATH}/src/jetstream/jetstream --env=mariadb-dev up
-else
-  echo "Build the Stratos backend and run db migrations with:"
-  echo "  ./jetstream --env=mariadb-local up"
-fi
+# The container can set up users and a new database via env vars
+ID=$(docker run --name stratos-db -d -e MYSQL_DATABASE=stratosdb -e MYSQL_ROOT_PASSWORD=dbroot -e MYSQL_PASSWORD=strat0s -p 3306:3306 ${IMAGE})
+echo "Launched container: $ID"
+echo "Database started ... it may take a few seconds to complete initialization ..."

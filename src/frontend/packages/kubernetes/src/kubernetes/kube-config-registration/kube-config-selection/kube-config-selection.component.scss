@@ -1,0 +1,35 @@
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.kube-config-select {
+  &__panel {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  &__upload {
+    text-align: center;
+  }
+  &__title {
+    font-size: 24px;
+    text-align: center;
+  }
+  &__icon {
+    font-size: 96px;
+    height: 96px;
+    opacity: .7;
+    width: 96px;
+  }
+  &__table {
+    flex: 1;
+  }
+  &__buttons {
+    padding-bottom: 12px;
+    button {
+      margin-right: 24px;
+    }
+  }
+}

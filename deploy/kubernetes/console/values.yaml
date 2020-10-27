@@ -1,18 +1,15 @@
 # Tag for images - do not edit
 consoleVersion: latest
 dockerRegistrySecret: regsecret
-# Specify default DB password
-dbPassword: changeme
-dbProvider: mysql
+
 # Provide Proxy settings if required
 #httpProxy: proxy.corp.net
 #httpsProxy: proxy.corp.net
 #noProxy: localhost
 #ftpProxy: proxy.corp.net
 #socksProxy: sock-proxy.corp.net
-imagePullPolicy: IfNotPresent
-# useLb is deprecated - use console.service.type
-useLb: false
+imagePullPolicy: Always
+
 console:
   cookieDomain:
   # externalIP deprecated - use console.service.externalIPs
@@ -24,7 +21,8 @@ console:
   sessionStoreSecret:
   # Stratos Services
   service:
-    annotations: []
+    annotations: {}
+    extraLabels: {}
     externalIPs: []
     loadBalancerIP:
     loadBalancerSourceRanges: []
@@ -59,49 +57,110 @@ console:
       servicePort: 80
       # nodePort: 30001
 
+
   # Name of config map that provides the template files for user invitation emails
   templatesConfigMapName:
 
   # Email subject of the user invitation message 
   userInviteSubject: ~
 
-  # Whether to perform the volume migration job on install/upgrade (migrate to secrets)
-  migrateVolumes: true
-  
   # Enable/disable Tech Preview
   techPreview: false
+
+  # Enable/disable API key-based access to Stratos API
+  apiKeysEnabled: admin_only
+
+  ui:
+    # Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched 
+    listMaxSize:
+    # If the maximum list size is met give the user the option to fetch all results regardless
+    listAllowLoadMaxed: false
 
   # Use local admin user instead of UAA - set to a password to enable
   localAdminPassword: ~
 
+  # Secret containing certificate for the Console
+  tlsSecretName:
+
+  # URL of a Cloud Foundry to use for authentication and to auto-register on login
+  # Deprecated
+  autoRegisterCF: ~
+
+  # Custom annotations to apply to Stateful sets
+  statefulSetAnnotations: {}
+
+  # Extra labels to apply to Stateful sets
+  statefulSetExtraLabels: {}
+
+  # Custom annotations to apply to Deployments
+  deploymentAnnotations: {}
+
+  # Extra labels to apply to Deployments
+  deploymentExtraLabels: {}
+
+  # Custom annotations to apply to Jobs
+  jobAnnotations: {}
+
+  # Extra labels to apply to Jobs
+  jobExtraLabels: {}
+
+  # Custom annotations to apply to Pods
+  podAnnotations: {}
+
+  # Extra labels to apply to Pods
+  podExtraLabels: {}
+
+  # Node Selector for console Pod
+  nodeSelector: {}
+
+  # Download link when installing the Kubernetes Dashboard in a targetted Kube Endpoint
+  kubeDashboardImage:
+
+  # Enable Artifact Hub
+  artifactHubEnabled: true
+
+  # Size for analysis reports volume
+  reportsVolumeSize: 1Gi
+
+  # Do not use a persistent volume for analysis reports
+  reportsVolumeDisabled: false
+
+  # ssl protocols and ciphers overrides - leave empty for defaults
+  sslProtocols:
+  sslCiphers:
+  
+  # Number of replicas to deploy
+  replicaCount: 1
+
 images:
   console: stratos-console
   proxy: stratos-jetstream
-  postflight: stratos-postflight-job
   mariadb: stratos-mariadb
+  configInit: stratos-config-init
+  analyzers: stratos-analyzers
 
 # Specify which storage class should be used for PVCs
 #storageClass: default
-#consoleCert: |
-#    -----BEGIN CERTIFICATE-----
-#   MIIDXTCCAkWgAwIBAgIJAJooOiQWl1v1MA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
-#   ...
-#    -----END CERTIFICATE-----
-#consoleCertKey: |
-#    -----BEGIN PRIVATE KEY-----
-#    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkdgEAAoIBAQDV9+ySh0xZzM41
-#    ...
-#    -----END PRIVATE KEYE-----
-# MariaDB chart configuration
+
+# Database configuration
 mariadb:
-  # Only required for creating the databases
-  mariadbRootPassword: changeme
-  adminUser: root
-  # Credentials for user
-  mariadbUser: console
-  mariadbPassword: changeme
-  mariadbDatabase: console
-  usePassword: true
+  # Whether or not to use an external database in place of the in-build MariaDB
+  external: false
+  database: console
+  user: console
+  # Leave password blank to auto-generate
+  userPassword:
+  # Leave password blank to auto-generate (not needed for external database)
+  rootPassword:
+  # DB Host (when using an external database)
+  host:
+  # Override port (default 3306) (when using an external database)
+  port:
+  # TLS Mode - can be true, false, skip-verify or preferred
+  tls:
+  # Override DB type - default is mysql
+  type:
+
   resources:
     requests:
       memory: 256Mi
@@ -111,20 +170,32 @@ mariadb:
     accessMode: ReadWriteOnce
     size: 1Gi
     storageClass:
+  # Node selector for the database pod
+  nodeSelector: {}
+
+configInit:
+  # Node selector for the config init pod
+  nodeSelector: {}
+  
+# UAA configuration
 uaa:
-  protocol: https://
-  port: 
-  host: 
-  consoleClient:  
+  # UAA endpoint (e.g. https://uaa.domain:2793)
+  endpoint: ~
+  # Client to use when authenticating (default is 'cf')
+  consoleClient: 
+  # Client Secret to use when authenticating (default is '')
   consoleClientSecret: 
-  consoleAdminIdentifier: 
+  # Scope that determines if a user is a Stratos admin
+  consoleAdminIdentifier:
+  # Skip SSL validation when communicating with the UAA
   skipSSLValidation: false
+
 # SCF values compatability 
 env:
   DOMAIN:
   UAA_HOST: 
   UAA_PORT: 2793
-  # UAA Zone (namespace cf ias deployed to when deployed to Kubernetes)
+  # UAA Zone (namespace cf is deployed to when deployed to Kubernetes)
   UAA_ZONE: scf
 
   # SMTP Settings for Email Sending (User Invites)
@@ -158,7 +229,16 @@ kube:
     username:
     password:
     email: default
+
+# ================================================================================
+# Values below are for internal use only - do not use
+# ================================================================================
+
+autoCleanup: false
+
 services:
   loadbalanced: false
-metrics:
-  enabled: false
+
+# useLb is deprecated - use console.service.type
+useLb: false
+

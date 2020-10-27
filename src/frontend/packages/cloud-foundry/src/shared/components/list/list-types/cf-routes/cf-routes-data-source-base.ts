@@ -1,12 +1,10 @@
 import { Store } from '@ngrx/store';
+import { getRowMetadata } from '@stratosui/store';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { routeEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IRoute } from '../../../../../../../core/src/core/cf-api.types';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog.service';
 import { safeUnsubscribe } from '../../../../../../../core/src/core/utils.service';
 import {
   ListPaginationMultiFilterChange,
@@ -16,13 +14,17 @@ import {
   TableRowStateManager,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../../../../../../store/src/monitors/pagination-monitor';
-import { CFListDataSource } from '../../../../cf-list-data-source';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { PaginatedAction, PaginationParam } from '../../../../../../../store/src/types/pagination.types';
+import { IRoute } from '../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
+import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { getRoute, isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
-import { cfOrgSpaceFilter, getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfOrgSpaceFilter } from '../../../../../features/cf/cf.helpers';
+import { CFListDataSource } from '../../../../cf-list-data-source';
 import { createCfOrSpaceMultipleFilterFn } from '../../../../data-services/cf-org-space-service.service';
 
 export interface ListCfRoute extends IRoute {
@@ -57,7 +59,12 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     appGuid?: string,
     genericRouteState = true
   ) {
-    const { rowsState, sub } = CfRoutesDataSourceBase.createRowState(store, action.paginationKey, genericRouteState);
+    const { rowsState, sub } = CfRoutesDataSourceBase.createRowState(
+      store,
+      action.paginationKey,
+      genericRouteState,
+      action.flattenPagination
+    );
 
     super({
       store,
@@ -86,7 +93,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           };
 
           if (appGuid && route.entity.apps) {
-            const apps = route.entity.apps;
+            const apps = route.entity.apps.filter(app => !!app);
             const foundApp = !!apps && (apps.findIndex(a => a.metadata.guid === appGuid) >= 0);
             entity.mappedAppsCount = foundApp ? Number.MAX_SAFE_INTEGER : (route.entity.apps || []).length;
             entity.mappedAppsCountLabel = foundApp ? `Already attached` : entity.mappedAppsCount.toString();
@@ -111,9 +118,13 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
   /**
    * Create a row state manager that will set the route row state to busy/blocked/deleting etc
    */
-  private static createRowState(store, paginationKey, genericRouteState: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
+  private static createRowState(
+    store: Store<AppState>,
+    paginationKey,
+    genericRouteState: boolean,
+    isLocal: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
     if (genericRouteState) {
-      const { rowStateManager, sub } = CfRoutesDataSourceBase.getRowStateManager(store, paginationKey);
+      const { rowStateManager, sub } = CfRoutesDataSourceBase.getRowStateManager(store, paginationKey, isLocal);
       return {
         rowsState: rowStateManager.observable,
         sub
@@ -126,7 +137,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
     }
   }
 
-  private static getRowStateManager(store: Store<CFAppState>, paginationKey: string): {
+  private static getRowStateManager(store: Store<AppState>, paginationKey: string, isLocal: boolean): {
     rowStateManager: TableRowStateManager,
     sub: Subscription
   } {
@@ -137,11 +148,11 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
       {
         entityType: routeEntityType,
         endpointType: CF_ENDPOINT_TYPE
-      }
+      },
+      isLocal
     );
 
     const sub = this.setUpManager(
-      store,
       paginationMonitor,
       rowStateManager
     );
@@ -153,7 +164,6 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
 
   // This pattern might be worth pulling out into a more general helper if we use it again.
   private static setUpManager(
-    store: Store<CFAppState>,
     paginationMonitor: PaginationMonitor<APIResource>,
     rowStateManager: TableRowStateManager
   ) {
@@ -164,7 +174,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
             entityType: routeEntityType,
             endpointType: CF_ENDPOINT_TYPE
           });
-          const entityMonitor = catalogEntity.getEntityMonitor(store, route.metadata.guid);
+          const entityMonitor = catalogEntity.store.getEntityMonitor(route.metadata.guid);
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating.unmapping || { busy: false };

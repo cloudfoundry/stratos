@@ -2,17 +2,14 @@ import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { ConfirmDialogComponent } from '../po/confirm-dialog';
 import { MetaCard } from '../po/meta-card.po';
 import { SideNavMenuItem } from '../po/side-nav.po';
-import { CreateServiceInstance } from './create-service-instance.po';
+import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
 describe('Edit Service Instance', () => {
-  const createServiceInstance = new CreateServiceInstance();
-  let createMarketplaceServiceInstance;
   let e2eSetup;
   let servicesHelperE2E: ServicesHelperE2E;
   const servicesWall = new ServicesWallPage();
@@ -31,15 +28,15 @@ describe('Edit Service Instance', () => {
       .getInfo();
   });
 
-  beforeEach(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
-    createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
-    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
-  });
+  beforeAll(() => {
+    servicesHelperE2E = new ServicesHelperE2E(e2eSetup, null, servicesHelperE2E);
+    servicesHelperE2E.setCreateServiceInstance(new CreateMarketplaceServiceInstance());
+    serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+    serviceNamesToDelete.push(serviceInstanceName);
 
-  const timeout = 100000;
-  extendE2ETestTime(timeout);
+    servicesHelperE2E.createServiceViaAPI(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
+
+  }, 30000);
 
   beforeEach(() => {
     servicesWall.sideNav.goto(SideNavMenuItem.Services);
@@ -47,16 +44,8 @@ describe('Edit Service Instance', () => {
   });
 
   it('- should be able edit a service instance', () => {
-    servicesWall.clickCreateServiceInstance();
-    createServiceInstance.waitForPage();
-    createServiceInstance.selectMarketplace();
-    serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
-
-    servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
-
     servicesWall.waitForPage();
-
-    serviceNamesToDelete.push(serviceInstanceName);
+    servicesWall.serviceInstancesList.header.refresh();
 
     return getCardWithTitle(serviceInstanceName)
       .then((card: MetaCard) => card.openActionMenu())
@@ -65,7 +54,10 @@ describe('Edit Service Instance', () => {
         menu.waitUntilNotShown();
 
         return browser.getCurrentUrl().then(url => {
-          expect(url.endsWith('edit')).toBeTruthy();
+          const query = url.indexOf('?');
+          const urlWithoutQuery = query >= 0 ? url.substring(0, query) : url;
+          expect(urlWithoutQuery.endsWith('edit')).toBeTruthy();
+
           servicesHelperE2E.setServicePlan(true);
           servicesHelperE2E.createServiceInstance.stepper.next();
 
@@ -76,7 +68,7 @@ describe('Edit Service Instance', () => {
           servicesHelperE2E.createServiceInstance.stepper.waitUntilNotShown();
         });
       }).catch(e => fail(e));
-  }, timeout);
+  });
 
   it('- should have edited service instance', () => {
     servicesWall.waitForPage();

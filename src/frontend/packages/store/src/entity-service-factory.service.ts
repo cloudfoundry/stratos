@@ -1,12 +1,12 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from './app-state';
-import { EntityRequestAction } from './types/request.types';
-import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
-import { entityCatalog } from './entity-catalog/entity-catalog.service';
+import { entityCatalog } from './entity-catalog/entity-catalog';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
-import { ENTITY_INFO_HANDLER, EntityInfoHandler, EntityService } from './entity-service';
+import { EntityService } from './entity-service';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { EntityRequestAction } from './types/request.types';
 
 @Injectable()
 export class EntityServiceFactory {
@@ -19,7 +19,6 @@ export class EntityServiceFactory {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private entityMonitorFactory: EntityMonitorFactory,
-    @Optional() @Inject(ENTITY_INFO_HANDLER) private entityInfoHandler: EntityInfoHandler
   ) { }
 
   // FIXME: See #3833. Improve typing of action passed to entity service factory create
@@ -50,9 +49,9 @@ export class EntityServiceFactory {
         config.entityGuid,
         config.endpointGuid,
         config.actionMetadata || {}
-      ), this.entityInfoHandler);
+      ));
     }
-    return new EntityService<T>(this.store, entityMonitor, action, this.entityInfoHandler);
+    return new EntityService<T>(this.store, entityMonitor, action);
   }
 
 }

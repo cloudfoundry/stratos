@@ -4,8 +4,13 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("autoscaler", []string{"cloudfoundry"}, Init)
+}
 
 // Autoscaler is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type Autoscaler struct {
@@ -44,6 +49,8 @@ func (a *Autoscaler) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/autoscaler/apps/:appId/policy", a.getAutoscalerPolicy)
 	echoGroup.PUT("/autoscaler/apps/:appId/policy", a.attachAutoscalerPolicy)
 	echoGroup.DELETE("/autoscaler/apps/:appId/policy", a.detachAutoscalerPolicy)
+	echoGroup.PUT("/autoscaler/apps/:appId/credential", a.createAutoscalerCredential)
+	echoGroup.DELETE("/autoscaler/apps/:appId/credential", a.deleteAutoscalerCredential)
 	echoGroup.GET("/autoscaler/apps/:appId/metric/:metricType", a.getAutoscalerMetric)
 	echoGroup.GET("/autoscaler/apps/:appId/event", a.getAutoscalerEvent)
 }

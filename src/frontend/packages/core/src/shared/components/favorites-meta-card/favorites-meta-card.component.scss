@@ -2,6 +2,7 @@
   min-height: 160px;
   outline: none;
   &__header-text {
+    line-height: 24px;
     margin-top: 0;
   }
   &__type {
@@ -30,9 +31,45 @@
   &__clickable {
     cursor: pointer;
   }
+  &__header-text-panel {
+    width: 100%;
+  }
   &__header {
     display: flex;
-    white-space: nowrap;
+  }
+  &__logo-panel {
+    display: flex;
+    justify-content: left;
+    width: 56px;
+  }
+  &__logo {
+    height: 48px;
+    margin-right: 8px;
+    width: auto;
+  }
+  &__icon {
+    margin-right: 4px;
+    opacity: .7;
+  }
+  &__icon-panel {
+    display: flex;
+    justify-content: left;
+    width: 32px;
+  }
+  &__panel {
+    display: flex;
+    :first-child {
+      flex: 1;
+    }
+  }
+  &__disconnected {
+    align-self: center;
+    border-radius: 2px;
+    display: flex;
+    font-size: 14px;
+    font-weight: normal;
+    margin-right: 8px;
+    padding: 2px 4px;
   }
 }
 
@@ -52,3 +89,5 @@
 .subtle-text {
   opacity: .6;
 }
+
+

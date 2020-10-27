@@ -157,4 +157,8 @@ fi
 # Enable docker for deploy app from docker test
 cf enable-feature-flag diego_docker
 
+# Enable features for testing add/remove role via username
+cf enable-feature-flag set_roles_by_username
+cf enable-feature-flag unset_roles_by_username
+
 echo "All done"

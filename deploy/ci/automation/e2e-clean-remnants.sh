@@ -37,18 +37,17 @@ function clean() {
   local ITEMS=$1
   local PREFIX=$2
   local CMD=$3
-  local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+  local REGEX=""
   local NOW=$(date "+%s")
 
   if [ -z "$4" ]; then
-    local REGEX="^($PREFIX)(.*)\.([0-9]*)[Tt]([0-9]*)[zZ].*"
+    local REGEX="^($PREFIX)(.*)\.([0-9\-]*)[Tt]([0-9:]*)([zZ]|\.[0-9]*z).*"
   else
     local REGEX="$4"
   fi
 
   while IFS= read -r line
   do
-
     if [ -z "$5" ]; then
       NAME="${line%% *}"
     else
@@ -58,8 +57,10 @@ function clean() {
     if [[ $NAME =~ $REGEX ]]; then
       DS="${BASH_REMATCH[3]}"
       DS=${DS//_/}
+      DS=${DS//-/}
       TS="${BASH_REMATCH[4]}"
       TS=${TS//_/}
+      TS=${TS//:/}
       TS="${TS:0:6}"
 
       if [[ "$unamestr" == 'Darwin' ]]; then
@@ -69,8 +70,8 @@ function clean() {
         EPOCH=$(date -d "$TIMESTAMP" "+%s")
       fi
       DIFF=$(($NOW-$EPOCH))
-      # Delete anything older than 6 hours
-      if [ $DIFF -gt 21600 ]; then
+      # Delete anything older than 2 hours
+      if [ $DIFF -gt 7200 ]; then
         if [ $DRYRUN == "false" ]; then
           echo "$NAME  [DELETE]"
           cf $CMD $NAME -f
@@ -118,6 +119,8 @@ echo "Cleaning users without roles"
 USERS=$(cf curl "/v2/users?results-per-page=100" | jq -r .resources[].entity.username)
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travis)(-remove-users)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptancee2etravis)(invite[0-9])(20[0-9]*)[Tt]([0-9]*)[zZ].*"
+clean "$USERS" "-" "delete-user" "^(acceptance\.e2e\.travisci)(-manage-by-username)\.(20[0-9]*)[Tt]([0-9]*)[zZ].*"
 
 # Routes
 echo "Cleaning routes"

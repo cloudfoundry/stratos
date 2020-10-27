@@ -39,7 +39,6 @@ else
   # Build front-end
   log "Fetching front-end dependencies" $CYAN
   npm install
-  npm run customize
 
   log "Building front-end" $CYAN
   npm run build-cf
