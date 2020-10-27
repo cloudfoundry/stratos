@@ -18,17 +18,11 @@ interface GetMultipleActionConfig {
   extraArgs?: Record<any, any>;
 }
 
+/**
+ * Configuration required to display a list. This includes params used to create the paginated action associated with the list
+ */
 export interface ListEntityConfig extends GetMultipleActionConfig {
   entityConfig: EntityCatalogEntityConfig;
-}
-
-function actionFromConfig(config: ListEntityConfig): PaginatedAction {
-  const catalogEntity = entityCatalog.getEntity(config.entityConfig);
-  const getAllActionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('getMultiple');
-  if (!getAllActionBuilder) {
-    throw Error(`List Error: ${catalogEntity.entityKey} has no action builder for the getMultiple action.`);
-  }
-  return getAllActionBuilder(config.endpointGuid, config.paginationKey, config.extraArgs);
 }
 
 /* tslint:disable:no-use-before-declare  */
@@ -55,11 +49,26 @@ export class ListDataSourceFromActionOrConfig<A, T> extends ListDataSource<T, A>
 /* tslint:enable */
 
 export class ListActionOrConfigHelpers {
+  /**
+   * Given a entity config create the paginated action to fetch all of it's type via `getMultiple`
+   */
+  private static actionFromConfig(config: ListEntityConfig): PaginatedAction {
+    const catalogEntity = entityCatalog.getEntity(config.entityConfig);
+    const getAllActionBuilder = catalogEntity.actionOrchestrator.getActionBuilder('getMultiple');
+    if (!getAllActionBuilder) {
+      throw Error(`List Error: ${catalogEntity.entityKey} has no action builder for the getMultiple action.`);
+    }
+    return getAllActionBuilder(config.endpointGuid, config.paginationKey, config.extraArgs);
+  }
+
+  /**
+   * Given a paginated action or entity config create a paginated action and update the required properties
+   */
   static createListAction(actionOrConfig: ListActionOrConfig): {
     action: PaginatedAction,
     catalogEntity: StratosBaseCatalogEntity;
   } {
-    const action = isPaginatedAction(actionOrConfig) || actionFromConfig(actionOrConfig as ListEntityConfig);
+    const action = isPaginatedAction(actionOrConfig) || ListActionOrConfigHelpers.actionFromConfig(actionOrConfig as ListEntityConfig);
     const catalogEntity = entityCatalog.getEntity(action);
     action.paginationKey = action.paginationKey || catalogEntity.entityKey + '-list';
     return {
@@ -68,6 +77,9 @@ export class ListActionOrConfigHelpers {
     };
   }
 
+  /**
+   * Create a data source config to be used by a data source
+   */
   static createDataSourceConfig<A, T>(
     store: Store<any>,
     actionOrConfig: ListActionOrConfig,

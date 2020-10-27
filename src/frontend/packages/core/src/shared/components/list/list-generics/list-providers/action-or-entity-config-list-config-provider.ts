@@ -6,9 +6,9 @@ import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action
 import { CatalogEntityDrivenListConfig } from '../helpers/entity-catalogue-list-config';
 import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from '../list-config-provider.types';
 
-
-// TODO: RC add doc
-
+/**
+ * Create a List provider (list config and data source) using either a paginated action or a list entity config
+ */
 export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigProvider<T, A> {
   private listConfig: IListConfig<T>;
   private overrideListConfig: Partial<IListConfig<T>>;
@@ -16,10 +16,16 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
 
   constructor(private store: Store<any>, private actionOrConfig: ListActionOrConfig) { }
 
+  /**
+   * Create a IListConfig instance with defaults and, if provided, local updates
+   */
   public getListConfig(): IListConfig<T> {
     return this.listConfig || this.newListConfig();
   }
 
+  /**
+   * Update the current list config with new values
+   */
   public updateListConfig(updates: ListConfigUpdate<T>) {
     this.overrideListConfig = {
       ...this.overrideListConfig,
@@ -27,6 +33,9 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
     };
   }
 
+  /**
+   * Update the current data source with new values
+   */
   public updateDataSourceConfig(updates: ListDataSourceConfigUpdate<A, T>) {
     this.overrideDataSourceConfig = {
       ...this.overrideDataSourceConfig,
@@ -43,10 +52,14 @@ export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigPro
     }
 
     const { catalogEntity } = ListActionOrConfigHelpers.createListAction(this.actionOrConfig);
+
+    // Create the List Config
     this.listConfig = {
       ...new CatalogEntityDrivenListConfig<T>(catalogEntity, this.store),
       ...(this.overrideListConfig || {})
     };
+
+    // Create the Data Source
     const dsConfig = ListActionOrConfigHelpers.createDataSourceConfig<A, T>(
       this.store,
       this.actionOrConfig,
