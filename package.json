@@ -89,7 +89,7 @@
     "rxjs-spy": "^7.0.2",
     "rxjs-websockets": "~8.0.1",
     "ts-md5": "^1.2.7",
-    "tslib": "^1.10.0",
+    "tslib": "^2.0.3",
     "web-animations-js": "^2.3.2",
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
