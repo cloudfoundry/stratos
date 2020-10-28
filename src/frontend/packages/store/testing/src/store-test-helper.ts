@@ -1,6 +1,6 @@
 import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule } from '@ngrx/store';
+import { Store, StoreModule, StoreRootModule } from '@ngrx/store';
 import {
   appReducers,
   AppState,
@@ -334,7 +334,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
 
 export function createBasicStoreModule(
   initialState: Partial<AppState<BaseEntityValues>> = getDefaultInitialTestStoreState()
-): ModuleWithProviders {
+): ModuleWithProviders<StoreRootModule> {
   return StoreModule.forRoot(
     appReducers,
     {
@@ -343,7 +343,7 @@ export function createBasicStoreModule(
   );
 }
 
-export function createEmptyStoreModule(): ModuleWithProviders {
+export function createEmptyStoreModule(): ModuleWithProviders<StoreRootModule> {
   return StoreModule.forRoot(
     appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
   );
@@ -390,7 +390,9 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig,
   }, getDefaultInitialTestStoreState());
 }
 
-export function createEntityStore(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+export function createEntityStore(
+  entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>
+): ModuleWithProviders<StoreRootModule> {
   const initialState = createEntityStoreState(entityMap);
   return createBasicStoreModule(initialState);
 }

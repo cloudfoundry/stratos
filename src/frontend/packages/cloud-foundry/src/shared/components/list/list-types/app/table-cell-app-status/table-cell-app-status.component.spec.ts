@@ -12,13 +12,15 @@ import {
   ApplicationStateComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
 
 describe('TableCellAppStatusComponent', () => {
-  let component: TableCellAppStatusComponent<any>;
-  let fixture: ComponentFixture<TableCellAppStatusComponent<any>>;
+  let component: TableCellAppStatusComponent;
+  let fixture: ComponentFixture<TableCellAppStatusComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -44,7 +46,7 @@ describe('TableCellAppStatusComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppStatusComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {}, metadata: {} };
+    component.row = { entity: {}, metadata: {} } as APIResource<IApp>;
     fixture.detectChanges();
   });
 

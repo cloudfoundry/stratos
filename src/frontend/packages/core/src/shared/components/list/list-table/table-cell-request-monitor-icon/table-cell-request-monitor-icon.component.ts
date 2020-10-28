@@ -23,7 +23,7 @@ interface Config<T> {
   templateUrl: './table-cell-request-monitor-icon.component.html',
   styleUrls: ['./table-cell-request-monitor-icon.component.scss']
 })
-export class TableCellRequestMonitorIconComponent<T> extends TableCellCustom<T, Config<T>> implements OnInit {
+export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;
 
   public id: string;
