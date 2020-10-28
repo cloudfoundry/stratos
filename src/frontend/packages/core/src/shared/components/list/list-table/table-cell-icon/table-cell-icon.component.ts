@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 
 export interface TableCellIconComponentConfig<T> {
   getIcon: (row: T) => { icon: string, font?: string, tooltip?: string; };
@@ -12,7 +12,7 @@ export interface TableCellIconComponentConfig<T> {
   templateUrl: './table-cell-icon.component.html',
   styleUrls: ['./table-cell-icon.component.scss']
 })
-export class TableCellIconComponent<T = any> extends TableCellCustomComponent<T, TableCellIconComponentConfig<T>> {
+export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
 
 
   @Input('row')

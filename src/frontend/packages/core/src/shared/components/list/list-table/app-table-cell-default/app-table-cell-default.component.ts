@@ -3,7 +3,7 @@ import { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
 
 @Component({
@@ -11,7 +11,7 @@ import { ICellDefinition } from '../table.types';
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
 })
-export class TableCellDefaultComponent<T> extends TableCellCustomComponent<T> implements OnDestroy {
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
 
   public cellDefinition: ICellDefinition<T>;
 

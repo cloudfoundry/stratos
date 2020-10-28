@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 
@@ -11,7 +11,7 @@ import { ListAppEnvVar } from '../cf-app-variables-data-source';
   templateUrl: './table-cell-edit-variable.component.html',
   styleUrls: ['./table-cell-edit-variable.component.scss']
 })
-export class TableCellEditVariableComponent extends TableCellCustomComponent<ListAppEnvVar> {
+export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
 
   constructor(
     private dialog: MatDialog,

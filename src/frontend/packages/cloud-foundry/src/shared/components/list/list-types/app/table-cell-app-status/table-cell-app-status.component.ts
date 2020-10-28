@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
@@ -13,7 +13,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
 })
-export class TableCellAppStatusComponent extends TableCellCustomComponent<APIResource<IApp>> implements OnInit {
+export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
 
   applicationState: ApplicationStateData;
   @Input('config')

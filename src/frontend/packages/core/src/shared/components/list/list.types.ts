@@ -3,8 +3,7 @@ import { Observable } from 'rxjs';
 
 import { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
 
-// @Component({})
-export abstract class TableCellCustomComponent<T, C = any> {
+export abstract class TableCellCustom<T, C = any> {
   protected pDataSource: IListDataSource<T>;
   set dataSource(dataSource: IListDataSource<T>) {
     this.pDataSource = dataSource;
@@ -40,7 +39,7 @@ export abstract class TableCellCustomComponent<T, C = any> {
   rowState: Observable<RowState>;
 }
 
-export abstract class CardCell<T> extends TableCellCustomComponent<T> {
+export abstract class CardCell<T> extends TableCellCustom<T> {
   static columns = 3;
 
   // public columns = CardCell.columns;

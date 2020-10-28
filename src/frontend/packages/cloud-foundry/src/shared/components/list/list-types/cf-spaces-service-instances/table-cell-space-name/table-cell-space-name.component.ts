@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
@@ -10,7 +10,7 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-space-name.component.html',
   styleUrls: ['./table-cell-space-name.component.scss']
 })
-export class TableCellSpaceNameComponent extends TableCellCustomComponent<APIResource<IServiceInstance>> implements OnInit {
+export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
   breadcrumbs: {};
   spaceUrl: string[];

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IQuotaDefinition } from '../../../../../../cf-api.types';
 
@@ -9,7 +9,7 @@ import { IQuotaDefinition } from '../../../../../../cf-api.types';
   templateUrl: './table-cell-quota.component.html',
   styleUrls: ['./table-cell-quota.component.scss']
 })
-export class TableCellQuotaComponent extends TableCellCustomComponent<APIResource<IQuotaDefinition>> implements OnInit {
+export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaDefinition>> implements OnInit {
   quotaUrl: string[];
 
   constructor() {

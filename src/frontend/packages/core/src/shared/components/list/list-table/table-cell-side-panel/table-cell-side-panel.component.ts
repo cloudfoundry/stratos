@@ -1,7 +1,7 @@
 import { Component, ComponentFactoryResolver, Input } from '@angular/core';
 
 import { SidePanelService } from '../../../../services/side-panel.service';
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 import { CellConfigFunction } from '../table.types';
 
 export interface TableCellSidePanelConfig<T> {
@@ -15,7 +15,7 @@ export interface TableCellSidePanelConfig<T> {
   templateUrl: './table-cell-side-panel.component.html',
   styleUrls: ['./table-cell-side-panel.component.scss']
 })
-export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustomComponent<T, object | CellConfigFunction<T>> {
+export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 
   public actualConfig: TableCellSidePanelConfig<A>;
 

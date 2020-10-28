@@ -3,7 +3,7 @@ import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
@@ -20,7 +20,7 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
   styleUrls: ['./table-cell-service-instance-apps-attached.component.scss']
 })
 export class TableCellServiceInstanceAppsAttachedComponent
-  extends TableCellCustomComponent<APIResource<IServiceInstance>>
+  extends TableCellCustom<APIResource<IServiceInstance>>
   implements OnInit {
 
   boundApps$: Observable<AppChip[]>;

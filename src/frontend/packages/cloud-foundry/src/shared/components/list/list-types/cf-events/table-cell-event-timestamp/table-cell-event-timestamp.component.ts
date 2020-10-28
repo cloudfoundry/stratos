@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
@@ -8,4 +8,4 @@ import { TableCellCustomComponent } from '../../../../../../../../core/src/share
   templateUrl: './table-cell-event-timestamp.component.html',
   styleUrls: ['./table-cell-event-timestamp.component.scss']
 })
-export class TableCellEventTimestampComponent<T> extends TableCellCustomComponent<T> { }
+export class TableCellEventTimestampComponent<T> extends TableCellCustom<T> { }

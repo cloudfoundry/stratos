@@ -6,7 +6,7 @@ import { cfEntityCatalog } from '../../../../../../../../cloud-foundry/src/cf-en
 import { userProvidedServiceInstanceEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../../../../cloud-foundry/src/cf-types';
 import { getServiceName } from '../../../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
@@ -20,7 +20,7 @@ import {
   templateUrl: './table-cell-service.component.html',
   styleUrls: ['./table-cell-service.component.scss']
 })
-export class TableCellServiceComponent extends TableCellCustomComponent<APIResource<IServiceInstance>> implements OnInit {
+export class TableCellServiceComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
   serviceName$: Observable<string>;
   serviceUrl$: Observable<string>;

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
@@ -9,7 +9,7 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-provider.component.html',
   styleUrls: ['./table-cell-service-provider.component.scss']
 })
-export class TableCellServiceProviderComponent extends TableCellCustomComponent<APIResource<IService>>  {
+export class TableCellServiceProviderComponent extends TableCellCustom<APIResource<IService>>  {
 
   extraInfo: IServiceExtra;
 

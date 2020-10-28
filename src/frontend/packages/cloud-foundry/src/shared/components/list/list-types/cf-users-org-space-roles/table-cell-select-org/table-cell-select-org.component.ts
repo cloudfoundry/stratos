@@ -5,7 +5,7 @@ import { first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
@@ -17,7 +17,7 @@ import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-
   templateUrl: './table-cell-select-org.component.html',
   styleUrls: ['./table-cell-select-org.component.scss']
 })
-export class TableCellSelectOrgComponent extends TableCellCustomComponent<APIResource<IOrganization>> implements OnInit, OnDestroy {
+export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
 
   /**
    * Observable which is populated if only a single org is to be used
@@ -31,7 +31,9 @@ export class TableCellSelectOrgComponent extends TableCellCustomComponent<APIRes
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfRolesService: CfRolesService,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {

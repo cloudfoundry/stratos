@@ -1,14 +1,14 @@
 import { Component, Input } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 
 @Component({
   selector: 'app-table-cell-edit',
   templateUrl: './table-cell-edit.component.html',
   styleUrls: ['./table-cell-edit.component.scss']
 })
-export class TableCellEditComponent<T> extends TableCellCustomComponent<T> {
+export class TableCellEditComponent<T> extends TableCellCustom<T> {
 
   @Input()
   get row(): T {

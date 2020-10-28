@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigAuthHelper } from '../../kube-config-auth.helper';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
@@ -10,7 +10,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
   templateUrl: './kube-config-table-sub-type-select.component.html',
   styleUrls: ['./kube-config-table-sub-type-select.component.scss']
 })
-export class KubeConfigTableSubTypeSelectComponent extends TableCellCustomComponent<KubeConfigFileCluster> implements OnInit {
+export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 
   selected: string;
 

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 
 export interface TableCellBooleanIndicatorComponentConfig<T> {
   isEnabled: (row: T) => boolean;
@@ -14,7 +14,7 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
   templateUrl: './table-cell-boolean-indicator.component.html',
   styleUrls: ['./table-cell-boolean-indicator.component.scss']
 })
-export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustomComponent<T, TableCellBooleanIndicatorComponentConfig<T>> {
+export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
   @Input('row')
   get row() { return this.pRow; }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../store/kube.types';
 
 @Component({
@@ -8,7 +8,7 @@ import { ConditionType, ConditionTypeLabels, KubernetesNode } from '../../../sto
   templateUrl: './kubernetes-node-pressure.component.html',
   styleUrls: ['./kubernetes-node-pressure.component.scss']
 })
-export class KubernetesNodePressureComponent extends TableCellCustomComponent<KubernetesNode> implements OnInit {
+export class KubernetesNodePressureComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   errors: string[] = [];
 

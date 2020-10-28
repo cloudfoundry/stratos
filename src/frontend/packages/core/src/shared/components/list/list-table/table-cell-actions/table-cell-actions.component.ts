@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 
 
 @Component({
@@ -14,7 +14,7 @@ import { TableCellCustomComponent } from '../../list.types';
   templateUrl: './table-cell-actions.component.html',
   styleUrls: ['./table-cell-actions.component.scss']
 })
-export class TableCellActionsComponent<T> extends TableCellCustomComponent<T> implements OnInit {
+export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 
   @Input()
   rowState: Observable<RowState>;

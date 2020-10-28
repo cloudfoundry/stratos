@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
@@ -24,7 +24,7 @@ export interface TableCellServiceBrokerComponentConfig {
   styleUrls: ['./table-cell-service-broker.component.scss']
 })
 export class TableCellServiceBrokerComponent extends
-  TableCellCustomComponent<APIResource<IService>,
+  TableCellCustom<APIResource<IService>,
   TableCellServiceBrokerComponentConfig> {
 
   @Input()

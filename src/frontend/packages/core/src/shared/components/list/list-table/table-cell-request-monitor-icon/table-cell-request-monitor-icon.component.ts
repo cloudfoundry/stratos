@@ -4,7 +4,7 @@ import { getRowMetadata } from '@stratosui/store';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 
 export interface ITableCellRequestMonitorIconConfig {
   entityKey: string;
@@ -23,7 +23,7 @@ interface Config<T> {
   templateUrl: './table-cell-request-monitor-icon.component.html',
   styleUrls: ['./table-cell-request-monitor-icon.component.scss']
 })
-export class TableCellRequestMonitorIconComponent<T> extends TableCellCustomComponent<T, Config<T>> implements OnInit {
+export class TableCellRequestMonitorIconComponent<T> extends TableCellCustom<T, Config<T>> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;
 
   // @Input()

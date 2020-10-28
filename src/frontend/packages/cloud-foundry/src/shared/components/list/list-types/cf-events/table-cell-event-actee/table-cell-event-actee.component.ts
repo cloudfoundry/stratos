@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 interface CellEVentActeeConfig {
@@ -12,7 +12,7 @@ interface CellEVentActeeConfig {
   templateUrl: './table-cell-event-actee.component.html',
   styleUrls: ['./table-cell-event-actee.component.scss']
 })
-export class TableCellEventActeeComponent extends TableCellCustomComponent<APIResource, CellEVentActeeConfig> {
+export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
 
   icon: {
     [type: string]: {

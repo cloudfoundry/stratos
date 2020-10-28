@@ -1,13 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { TableCellCustomComponent } from '../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../cf-api.types';
 import { CfOrgSpaceLabelService } from '../../../../services/cf-org-space-label.service';
 
 
-export class TableCellAppCfOrgSpaceBase extends TableCellCustomComponent<APIResource<IApp>> {
+export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp>> {
 
   public cfOrgSpace: CfOrgSpaceLabelService;
 

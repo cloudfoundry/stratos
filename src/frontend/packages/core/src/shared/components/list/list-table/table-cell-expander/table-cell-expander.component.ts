@@ -1,7 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../list.types';
+import { TableCellCustom } from '../../list.types';
 import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
 import { CellConfigFunction } from '../table.types';
 
@@ -23,7 +23,7 @@ export interface TableCellExpanderConfig {
     ]),
   ]
 })
-export class TableCellExpanderComponent<T = any> extends TableCellCustomComponent<T, CellConfigFunction<T>> implements OnInit {
+export class TableCellExpanderComponent<T = any> extends TableCellCustom<T, CellConfigFunction<T>> implements OnInit {
 
   expanded = false;
   constructor(public expandedService: TableRowExpandedService) {

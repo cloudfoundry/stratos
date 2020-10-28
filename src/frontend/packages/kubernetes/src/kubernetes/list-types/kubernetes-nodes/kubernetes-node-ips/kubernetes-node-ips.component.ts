@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
 
 @Component({
@@ -8,7 +8,7 @@ import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } 
   templateUrl: './kubernetes-node-ips.component.html',
   styleUrls: ['./kubernetes-node-ips.component.scss']
 })
-export class KubernetesNodeIpsComponent extends TableCellCustomComponent<KubernetesNode> implements OnInit {
+export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   tooltip: string;
 

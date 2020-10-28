@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { TableCellCustomComponent } from '../../../../shared/components/list/list.types';
+import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { BackupEndpointsService } from '../backup-endpoints.service';
   templateUrl: './backup-checkbox-cell.component.html',
   styleUrls: ['./backup-checkbox-cell.component.scss']
 })
-export class BackupCheckboxCellComponent extends TableCellCustomComponent<EndpointModel> {
+export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel> {
 
   constructor(public service: BackupEndpointsService) {
     super();

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { IFeatureFlag } from '../../../../../../cf-api.types';
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 
@@ -9,7 +9,7 @@ import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
   templateUrl: './table-cell-feature-flag-description.component.html',
   styleUrls: ['./table-cell-feature-flag-description.component.scss']
 })
-export class TableCellFeatureFlagDescriptionComponent extends TableCellCustomComponent<IFeatureFlag> {
+export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IFeatureFlag> {
 
   description: string;
 

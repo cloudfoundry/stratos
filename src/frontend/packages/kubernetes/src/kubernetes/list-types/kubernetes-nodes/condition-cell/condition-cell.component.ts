@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
@@ -8,7 +8,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   templateUrl: './condition-cell.component.html',
   styleUrls: ['./condition-cell.component.scss']
 })
-export class ConditionCellComponent extends TableCellCustomComponent<KubernetesNode> implements OnInit {
+export class ConditionCellComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   public isTrue: boolean = null;
 
   public subtle = false;

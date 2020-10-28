@@ -2,14 +2,14 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { TableCellCustomComponent } from '../../../list.types';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
   templateUrl: './table-cell-endpoint-status.component.html',
   styleUrls: ['./table-cell-endpoint-status.component.scss']
 })
-export class TableCellEndpointStatusComponent extends TableCellCustomComponent<EndpointModel, { showLabel: boolean; }> implements OnInit {
+export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {
 
   public connectable = true;
 

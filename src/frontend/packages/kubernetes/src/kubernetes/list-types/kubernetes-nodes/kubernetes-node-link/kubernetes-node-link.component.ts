@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TableCellCustomComponent } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesNode } from '../../../store/kube.types';
 
@@ -9,7 +9,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   templateUrl: './kubernetes-node-link.component.html',
   styleUrls: ['./kubernetes-node-link.component.scss']
 })
-export class KubernetesNodeLinkComponent extends TableCellCustomComponent<KubernetesNode> implements OnInit {
+export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 
   public nodeLink: string;
 
