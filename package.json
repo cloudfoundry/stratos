@@ -82,7 +82,7 @@
     "moment-timezone": "^0.5.13",
     "ngrx-store-localstorage": "10.1.1",
     "ngx-moment": "^3.5.0",
-    "ngx-monaco-editor": "^10.0.0-beta.1",
+    "ngx-monaco-editor": "^9.0.0",
     "normalizr": "^3.6.0",
     "reselect": "^4.0.0",
     "rxjs": "^6.6.3",
