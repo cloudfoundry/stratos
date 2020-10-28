@@ -99,15 +99,15 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     });
   }
 
-  setEventFilters(values: { actee: string, type: string[] }) {
+  setEventFilters(values: { actee: string, type: string[]; }) {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {
       const action = this.eventSource.action as PaginatedAction;
 
       // Recreate the whole q param and set it again using 'AddParams'
-      const typeChanged = !arraysEqual(values.type, currentFilters.type)
-      const acteeChanged = valueOrCommonFalsy(values.actee) !== valueOrCommonFalsy(currentFilters.actee)
+      const typeChanged = !arraysEqual(values.type, currentFilters.type);
+      const acteeChanged = valueOrCommonFalsy(values.actee) !== valueOrCommonFalsy(currentFilters.actee);
       if (typeChanged || acteeChanged) {
         const newQ: string[] = [];
         if (values.type && values.type.length) {
@@ -123,7 +123,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
 
   getEventFilters(): Observable<{
     type: string[],
-    actee: string
+    actee: string;
   }> {
     return this.getDataSource().pagination$.pipe(
       distinctUntilChanged(),

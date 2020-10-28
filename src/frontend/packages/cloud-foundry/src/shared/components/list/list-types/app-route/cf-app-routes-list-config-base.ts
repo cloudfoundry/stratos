@@ -64,7 +64,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     this.getDataSource = () => {
       // Lazy init so that any changes to the columns & data functions (like sort) are correctly applied
       if (!this.dataSource) {
-        const getAppRoutesAction = cfEntityCatalog.route.actions.getAllForApplication(appService.appGuid, appService.cfGuid)
+        const getAppRoutesAction = cfEntityCatalog.route.actions.getAllForApplication(appService.appGuid, appService.cfGuid);
         this.dataSource = new CfAppRoutesDataSource(
           store,
           appService,

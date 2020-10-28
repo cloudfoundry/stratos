@@ -47,7 +47,8 @@
     "quotemark": [true, "single"],
     "semicolon": {
       "options": [
-        "always"
+        "always",
+        "ignore-bound-class-methods"
       ]
     },
     "space-before-function-paren": {
@@ -67,8 +68,7 @@
     "no-input-rename": true,
     "no-output-rename": true,
     "typedef-whitespace": {
-      "options": [
-        {
+      "options": [{
           "call-signature": "nospace",
           "index-signature": "nospace",
           "parameter": "nospace",
@@ -91,8 +91,8 @@
     "rxjs-collapse-imports": true,
     "rxjs-pipeable-operators-only": true,
     "rxjs-no-static-observable-methods": true,
-    "rxjs-proper-imports": true
-  ,    "variable-name": {
+    "rxjs-proper-imports": true,
+    "variable-name": {
       "options": [
         "ban-keywords",
         "check-format",
@@ -109,5 +109,5 @@
         "check-typecast"
       ]
     }
-}
+  }
 }

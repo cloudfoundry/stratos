@@ -361,7 +361,7 @@ export interface CfEvent {
   actee_type: string;
   actee_name: string;
   timestamp: string;
-  metadata: { [name: string]: any };
+  metadata: { [name: string]: any; };
   space_guid?: string;
   organization_guid?: string;
 }

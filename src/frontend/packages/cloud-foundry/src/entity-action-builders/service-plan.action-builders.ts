@@ -7,8 +7,8 @@ export interface ServicePlanActionBuilders extends OrchestratedActionBuilders {
     endpointGuid: string,
     paginationKey: string,
     includeRelations?: string[]
-  ) => GetServicePlansForService
-};
+  ) => GetServicePlansForService;
+}
 
 export const servicePlanActionBuilders: ServicePlanActionBuilders = {
   getAllForServiceInstance: (

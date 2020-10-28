@@ -34,7 +34,7 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
     },
     label: 'Delete',
     description: 'Delete API Key',
-  }
+  };
   private singleActions: IListAction<ApiKey>[] = [this.deleteAction];
 
 

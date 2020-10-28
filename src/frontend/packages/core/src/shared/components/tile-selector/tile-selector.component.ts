@@ -17,7 +17,7 @@ export class TileSelectorComponent {
   @Input() set dynamicSmallerTiles(tiles: number) {
     this.pDynamicSmallerTiles = tiles;
     this.updateSmallerTiles();
-  };
+  }
   @Input() set options(options: ITileConfig[]) {
     if (!options) {
       return;

@@ -87,7 +87,7 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
-  getCommitApiUrl(projectName: string, commitSha: string, ): string {
+  getCommitApiUrl(projectName: string, commitSha: string): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
@@ -143,7 +143,7 @@ export class GitLabSCM implements GitSCM {
       httpClient.get<[]>(`${gitLabAPIUrl}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
     ]).pipe(
       map(([a, b]: [any[], any[]]) => a.concat(b)),
-    )
+    );
   }
 
   private convertProject(prj: any): GitRepo {

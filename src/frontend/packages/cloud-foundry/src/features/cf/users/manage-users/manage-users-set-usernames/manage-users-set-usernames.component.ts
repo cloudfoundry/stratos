@@ -89,7 +89,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
 
     // Set starting value of add/remove radio button
-    canAddRemove.pipe(first()).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }))
+    canAddRemove.pipe(first()).subscribe(([canAdd]) => this.setIsRemove({ source: null, value: !canAdd }));
 
     // Block content until we know the add/remove state
     this.blocked$ = canAddRemove.pipe(
@@ -136,5 +136,5 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     return of({
       success: true
     });
-  }
+  };
 }

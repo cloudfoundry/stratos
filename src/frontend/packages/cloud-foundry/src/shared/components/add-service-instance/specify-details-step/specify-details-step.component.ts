@@ -104,9 +104,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } =>
+    return (formField: AbstractControl): { [key: string]: any; } =>
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
-  }
+  };
 
   constructor(
     private store: Store<CFAppState>,
@@ -212,7 +212,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ).subscribe();
     }
     this.subscriptions.push(this.setupFormValidatorData());
-  }
+  };
 
   setServiceParams(data) {
     this.serviceParams = data;
@@ -232,7 +232,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     } else if (mode === CreateServiceFormMode.BindServiceInstance) {
       this.bindExistingInstance = true;
     }
-  }
+  };
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(
@@ -353,7 +353,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         return observableOf(this.routeToServices());
       }),
     );
-  }
+  };
 
   routeToServices = (): StepOnNextResult => {
     return {
@@ -361,10 +361,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       // We should always go back to where we came from, aka 'cancel' location.
       redirect: true,
     };
-  }
+  };
 
   private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
+    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0];
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
@@ -418,13 +418,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         newServiceInstanceGuid,
         cfGuid,
         { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-      )
+      );
     }
     return cfEntityCatalog.serviceInstance.actions.create(
       newServiceInstanceGuid,
       cfGuid,
       { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-    )
+    );
   }
 
   private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
@@ -509,6 +509,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       return this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1;
     }
     return true;
-  }
+  };
 
 }

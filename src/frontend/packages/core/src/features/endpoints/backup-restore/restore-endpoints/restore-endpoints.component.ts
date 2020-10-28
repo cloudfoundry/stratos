@@ -79,7 +79,7 @@ export class RestoreEndpointsComponent {
     };
 
     const restoreSuccess = () => {
-      stratosEntityCatalog.endpoint.api.getAll()
+      stratosEntityCatalog.endpoint.api.getAll();
       result.next({
         success: true,
         redirect: true,
@@ -100,6 +100,6 @@ export class RestoreEndpointsComponent {
     this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
 
     return result.asObservable();
-  }
+  };
 
 }

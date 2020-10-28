@@ -19,7 +19,9 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
   styleUrls: ['./table-cell-service-instance-apps-attached.component.scss']
 })
-export class TableCellServiceInstanceAppsAttachedComponent extends TableCellCustomComponent<APIResource<IServiceInstance>> implements OnInit {
+export class TableCellServiceInstanceAppsAttachedComponent
+  extends TableCellCustomComponent<APIResource<IServiceInstance>>
+  implements OnInit {
 
   boundApps$: Observable<AppChip[]>;
   config$ = new BehaviorSubject(null);

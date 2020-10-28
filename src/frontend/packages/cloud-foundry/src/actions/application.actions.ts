@@ -51,7 +51,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
       'GET',
       'apps'
     );
-    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey('cf', endpointGuid)
+    this.paginationKey = this.paginationKey || createEntityRelationPaginationKey('cf', endpointGuid);
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [applicationEntitySchema];
@@ -151,7 +151,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
       ...keepFromOld
     };
     return newEntities;
-  }
+  };
 }
 
 export class DeleteApplication extends CFStartAction implements ICFAction {

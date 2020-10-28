@@ -21,12 +21,12 @@ export interface SpaceActionBuilders extends OrchestratedActionBuilders {
   remove: (
     guid: string,
     endpointGuid: string,
-    { orgGuid }: { orgGuid: string }
+    { orgGuid }: { orgGuid: string; }
   ) => DeleteSpace;
   create: (
     id: string,
     endpointGuid: string,
-    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace }
+    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace; }
   ) => CreateSpace;
   update: (
     guid: string,
@@ -70,15 +70,15 @@ export const spaceActionBuilders: SpaceActionBuilders = {
       endpointGuid,
       includeRelations || [],
       populateMissing
-    )
+    );
     action.entity = [cfEntityFactory(spaceWithOrgEntityType)];
-    action.schemaKey = spaceWithOrgEntityType
+    action.schemaKey = spaceWithOrgEntityType;
     return action;
   },
   remove: (
     guid,
     endpointGuid,
-    { orgGuid }: { orgGuid: string }
+    { orgGuid }: { orgGuid: string, }
   ) => new DeleteSpace(
     guid,
     orgGuid,
@@ -87,7 +87,7 @@ export const spaceActionBuilders: SpaceActionBuilders = {
   create: (
     id: string,
     endpointGuid: string,
-    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace }
+    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace, }
   ) => new CreateSpace(
     endpointGuid,
     orgGuid,

@@ -41,7 +41,7 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     authTypes: [],
     type: STRATOS_ENDPOINT_TYPE,
     schema: null
-  }
+  };
   return [
     generateEndpoint(stratosType),
     generateSystemInfo(stratosType),
@@ -49,7 +49,7 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     generateUserProfile(stratosType),
     generateMetricsEndpoint(),
     generateAPIKeys(stratosType)
-  ]
+  ];
 }
 
 /**
@@ -61,7 +61,7 @@ function generateEndpoint(stratosType) {
     schema: stratosEntityFactory(endpointEntityType),
     type: endpointEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.endpoint = new StratosCatalogEntity<
     undefined,
     EndpointModel,
@@ -74,7 +74,7 @@ function generateEndpoint(stratosType) {
       ],
       actionBuilders: endpointActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.endpoint;
 }
 
@@ -83,7 +83,7 @@ function generateSystemInfo(stratosType) {
     schema: stratosEntityFactory(systemInfoEntityType),
     type: systemInfoEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.systemInfo = new StratosCatalogEntity<
     undefined,
     SystemInfo,
@@ -93,7 +93,7 @@ function generateSystemInfo(stratosType) {
     {
       actionBuilders: systemInfoActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.systemInfo;
 }
 
@@ -102,7 +102,7 @@ function generateUserFavorite(stratosType) {
     schema: stratosEntityFactory(userFavouritesEntityType),
     type: userFavouritesEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.userFavorite = new StratosCatalogEntity<
     undefined,
     UserFavorite,
@@ -116,7 +116,7 @@ function generateUserFavorite(stratosType) {
       ],
       actionBuilders: userFavoriteActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.userFavorite;
 }
 
@@ -125,7 +125,7 @@ function generateUserProfile(stratosType) {
     schema: stratosEntityFactory(userProfileEntityType),
     type: userProfileEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.userProfile = new StratosCatalogEntity<
     undefined,
     UserProfileInfo,
@@ -135,7 +135,7 @@ function generateUserProfile(stratosType) {
     {
       actionBuilders: userProfileActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.userProfile;
 }
 
@@ -151,7 +151,7 @@ function generateMetricsEndpoint() {
     renderPriority: 1
   },
     metadata => `/endpoints/metrics/${metadata.guid}`
-  )
+  );
   return stratosEntityCatalog.metricsEndpoint;
 }
 
@@ -160,7 +160,7 @@ function generateAPIKeys(stratosType) {
     schema: stratosEntityFactory(apiKeyEntityType),
     type: apiKeyEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.apiKey = new StratosCatalogEntity<
     undefined,
     ApiKey,
@@ -170,6 +170,6 @@ function generateAPIKeys(stratosType) {
     {
       actionBuilders: apiKeyActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.apiKey;
 }

@@ -85,15 +85,15 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           });
         }
       })
-    )
+    );
 
     this.orgSubscription = this.orgs$.subscribe();
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } =>
+    return (formField: AbstractControl): { [key: string]: any; } =>
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
-  }
+  };
 
   validateNameTaken = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
 
@@ -113,7 +113,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         message: requestInfo.error ? `Failed to create organization: ${requestInfo.message}` : ''
       }))
     );
-  }
+  };
 
   ngOnDestroy() {
     this.orgSubscription.unsubscribe();

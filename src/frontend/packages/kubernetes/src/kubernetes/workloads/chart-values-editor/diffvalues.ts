@@ -2,16 +2,16 @@
 
 function arraysAreEqual(a1: any[], a2: any[]): boolean {
   if (a1.length !== a2.length) {
-    return false
+    return false;
   }
 
   // Compare each item in the array
-  for (let i=0; i<a1.length; i++) {
+  for (let i = 0; i < a1.length; i++) {
     if (Array.isArray(a1[i])) {
       if (!arraysAreEqual(a1[i], a2[i])) {
         return false;
       }
-    } else if (typeof(a1[i] === 'object')) {
+    } else if (typeof (a1[i] === 'object')) {
       if (!objectsAreEqual(a1[i], a2[i])) {
         return false;
       }
@@ -28,14 +28,14 @@ function objectsAreEqual(src: any, dest: any): boolean {
   }
 
   Object.keys(src).forEach(key => {
-    if (typeof(src[key]) !== typeof(dest[key])) {
+    if (typeof (src[key]) !== typeof (dest[key])) {
       return false;
-    } else if(src[key] === null && dest[key] === null) {
+    } else if (src[key] === null && dest[key] === null) {
       return true;
     } else if (Array.isArray(src[key]) && !arraysAreEqual(src[key], dest[key])) {
-        return false;
-    } else if (typeof(src[key]) === 'object' && !objectsAreEqual(src[key], dest[key])) {
-        return false;
+      return false;
+    } else if (typeof (src[key]) === 'object' && !objectsAreEqual(src[key], dest[key])) {
+      return false;
     }
   });
 
@@ -50,15 +50,15 @@ export function diffObjects(src: any, dest: any): any {
   }
 
   Object.keys(src).forEach(key => {
-    if (typeof(src[key]) === typeof(dest[key])) {
-      if(src[key] === null && dest[key] === null) {
+    if (typeof (src[key]) === typeof (dest[key])) {
+      if (src[key] === null && dest[key] === null) {
         delete src[key];
-      } else if(Array.isArray(src[key])) {
+      } else if (Array.isArray(src[key])) {
         // Array
         if (arraysAreEqual(src[key], dest[key])) {
           delete src[key];
         }
-      } else if (typeof(src[key]) === 'object') {
+      } else if (typeof (src[key]) === 'object') {
         // Object
         diffObjects(src[key], dest[key]);
         if (src[key] && Object.keys(src[key]).length === 0) {

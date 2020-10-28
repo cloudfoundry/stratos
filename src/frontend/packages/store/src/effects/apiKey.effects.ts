@@ -36,7 +36,7 @@ export class ApiKeyEffect {
     ofType<AddApiKey>(API_KEY_ADD),
     mergeMap(action => {
       const actionType = 'create';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
 
       return this.http.post<ApiKey>(apiKeyUrlPath, new HttpParams({
         encoder: new BrowserStandardEncoder(),
@@ -54,7 +54,7 @@ export class ApiKeyEffect {
               }
             },
             result: [guid]
-          }
+          };
           this.store.dispatch(new WrapperRequestActionSuccess(response, action, actionType));
           return [];
         }),
@@ -70,7 +70,7 @@ export class ApiKeyEffect {
     ofType<DeleteApiKey>(API_KEY_DELETE),
     mergeMap(action => {
       const actionType = 'delete';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
 
       return this.http.delete(apiKeyUrlPath, {
         params: new HttpParams({
@@ -96,7 +96,7 @@ export class ApiKeyEffect {
     ofType<GetAllApiKeys>(API_KEY_GET_ALL),
     mergeMap(action => {
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.get(apiKeyUrlPath).pipe(
         switchMap((res: ApiKey[]) => {
           const entityKey = entityCatalog.getEntityKey(action);
@@ -106,7 +106,7 @@ export class ApiKeyEffect {
               }
             },
             result: []
-          }
+          };
 
           res.forEach(apiKey => {
             const guid = action.entity[0].getId(apiKey);

@@ -30,14 +30,14 @@ export class KubernetesNodeSummaryCardComponent {
 
     this.caaspNodeUpdates$ = this.caaspNode$.pipe(
       map(node => node.updates)
-    )
+    );
 
     this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
       map(node => node.disruptiveUpdates)
-    )
+    );
 
     this.caaspNodeSecurity$ = this.caaspNode$.pipe(
       map(node => node.securityUpdates)
-    )
+    );
   }
 }
