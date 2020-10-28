@@ -25,15 +25,12 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   public canFavorite = false;
 
   @Input('config')
-  // get config() { return this.pConfig; }
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
     this.pConfig = config;
     this.createUserFavorite();
   }
 
-  // private pRow: T;
   @Input('row')
-  // get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     this.createUserFavorite();

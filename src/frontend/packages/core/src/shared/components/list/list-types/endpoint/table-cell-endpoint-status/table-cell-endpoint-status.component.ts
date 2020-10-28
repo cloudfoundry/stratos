@@ -20,9 +20,6 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   set row(row: EndpointModel) {
     this.pRow = row;
   }
-  // @Input() config: { showLabel: boolean } = {
-  //   showLabel: true
-  // };
 
   constructor() {
     super();

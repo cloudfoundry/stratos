@@ -123,7 +123,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
 
   getEventFilters(): Observable<{
     type: string[],
-    actee: string;
+    actee: string,
   }> {
     return this.getDataSource().pagination$.pipe(
       distinctUntilChanged(),

@@ -29,7 +29,7 @@ export class RestoreEndpointsService {
 
   file = new BehaviorSubject<{
     name: string,
-    content: BackupContent;
+    content: BackupContent,
   }>(null);
   file$ = this.file.asObservable();
 

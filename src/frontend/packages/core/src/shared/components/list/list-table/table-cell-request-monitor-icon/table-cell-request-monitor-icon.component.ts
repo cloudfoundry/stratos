@@ -26,17 +26,7 @@ interface Config<T> {
 export class TableCellRequestMonitorIconComponent<T> extends TableCellCustom<T, Config<T>> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;
 
-  // @Input()
-  // public config: (element) => ITableCellRequestMonitorIconConfig;
-
-  // @Input()
-  // public row;
-
   public id: string;
-
-  constructor() {
-    super();
-  }
 
   ngOnInit() {
     this.configObj = this.config.getConfig(this.row);

@@ -115,9 +115,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
     this.updateCardStatus();
   }
-  // get dataSource() {
-  //   return this.pDataSource;
-  // }
 
   constructor(
     private store: Store<AppState>,

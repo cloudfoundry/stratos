@@ -24,7 +24,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   createSpaceForm: FormGroup;
   quotaSubscription: Subscription;
 
-  get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }, }
+  get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
 
   get quotaDefinition(): any {
     const control = this.createSpaceForm.get('quotaDefinition');

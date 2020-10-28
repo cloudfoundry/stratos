@@ -80,7 +80,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
       cellConfig: {
-        getConfig: this.getCellConfig || defaultGetCellConfig // TODO: RC test
+        getConfig: this.getCellConfig || defaultGetCellConfig
       },
       cellFlex: '0 0 24px'
     };
