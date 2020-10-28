@@ -81,7 +81,7 @@ export interface IAuthForm {
   formGroup: FormGroup;
 }
 
-export interface EndpointAuthValues { [key: string]: string; }
+export interface EndpointAuthValues { [key: string]: string, }
 
 /**
  * Optional interface that an Endpoint Auth Form Component can implement

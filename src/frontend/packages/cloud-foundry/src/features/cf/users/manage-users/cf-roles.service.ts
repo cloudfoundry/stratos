@@ -43,7 +43,7 @@ export class CfRolesService {
   existingRoles$: Observable<CfUserRolesSelected>;
   newRoles$: Observable<IUserPermissionInOrg>;
   loading$: Observable<boolean>;
-  cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>; } = {};
+  cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>, } = {};
 
   /**
    * Given a list of orgs or spaces remove those that the connected user cannot edit roles in.
@@ -79,7 +79,7 @@ export class CfRolesService {
     guid: string,
     cfGuid: string,
     orgGuid: string,
-    spaceGuid): Observable<{ guid: string, canEdit: boolean; }> {
+    spaceGuid): Observable<{ guid: string, canEdit: boolean, }> {
     return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
       first(),
       map(canEdit => ({ guid, canEdit }))
@@ -137,7 +137,7 @@ export class CfRolesService {
   }
 
   private populateUserRoles(user: APIResource<CfUser>, roles: CfUserRolesSelected) {
-    const mappedUser: { [orgGuid: string]: IUserPermissionInOrg; } = {};
+    const mappedUser: { [orgGuid: string]: IUserPermissionInOrg, } = {};
     const orgRoles = this.cfUserService.getOrgRolesFromUser(user.entity);
     const spaceRoles = this.cfUserService.getSpaceRolesFromUser(user.entity);
     // ... populate org roles ...

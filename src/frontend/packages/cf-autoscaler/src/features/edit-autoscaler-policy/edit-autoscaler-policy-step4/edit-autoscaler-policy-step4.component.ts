@@ -104,7 +104,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
     );
   };
 
-  private getStateResult(info: RequestInfoState): { error: boolean, message: string; } {
+  private getStateResult(info: RequestInfoState): { error: boolean, message: string, } {
     if (this.isCreate) {
       return {
         error: info.error,
@@ -170,7 +170,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateInitialMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value, this.editSpecificDateForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
@@ -178,7 +178,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateStartDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -211,7 +211,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 
   validateSpecificDateEndDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -251,7 +251,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 }
 
 export function validateRecurringSpecificMin(editForm, editMutualValidation): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any; } => {
+  return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
     const lastValid = editMutualValidation.limit;
@@ -267,7 +267,7 @@ export function validateRecurringSpecificMin(editForm, editMutualValidation): Va
 }
 
 export function validateRecurringSpecificMax(editForm, editMutualValidation): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any; } => {
+  return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
     const lastValid = editMutualValidation.limit;

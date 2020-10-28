@@ -143,7 +143,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerMetricType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -158,7 +158,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerOperator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editTriggerForm) {
         this.editScaleType = getScaleType(control.value);
         this.editTriggerForm.controls.threshold.updateValueAndValidity();
@@ -168,7 +168,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerThreshold(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -188,7 +188,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustment(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -202,7 +202,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustmentType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editTriggerForm) {
         this.editAdjustmentType = control.value;
         this.editTriggerForm.controls.adjustment.updateValueAndValidity();

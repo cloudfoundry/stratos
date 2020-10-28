@@ -54,7 +54,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-interface Org { metadata: { guid: string, }; }
+interface Org { metadata: { guid: string, }, }
 interface CfUserWithWarning extends CfUser {
   showWarning: boolean;
 }

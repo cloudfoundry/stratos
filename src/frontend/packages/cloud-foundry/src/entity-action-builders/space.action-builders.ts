@@ -21,12 +21,12 @@ export interface SpaceActionBuilders extends OrchestratedActionBuilders {
   remove: (
     guid: string,
     endpointGuid: string,
-    { orgGuid }: { orgGuid: string; }
+    { orgGuid }: { orgGuid: string, }
   ) => DeleteSpace;
   create: (
     id: string,
     endpointGuid: string,
-    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace; }
+    { orgGuid, createSpace }: { orgGuid: string, createSpace: IUpdateSpace, }
   ) => CreateSpace;
   update: (
     guid: string,

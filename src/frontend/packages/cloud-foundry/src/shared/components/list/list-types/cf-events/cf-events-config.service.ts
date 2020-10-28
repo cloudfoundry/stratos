@@ -99,7 +99,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     });
   }
 
-  setEventFilters(values: { actee: string, type: string[]; }) {
+  setEventFilters(values: { actee: string, type: string[], }) {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {

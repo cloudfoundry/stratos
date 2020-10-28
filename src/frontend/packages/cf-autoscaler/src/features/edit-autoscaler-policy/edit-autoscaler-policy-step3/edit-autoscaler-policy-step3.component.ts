@@ -160,7 +160,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   validateRecurringScheduleGlobal(controlName?: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editRecurringScheduleForm) {
         if (controlName === 'repeat_type') {
           this.editRepeatType = control.value;
@@ -177,7 +177,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   validateRecurringScheduleInitialMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editRecurringScheduleForm &&
         numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
           this.editRecurringScheduleForm.get('instance_max_count').value + 1, false);
@@ -186,7 +186,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   validateRecurringScheduleDate(mutualName: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editEffectiveType === 'always') {
         return null;
       }
@@ -206,7 +206,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   validateRecurringScheduleTime(mutualName: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editRecurringScheduleForm &&
         timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, this.editRecurringScheduleForm.get('end_time').value);
       const lastValid = this.editMutualValidation.time;
@@ -217,7 +217,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   validateRecurringScheduleWeekMonth(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any; } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const newSchedule: any = {
         start_time: this.editRecurringScheduleForm.get('start_time').value,
         end_time: this.editRecurringScheduleForm.get('end_time').value

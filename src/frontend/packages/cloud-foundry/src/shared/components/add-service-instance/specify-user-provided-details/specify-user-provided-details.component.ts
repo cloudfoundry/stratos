@@ -67,7 +67,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
-  public tags: { label: string; }[] = [];
+  public tags: { label: string, }[] = [];
   public valid = new BehaviorSubject(false);
   private subscriptions: Subscription[] = [];
   private tagsChanged = new BehaviorSubject(true);

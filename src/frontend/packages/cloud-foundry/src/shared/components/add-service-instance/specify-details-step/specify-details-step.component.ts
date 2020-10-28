@@ -104,7 +104,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any; } =>
+    return (formField: AbstractControl): { [key: string]: any, } =>
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
@@ -363,7 +363,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   };
 
-  private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>
+  private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[], }, }) =>
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0];
 
   private setupValidate() {

@@ -268,7 +268,7 @@ export class ApplicationService {
     );
   }
 
-  isEntityComplete(value, requestInfo: { fetching: boolean; }): boolean {
+  isEntityComplete(value, requestInfo: { fetching: boolean, }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {

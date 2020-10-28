@@ -91,7 +91,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any; } =>
+    return (formField: AbstractControl): { [key: string]: any, } =>
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 

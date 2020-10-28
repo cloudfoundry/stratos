@@ -17,7 +17,7 @@ export class TableCellAppStatusComponent extends TableCellCustomComponent<APIRes
 
   applicationState: ApplicationStateData;
   @Input('config')
-  set config(value: { hideIcon: boolean, initialStateOnly: boolean; }) {
+  set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     value = value || {
       hideIcon: false,
       initialStateOnly: false

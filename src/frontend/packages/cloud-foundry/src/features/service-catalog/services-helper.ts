@@ -121,7 +121,7 @@ export const getServicePlans = (
     }));
 };
 
-export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra; }): string =>
+export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra, }): string =>
   plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
 
 export const getServicePlanAccessibility = (
