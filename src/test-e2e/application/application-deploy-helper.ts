@@ -148,6 +148,8 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
 
     it('Should pass Source step', () => {
       e2e.debugLog(`${loggingPrefix} Source Step`);
+      deployApp.stepper.waitUntilShown();
+      deployApp.stepper.waitForStepNotBusy();
       deployApp.stepper.getActiveStepName().then(activeStep => {
         console.warn(`Should pass Source step: activeStep: ${activeStep}`);
         expect(activeStep).toBe('Source');
@@ -155,6 +157,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       // expect(deployApp.stepper.getActiveStepName()).toBe('Source');
       expect(deployApp.stepper.canNext()).toBeFalsy();
 
+      browser.waitForAngularEnabled(false);
       switch (type) {
         case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
           deployApp.stepper.getStepperForm().fill({ projectname: res.testApp });
@@ -168,7 +171,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
           deployApp.stepper.getStepperForm().fill({ dockerimg: res.dockerUrl });
           break;
       }
-
+      browser.waitForAngularEnabled(true);
 
       // Press next to get to source config step
       deployApp.stepper.waitUntilCanNext('Next').then(x => {
