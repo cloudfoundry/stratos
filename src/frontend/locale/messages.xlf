@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="side-nav__home" datatype="html">
+        <source>Home</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/app.routing.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <note priority="1" from="description">Side Nav label for &apos;Home&apos;</note>
+        <note priority="1" from="meaning">Side Nav Home</note>
+      </trans-unit>
+      <trans-unit id="side-nav__endpoints" datatype="html">
+        <source>Endpoints</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/app.routing.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <note priority="1" from="description">Side Nav label for &apos;Endpoints&apos;</note>
+        <note priority="1" from="meaning">Side Nav Endpoint</note>
+      </trans-unit>
+      <trans-unit id="home-page__page-header__home" datatype="html">
+        <source>Home</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/features/home/home/home-page.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <note priority="1" from="description">Text shown at top of home page</note>
+        <note priority="1" from="meaning">Home Page Header</note>
+      </trans-unit>
+      <trans-unit id="home-page__section-header__favourites" datatype="html">
+        <source>Favorites</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/features/home/home/home-page.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <note priority="1" from="description">Favourites text shown on home page</note>
+        <note priority="1" from="meaning">Section Heading</note>
+      </trans-unit>
+      <trans-unit id="home-page__section-header__activity" datatype="html">
+        <source>Recent Activity</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/features/home/home/home-page.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+        <note priority="1" from="description">Recent activity text shown on home page</note>
+        <note priority="1" from="meaning">Section Heading</note>
+      </trans-unit>
+      <trans-unit id="recent-activity-list__no-content" datatype="html">
+        <source>Session activity will appear here</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/recent-entities/recent-entities.component.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <note priority="1" from="description">Message shown on home screen when there&apos;s no recent activity</note>
+        <note priority="1" from="meaning">No Activity Message</note>
+      </trans-unit>
+      <trans-unit id="favorites-list__no-content" datatype="html">
+        <source>It looks like you don&apos;t have any favorites, why don&apos;t you start by adding an endpoint?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <note priority="1" from="description">Message shown on home screen when there are no favourites</note>
+        <note priority="1" from="meaning">No Favourites Message</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

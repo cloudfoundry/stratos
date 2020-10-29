@@ -18,6 +18,7 @@ import { UserFavoriteManager } from '../../../../../store/src/user-favorite-mana
 export class FavoritesGlobalListComponent implements OnInit {
   public favInfo$: Observable<IFavoritesInfo>;
   public favoriteGroups$: Observable<IGroupedFavorites[]>;
+  public noContentMessage: string = $localize`:No Favourites Message|Message shown on home screen when there are no favourites@@favorites-list__no-content:It looks like you don't have any favorites, why don't you start by adding an endpoint?`;
   constructor(
     private store: Store<AppState>,
     private userFavoriteManager: UserFavoriteManager

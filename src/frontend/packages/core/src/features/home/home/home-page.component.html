@@ -1,10 +1,11 @@
 <app-page-header [showHistory]="false" [endpointIds$]="allEndpointIds$">
-  <h1>Home</h1>
+  <h1 i18n="Home Page Header|Text shown at top of home page@@home-page__page-header__home">Home</h1>
 </app-page-header>
 <div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
   <div class="favorites-list">
     <div class="home-page__list-header">
-      <h3 class="home-page__header">Favorites</h3>
+      <h3 class="home-page__header"
+        i18n="Section Heading|Favourites text shown on home page@@home-page__section-header__favourites">Favorites</h3>
       <button mat-icon-button *ngIf="showFilterToggle$ | async" [ngSwitch]="showFilters"
         (click)="toggleShowFilters($event)">
         <mat-icon *ngSwitchCase="true" matTooltip="Hide filters" aria-label="Show filters">filter_list</mat-icon>
@@ -15,11 +16,15 @@
   </div>
   <div class="recent-list">
     <div class="home-page__list-header">
-      <h3 class="home-page__header">Recent Activity</h3>
+      <h3 class="home-page__header"
+        i18n="Section Heading|Recent activity text shown on home page@@home-page__section-header__activity">Recent
+        Activity</h3>
     </div>
+
     <app-recent-entities class="home-page__scroller"></app-recent-entities>
   </div>
 </div>
+
 <ng-template #noEndpoints>
   <app-endpoints-missing [showToolbarHint]="false"></app-endpoints-missing>
 </ng-template>

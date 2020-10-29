@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="home-page__section-header__favourites" datatype="html">
+        <source>Favorites</source>
+        <target state="new">GB - Favourites</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/features/home/home/home-page.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <note priority="1" from="description">Favourites text shown on home page</note>
+        <note priority="1" from="meaning">Section Heading</note>
+      </trans-unit>
+      <trans-unit id="home-page__page-header__home" datatype="html">
+        <source>Home</source>
+        <target state="new">GB - Home</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/features/home/home/home-page.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <note priority="1" from="description">Text shown at top of home page</note>
+        <note priority="1" from="meaning">Home Page Header</note>
+      </trans-unit>
+      <trans-unit id="favorites-list__no-content" datatype="html">
+        <source>It looks like you don&apos;t have any favorites, why don&apos;t you start by adding an endpoint?</source>
+        <target state="new">GB - It looks like you don&apos;t have any favorites, why don&apos;t you start by adding an endpoint?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <note priority="1" from="description">comment</note>
+        <note priority="1" from="meaning">meaning</note>
+      </trans-unit>
+      <trans-unit id="home-page__section-header__activity" datatype="html">
+        <source>Recent Activity</source>
+        <target state="new">GB - Recent Activity</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">Recent activity text shown on home page</note>
+        <note priority="1" from="meaning">Section Heading</note>
+      </trans-unit>
+      <trans-unit id="recent-activity-list__no-content" datatype="html">
+        <source>Session activity will appear here</source>
+        <target state="new">GB - Session activity will appear here</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">TODO: description</note>
+        <note priority="1" from="meaning">Section Heading</note>
+      </trans-unit>
+      <trans-unit id="side-nav__home" datatype="html">
+        <source>Home</source>
+        <target state="new">GB - Home</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">TODO: description</note>
+        <note priority="1" from="meaning">TODO: meaning</note>
+      </trans-unit>
+      <trans-unit id="side-nav__endpoints" datatype="html">
+        <source>Endpoints</source>
+        <target state="new">GB - Endpoints</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">TODO: description</note>
+        <note priority="1" from="meaning">TODO: meaning</note>
+      </trans-unit>
+      <trans-unit id="side-nav__application" datatype="html">
+        <source>Applications</source>
+        <target state="new">GB - Applications</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">core/src/shared/components/favorites-global-list/favorites-global-list.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <note priority="1" from="description">TODO: description</note>
+        <note priority="1" from="meaning">TODO: meaning</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

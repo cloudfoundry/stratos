@@ -43,7 +43,9 @@
     "build-devkit": "cd src/frontend/packages/devkit && npm run build",
     "clean-symlinks": "node build/clean-symlinks.js",
     "dev-setup": "node build/dev-setup.js",
-    "prepare-backend": "node dist-devkit/backend.js"
+    "prepare-backend": "node dist-devkit/backend.js",
+    "i18n-extract": "ng xi18n --output-path src/frontend/locale --ivy",
+    "i18n-extract-prod": "ng xi18n --output-path src/frontend/locale --prod --ivy"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -55,6 +57,7 @@
     "@angular/core": "^10.2.0",
     "@angular/flex-layout": "^10.0.0-beta.32",
     "@angular/forms": "^10.2.0",
+    "@angular/localize": "^10.2.0",
     "@angular/material": "^10.2.5",
     "@angular/material-moment-adapter": "^10.2.5",
     "@angular/platform-browser": "^10.2.0",
@@ -75,6 +78,7 @@
     "core-js": "^3.6.5",
     "immer": "^6.0.3",
     "intersect": "^1.0.1",
+    "lodash": "^4.17.20",
     "lodash-es": "^4.17.14",
     "mappy-breakpoints": "^0.2.3",
     "marked": "^1.1.0",
@@ -93,8 +97,7 @@
     "web-animations-js": "^2.3.2",
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
-    "zone.js": "~0.10.2",
-    "lodash": "^4.17.20"
+    "zone.js": "~0.10.2"
   },
   "engines": {
     "node": "12.13.0"
@@ -109,7 +112,7 @@
     "@angular/cli": "^10.2.0",
     "@angular/compiler-cli": "^10.2.0",
     "@angular/language-service": "^10.2.0",
-    "@schematics/angular": "^9.1.5",
+    "@schematics/angular": "^10.2.0",
     "@types/jasmine": "^3.5.10",
     "@types/jasminewd2": "~2.0.8",
     "@types/js-yaml": "^3.12.5",

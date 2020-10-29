@@ -1,5 +1,7 @@
+import '@angular/localize/init';
+
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, Component, HostBinding, Inject, LOCALE_ID, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
@@ -25,7 +27,9 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     store: Store<AuthOnlyAppState>,
     public themeService: ThemeService,
     @Inject(DOCUMENT) private document: Document,
+    @Inject(LOCALE_ID) protected localeId: string
   ) {
+    console.error(localeId);
     // We use the username to key the session storage. We could replace this with the users id?
     this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
     if (!environment.production) {
