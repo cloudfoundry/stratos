@@ -21,9 +21,9 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
   deployedCommit: promise.Promise<string>,
   appDetails: {
     cfGuid: string,
-    appGuid: string
+    appGuid: string;
   },
-  dockerUrl: string
+  dockerUrl: string;
 } {
   const res = {
     testApp: e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app',
@@ -148,7 +148,11 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
 
     it('Should pass Source step', () => {
       e2e.debugLog(`${loggingPrefix} Source Step`);
-      expect(deployApp.stepper.getActiveStepName()).toBe('Source');
+      deployApp.stepper.getActiveStepName().then(activeStep => {
+        console.warn(`Should pass Source step: activeStep: ${activeStep}`);
+        expect(activeStep).toBe('Source');
+      });
+      // expect(deployApp.stepper.getActiveStepName()).toBe('Source');
       expect(deployApp.stepper.canNext()).toBeFalsy();
 
       switch (type) {
@@ -167,8 +171,12 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
 
 
       // Press next to get to source config step
-      deployApp.stepper.waitUntilCanNext('Next');
-      deployApp.stepper.next();
+      deployApp.stepper.waitUntilCanNext('Next').then(x => {
+        console.warn(`Should pass Source step: waitUntilCanNext: ${x}`);
+      });
+      deployApp.stepper.next().then(x => {
+        console.warn(`Should pass Source step: next: ${x}`);
+      });
     });
 
     it('Should pass Source Config step', () => {
