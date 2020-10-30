@@ -31,6 +31,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
           this.countDown = this.calcCountdown();
           if (this.countDown <= 0) {
             this.autoLogout.unsubscribe();
+            this.dialogRef.close(false);
             this.router.navigate(['/login/logout']);
           } else {
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
