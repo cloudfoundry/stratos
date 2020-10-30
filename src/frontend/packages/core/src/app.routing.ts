@@ -66,7 +66,7 @@ const appRoutes: Routes = [
         component: HomePageComponent,
         data: {
           stratosNavigation: {
-            label: 'Home',
+            label: $localize`:Side Nav Home|Side Nav label for 'Home'@@side-nav__home:Home`,
             matIcon: 'home',
             position: 10,
             requiresPersistence: true
@@ -77,7 +77,7 @@ const appRoutes: Routes = [
         path: 'endpoints',
         data: {
           stratosNavigation: {
-            label: 'Endpoints',
+            label: $localize`:Side Nav Endpoint|Side Nav label for 'Endpoints'@@side-nav__endpoints:Endpoints`,
             matIcon: 'endpoints',
             matIconFont: 'stratos-icons',
             position: 100,

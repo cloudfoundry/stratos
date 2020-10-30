@@ -31,7 +31,7 @@ export class ServiceBrokerCardComponent implements OnDestroy {
       filter(o => !!o),
       // Broker is space scoped
       switchMap(spaceGuid => {
-        return cfEntityCatalog.space.store.getEntityService(spaceGuid, this.servicesService.cfGuid).waitForEntity$
+        return cfEntityCatalog.space.store.getEntityService(spaceGuid, this.servicesService.cfGuid).waitForEntity$;
       }),
       tap(space => {
         this.spaceLink = ['/cloud-foundry',

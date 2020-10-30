@@ -178,12 +178,12 @@ export class ApplicationService {
   public getApplicationEnvVarsMonitor() {
     return cfEntityCatalog.appEnvVar.store.getEntityMonitor(
       this.appGuid
-    )
+    );
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-    const appStats = cfEntityCatalog.appStats.store.getPaginationService(this.appGuid, this.cfGuid)
+    const appStats = cfEntityCatalog.appStats.store.getPaginationService(this.appGuid, this.cfGuid);
     // This will fail to fetch the app stats if the current app is not running but we're
     // willing to do this to speed up the initial fetch for a running application.
     this.appStats$ = appStats.entities$;
@@ -268,7 +268,7 @@ export class ApplicationService {
     );
   }
 
-  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
+  isEntityComplete(value, requestInfo: { fetching: boolean, }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {

@@ -22,11 +22,13 @@ describe('TableCellRequestMonitorIconComponent', () => {
     fixture = TestBed.createComponent(TableCellRequestMonitorIconComponent);
     component = fixture.componentInstance;
     component.id = '1';
-    component.config = () => ({
-      entityKey: '',
-      schema: stratosEntityFactory(endpointEntityType),
-      monitorState: AppMonitorComponentTypes.DELETE
-    });
+    component.config = {
+      getConfig: () => ({
+        entityKey: '',
+        schema: stratosEntityFactory(endpointEntityType),
+        monitorState: AppMonitorComponentTypes.DELETE
+      })
+    };
     component.row = {
       metadata: {
         guid: '1'

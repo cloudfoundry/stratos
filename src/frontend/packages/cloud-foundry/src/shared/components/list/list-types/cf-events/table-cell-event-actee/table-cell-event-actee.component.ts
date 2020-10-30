@@ -1,20 +1,24 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
+
+interface CellEVentActeeConfig {
+  setActeeFilter: (actee: string) => void;
+}
 
 @Component({
   selector: 'app-table-cell-event-actee',
   templateUrl: './table-cell-event-actee.component.html',
   styleUrls: ['./table-cell-event-actee.component.scss']
 })
-export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
+export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
 
   icon: {
     [type: string]: {
       icon: string,
-      iconFont?: string
-    }
+      iconFont?: string;
+    };
   } = {
       '': {
         icon: 'help'
@@ -70,15 +74,6 @@ export class TableCellEventActeeComponent extends TableCellCustom<APIResource> {
         iconFont: 'stratos-icons'
       },
     };
-
-  @Input() config: {
-    setActeeFilter: (actee: string) => void;
-  };
-
-  // constructor() { }
-
-  // ngOnInit() {
-  // }
 
   setActee() {
     this.config.setActeeFilter(this.row.entity.actee);

@@ -7,7 +7,7 @@ const customRoutes: Routes = [
     loadChildren: () => import('./features/applications/applications.module').then(m => m.ApplicationsModule),
     data: {
       stratosNavigation: {
-        label: 'Applications',
+        label: $localize`:Side Nav CF Applications|Side Nav label for 'applications'@@side-nav__application:applications`,
         matIcon: 'apps',
         requiresEndpointType: 'cf',
         position: 20
@@ -53,7 +53,7 @@ const customRoutes: Routes = [
       }
     },
   },
-]
+];
 
 @NgModule({
   imports: [

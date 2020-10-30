@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
 import { NormalModuleReplacementPlugin } from 'webpack';
+
 import { StratosConfig } from '../lib/stratos.config';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
@@ -60,7 +60,7 @@ export class ExtensionsHandler {
       p = p.replace(/\\/g, '\\\\');
       regex = new RegExp(p);
     } else {
-      regex = importModuleRegex
+      regex = importModuleRegex;
     }
 
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(

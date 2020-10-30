@@ -7,10 +7,33 @@
       "root": "src/frontend/packages",
       "sourceRoot": "src/frontend/packages",
       "projectType": "application",
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "fr": {
+            "translation": "src/frontend/locale/messages.fr.xlf"
+          },
+          "en-GB": {
+            "translation": "src/frontend/locale/messages.en-GB.xlf"
+          }
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "moment-timezone",
+              "js-yaml",
+              "webcola",
+              "dagre",
+              "lodash/isEqual",
+              "ajv",
+              "lodash/filter",
+              "lodash/map",
+              "lodash/uniqueId",
+              "lodash/cloneDeep"
+            ],
             "customWebpackConfig": {
               "path": "./dist-devkit/build/main.js"
             },
@@ -44,7 +67,10 @@
               "src/frontend/packages/core/src/styles.scss",
               "node_modules/xterm/css/xterm.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "localize": ["en-GB"],
+            "i18nMissingTranslation": "warning",
+            "aot": true
           },
           "configurations": {
             "production": {
@@ -53,6 +79,7 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
+              "localize": true,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -61,6 +88,12 @@
                 "replace": "src/frontend/packages/core/src/environments/environment.ts",
                 "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
               }]
+            },
+            "fr": {
+              "localize": ["fr"]
+            },
+            "en-GB": {
+              "localize": ["en-GB"]
             }
           }
         },
@@ -77,6 +110,12 @@
           "configurations": {
             "production": {
               "browserTarget": "stratos:build:production"
+            },
+            "fr": {
+              "browserTarget": "stratos:build:fr"
+            },
+            "en-GB": {
+              "browserTarget": "stratos:build:en-GB"
             }
           }
         },
@@ -84,6 +123,11 @@
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "browserTarget": "stratos:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "stratos:build:production"
+            }
           }
         }
       }

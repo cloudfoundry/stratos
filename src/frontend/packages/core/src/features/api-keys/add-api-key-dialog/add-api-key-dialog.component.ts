@@ -20,7 +20,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   private hasErrored = new BehaviorSubject(null);
   public hasErrored$ = this.hasErrored.asObservable();
-  private isBusy = new BehaviorSubject(false)
+  private isBusy = new BehaviorSubject(false);
   public isBusy$ = this.isBusy.asObservable();
 
   private sub: Subscription;
@@ -56,11 +56,11 @@ export class AddApiKeyDialogComponent implements OnDestroy {
         } else {
           const response: NormalizedResponse<ApiKey> = state.response;
           const entityKey = entityCatalog.getEntityKey(stratosEntityCatalog.apiKey.actions.create(''));
-          this.dialogRef.close(response.entities[entityKey][response.result[0]])
+          this.dialogRef.close(response.entities[entityKey][response.result[0]]);
         }
       }),
       first()
-    ).subscribe()
+    ).subscribe();
   }
 
 }

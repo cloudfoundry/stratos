@@ -3,9 +3,7 @@
   <div class="favorite-list" *ngIf="favoriteGroups$ | async as entityGroups">
     <ng-container *ngIf="!favoriteInfo.fetching && !favoriteInfo.error">
       <div class="favorites-list__empty-text" *ngIf="!entityGroups || !entityGroups.length">
-        <app-no-content-message icon="star_border" [secondLine]="{
-            text: 'It looks like you don\'t have any favorites, why don\'t you start by adding an endpoint?'
-        }"></app-no-content-message>
+        <app-no-content-message icon="star_border" [secondLine]="{ text: noContentMessage }"></app-no-content-message>
       </div>
       <div class="favorite-list__group"
         *ngFor="let favGroup of entityGroups;trackBy: trackByEndpointId; last as isLast; count as count">
@@ -14,8 +12,7 @@
           [favoriteEntity]="favGroup.endpoint"></app-favorites-meta-card>
         <app-favorites-entity-list *ngIf="favGroup.entities && favGroup.entities.length" class="favorite-list__entities"
           [endpointTypes]="favGroup.endpoint.favorite.endpointType" [entities]="favGroup.entities"
-          [autoExpand]="count === 1"
-          [showFilters]="showFilters"></app-favorites-entity-list>
+          [autoExpand]="count === 1" [showFilters]="showFilters"></app-favorites-entity-list>
         <div *ngIf="favGroup.entities && favGroup.entities.length && !isLast" class="favorite-list__seperator"></div>
       </div>
     </ng-container>

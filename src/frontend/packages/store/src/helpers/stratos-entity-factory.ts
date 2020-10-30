@@ -11,7 +11,7 @@ export const metricEntityType = 'metrics';
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 class StratosEntitySchema extends EntitySchema {

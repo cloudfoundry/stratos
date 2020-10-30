@@ -21,7 +21,7 @@ class RenderableRecent {
   public iconFont: string;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
-    this.icon = catalogEntity.definition.icon;;
+    this.icon = catalogEntity.definition.icon;
     this.iconFont = catalogEntity.definition.iconFont;
 
     if (entity.entityType === endpointEntityType) {
@@ -49,6 +49,8 @@ export class RecentEntitiesComponent {
   public history = false;
 
   @Input() mode: string;
+
+  public noContentMessage: string = $localize`:No Activity Message|Message shown on home screen when there's no recent activity@@recent-activity-list__no-content:Session activity will appear here`;
 
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;

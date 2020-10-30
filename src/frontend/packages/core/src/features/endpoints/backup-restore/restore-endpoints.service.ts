@@ -29,7 +29,7 @@ export class RestoreEndpointsService {
 
   file = new BehaviorSubject<{
     name: string,
-    content: BackupContent
+    content: BackupContent,
   }>(null);
   file$ = this.file.asObservable();
 
@@ -60,7 +60,7 @@ export class RestoreEndpointsService {
       this.file$,
       this.currentDbVersion$
     ]).pipe(
-      filter(([file,]) => !!file && !!file.content),
+      filter(([file]) => !!file && !!file.content),
       map(([file, currentDbVersion]) => {
         return file && file.content && file.content.dbVersion === currentDbVersion;
       })

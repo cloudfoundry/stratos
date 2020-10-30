@@ -48,7 +48,7 @@ export class EntityCatalogEntityStoreHelpers {
     return helper.esf.create<Y>(
       action.guid,
       action
-    )
+    );
   }
 
   private static createPaginationMonitor<Y>(
@@ -158,7 +158,7 @@ export class EntityCatalogEntityStoreHelpers {
         if (!actionBuilder) {
           throw new Error(`\`get\` action builder not implemented for ${entityKey}`);
         }
-        return EntityCatalogEntityStoreHelpers.createEntityService('get', actionBuilder(...args))
+        return EntityCatalogEntityStoreHelpers.createEntityService('get', actionBuilder(...args));
       },
       getPaginationMonitor: (
         ...args: Parameters<ABC['getMultiple']>
@@ -209,7 +209,7 @@ export class EntityCatalogEntityStoreHelpers {
               entityKey,
               getSchema(action.schemaKey),
               startWithNull
-            )
+            );
           },
           getEntityService: (
             ...args: any

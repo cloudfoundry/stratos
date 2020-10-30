@@ -38,7 +38,7 @@ export class NoContentMessageComponent implements AfterViewInit {
         if (elem) {
           const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
           this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
-          this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show')
+          this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
         }
       }
     }, 500);

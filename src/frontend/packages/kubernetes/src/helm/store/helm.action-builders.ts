@@ -4,10 +4,10 @@ import { GetHelmChartVersions, GetHelmVersions, GetMonocularCharts, HelmInstall,
 import { HelmInstallValues } from './helm.types';
 
 export interface HelmChartActionBuilders extends OrchestratedActionBuilders {
-  getMultiple: () => GetMonocularCharts,
+  getMultiple: () => GetMonocularCharts;
   // Helm install added to chart action builder and not helm release/workload to ensure action & effect are available in this module
   // (others may not have loaded)
-  install: (values: HelmInstallValues) => HelmInstall,
+  install: (values: HelmInstallValues) => HelmInstall;
   synchronise: (endpoint: EndpointModel) => HelmSynchronise;
 }
 
