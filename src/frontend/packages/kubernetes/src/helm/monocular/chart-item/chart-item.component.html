@@ -1,9 +1,7 @@
-<app-list-item class="chart-item" [detailUrl]="goToDetailUrl()" height="auto">
+<app-list-item class="chart-item" [detailUrl]="goToDetailUrl()" height="auto"
+  [artifactHubAndOthers$]="artifactHubAndOthers$" [chart]="chart">
   <img class="list-item-logo chart-item-logo" alt="{{ chart.attributes.name }}'s logo" src="{{ iconUrl }}" />
   <div class="list-item-info chart-item-info">
-    <p>
-      <span class="chart-item-info__version" *ngIf="endpointName$ | async as endpointNam">{{endpointNam}}</span>
-    </p>
     <h2 class="chart-item-info__title">
       <a [href]="goToDetailUrl()"
         [routerLink]="goToDetailUrl()">{{ chart.attributes.repo.name }}/{{ chart.attributes.name }}</a>
