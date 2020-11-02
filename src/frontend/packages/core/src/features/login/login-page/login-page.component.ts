@@ -45,6 +45,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   subscription: Subscription;
 
+  showPassword = false;
+
   ngOnInit() {
     this.ssoLogin = false;
     this.store.dispatch(new VerifySession());

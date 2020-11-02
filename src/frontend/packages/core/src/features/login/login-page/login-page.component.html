@@ -8,9 +8,14 @@
             <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
           </mat-form-field>
           <mat-form-field *ngIf="!ssoLogin" [hideRequiredMarker]="true">
-            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+            <input matInput required [type]="!showPassword ? 'password' : 'text'" [(ngModel)]="password" name="password"
+              placeholder="Password">
+            <span matSuffix>
+              <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+            </span>
           </mat-form-field>
-          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button
+            [disabled]="!ssoLogin && !loginForm.valid">Login</button>
         </form>
       </div>
       <div id="login__loading" class="login__loading">
@@ -18,7 +23,8 @@
       </div>
     </div>
   </mat-card>
-  <div id="login-error-message" class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
+  <div id="login-error-message" class="login-message"
+    [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
     {{ message }}
   </div>
 </app-intro-screen>
