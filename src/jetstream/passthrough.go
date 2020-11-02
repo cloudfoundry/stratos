@@ -522,6 +522,7 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 
 	header := getEchoHeaders(c)
 	header.Del("Cookie")
+	header.Del(APIKeyHeader)
 
 	portalUserGUID, err := getPortalUserGUID(c)
 	if err != nil {
