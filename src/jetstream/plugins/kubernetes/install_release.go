@@ -66,7 +66,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	chart, err := c.loadChart(params.ChartURL)
 	if err != nil {
-		return interfaces.NewJetstreamUserErrorf("Could not load chart: %v+", err)
+		return interfaces.NewJetstreamErrorf("Could not load chart: %v+", err)
 	}
 
 	endpointGUID := params.Endpoint
@@ -91,7 +91,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	coreclient := clientset.CoreV1()
 	_, err = coreclient.Namespaces().Get(params.Namespace, metav1.GetOptions{})
 	if err != nil {
-		return interfaces.NewJetstreamUserErrorf("Namespace '%s' does not exist", params.Namespace)
+		return interfaces.NewJetstreamErrorf("Namespace '%s' does not exist", params.Namespace)
 	}
 
 	// Check release name is valid and does not already exist
