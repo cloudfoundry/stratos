@@ -3,15 +3,11 @@
   display: flex;
   justify-content: center;
 
-  &__run {
-    padding-right: 0;
+  &__divider {
+    margin: 4px 0;
   }
 
-  &__info {
-    margin-left: -3px;
-    padding: 0;
-    width: 33px;
-    height: 33px;
-    line-height: 33px;
+  &__run {
+    padding-right: 0;
   }
 }
