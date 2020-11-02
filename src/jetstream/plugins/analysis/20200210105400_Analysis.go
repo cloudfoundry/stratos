@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"database/sql"
+	"strings"
 
 	"bitbucket.org/liamstask/goose/lib/goose"
 
@@ -16,7 +17,15 @@ func init() {
 		createAnalysisTabls += "endpoint       VARCHAR(36) NOT NULL,"
 		createAnalysisTabls += "endpoint_type  VARCHAR(36) NOT NULL,"
 		createAnalysisTabls += "name           VARCHAR(255) NOT NULL,"
-		createAnalysisTabls += "user           VARCHAR(36) NOT NULL,"
+
+		// `user` is a reserved keyword in postgres. For other DBs the column is renamed into
+		// `user_guid` in a subsequent `20201102132553_RenameUserColumn` migration
+		if strings.Contains(conf.Driver.Name, "postgres") {
+			createAnalysisTabls += "user_guid      VARCHAR(36) NOT NULL,"
+		} else {
+			createAnalysisTabls += "user           VARCHAR(36) NOT NULL,"
+		}
+
 		createAnalysisTabls += "path           VARCHAR(255) NOT NULL,"
 		createAnalysisTabls += "type           VARCHAR(64) NOT NULL,"
 		createAnalysisTabls += "format         VARCHAR(64) NOT NULL,"
