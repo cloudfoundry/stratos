@@ -18,16 +18,13 @@
     max-height: 100%;
     overflow: auto;
     &--collapse {
-      flex: 0;
       margin-right: 0;
-      padding-right: 0;
+      min-width: 0;
       width: 0;
     }
     &--expand {
-      flex: 1;
       margin-right: 10px;
-      padding-right: 10px;
-      transition: all .75s ease-out;
+      min-width: 200px;
       width: initial;
     }
 
@@ -39,6 +36,7 @@
     &__lists {
       max-height: 100%;
       overflow: auto;
+      padding-right: 10px;
     }
 
     &__stratos,
