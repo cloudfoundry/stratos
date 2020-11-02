@@ -28,7 +28,7 @@ you will need to edit the `src/jetstream/config.properties` file and set these t
 The Jetstream backend should be configured.
 
 :::note
-Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the Kubernetes Terminal feature.
+Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
 :::
 
 
@@ -52,5 +52,5 @@ ANALYSIS_SERVICES_API=http://127.0.0.1:8090
 ```
 
 :::note
-Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the Kubernetes Terminal feature.
+Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
 :::

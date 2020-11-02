@@ -8,7 +8,7 @@ import { SetClientFilter } from '../../../../../store/src/actions/pagination.act
 import { AppState } from '../../../../../store/src/app-state';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { helmEntityCatalog } from '../../helm-entity-catalog';
-import { HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsListConfig } from '../../list-types/monocular-charts-list-config.service';
 
 @Component({
@@ -43,17 +43,21 @@ export class CatalogTabComponent {
       filter(entities => !!entities),
       first()
     ).subscribe(endpoints => {
-      let stratosRepos = 0;
+      let stratosHelmEndpoints = 0;
       for (const ep of endpoints) {
+        if (ep.cnsi_type !== HELM_ENDPOINT_TYPE) {
+          continue;
+        }
+
+        stratosHelmEndpoints++;
         if (ep.sub_type === HELM_HUB_ENDPOINT_TYPE) {
+          // Always show the filter if there's artifact hub attached
           this.collapsed = false;
           this.hide = false;
           return;
-        } else {
-          stratosRepos++;
         }
       }
-      this.hide = stratosRepos === 1;
+      this.hide = stratosHelmEndpoints === 1;
     });
 
     // Collect all unique repos in stratos and artifact hub repos
