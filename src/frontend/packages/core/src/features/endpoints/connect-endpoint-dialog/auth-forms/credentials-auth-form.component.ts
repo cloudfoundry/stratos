@@ -9,5 +9,8 @@ import { IAuthForm } from '../../../../../../store/src/extension-types';
   styleUrls: ['./credentials-auth-form.component.scss']
 })
 export class CredentialsAuthFormComponent implements IAuthForm {
+
+  showPassword = false;
+
   @Input() formGroup: FormGroup;
 }
