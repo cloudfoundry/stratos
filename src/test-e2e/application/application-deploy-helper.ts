@@ -148,27 +148,16 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
 
     it('Should pass Source step', () => {
       e2e.debugLog(`${loggingPrefix} Source Step`);
-      e2e.log('Should pass Source step: 1');
       deployApp.stepper.waitUntilShown();
-      e2e.log('Should pass Source step: 2');
       deployApp.stepper.waitForStepNotBusy();
-      e2e.log('Should pass Source step: 3');
       deployApp.stepper.getActiveStepName().then(activeStep => {
         console.warn(`Should pass Source step: activeStep: ${activeStep}`);
         expect(activeStep).toBe('Source');
       });
-      e2e.log('Should pass Source step: 4');
       // expect(deployApp.stepper.getActiveStepName()).toBe('Source');
-      // expect(deployApp.stepper.canNext()).toBeFalsy();
-      deployApp.stepper.canNext().then(canNext => {
-        console.warn(`Should pass Source step: canNext: ${canNext}`);
-        expect(canNext).toBeFalsy();
-      });
-      e2e.log('Should pass Source step: 5');
+      expect(deployApp.stepper.canNext()).toBeFalsy();
 
       browser.waitForAngularEnabled(false);
-
-      e2e.log('Should pass Source step: 6');
       switch (type) {
         case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
           deployApp.stepper.getStepperForm().fill({ projectname: res.testApp });
@@ -182,25 +171,15 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
           deployApp.stepper.getStepperForm().fill({ dockerimg: res.dockerUrl });
           break;
       }
-
-      e2e.log('Should pass Source step: 7');
+      browser.waitForAngularEnabled(true);
 
       // Press next to get to source config step
       deployApp.stepper.waitUntilCanNext('Next').then(x => {
         console.warn(`Should pass Source step: waitUntilCanNext: ${x}`);
       });
-
-      e2e.log('Should pass Source step: 8');
-
       deployApp.stepper.next().then(x => {
         console.warn(`Should pass Source step: next: ${x}`);
       });
-
-      e2e.log('Should pass Source step: 9');
-
-      browser.waitForAngularEnabled(true);
-
-      e2e.log('Should pass Source step: 10');
     });
 
     it('Should pass Source Config step', () => {
