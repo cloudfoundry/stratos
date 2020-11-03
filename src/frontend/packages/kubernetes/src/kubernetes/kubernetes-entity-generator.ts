@@ -318,26 +318,27 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     icon: 'namespace',
     iconFont: 'stratos-icons',
   };
-  kubeEntityCatalog.namespace = new StratosCatalogEntity<IKubeResourceFavMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
-    actionBuilders: kubeNamespaceActionBuilders,
-    entityBuilder: {
-      getIsValid: (favourite) => {
-        console.log('get is Valid for a namespace');
-        console.log(favourite);
-        return of(false)
-      },
-      getMetadata: (namespace: any) => {
-        return {
-          endpointId: namespace.kubeGuid,
-          guid: namespace.metadata.uid,
-          kubeGuid: namespace.kubeGuid,
-  //        createdAt: moment(app.metadata.created_at).format('LLL'),
-          name: namespace.metadata.name,
-        };
-      },
-      getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
-      getGuid: metadata => metadata.guid,
-    },  });
+  kubeEntityCatalog.namespace = new StratosCatalogEntity<IKubeResourceFavMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
+    definition, {
+      actionBuilders: kubeNamespaceActionBuilders,
+      entityBuilder: {
+        getIsValid: (favourite) => {
+          console.log('get is Valid for a namespace');
+          console.log(favourite);
+          return of(false)
+        },
+        getMetadata: (namespace: any) => {
+          return {
+            endpointId: namespace.kubeGuid,
+            guid: namespace.metadata.uid,
+            kubeGuid: namespace.kubeGuid,
+            name: namespace.metadata.name,
+          };
+        },
+        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
+        getGuid: metadata => metadata.guid,
+      }
+    });
   return kubeEntityCatalog.namespace;
 }
 
