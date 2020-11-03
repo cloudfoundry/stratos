@@ -2,8 +2,7 @@ import { Store } from '@ngrx/store';
 
 import { ListDataSource } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../core/src/shared/components/list/list.component.types';
-import { IRequestEntityTypeState } from '../../../../store/src/app-state';
-import { AppState, EndpointModel } from '../../../../store/src/public-api';
+import { AppState } from '../../../../store/src/public-api';
 import { PaginationEntityState } from '../../../../store/src/types/pagination.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { MonocularChart } from '../store/helm.types';
@@ -13,7 +12,6 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<MonocularChart>,
-    endpoints: IRequestEntityTypeState<EndpointModel>
   ) {
     const action = helmEntityCatalog.chart.actions.getMultiple();
     super({
@@ -28,13 +26,7 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
         { type: 'filter', field: 'name' },
         (entities: MonocularChart[], paginationState: PaginationEntityState) => {
           const repository = paginationState.clientPagination.filter.items.repository;
-          if (!repository) {
-            return entities;
-          }
-          return entities.filter(e => e.monocularEndpointId ?
-            repository === endpoints[e.monocularEndpointId].name :
-            repository === e.attributes.repo.name
-          );
+          return repository ? entities.filter(e => repository === e.attributes.repo.name) : entities;
         }
       ]
     });

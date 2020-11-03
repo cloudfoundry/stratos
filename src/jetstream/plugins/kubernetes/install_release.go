@@ -56,12 +56,12 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	var params installRequest
 	err := json.Unmarshal(buf.Bytes(), &params)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Create Release Parameters: %v+", err)
+		return interfaces.NewJetstreamUserErrorf("Could not get Create Release Parameters: %v+", err)
 	}
 
 	// Client must give us the download URL for the chart
 	if len(params.ChartURL) == 0 {
-		return interfaces.NewJetstreamErrorf("Client did not supply Chart download URL")
+		return interfaces.NewJetstreamUserError("Client did not supply Chart download URL")
 	}
 
 	chart, err := c.loadChart(params.ChartURL)
@@ -74,7 +74,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, params.Namespace)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
+		return interfaces.NewJetstreamUserErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
@@ -82,7 +82,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	userSuppliedValues := map[string]interface{}{}
 	if err := yaml.Unmarshal([]byte(params.Values), &userSuppliedValues); err != nil {
 		// Could not parse the user's values
-		return interfaces.NewJetstreamErrorf("Could not parse values: %+v", err)
+		return interfaces.NewJetstreamUserErrorf("Could not parse values: %+v", err)
 	}
 
 	// In Helm 3, the namespace must already exist
@@ -107,7 +107,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	release, err := install.Run(chart, userSuppliedValues)
 	if err != nil {
-		return interfaces.NewJetstreamError(fmt.Sprintf("Error installing %+v", err))
+		return interfaces.NewJetstreamUserErrorf(fmt.Sprintf("Error installing: %+v", err))
 	}
 
 	return ec.JSON(200, release)
