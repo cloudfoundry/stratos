@@ -48,6 +48,7 @@ $stratos-icons-font-path: '../assets/fonts/stratos' !default;
 // Modified to include some extra icons for Stratos
 
 @font-face {
+  font-display: block;
   font-family: 'stratos-icons';
   font-style: normal;
   font-weight: normal;
@@ -62,7 +63,6 @@ $stratos-icons-font-path: '../assets/fonts/stratos' !default;
 .stratos-icons {
   direction: ltr;
   display: inline-block;
-  font-display: block;
   font-family: 'stratos-icons';
   // Support for IE.
   font-feature-settings: 'liga';
