@@ -233,7 +233,8 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
             return mod.instance.createHomeCard(mod.componentFactoryResolver);
           });
         }),
-        shortcuts: k8sShortcuts
+        fullView: true
+        // shortcuts: k8sShortcuts
       }
   };
   return [

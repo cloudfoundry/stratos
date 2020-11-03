@@ -7,6 +7,7 @@ import { FavoritesMetaCardComponent } from './home/favorites-meta-card/favorites
 import { HomePageCardDirective } from './home/home-page-card.directive';
 import { HomePageEndpointCardComponent } from './home/home-page-endpoint-card/home-page-endpoint-card.component';
 import { HomePageComponent } from './home/home-page.component';
+import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.component';
 
 
 @NgModule({
@@ -21,9 +22,11 @@ import { HomePageComponent } from './home/home-page.component';
     HomePageCardDirective,
     HomePageEndpointCardComponent,
     FavoritesMetaCardComponent,
+    HomeShortcutsComponent,
   ],
   exports: [
     FavoritesMetaCardComponent,
+    HomeShortcutsComponent,
   ]
 })
 export class HomeModule { }

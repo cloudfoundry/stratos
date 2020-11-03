@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
@@ -64,10 +64,8 @@ export class HomePageEndpointCardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-
-    // TODO: Should this be first = it means when you un-favorite, the card stays on the page
+    // Favorites for this endpoint
     this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid).pipe(
-      first(),
       map(f => {
         return f.map(item => this.userFavoriteManager.mapToHydrated(item));
       })

@@ -36,18 +36,18 @@ export class HomePageComponent {
   private layouts: HomePageCardLayout[];
 
   constructor(
-    endpointsService: EndpointsService,
+    public endpointsService: EndpointsService,
     private store: Store<AppState>,
     public userFavoriteManager: UserFavoriteManager
   ) {
     this.layout$ = this.layout.asObservable();
-    this.allEndpointIds$ = endpointsService.endpoints$.pipe(
+    this.allEndpointIds$ = this.endpointsService.endpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
-    this.haveRegistered$ = endpointsService.haveRegistered$;
+    this.haveRegistered$ = this.endpointsService.haveRegistered$;
 
     // Only show endpoints that have Home Card metadata
-    this.endpoints$ = combineLatest([endpointsService.endpoints$, userFavoriteManager.getAllFavorites()]).pipe(
+    this.endpoints$ = combineLatest([this.endpointsService.endpoints$, userFavoriteManager.getAllFavorites()]).pipe(
      map(([endpoints, [favGroups, favs]]) => {
        const ordered = this.orderEndpoints(endpoints, favGroups);
        return ordered.filter(ep => {
@@ -97,26 +97,25 @@ export class HomePageComponent {
   }
 
   public onChangeLayout(layout: HomePageCardLayout) {
-
     this.layoutID = layout.id;
 
     // If the layout is automatic, then adjust based on number of things to show
-    if (layout.id === 0) {
+    const lay$ = layout.id === 0 ? this.automaticLayout() : of(layout);
+    lay$.pipe(first()).subscribe(lo => {
+      this.layout.next(lo);
 
-      // TODO
-      console.log('Automatic layout');
-      layout = new HomePageCardLayout(1, 1, 'Full');
-    }
+      // Update the grid columns based on the layout
+      this.columns = lo.x;
 
-    this.layout.next(layout);
-
-    // Update the grid columns based on the layout
-    this.columns = layout.x;
-
-    // Persist the state
-    this.store.dispatch(new SetHomeCardLayoutAction(this.layoutID));
+      // Persist the state
+      this.store.dispatch(new SetHomeCardLayoutAction(this.layoutID));
+    });
   }
 
+  // Order the endpoint cards - we always show all endpoints, order is:
+  // 1. Endpoint has been added as a favourite
+  // 2. Endpoint that has child favourites
+  // 3. Remaining endpoints
   private orderEndpoints(endpoints: IRequestEntityTypeState<EndpointModel>, favorites: IUserFavoritesGroups): EndpointModel[] {
     const processed = {};
     const result = [];
@@ -151,26 +150,45 @@ export class HomePageComponent {
     return result;
   }
 
+  // Automatic layout - select the best layout based on the available endpoints
+  private automaticLayout(): Observable<HomePageCardLayout> {
+    return this.endpointsService.endpoints$.pipe(
+      map(eps => Object.values(eps)),
+      map(eps => eps.filter(ep => {
+        const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+        return !!defn.definition.homeCard;
+      })),
+      map(eps => {
+        switch(eps.length) {
+          case 1:
+            return new HomePageCardLayout(1, 1);
+          case 2:
+            return new HomePageCardLayout(1, 2);
+          case 3:
+            return new HomePageCardLayout(2, 2);
+          case 4:
+            return new HomePageCardLayout(2, 2);
+          default:
+            return new HomePageCardLayout(3, 2);
+        }
+      })
+    );
+  }
 
   // Validate all of the entities one by one and update if they are no longer valid
   // validate() {
   //   this.favoriteGroups$.pipe(first()).subscribe(f => {
   //     console.log('Validating favourites');
   //     console.log(f);
-
   //     f.forEach(group => {
   //       console.log(group);
   //       // Maybe we need to check the enpoint via the health check first?
   //       // Check each entity in turn
   //       group.entities.forEach(entity => {
   //         console.log(entity);
-
   //       });
   //     })
-
   //   });
-
-
   // }
 }
 

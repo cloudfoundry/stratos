@@ -23,23 +23,15 @@
       </div>
       <div class="home-card__right" *ngIf="!fullView">
         <div *ngIf="links$ | async as links">
-        <div class="home-card__fav-title">Favorites</div>
-        <div class="home-card__fav" *ngIf="links.favs.length > 0">
-          <app-favorites-meta-card *ngFor="let entity of links.favs"
-          class="home-card__fav-card" [favoriteEntity]="entity" [mode]="plain" [compact]="true"></app-favorites-meta-card>
-        </div>
-        <div class="home-card__fav" *ngIf="links.favs.length === 0">
-          No favorites
-        </div>
-        <div *ngIf="links.shortcuts && links.shortcuts.length > 0">
-          <div class="home-card__shortcut-title">Shortcuts</div>
-          <div class="home-card__fav">
-            <div *ngFor="let shortcut of links.shortcuts" class="home-card__shortcut">
-              <div class="home-card__shortcut-icon"><mat-icon [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</mat-icon></div>
-              <div><a [routerLink]="shortcut.link">{{ shortcut.title }}</a></div>
-            </div>
+          <div class="home-card__fav-title">Favorites</div>
+          <div class="home-card__fav" *ngIf="links.favs.length > 0">
+            <app-favorites-meta-card *ngFor="let entity of links.favs"
+            class="home-card__fav-card" [favoriteEntity]="entity" [mode]="plain" [compact]="true"></app-favorites-meta-card>
           </div>
-        </div>
+          <div class="home-card__fav" *ngIf="links.favs.length === 0">
+            <div class="home-card__fav-none">No favorites</div>
+          </div>
+          <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
         </div>
       </div>
     </div>

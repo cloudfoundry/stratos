@@ -28,7 +28,7 @@ export class HomePageCardDirective implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // Dynamically load the component
+    // Dynamically load the component for the Home Card
     const endpointEntity = entityCatalog.getEndpoint(this.appHomeCard.cnsi_type, this.appHomeCard.sub_type)
     if (endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.load(endpointEntity);
