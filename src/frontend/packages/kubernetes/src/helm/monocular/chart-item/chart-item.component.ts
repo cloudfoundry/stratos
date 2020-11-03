@@ -9,7 +9,7 @@ import { ChartsService } from '../shared/services/charts.service';
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
   /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['chart', 'showVersion', 'showDescription', 'artifactHubAndOthers$']
+  inputs: ['chart', 'showVersion', 'showDescription', 'artifactHubAndHelmRepoTypes$']
 })
 export class ChartItemComponent implements OnInit {
   public iconUrl: string;
@@ -20,7 +20,7 @@ export class ChartItemComponent implements OnInit {
   // Truncate the description
   public showDescription = true;
 
-  public artifactHubAndOthers$: Observable<boolean>;
+  public artifactHubAndHelmRepoTypes$: Observable<boolean>;
 
   constructor(private chartsService: ChartsService) {
   }

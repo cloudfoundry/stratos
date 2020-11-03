@@ -14,17 +14,17 @@ import { Chart } from '../shared/models/chart';
 export class ListItemComponent implements OnInit {
 
   @Input() height = 'default';
-  @Input() public artifactHubAndOthers$: Observable<boolean>;
+  @Input() public artifactHubAndHelmRepoTypes$: Observable<boolean>;
   @Input() chart: Chart;
 
   public detailUrl: string;
   public showArtifactHub$: Observable<boolean>;
 
   ngOnInit() {
-    this.showArtifactHub$ = this.artifactHubAndOthers$ ? this.artifactHubAndOthers$.pipe(
-      map(artifactHubAndOthers =>
+    this.showArtifactHub$ = this.artifactHubAndHelmRepoTypes$ ? this.artifactHubAndHelmRepoTypes$.pipe(
+      map(artifactHubAndHelmRepoTypes =>
         // Only show if we have artifact hub registered, there's other helm repo's also registered and this chart is from artifact hub
-        artifactHubAndOthers && !!this.chart.monocularEndpointId
+        artifactHubAndHelmRepoTypes && !!this.chart.monocularEndpointId
       ),
     ) : of(false);
   }
