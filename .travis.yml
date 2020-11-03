@@ -19,7 +19,6 @@ branches:
   only:
     - master
     - v2-master
-    - "4.2.1"
     - e2e-tests
 cache:
   directories:
