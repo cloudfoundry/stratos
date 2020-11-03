@@ -1,7 +1,17 @@
-<div class="compact-app-card" *ngIf="app">
+<div class="compact-app-card" *ngIf="app; else placeholder">
   <app-application-state-icon [status]="appStatus$ | async "></app-application-state-icon>
   <div class="compact-app-card__name">
-    <a [routerLink]="['/applications', activeRouteCfOrgSpace.cfGuid , app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
+    <a [routerLink]="['/applications', endpoint, app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
   </div>
-  <div class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
+  <div *ngIf="showDate" [ngClass]="{'compact-app-card__subtle': dateMode === 'subtle'}" class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
 </div>
+
+<ng-template #placeholder>
+  <div class="compact-app-card">
+    <div class="ph-item ph-icon"></div>
+    <div class="compact-app-card__name">
+      <div class="ph-item ph-large"></div>
+    </div>
+    <div *ngIf="showDate" [ngClass]="{'compact-app-card__subtle': dateMode === 'subtle'}" class="ph-item ph-small compact-app-card__updated"></div>
+  </div>
+</ng-template>

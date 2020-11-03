@@ -1,3 +1,4 @@
+import { Compiler, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -58,6 +59,20 @@ export interface IStratosEntityWithIcons {
 export interface IEntityMetadata {
   name: string;
   [key: string]: string;
+}
+
+export interface HomeCardShortcut {
+  title: string;
+  link: string[];
+  icon: string;
+  iconFont?: string;
+}
+
+// Metadata for Home Card
+export interface HomeCardMetadata {
+  component?: (compiler: Compiler, injector: Injector) => any;
+  shortcuts?: (endpointID: string) => HomeCardShortcut[];
+  fullView?: boolean;
 }
 
 /**
@@ -161,6 +176,11 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    * Note - These should be restricted by type
    */
   readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+
+  /**
+   * Metadata for the card to show on the Home Page for this endpoint type
+   */
+  readonly homeCard?: HomeCardMetadata;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }

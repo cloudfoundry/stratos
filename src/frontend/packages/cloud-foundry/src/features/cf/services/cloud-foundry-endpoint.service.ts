@@ -140,7 +140,14 @@ export class CloudFoundryEndpointService {
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
   ) {
-    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    if (this.activeRouteCfOrgSpace) {
+      this.init(this.activeRouteCfOrgSpace);
+    }
+  }
+
+  public init(config: ActiveRouteCfOrgSpace) {
+    this.activeRouteCfOrgSpace = config;
+    this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
 
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 

@@ -1,23 +1,26 @@
-<app-page-header [showHistory]="false" [endpointIds$]="allEndpointIds$">
+<app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
-</app-page-header>
-<div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
-  <div class="favorites-list">
-    <div class="home-page__list-header">
-      <h3 class="home-page__header">Favorites</h3>
-      <button mat-icon-button *ngIf="showFilterToggle$ | async" [ngSwitch]="showFilters"
-        (click)="toggleShowFilters($event)">
-        <mat-icon *ngSwitchCase="true" matTooltip="Hide filters" aria-label="Show filters">filter_list</mat-icon>
-        <mat-icon *ngSwitchCase="false" matTooltip="Show filters" aria-label="Hide filters">filter_list</mat-icon>
+  <div class="page-header-right">
+    <div *ngIf="layouts$ | async as layouts">
+      <mat-menu #appMenu="matMenu" xPosition="before">
+        <button (click)="onChangeLayout(layout)" mat-menu-item *ngFor="let layout of layouts" class="layout-menu">
+          <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">{{ layout.title }}</div>
+          <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done</mat-icon>
+        </button>
+      </mat-menu>
+      <button mat-button [matMenuTriggerFor]="appMenu">
+        <mat-icon>view_week</mat-icon>
+        <mat-icon>arrow_drop_down</mat-icon>
       </button>
     </div>
-    <app-favorites-global-list [showFilters]="showFilters" class="home-page__scroller"></app-favorites-global-list>
   </div>
-  <div class="recent-list">
-    <div class="home-page__list-header">
-      <h3 class="home-page__header">Recent Activity</h3>
+</app-page-header>
+<div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
+  <div class="home-page__list" [ngClass]="{'home-page__list-2': columns === 2, 'home-page__list-3': columns === 3}">
+    <!-- Show a card for each endpoint -->
+    <div *ngFor="let ep of endpoints$ | async" class="home-page__card">
+      <app-home-page-endpoint-card [layout]="layout$ | async" [endpoint]="ep"></app-home-page-endpoint-card>
     </div>
-    <app-recent-entities class="home-page__scroller"></app-recent-entities>
   </div>
 </div>
 <ng-template #noEndpoints>

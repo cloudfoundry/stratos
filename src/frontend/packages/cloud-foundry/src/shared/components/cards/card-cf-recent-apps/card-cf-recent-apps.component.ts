@@ -1,13 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { filter, map, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { PaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { appDataSort, CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { appDataSort } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 const RECENT_ITEMS_COUNT = 10;
 
@@ -22,17 +21,42 @@ export class CardCfRecentAppsComponent implements OnInit {
   @Input() allApps$: Observable<APIResource<IApp>[]>;
   @Input() loading$: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
+  @Input() endpoint: string;
+  @Input() mode: string;
+  @Input() showDate: boolean;
+  @Input() dateMode: string;
 
-  constructor(
-    private store: Store<CFAppState>,
-    public cfEndpointService: CloudFoundryEndpointService,
-  ) { }
+  public canRefresh = false;
+
+  public placeholders: any[];
+
+  appsPagObs: PaginationObservables<APIResource<IApp>>;
+
+  private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
+
+  @Input() set maxRows(value: number) {
+    this.maxRowsSubject.next(value);
+    this.placeholders = new Array(value).fill(null);
+  }
+
+  constructor() {
+    this.placeholders = new Array(RECENT_ITEMS_COUNT).fill(null);
+  }
 
   ngOnInit() {
-    this.recentApps$ = this.allApps$.pipe(
-      filter(apps => !!apps),
-      first(),
-      map(apps => this.restrictApps(apps)),
+    this.canRefresh = this.refresh.observers.length > 0;
+    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.endpoint);
+    if (!this.allApps$) {
+      this.allApps$ = this.appsPagObs.entities$;
+      this.loading$ = this.appsPagObs.fetchingEntities$;
+    }
+
+    this.recentApps$ = combineLatest(
+      this.allApps$,
+      this.maxRowsSubject.asObservable()
+    ).pipe(
+      filter(([apps]) => !!apps),
+      map(([apps, maxRows]) => this.restrictApps(apps, maxRows)),
       tap(apps => this.fetchAppStats(apps))
     );
   }
@@ -40,18 +64,16 @@ export class CardCfRecentAppsComponent implements OnInit {
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
     recentApps.forEach(app => {
       if (app.entity.state === 'STARTED') {
-        cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.cfEndpointService.cfGuid);
+        cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);
       }
     });
   }
 
-  private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
+  private restrictApps(apps: APIResource<IApp>[], maxRows = RECENT_ITEMS_COUNT): APIResource<IApp>[] {
     if (!apps) {
       return [];
     }
-    return apps.sort(appDataSort).slice(0, RECENT_ITEMS_COUNT);
+    return apps.sort(appDataSort).slice(0, maxRows);
   }
 
 }
-
-

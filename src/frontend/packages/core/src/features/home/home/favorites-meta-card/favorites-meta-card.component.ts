@@ -2,17 +2,17 @@ import { Component, Input } from '@angular/core';
 import { isObservable, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { IFavoritesMetaCardConfig } from '../../../../../store/src/favorite-config-mapper';
-import { stratosEntityFactory, userFavouritesEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { MenuItem } from '../../../../../store/src/types/menu-item.types';
-import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IFavoriteEntity } from '../../../../../store/src/types/user-favorite-manager.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { isEndpointConnected } from '../../../features/endpoints/connect.service';
-import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { IFavoritesMetaCardConfig } from '../../../../../../store/src/favorite-config-mapper';
+import { userFavouritesEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
+import { entityCatalog, stratosEntityFactory } from '../../../../../../store/src/public-api';
+import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+import { MenuItem } from '../../../../../../store/src/types/menu-item.types';
+import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { IFavoriteEntity } from '../../../../../../store/src/types/user-favorite-manager.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
+import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { isEndpointConnected } from '../../../endpoints/connect.service';
 
 interface FavoriteIconData {
   hasIcon: boolean;
@@ -41,6 +41,9 @@ export class FavoritesMetaCardComponent {
 
   @Input()
   public endpointDisconnected = false;
+
+  @Input()
+  public mode: string;
 
   public config: IFavoritesMetaCardConfig;
 

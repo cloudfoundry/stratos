@@ -106,7 +106,7 @@ export class UserFavoriteManager {
     });
   }
 
-  private mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
+  public mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
     const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
 
     return {
@@ -129,5 +129,28 @@ export class UserFavoriteManager {
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
     stratosEntityCatalog.userFavorite.api.toggle(favorite);
+  }
+
+  // Get all favorites for the given endpoint ID
+  public getFavoritesForEndpoint(endpointID: string): Observable<UserFavorite<IFavoriteMetadata>[]> {
+    const waitForFavorites$ = this.getWaitForFavoritesObservable();
+    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
+      map(favs => {
+        const result = [];
+        Object.values(favs).forEach(f => {
+          if (f.endpointId === endpointID && f.entityId) {
+            result.push(f);
+          }
+        })
+        return result;
+      })
+    )
+  }
+
+  public getEndpointIDFromFavoriteID(id: string): string {
+    const p = id.split('-');
+    const idParts = p.slice(0, p.length - 2);
+    return idParts.join('-');
   }
 }

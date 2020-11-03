@@ -20,6 +20,11 @@ export class CompactAppCardComponent implements OnInit {
 
   @Input() app;
 
+  @Input() endpoint: string;
+
+  @Input() showDate = true;
+  @Input() dateMode: string;
+
   applicationState$: Observable<ApplicationStateData>;
 
   appStatus$: Observable<StratosStatus>;
@@ -34,14 +39,23 @@ export class CompactAppCardComponent implements OnInit {
 
   ) { }
   ngOnInit() {
+    if(this.activeRouteCfOrgSpace) {
+      this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);
+      if (!this.endpoint) {
+        this.endpoint = this.activeRouteCfOrgSpace.cfGuid;
+      }
+    }
 
-    this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);
+    if (!this.app) {
+      return
+    }
+
     const initState = this.appStateService.get(this.app.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.appStateService,
       this.app.entity,
       this.app.metadata.guid,
-      this.activeRouteCfOrgSpace.cfGuid
+      this.endpoint
     ).pipe(
       startWith(initState)
     );

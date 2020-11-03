@@ -32,7 +32,7 @@ class RenderableRecent {
       this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
           if (entity.endpointId && Object.keys(endpoints).length > 1) {
-            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
+            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
           }
           return entity.prettyType;
         })

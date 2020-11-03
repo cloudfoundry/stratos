@@ -1,3 +1,4 @@
+import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { of } from 'rxjs';
 
@@ -146,6 +147,23 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   }
 };
 
+function k8sShortcuts(id: string) {
+  return [
+    {
+      title: 'View Nodes',
+      link: ['/kubernetes', id, 'nodes'],
+      icon: 'node',
+      iconFont: 'stratos-icons'
+    },
+    {
+      title: 'View Namespaces',
+      link: ['/kubernetes', id, 'namespaces'],
+      icon: 'namespace',
+      iconFont: 'stratos-icons'
+    }
+  ];
+}
+
 export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: KUBERNETES_ENDPOINT_TYPE,
@@ -207,7 +225,16 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
         authTypes: [BaseEndpointAuth.UsernamePassword, kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
         logoUrl: '/core/assets/custom/k3s.svg',
         renderPriority: 6
-      }]
+      }],
+      homeCard: {
+        component: (compiler: Compiler, injector: Injector) => import('./home/kubernetes-home-card.module').then((m) => {
+          return compiler.compileModuleAndAllComponentsAsync(m.KubernetesHomeCardModule).then(cm => {
+            const mod = cm.ngModuleFactory.create(injector);
+            return mod.instance.createHomeCard(mod.componentFactoryResolver);
+          });
+        }),
+        shortcuts: k8sShortcuts
+      }
   };
   return [
     generateEndpointEntity(endpointDefinition),
@@ -310,10 +337,6 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
       },
       getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
       getGuid: metadata => metadata.guid,
-      getLines: () => ([
-//        ['Hello', (meta) => 'World!']
-//        ['Created', (meta) => meta.createdAt]
-      ])
     },  });
   return kubeEntityCatalog.namespace;
 }
@@ -378,19 +401,4 @@ function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
     entity.kubeGuid,
     entity
   );
-
-
-  // if (isCfEntity(entity as CfAPIResource)) {
-  //   return favoritesConfigMapper.getFavoriteFromEntity<T>(
-  //     entityType,
-  //     'cf',
-  //     entity.entity.cfGuid,
-  //     entity
-  //   );
-  // }
 }
-
-// function isCfEntity(entity: CfAPIResource) {
-//   return entity && entity.entity.cfGuid && entity.metadata && entity.metadata.guid;
-// }
-

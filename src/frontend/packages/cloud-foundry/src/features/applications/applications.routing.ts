@@ -39,6 +39,12 @@ const applicationsRoutes: Routes = [
   {
     path: 'new',
     component: NewApplicationBaseStepComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'new/:endpointId',
+    component: NewApplicationBaseStepComponent,
+    pathMatch: 'full'
   },
   {
     path: 'create',
