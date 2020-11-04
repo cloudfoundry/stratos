@@ -1,10 +1,12 @@
 import {
   EntityRequestActionConfig,
+  GetMultipleActionBuilder,
   KnownEntityActionBuilder,
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
+  PaginationRequestActionConfig,
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { FetchBranchesForProject, FetchBranchForProject, FetchCommits } from '../actions/deploy-applications.actions';
+import { FetchBranchesForProject, FetchBranchForProject } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
 import { GitSCM } from '../shared/data-services/scm/scm';
 
@@ -22,33 +24,49 @@ export const gitRepoActionBuilders: GitRepoActionBuilders = {
 
 export interface GitMeta {
   projectName: string;
-  scm: GitSCM; // FIXME: Remove from action, see #4245
+  scm: GitSCM; // FIXME: Remove from action, see #4245. This should just be 'type' and used GitSCMService (change that to create array on need)
   commitSha?: string;
   branchName?: string;
 }
 
+// TODO: RC 1. ~~PaginationRequestActionConfig takes pagination key~~
+// TODO: RC 2. ~~why these interface,GitCommitActionBuilders and GitCommitActionBuildersConfig needed?
+// one for normal requests... used by typing... other used by builder config approach~~
+// TODO: RC 3. ~~access store by type... only works for OrchestratedActionBuilders and not OrchestratedActionBuilderConfig~~
+// TODO: RC 4 (Separate) 4245. git commit id process (schema wrong, effect has it... but should move to schema)
+// TODO: RC 5 (Separate) 4245. gitscm in action... this can be huge in store. need to pass through type and GitSCMService (but that should
+// dynamically create type)
+
+// can handle per entity type and endpoint type error handling
+
+// gitCommitActionBuilders, of type builders config, gets converted into type GitCommitActionBuilders by ActionBuilderConfigMapper
+
+// These are used when we want to create teh action builders... and will result in GitCommitActionBuilders
 export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
-  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
+  getMultiple: PaginationRequestActionConfig<GetMultipleActionBuilder>;
 }
 
+// These are used when we want to CALL anything action/store related and are created via the GitCommitActionBuildersConfig
 export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
   get: KnownEntityActionBuilder<GitMeta>;
-  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
+  getMultiple: GetMultipleActionBuilder<GitMeta>;
 }
 
 export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
   get: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
-    (id, endpointGuid, meta) => meta.scm.getCommitApiUrl(meta.projectName, meta.commitSha),
+    (id, endpointGuid, meta2) => meta2.scm.getCommitApiUrl(meta2.projectName, meta2.commitSha),
     {
-      externalRequest: true
+      externalRequest: true,
     }
   ),
-  getMultiple: (
-    commitSha: string,
-    endpointGuid: string,
-    commitMeta: GitMeta
-  ) => new FetchCommits(commitMeta.scm, commitMeta.projectName, commitSha)
+  getMultiple: new PaginationRequestActionConfig<GetMultipleActionBuilder<GitMeta>>(
+    (endpointGuid, paginationKey, meta) => paginationKey || meta.scm.getType() + meta.projectName + meta.commitSha,
+    (endpointGuid, paginationKey, meta) => meta.scm.getCommitsApiUrl(meta.projectName, meta.commitSha),
+    {
+      externalRequest: true,
+    }
+  )
 };
 
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {

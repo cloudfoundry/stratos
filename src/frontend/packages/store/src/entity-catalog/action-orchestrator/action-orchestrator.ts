@@ -62,7 +62,7 @@ export class PaginationRequestActionConfig<T extends OrchestratedActionBuilder> 
   public schemaKey: string;
   public externalRequest: boolean;
   constructor(
-    public paginationKey: string,
+    public getPaginationKey: (...args: Parameters<T>) => string,
     public getUrl: (...args: Parameters<T>) => string,
     {
       requestConfig = {},

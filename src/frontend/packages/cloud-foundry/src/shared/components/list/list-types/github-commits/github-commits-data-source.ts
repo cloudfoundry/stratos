@@ -45,7 +45,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
       store,
       action,
       schema: new CFEntitySchema(gitCommitEntityType),
-      getRowUniqueId: (object: GitCommit) => object.sha,
+      getRowUniqueId: (object: GitCommit) => object.sha, // TODO: RC
       paginationKey,
       isLocal: true,
       transformEntities: [],

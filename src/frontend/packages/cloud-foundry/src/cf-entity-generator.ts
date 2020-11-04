@@ -913,12 +913,21 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
+
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
       return {
         ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid
+        guid: action.guid || metadata.scm.getType() + '-' + metadata.projectName + '-' + data.sha // TODO: RC should come from schema
       };
+    },
+    paginationConfig: {
+      getEntitiesFromResponse: response => response, // Required to override default cf one // TODO: RC test gitlab
+      getTotalPages: response => 1, // TODO: RC
+      getTotalEntities: response => response.length, // TODO: RC
+      getPaginationParameters: (page: number) => ({}), // TODO: RC used by flattener?
+      canIgnoreMaxedState: (store: Store<AppState>) => of(true),// TODO: RC used by flattener
+      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),// TODO: RC used by flattener
     },
   };
   cfEntityCatalog.gitCommit = new StratosCatalogEntity<IBasicCFMetaData, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(

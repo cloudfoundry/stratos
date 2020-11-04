@@ -49,7 +49,7 @@ import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: 'guid' });
@@ -67,7 +67,8 @@ entityCache[gitBranchesEntityType] = GithubBranchSchema;
 const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.guid });
+// TODO: RC the id is wrong, not the same as addCommit in deploy-app.effects. See #4245
+const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.sha });
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);

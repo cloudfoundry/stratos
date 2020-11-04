@@ -87,7 +87,7 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
-  getCommitApiUrl(projectName: string, commitSha: string, ): string {
+  getCommitApiUrl(projectName: string, commitSha: string,): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
@@ -107,6 +107,10 @@ export class GitLabSCM implements GitSCM {
         return commits;
       })
     );
+  }
+  getCommitsApiUrl(projectName: string, ref: string): string {
+    const prjNameEncoded = encodeURIComponent(projectName);
+    return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${ref}&${GITLAB_PER_PAGE_PARAM}=${GITLAB_PER_PAGE_PARAM_VALUE.toString()}`;
   }
 
   getCloneURL(projectName: string): string {
@@ -143,7 +147,7 @@ export class GitLabSCM implements GitSCM {
       httpClient.get<[]>(`${gitLabAPIUrl}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
     ]).pipe(
       map(([a, b]: [any[], any[]]) => a.concat(b)),
-    )
+    );
   }
 
   private convertProject(prj: any): GitRepo {

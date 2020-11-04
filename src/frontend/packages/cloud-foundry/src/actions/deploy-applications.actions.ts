@@ -2,11 +2,11 @@ import { Action } from '@ngrx/store';
 
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { gitBranchesEntityType, gitCommitEntityType } from '../cf-entity-types';
+import { gitBranchesEntityType } from '../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { GitSCM } from '../shared/data-services/scm/scm';
 import { DockerAppDetails, GitAppDetails, OverrideAppDetails, SourceType } from '../store/types/deploy-application.types';
-import { GitBranch, GitCommit } from '../store/types/git.types';
+import { GitBranch } from '../store/types/git.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Project exists';
@@ -61,7 +61,7 @@ export class ProjectExists implements Action {
 
 export class FetchBranchForProject implements EntityRequestAction {
   constructor(public scm: GitSCM, public projectName: string, public guid: string, public branchName: string) {
-    this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`
+    this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`;
   }
   actions = [
     FETCH_BRANCH_START,
@@ -101,38 +101,38 @@ export class SaveAppOverrides implements Action {
   type = SAVE_APP_OVERRIDE_DETAILS;
 }
 
-export class FetchCommit implements EntityRequestAction {
-  commit: GitCommit;
-  public endpointType = CF_ENDPOINT_TYPE;
-  constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
-  type = FETCH_COMMIT;
-  entityType = gitCommitEntityType;
-}
+// export class FetchCommit implements EntityRequestAction {
+//   commit: GitCommit;
+//   public endpointType = CF_ENDPOINT_TYPE;
+//   constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
+//   type = FETCH_COMMIT;
+//   entityType = gitCommitEntityType;
+// }
 
-export class FetchCommits implements PaginatedAction {
+// export class FetchCommits implements PaginatedAction {
 
-  /**
-   * Creates an instance of FetchCommits.
-   * @param projectName For example `cloudfoundry-incubator/stratos`
-   * @param sha Branch name, tag, etc
-   */
-  constructor(public scm: GitSCM, public projectName: string, public sha: string) {
-    this.paginationKey = scm.getType() + projectName + sha;
-  }
-  actions = [
-    '[Deploy App] Fetch commits start',
-    '[Deploy App] Fetch commits success',
-    '[Deploy App] Fetch commits failed',
-  ];
-  public endpointType = CF_ENDPOINT_TYPE;
-  type = FETCH_COMMITS;
-  entityType = gitCommitEntityType;
-  paginationKey: string;
-  initialParams = {
-    'order-direction': 'asc',
-    'order-direction-field': 'date',
-  };
-}
+//   /**
+//    * Creates an instance of FetchCommits.
+//    * @param projectName For example `cloudfoundry-incubator/stratos`
+//    * @param sha Branch name, tag, etc
+//    */
+//   constructor(public scm: GitSCM, public projectName: string, public sha: string) {
+//     this.paginationKey = scm.getType() + projectName + sha;
+//   }
+//   actions = [
+//     '[Deploy App] Fetch commits start',
+//     '[Deploy App] Fetch commits success',
+//     '[Deploy App] Fetch commits failed',
+//   ];
+//   public endpointType = CF_ENDPOINT_TYPE;
+//   type = FETCH_COMMITS;
+//   entityType = gitCommitEntityType;
+//   paginationKey: string;
+//   initialParams = { // TODO: RC how apply these??? <------------------------------
+//     'order-direction': 'asc',
+//     'order-direction-field': 'date',
+//   };
+// }
 
 export class StoreCFSettings implements Action {
   constructor(public cloudFoundryDetails: any) { }
