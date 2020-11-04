@@ -56,4 +56,10 @@ $list-item-content-min-height: 140px;
       padding: 10px 0;
     }
   }
+
+  &-svg {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
 }
