@@ -3,10 +3,13 @@
   <div class="page-header-right">
     <div *ngIf="layouts$ | async as layouts">
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <button (click)="onChangeLayout(layout)" mat-menu-item *ngFor="let layout of layouts" class="layout-menu">
-          <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">{{ layout.title }}</div>
-          <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done</mat-icon>
-        </button>
+        <div  *ngFor="let layout of layouts">
+          <button *ngIf="layout" (click)="onChangeLayout(layout)" mat-menu-item class="layout-menu">
+            <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">{{ layout.title }}</div>
+            <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done</mat-icon>
+          </button>
+          <div *ngIf="!layout" class="layout-menu__sep"></div>
+        </div>
       </mat-menu>
       <button mat-button [matMenuTriggerFor]="appMenu">
         <mat-icon>view_week</mat-icon>

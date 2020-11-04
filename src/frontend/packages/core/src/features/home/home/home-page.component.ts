@@ -63,6 +63,7 @@ export class HomePageComponent {
 
     this.layouts = [
       new HomePageCardLayout(0, 0, 'Automatic'),
+      null,
       new HomePageCardLayout(1, 1, 'Single Column'),
       new HomePageCardLayout(1, 2, 'Compact Single Column'),
       new HomePageCardLayout(2, 1, 'Two Column'),
