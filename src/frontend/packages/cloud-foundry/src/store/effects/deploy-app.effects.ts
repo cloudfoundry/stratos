@@ -3,30 +3,16 @@ import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
-import { catchError, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { NormalizedResponse } from '../../../../store/src/types/api.types';
-import { PaginatedAction } from '../../../../store/src/types/pagination.types';
-import {
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess,
-} from '../../../../store/src/types/request.types';
 import {
   CHECK_PROJECT_EXISTS,
   CheckProjectExists,
-  FETCH_BRANCH_FOR_PROJECT,
-  FETCH_BRANCHES_FOR_PROJECT,
-  FetchBranchesForProject,
-  FetchBranchForProject,
   ProjectDoesntExist,
   ProjectExists,
   ProjectFetchFail,
 } from '../../actions/deploy-applications.actions';
 import { CFAppState } from '../../cf-app-state';
-import { gitBranchesEntityType } from '../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 
 function parseHttpPipeError(res: any): { message?: string; } {
@@ -75,78 +61,78 @@ export class DeployAppEffects {
     })
   );
 
-  @Effect()
-  fetchBranches$ = this.actions$.pipe(
-    ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT),
-    mergeMap(action => {
-      const actionType = 'fetch';
-      const apiAction = {
-        entityType: gitBranchesEntityType,
-        endpointType: CF_ENDPOINT_TYPE,
-        type: action.type,
-        paginationKey: action.paginationKey
-      } as PaginatedAction;
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return action.scm.getBranches(this.httpClient, action.projectName).pipe(
-        mergeMap(branches => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
-          const mappedData: NormalizedResponse = {
-            entities: { [entityKey]: {} },
-            result: []
-          };
+  // @Effect()
+  // fetchBranches$ = this.actions$.pipe(
+  //   ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT),
+  //   mergeMap(action => {
+  //     const actionType = 'fetch';
+  //     const apiAction = {
+  //       entityType: gitBranchesEntityType,
+  //       endpointType: CF_ENDPOINT_TYPE,
+  //       type: action.type,
+  //       paginationKey: action.paginationKey
+  //     } as PaginatedAction;
+  //     this.store.dispatch(new StartRequestAction(apiAction, actionType));
+  //     return action.scm.getBranches(this.httpClient, action.projectName).pipe(
+  //       mergeMap(branches => {
+  //         const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+  //         const mappedData: NormalizedResponse = {
+  //           entities: { [entityKey]: {} },
+  //           result: []
+  //         };
 
-          const scmType = action.scm.getType();
-          branches.forEach(b => {
-            const id = `${scmType}-${action.projectName}-${b.name}`;
-            b.projectId = action.projectName;
-            b.entityId = id;
-            // mappedData.entities[entityKey][id] = {
-            //   entity: b,
-            //   metadata: {}
-            // };
-            mappedData.entities[entityKey][id] = b;
-            mappedData.result.push(id);
-          });
-          return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-          ];
-        }),
-        catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-        ]));
-    }));
+  //         const scmType = action.scm.getType();
+  //         branches.forEach(b => {
+  //           const id = `${scmType}-${action.projectName}-${b.name}`;
+  //           b.projectId = action.projectName; // TODO: RC !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //           b.entityId = id;
+  //           // mappedData.entities[entityKey][id] = {
+  //           //   entity: b,
+  //           //   metadata: {}
+  //           // };
+  //           mappedData.entities[entityKey][id] = b;
+  //           mappedData.result.push(id);
+  //         });
+  //         return [
+  //           new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+  //         ];
+  //       }),
+  //       catchError(err => [
+  //         new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+  //       ]));
+  //   }));
 
-  @Effect()
-  fetchBranch$ = this.actions$.pipe(
-    ofType<FetchBranchForProject>(FETCH_BRANCH_FOR_PROJECT),
-    mergeMap(action => {
-      const actionType = 'fetch';
-      const apiAction = {
-        entityType: gitBranchesEntityType,
-        endpointType: CF_ENDPOINT_TYPE,
-        type: action.type,
-        guid: action.guid
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return action.scm.getBranch(this.httpClient, action.projectName, action.branchName).pipe(
-        mergeMap(branch => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
-          const mappedData: NormalizedResponse = {
-            entities: { [entityKey]: {} },
-            result: []
-          };
-          branch.projectId = action.projectName;
-          branch.entityId = action.guid;
-          mappedData.entities[entityKey][action.guid] = branch;
-          mappedData.result.push(action.guid);
-          return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
-          ];
-        }),
-        catchError(err => [
-          new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
-        ]));
-    }));
+  // @Effect()
+  // fetchBranch$ = this.actions$.pipe(
+  //   ofType<FetchBranchForProject>(FETCH_BRANCH_FOR_PROJECT),
+  //   mergeMap(action => {
+  //     const actionType = 'fetch';
+  //     const apiAction = {
+  //       entityType: gitBranchesEntityType,
+  //       endpointType: CF_ENDPOINT_TYPE,
+  //       type: action.type,
+  //       guid: action.guid
+  //     };
+  //     this.store.dispatch(new StartRequestAction(apiAction, actionType));
+  //     return action.scm.getBranch(this.httpClient, action.projectName, action.branchName).pipe(
+  //       mergeMap(branch => {
+  //         const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+  //         const mappedData: NormalizedResponse = {
+  //           entities: { [entityKey]: {} },
+  //           result: []
+  //         };
+  //         branch.projectId = action.projectName;
+  //         branch.entityId = action.guid;
+  //         mappedData.entities[entityKey][action.guid] = branch;
+  //         mappedData.result.push(action.guid);
+  //         return [
+  //           new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+  //         ];
+  //       }),
+  //       catchError(err => [
+  //         new WrapperRequestActionFailed(createFailedGithubRequestMessage(err), apiAction, actionType)
+  //       ]));
+  //   }));
 
   // @Effect()
   // fetchCommit$ = this.actions$.pipe(

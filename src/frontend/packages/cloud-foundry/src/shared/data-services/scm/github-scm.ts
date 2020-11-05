@@ -43,6 +43,10 @@ export class GitHubSCM implements GitSCM {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches/${branchName}`) as Observable<GitBranch>;
   }
 
+  getBranchApiUrl(projectName: string, branchName: string): string {
+    return `${this.gitHubURL}/repos/${projectName}/branches/${branchName}`;
+  }
+
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const url = `${this.gitHubURL}/repos/${projectName}/branches`;
     const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
@@ -54,22 +58,27 @@ export class GitHubSCM implements GitSCM {
     );
   }
 
-  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
-    return httpClient.get<GitCommit>(this.getCommitApiUrl(projectName, commitSha)) as Observable<GitCommit>;
+  getBranchesApiUrl(projectName: string): string {
+    // TODO: RC flatten config
+    return '';
   }
+
+  // getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
+  //   return httpClient.get<GitCommit>(this.getCommitApiUrl(projectName, commitSha)) as Observable<GitCommit>;
+  // }
 
   getCommitApiUrl(projectName: string, commitSha: string) {
     return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
 
-  getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return httpClient.get<GitCommit[]>(
-      `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`, {
-      params: {
-        [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
-      }
-    });
-  }
+  // getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
+  //   return httpClient.get<GitCommit[]>(
+  //     `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`, {
+  //     params: {
+  //       [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
+  //     }
+  //   });
+  // }
 
   getCommitsApiUrl(projectName: string, ref: string): string {
     return `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}&${GITHUB_PER_PAGE_PARAM}=${GITHUB_PER_PAGE_PARAM_VALUE.toString()}`;

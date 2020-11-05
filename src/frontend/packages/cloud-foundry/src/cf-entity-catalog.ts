@@ -41,6 +41,7 @@ import { DomainActionBuilders } from './entity-action-builders/domin.action-buil
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import {
   GitBranchActionBuilders,
+  GitBranchActionBuildersConfig,
   GitCommitActionBuilders,
   GitCommitActionBuildersConfig,
   GitRepoActionBuilders,
@@ -188,6 +189,7 @@ export class CfEntityCatalog {
   public gitBranch: StratosBaseCatalogEntity<
     IBasicCFMetaData,
     GitBranch,
+    GitBranchActionBuildersConfig,
     GitBranchActionBuilders
   >;
 

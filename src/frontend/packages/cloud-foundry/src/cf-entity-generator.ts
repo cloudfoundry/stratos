@@ -115,6 +115,7 @@ import { FeatureFlagActionBuilders, featureFlagActionBuilders } from './entity-a
 import {
   GitBranchActionBuilders,
   gitBranchActionBuilders,
+  GitBranchActionBuildersConfig,
   GitCommitActionBuilders,
   gitCommitActionBuilders,
   GitCommitActionBuildersConfig,
@@ -979,9 +980,18 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: cfEntityFactory(gitBranchesEntityType),
     label: 'Git Branch',
     labelPlural: 'Git Branches',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      const metadata = (action.metadata as GitMeta[])[0];
+      const id = `${metadata.scm.getType()}-${action.projectName}-${b.name}`;
+      return {
+        ...metadata.scm.convertCommit(metadata.projectName, data),
+        guid: action.guid || metadata.scm.getType() + '-' + metadata.projectName + '-' + data.sha // TODO: RC should come from schema
+      };
+    },
   };
-  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuilders>(
+  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuildersConfig, GitBranchActionBuilders>(
     definition,
     {
       dataReducers: [

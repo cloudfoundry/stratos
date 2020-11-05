@@ -61,7 +61,7 @@ entityCache[appStatsEntityType] = AppStatSchema;
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
 
-const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'entityId' });
+const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'entityId' }); // TODO: RC huh??
 entityCache[gitBranchesEntityType] = GithubBranchSchema;
 
 const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);

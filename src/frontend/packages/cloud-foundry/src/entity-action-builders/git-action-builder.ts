@@ -6,7 +6,6 @@ import {
   OrchestratedActionBuilders,
   PaginationRequestActionConfig,
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { FetchBranchesForProject, FetchBranchForProject } from '../actions/deploy-applications.actions';
 import { FetchGitHubRepoInfo } from '../actions/github.actions';
 import { GitSCM } from '../shared/data-services/scm/scm';
 
@@ -36,6 +35,7 @@ export interface GitMeta {
 // TODO: RC 4 (Separate) 4245. git commit id process (schema wrong, effect has it... but should move to schema)
 // TODO: RC 5 (Separate) 4245. gitscm in action... this can be huge in store. need to pass through type and GitSCMService (but that should
 // dynamically create type)
+// TODO: RC 6 . why does generic single entity process work without fix?
 
 // can handle per entity type and endpoint type error handling
 
@@ -69,34 +69,55 @@ export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
   )
 };
 
-export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
-  /**
-   * guid & endpointGuid are optional
-   */
-  get: (
-    guid: string,
-    endpointId: string,
-    meta: GitMeta
-  ) => FetchBranchForProject;
-  /**
-   * endpointGuid & paginationKey are optional
-   */
-  getMultiple: (
-    endpointGuid: string,
-    paginationKey: string,
-    meta: GitMeta
-  ) => FetchBranchesForProject;
+export interface GitBranchActionBuildersConfig extends OrchestratedActionBuilderConfig {
+  getFromProject: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
+  getMultipleFromProject: PaginationRequestActionConfig<GetMultipleActionBuilder>;
 }
 
-export const gitBranchActionBuilders: GitBranchActionBuilders = {
-  get: (
-    guid: string,
-    endpointId: string,
-    meta: GitMeta
-  ) => new FetchBranchForProject(meta.scm, meta.projectName, guid, meta.branchName),
-  getMultiple: (
-    endpointGuid: string = null,
-    paginationKey: string = null,
-    meta?: GitMeta
-  ) => new FetchBranchesForProject(meta.scm, meta.projectName)
+export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
+  getFromProject: KnownEntityActionBuilder<GitMeta>;
+  getMultipleFromProject: GetMultipleActionBuilder<GitMeta>;
+  // /**
+  //  * guid & endpointGuid are optional
+  //  */
+  // get: (
+  //   guid: string,
+  //   endpointId: string,
+  //   meta: GitMeta
+  // ) => FetchBranchForProject;
+  // /**
+  //  * endpointGuid & paginationKey are optional
+  //  */
+  // getMultiple: (
+  //   endpointGuid: string,
+  //   paginationKey: string,
+  //   meta: GitMeta
+  // ) => FetchBranchesForProject;
+}
+
+export const gitBranchActionBuilders: GitBranchActionBuildersConfig = {
+  getFromProject: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
+    (id, endpointGuid, meta2) => meta2.scm.getBranchApiUrl(meta2.projectName, meta2.branchName),
+    {
+      externalRequest: true,
+    }
+  ),
+  getMultipleFromProject: new PaginationRequestActionConfig<GetMultipleActionBuilder<GitMeta>>(
+    (endpointGuid, paginationKey, meta) => paginationKey || meta.scm.getType() + ':' + meta.projectName,
+    (endpointGuid, paginationKey, meta) => meta.scm.getBranchesApiUrl(meta.projectName),
+    {
+      externalRequest: true,
+    }
+  )
+
+  // get: (
+  //   guid: string,
+  //   endpointId: string,
+  //   meta: GitMeta
+  // ) => new FetchBranchForProject(meta.scm, meta.projectName, guid, meta.branchName),
+  // getMultiple: (
+  //   endpointGuid: string = null,
+  //   paginationKey: string = null,
+  //   meta?: GitMeta
+  // ) => new FetchBranchesForProject(meta.scm, meta.projectName)
 };
