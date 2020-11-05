@@ -141,7 +141,8 @@
     }
   }
   &__fav-none {
-    margin-left: 12px;
+    opacity: 0.7;
+    text-align: center;
   }
   &__fav-title-panel {
     display: flex;

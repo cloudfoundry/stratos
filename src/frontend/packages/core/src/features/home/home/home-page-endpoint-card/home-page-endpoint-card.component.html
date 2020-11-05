@@ -11,10 +11,12 @@
       </h2>
       <div class="fav-meta-card__type">{{ definition.label }}</div>
     </div>
-  <mat-progress-spinner *ngIf="isLoading" class="fav-meta-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
-  <div class="fav-meta-card__header-star">
-    <app-entity-favorite-star [confirmRemoval]="true" class="fav-meta-card__star" [favorite]="favorite"></app-entity-favorite-star>
-  </div>
+    <div *ngIf="isLoading">
+      <mat-progress-spinner class="fav-meta-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    </div>
+    <div class="fav-meta-card__header-star">
+      <app-entity-favorite-star [confirmRemoval]="true" class="fav-meta-card__star" [favorite]="favorite"></app-entity-favorite-star>
+    </div>
   </mat-card-header>
   <mat-card-content class="fav-meta-card__content">
     <div class="home-card">
