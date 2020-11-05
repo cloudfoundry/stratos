@@ -4,7 +4,7 @@ import { CoreModule, SharedModule } from '@stratosui/core';
 
 import { MDAppModule } from './../../core/md.module';
 import { FavoritesMetaCardComponent } from './home/favorites-meta-card/favorites-meta-card.component';
-import { HomePageCardDirective } from './home/home-page-card.directive';
+import { FavoritesSidePanelComponent } from './home/favorites-side-panel/favorites-side-panel.component';
 import { HomePageEndpointCardComponent } from './home/home-page-endpoint-card/home-page-endpoint-card.component';
 import { HomePageComponent } from './home/home-page.component';
 import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.component';
@@ -19,10 +19,10 @@ import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.com
   ],
   declarations: [
     HomePageComponent,
-    HomePageCardDirective,
     HomePageEndpointCardComponent,
     FavoritesMetaCardComponent,
     HomeShortcutsComponent,
+    FavoritesSidePanelComponent,
   ],
   exports: [
     FavoritesMetaCardComponent,

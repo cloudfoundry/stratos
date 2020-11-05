@@ -23,7 +23,10 @@
       </div>
       <div class="home-card__right" *ngIf="!fullView">
         <div *ngIf="links$ | async as links">
-          <div class="home-card__fav-title">Favorites</div>
+          <div class="home-card__fav-title-panel">
+            <div class="home-card__fav-title">Favorites</div>
+            <div *ngIf="hiddenFavorites > 0" class="home-card__fav-more"><a (click)="showFavoritesPanel()">{{hiddenFavorites}} more ...</a></div>
+          </div>
           <div class="home-card__fav" *ngIf="links.favs.length > 0">
             <app-favorites-meta-card *ngFor="let entity of links.favs"
             class="home-card__fav-card" [favoriteEntity]="entity" [mode]="plain" [compact]="true"></app-favorites-meta-card>

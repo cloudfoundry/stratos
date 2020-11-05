@@ -2,7 +2,7 @@
   $foreground: map-get($theme, foreground);
 
   .fav-meta-card {
-    border: 1px solid mat-color($foreground, divider);
+    //border: 1px solid mat-color($foreground, divider);
     &__content {
       border-top: 1px solid mat-color($foreground, divider);
     }

@@ -11,6 +11,12 @@ import { Router } from '@angular/router';
 import { asapScheduler, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators';
 
+export enum SidePanelMode {
+  Modal = 0,
+  Normal = 1,
+  Narrow = 2,
+}
+
 /**
  * Service to allow the overlay side panel to be shown or hidden.
  *
@@ -23,8 +29,8 @@ export class SidePanelService {
   private openedSubject: BehaviorSubject<boolean>;
   public opened$: Observable<boolean>;
 
-  private previewModeSubject: BehaviorSubject<boolean>;
-  public previewMode$: Observable<boolean>;
+  private previewModeSubject: BehaviorSubject<SidePanelMode>;
+  public previewMode$: Observable<SidePanelMode>;
 
   private container: ViewContainerRef;
 
@@ -36,7 +42,7 @@ export class SidePanelService {
     this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
 
-    this.previewModeSubject = new BehaviorSubject(false);
+    this.previewModeSubject = new BehaviorSubject<SidePanelMode>(-1);
     this.previewMode$ = this.observeSubject(this.previewModeSubject);
 
     this.setupRouterListener();
@@ -63,7 +69,21 @@ export class SidePanelService {
     }
 
     this.render(component, props, componentFactoryResolver);
-    this.previewModeSubject.next(true);
+    this.previewModeSubject.next(SidePanelMode.Normal);
+    this.open();
+  }
+
+  /**
+   * Show the preview panel in a preview style - does not overlap title bar and colours are more muted
+   */
+  public showMode(
+    mode: SidePanelMode, component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {
+    if (!this.container) {
+      throw new Error('SidePanelService: container must be set');
+    }
+
+    this.render(component, props, componentFactoryResolver);
+    this.previewModeSubject.next(mode);
     this.open();
   }
 
@@ -76,7 +96,7 @@ export class SidePanelService {
     }
 
     this.render(component, props, componentFactoryResolver);
-    this.previewModeSubject.next(false);
+    this.previewModeSubject.next(SidePanelMode.Modal);
     this.open();
   }
 

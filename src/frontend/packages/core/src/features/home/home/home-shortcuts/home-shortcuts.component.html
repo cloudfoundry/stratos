@@ -1,4 +1,4 @@
-<div *ngIf="shortcuts">
+<div *ngIf="shortcuts && shortcuts.length > 0">
   <div class="home-shortcut__title">Shortcuts</div>
   <div class="home-shortcut__items">
     <div *ngFor="let shortcut of shortcuts" class="home-shortcut__item">

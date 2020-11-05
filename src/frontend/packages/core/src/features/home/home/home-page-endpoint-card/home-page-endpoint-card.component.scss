@@ -143,8 +143,18 @@
   &__fav-none {
     margin-left: 12px;
   }
-  &__fav-title {
+  &__fav-title-panel {
+    display: flex;
     margin-bottom: 10px;
+  }
+  &__fav-title {
+    flex: 1;
+  }
+  &__fav-more {
+    font-size: 12px;
+    A {
+      cursor: pointer;
+    }
   }
   &__fav-card {
     display: flex;

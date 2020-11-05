@@ -23,6 +23,8 @@ import {
 import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
+import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
+import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 
@@ -57,6 +59,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
 
   favorites$: Observable<any>;
+  hiddenFavorites = 0;
 
   shortcuts: HomeCardShortcut[];
 
@@ -87,6 +90,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   constructor(
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userFavoriteManager: UserFavoriteManager,
+    private sidePanelService: SidePanelService,
     private compiler: Compiler,
     private injector: Injector,
   ) {
@@ -134,6 +138,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       map(([favs, layout]) => {
         let shortcuts: HomeCardShortcut[] = this.shortcuts || [];
         const totalShortcuts = shortcuts.length;
+        this.hiddenFavorites = favs.length - MAX_FAVS;
         // Based on the layout, adjust the numbers returned
         if (layout.y > 1) {
           if (favs.length > MAX_FAVS) {
@@ -202,5 +207,12 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   private cardLoaded() {
     this.loaded.next();
     this.isLoading = false;
+  }
+
+  public showFavoritesPanel() {
+    this.sidePanelService.showMode(SidePanelMode.Narrow, FavoritesSidePanelComponent, {
+      endpoint: this.endpoint,
+      favorites$: this.favorites$
+    });
   }
 }
