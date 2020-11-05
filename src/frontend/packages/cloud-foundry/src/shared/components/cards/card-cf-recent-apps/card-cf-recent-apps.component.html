@@ -1,4 +1,4 @@
-<ng-container *ngIf="(appsPagObs.hasEntities$ | async) !== false; else placeholder">
+<ng-container *ngIf="(hasEntities$ | async) !== false; else placeholder">
   <mat-card class="recent-apps-card" [ngClass]="{'recent-apps-card__plain': mode === 'plain'}">
     <mat-card-header class="recent-apps-card__header">
       <mat-card-title class="recent-apps-card__title">Recently updated applications</mat-card-title>

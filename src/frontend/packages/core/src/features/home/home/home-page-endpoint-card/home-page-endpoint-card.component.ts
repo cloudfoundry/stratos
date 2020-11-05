@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -39,6 +39,8 @@ export class HomePageEndpointCardComponent implements OnInit {
     this.updateLayout();
   };
 
+  @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
+
   favorites$: Observable<any>;
 
   shortcuts: HomeCardShortcut[];
@@ -55,13 +57,19 @@ export class HomePageEndpointCardComponent implements OnInit {
 
   public link: string;
 
+  load$: Observable<boolean>;
+  loadSubj = new BehaviorSubject<boolean>(false);
+  isLoading = false;
+
   // Should the Home Card use the whole width, or do we show the links panel as well?
   fullView = false;
 
   constructor(
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userFavoriteManager: UserFavoriteManager,
-  ) { }
+  ) {
+    this.load$ = this.loadSubj.asObservable();
+  }
 
   ngOnInit(): void {
     // Favorites for this endpoint
@@ -117,6 +125,16 @@ export class HomePageEndpointCardComponent implements OnInit {
         };
       })
     );
+  }
+
+  public load() {
+    this.loadSubj.next(true);
+    this.isLoading = true;
+  }
+
+  public cardLoaded() {
+    this.loaded.next(this);
+    this.isLoading = false;
   }
 
   public updateLayout() {

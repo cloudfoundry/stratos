@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
 import { PaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
@@ -25,12 +25,16 @@ export class CardCfRecentAppsComponent implements OnInit {
   @Input() mode: string;
   @Input() showDate: boolean;
   @Input() dateMode: string;
+  @Input() noStats = false;
+  @Input() placeholderMode = false;
 
   public canRefresh = false;
 
   public placeholders: any[];
 
   appsPagObs: PaginationObservables<APIResource<IApp>>;
+
+  hasEntities$: Observable<boolean>;
 
   private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
 
@@ -44,11 +48,19 @@ export class CardCfRecentAppsComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (this.placeholderMode) {
+      this.canRefresh = false;
+      this.hasEntities$ = of(false);
+      return;
+    }
     this.canRefresh = this.refresh.observers.length > 0;
     this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.endpoint);
     if (!this.allApps$) {
       this.allApps$ = this.appsPagObs.entities$;
       this.loading$ = this.appsPagObs.fetchingEntities$;
+      this.hasEntities$ = this.appsPagObs.hasEntities$
+    } else {
+      this.hasEntities$ = of(true);
     }
 
     this.recentApps$ = combineLatest(
@@ -62,11 +74,13 @@ export class CardCfRecentAppsComponent implements OnInit {
   }
 
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
-    recentApps.forEach(app => {
-      if (app.entity.state === 'STARTED') {
-        cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);
-      }
-    });
+    if(!this.noStats) {
+      recentApps.forEach(app => {
+        if (app.entity.state === 'STARTED') {
+          cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);
+        }
+      });
+    }
   }
 
   private restrictApps(apps: APIResource<IApp>[], maxRows = RECENT_ITEMS_COUNT): APIResource<IApp>[] {

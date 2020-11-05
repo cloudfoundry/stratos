@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
@@ -11,13 +11,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss'],
-  providers: [
-    // {
-    //   provide: ActiveRouteCfOrgSpace,
-    //   useValue: null,
-    // },
-  ]
+  styleUrls: ['./kubernetes-home-card.component.scss']
 })
 export class KubernetesHomeCardComponent implements OnInit {
 
@@ -48,17 +42,6 @@ export class KubernetesHomeCardComponent implements OnInit {
     const guid = this.endpoint.guid;
     this.kubeEndpointService.initialize(this.endpoint.guid);
 
-    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
-    const pods$ = podsObs.entities$;
-    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
-    const nodes$ = nodesObs.entities$;
-    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
-    const namespaces$ = namespacesObs.entities$;
-
-    this.podCount$ = pods$.pipe(map(entities => entities.length));
-    this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
-    this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
-
     this.shortcuts = [
       {
         title: 'View Nodes',
@@ -73,6 +56,23 @@ export class KubernetesHomeCardComponent implements OnInit {
         iconFont: 'stratos-icons'
       }
     ];
+
+  }
+
+
+  // Card is instructed to load its view by the container, whn it is visible
+  load(): Observable<boolean> {
+    const guid = this.endpoint.guid;
+    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
+    const pods$ = podsObs.entities$;
+    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
+    const nodes$ = nodesObs.entities$;
+    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
+    const namespaces$ = namespacesObs.entities$;
+
+    this.podCount$ = pods$.pipe(map(entities => entities.length));
+    this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
+    this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
 
     this.kubeEndpointService.kubeTerminalEnabled$.pipe(first()).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
@@ -98,5 +98,9 @@ export class KubernetesHomeCardComponent implements OnInit {
         );
       }
     });
+
+    return combineLatest([this.podCount$, this.nodeCount$, this.namespaceCount$]).pipe(
+      map(() => true)
+    );
   }
 }

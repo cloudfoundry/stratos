@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/public-api';
 
@@ -27,6 +29,7 @@ export class HomePageCardLayout {
 export abstract class HomePageEndpointCard {
   public layout: HomePageCardLayout;
   public endpoint: EndpointModel;
+  public load: () => Observable<boolean>;
 }
 
 export interface LinkMetadata {

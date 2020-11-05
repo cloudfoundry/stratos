@@ -5,8 +5,9 @@
   height: 100%;
   outline: none;
   padding: 0;
-
+  
   &__header {
+    align-items: center;
     display: flex;
     margin: 8px 16px 16px 16px;
   }

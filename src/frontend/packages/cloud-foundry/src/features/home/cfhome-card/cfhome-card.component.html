@@ -3,12 +3,12 @@
     <app-tile>
       <app-card-number-metric mode="plain" [link]="appLink"
         icon="apps" label="Applications" labelSingular="Application"
-        value="{{ (cfEndpointService.appsPagObs.totalEntities$ | async) }}"></app-card-number-metric>
+        value="{{ (appCount$ | async) }}"></app-card-number-metric>
     </app-tile>
     <app-tile>
       <app-card-number-metric mode="plain" link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations"
         iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org"
-        value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+        value="{{ (orgCount$ | async) }}"></app-card-number-metric>
     </app-tile>
     <app-tile *ngIf="layout.x === 1">
       <app-card-number-metric mode="plain" link="/cloud-foundry/{{cfEndpointService.cfGuid}}/routes"
@@ -17,7 +17,8 @@
   </app-tile-group>
   <app-tile-group>
     <app-tile>
-      <app-card-cf-recent-apps *ngIf="recentAppsRows > 0" dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="endpoint.guid"></app-card-cf-recent-apps>
+      <app-card-cf-recent-apps *ngIf="cardLoaded && recentAppsRows > 0" [noStats]="true" dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid"></app-card-cf-recent-apps>
+      <app-card-cf-recent-apps *ngIf="!cardLoaded && recentAppsRows > 0" [placeholderMode]="true" [maxRows]="recentAppsRows" mode="plain"></app-card-cf-recent-apps>
     </app-tile>
   </app-tile-group>
 </app-tile-grid>
