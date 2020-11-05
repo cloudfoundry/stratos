@@ -19,7 +19,7 @@
   <mat-card-content class="fav-meta-card__content">
     <div class="home-card">
       <div class="home-card__left">
-        <ng-template (loaded)="cardLoaded()" [layout]="layout" [load]="load$ | async" [appHomeCard]="endpoint"></ng-template>
+        <ng-template #customCard></ng-template>
       </div>
       <div class="home-card__right" *ngIf="!fullView">
         <div *ngIf="links$ | async as links">

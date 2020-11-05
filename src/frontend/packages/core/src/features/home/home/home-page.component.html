@@ -21,7 +21,7 @@
 <div class="home-page" *ngIf="haveRegistered$ | async ; else noEndpoints">
   <div class="home-page__list" [ngClass]="{'home-page__list-2': columns === 2, 'home-page__list-3': columns === 3}" #endpointsPanel>
     <div *ngFor="let ep of endpoints$ | async" class="home-page__card" #endpointCard>
-      <app-home-page-endpoint-card (loaded)="cardLoaded($event)" [layout]="layout$ | async" [endpoint]="ep"></app-home-page-endpoint-card>
+      <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep"></app-home-page-endpoint-card>
     </div>
   </div>
 </div>

@@ -6,12 +6,12 @@
         value="{{ (appCount$ | async) }}"></app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations"
+      <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/organizations"
         iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org"
         value="{{ (orgCount$ | async) }}"></app-card-number-metric>
     </app-tile>
     <app-tile *ngIf="layout.x === 1">
-      <app-card-number-metric mode="plain" link="/cloud-foundry/{{cfEndpointService.cfGuid}}/routes"
+      <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/routes"
       iconFont="stratos-icons" icon="route" label="Routes" value="{{ (routeCount$ | async) }}"></app-card-number-metric>
     </app-tile>
   </app-tile-group>

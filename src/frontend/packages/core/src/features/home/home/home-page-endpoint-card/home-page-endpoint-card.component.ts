@@ -1,6 +1,19 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {
+  AfterViewInit,
+  Compiler,
+  Component,
+  ComponentRef,
+  EventEmitter,
+  Injector,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
@@ -11,7 +24,7 @@ import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-conf
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
-import { HomePageCardLayout, LinkMetadata } from './../../home.types';
+import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 
 const MAX_FAVS = 5;
 const MAX_SHORTCUTS = 5;
@@ -22,7 +35,9 @@ const MAX_LINKS = 5;
   templateUrl: './home-page-endpoint-card.component.html',
   styleUrls: ['./home-page-endpoint-card.component.scss']
 })
-export class HomePageEndpointCardComponent implements OnInit {
+export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChild('customCard', {read:ViewContainerRef}) customCard: ViewContainerRef;
 
   @Input() endpoint: EndpointModel;
 
@@ -61,14 +76,31 @@ export class HomePageEndpointCardComponent implements OnInit {
   loadSubj = new BehaviorSubject<boolean>(false);
   isLoading = false;
 
+  private ref: ComponentRef<HomePageEndpointCard>;
+  private sub: Subscription;
+
+  private canLoad = false;
+
   // Should the Home Card use the whole width, or do we show the links panel as well?
   fullView = false;
 
   constructor(
     private favoritesConfigMapper: FavoritesConfigMapper,
     private userFavoriteManager: UserFavoriteManager,
+    private compiler: Compiler,
+    private injector: Injector,
   ) {
     this.load$ = this.loadSubj.asObservable();
+  }
+
+  ngAfterViewInit(): void {
+    // Dynamically load the component for the Home Card for this endopoint
+    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
+    if (endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
+      this.createCard(endpointEntity);
+    } else {
+      console.warn(`No endpoint home card for ${this.endpoint.guid}`);
+    }
   }
 
   ngOnInit(): void {
@@ -127,17 +159,48 @@ export class HomePageEndpointCardComponent implements OnInit {
     );
   }
 
-  public load() {
-    this.loadSubj.next(true);
-    this.isLoading = true;
+  ngOnDestroy() {
+    if (this.ref) {
+      this.ref.destroy();
+    }
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
   }
 
-  public cardLoaded() {
-    this.loaded.next(this);
-    this.isLoading = false;
+  public load() {
+    this.canLoad = true;
+    this.isLoading = true;
+    this.loadCard();
   }
 
   public updateLayout() {
     this.layout$.next(this.layout);
+
+    if (this.ref && this.ref.instance) {
+      (this.ref.instance as any).layout = this._layout;
+    }
+  }
+
+  async createCard(endpointEntity: any) {
+    this.customCard.clear();
+    const component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+    this.ref = this.customCard.createComponent(component);
+    (this.ref.instance as any).endpoint = this.endpoint;
+    (this.ref.instance as any).layout = this._layout;
+    this.loadCard();
+  }
+
+  // Ask the card to load itself
+  loadCard() {
+    if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
+      const loadObs = this.ref.instance.load() || of(true);
+      this.sub = loadObs.pipe(filter(v => v === true), first()).subscribe(() => this.cardLoaded());
+    }
+  }
+
+  private cardLoaded() {
+    this.loaded.next();
+    this.isLoading = false;
   }
 }

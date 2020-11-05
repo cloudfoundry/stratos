@@ -134,6 +134,20 @@ export class CloudFoundryEndpointService {
     return fetchTotalResults(action, store, pmf);
   }
 
+  public static fetchOrgs(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string):
+    Observable<APIResource<IOrganization>[]> {
+    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
+    return getPaginationObservables<APIResource<IOrganization>>({
+      store,
+      action: getAllOrgsAction,
+      paginationMonitor: pmf.create(
+        getAllOrgsAction.paginationKey,
+        cfEntityFactory(organizationEntityType),
+        getAllOrgsAction.flattenPagination
+      )
+    }, getAllOrgsAction.flattenPagination).entities$;
+  }
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<CFAppState>,
@@ -159,16 +173,7 @@ export class CloudFoundryEndpointService {
   private constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
-      store: this.store,
-      action: getAllOrgsAction,
-      paginationMonitor: this.pmf.create(
-        getAllOrgsAction.paginationKey,
-        cfEntityFactory(organizationEntityType),
-        getAllOrgsAction.flattenPagination
-      )
-    }, getAllOrgsAction.flattenPagination).entities$;
+    this.orgs$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.cfGuid);
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 

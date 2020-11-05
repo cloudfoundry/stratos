@@ -1,8 +1,20 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { SetHomeCardLayoutAction } from '../../../../../store/src/actions/dashboard-actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
@@ -53,42 +65,16 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   notLoadedCardIndices: number[] = [];
 
   private sub: Subscription;
+  private cardChangesSub: Subscription;
+  private checkLayout = new BehaviorSubject<boolean>(true);
 
   constructor(
     public endpointsService: EndpointsService,
     private store: Store<AppState>,
     public userFavoriteManager: UserFavoriteManager,
     private scrollDispatcher: ScrollDispatcher,
+    @Inject(DOCUMENT) private document
   ) {
-    this.layouts$ = of(this.layouts);
-    this.layout$ = this.layout.asObservable();
-    this.allEndpointIds$ = this.endpointsService.endpoints$.pipe(
-      map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
-    );
-    this.haveRegistered$ = this.endpointsService.haveRegistered$;
-
-    // Only show endpoints that have Home Card metadata
-    this.endpoints$ = combineLatest([this.endpointsService.endpoints$, userFavoriteManager.getAllFavorites()]).pipe(
-     map(([endpoints, [favGroups, favs]]) => {
-       const ordered = this.orderEndpoints(endpoints, favGroups);
-       return ordered.filter(ep => {
-        const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
-        return !!defn.definition.homeCard;
-      })
-    })
-    );
-
-    // Set an initial layout
-    this.layout.next(new HomePageCardLayout(1, 1));
-
-    this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.homeLayout || 0),
-      first()
-    ).subscribe(id => {
-      const selected = this.layouts.find(hpcl => hpcl && hpcl.id === id) || this.layouts[0];
-      this.onChangeLayout(selected);
-    })
-
     // Redirect to /applications if not enabled
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {
@@ -104,66 +90,109 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       first()
     ).subscribe();
 
+    this.layouts$ = of(this.layouts);
+    this.layout$ = this.layout.asObservable();
+    this.allEndpointIds$ = this.endpointsService.endpoints$.pipe(
+      map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+    );
+    this.haveRegistered$ = this.endpointsService.haveRegistered$;
+
+    // Only show endpoints that have Home Card metadata
+    this.endpoints$ = combineLatest([this.endpointsService.endpoints$, userFavoriteManager.getAllFavorites()]).pipe(
+      map(([endpoints, [favGroups, favs]]) => {
+        const ordered = this.orderEndpoints(endpoints, favGroups);
+        return ordered.filter(ep => {
+          const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+          return !!defn.definition.homeCard;
+        });
+      })
+    );
+
+    // Set an initial layout
+    this.layout.next(this.getLayout(1, 1));
+
+    this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.homeLayout || 0),
+      first()
+    ).subscribe(id => {
+      const selected = this.layouts.find(hpcl => hpcl && hpcl.id === id) || this.layouts[0];
+      this.onChangeLayout(selected);
+    })
   }
 
   ngOnInit() {
-    // Listen for scroll events - used to load cards as they come into view
-    this.sub = this.scrollDispatcher.scrolled().subscribe((x:any) => {
-      const el = x.elementRef.nativeElement;
-      this.handleScroll(el.scrollTop);
-    });
+    const check$ = this.checkLayout.asObservable().pipe(filter(v => v));
+    const scroll$ = this.scrollDispatcher.scrolled().pipe(map((e: any) => {
+      const el = e.elementRef.nativeElement;
+      return el.scrollTop;
+    }), startWith(0));
+
+    // Load cards as they come into view
+    this.sub = combineLatest([scroll$, check$]).pipe(debounceTime(200)).subscribe(([scrollTop, check]) => {
+      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible and shoule be loaded
+      // Only load the first one - after that one has loaded, we'll call this method again and check for the next one
+      const remaining = [];
+      let processedCard = false;
+      for (const index of this.notLoadedCardIndices) {
+        const cardElement = this.endpointElements.toArray()[index] as ElementRef;
+        const top = cardElement.nativeElement.offsetTop;
+        const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
+        const bottom = scrollTop + height;
+        if (!processedCard && top >= scrollTop && top <= bottom) {
+          const card = this.endpointCards.toArray()[index];
+          card.load();
+          processedCard = true;
+        } else {
+          remaining.push(index);
+        }
+      };
+      this.notLoadedCardIndices = remaining;
+    })
   }
 
   ngOnDestroy() {
     if (this.sub) {
       this.sub.unsubscribe();
     }
+    if (this.cardChangesSub) {
+      this.cardChangesSub.unsubscribe();
+    }
   }
 
   ngAfterViewInit(): void {
-    this.endpointElements.changes.subscribe(cards => {
-      this.notLoadedCardIndices = [];
-      for(let i=0;i< cards.length; i++) {
-        this.notLoadedCardIndices.push(i);
-      }
-      // Schedule a check for cards that are visible and should be loaded
-      setTimeout(() => this.handleScroll(), 100);
-    });
+    this.cardChangesSub = this.endpointElements.changes.subscribe(cards => this.setCardsToLoad(cards));
+    if (this.endpointElements.toArray().length > 0) {
+      this.setCardsToLoad(this.endpointElements.toArray());
+    }
+  }
+
+  setCardsToLoad(cards: any[]) {
+    this.notLoadedCardIndices = [];
+    for(let i=0;i< cards.length; i++) {
+      this.notLoadedCardIndices.push(i);
+    }
+    setTimeout(() => this.checkCardsInView(), 1);
   }
 
   // This is called after a card has loaded - we call the scroll handler again
   // to check if there are more cards that are visible and thus can be loaded
   cardLoaded() {
-    console.log('Card loaded');
-    this.handleScroll();
+    this.checkCardsInView();
   }
 
-  // User has scrolled - check the remaining cards that have not been loaded
-  // to see if any are now visible and shoule be loaded
-  // Only load the first one - after that one has loaded, we'll call this method again
-  // and check for the next one
-  handleScroll(scrollTop: number = 0) {
-    const remaining = [];
-    let processedCard = false;
-    for (const index of this.notLoadedCardIndices) {
-      const cardElement = this.endpointElements.toArray()[index] as ElementRef;
-      const top = cardElement.nativeElement.offsetTop;
-      const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
-      const bottom = scrollTop + height;
-      if (!processedCard && top >= scrollTop && top <= bottom) {
-        const card = this.endpointCards.toArray()[index];
-        card.load();
-        processedCard = true;
-      } else {
-        remaining.push(index);
-      }
-    };
-    this.notLoadedCardIndices = remaining;
+  @HostListener('window:resize')
+  onResize() {
+    // If we resize the window and make it larger then new cards may come into view
+    this.checkCardsInView();
   }
 
+  // Check the cards in view
+  checkCardsInView() {
+    this.checkLayout.next(true);
+  }
+
+  // The layout was changed
   public onChangeLayout(layout: HomePageCardLayout) {
-    console.log('onChangeLayout');
-    console.log(layout);
     this.layoutID = layout.id;
 
     // If the layout is automatic, then adjust based on number of things to show
@@ -178,8 +207,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       this.store.dispatch(new SetHomeCardLayoutAction(this.layoutID));
 
       // Ensure we check again if any cards are now visible
-      console.log('Handle scroll');
-      this.handleScroll();
+      // Schedule the check so it happens afer the cards have been laid out
+      setTimeout(() => this.checkCardsInView(), 1);
     });
   }
 

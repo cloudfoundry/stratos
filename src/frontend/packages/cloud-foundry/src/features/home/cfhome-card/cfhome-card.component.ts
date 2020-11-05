@@ -45,9 +45,6 @@ export class CFHomeCardComponent {
 
   @Input() set endpoint(value: EndpointModel) {
     this.guid = value.guid;
-    const config = new ActiveRouteCfOrgSpace();
-    config.cfGuid = this.guid;
-    this.cfEndpointService.init(config);
   }
 
   guid: string;
@@ -66,7 +63,6 @@ export class CFHomeCardComponent {
   private appStatsToLoad: APIResource<IApp>[] = [];
 
   constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
     private store: Store<CFAppState>,
     private pmf: PaginationMonitorFactory,
   ) {}
@@ -74,16 +70,18 @@ export class CFHomeCardComponent {
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
     this.cardLoaded = true;
-    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid)
-
-    this.appCount$ = this.cfEndpointService.appsPagObs.totalEntities$;
-    this.orgCount$ = this.cfEndpointService.orgs$.pipe(map(orgs => orgs.length));
+    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
+    this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
+    this.orgCount$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.guid).pipe(map(orgs => orgs.length));
 
     this.appLink = () => goToAppWall(this.store, this.guid);;
 
+    const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
+
     // When the apps are loaded, fetch the app stats
-    this.cfEndpointService.appsPagObs.entities$.pipe(first()).subscribe(apps => {
+    appsPagObs.entities$.pipe(first()).subscribe(apps => {
       this.appStatsToLoad = this.restrictApps(apps);
+      this.fetchAppStats();
       this.fetchAppStats();
     });
 
@@ -93,7 +91,7 @@ export class CFHomeCardComponent {
       this.routeCount$,
       this.appCount$,
       this.orgCount$,
-      this.cfEndpointService.appsPagObs.entities$,
+      appsPagObs.entities$,
       appStatLoaded$
     ]).pipe(
       map(() => true)
@@ -109,7 +107,7 @@ export class CFHomeCardComponent {
     }
   }
 
-  // Fetch the app stats - we fetch one at a time
+  // Fetch the app stats - we fetch two at a time
   private fetchAppStats() {
     if (this.appStatsToLoad.length > 0) {
       const app = this.appStatsToLoad.shift();
@@ -121,8 +119,10 @@ export class CFHomeCardComponent {
           first()
         ).subscribe(a => {
           this.fetchAppStats();
+          this.fetchAppStats();
         });
       } else {
+        this.fetchAppStats();
         this.fetchAppStats();
       }
     } else {
