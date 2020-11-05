@@ -26,11 +26,18 @@
         }
       }
 
-      .mat-select-value-text,
-      .mat-input-element.ng-dirty,
-      .mat-chip {
-        color: mat-color($accent);
+      @include accent(mat-color($accent));
+      .sort {
+        @include accent(unset)
       }
     }
+  }
+}
+
+@mixin accent($colour) {
+  .mat-select-value-text,
+  .mat-input-element.ng-dirty,
+  .mat-chip {
+    color: $colour;
   }
 }
