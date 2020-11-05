@@ -21,12 +21,6 @@ function createErrorMessage(definition: IStratosEntityDefinition, errors: Jetstr
   return errorMessageHandler(errors);
 }
 
-// function getEntitySuccessMapper(entityKey: string): SuccessfulApiResponseDataMapper<any, any> {
-//   const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
-//   // TODO: RC success mapper should run before normalizedEntities created in getNormalizedEntityData
-//   const entitySuccessMapper = getSuccessMapper(innerCatalogEntity);
-// }
-
 function mapEntities<T = any>(
   entities: T[],
   action: EntityRequestAction,
@@ -55,7 +49,6 @@ function getEntities(
   return Object.keys(endpointResponse.normalizedEntities.entities).reduce(
     (newEntities, entityKey) => {
       const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
-      // TODO: RC success mapper should run before normalizedEntities created in getNormalizedEntityData
       const entitySuccessMapper = getSuccessMapper(innerCatalogEntity);
       const entities = entitySuccessMapper ? Object.keys(endpointResponse.normalizedEntities.entities[entityKey]).reduce(
         (newEntitiesOfType, guid) => {
@@ -80,39 +73,6 @@ function getEntities(
       };
     }, {});
 }
-// function getEntities2(
-//   entities: any[],
-//   action: EntityRequestAction
-// ): { [entityKey: string]: any[]; } {
-//   return Object.keys(endpointResponse.normalizedEntities.entities).reduce((newEntities, entityKey) => {
-//     const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
-//     // TODO: RC success mapper should run before normalizedEntities created in getNormalizedEntityData
-//     const entitySuccessMapper = getSuccessMapper(innerCatalogEntity);
-
-//     return entitySuccessMapper ? entities.map(entity => {
-//       const mappedEntity = entitySuccessMapper(
-//         entity,
-//         action.endpointGuid,
-//         action.guid,
-//         entityKey,
-//         action.endpointType,
-//         action
-//       );
-//       const newGuid = mappedEntity ? innerCatalogEntity.getGuidFromEntity(mappedEntity) || action.guid : action.guid;
-//       return {
-//         ...newEntitiesOfType,
-//         [newGuid]: entity
-//       };
-//     }) :
-//       entities;
-
-//     return {
-//       ...newEntities,
-//       [entityKey]: entities2
-//     };
-//   }, {});
-// }
-
 
 function getSchema(
   action: EntityRequestAction,
@@ -168,6 +128,10 @@ export function mapMultiEndpointResponses(
 
     const responses = multiEndpointResponses.successes
       .map((responseData: MultiEndpointResponse<any>) => {
+        // TODO: RC Document - Chicken and egg problem.
+        // - Normal flow - normalize a list of entities... and then in getEntities for all entity types and their entities, run through entity success mapper
+        // - Alternative flow - to ensure the normalize process can key entities correctly run through success mapper BEFORE noramalizing
+
         if (canNormalizeBeforeMap(action, catalogEntity)) {
           const endpointResponse = {
             normalizedEntities: getNormalizedEntityData(responseData.entities, action, catalogEntity),

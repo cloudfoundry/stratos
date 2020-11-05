@@ -9,6 +9,10 @@ export interface SCMIcon {
   fontName: string;
 }
 
+export const getCommitGuid = (scmType: string, projectName: string, sha: string): string => scmType + '--' + projectName + '--' + sha;
+export const getRepositoryGuid = (scmType: string, projectName: string): string => scmType + '--' + projectName;
+export const getBranchGuid = (scmType: string, projectName: string, branchName: string): string => scmType + '--' + projectName + '--' + branchName;
+
 // Interface that a Git SCM provider must implement
 export interface GitSCM {
   getType(): GitSCMType;

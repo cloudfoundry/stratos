@@ -18,9 +18,10 @@ export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: KnownEntityActionBuilder<GitMeta>;
 }
 
+
 export const gitRepoActionBuilders: GitRepoActionBuildersConfig = {
   getRepoInfo: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
-    (guid, endpointGuid, meta: GitMeta) => meta.scm.getRepositoryApiUrl(meta.projectName), // TODO: RC bork this to see broken error message on app github page
+    (guid, endpointGuid, meta: GitMeta) => meta.scm.getRepositoryApiUrl(meta.projectName), // TODO: RC FIX bork this to see broken error message on app github page
     {
       externalRequest: true,
     }
@@ -37,18 +38,10 @@ export interface GitMeta {
   branchName?: string;
 }
 
-// TODO: RC 1. ~~PaginationRequestActionConfig takes pagination key~~
-// TODO: RC 2. ~~why these interface,GitCommitActionBuilders and GitCommitActionBuildersConfig needed?
-// one for normal requests... used by typing... other used by builder config approach~~
-// TODO: RC 3. ~~access store by type... only works for OrchestratedActionBuilders and not OrchestratedActionBuilderConfig~~
-// TODO: RC 4 (Separate) 4245. git commit id process (schema wrong, effect has it... but should move to schema)
-// TODO: RC 5 (Separate) 4245. gitscm in action... this can be huge in store. need to pass through type and GitSCMService (but that should
-// dynamically create type)
-// TODO: RC 6 . why does generic single entity process work without fix?
-
-// can handle per entity type and endpoint type error handling
-
-// gitCommitActionBuilders, of type builders config, gets converted into type GitCommitActionBuilders by ActionBuilderConfigMapper
+// TODO: RC Document - Action builder typing needs improving.
+// - OrchestratedActionBuilderConfig interface is used in entity when it's created to dynamically create an instance of OrchestratedActionBuilders
+// - OrchestratedActionBuilders interface defines what the end-dev-user can use when accessing actions/store/etc
+// - Implementation is usually just of the OrchestratedActionBuilders
 
 // These are used when we want to create teh action builders... and will result in GitCommitActionBuilders
 export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {

@@ -22,7 +22,7 @@ export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJet
   return Object.keys(response).reduce((mapped, endpointKey) => {
     const page = response[endpointKey];
     return page ? {
-      ...mapped, // TODO: RC ouch
+      ...mapped,
       [endpointKey]: [page]
     } : mapped;
   }, {});

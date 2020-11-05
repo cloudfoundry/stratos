@@ -62,26 +62,13 @@ export class GitHubSCM implements GitSCM {
   // }
 
   getBranchesApiUrl(projectName: string): string {
-    // TODO: RC flatten config
+    // TODO: RC Fix This is broken, flatten pagination is not here, flatten config in entity needs access to header
     return `${this.gitHubURL}/repos/${projectName}/branches`;
   }
-
-  // getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
-  //   return httpClient.get<GitCommit>(this.getCommitApiUrl(projectName, commitSha)) as Observable<GitCommit>;
-  // }
 
   getCommitApiUrl(projectName: string, commitSha: string) {
     return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
-
-  // getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-  //   return httpClient.get<GitCommit[]>(
-  //     `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`, {
-  //     params: {
-  //       [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
-  //     }
-  //   });
-  // }
 
   getCommitsApiUrl(projectName: string, ref: string): string {
     return `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}&${GITHUB_PER_PAGE_PARAM}=${GITHUB_PER_PAGE_PARAM_VALUE.toString()}`;
@@ -100,7 +87,7 @@ export class GitHubSCM implements GitSCM {
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
-    // TODO: RC how to integrate with generics?
+    // TODO: RC Fix how to integrate with generics?
     const prjParts = projectName.split('/');
     let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name+fork:true`;
     if (prjParts.length > 1) {

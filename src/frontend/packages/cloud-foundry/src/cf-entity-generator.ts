@@ -14,12 +14,16 @@ import {
 import {
   EndpointHealthCheck,
   IStratosEntityDefinition,
+  NonJetstreamRequestHandler,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
 import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  PaginationPageIteratorConfig,
+} from '../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
@@ -167,11 +171,7 @@ import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-
 import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import {
-  GITHUB_PAGE_PARAM,
-  GITHUB_PER_PAGE_PARAM,
-  GITHUB_PER_PAGE_PARAM_VALUE,
-} from './shared/data-services/scm/github-pagination.helper';
+import { getBranchGuid, getCommitGuid, getRepositoryGuid } from './shared/data-services/scm/scm';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
@@ -912,6 +912,22 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
   return cfEntityCatalog.domain;
 }
 
+// TODO: RC Document - List use initialParams from action to set starting sort order and field. With generic actions we don't have these
+// TODO: RC Document - paginationConfig getEntitiesFromResponse is needed (to override parent) however others are not but required by typing
+
+// TODO: RC Document - PaginationPageIteratorConfig - will be different for github & gitlab
+// TODO: RC Document - PaginationPageIteratorConfig - github requires info from HEADER, all we have here is RESPONSE
+
+// TODO: RC Test - Gitlab
+const basicGitPaginationConfig: PaginationPageIteratorConfig<any, any> = {
+  getEntitiesFromResponse: response => response, // Required to override default cf one
+  getTotalPages: response => 1,
+  getTotalEntities: response => response.length,
+  getPaginationParameters: (page: number) => ({}),
+  canIgnoreMaxedState: (store: Store<AppState>) => of(true),
+  maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),
+};
+
 function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: gitCommitEntityType,
@@ -919,23 +935,18 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     label: 'Git Commit',
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition,
-    nonJetstreamRequest: true, // TODO: RC this is pointless on it's own! Needs nonJetstreamRequestHandler! See isJetstreamRequest
-    // nonJetstreamRequestHandler // TODO: RC Must implement.. or all requests succeed! See handleNonJetstreamResponsePipeFactory
+    nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
       return {
         ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid || metadata.scm.getType() + '-' + metadata.projectName + '-' + data.sha // TODO: RC should come from schema
+        // For single entity requests we already ahve the guid... for multi entity requests we need to create it
+        // This should come from the schema... however we need to bring the entity type
+        guid: action.guid || getCommitGuid(metadata.scm.getType(), metadata.projectName, data.sha)
       };
     },
-    paginationConfig: {
-      getEntitiesFromResponse: response => response, // Required to override default cf one // TODO: RC test gitlab
-      getTotalPages: response => 1, // TODO: RC
-      getTotalEntities: response => response.length, // TODO: RC
-      getPaginationParameters: (page: number) => ({}), // TODO: RC used by flattener?
-      canIgnoreMaxedState: (store: Store<AppState>) => of(true),// TODO: RC used by flattener
-      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),// TODO: RC used by flattener
-    },
+    paginationConfig: basicGitPaginationConfig,
   };
   cfEntityCatalog.gitCommit = new StratosCatalogEntity<IBasicCFMetaData, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
@@ -956,6 +967,21 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
   return cfEntityCatalog.gitCommit;
 }
 
+// TODO: RC Document - entity definitions need nonJetstreamRequest AND nonJetstreamRequestHandler
+// TODO: RC Document - nonJetstreamRequestHandler isSuccess ... not sure what the point of this is if it only looks at body of response
+// TODO: RC Document - nonJetstreamRequestHandler getErrorCode ... not sure what the point of this is if it only looks at body of response
+// TODO: RC Document - guids in generic action single/paginated requests need to come from somewhere.
+// - Previously the custom actions created unique guids for these
+// - need a way for generic action to calculate this (normally would look at schema, but for git we need the scm)
+// - see #4245
+
+
+// TODO: RC errorMessageHandler createFailedGithubRequestMessage
+const nonchalantGitRequestHandler: NonJetstreamRequestHandler<any> = {
+  isSuccess: (request) => !!request,
+  getErrorCode: (request) => '400'
+};
+
 function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: gitRepoEntityType,
@@ -964,19 +990,16 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
     labelPlural: 'Git Repositories',
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
-    nonJetstreamRequestHandler: { // TODO: RD
-      isSuccess: (request) => true,
-      getErrorCode: (request) => '400'
-    }, // TODO: RC Must implement.. or all requests succeed! See handleNonJetstreamResponsePipeFactory
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
-      const id = `${metadata.scm.getType()}-${metadata.projectName}`;// TODO: RC should come from schema
       const res = {
         ...data,
-        guid: id,
+        guid: action.guid || getRepositoryGuid(metadata.scm.getType(), metadata.projectName),
       };
       return res;
     },
+    paginationConfig: basicGitPaginationConfig,
   };
   cfEntityCatalog.gitRepo = new StratosCatalogEntity<
     IBasicCFMetaData,
@@ -996,7 +1019,6 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
 }
 
 function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  // TODO: RC wrap failures in createFailedGithubRequestMessage
   const definition: IStratosEntityDefinition = {
     type: gitBranchesEntityType,
     schema: cfEntityFactory(gitBranchesEntityType),
@@ -1004,42 +1026,19 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Branches',
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
-    nonJetstreamRequestHandler: { // TODO: RD
-      isSuccess: (request) => true,
-      getErrorCode: (request) => '400'
-    },
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
-      const id = `${metadata.scm.getType()}-${metadata.projectName}-${data.name}`;// TODO: RC should come from schema
       const res = {
         ...data,
-        guid: id,
+        guid: action.guid || getBranchGuid(metadata.scm.getType(), metadata.projectName, data.name),
         projectId: metadata.projectName,
-        // entityId: id, // TODO: RC why isn't this just guid?
       };
-      // TODO: RC handle gitlab... but not like this
-      // TODO: RC test this works with both branch and branches calls
+      // This is a gitlab --> common github commit format fix
       res.commit.sha = res.commit.sha || res.commit.id;
       return res;
     },
-    paginationConfig: {
-      // TODO: RC difference between github and gitlab.
-      // TODO: RC github requires info from HEADER, all we have here is RESPONSE
-      getEntitiesFromResponse: response => response, // Required to override default cf one // TODO: RC test gitlab
-      getTotalPages: response => {
-        return 1;
-      }, // TODO: RC
-      getTotalEntities: response => {
-        return response.length;
-      }, // TODO: RC
-      getPaginationParameters: (page: number) => ({
-        [GITHUB_PAGE_PARAM]: page.toString(),
-        [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
-      }), // TODO: RC used by flattener?
-
-      canIgnoreMaxedState: (store: Store<AppState>) => of(true),// TODO: RC used by flattener
-      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),// TODO: RC used by flattener
-    },
+    paginationConfig: basicGitPaginationConfig,
   };
   cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuildersConfig, GitBranchActionBuilders>(
     definition,

@@ -51,7 +51,8 @@ export class DeployAppEffects {
       return state.projectExists && state.projectExists.checking;
     }),
     switchMap(([action, state]: [CheckProjectExists, any]) => {
-      // TODO: RC... we need to check the response for a 404 status... however that level of debug has been lost(?)
+      // TODO: RC Fix We need to check the response for a 404 status... however that level of debug has been lost in the request pipeline
+      // we only have the response object
       // return cfEntityCatalog.gitRepo.api.getRepoInfo<RequestInfoState>(action.projectName, null, {
       //   scm: action.scm,
       //   projectName: action.projectName

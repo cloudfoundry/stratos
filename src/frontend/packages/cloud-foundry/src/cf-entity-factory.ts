@@ -61,13 +61,12 @@ entityCache[appStatsEntityType] = AppStatSchema;
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
 
-const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'guid' }); // TODO: RC huh??
+const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitBranchesEntityType] = GithubBranchSchema;
 
 const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-// TODO: RC the id is wrong, not the same as addCommit in deploy-app.effects. See #4245
 const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 

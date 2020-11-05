@@ -13,6 +13,7 @@ import { GitMeta } from '../../../../../../entity-action-builders/git-action-bui
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
+import { getBranchGuid, getCommitGuid, getRepositoryGuid } from '../../../../../../shared/data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
 import { GitBranch, GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
@@ -81,19 +82,24 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         const gitRepInfoMeta: GitMeta = { projectName: stProject.deploySource.project, scm };
-        const repoEntityID = `${scm.getType()}-${projectName}`; // TODO: RC needs to come from central place
+        const repoEntityID = getRepositoryGuid(scm.getType(), projectName);
         this.gitSCMRepoEntityService = cfEntityCatalog.gitRepo.store.getRepoInfo.getEntityService(repoEntityID, null, gitRepInfoMeta);
 
         const gitMeta: GitMeta = { projectName: stProject.deploySource.project, scm, commitSha };
-        const commitEntityID = `${scm.getType()}-${repoEntityID}-${commitSha}`; // FIXME: Should come from action #4245
-        this.gitCommitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, gitMeta);
-        const branchID = `${scm.getType()}-${projectName}-${stProject.deploySource.branch}`; // TODO: RC like above, should come from central source
-        this.gitBranchEntityService = cfEntityCatalog.gitBranch.store.getFromProject.getEntityService(branchID, undefined, {
-          scm,
-          projectName,
-          branchName: stProject.deploySource.branch
-        });
-
+        this.gitCommitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(
+          getCommitGuid(scm.getType(), repoEntityID, commitSha),
+          null,
+          gitMeta
+        );
+        this.gitBranchEntityService = cfEntityCatalog.gitBranch.store.getFromProject.getEntityService(
+          getBranchGuid(scm.getType(), projectName, stProject.deploySource.branch),
+          undefined,
+          {
+            scm,
+            projectName,
+            branchName: stProject.deploySource.branch
+          }
+        );
 
         this.gitSCMRepo$ = this.gitSCMRepoEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity)
