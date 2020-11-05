@@ -1,9 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitCommit, GitRepo } from '../../../store/types/git.types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
@@ -28,11 +28,13 @@ export class GitLabSCM implements GitSCM {
     };
   }
 
+
+  // TODO: RC this should be removed once deploy-app effects switches over to new approach
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
     const obs$ = parts.length !== 2 ?
-      observableOf(null) :
+      of(null) :
       httpClient.get(`${gitLabAPIUrl}/projects/${parts.join('%2F')}`);
 
     return obs$.pipe(
@@ -47,67 +49,90 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
-  getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
-    const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches/${branchName}`).pipe(
-      map((data: any) => {
-        const nb = { ...data };
-        nb.commit.sha = nb.commit.id;
-        return nb;
-      })
-    );
-  }
-
-  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(
-      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`, {
-      params: {
-        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
-      }
+  getRepositoryApiUrl(projectName: string): string {
+    const parts = projectName.split('/');
+    if (parts.length !== 2) {
+      // TODO: RC test
+      throw new HttpErrorResponse({
+        status: 404,
+        statusText: 'Cannot get repository, not enough parts in project name'
+      });
     }
-    ).pipe(
-      map((data: any) => {
-        const branches = [];
-        data.forEach(b => {
-          const nb = { ...b };
-          nb.commit.sha = b.commit.id;
-          branches.push(nb);
-        });
-        return branches;
-      })
-    );
+    return `${gitLabAPIUrl}/projects/${parts.join('%2F')}`;
   }
 
-  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
-    return httpClient.get(this.getCommitApiUrl(projectName, commitSha)).pipe(
-      map(data => {
-        return this.convertCommit(projectName, data);
-      })
-    );
+  // getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
+  //   const prjNameEncoded = encodeURIComponent(projectName);
+  //   return httpClient.get(`${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches/${branchName}`).pipe(
+  //     map((data: any) => {
+  //       const nb = { ...data };
+  //       nb.commit.sha = nb.commit.id;
+  //       return nb;
+  //     })
+  //   );
+  // }
+
+  getBranchApiUrl(projectName: string, branchName: string): string {
+    const prjNameEncoded = encodeURIComponent(projectName);
+    return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches/${branchName}`;
   }
+
+  // getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
+  //   const prjNameEncoded = encodeURIComponent(projectName);
+  //   return httpClient.get(
+  //     `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`, {
+  //     params: {
+  //       [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+  //     }
+  //   }
+  //   ).pipe(
+  //     map((data: any) => {
+  //       const branches = [];
+  //       data.forEach(b => {
+  //         const nb = { ...b };
+  //         nb.commit.sha = b.commit.id;
+  //         branches.push(nb);
+  //       });
+  //       return branches;
+  //     })
+  //   );
+  // }
+
+  getBranchesApiUrl(projectName: string): string {
+    const prjNameEncoded = encodeURIComponent(projectName);
+    return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/branches`;
+  }
+
+  // getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
+  //   return httpClient.get(this.getCommitApiUrl(projectName, commitSha)).pipe(
+  //     map(data => {
+  //       return this.convertCommit(projectName, data);
+  //     })
+  //   );
+  // }
 
   getCommitApiUrl(projectName: string, commitSha: string,): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
 
-  getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
-    const prjNameEncoded = encodeURIComponent(projectName);
-    return httpClient.get(
-      `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`, {
-      params: {
-        [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
-      }
-    }
-    ).pipe(
-      map((data: any) => {
-        const commits = [];
-        data.forEach(c => commits.push(this.convertCommit(projectName, c)));
-        return commits;
-      })
-    );
-  }
+  // getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
+  //   const prjNameEncoded = encodeURIComponent(projectName);
+  //   return httpClient.get(
+  //     `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`, {
+  //     params: {
+  //       [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+  //     }
+  //   }
+  //   ).pipe(
+  //     map((data: any) => {
+  //       const commits = [];
+  //       data.forEach(c => commits.push(this.convertCommit(projectName, c)));
+  //       return commits;
+  //     })
+  //   );
+  // }
+
   getCommitsApiUrl(projectName: string, ref: string): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${ref}&${GITLAB_PER_PAGE_PARAM}=${GITLAB_PER_PAGE_PARAM_VALUE.toString()}`;

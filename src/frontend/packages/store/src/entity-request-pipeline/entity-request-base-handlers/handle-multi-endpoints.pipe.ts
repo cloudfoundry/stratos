@@ -63,23 +63,28 @@ function mapJetstreamResponses(
   }, baseResponse);
 }
 
-function getAllEntitiesFromResponses(response: any, getEntitiesFromResponse?: (response: any) => any) {
+function getAllInnerEntitiesFromResponse(response: any, getEntitiesFromResponse?: (response: any) => any) {
+  const entities = getEntitiesFromResponse(response);
+  if (Array.isArray(entities)) {
+    return [
+      ...entities
+    ];
+  }
+  return [
+    entities
+  ];
+}
+
+function getAllEntitiesFromResponses(response: any, getEntitiesFromResponse?: (response: any) => any, isNonJetstream = false) {
   if (!Array.isArray(response)) {
     return response;
   }
   if (getEntitiesFromResponse) {
+    if (isNonJetstream) {
+      return getAllInnerEntitiesFromResponse(response, getEntitiesFromResponse);
+    }
     return response.reduce((merged, res) => {
-      const entities = getEntitiesFromResponse(res);
-      if (Array.isArray(entities)) {
-        return [
-          ...merged,
-          ...entities
-        ];
-      }
-      return [
-        ...merged,
-        entities
-      ];
+      return getAllInnerEntitiesFromResponse(res, getEntitiesFromResponse);
     }, []);
   }
   return response;
@@ -88,9 +93,10 @@ function getAllEntitiesFromResponses(response: any, getEntitiesFromResponse?: (r
 function postProcessSuccessResponses(
   response: any,
   endpointGuid: string,
-  flattenerConfig: PaginationPageIteratorConfig<any, any>
+  flattenerConfig: PaginationPageIteratorConfig<any, any>,
+  isNonJetstream = false
 ): MultiEndpointResponse<any> {
-  const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null);
+  const entities = getAllEntitiesFromResponses(response, flattenerConfig ? flattenerConfig.getEntitiesFromResponse : null, isNonJetstream);
   const jetStreamResponse = {
     [endpointGuid]: response
   };
@@ -146,7 +152,7 @@ export const handleNonJetstreamResponsePipeFactory = (
   flattenerConfig?: PaginationPageIteratorConfig<any, any>
 ) => (resData: any): HandledMultiEndpointResponse => {
   const isSuccess = nonJetstreamRequestHandler ? nonJetstreamRequestHandler.isSuccess(resData) : true;
-  const mappedRes = postProcessSuccessResponses(resData, null, flattenerConfig);
+  const mappedRes = postProcessSuccessResponses(resData, null, flattenerConfig, true);
   if (isSuccess) {
     return {
       successes: [mappedRes],

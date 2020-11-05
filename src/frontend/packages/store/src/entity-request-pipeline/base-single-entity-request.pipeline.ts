@@ -61,7 +61,7 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
       catalogEntity,
       requestType,
       multiEndpointResponses,
-      actionDispatcher
+      actionDispatcher,
     ))
   );
 };

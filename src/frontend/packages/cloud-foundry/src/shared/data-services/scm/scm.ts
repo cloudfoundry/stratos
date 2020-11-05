@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitCommit, GitRepo } from '../../../store/types/git.types';
 import { GitSCMType } from './scm.service';
 
 export interface SCMIcon {
@@ -15,13 +15,14 @@ export interface GitSCM {
   getLabel(): string;
   getIcon(): SCMIcon;
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo>;
-  getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
+  getRepositoryApiUrl(projectName: string): string;
+  // getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranchApiUrl(projectName: string, branchId: string): string;
-  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
+  // getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
   getBranchesApiUrl(projectName: string): string;
-  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
+  // getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
   convertCommit(projectName: string, commit: any): GitCommit;
-  getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]>;
+  // getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]>;
   getCommitsApiUrl(projectName: string, ref: string): string;
   getCloneURL(projectName: string): string;
   getCommitURL(projectName: string, commitSha: string): string;

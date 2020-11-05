@@ -45,6 +45,7 @@ import {
   GitCommitActionBuilders,
   GitCommitActionBuildersConfig,
   GitRepoActionBuilders,
+  GitRepoActionBuildersConfig,
 } from './entity-action-builders/git-action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
@@ -183,6 +184,7 @@ export class CfEntityCatalog {
   public gitRepo: StratosBaseCatalogEntity<
     IBasicCFMetaData,
     GitRepo,
+    GitRepoActionBuildersConfig,
     GitRepoActionBuilders
   >;
 

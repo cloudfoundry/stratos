@@ -122,6 +122,7 @@ import {
   GitMeta,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
+  GitRepoActionBuildersConfig,
 } from './entity-action-builders/git-action-builder';
 import {
   OrganizationActionBuilders,
@@ -166,6 +167,11 @@ import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-
 import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import {
+  GITHUB_PAGE_PARAM,
+  GITHUB_PER_PAGE_PARAM,
+  GITHUB_PER_PAGE_PARAM_VALUE,
+} from './shared/data-services/scm/github-pagination.helper';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
@@ -624,7 +630,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
         return {
           ...data,
           cfGuid: endpointGuid,
-          guid: `${action.guid}-${guid}`
+          guid: `${action.guid}-${guid}` // TODO: RC test. see map-multi-endpoint.pipes.ts. prob need to grab from schema?? data.guid??
         };
       }
       return data;
@@ -913,8 +919,8 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     label: 'Git Commit',
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition,
-    nonJetstreamRequest: true,
-
+    nonJetstreamRequest: true, // TODO: RC this is pointless on it's own! Needs nonJetstreamRequestHandler! See isJetstreamRequest
+    // nonJetstreamRequestHandler // TODO: RC Must implement.. or all requests succeed! See handleNonJetstreamResponsePipeFactory
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
       return {
@@ -956,11 +962,26 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
     schema: cfEntityFactory(gitRepoEntityType),
     label: 'Git Repository',
     labelPlural: 'Git Repositories',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: { // TODO: RD
+      isSuccess: (request) => true,
+      getErrorCode: (request) => '400'
+    }, // TODO: RC Must implement.. or all requests succeed! See handleNonJetstreamResponsePipeFactory
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      const metadata = (action.metadata as GitMeta[])[0];
+      const id = `${metadata.scm.getType()}-${metadata.projectName}`;// TODO: RC should come from schema
+      const res = {
+        ...data,
+        guid: id,
+      };
+      return res;
+    },
   };
   cfEntityCatalog.gitRepo = new StratosCatalogEntity<
     IBasicCFMetaData,
     GitRepo,
+    GitRepoActionBuildersConfig,
     GitRepoActionBuilders
   >(
     definition,
@@ -975,6 +996,7 @@ function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefin
 }
 
 function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  // TODO: RC wrap failures in createFailedGithubRequestMessage
   const definition: IStratosEntityDefinition = {
     type: gitBranchesEntityType,
     schema: cfEntityFactory(gitBranchesEntityType),
@@ -982,13 +1004,41 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Branches',
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: { // TODO: RD
+      isSuccess: (request) => true,
+      getErrorCode: (request) => '400'
+    },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
-      const id = `${metadata.scm.getType()}-${action.projectName}-${b.name}`;
-      return {
-        ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid || metadata.scm.getType() + '-' + metadata.projectName + '-' + data.sha // TODO: RC should come from schema
+      const id = `${metadata.scm.getType()}-${metadata.projectName}-${data.name}`;// TODO: RC should come from schema
+      const res = {
+        ...data,
+        guid: id,
+        projectId: metadata.projectName,
+        // entityId: id, // TODO: RC why isn't this just guid?
       };
+      // TODO: RC handle gitlab... but not like this
+      // TODO: RC test this works with both branch and branches calls
+      res.commit.sha = res.commit.sha || res.commit.id;
+      return res;
+    },
+    paginationConfig: {
+      // TODO: RC difference between github and gitlab.
+      // TODO: RC github requires info from HEADER, all we have here is RESPONSE
+      getEntitiesFromResponse: response => response, // Required to override default cf one // TODO: RC test gitlab
+      getTotalPages: response => {
+        return 1;
+      }, // TODO: RC
+      getTotalEntities: response => {
+        return response.length;
+      }, // TODO: RC
+      getPaginationParameters: (page: number) => ({
+        [GITHUB_PAGE_PARAM]: page.toString(),
+        [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
+      }), // TODO: RC used by flattener?
+
+      canIgnoreMaxedState: (store: Store<AppState>) => of(true),// TODO: RC used by flattener
+      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),// TODO: RC used by flattener
     },
   };
   cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuildersConfig, GitBranchActionBuilders>(

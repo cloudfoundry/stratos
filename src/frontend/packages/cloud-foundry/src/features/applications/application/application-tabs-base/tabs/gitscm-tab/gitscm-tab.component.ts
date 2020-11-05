@@ -81,14 +81,14 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         const gitRepInfoMeta: GitMeta = { projectName: stProject.deploySource.project, scm };
-        this.gitSCMRepoEntityService = cfEntityCatalog.gitRepo.store.getRepoInfo.getEntityService(gitRepInfoMeta);
+        const repoEntityID = `${scm.getType()}-${projectName}`; // TODO: RC needs to come from central place
+        this.gitSCMRepoEntityService = cfEntityCatalog.gitRepo.store.getRepoInfo.getEntityService(repoEntityID, null, gitRepInfoMeta);
 
         const gitMeta: GitMeta = { projectName: stProject.deploySource.project, scm, commitSha };
-        const repoEntityID = `${scmType}-${projectName}`;
-        const commitEntityID = `${repoEntityID}-${commitSha}`; // FIXME: Should come from action #4245
+        const commitEntityID = `${scm.getType()}-${repoEntityID}-${commitSha}`; // FIXME: Should come from action #4245
         this.gitCommitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, gitMeta);
-
-        this.gitBranchEntityService = cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
+        const branchID = `${scm.getType()}-${projectName}-${stProject.deploySource.branch}`; // TODO: RC like above, should come from central source
+        this.gitBranchEntityService = cfEntityCatalog.gitBranch.store.getFromProject.getEntityService(branchID, undefined, {
           scm,
           projectName,
           branchName: stProject.deploySource.branch

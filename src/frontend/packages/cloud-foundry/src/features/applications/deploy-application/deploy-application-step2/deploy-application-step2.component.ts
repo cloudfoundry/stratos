@@ -157,7 +157,7 @@ export class DeployApplicationStep2Component
       }));
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
-  }
+  };
 
   ngOnInit() {
     this.sourceType$ = combineLatest(
@@ -219,7 +219,7 @@ export class DeployApplicationStep2Component
     }
 
     this.store.dispatch(new SetAppSourceDetails(sourceType));
-  }
+  };
 
   ngAfterContentInit() {
     this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
@@ -250,7 +250,7 @@ export class DeployApplicationStep2Component
         distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
         // Convert project name into branches pagination observable
         switchMap(state =>
-          cfEntityCatalog.gitBranch.store.getPaginationService(null, null, {
+          cfEntityCatalog.gitBranch.store.getMultipleFromProject.getPaginationService(null, null, {
             scm: this.scm,
             projectName: state.name
           }).entities$
@@ -288,7 +288,7 @@ export class DeployApplicationStep2Component
             const commitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, {
               projectName: projectInfo.full_name,
               scm: this.scm, commitSha
-            })
+            });
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();

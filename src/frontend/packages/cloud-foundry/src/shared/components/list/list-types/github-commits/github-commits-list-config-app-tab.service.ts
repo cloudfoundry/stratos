@@ -127,8 +127,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.deployedCommitSha = stratosProject.deploySource.commit;
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
-
-      cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
+      const branchID = `${this.scm.getType()}-${this.projectName}-${stratosProject.deploySource.branch}`; // TODO: RC should come from central source
+      cfEntityCatalog.gitBranch.store.getFromProject.getEntityService(branchID, undefined, {
         scm: this.scm,
         projectName: this.projectName,
         branchName: stratosProject.deploySource.branch

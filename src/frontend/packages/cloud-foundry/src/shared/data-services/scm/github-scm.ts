@@ -8,7 +8,6 @@ import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
-  GithubFlattenerForArrayPaginationConfig,
   GithubFlattenerPaginationConfig,
 } from './github-pagination.helper';
 import { GitSCM, SCMIcon } from './scm';
@@ -39,6 +38,10 @@ export class GitHubSCM implements GitSCM {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}`) as Observable<GitRepo>;
   }
 
+  getRepositoryApiUrl(projectName: string): string {
+    return `${this.gitHubURL}/repos/${projectName}`;
+  }
+
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches/${branchName}`) as Observable<GitBranch>;
   }
@@ -47,20 +50,20 @@ export class GitHubSCM implements GitSCM {
     return `${this.gitHubURL}/repos/${projectName}/branches/${branchName}`;
   }
 
-  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    const url = `${this.gitHubURL}/repos/${projectName}/branches`;
-    const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
-    const firstRequest = config.fetch(...config.buildFetchParams(1));
-    return flattenPagination(
-      null,
-      firstRequest,
-      config
-    );
-  }
+  // getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
+  //   const url = `${this.gitHubURL}/repos/${projectName}/branches`;
+  //   const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
+  //   const firstRequest = config.fetch(...config.buildFetchParams(1));
+  //   return flattenPagination(
+  //     null,
+  //     firstRequest,
+  //     config
+  //   );
+  // }
 
   getBranchesApiUrl(projectName: string): string {
     // TODO: RC flatten config
-    return '';
+    return `${this.gitHubURL}/repos/${projectName}/branches`;
   }
 
   // getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
@@ -97,6 +100,7 @@ export class GitHubSCM implements GitSCM {
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
+    // TODO: RC how to integrate with generics?
     const prjParts = projectName.split('/');
     let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name+fork:true`;
     if (prjParts.length > 1) {

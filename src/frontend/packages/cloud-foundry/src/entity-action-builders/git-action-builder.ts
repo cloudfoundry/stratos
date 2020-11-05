@@ -6,19 +6,28 @@ import {
   OrchestratedActionBuilders,
   PaginationRequestActionConfig,
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { FetchGitHubRepoInfo } from '../actions/github.actions';
 import { GitSCM } from '../shared/data-services/scm/scm';
 
-export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
-  getRepoInfo: (
-    meta: GitMeta
-  ) => FetchGitHubRepoInfo;
+// type BaseGitMetaActionFn = (meta: GitMeta) => EntityRequestAction;
+
+export interface GitRepoActionBuildersConfig extends OrchestratedActionBuilderConfig {
+  getRepoInfo: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
 }
 
-export const gitRepoActionBuilders: GitRepoActionBuilders = {
-  getRepoInfo: (
-    meta: GitMeta
-  ) => new FetchGitHubRepoInfo(meta)
+export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
+  getRepoInfo: KnownEntityActionBuilder<GitMeta>;
+}
+
+export const gitRepoActionBuilders: GitRepoActionBuildersConfig = {
+  getRepoInfo: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
+    (guid, endpointGuid, meta: GitMeta) => meta.scm.getRepositoryApiUrl(meta.projectName), // TODO: RC bork this to see broken error message on app github page
+    {
+      externalRequest: true,
+    }
+  ),
+  // getRepoInfo: (
+  //   meta: GitMeta
+  // ) => new FetchGitHubRepoInfo(meta)
 };
 
 export interface GitMeta {
@@ -55,6 +64,7 @@ export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
 
 export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
   get: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
+    // TODO: Confirm - if we're just fetching ... how is the guid/id made up??
     (id, endpointGuid, meta2) => meta2.scm.getCommitApiUrl(meta2.projectName, meta2.commitSha),
     {
       externalRequest: true,
@@ -77,22 +87,6 @@ export interface GitBranchActionBuildersConfig extends OrchestratedActionBuilder
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
   getFromProject: KnownEntityActionBuilder<GitMeta>;
   getMultipleFromProject: GetMultipleActionBuilder<GitMeta>;
-  // /**
-  //  * guid & endpointGuid are optional
-  //  */
-  // get: (
-  //   guid: string,
-  //   endpointId: string,
-  //   meta: GitMeta
-  // ) => FetchBranchForProject;
-  // /**
-  //  * endpointGuid & paginationKey are optional
-  //  */
-  // getMultiple: (
-  //   endpointGuid: string,
-  //   paginationKey: string,
-  //   meta: GitMeta
-  // ) => FetchBranchesForProject;
 }
 
 export const gitBranchActionBuilders: GitBranchActionBuildersConfig = {
