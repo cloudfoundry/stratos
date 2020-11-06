@@ -1,9 +1,9 @@
 <mat-card class="fav-meta-card">
-  <mat-card-header class="fav-meta-card__header">
+  <mat-card-header class="fav-meta-card__header"  *ngIf="endpoint && definiton">
     <div class="fav-meta-card__logo-panel" [routerLink]="link">
-      <img class="fav-meta-card__logo" *ngIf="definition && definition.logoUrl" [src]="definition.logoUrl" />
+      <img class="fav-meta-card__logo" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
     </div>
-    <div class="fav-meta-card__header-text-panel" [routerLink]="link" *ngIf="endpoint && definiton">
+    <div class="fav-meta-card__header-text-panel" [routerLink]="link">
       <h2 class="fav-meta-card__header-text">
         <div class="fav-meta-card__panel">
           <app-multiline-title>{{ endpoint.name }}</app-multiline-title>

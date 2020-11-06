@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
 import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
 import { CoreModule, SharedModule } from '../../../../public-api';
@@ -32,6 +33,10 @@ describe('HomePageEndpointCardComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HomePageEndpointCardComponent);
+    fixture.componentInstance.endpoint = {
+      cnsi_type: 'cf',
+      sub_type: ''
+    } as EndpointModel;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
