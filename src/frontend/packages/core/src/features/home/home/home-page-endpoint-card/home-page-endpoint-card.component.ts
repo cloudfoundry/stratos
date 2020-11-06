@@ -104,6 +104,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   }
 
   ngAfterViewInit() {
+    if (!this.endpoint) {
+      return;
+    }
     // Dynamically load the component for the Home Card for this endopoint
     const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
     if (endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
@@ -114,6 +117,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   }
 
   ngOnInit() {
+    if (!this.endpoint) {
+      return;
+    }
     // Favorites for this endpoint
     this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid).pipe(
       map(f => {
