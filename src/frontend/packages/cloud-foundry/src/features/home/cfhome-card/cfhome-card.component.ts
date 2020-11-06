@@ -66,7 +66,10 @@ export class CFHomeCardComponent {
   constructor(
     private store: Store<CFAppState>,
     private pmf: PaginationMonitorFactory,
-  ) {}
+  ) {
+    // Set a default layout
+    this._layout = new HomePageCardLayout(1, 1);
+  }
 
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
