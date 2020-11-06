@@ -135,10 +135,16 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       let processedCard = false;
       for (const index of this.notLoadedCardIndices) {
         const cardElement = this.endpointElements.toArray()[index] as ElementRef;
-        const top = cardElement.nativeElement.offsetTop;
+        const cardTop = cardElement.nativeElement.offsetTop;
+        const cardBottom = cardTop + cardElement.nativeElement.offsetHeight;
         const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
-        const bottom = scrollTop + height;
-        if (!processedCard && top >= scrollTop && top <= bottom) {
+        const scrollBottom = scrollTop + height;
+
+        console.log(index + ' ' + cardTop + ' ' + cardBottom + ' ' + scrollTop + ' ' + scrollBottom);
+        // Check if the card is in view - either its top or bottom must be withtin he visible scroll area
+        if (!processedCard &&
+          (cardTop >= scrollTop && cardTop <= scrollBottom) ||
+          (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
           const card = this.endpointCards.toArray()[index];
           card.load();
           processedCard = true;

@@ -21,7 +21,12 @@
   <mat-card-content class="fav-meta-card__content">
     <div class="home-card">
       <div class="home-card__left">
+        <div>
         <ng-template #customCard></ng-template>
+      </div>
+        <div *ngIf="!showShortcutsOnSide" class="home-card__shortcuts-left">
+          <app-home-shortcuts *ngIf="links$ | async as links" [shortcuts]="links.shortcuts"></app-home-shortcuts>
+        </div>
       </div>
       <div class="home-card__right" *ngIf="!fullView">
         <div *ngIf="links$ | async as links">
@@ -36,7 +41,7 @@
           <div class="home-card__fav" *ngIf="links.favs.length === 0">
             <div class="home-card__fav-none">No favorites</div>
           </div>
-          <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+          <app-home-shortcuts *ngIf="showShortcutsOnSide" [shortcuts]="links.shortcuts"></app-home-shortcuts>
         </div>
       </div>
     </div>

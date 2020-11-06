@@ -28,7 +28,9 @@ import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-s
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 
-const MAX_FAVS = 5;
+const MAX_FAVS_NORMAL = 15;
+const MAX_FAVS_COMPACT = 5;
+const CUTOFF_SHOW_SHORTCUTS_ON_LEFT = 10;
 const MAX_SHORTCUTS = 5;
 const MAX_LINKS = 5;
 
@@ -59,7 +61,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
 
   favorites$: Observable<any>;
-  hiddenFavorites = 0;
 
   shortcuts: HomeCardShortcut[];
 
@@ -84,6 +85,10 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   private canLoad = false;
 
+  // Should we show shortcuts on the side or udner the manin panel?
+  showShortcutsOnSide = true;
+  hiddenFavorites = 0;
+
   // Should the Home Card use the whole width, or do we show the links panel as well?
   fullView = false;
 
@@ -97,7 +102,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.load$ = this.loadSubj.asObservable();
   }
 
-  ngAfterViewInit(): void {
+  ngAfterViewInit() {
     // Dynamically load the component for the Home Card for this endopoint
     const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
     if (endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
@@ -107,7 +112,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     // Favorites for this endpoint
     this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid).pipe(
       map(f => {
@@ -137,12 +142,17 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
       map(([favs, layout]) => {
         let shortcuts: HomeCardShortcut[] = this.shortcuts || [];
+
+        const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
         const totalShortcuts = shortcuts.length;
-        this.hiddenFavorites = favs.length - MAX_FAVS;
+        this.hiddenFavorites = favs.length - max;
+
         // Based on the layout, adjust the numbers returned
         if (layout.y > 1) {
-          if (favs.length > MAX_FAVS) {
-            favs = favs.slice(0, MAX_FAVS);
+          // Compact card view
+          this.showShortcutsOnSide = true;
+          if (favs.length > max) {
+            favs = favs.slice(0, max);
           }
           if (totalShortcuts > MAX_SHORTCUTS) {
             shortcuts = this.shortcuts.slice(0, MAX_SHORTCUTS);
@@ -154,6 +164,12 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
               limit = 0;
             }
             shortcuts = this.shortcuts.slice(0, limit);
+          }
+        } else {
+          // Full card view - move the shortcuts into the main left panel if we have more
+          // than a certain number of favorites to also show
+          if (favs.length >= CUTOFF_SHOW_SHORTCUTS_ON_LEFT) {
+            this.showShortcutsOnSide = false;
           }
         }
         return {
@@ -173,12 +189,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     }
   }
 
-  public load() {
-    this.canLoad = true;
-    this.isLoading = true;
-    this.loadCard();
-  }
-
+  // Layout has changed
   public updateLayout() {
     this.layout$.next(this.layout);
 
@@ -196,17 +207,22 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.loadCard();
   }
 
+  // Load the card
+  public load() {
+    this.canLoad = true;
+    this.loadCard();
+  }
+
   // Ask the card to load itself
   loadCard() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
+      this.isLoading = true;
       const loadObs = this.ref.instance.load() || of(true);
-      this.sub = loadObs.pipe(filter(v => v === true), first()).subscribe(() => this.cardLoaded());
+      this.sub = loadObs.pipe(filter(v => v === true), first()).subscribe(() => {
+        this.loaded.next();
+        this.isLoading = false;
+      });
     }
-  }
-
-  private cardLoaded() {
-    this.loaded.next();
-    this.isLoading = false;
   }
 
   public showFavoritesPanel() {
