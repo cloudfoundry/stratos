@@ -23,7 +23,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   @Output() refresh = new EventEmitter<any>();
   @Input() endpoint: string;
   @Input() mode: string;
-  @Input() showDate: boolean;
+  @Input() showDate = true;
   @Input() dateMode: string;
   @Input() noStats = false;
   @Input() placeholderMode = false;
