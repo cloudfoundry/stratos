@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
@@ -8,7 +9,7 @@ import { ChartsService } from '../shared/services/charts.service';
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
   /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['chart', 'showVersion', 'showDescription']
+  inputs: ['chart', 'showVersion', 'showDescription', 'artifactHubAndHelmRepoTypes$']
 })
 export class ChartItemComponent implements OnInit {
   public iconUrl: string;
@@ -19,7 +20,10 @@ export class ChartItemComponent implements OnInit {
   // Truncate the description
   public showDescription = true;
 
-  constructor(private chartsService: ChartsService) { }
+  public artifactHubAndHelmRepoTypes$: Observable<boolean>;
+
+  constructor(private chartsService: ChartsService) {
+  }
 
   ngOnInit() {
     this.iconUrl = this.chartsService.getChartIconURL(this.chart);

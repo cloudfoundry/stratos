@@ -1021,16 +1021,14 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Disconnect endpoint
 	stableAPIGroup.DELETE("/tokens/:cnsi_guid", p.logoutOfCNSI)
 
+	// Connect to Endpoint (SSO)
+	stableAPIGroup.GET("/tokens", p.ssoLoginToCNSI)
+
 	// CNSI operations
 	stableAPIGroup.GET("/endpoints", p.listCNSIs)
 
 	// Proxy single request
 	stableAPIGroup.GET("/proxy/:uuid/*", p.ProxySingleRequest)
-
-	sessionAuthGroup := sessionGroup.Group("/auth")
-
-	// Connect to Endpoint (SSO)
-	sessionAuthGroup.GET("/tokens", p.ssoLoginToCNSI)
 
 	// Info
 	sessionGroup.GET("/info", p.info)
