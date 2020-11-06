@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CFHomeCardComponent } from './cfhome-card.component';
 
 describe('CFHomeCardComponent', () => {
@@ -8,7 +9,8 @@ describe('CFHomeCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CFHomeCardComponent ]
+      declarations: [ CFHomeCardComponent ],
+      imports: generateCfBaseTestModules()
     })
     .compileComponents();
   }));

@@ -1,5 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
+import { CoreTestingModule } from '../../../../../test-framework/core-test.modules';
+import { CoreModule, SharedModule } from '../../../../public-api';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card.component';
 
 describe('HomePageEndpointCardComponent', () => {
@@ -8,7 +12,14 @@ describe('HomePageEndpointCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HomePageEndpointCardComponent ]
+      declarations: [ HomePageEndpointCardComponent ],
+      imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
+        CoreTestingModule,
+        createBasicStoreModule()
+      ],
     })
     .compileComponents();
   }));
