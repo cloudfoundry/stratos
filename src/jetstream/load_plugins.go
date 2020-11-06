@@ -3,12 +3,16 @@ package main
 import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/yamlgenerated"
 )
 
 func (pp *portalProxy) loadPlugins() {
 
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
 	log.Info("Initialising plugins")
+
+	yamlgenerated.MakePluginsFromConfig()
 
 	for name := range interfaces.PluginInits {
 		addPlugin(pp, name)
