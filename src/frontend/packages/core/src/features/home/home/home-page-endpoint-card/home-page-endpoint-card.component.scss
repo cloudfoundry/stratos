@@ -138,6 +138,9 @@
       box-shadow: none;
     }
   }
+  &__right-2 {
+    min-width: 280px;
+  }
   &__fav {
     > * {
       margin-bottom: 10px;

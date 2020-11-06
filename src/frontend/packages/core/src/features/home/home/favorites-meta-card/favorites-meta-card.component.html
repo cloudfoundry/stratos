@@ -1,47 +1,10 @@
-<app-meta-card [favorite]="metaFavorite" [confirmFavoriteRemoval]="true" [ngClass]="{'fav-meta-card__clickable': !!(routerLink$ | async)}"
-  [actionMenu]="actions$ | async" [routerLink]="routerLink$ | async" class="fav-meta-card" *ngIf="config" [status$]="status$"
-  [entityConfig]="entityConfig" mode="plain">
-  <app-meta-card-title class="fav-meta-card__header">
-    <div class="fav-meta-card__header">
-      <div class="fav-meta-card__icon-panel">
-        <mat-icon class="fav-meta-card__icon" *ngIf="icon.icon && !icon.logoUrl" [fontSet]="icon.iconFont">{{ icon.icon }}</mat-icon>
-      </div>
-      <div class="fav-meta-card__header-text-panel">
-        <h3 class="fav-meta-card__header-text">
-          <app-multiline-title>{{ name$ | async }}</app-multiline-title>
-        </h3>
-      <div class="fav-meta-card__type">{{ prettyName }}</div>
-    </div>
+<mat-card [ngClass]="{'fav-meta-card__clickable': !!config.routerLink}" [routerLink]="config.routerLink" class="fav-meta-card" *ngIf="config">
+  <div class="fav-meta-card__icon-panel">
+    <mat-icon class="fav-meta-card__icon" *ngIf="icon.icon" [fontSet]="icon.iconFont">{{ icon.icon }}</mat-icon>
   </div>
-  </app-meta-card-title>
-</app-meta-card>
-<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && !endpoint">
-  <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite not found</div>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && !(endpointConnected$ | async)">Could
-    not
-    fetch {{ prettyName |
-    lowercase }}</small>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="!showMore && (endpointConnected$ | async)">Endpoint
-    disconnected</small>
-  <div class="error-details" *ngIf="showMore">
-    <div class="error-details__label subtle-text">Type</div>
-    <div class="error-details__value">{{ prettyName }}</div>
-    <div class="error-details__label subtle-text">ID</div>
-    <div class="error-details__value">{{ favorite.entityId }}</div>
-    <button mat-button color="warn" (click)="confirmFavoriteRemoval()">Unfavorite</button>
+  <div class="fav-meta-card__info">
+    <div class="fav-meta-card__name">{{ config.name }}</div>
+    <div class="fav-meta-card__type">{{ prettyName }}</div>
   </div>
-  <button *ngIf="!showMore" (click)="toggleMoreError()" mat-button color="primary">Show details</button>
-</mat-card>
-
-<mat-card class="fav-meta-card__missing fav-meta-card" *ngIf="!config && !placeholder && endpoint">
-  <div class="fav-meta-card__missing-text subtle-text" *ngIf="!showMore">Favorite endpoint is not registered</div>
-  <small class="fav-meta-card__missing-small-text subtle-text" *ngIf="endpointHasEntities">
-    To unfavorite this endpoint, please unfavorite all child entities first.
-  </small>
-  <div class="error-details">
-    <div class="error-details__label subtle-text">ID</div>
-    <div class="error-details__value">{{ favorite.endpointId }}</div>
-  </div>
-  <div *ngIf="(endpointConnected$ | async)">Disconnected</div>
-  <button mat-button color="warn" *ngIf="!endpointHasEntities" (click)="confirmFavoriteRemoval()">Unfavorite</button>
+  <app-entity-favorite-star class="fav-meta-card__star" [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
 </mat-card>

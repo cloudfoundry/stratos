@@ -1,54 +1,15 @@
+.mat-card.fav-meta-card {
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .fav-meta-card {
+  align-items: center;
+  display: flex;
   outline: none;
-  &__header-text {
-    line-height: 24px;
-    margin-top: 0;
-  }
-  &__content {
-    height: 100%;
-  }
-  &__type {
-    $type-height: 20px;
-    font-size: 13px;
-    line-height: $type-height;
-    margin-top: -($type-height - 2px);
-    opacity: .6;
-  }
-  &__missing {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: space-around;
-    padding: 10px;
-    padding-top: 20px;
-    &-text {
-      font-size: 20px;
-      font-weight: bold;
-    }
-    &-small-text {
-      margin-bottom: 20px;
-    }
-  }
+  padding: 8px 10px;
   &__clickable {
     cursor: pointer;
-  }
-  &__header-text-panel {
-    width: 100%;
-  }
-  &__header {
-    display: flex;
-
-  }
-  &__logo-panel {
-    display: flex;
-    justify-content: left;
-    width: 56px;
-  }
-  &__logo {
-    height: 48px;
-    margin-right: 8px;
-    width: auto;
   }
   &__icon {
     margin-right: 4px;
@@ -60,36 +21,20 @@
     justify-content: left;
     width: 32px;
   }
-  &__panel {
-    display: flex;
-    :first-child {
-      flex: 1;
-    }
+  &__info {
+    flex: 1;
   }
-  &__disconnected {
-    align-self: center;
-    border-radius: 2px;
-    display: flex;
+  &__name {
     font-size: 14px;
-    font-weight: normal;
-    margin-right: 8px;
-    padding: 2px 4px;
+    font-weight: bold;
+    margin-bottom: 4px;
   }
-}
-
-.error-details {
-  display: flex;
-  flex-direction: column;
-  padding: 0 20px;
-  &__value {
-    padding-bottom: 5px;
-  }
-  &__label {
-    font-size: 10px;
+  &__type {
+    font-size: 12px;
     opacity: .6;
   }
-}
-
-.subtle-text {
-  opacity: .6;
+  &__star {
+    flex: 0;
+    opacity: .7;
+  }
 }

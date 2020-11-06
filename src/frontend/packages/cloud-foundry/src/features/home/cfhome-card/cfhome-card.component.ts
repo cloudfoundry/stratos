@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, tap } from 'rxjs/operators';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/public-api';
@@ -58,7 +58,8 @@ export class CFHomeCardComponent {
   routeCount$: Observable<number>;
 
   cardLoaded = false;
-  statsLoaded = false;
+
+  recentApps = [];
 
   private appStatsLoaded = new BehaviorSubject<boolean>(false);
   private appStatsToLoad: APIResource<IApp>[] = [];
@@ -84,6 +85,7 @@ export class CFHomeCardComponent {
 
     // When the apps are loaded, fetch the app stats
     appsPagObs.entities$.pipe(first()).subscribe(apps => {
+      this.recentApps = apps;
       this.appStatsToLoad = this.restrictApps(apps);
       this.fetchAppStats();
       this.fetchAppStats();
@@ -97,17 +99,23 @@ export class CFHomeCardComponent {
       appsPagObs.entities$,
       appStatLoaded$
     ]).pipe(
-      map(() => true),
-      tap(() => { this.statsLoaded = true; })
+      map(() => true)
     );
   }
 
   public updateLayout() {
+    const currentRows = this.recentAppsRows;
     this.recentAppsRows = this.layout.y > 1 ? 5 : 10;
 
     // Hide recent apps if more than 2 columns
     if (this.layout.x > 2) {
       this.recentAppsRows = 0;
+    }
+
+    // If the layout changes and there are apps to show then we need to fetch the app stats for them
+    if (this.recentAppsRows > currentRows) {
+      this.appStatsToLoad = this.restrictApps(this.recentApps);
+      this.fetchAppStats();
     }
   }
 
