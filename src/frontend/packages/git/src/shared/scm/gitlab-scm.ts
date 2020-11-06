@@ -3,7 +3,7 @@ import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
 import { GitSCM, SCMIcon } from './scm';
 import { GitSCMType } from './scm.service';
 
@@ -87,7 +87,7 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
-  getCommitApiUrl(projectName: string, commitSha: string, ): string {
+  getCommitApiUrl(projectName: string, commitSha: string,): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }
@@ -143,7 +143,7 @@ export class GitLabSCM implements GitSCM {
       httpClient.get<[]>(`${gitLabAPIUrl}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
     ]).pipe(
       map(([a, b]: [any[], any[]]) => a.concat(b)),
-    )
+    );
   }
 
   private convertProject(prj: any): GitRepo {
@@ -181,6 +181,10 @@ export class GitLabSCM implements GitSCM {
       },
       sha: commit.id
     };
+  }
+
+  parseErrorString(error: any, message: string): string {
+    return 'Git request failed';
   }
 
 }

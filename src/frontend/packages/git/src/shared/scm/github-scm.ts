@@ -3,8 +3,8 @@ import { flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { getGitHubAPIURL } from '../../../../../core/src/core/github.helpers';
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import { getGitHubAPIURL } from '../github.helpers';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
@@ -45,13 +45,13 @@ export class GitHubSCM implements GitSCM {
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const url = `${this.gitHubURL}/repos/${projectName}/branches`;
-    const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url)
-    const firstRequest = config.fetch(...config.buildFetchParams(1))
+    const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
+    const firstRequest = config.fetch(...config.buildFetchParams(1));
     return flattenPagination(
       null,
       firstRequest,
       config
-    )
+    );
   }
 
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
@@ -90,8 +90,8 @@ export class GitHubSCM implements GitSCM {
       url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
     }
 
-    const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url)
-    const firstRequest = config.fetch(...config.buildFetchParams(1))
+    const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url);
+    const firstRequest = config.fetch(...config.buildFetchParams(1));
     return flattenPagination(
       null,
       firstRequest,
@@ -100,11 +100,16 @@ export class GitHubSCM implements GitSCM {
       map(repos => {
         return repos.map(item => item.full_name);
       })
-    )
+    );
   }
 
   public convertCommit(projectName: string, commit: any): GitCommit {
     return commit;
   }
 
+  parseErrorString(error: any, message: string): string {
+    return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
+      'Git ' + message.substring(0, message.indexOf('(')) :
+      'Git request failed';
+  }
 }

@@ -1,20 +1,19 @@
 import { Store } from '@ngrx/store';
 import { of as observableOf } from 'rxjs';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityCatalog } from '../../../../../../../cloud-foundry/src/cf-entity-catalog';
-import { CFEntitySchema } from '../../../../../../../cloud-foundry/src/cf-entity-schema-types';
-import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { GitMeta } from '../../../../../../../cloud-foundry/src/entity-action-builders/git-action-builder';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { GitSCM } from '../../../../data-services/scm/scm';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GitEntitySchema } from '../../../../../store/git-entity-factory';
+import { gitEntityCatalog } from '../../../../../store/git-entity-generator';
+import { GitCommit } from '../../../../../store/git.public-types';
+import { GitMeta, GitSCM } from '../../../../scm/scm';
+
 
 export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
-  store: Store<CFAppState>;
+  store: Store<AppState>;
 
   /**
    * Creates an instance of GithubCommitsDataSource.
@@ -22,7 +21,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
    * @param sha Branch name, tag, etc
    */
   constructor(
-    store: Store<CFAppState>,
+    store: Store<AppState>,
     listConfig: IListConfig<GitCommit>,
     scm: GitSCM,
     projectName: string,
@@ -34,7 +33,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
       projectName,
       commitSha: sha
     };
-    const action = cfEntityCatalog.gitCommit.actions.getMultiple(sha, null, gitMeta);
+    const action = gitEntityCatalog.commit.actions.getMultiple(sha, null, gitMeta);
     const paginationKey = action.paginationKey;
     const rowsState = observableOf(commitSha ? {
       [commitSha]: {
@@ -44,7 +43,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
     super({
       store,
       action,
-      schema: new CFEntitySchema(gitCommitEntityType),
+      schema: new GitEntitySchema(action.entityType),
       getRowUniqueId: (object: GitCommit) => object.sha,
       paginationKey,
       isLocal: true,

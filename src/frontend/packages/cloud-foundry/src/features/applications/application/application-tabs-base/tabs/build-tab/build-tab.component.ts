@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -18,7 +19,6 @@ import { ActionState } from '../../../../../../../../store/src/reducers/api-requ
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
@@ -57,7 +57,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean }>;
+  public isBusyUpdating$: Observable<{ updating: boolean; }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(
@@ -78,7 +78,7 @@ export class BuildTabComponent implements OnInit {
 
   sshStatus$: Observable<string>;
 
-  deploySource$: Observable<{ type: string, [name: string]: any }>;
+  deploySource$: Observable<{ type: string, [name: string]: any; }>;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
@@ -115,7 +115,7 @@ export class BuildTabComponent implements OnInit {
         this.applicationService.cfGuid,
         space.metadata.guid)
       )
-    )
+    );
 
     const deploySource$ = observableCombineLatest(
       this.applicationService.applicationStratProject$,
@@ -159,7 +159,7 @@ export class BuildTabComponent implements OnInit {
         }
       }),
       startWith({ type: 'loading' })
-    )
+    );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
       switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
@@ -187,7 +187,7 @@ export class BuildTabComponent implements OnInit {
   private dispatchAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
     cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
-  }
+  };
 
   restartApplication() {
     this.confirmDialog.open(appRestartConfirmation, () => {

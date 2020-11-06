@@ -54,7 +54,6 @@ import {
   CreateApplicationStep1Component,
 } from './components/create-application/create-application-step1/create-application-step1.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
-import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import {
   TableCellCfCellComponent,
 } from './components/list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
@@ -181,9 +180,6 @@ import {
   CfSpacePermissionCellComponent,
 } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import {
-  TableCellCommitAuthorComponent,
-} from './components/list/list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
-import {
   TableCellAServicePlanExtrasComponent,
 } from './components/list/list-types/service-plans/table-cell-service-plan-extras/table-cell-service-plan-extras.component';
 import {
@@ -250,7 +246,6 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
   TableCellServiceInstanceTagsComponent,
-  TableCellCommitAuthorComponent,
   TableCellServiceBrokerComponent
 ];
 
@@ -319,7 +314,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     TableCellFeatureFlagDescriptionComponent,
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
-    GithubCommitAuthorComponent,
     EnvVarViewComponent,
     CfUserPermissionDirective
   ],
@@ -362,7 +356,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CloudFoundryEventsListComponent,
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
-    GithubCommitAuthorComponent,
     EnvVarViewComponent,
     CfUserPermissionDirective
   ],
