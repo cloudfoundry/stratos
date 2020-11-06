@@ -28,6 +28,10 @@ export class GitLabSCM implements GitSCM {
     };
   }
 
+  getAPIUrl(): string {
+    return gitLabAPIUrl;
+  }
+
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 

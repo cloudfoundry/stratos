@@ -1,3 +1,4 @@
+import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -8,6 +9,7 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
 import { GitMeta } from '../shared/scm/scm';
 import {
   GitBranchActionBuilders,
@@ -18,7 +20,7 @@ import {
   GitRepoActionBuilders,
   gitRepoActionBuilders,
 } from './git-action-builder';
-import { GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
+import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
@@ -59,7 +61,73 @@ class GitEntityCatalog {
       logoUrl: '/core/assets/Git-logo.png',
       authTypes: [],
       renderPriority: 20,
-      registeredLimit: () => 0,
+      registrationComponent: GitRegistrationComponent,
+      subTypes: [
+        {
+          // TODO: RCuse better images for public/private
+          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GIT,
+          label: 'Public GIT',
+          labelShort: 'Public GIT',
+          authTypes: [],
+          unConnectable: true,
+          logoUrl: '/core/assets/Git-logo.png',
+          renderPriority: 1,
+          registrationComponent: null
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GIT,
+          label: 'Private GIT',
+          labelShort: 'Private GIT',
+          authTypes: [
+            BaseEndpointAuth.UsernamePassword, // TODO: RC this should not be username/password
+          ],
+          logoUrl: '/core/assets/Git-logo.png', // TODO: RC location of all these
+          renderPriority: 2,
+          registrationComponent: null,
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GITHUB,
+          label: 'Public Github',
+          labelShort: 'Public Github',
+          authTypes: [],
+          unConnectable: true,
+          logoUrl: '/core/assets/endpoint-icons/github-logo.png',
+          renderPriority: 3,
+          registeredLimit: () => 1,
+          registrationComponent: null
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GITHUB,
+          label: 'Private Github',
+          labelShort: 'Private Github',
+          authTypes: [],
+          logoUrl: '/core/assets/endpoint-icons/github-logo.png',
+          renderPriority: 4,
+          registeredLimit: () => 1,
+          registrationComponent: null
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GITLAB,
+          label: 'Public Gitlab',
+          labelShort: 'Public Gitlab',
+          authTypes: [],
+          unConnectable: true,
+          logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
+          renderPriority: 5,
+          registeredLimit: () => 1,
+          registrationComponent: null
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GITLAB,
+          label: 'Private Gitlab',
+          labelShort: 'Private Gitlab',
+          authTypes: [],
+          logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
+          renderPriority: 6,
+          registeredLimit: () => 1,
+          registrationComponent: null
+        },
+      ]
     };
 
     this.gitEndpoint = new StratosCatalogEndpointEntity(

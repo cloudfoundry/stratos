@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { CoreModule, MDAppModule, SharedModule } from '../../../core/src/public-api';
+import { GitRegistrationComponent } from './components/git-registration/git-registration.component';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import {
   TableCellCommitAuthorComponent,
@@ -17,10 +18,11 @@ import { GitSCMService } from './scm/scm.service';
   ],
   declarations: [
     TableCellCommitAuthorComponent,
-    GithubCommitAuthorComponent
+    GithubCommitAuthorComponent,
+    GitRegistrationComponent
   ],
   exports: [
-    GithubCommitAuthorComponent
+    GithubCommitAuthorComponent,
   ],
   entryComponents: [
     TableCellCommitAuthorComponent

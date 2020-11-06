@@ -18,6 +18,12 @@ import {
 } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
+
+// TODO: RC 1) Add endpoint guid to all of these
+// TODO: RC 2) use endpoint guid in scm(?) to get entity from store (for url and type/subtype)
+// TODO: RC 3) in scm(?) if subtype is private use proxy to jetstream
+// TODO: RC 4) in scm(?) if subtype is public use endpoint url
+
 export class FetchBranchForProject implements EntityRequestAction {
   constructor(public scm: GitSCM, public projectName: string, public guid: string, public branchName: string) {
     this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`;

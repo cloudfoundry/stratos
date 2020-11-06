@@ -35,6 +35,10 @@ export class GitHubSCM implements GitSCM {
     };
   }
 
+  getAPIUrl(): string {
+    return this.gitHubURL;
+  }
+
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}`) as Observable<GitRepo>;
   }
@@ -72,7 +76,7 @@ export class GitHubSCM implements GitSCM {
   }
 
   getCloneURL(projectName: string): string {
-    return `https://github.com/${projectName}`;
+    return `https://github.com/${projectName}`; // TODO: RC API VS NON API. What to do for public/private git that isn't github? Another scm?
   }
 
   getCommitURL(projectName: string, commitSha: string): string {
