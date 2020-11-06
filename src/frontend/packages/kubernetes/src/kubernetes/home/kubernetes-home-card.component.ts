@@ -56,9 +56,7 @@ export class KubernetesHomeCardComponent implements OnInit {
         iconFont: 'stratos-icons'
       }
     ];
-
   }
-
 
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {

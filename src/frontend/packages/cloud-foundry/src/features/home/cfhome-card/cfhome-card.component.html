@@ -17,7 +17,7 @@
   </app-tile-group>
   <app-tile-group>
     <app-tile>
-      <app-card-cf-recent-apps *ngIf="cardLoaded && recentAppsRows > 0" [noStats]="true" dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid"></app-card-cf-recent-apps>
+      <app-card-cf-recent-apps *ngIf="cardLoaded && recentAppsRows > 0" [noStats]="!statsLoaded" dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid"></app-card-cf-recent-apps>
       <app-card-cf-recent-apps *ngIf="!cardLoaded && recentAppsRows > 0" [placeholderMode]="true" [maxRows]="recentAppsRows" mode="plain"></app-card-cf-recent-apps>
     </app-tile>
   </app-tile-group>

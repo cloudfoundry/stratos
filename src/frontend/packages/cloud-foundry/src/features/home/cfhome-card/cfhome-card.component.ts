@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/public-api';
@@ -58,6 +58,7 @@ export class CFHomeCardComponent {
   routeCount$: Observable<number>;
 
   cardLoaded = false;
+  statsLoaded = false;
 
   private appStatsLoaded = new BehaviorSubject<boolean>(false);
   private appStatsToLoad: APIResource<IApp>[] = [];
@@ -86,7 +87,6 @@ export class CFHomeCardComponent {
     });
 
     const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(filter(loaded => loaded));
-
     return combineLatest([
       this.routeCount$,
       this.appCount$,
@@ -94,7 +94,8 @@ export class CFHomeCardComponent {
       appsPagObs.entities$,
       appStatLoaded$
     ]).pipe(
-      map(() => true)
+      map(() => true),
+      tap(() => { this.statsLoaded = true; })
     );
   }
 

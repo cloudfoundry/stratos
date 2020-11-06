@@ -13,7 +13,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
@@ -79,6 +79,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   load$: Observable<boolean>;
   loadSubj = new BehaviorSubject<boolean>(false);
   isLoading = false;
+  isError = false;
 
   private ref: ComponentRef<HomePageEndpointCard>;
   private sub: Subscription;
@@ -218,9 +219,15 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
       this.isLoading = true;
       const loadObs = this.ref.instance.load() || of(true);
-      this.sub = loadObs.pipe(filter(v => v === true), first()).subscribe(() => {
+
+      // Timeout after 10 seconds
+      this.sub = loadObs.pipe(timeout(10000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next();
         this.isLoading = false;
+      }, () => {
+        this.loaded.next();
+        this.isLoading = false;
+        this.isError = true;
       });
     }
   }

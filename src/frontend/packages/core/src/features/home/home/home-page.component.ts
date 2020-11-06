@@ -63,6 +63,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
 
   notLoadedCardIndices: number[] = [];
+  cardsToLoad: HomePageEndpointCardComponent[] = [];
+  isLoadingACard = false;
 
   private sub: Subscription;
   private cardChangesSub: Subscription;
@@ -132,28 +134,32 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible and shoule be loaded
       // Only load the first one - after that one has loaded, we'll call this method again and check for the next one
       const remaining = [];
-      let processedCard = false;
+      const processedCard = false;
       for (const index of this.notLoadedCardIndices) {
         const cardElement = this.endpointElements.toArray()[index] as ElementRef;
         const cardTop = cardElement.nativeElement.offsetTop;
         const cardBottom = cardTop + cardElement.nativeElement.offsetHeight;
         const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
         const scrollBottom = scrollTop + height;
-
-        console.log(index + ' ' + cardTop + ' ' + cardBottom + ' ' + scrollTop + ' ' + scrollBottom);
         // Check if the card is in view - either its top or bottom must be withtin he visible scroll area
-        if (!processedCard &&
-          (cardTop >= scrollTop && cardTop <= scrollBottom) ||
-          (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
+        if ((cardTop >= scrollTop && cardTop <= scrollBottom) || (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
           const card = this.endpointCards.toArray()[index];
-          card.load();
-          processedCard = true;
+          this.cardsToLoad.push(card);
+          this.processCardsToLoad();
         } else {
           remaining.push(index);
         }
       };
       this.notLoadedCardIndices = remaining;
     })
+  }
+
+  processCardsToLoad() {
+    if (!this.isLoadingACard && this.cardsToLoad.length > 0) {
+      const nextCardToLoad = this.cardsToLoad.shift();
+      this.isLoadingACard = true;
+      nextCardToLoad.load();
+    }
   }
 
   ngOnDestroy() {
@@ -183,6 +189,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // This is called after a card has loaded - we call the scroll handler again
   // to check if there are more cards that are visible and thus can be loaded
   cardLoaded() {
+    this.isLoadingACard = false;
+    this.processCardsToLoad();
     this.checkCardsInView();
   }
 
@@ -284,21 +292,4 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private getLayout(x: number, y: number): HomePageCardLayout {
     return this.layouts.find(item => item && item.x === x && item.y === y);
   }
-
-  // Validate all of the entities one by one and update if they are no longer valid
-  // validate() {
-  //   this.favoriteGroups$.pipe(first()).subscribe(f => {
-  //     console.log('Validating favourites');
-  //     console.log(f);
-  //     f.forEach(group => {
-  //       console.log(group);
-  //       // Maybe we need to check the enpoint via the health check first?
-  //       // Check each entity in turn
-  //       group.entities.forEach(entity => {
-  //         console.log(entity);
-  //       });
-  //     })
-  //   });
-  // }
 }
-

@@ -46,6 +46,9 @@
     margin-left: 20px;
     opacity: 0.7;
   }
+  &__error {
+    display: flex;
+  }
   // Check if these are needed
   &__type {
     $type-height: 20px;

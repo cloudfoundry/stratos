@@ -14,6 +14,9 @@
     <div *ngIf="isLoading">
       <mat-progress-spinner class="fav-meta-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
     </div>
+    <div *ngIf="isError" class="fav-meta-card__error text-warning">
+      <mat-icon>warning</mat-icon>
+    </div>
     <div class="fav-meta-card__header-star">
       <app-entity-favorite-star [confirmRemoval]="true" class="fav-meta-card__star" [favorite]="favorite"></app-entity-favorite-star>
     </div>
