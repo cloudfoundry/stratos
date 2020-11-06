@@ -57,6 +57,8 @@ export class CFHomeCardComponent {
   orgCount$: Observable<number>;
   routeCount$: Observable<number>;
 
+  hasNoApps$: Observable<boolean>;
+
   cardLoaded = false;
 
   recentApps = [];
@@ -84,12 +86,13 @@ export class CFHomeCardComponent {
     const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
 
     // When the apps are loaded, fetch the app stats
-    appsPagObs.entities$.pipe(first()).subscribe(apps => {
+    this.hasNoApps$ = appsPagObs.entities$.pipe(first(), map(apps => {
       this.recentApps = apps;
       this.appStatsToLoad = this.restrictApps(apps);
       this.fetchAppStats();
       this.fetchAppStats();
-    });
+      return apps.length === 0;
+    }));
 
     const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(filter(loaded => loaded));
     return combineLatest([

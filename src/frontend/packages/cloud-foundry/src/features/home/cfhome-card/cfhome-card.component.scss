@@ -4,4 +4,20 @@
     margin-right: 1em;
     margin-top: 1em;
   }
+  &__no-apps {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    opacity: 0.7;
+    > mat-icon {
+      font-size: 40px;
+      height: 40px;
+      width: 40px;
+    }
+    > div {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  }
 }

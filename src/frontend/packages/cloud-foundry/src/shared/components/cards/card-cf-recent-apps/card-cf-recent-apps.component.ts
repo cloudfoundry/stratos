@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, startWith, tap } from 'rxjs/operators';
 
 import { PaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -27,6 +27,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   @Input() dateMode: string;
   @Input() noStats = false;
   @Input() placeholderMode = false;
+  @Input() hideWhenEmpty = false;
 
   public canRefresh = false;
 
@@ -35,6 +36,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   appsPagObs: PaginationObservables<APIResource<IApp>>;
 
   hasEntities$: Observable<boolean>;
+  show$: Observable<boolean>;
 
   private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
 
@@ -70,6 +72,13 @@ export class CardCfRecentAppsComponent implements OnInit {
       filter(([apps]) => !!apps),
       map(([apps, maxRows]) => this.restrictApps(apps, maxRows)),
       tap(apps => this.fetchAppStats(apps))
+    );
+
+    this.show$ = this.allApps$.pipe(
+      map(apps => {
+        return !this.hideWhenEmpty || this.hideWhenEmpty && apps.length > 0;
+      }),
+      startWith(true),
     );
   }
 
