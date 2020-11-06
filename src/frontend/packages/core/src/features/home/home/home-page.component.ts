@@ -43,6 +43,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private layout = new BehaviorSubject<HomePageCardLayout>(null);
   public layout$: Observable<HomePageCardLayout>;
 
+  public haveThingsToShow$: Observable<boolean>;
+
   public columns = 1;
 
   public layoutID = 0;
@@ -99,8 +101,10 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
 
+    const connected$ = this.endpointsService.endpoints$;
+
     // Only show endpoints that have Home Card metadata
-    this.endpoints$ = combineLatest([this.endpointsService.endpoints$, userFavoriteManager.getAllFavorites()]).pipe(
+    this.endpoints$ = combineLatest([connected$, userFavoriteManager.getAllFavorites()]).pipe(
       map(([endpoints, [favGroups, favs]]) => {
         const ordered = this.orderEndpoints(endpoints, favGroups);
         return ordered.filter(ep => {
@@ -109,6 +113,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         });
       })
     );
+
+    this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => eps.length > 0), startWith(true));
 
     // Set an initial layout
     this.layout.next(this.getLayout(1, 1));
@@ -261,7 +267,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     })
 
-    return result;
+    // Filter out the disconnected ones
+    return result.filter(ep => ep.connectionStatus === 'connected');
   }
 
   // Automatic layout - select the best layout based on the available endpoints
