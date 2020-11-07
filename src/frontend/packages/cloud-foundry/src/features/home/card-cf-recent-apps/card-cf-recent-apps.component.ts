@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 
-import { PaginationObservables } from '../../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { APIResource } from '../../../../../../store/src/types/api.types';
-import { IApp } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { appDataSort } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { IApp } from '../../../cf-api.types';
+import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
+
 
 const RECENT_ITEMS_COUNT = 10;
 
