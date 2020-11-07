@@ -40,7 +40,9 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   ngOnInit() {
     const guid = this.endpoint.guid;
-    this.kubeEndpointService.initialize(this.endpoint.guid);
+    if (guid) {
+      this.kubeEndpointService.initialize(this.endpoint.guid);
+    }
 
     this.shortcuts = [
       {
