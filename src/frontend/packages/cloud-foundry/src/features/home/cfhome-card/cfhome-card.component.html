@@ -22,8 +22,11 @@
 
       <div *ngIf="(hasNoApps$ | async)" class="cf-home-card__no-apps">
         <mat-icon>apps</mat-icon>
-        <div>You don't have any applications</div>
-       
+        <div class="cf-home-card__no-apps-title">You don't have any applications</div>
+        <div *ngIf="showDeployAppTiles">
+          <div class="cf-home-card__no-apps-deploy">Get started by deploying an Application from ...</div>
+          <app-tile-selector [options]="tileSelectorConfig" [compactTiles]="true" (selection)="selectedTile = $event"></app-tile-selector>
+        </div>
       </div>
     </app-tile>
   </app-tile-group>

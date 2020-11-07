@@ -13,6 +13,7 @@ export class TileSelectorComponent {
   public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
   @Input() smallerTiles = false;
+  @Input() compactTiles = false;
   @Input() dynamicSmallerTiles = 0;
   @Input() set options(options: ITileConfig[]) {
     if (!options) {

@@ -11,13 +11,19 @@
     margin-top: 20px;
     opacity: 0.7;
     > mat-icon {
-      font-size: 40px;
-      height: 40px;
-      width: 40px;
+      font-size: 48px;
+      height: 48px;
+      width: 48px;
     }
-    > div {
+    &-title {
       font-size: 16px;
       margin: 10px 8px;
+      text-align: center;
+    }
+    &-deploy {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 20px 0;
       text-align: center;
     }
   }

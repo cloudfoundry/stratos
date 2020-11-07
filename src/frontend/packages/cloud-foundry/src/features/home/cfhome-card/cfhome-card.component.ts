@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
+import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { EndpointModel } from '../../../../../store/src/public-api';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -10,10 +12,20 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { SourceType } from '../../../store/types/deploy-application.types';
+import {
+  ApplicationDeploySourceTypes,
+  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
+} from '../../applications/deploy-application/deploy-application-steps.types';
+import {
+  AUTO_SELECT_CF_URL_PARAM,
+  IAppTileData,
+} from '../../applications/new-application-base-step/new-application-base-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { HomePageCardLayout } from './../../../../../core/src/features/home/home.types';
+import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
 
 
 @Component({
@@ -66,12 +78,45 @@ export class CFHomeCardComponent {
   private appStatsLoaded = new BehaviorSubject<boolean>(false);
   private appStatsToLoad: APIResource<IApp>[] = [];
 
+  private sourceTypes: SourceType[];
+  public tileSelectorConfig: ITileConfig<IAppTileData>[];
+
+  showDeployAppTiles = false;
+
   constructor(
     private store: Store<CFAppState>,
     private pmf: PaginationMonitorFactory,
+    appDeploySourceTypes: ApplicationDeploySourceTypes,
   ) {
     // Set a default layout
     this._layout = new HomePageCardLayout(1, 1);
+
+    // Get source types for if we are showing tiles to deploy an application
+    this.sourceTypes = appDeploySourceTypes.getTypes();
+    this.tileSelectorConfig = [
+      ...this.sourceTypes.map(type =>
+        new ITileConfig<IAppTileData>(
+          type.name,
+          type.graphic,
+          { type: 'deploy', subType: type.id },
+        )
+      )
+    ];
+  }
+
+  // Deploy an app from the Home Card for the given endpoint
+  set selectedTile(tile: ITileConfig<IAppTileData>) {
+    const type = tile ? tile.data.type : null;
+    if (tile) {
+      const query = {
+        [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
+        [AUTO_SELECT_CF_URL_PARAM]:this.guid
+      };
+      if (tile.data.subType) {
+        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
+      }
+      this.store.dispatch(new RouterNav({ path: `applications/${type}`, query }));
+    }
   }
 
   // Card is instructed to load its view by the container, whn it is visible
@@ -120,6 +165,9 @@ export class CFHomeCardComponent {
       this.appStatsToLoad = this.restrictApps(this.recentApps);
       this.fetchAppStats();
     }
+
+    // Only show the deploy app tiles in the full view
+    this.showDeployAppTiles = this.layout.x === 1 && this.layout.y === 1;
   }
 
   // Fetch the app stats - we fetch two at a time

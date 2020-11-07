@@ -5,6 +5,7 @@ import { CoreModule } from '../../../../../core/src/core/core.module';
 import { HomeModule } from '../../../../../core/src/features/home/home.module';
 import { SharedModule } from '../../../../../core/src/public-api';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
+import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { CardCfRecentAppsComponent } from '../card-cf-recent-apps/card-cf-recent-apps.component';
 import { CompactAppCardComponent } from '../card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { MDAppModule } from './../../../../../core/src/core/md.module';
@@ -30,6 +31,7 @@ import { CFHomeCardComponent } from './cfhome-card.component';
   ],
   providers: [
     ApplicationStateService,
+    ApplicationDeploySourceTypes,
   ]
 })
 export class CFHomeCardModule {

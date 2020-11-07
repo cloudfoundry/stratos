@@ -2,13 +2,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   ApplicationStateIconComponent,
-} from '../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
+} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
 import {
   ApplicationStateIconPipe,
-} from '../../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
-import { generateCfBaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
-import { ApplicationStateService } from '../../../../services/application-state.service';
+} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
+import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ApplicationStateService } from '../../../../shared/services/application-state.service';
+import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 import { CompactAppCardComponent } from './compact-app-card.component';
 
 describe('CompactAppCardComponent', () => {

@@ -3,21 +3,21 @@ import { of as observableOf } from 'rxjs';
 
 import {
   ApplicationStateIconComponent,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
+} from '../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
 import {
   ApplicationStateIconPipe,
-} from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
+} from '../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
 import {
   PollingIndicatorComponent,
-} from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
+} from '../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import {
   generateActiveRouteCfOrgSpaceMock,
   generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
-import { CfUserService } from '../../../data-services/cf-user.service';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { CardCfRecentAppsComponent } from './card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
 

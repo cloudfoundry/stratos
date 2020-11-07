@@ -15,10 +15,11 @@ import {
 export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
 
 
-interface IAppTileData extends ITileData {
+export interface IAppTileData extends ITileData {
   type: string;
   subType?: string;
 }
+
 @Component({
   selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
