@@ -27,7 +27,7 @@
 </div>
 <ng-template #noEndpoints>
   <div *ngIf="haveRegistered$ | async; else noneRegistered">
-    <app-no-content-message  [icon]="'settings_ethernet'" firstLine="No connected endpoints"></app-no-content-message>
+    <app-no-content-message [icon]="'settings_ethernet'" firstLine="No connected endpoints"></app-no-content-message>
   </div>
 </ng-template>
 
