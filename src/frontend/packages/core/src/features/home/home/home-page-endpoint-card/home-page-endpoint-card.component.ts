@@ -122,25 +122,28 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     );
 
     this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
-    this.definition = this.entity.definition;
-    this.favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.endpoint);
+    if (this.entity) {
+      this.definition = this.entity.definition;
+      this.favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.endpoint);
 
-    // Get the list of shortcuts for the endpoint for the given endpoint ID
-    if (this.definition.homeCard && this.definition.homeCard.shortcuts) {
-      this.shortcuts = this.definition.homeCard.shortcuts(this.endpoint.guid);
-    }
+      // Get the list of shortcuts for the endpoint for the given endpoint ID
+      if (this.definition.homeCard && this.definition.homeCard.shortcuts) {
+        this.shortcuts = this.definition.homeCard.shortcuts(this.endpoint.guid);
+      }
 
-    this.fullView = this.definition.homeCard && this.definition.homeCard.fullView;
+      this.fullView = this.definition.homeCard && this.definition.homeCard.fullView;
 
-    const mapper = this.favoritesConfigMapper.getMapperFunction(this.favorite);
-    if (mapper && this.favorite.metadata) {
-      const p = mapper(this.favorite.metadata);
-      if (p) {
-        this.link = p.routerLink;
+      const mapper = this.favoritesConfigMapper.getMapperFunction(this.favorite);
+      if (mapper && this.favorite.metadata) {
+        const p = mapper(this.favorite.metadata);
+        if (p) {
+          this.link = p.routerLink;
+        }
       }
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
+      filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
         let shortcuts: HomeCardShortcut[] = this.shortcuts || [];
 

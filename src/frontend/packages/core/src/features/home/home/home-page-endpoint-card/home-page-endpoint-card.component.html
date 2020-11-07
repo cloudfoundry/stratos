@@ -38,8 +38,7 @@
             <div *ngIf="hiddenFavorites > 0" class="home-card__fav-more"><a (click)="showFavoritesPanel()">{{hiddenFavorites}} more ...</a></div>
           </div>
           <div class="home-card__fav" *ngIf="links.favs.length > 0">
-            <app-favorites-meta-card *ngFor="let entity of links.favs"
-            class="home-card__fav-card" [favoriteEntity]="entity" [mode]="plain" [compact]="true"></app-favorites-meta-card>
+            <app-favorites-meta-card *ngFor="let entity of links.favs" class="home-card__fav-card" [favoriteEntity]="entity"></app-favorites-meta-card>
           </div>
           <div class="home-card__fav" *ngIf="links.favs.length === 0">
             <div class="home-card__fav-none">No favorites</div>

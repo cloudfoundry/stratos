@@ -1,20 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CFHomeCardComponent } from './kubernetes-home-card.component';
+import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubernetesHomeCardComponent } from './kubernetes-home-card.component';
 
-describe('CFHomeCardComponent', () => {
-  let component: CFHomeCardComponent;
-  let fixture: ComponentFixture<CFHomeCardComponent>;
+describe('KubernetesHomeCardComponent', () => {
+  let component: KubernetesHomeCardComponent;
+  let fixture: ComponentFixture<KubernetesHomeCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CFHomeCardComponent ]
+      declarations: [ KubernetesHomeCardComponent ],
+      providers: [ KubernetesEndpointService ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CFHomeCardComponent);
+    fixture = TestBed.createComponent(KubernetesHomeCardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

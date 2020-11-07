@@ -34,12 +34,15 @@ describe('HomePageEndpointCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(HomePageEndpointCardComponent);
     fixture.componentInstance.endpoint = {
-      cnsi_type: 'cf',
-      sub_type: ''
+      cnsi_type: 'metrics',
     } as EndpointModel;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
+  afterEach(() => {
+    component.ngOnDestroy();
+  })
 
   it('should create', () => {
     expect(component).toBeTruthy();
