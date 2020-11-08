@@ -35,8 +35,7 @@ export class KubernetesHomeCardComponent implements OnInit {
   public nodeCount$: Observable<number>;
   public namespaceCount$: Observable<number>;
 
-  constructor(private kubeEndpointService: KubernetesEndpointService) {
-  }
+  constructor(private kubeEndpointService: KubernetesEndpointService) { }
 
   ngOnInit() {
     const guid = this.endpoint.guid;

@@ -13,8 +13,6 @@ export class FavoritesSidePanelComponent implements PreviewableComponent {
   favorites$: Observable<any>;
   name: string;
 
-  constructor() { }
-
   setProps(props: { [key: string]: any; }): void {
     this.favorites$ = props.favorites$
     this.name = props.endpoint.name;

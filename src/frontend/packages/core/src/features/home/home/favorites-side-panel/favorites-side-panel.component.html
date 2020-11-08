@@ -1,7 +1,5 @@
 <app-sidepanel-preview title="Favorites for {{name}}">
-
   <div *ngIf="favorites$ | async as favs">
       <app-favorites-meta-card *ngFor="let entity of favs" class="fav-side-panel__card" [favoriteEntity]="entity"></app-favorites-meta-card>
-</div>
-
+  </div>
 </app-sidepanel-preview>
