@@ -1,27 +1,27 @@
-<mat-card class="fav-meta-card">
-  <mat-card-header class="fav-meta-card__header" *ngIf="endpoint && definition">
-    <div class="fav-meta-card__logo-panel" [routerLink]="link">
-      <img class="fav-meta-card__logo" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
+<mat-card class="home-endpoint-card">
+  <mat-card-header class="home-endpoint-card__header" *ngIf="endpoint && definition">
+    <div class="home-endpoint-card__logo-panel" [routerLink]="link">
+      <img class="home-endpoint-card__logo" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
     </div>
-    <div class="fav-meta-card__header-text-panel" [routerLink]="link">
-      <h2 class="fav-meta-card__header-text">
-        <div class="fav-meta-card__panel" *ngIf="endpoint">
+    <div class="home-endpoint-card__header-text-panel" [routerLink]="link">
+      <h2 class="home-endpoint-card__header-text">
+        <div class="home-endpoint-card__panel" *ngIf="endpoint">
           <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
         </div>
       </h2>
-      <div class="fav-meta-card__type">{{ definition.label }}</div>
+      <div class="home-endpoint-card__type">{{ definition.label }}</div>
     </div>
     <div *ngIf="isLoading">
-      <mat-progress-spinner class="fav-meta-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+      <mat-progress-spinner class="home-endpoint-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
     </div>
-    <div *ngIf="isError" class="fav-meta-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
+    <div *ngIf="isError" class="home-endpoint-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
       <mat-icon>warning</mat-icon>
     </div>
-    <div class="fav-meta-card__header-star">
-      <app-entity-favorite-star [confirmRemoval]="true" class="fav-meta-card__star" [favorite]="favorite"></app-entity-favorite-star>
+    <div class="home-endpoint-card__header-star">
+      <app-entity-favorite-star [confirmRemoval]="true" class="home-endpoint-card__star" [favorite]="favorite"></app-entity-favorite-star>
     </div>
   </mat-card-header>
-  <mat-card-content class="fav-meta-card__content">
+  <mat-card-content class="home-endpoint-card__content">
     <div class="home-card">
       <div class="home-card__left">
         <div>

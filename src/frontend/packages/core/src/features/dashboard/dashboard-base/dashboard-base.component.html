@@ -33,7 +33,7 @@
                 </div>
               </div>
             </div>
-            <div #content class="dashboard__content" id="dashboard-content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}" cdkScrollable>
+            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}" cdkScrollable>
               <router-outlet></router-outlet>
             </div>
           </div>

@@ -1,8 +1,7 @@
 @mixin home-page-endpoint-card-theme($theme, $app-theme) {
   $foreground: map-get($theme, foreground);
 
-  .fav-meta-card {
-    //border: 1px solid mat-color($foreground, divider);
+  .home-endpoint-card {
     &__content {
       border-top: 1px solid mat-color($foreground, divider);
     }
@@ -10,7 +9,6 @@
 
   .home-card__right {
     border-left: 1px solid mat-color($foreground, divider);
-
     mat-card {
       border: 1px solid mat-color($foreground, divider);;
     }
