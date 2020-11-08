@@ -11,5 +11,6 @@ import { IAuthForm } from '../../../../../store/src/extension-types';
   styleUrls: ['./kubernetes-aws-auth-form.component.scss']
 })
 export class KubernetesAWSAuthFormComponent implements IAuthForm {
+  showPassword = false;
   @Input() formGroup: FormGroup;
 }

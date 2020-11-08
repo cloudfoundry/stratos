@@ -345,7 +345,7 @@ spec:
       - name: "{{ .Release.Name }}-cert-volume"
         secret:
           {{- if .Values.console.tlsSecretName }}
-          secretName: "{{ .values.console.tlsSecretName }}"
+          secretName: "{{ .Values.console.tlsSecretName }}"
           {{- else }}
           secretName: "{{ .Release.Name }}-cert"
           {{- end }}

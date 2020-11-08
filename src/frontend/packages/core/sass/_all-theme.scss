@@ -48,6 +48,7 @@
 @import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
 @import '../src/shared/components/user-avatar/user-avatar.component.theme';
 @import './components/text-status.theme';
+@import './components/text-area.theme';
 @import './components/hyperlinks.theme';
 @import './mat-desktop';
 @import './fonts';
@@ -81,6 +82,7 @@
   @include app-mat-snack-bar-theme($theme, $app-theme);
   @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
+  @include app-text-area($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
   @include app-ssh-viewer-theme($theme, $app-theme);

@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from '../../../../store/src/app-state';
 import { selectSessionData } from '../../../../store/src/reducers/auth.reducer';
@@ -61,7 +61,7 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  constructor(private store: Store<GeneralEntityAppState>, ) {
+  constructor(private store: Store<GeneralEntityAppState>,) {
     super();
   }
 
@@ -114,6 +114,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
 
   private apiKeyCheck(): Observable<boolean> {
     return this.store.select(selectSessionData()).pipe(
+      filter(sessionData => !!sessionData),
       switchMap(sessionData => {
         switch (sessionData.config.APIKeysEnabled) {
           case APIKeysEnabled.ADMIN_ONLY:

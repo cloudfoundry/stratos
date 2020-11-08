@@ -61,16 +61,24 @@
   min-width: 0;
 
   @include breakpoint(tablet) {
+    // 900px
     grid-column-gap: $bottom-space;
     grid-row-gap: $bottom-space;
     grid-template-columns: repeat(2, 1fr);
   }
 
   @include breakpoint(laptop) {
+    // 1200px
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1350px) {
+    // Without this, and the side nav expanded, the rows exceed the available H space... which pushed the `live reload` button out of view
     grid-template-columns: repeat(4, 1fr);
   }
 
   @include breakpoint(desktop) {
+    // 1800px
     grid-template-columns: repeat(5, 1fr);
   }
 }

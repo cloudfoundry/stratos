@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import moment from 'moment';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -26,7 +27,9 @@ import { BackupEndpointTypes } from '../backup-restore.types';
     BackupEndpointsService
   ]
 })
-export class BackupEndpointsComponent {
+export class BackupEndpointsComponent implements OnDestroy {
+
+  sub: Subscription;
 
   // Step 1
   columns: ITableColumn<EndpointModel>[] = [
@@ -66,7 +69,7 @@ export class BackupEndpointsComponent {
   // Step 2
   passwordValid$: Observable<boolean>;
   passwordForm: FormGroup;
-  show = false;
+  showPassword: boolean[] = [];
 
   constructor(
     public service: BackupEndpointsService,
@@ -76,6 +79,9 @@ export class BackupEndpointsComponent {
     this.setupPasswordStep();
   }
 
+  ngOnDestroy(): void {
+    safeUnsubscribe(this.sub);
+  }
 
   setupSelectStep() {
     const endpointObs = stratosEntityCatalog.endpoint.store.getAll.getPaginationService();
@@ -105,7 +111,11 @@ export class BackupEndpointsComponent {
   setupPasswordStep() {
     this.passwordForm = new FormGroup({
       password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+      password2: new FormControl(''),
     });
+    this.sub = this.passwordForm.controls.password.valueChanges.subscribe(value => this.passwordForm.controls.password2.setValidators(
+      [Validators.required, Validators.pattern(value)]
+    ));
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
         this.service.password = this.passwordForm.controls.password.value;
@@ -162,7 +172,7 @@ export class BackupEndpointsComponent {
     }
 
     return result.asObservable();
-  }
+  };
 
 
   private getEndpointTypeString(endpoint: EndpointModel): string {

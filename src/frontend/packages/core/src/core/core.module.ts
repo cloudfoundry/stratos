@@ -30,6 +30,7 @@ import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
+import { ShowHideButtonComponent } from './show-hide-button/show-hide-button.component';
 import { StatefulIconComponent } from './stateful-icon/stateful-icon.component';
 import { TruncatePipe } from './truncate.pipe';
 import { UserProfileService } from './user-profile.service';
@@ -67,6 +68,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     StatefulIconComponent,
     NoContentMessageComponent,
     DisableRouterLinkDirective,
+    ShowHideButtonComponent
   ],
   providers: [
     AuthGuardService,
@@ -107,6 +109,7 @@ import { WindowRef } from './window-ref/window-ref.service';
     DisableRouterLinkDirective,
     NoContentMessageComponent,
     UserAvatarComponent,
+    ShowHideButtonComponent
   ],
   entryComponents: [
     LogOutDialogComponent
