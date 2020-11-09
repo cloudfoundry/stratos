@@ -234,12 +234,11 @@ export class AppModule {
     ).subscribe(
       ([entities, recents]) => {
         Object.values(recents).forEach(recentEntity => {
-          const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
-            const name = mapper(entityToMetadata).name;
+            const name = entityToMetadata.name;
             if (name && name !== recentEntity.name) {
               // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
@@ -265,10 +264,9 @@ export class AppModule {
       if (entity) {
         const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-          stratosEntityCatalog.userFavorite.api.updateFavorite({
-            ...favorite,
-            metadata: newMetadata
-          });
+          const fav = this.userFavoriteManager.getUserFavoriteFromObject(favorite);
+          fav.metadata = newMetadata;
+          stratosEntityCatalog.userFavorite.api.updateFavorite(fav);
         }
       }
     }

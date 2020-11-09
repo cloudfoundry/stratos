@@ -230,7 +230,7 @@ export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEnti
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
-  getGuid(entityMetadata: T): string;
+  getGuid(entity: Y): string;
   getLink?(entityMetadata: T): string;
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,

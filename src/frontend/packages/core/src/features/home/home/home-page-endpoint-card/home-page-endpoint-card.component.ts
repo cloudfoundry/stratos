@@ -34,6 +34,13 @@ const CUTOFF_SHOW_SHORTCUTS_ON_LEFT = 10;
 const MAX_SHORTCUTS = 5;
 const MAX_LINKS = 5;
 
+// Loading/error status of the card
+enum Status {
+  OK = 0,
+  Loading = 1,
+  Error = 2,
+}
+
 @Component({
   selector: 'app-home-page-endpoint-card',
   templateUrl: './home-page-endpoint-card.component.html',
@@ -76,10 +83,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   public link: string;
 
-  load$: Observable<boolean>;
-  loadSubj = new BehaviorSubject<boolean>(false);
-  isLoading = false;
-  isError = false;
+  // Status = 0 OK, 1 Loading, 2 Error
+  status$: Observable<Status>;
+  status = new BehaviorSubject<Status>(Status.OK);
 
   private ref: ComponentRef<HomePageEndpointCard>;
   private sub: Subscription;
@@ -100,7 +106,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     private compiler: Compiler,
     private injector: Injector,
   ) {
-    this.load$ = this.loadSubj.asObservable();
+    this.status$ = this.status.asObservable();
   }
 
   ngAfterViewInit() {
@@ -115,11 +121,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   ngOnInit() {
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid).pipe(
-      map(f => {
-        return f.map(item => this.userFavoriteManager.mapToHydrated(item));
-      })
-    );
+    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid);
 
     this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
     if (this.entity) {
@@ -132,14 +134,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       }
 
       this.fullView = this.definition.homeCard && this.definition.homeCard.fullView;
-
-      const mapper = this.favoritesConfigMapper.getMapperFunction(this.favorite);
-      if (mapper && this.favorite.metadata) {
-        const p = mapper(this.favorite.metadata);
-        if (p) {
-          this.link = p.routerLink;
-        }
-      }
+      this.link = this.favorite.getLink();
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
@@ -220,17 +215,18 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Ask the card to load itself
   loadCard() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
-      this.isLoading = true;
+      this.status.next(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
       // Timeout after 10 seconds
       this.sub = loadObs.pipe(timeout(10000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next();
-        this.isLoading = false;
+        setTimeout(() => this.status.next(Status.OK), 0);
+        this.sub.unsubscribe();
       }, () => {
         this.loaded.next();
-        this.isLoading = false;
-        this.isError = true;
+        this.status.next(Status.Error);
+        this.sub.unsubscribe();
       });
     }
   }

@@ -25,13 +25,9 @@ export function getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadat
 
 export function deriveEndpointFavoriteFromFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
   if (favorite.entityType !== 'endpoint') {
-    const endpointFav = {
-      ...favorite
-    };
-    endpointFav.entityId = null;
-    endpointFav.entityType = 'endpoint';
-    endpointFav.guid = UserFavorite.buildFavoriteStoreEntityGuid(endpointFav);
-    return endpointFav;
+    return new UserFavorite<IFavoriteMetadata>(
+      favorite.endpointId, favorite.endpointType, 'endpoint', null, favorite.metadata
+    );
   }
   return favorite;
 }

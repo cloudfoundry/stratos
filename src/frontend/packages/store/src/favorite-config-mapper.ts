@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
@@ -9,17 +8,6 @@ import { EndpointModel } from './types/endpoint.types';
 import { MenuItem } from './types/menu-item.types';
 import { EntityRequestAction } from './types/request.types';
 import { IFavoriteMetadata, IFavoriteTypeInfo, UserFavorite, UserFavoriteEndpoint } from './types/user-favorites.types';
-
-
-export interface IFavoriteTypes {
-  type: string;
-  prettyName: string;
-}
-
-/**
- * [label, value]
- */
-export type TFavoritesMetaCardLine = [string, string | Observable<string>];
 
 export interface IFavoritesMetaCardConfig {
   type: string;
@@ -61,7 +49,6 @@ export interface IFavoriteActionGenerators {
 })
 export class FavoritesConfigMapper {
   private mapperKeySeparator = '-';
-  // private mappers: IFavoriteMappers = {};
   constructor() { }
   public getMapperKeyFromFavoriteInfo(favoriteInfo: IFavoriteTypeInfo) {
     const { endpointType, entityType } = favoriteInfo;
@@ -69,55 +56,14 @@ export class FavoritesConfigMapper {
   }
 
   /**
-   * For a given favorite, return the corresponding favorite meta card mapper
-   */
-  public getMapperFunction<T extends IEntityMetadata = IEntityMetadata>(favorite: IFavoriteTypeInfo) {
-    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
-    return (entity: T) => {
-      if (!entity) {
-        return {
-          type: null,
-          routerLink: null,
-          name: null,
-          menuItems: null
-        };
-      }
-      return {
-        type: catalogEntity.definition.type,
-        routerLink: catalogEntity.builders.entityBuilder.getLink(entity),
-        name: entity.name,
-        menuItems: catalogEntity.builders.entityBuilder.getActions ? catalogEntity.builders.entityBuilder.getActions(entity) : null
-      };
-    };
-  }
-
-  /**
-   * For a given favorite, return the corresponding human readable type name
-   */
-  public getPrettyTypeName(favorite: IFavoriteTypeInfo) {
-    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
-    return catalogEntity ? catalogEntity.definition.label : null;
-  }
-
-  /**
-   * For a given favorite, return the corresponding hydration action
+   * For a given favorite, return the corresponding metadata
    */
   public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
     const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
     return catalogEntity ? catalogEntity.builders.entityBuilder.getMetadata(entity) : null;
   }
 
-  /**
-   * For a given endpoint type, return the list of possible favorite types
-   */
-  public getAllTypesForEndpoint(endpointType: string): IFavoriteTypes[] {
-    return entityCatalog.getAllEntitiesForEndpointType(endpointType).map(catalogEntity => ({
-      type: catalogEntity.definition.type,
-      prettyName: catalogEntity.definition.label
-    }));
-  }
-
-  private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+   private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     catalogEntity: StratosBaseCatalogEntity<T, Y>,
     entity: any,
     endpointId: string
@@ -127,7 +73,7 @@ export class FavoritesConfigMapper {
     const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
     const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(metadata);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(entity);
     if (!endpointId) {
       console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
     }

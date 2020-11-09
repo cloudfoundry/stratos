@@ -42,7 +42,7 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends 
   private createUserFavorite() {
     if (this.row && this.config) {
       this.favorite = this.config.createUserFavorite(this.row);
-      this.canFavorite = !!this.favoritesConfigMapper.getMapperFunction(this.favorite);
+      this.canFavorite = this.favorite.canFavorite();
     }
   }
 }

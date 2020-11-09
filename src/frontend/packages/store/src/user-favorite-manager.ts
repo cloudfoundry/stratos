@@ -4,7 +4,6 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
-import { entityCatalog } from './entity-catalog/entity-catalog';
 import { FavoritesConfigMapper } from './favorite-config-mapper';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
@@ -16,8 +15,13 @@ import {
 import { isFavorite } from './selectors/favorite.selectors';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
-import { IGroupedFavorites, IHydrationResults } from './types/user-favorite-manager.types';
 import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
+
+
+interface IGroupedFavorites {
+  endpoint: UserFavorite<IEndpointFavMetadata>;
+  entities: UserFavorite<IFavoriteMetadata>[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -86,7 +90,7 @@ export class UserFavoriteManager {
     favoriteEntities: IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>
   ): Observable<IGroupedFavorites> {
     const endpointFav = favoriteEntities[endpointFavoriteGuid] as UserFavorite<IEndpointFavMetadata>;
-    const entities = favEntitiesGuid.map(guid => this.mapToHydrated(favoriteEntities[guid]));
+    const entities = favEntitiesGuid.map(guid => this.getUserFavoriteFromObject(favoriteEntities[guid]));
     if (!endpointFav) {
       return this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
@@ -95,26 +99,19 @@ export class UserFavoriteManager {
           return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
         }),
         map(endpointFavorite => ({
-          endpoint: this.mapToHydrated<IEndpointFavMetadata>(endpointFavorite),
+          endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
           entities
         }))
       );
     }
     return of({
-      endpoint: this.mapToHydrated<IEndpointFavMetadata>(endpointFav),
+      endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFav),
       entities
     });
   }
 
-  public mapToHydrated = <T extends IFavoriteMetadata>(favorite: UserFavorite<T>): IHydrationResults<T> => {
-    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
-
-    return {
-      type: catalogEntity.definition.type,
-      cardMapper: this.favoritesConfigMapper.getMapperFunction(favorite),
-      prettyName: catalogEntity.definition.label,
-      favorite
-    };
+  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: UserFavorite<T>): UserFavorite<T> => {
+    return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
   }
 
   public hydrateFavorite(favorite: UserFavorite<IFavoriteMetadata>): IFavoriteMetadata {
@@ -140,7 +137,8 @@ export class UserFavoriteManager {
         const result = [];
         Object.values(favs).forEach(f => {
           if (f.endpointId === endpointID && f.entityId) {
-            result.push(f);
+            // Ensure we actually have a UserFavorite object and not a struct
+            result.push(this.getUserFavoriteFromObject(f));
           }
         })
         return result;

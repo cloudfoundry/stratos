@@ -337,7 +337,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
           };
         },
         getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
-        getGuid: metadata => metadata.guid,
+        getGuid: namespace => namespace.metadata.uid,
       }
     });
   return kubeEntityCatalog.namespace;

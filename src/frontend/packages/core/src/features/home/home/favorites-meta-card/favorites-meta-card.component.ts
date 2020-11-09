@@ -5,16 +5,10 @@ import { first } from 'rxjs/operators';
 
 import { IFavoritesMetaCardConfig } from '../../../../../../store/src/favorite-config-mapper';
 import { entityCatalog } from '../../../../../../store/src/public-api';
-import { IFavoriteEntity } from '../../../../../../store/src/types/user-favorite-manager.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
+import { FavoriteIconData, IFavoriteMetadata, UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-
-interface FavoriteIconData {
-  icon?: string;
-  iconFont?: string;
-}
 
 @Component({
   selector: 'app-favorites-meta-card',
@@ -28,9 +22,15 @@ export class FavoritesMetaCardComponent {
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 
-  public prettyName: string;
+  // Type of favorite - e.g. 'Application'
+  public favoriteType: string;
+
+  // Favorite name
+  public name: string;
 
   public config: IFavoritesMetaCardConfig;
+
+  public routerLink: string;
 
   public icon: FavoriteIconData;
 
@@ -43,24 +43,18 @@ export class FavoritesMetaCardComponent {
   ) {}
 
   @Input()
-  set favoriteEntity(favoriteEntity: IFavoriteEntity) {
+  set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {
     if (favoriteEntity) {
-      const { cardMapper, favorite, prettyName } = favoriteEntity;
-      this.favorite = favorite;
-      this.prettyName = prettyName || 'Unknown';
-      const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
-      this.icon = {
-        icon: entityDef.definition.icon,
-        iconFont: entityDef.definition.iconFont,
-      };
-
-      const config = cardMapper && favorite && favorite.metadata ? cardMapper(favorite.metadata) : null;
-      this.config = config;
+      this.favorite = favoriteEntity;
+      this.favoriteType = this.favorite.getPrettyTypeName();
+      this.icon = this.favorite.getIcon();
+      this.name = this.favorite.metadata.name
+      this.routerLink = this.favorite.getLink();
     }
   }
 
   openFavorite() {
-    if (!this.config.routerLink) {
+    if (!this.routerLink) {
       return;
     }
     const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
@@ -78,7 +72,7 @@ export class FavoritesMetaCardComponent {
         this.confirmDialog.open(confirmation, () => { this.userFavoriteManager.toggleFavorite(this.favorite); })
       } else {
         // Navigate to the favorite
-        this.router.navigate([this.config.routerLink]);
+        this.router.navigate([this.routerLink]);
       }
     });
   }
