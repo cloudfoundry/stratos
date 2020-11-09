@@ -90,8 +90,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
 
   public canFavorite(): boolean {
     // What do we need to be able to favorite an entity?
-    // TODO
-    return true;
+    return !!this.entityBuilder.getGuid && !!this.entityBuilder.getMetadata && !!this.entityBuilder.getLink;
   }
 
   // Get the link to navigate to the view for the given entity backing this user favorite

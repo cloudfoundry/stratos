@@ -1,6 +1,5 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import moment from 'moment';
 import { combineLatest, Observable, of, OperatorFunction } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
@@ -443,6 +442,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
   ];
 }
 
+// Helper operator
 function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
   return input$ => input$.pipe(
     pairwise(),
@@ -1214,7 +1214,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
-          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
         getLink: (metadata) => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
@@ -1255,7 +1254,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
-          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
         getGuid: entity => entity.metadata.guid,
@@ -1293,24 +1291,16 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       entityBuilder: {
         getMetadata: org => ({
           guid: org.metadata.guid,
-          status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
-          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
         getGuid: entity => entity.metadata.guid,
+        getIsValid: (metadata) => cfEntityCatalog.org.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
       }
     }
   );
   return cfEntityCatalog.org;
-}
-
-function getOrgStatus(org: APIResource<IOrganization>) {
-  if (!org || !org.entity || !org.entity.status) {
-    return 'Unknown';
-  }
-  return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
 }
 
 function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {
