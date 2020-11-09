@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { IFavoritesMetaCardConfig } from '../../../../../../store/src/favorite-config-mapper';
 import { entityCatalog } from '../../../../../../store/src/public-api';
 import { FavoriteIconData, IFavoriteMetadata, UserFavorite } from '../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
@@ -27,8 +26,6 @@ export class FavoritesMetaCardComponent {
 
   // Favorite name
   public name: string;
-
-  public config: IFavoritesMetaCardConfig;
 
   public routerLink: string;
 

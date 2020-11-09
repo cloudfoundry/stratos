@@ -5,8 +5,8 @@ import { filter, map } from 'rxjs/operators';
 
 import { IAppFavMetadata } from '../../../../cloud-foundry/src/cf-metadata-types';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
 import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -47,7 +47,7 @@ export class KubernetesNamespaceComponent {
     public kubeEndpointService: KubernetesEndpointService,
     public kubeNamespaceService: KubernetesNamespaceService,
     public analysisService: KubernetesAnalysisService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userFavoriteManager: UserFavoriteManager,
   ) {
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
@@ -75,7 +75,7 @@ export class KubernetesNamespaceComponent {
         prettyText: 'Kubernetes Namespace',
       },
       kubernetesNamespacesEntityType,
-      this.favoritesConfigMapper,
+      this.userFavoriteManager,
       KUBERNETES_ENDPOINT_TYPE
     ))
   );

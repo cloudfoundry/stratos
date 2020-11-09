@@ -9,7 +9,6 @@ import { map, startWith } from 'rxjs/operators';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
@@ -149,7 +148,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private tabNavService: TabNavService,
     private router: Router,
     eventService: GlobalEventService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
     private cups: CurrentUserPermissionsService,
     private endpointsService: EndpointsService,

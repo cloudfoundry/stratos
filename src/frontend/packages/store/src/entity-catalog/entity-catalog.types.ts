@@ -20,11 +20,11 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EndpointAuthTypeConfig } from '../extension-types';
-import { FavoritesConfigMapper } from '../favorite-config-mapper';
 import { EntitySchema } from '../helpers/entity-schema';
 import { EndpointModel } from '../types/endpoint.types';
 import { StratosStatus } from '../types/shared.types';
 import { UserFavorite } from '../types/user-favorites.types';
+import { UserFavoriteManager } from '../user-favorite-manager';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -161,7 +161,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
-    entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
+    entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
   /**
    * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type

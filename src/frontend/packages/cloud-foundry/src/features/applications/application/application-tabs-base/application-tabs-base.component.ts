@@ -20,13 +20,13 @@ import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/p
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../store/src/helpers/entity-schema';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
@@ -48,7 +48,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
+    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean }>;
@@ -62,7 +62,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     scmService: GitSCMService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userFavoriteManager: UserFavoriteManager,
     private appPollingService: ApplicationPollingService
   ) {
     const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);

@@ -4,7 +4,10 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
-import { FavoritesConfigMapper } from './favorite-config-mapper';
+import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
+import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
+import { EndpointModel, entityCatalog } from './public-api';
 import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
@@ -15,7 +18,13 @@ import {
 import { isFavorite } from './selectors/favorite.selectors';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
-import { IEndpointFavMetadata, IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
+import {
+  IEndpointFavMetadata,
+  IFavoriteMetadata,
+  IFavoriteTypeInfo,
+  UserFavorite,
+  UserFavoriteEndpoint,
+} from './types/user-favorites.types';
 
 
 interface IGroupedFavorites {
@@ -27,10 +36,7 @@ interface IGroupedFavorites {
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private favoritesConfigMapper: FavoritesConfigMapper
-  ) { }
+  constructor(private store: Store<GeneralEntityAppState>) { }
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
@@ -96,7 +102,7 @@ export class UserFavoriteManager {
         map(endpoints => {
           const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
           const endpointEntity = endpoints[endpointGuid];
-          return this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpointEntity);
+          return this.getFavoriteEndpointFromEntity(endpointEntity);
         }),
         map(endpointFavorite => ({
           endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
@@ -151,4 +157,57 @@ export class UserFavoriteManager {
     const idParts = p.slice(0, p.length - 2);
     return idParts.join('-');
   }
+
+  /**
+   * For a given favorite, return the corresponding metadata
+   */
+  public getEntityMetadata(favorite: IFavoriteTypeInfo, entity: any) {
+    const catalogEntity = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
+    return catalogEntity ? catalogEntity.builders.entityBuilder.getMetadata(entity) : null;
+  }
+
+   private buildFavoriteFromCatalogEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    catalogEntity: StratosBaseCatalogEntity<T, Y>,
+    entity: any,
+    endpointId: string
+  ) {
+    const isEndpoint = catalogEntity.isEndpoint;
+    const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
+    const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
+    const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(entity);
+    if (!endpointId) {
+      console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
+    }
+    return new UserFavorite<T>(
+      endpointId,
+      endpointType,
+      entityType,
+      guid,
+      metadata
+    );
+  }
+
+  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+    entityType: string,
+    endpointType: string,
+    endpointId: string,
+    entity: Y
+  ) {
+    const catalogEntity = entityCatalog.getEntity<T, Y>(endpointType, entityType) as StratosBaseCatalogEntity<T, Y>;
+    return this.buildFavoriteFromCatalogEntity<T, Y>(catalogEntity, entity, endpointId);
+  }
+
+  public getFavoriteEndpointFromEntity(
+    endpoint: EndpointModel
+  ): UserFavoriteEndpoint {
+    return this.getFavoriteFromEntity(
+      EntityCatalogHelpers.endpointType,
+      endpoint.cnsi_type,
+      endpoint.guid,
+      endpoint
+    );
+  }
+
 }

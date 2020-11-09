@@ -1,15 +1,15 @@
 import { IEntityMetadata } from '../../store/src/entity-catalog/entity-catalog.types';
-import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { UserFavorite } from '../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from './../../store/src/user-favorite-manager';
 import { CfAPIResource } from './store/types/cf-api.types';
 
 export function getFavoriteFromCfEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityType: string,
-  favoritesConfigMapper: FavoritesConfigMapper
+  userFavoriteManager: UserFavoriteManager
 ): UserFavorite<T> {
   if (isCfEntity(entity as CfAPIResource)) {
-    return favoritesConfigMapper.getFavoriteFromEntity<T>(
+    return userFavoriteManager.getFavoriteFromEntity<T>(
       entityType,
       'cf',
       entity.entity.cfGuid,

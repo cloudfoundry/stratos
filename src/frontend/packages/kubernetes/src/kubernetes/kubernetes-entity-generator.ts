@@ -14,9 +14,9 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
-import { FavoritesConfigMapper } from '../../../store/src/favorite-config-mapper';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -393,11 +393,9 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
 function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityType: string,
-  favoritesConfigMapper: FavoritesConfigMapper
+  userFavoriteManager: UserFavoriteManager
 ): UserFavorite<T> {
-  console.log('Hello');
-  console.log(entity);
-  return favoritesConfigMapper.getFavoriteFromEntity<T>(
+  return userFavoriteManager.getFavoriteFromEntity<T>(
     entityType,
     KUBERNETES_ENDPOINT_TYPE,
     entity.kubeGuid,

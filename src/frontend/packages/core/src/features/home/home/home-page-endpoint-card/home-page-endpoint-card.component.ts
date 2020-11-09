@@ -20,7 +20,6 @@ import {
   HomeCardShortcut,
   IStratosEndpointDefinition,
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
@@ -100,7 +99,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   fullView = false;
 
   constructor(
-    private favoritesConfigMapper: FavoritesConfigMapper,
     private userFavoriteManager: UserFavoriteManager,
     private sidePanelService: SidePanelService,
     private compiler: Compiler,
@@ -126,7 +124,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
     if (this.entity) {
       this.definition = this.entity.definition;
-      this.favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.endpoint);
+      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
 
       // Get the list of shortcuts for the endpoint for the given endpoint ID
       if (this.definition.homeCard && this.definition.homeCard.shortcuts) {
