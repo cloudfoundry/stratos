@@ -9,13 +9,15 @@ import { gitEntityCatalog } from './store/git-entity-generator';
     ngModule: EntityCatalogFeatureModule,
     providers: [
       {
-        provide: CATALOGUE_ENTITIES, useFactory: () => {
+        provide: CATALOGUE_ENTITIES,
+        useFactory: () => {
           const testEntityCatalog = entityCatalog as TestEntityCatalog;
           testEntityCatalog.clear();
           return [
             ...gitEntityCatalog.allGitEntities(),
           ];
-        }
+        },
+        multi: true
       }
     ]
   }]

@@ -21,7 +21,8 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
       ngModule: EntityCatalogFeatureModule,
       providers: [
         {
-          provide: CATALOGUE_ENTITIES, useFactory: () => {
+          provide: CATALOGUE_ENTITIES,
+          useFactory: () => {
             const testEntityCatalog = entityCatalog as TestEntityCatalog;
             testEntityCatalog.clear();
             return [
@@ -29,7 +30,8 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
               ...generateStratosEntities(),
               ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
             ];
-          }
+          },
+          multi: true
         }
       ]
     },
