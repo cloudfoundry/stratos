@@ -62,7 +62,7 @@ export class FavoritesMetaCardComponent {
       if (!isValid) {
         const confirmation = new ConfirmationDialogConfig(
           'Remove this Favorite?',
-          `The ${this.favorite.entityType} for this favorite appears to have been deleted. Remove the favorite?`,
+          `The ${this.favoriteType} for this favorite appears to have been deleted. Remove the favorite?`,
           'Remove',
           true
         );

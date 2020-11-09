@@ -1,6 +1,7 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { of } from 'rxjs';
+import { OperatorFunction } from 'rxjs';
+import { filter, map, pairwise } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -29,7 +30,7 @@ import {
   KubernetesSATokenAuthFormComponent,
 } from './auth-forms/kubernetes-serviceaccount-auth-form/kubernetes-serviceaccount-auth-form.component';
 import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
-import { kubeEntityCatalog } from './kubernetes-entity-catalog';
+import { kubeEntityCatalog, kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
   analysisReportEntityType,
   KUBERNETES_ENDPOINT_TYPE,
@@ -233,7 +234,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
             return mod.instance.createHomeCard(mod.componentFactoryResolver);
           });
         }),
-        fullView: true
+        fullView: false
         // shortcuts: k8sShortcuts
       }
   };
@@ -310,6 +311,17 @@ function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinit
   return kubeEntityCatalog.node;
 }
 
+
+function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
+  return input$ => input$.pipe(
+    pairwise(),
+    filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
+    map(([, newV]) => newV),
+    map(f => !(f as any).error)
+  )
+};
+
+
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: kubernetesNamespacesEntityType,
@@ -323,11 +335,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     definition, {
       actionBuilders: kubeNamespaceActionBuilders,
       entityBuilder: {
-        getIsValid: (favourite) => {
-          console.log('get is Valid for a namespace');
-          console.log(favourite);
-          return of(false)
-        },
+        getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.name, favorite.kubeGuid).pipe(entityFetchedWithoutError()),
         getMetadata: (namespace: any) => {
           return {
             endpointId: namespace.kubeGuid,
@@ -336,7 +344,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
             name: namespace.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
+        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}`,
         getGuid: namespace => namespace.metadata.uid,
       }
     });
