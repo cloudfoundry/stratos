@@ -1,8 +1,8 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import moment from 'moment';
-import { combineLatest, Observable, of } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { combineLatest, Observable, of, OperatorFunction } from 'rxjs';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
@@ -442,6 +442,15 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateCFMetrics(endpointDefinition)
   ];
 }
+
+function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
+  return input$ => input$.pipe(
+    pairwise(),
+    filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
+    map(([, newV]) => newV),
+    map(f => !(f as any).error)
+  )
+};
 
 function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
@@ -1208,11 +1217,9 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
           createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
-        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
+        getLink: (metadata) => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
         getGuid: metadata => metadata.guid,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ])
+        getIsValid: (metadata) => cfEntityCatalog.application.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
       },
       actionBuilders: applicationActionBuilder
     },
@@ -1250,11 +1257,14 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           cfGuid: space.entity.cfGuid,
           createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid
+        getGuid: metadata => metadata.guid,
+        getIsValid: (metadata) => cfEntityCatalog.space.api.get(metadata.guid, metadata.cfGuid).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
+          map(([, newV]) => newV),
+          map(f => !(f as any).error)
+        )
       }
     }
   );
@@ -1294,9 +1304,6 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
           createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
         getGuid: metadata => metadata.guid
       }
     }

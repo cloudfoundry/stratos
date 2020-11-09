@@ -229,18 +229,15 @@ export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEnti
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
-  getStatusObservable?(entity: Y): Observable<StratosStatus>;
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;
-  getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,
   };
   /**
    * Checks if the given entity is stil valid (e.g. has not been deleted)
-   * @param entityMetadata Entity metadata
    */
   getIsValid?(entityMetadata: T): Observable<boolean>;
   /**

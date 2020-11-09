@@ -328,11 +328,6 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
-    getLines: () => [
-      ['Address', (metadata) => metadata.address],
-      ['User', (metadata) => metadata.user],
-      ['Admin', (metadata) => metadata.admin]
-    ]
   };
   // This is needed here for typing
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;

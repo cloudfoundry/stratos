@@ -23,7 +23,6 @@ export type TFavoritesMetaCardLine = [string, string | Observable<string>];
 
 export interface IFavoritesMetaCardConfig {
   type: string;
-  lines?: TFavoritesMetaCardLine[];
   routerLink?: string;
   name: string;
   menuItems?: MenuItem[];
@@ -77,29 +76,19 @@ export class FavoritesConfigMapper {
     return (entity: T) => {
       if (!entity) {
         return {
-          lines: null,
           type: null,
           routerLink: null,
           name: null,
           menuItems: null
         };
       }
-      const linesBuilders = catalogEntity.builders.entityBuilder.getLines ? catalogEntity.builders.entityBuilder.getLines() : [];
       return {
-        lines: linesBuilders.map(builder => ([builder[0], builder[1](entity)])) as [string, string | Observable<string>][],
         type: catalogEntity.definition.type,
         routerLink: catalogEntity.builders.entityBuilder.getLink(entity),
         name: entity.name,
         menuItems: catalogEntity.builders.entityBuilder.getActions ? catalogEntity.builders.entityBuilder.getActions(entity) : null
       };
     };
-  }
-
-  /**
-   * Is there config for the given favorite type?
-   */
-  public hasFavoriteConfigForType(favorite: IFavoriteTypeInfo) {
-    return !!this.getMapperFunction(favorite);
   }
 
   /**
