@@ -125,13 +125,12 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
       this.config.getEventFilters().pipe(
         distinctUntilChanged()
       ).subscribe(params => {
-
         if (!this.initialSet) {
-          this.filtersFormGroup.controls.type.setValue(params.type);
-          this.filtersFormGroup.controls.actee.setValue(params.actee);
+          this.updateType(params.type);
+          this.updateActee(params.actee);
           this.initialSet = true;
         } else if (this.filtersFormGroup.controls.actee.value !== params.actee) {
-          this.filtersFormGroup.controls.actee.setValue(params.actee);
+          this.updateActee(params.actee);
         }
       })
     );
@@ -161,7 +160,18 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   }
 
   public clearActeeFilter() {
-    this.filtersFormGroup.patchValue({actee: ''});
+    this.filtersFormGroup.patchValue({ actee: '' });
+  }
+
+  private updateType(type: string[]) {
+    this.filtersFormGroup.controls.type.setValue(type);
+    this.filtersFormGroup.controls.type.markAsDirty();
+  }
+
+  private updateActee(actee: string) {
+    this.filtersFormGroup.controls.actee.setValue(actee);
+    this.filtersFormGroup.controls.actee.markAsDirty();
+    this.hasActeeFilter = !!actee;
   }
 
 }

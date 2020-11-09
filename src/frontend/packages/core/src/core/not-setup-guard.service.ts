@@ -1,12 +1,12 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CanActivate } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { AppState } from '../../../store/src/app-state';
-import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 
 const { proxyAPIVersion } = environment;
@@ -21,7 +21,7 @@ export class NotSetupGuardService implements CanActivate {
 
   canActivate(): Observable<boolean> {
 
-    const url = `/pp/${proxyAPIVersion}/auth/session/verify`;
+    const url = `/api/${proxyAPIVersion}/auth/verify`;
     return this.http.get(url).pipe(
       map(v => {
         // If the requests succeeds, then the user has a session, so everything must be setup already

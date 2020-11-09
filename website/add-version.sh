@@ -11,6 +11,11 @@ versionSha=$(jq -r '.release.tag_name' $GITHUB_EVENT_PATH)
 showVersionInDropDown=true
 internalVersionsFile="internal-versions.json"
 
+if [[ $versionLabel == "stable" ]]; then
+  echo "Skipping release, 'stable' is ignored"
+  exit 1
+fi
+
 echo Adding the following as latest docs version
 echo "Label            : $versionLabel"
 echo "Tag/Sha          : $versionSha"

@@ -1,0 +1,25 @@
+
+suite: test stratos custom certificate
+templates:
+  - deployment.yaml
+tests:
+  - it: should use cert if console.tlsSecretName set
+    set:
+      console.tlsSecretName: my-cert
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[1]
+          value:
+            name: RELEASE-NAME-cert-volume
+            secret:
+              secretName: my-cert
+  - it: should use default cert if console.tlsSecretName not set
+    release:
+      name: unitest
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[1]
+          value:
+            name: unitest-cert-volume
+            secret:
+              secretName: unitest-cert

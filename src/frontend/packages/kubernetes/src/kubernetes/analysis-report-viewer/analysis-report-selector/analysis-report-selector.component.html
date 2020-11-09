@@ -13,7 +13,7 @@
       issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and 
       doesn't contain the new report. This leaves user with no way to see report/refresh reports list
     -->
-    <button mat-button [matMenuTriggerFor]="appMenu">
+    <button mat-button [matMenuTriggerFor]="appMenu" class="analysis-menu-divider__overlay">
       <span>{{ prompt }}</span>
       <span *ngIf="selection">: {{ selection.title }}</span>
       <mat-icon>arrow_drop_down</mat-icon>

@@ -4,6 +4,7 @@ $stratos-icons-font-path: '../assets/fonts/stratos' !default;
 // See: https://google.github.io/material-design-icons/#icon-font-for-the-web
 
 @font-face {
+  font-display: block;
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
@@ -47,6 +48,7 @@ $stratos-icons-font-path: '../assets/fonts/stratos' !default;
 // Modified to include some extra icons for Stratos
 
 @font-face {
+  font-display: block;
   font-family: 'stratos-icons';
   font-style: normal;
   font-weight: normal;

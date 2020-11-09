@@ -144,6 +144,13 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
 	pp.Plugins["cf"] = initialisedEndpoint
+
+	pp.SessionStoreOptions = new(sessions.Options)
+	pp.SessionStoreOptions.Domain = "example.org"
+	pp.SessionStoreOptions.HttpOnly = false
+	pp.SessionStoreOptions.Secure = false
+	pp.SessionStoreOptions.Path = "/"
+
 	return pp
 }
 

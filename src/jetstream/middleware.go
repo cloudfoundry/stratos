@@ -92,6 +92,26 @@ func (p *portalProxy) sessionMiddleware() echo.MiddlewareFunc {
 	return p.sessionMiddlewareWithConfig(MiddlewareConfig{})
 }
 
+func (p *portalProxy) clearSessionCookie(c echo.Context, setCookieDomain bool) {
+	if setCookieDomain {
+		// Tell the frontend what the Cookie Domain is so it can check if sessions will work
+		// (used in verifySession)
+		c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
+	}
+
+	// Clear any session cookie
+	cookie := new(http.Cookie)
+	cookie.Name = p.SessionCookieName
+	cookie.Value = ""
+	cookie.Expires = time.Now().Add(-24 * time.Hour)
+	cookie.Domain = p.SessionStoreOptions.Domain
+	cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
+	cookie.Secure = p.SessionStoreOptions.Secure
+	cookie.Path = p.SessionStoreOptions.Path
+	cookie.MaxAge = 0
+	c.SetCookie(cookie)
+}
+
 func (p *portalProxy) sessionMiddlewareWithConfig(config MiddlewareConfig) echo.MiddlewareFunc {
 	// Default skipper function always returns false
 	if config.Skipper == nil {
@@ -115,26 +135,8 @@ func (p *portalProxy) sessionMiddlewareWithConfig(config MiddlewareConfig) echo.
 				return h(c)
 			}
 
-			// Don't log an error if we are verifying the session, as a failure is not an error
-			isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
-			if isVerify {
-				// Tell the frontend what the Cookie Domain is so it can check if sessions will work
-				c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
-			}
-
-			// Clear any session cookie
-			cookie := new(http.Cookie)
-			cookie.Name = p.SessionCookieName
-			cookie.Value = ""
-			cookie.Expires = time.Now().Add(-24 * time.Hour)
-			cookie.Domain = p.SessionStoreOptions.Domain
-			cookie.HttpOnly = p.SessionStoreOptions.HttpOnly
-			cookie.Secure = p.SessionStoreOptions.Secure
-			cookie.Path = p.SessionStoreOptions.Path
-			cookie.MaxAge = 0
-			c.SetCookie(cookie)
-
-			return handleSessionError(p.Config, c, err, isVerify, "User session could not be found")
+			p.clearSessionCookie(c, false)
+			return handleSessionError(p.Config, c, err, false, "User session could not be found")
 		}
 	}
 }
