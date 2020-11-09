@@ -26,6 +26,15 @@ import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
 
   @Input() finalStep: boolean;
+  private pFixedUrl: string;
+  @Input()
+  get fixedUrl(): string {
+    return this.pFixedUrl;
+  }
+  set fixedUrl(url: string) {
+    this.pFixedUrl = url;
+    this.urlField.model = this.pFixedUrl;
+  };
 
   existingEndpoints: Observable<{
     names: string[],
@@ -108,7 +117,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         };
       })
     );
-  }
+  };
 
 
   ngAfterContentInit() {

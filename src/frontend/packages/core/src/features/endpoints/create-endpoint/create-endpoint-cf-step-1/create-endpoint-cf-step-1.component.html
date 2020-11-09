@@ -8,12 +8,13 @@
   </mat-form-field>
   <mat-form-field novalidate>
     <input matInput id="url" name="url" ngModel #urlField="ngModel" type="url" required placeholder="Endpoint Address"
-      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
+      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls" [disabled]="!!fixedUrl">
     <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
   </mat-form-field>
-  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint
+  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel *ngIf="!fixedUrl">Skip SSL validation for the
+    endpoint
   </mat-checkbox>
   <div *ngIf="showAdvancedFields" class="create-endpoint__section">
     <h1 class="create-endpoint__section-title">Advanced Information (Optional)</h1>
