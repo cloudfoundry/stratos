@@ -30,7 +30,7 @@ import {
   KubernetesSATokenAuthFormComponent,
 } from './auth-forms/kubernetes-serviceaccount-auth-form/kubernetes-serviceaccount-auth-form.component';
 import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
-import { kubeEntityCatalog, kubeEntityCatalog } from './kubernetes-entity-catalog';
+import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import {
   analysisReportEntityType,
   KUBERNETES_ENDPOINT_TYPE,
