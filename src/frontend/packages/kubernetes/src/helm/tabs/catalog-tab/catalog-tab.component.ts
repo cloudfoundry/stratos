@@ -11,6 +11,8 @@ import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsListConfig } from '../../list-types/monocular-charts-list-config.service';
 
+const REPO_FILTER_NAME = 'repository';
+
 @Component({
   selector: 'app-catalog-tab',
   templateUrl: './catalog-tab.component.html',
@@ -86,6 +88,12 @@ export class CatalogTabComponent {
       }),
       startWith(null)
     );
+
+    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
+      first()
+    ).subscribe(pagination => {
+      this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+    });
   }
 
   /**
@@ -99,7 +107,7 @@ export class CatalogTabComponent {
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
         ...pagination.clientPagination.filter,
         items: {
-          repository: repoName,
+          [REPO_FILTER_NAME]: repoName,
         },
       }));
     });
