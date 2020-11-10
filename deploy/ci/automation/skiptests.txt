@@ -10,3 +10,7 @@ CF - Org - Invite User
 CF - Space - Invite User
 CF - Invite User Configuration
 Application Deploy Docker
+Create Service Instance with binding
+Delete Service Instance
+Manage Space
+Manage Space Quota
