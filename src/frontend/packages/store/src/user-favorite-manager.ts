@@ -65,10 +65,6 @@ export class UserFavoriteManager {
   }
 
   public hydrateAllFavorites(): Observable<IGroupedFavorites[]> {
-    return this.getHydrateObservable();
-  }
-
-  private getHydrateObservable() {
     return this.getAllFavorites().pipe(
       filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities),
       switchMap(([groups, favoriteEntities]) => this.getHydratedGroups(groups, favoriteEntities))
@@ -118,10 +114,6 @@ export class UserFavoriteManager {
 
   public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: UserFavorite<T>): UserFavorite<T> => {
     return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
-  }
-
-  public hydrateFavorite(favorite: UserFavorite<IFavoriteMetadata>): IFavoriteMetadata {
-    return favorite.metadata;
   }
 
   public getIsFavoriteObservable(favorite: UserFavorite<IFavoriteMetadata>) {
