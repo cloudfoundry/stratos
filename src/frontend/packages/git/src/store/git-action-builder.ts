@@ -1,46 +1,52 @@
-import {
-  EntityRequestActionConfig,
-  KnownEntityActionBuilder,
-  OrchestratedActionBuilderConfig,
-  OrchestratedActionBuilders,
-} from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GitMeta } from '../shared/scm/scm';
-import { FetchBranchesForProject, FetchBranchForProject, FetchCommits, FetchGitHubRepoInfo } from './git.actions';
+import {
+  FetchBranchesForProject,
+  FetchBranchForProject,
+  FetchCommit,
+  FetchCommits,
+  FetchGitHubRepoInfo,
+} from './git.actions';
 
 export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: (
+    endpointGuid: string,
     meta: GitMeta
   ) => FetchGitHubRepoInfo;
 }
 
 export const gitRepoActionBuilders: GitRepoActionBuilders = {
   getRepoInfo: (
+    endpointGuid: string,
     meta: GitMeta
-  ) => new FetchGitHubRepoInfo(meta)
+  ) => new FetchGitHubRepoInfo(meta, endpointGuid)
 };
 
-export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
-  get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
-  getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
-}
+// export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
+//   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
+//   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
+// }
 
 export interface GitCommitActionBuilders extends OrchestratedActionBuilders {
-  get: KnownEntityActionBuilder<GitMeta>;
+  get: (
+    guid: string,
+    endpointGuid: string,
+    meta: GitMeta
+  ) => FetchCommit;
   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
 }
 
-export const gitCommitActionBuilders: GitCommitActionBuildersConfig = {
-  get: new EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>(
-    (id, endpointGuid, meta) => meta.scm.getCommitApiUrl(meta.projectName, meta.commitSha),
-    {
-      externalRequest: true
-    }
-  ),
+export const gitCommitActionBuilders: GitCommitActionBuilders = {
+  get: (
+    guid: string,
+    endpointGuid: string,
+    meta: GitMeta
+  ) => new FetchCommit(meta.scm, endpointGuid, meta.commitSha, meta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,
     commitMeta: GitMeta
-  ) => new FetchCommits(commitMeta.scm, commitMeta.projectName, commitSha)
+  ) => new FetchCommits(commitMeta.scm, endpointGuid, commitMeta.projectName, commitSha)
 };
 
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
@@ -67,10 +73,10 @@ export const gitBranchActionBuilders: GitBranchActionBuilders = {
     guid: string,
     endpointId: string,
     meta: GitMeta
-  ) => new FetchBranchForProject(meta.scm, meta.projectName, guid, meta.branchName),
+  ) => new FetchBranchForProject(meta.scm, endpointId, meta.projectName, guid, meta.branchName),
   getMultiple: (
     endpointGuid: string = null,
     paginationKey: string = null,
     meta?: GitMeta
-  ) => new FetchBranchesForProject(meta.scm, meta.projectName)
+  ) => new FetchBranchesForProject(meta.scm, endpointGuid, meta.projectName)
 };

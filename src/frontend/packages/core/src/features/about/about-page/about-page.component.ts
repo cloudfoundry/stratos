@@ -10,8 +10,9 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { catchError, filter, map } from 'rxjs/operators';
 
+import { gitEntityCatalog, GitSCMService } from '../../../../../git/src/public_api';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
@@ -39,7 +40,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
-    cs: CustomizationService
+    cs: CustomizationService,
+    private gitSCMService: GitSCMService,
   ) {
     this.customizations = cs.get();
   }
@@ -63,6 +65,21 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
     this.addAboutInfoComponent();
     this.addSupportInfo();
+
+
+    gitEntityCatalog.branch.api.getMultiple(
+      'Z6KJAVYeHPkiEPuZty0-kArqors',
+      null,
+      {
+        projectName: 'richard-cox/my-private-repo',
+        scm: this.gitSCMService.getSCM('github')
+      }
+    ).pipe(
+      catchError(err => {
+        console.error(err);
+        return null;
+      })
+    ).subscribe(res => console.log(res));
   }
 
   ngOnDestroy() {

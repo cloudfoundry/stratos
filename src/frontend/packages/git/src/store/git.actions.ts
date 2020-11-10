@@ -25,7 +25,13 @@ import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '.
 // TODO: RC 4) in scm(?) if subtype is public use endpoint url
 
 export class FetchBranchForProject implements EntityRequestAction {
-  constructor(public scm: GitSCM, public projectName: string, public guid: string, public branchName: string) {
+  constructor(
+    public scm: GitSCM,
+    public endpointGuid: string,
+    public projectName: string,
+    public guid: string,
+    public branchName: string
+  ) {
     this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`;
   }
   actions = [
@@ -39,7 +45,11 @@ export class FetchBranchForProject implements EntityRequestAction {
 }
 
 export class FetchBranchesForProject implements PaginatedAction {
-  constructor(public scm: GitSCM, public projectName: string) {
+  constructor(
+    public scm: GitSCM,
+    public endpointGuid: string,
+    public projectName: string,
+  ) {
     this.paginationKey = FetchBranchesForProject.createPaginationKey(scm, projectName);
   }
   actions = [
@@ -59,7 +69,12 @@ export class FetchBranchesForProject implements PaginatedAction {
 export class FetchCommit implements EntityRequestAction {
   commit: GitCommit;
   public endpointType = GIT_ENDPOINT_TYPE;
-  constructor(public scm: GitSCM, public commitSha: string, public projectName: string) { }
+  constructor(
+    public scm: GitSCM,
+    public endpointGuid: string,
+    public commitSha: string,
+    public projectName: string
+  ) { }
   type = FETCH_COMMIT;
   entityType = gitCommitEntityType;
 }
@@ -71,7 +86,12 @@ export class FetchCommits implements PaginatedAction {
    * @param projectName For example `cloudfoundry-incubator/stratos`
    * @param sha Branch name, tag, etc
    */
-  constructor(public scm: GitSCM, public projectName: string, public sha: string) {
+  constructor(
+    public scm: GitSCM,
+    public endpointGuid: string,
+    public projectName: string,
+    public sha: string
+  ) {
     this.paginationKey = scm.getType() + projectName + sha;
   }
   actions = [
@@ -90,7 +110,10 @@ export class FetchCommits implements PaginatedAction {
 }
 
 export class FetchGitHubRepoInfo implements EntityRequestAction {
-  constructor(public meta: GitMeta) {
+  constructor(
+    public meta: GitMeta,
+    public endpointGuid: string,
+  ) {
     this.guid = this.meta.scm.getType() + '-' + this.meta.projectName;
   }
   type = FETCH_GITHUB_REPO;

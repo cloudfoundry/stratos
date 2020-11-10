@@ -33,7 +33,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   }
   set fixedUrl(url: string) {
     this.pFixedUrl = url;
-    this.urlField.model = this.pFixedUrl;
+    this.urlField.reset(this.pFixedUrl);
+    // TODO: RC blank on first visit... even when set
   };
 
   existingEndpoints: Observable<{
@@ -89,7 +90,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       subType,
       this.nameField.value,
       this.urlField.value,
-      !!this.skipSllField.value,
+      this.skipSllField ? !!this.skipSllField.value : false,
       this.clientIDField ? this.clientIDField.value : '',
       this.clientSecretField ? this.clientSecretField.value : '',
       this.ssoAllowedField ? !!this.ssoAllowedField.value : false,

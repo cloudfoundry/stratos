@@ -6,12 +6,14 @@ import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from '.
 export const GIT_ENDPOINT_TYPE = 'git';
 
 export enum GIT_ENDPOINT_SUB_TYPES {
-  PUBLIC_GIT = 'public_git',
-  PRIVATE_GIT = 'private_git',
-  PUBLIC_GITHUB = 'public_github',
-  PRIVATE_GITHUB = 'private_github',
-  PUBLIC_GITLAB = 'public_gitlab',
-  PRIVATE_GITLAB = 'private_gitlab',
+  // PUBLIC_GIT = 'public_git',
+  // PRIVATE_GIT = 'private_git',
+  GITHUB = 'github',
+  GITLAB = 'gitlab',
+  // PUBLIC_GITHUB = 'public_github',
+  // PRIVATE_GITHUB = 'private_github',
+  // PUBLIC_GITLAB = 'public_gitlab',
+  // PRIVATE_GITLAB = 'private_gitlab',
 }
 
 const entityCache: {

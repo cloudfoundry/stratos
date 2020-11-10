@@ -23,7 +23,7 @@ export class SetAppSourceDetails implements Action {
 }
 
 export class CheckProjectExists implements Action {
-  constructor(public scm: GitSCM, public projectName: any) { }
+  constructor(public scm: GitSCM, public endpointGuid: string, public projectName: any) { }
   type = CHECK_PROJECT_EXISTS;
 }
 

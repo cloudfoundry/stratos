@@ -10,13 +10,11 @@ import {
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
-import { GitMeta } from '../shared/scm/scm';
 import {
   GitBranchActionBuilders,
   gitBranchActionBuilders,
   GitCommitActionBuilders,
   gitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
 } from './git-action-builder';
@@ -35,7 +33,6 @@ class GitEntityCatalog {
   public commit: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     GitCommit,
-    GitCommitActionBuildersConfig,
     GitCommitActionBuilders
   >;
 
@@ -60,72 +57,30 @@ class GitEntityCatalog {
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/Git-logo.png',
       authTypes: [],
-      renderPriority: 20,
       registrationComponent: GitRegistrationComponent,
+      registeredLimit: () => 0,
       subTypes: [
         {
-          // TODO: RCuse better images for public/private
-          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GIT,
-          label: 'Public GIT',
-          labelShort: 'Public GIT',
-          authTypes: [],
-          unConnectable: true,
-          logoUrl: '/core/assets/Git-logo.png',
-          renderPriority: 1,
-          registrationComponent: null
-        },
-        {
-          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GIT,
-          label: 'Private GIT',
-          labelShort: 'Private GIT',
+          type: GIT_ENDPOINT_SUB_TYPES.GITHUB,
+          label: 'Github',
+          labelShort: 'Github',
           authTypes: [
-            BaseEndpointAuth.UsernamePassword, // TODO: RC this should not be username/password
+            BaseEndpointAuth.UsernamePassword // TODO: RC this isn't username password
           ],
-          logoUrl: '/core/assets/Git-logo.png', // TODO: RC location of all these
-          renderPriority: 2,
-          registrationComponent: null,
-        },
-        {
-          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GITHUB,
-          label: 'Public Github',
-          labelShort: 'Public Github',
-          authTypes: [],
-          unConnectable: true,
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
-          renderPriority: 3,
-          registeredLimit: () => 1,
-          registrationComponent: null
+          renderPriority: 50,
+          registeredLimit: () => Number.MAX_SAFE_INTEGER,
         },
         {
-          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GITHUB,
-          label: 'Private Github',
-          labelShort: 'Private Github',
-          authTypes: [],
-          logoUrl: '/core/assets/endpoint-icons/github-logo.png',
-          renderPriority: 4,
-          registeredLimit: () => 1,
-          registrationComponent: null
-        },
-        {
-          type: GIT_ENDPOINT_SUB_TYPES.PUBLIC_GITLAB,
-          label: 'Public Gitlab',
-          labelShort: 'Public Gitlab',
-          authTypes: [],
-          unConnectable: true,
+          type: GIT_ENDPOINT_SUB_TYPES.GITLAB,
+          label: 'Gitlab',
+          labelShort: 'Gitlab',
+          authTypes: [
+            BaseEndpointAuth.UsernamePassword // TODO: RC this isn't username password
+          ],
           logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
-          renderPriority: 5,
-          registeredLimit: () => 1,
-          registrationComponent: null
-        },
-        {
-          type: GIT_ENDPOINT_SUB_TYPES.PRIVATE_GITLAB,
-          label: 'Private Gitlab',
-          labelShort: 'Private Gitlab',
-          authTypes: [],
-          logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
-          renderPriority: 6,
-          registeredLimit: () => 1,
-          registrationComponent: null
+          renderPriority: 51,
+          registeredLimit: () => Number.MAX_SAFE_INTEGER,
         },
       ]
     };
@@ -147,15 +102,16 @@ class GitEntityCatalog {
       labelPlural: 'Git Commits',
       endpoint: endpointDefinition,
       nonJetstreamRequest: true,
-      successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
-        const metadata = (action.metadata as GitMeta[])[0];
-        return {
-          ...metadata.scm.convertCommit(metadata.projectName, data),
-          guid: action.guid
-        };
-      },
+      // TODO: RC remove generic request
+      // successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      //   const metadata = (action.metadata as GitMeta[])[0];
+      //   return {
+      //     ...metadata.scm.convertCommit(endpointGuid, metadata.projectName, data),
+      //     guid: action.guid
+      //   };
+      // },
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
+    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuilders>(
       definition,
       {
         dataReducers: [
