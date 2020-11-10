@@ -28,11 +28,6 @@
           <ng-template #noLink>
             <div class="recent-entity--name">{{ countedEntity.entity.name }}</div>
           </ng-template>
-          <!-- Don't show the date 
-          <div class="type-info" *ngIf="countedEntity.mostRecentHit">
-            {{ countedEntity.mostRecentHit | amTimeAgo }}
-          </div>
-          -->
           <div class="type-info">
             <span>{{ countedEntity.subText$ | async }}</span>
           </div>

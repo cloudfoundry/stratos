@@ -1,7 +1,0 @@
-<div class="compact-app-card" *ngIf="app">
-  <app-application-state-icon [status]="appStatus$ | async "></app-application-state-icon>
-  <div class="compact-app-card__name">
-    <a [routerLink]="['/applications', activeRouteCfOrgSpace.cfGuid , app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
-  </div>
-  <div class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
-</div>

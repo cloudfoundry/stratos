@@ -9,8 +9,6 @@ import { map, startWith } from 'rxjs/operators';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
@@ -89,26 +87,18 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
-      this.pFavorite = favorite;
-      const mapperFunction = this.favoritesConfigMapper.getMapperFunction(favorite);
-      const prettyType = this.favoritesConfigMapper.getPrettyTypeName(favorite);
-      const prettyEndpointType = this.favoritesConfigMapper.getPrettyTypeName({
-        endpointType: favorite.endpointType,
-        entityType: EntityCatalogHelpers.endpointType
-      });
-      if (mapperFunction) {
-        const { name, routerLink } = mapperFunction(favorite.metadata);
+      if (favorite.canFavorite()) {
+        this.pFavorite = favorite;
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
           date: moment().valueOf(),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,
-          name,
-          routerLink,
-          prettyType,
+          name: favorite.metadata.name,
+          routerLink: favorite.getLink(),
+          prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
-          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType
         }));
       }
     }
@@ -158,7 +148,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private tabNavService: TabNavService,
     private router: Router,
     eventService: GlobalEventService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
     private cups: CurrentUserPermissionsService,
     private endpointsService: EndpointsService,

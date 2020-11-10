@@ -15,6 +15,8 @@ export class TileSelectorTileComponent<Y = ITileGraphic> {
 
   @Input() smaller = false;
 
+  @Input() compact = false;
+
   @Output() tileSelect = new EventEmitter<ITileConfig>();
 
   public onClick(tile: ITileConfig) {

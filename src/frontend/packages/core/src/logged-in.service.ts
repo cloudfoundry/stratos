@@ -55,7 +55,7 @@ export class LoggedInService {
 
     this.sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
-        if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
+        if (auth.loggedIn && auth.sessionData && auth.sessionData.valid && !auth.error) {
           if (!this.sessionChecker || this.sessionChecker.closed) {
             this.openSessionCheckerPoll();
           }

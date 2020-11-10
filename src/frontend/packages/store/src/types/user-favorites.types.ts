@@ -1,4 +1,6 @@
-import { IEntityMetadata } from '../entity-catalog/entity-catalog.types';
+import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { IEntityMetadata, IStratosEntityBuilder, IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
+import { StratosBaseCatalogEntity } from './../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 
 export const userFavoritesPaginationKey = 'userFavorites';
 
@@ -38,10 +40,18 @@ export interface BackendUserFavorite {
   metadata: string;
 }
 
+export interface FavoriteIconData {
+  icon?: string;
+  iconFont?: string;
+}
+
 const favoriteGuidSeparator = '-';
 
 export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo {
   public guid: string;
+
+  private catalogEntity: StratosBaseCatalogEntity;
+  private entityBuilder: IStratosEntityBuilder<IEntityMetadata>;
 
   constructor(
     public endpointId: string,
@@ -53,32 +63,14 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     public entityId?: string,
     public metadata: T = null
   ) {
-    this.guid = UserFavorite.buildFavoriteStoreEntityGuid(this);
-  }
-
-  static buildFavoriteStoreEntityGuid(favorite: UserFavorite<IFavoriteMetadata>) {
-    const {
-      entityId,
-      endpointId,
-      entityType,
-      endpointType,
-    } = favorite;
-    return [
-      entityId,
-      endpointId,
-      entityType,
-      endpointType,
-    ]
-      .reduce((newArray, value) => {
-        if (value) {
-          return [
-            ...newArray,
-            value,
-          ];
-        }
-        return newArray;
-      }, [])
-      .join(favoriteGuidSeparator);
+    // Set the guid for this favorite
+    this.buildFavoriteStoreEntityGuid();
+    this.catalogEntity = entityCatalog.getEntity(this.endpointType, this.entityType);
+    if (this.catalogEntity && this.catalogEntity.builders && this.catalogEntity.builders.entityBuilder) {
+      this.entityBuilder = this.catalogEntity.builders.entityBuilder;
+    } else {
+      this.entityBuilder = {} as IStratosEntityBuilder<IEntityMetadata>;
+    }
   }
 
   static getEntityGuidFromFavoriteGuid(favoriteGuid: string): string {
@@ -94,6 +86,39 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
         `${favoriteGuidSeparator}${parts[parts.length - 2]}${favoriteGuidSeparator}${parts[parts.length - 1]}`,
         '');
     }
+  }
+
+  public canFavorite(): boolean {
+    // What do we need to be able to favorite an entity?
+    return !!this.entityBuilder.getGuid && !!this.entityBuilder.getMetadata && !!this.entityBuilder.getLink;
+  }
+
+  // Get the link to navigate to the view for the given entity backing this user favorite
+  public getLink(): string {
+    return this.entityBuilder.getLink ? this.entityBuilder.getLink(this.metadata) : null;
+  }
+
+  // Get the type name, e.g. 'Application'
+  public getPrettyTypeName(): string {
+    return this.catalogEntity && this.catalogEntity.definition ? this.catalogEntity.definition.label : 'Unknown';
+  }
+
+  // Get icon data for the favorite
+  public getIcon(): FavoriteIconData {
+    const defn = this.catalogEntity && this.catalogEntity.definition ? this.catalogEntity.definition : {} as IStratosEntityDefinition;
+    return {
+      icon: defn.icon || 'help',
+      iconFont: defn.iconFont
+    }
+  }
+
+  private buildFavoriteStoreEntityGuid() {
+    this.guid = [this.entityId, this.endpointId, this.entityType, this.endpointType].reduce((newArray, value) => {
+      if (value) {
+        return [ ...newArray, value ];
+      }
+      return newArray;
+    }, []).join(favoriteGuidSeparator);
   }
 }
 

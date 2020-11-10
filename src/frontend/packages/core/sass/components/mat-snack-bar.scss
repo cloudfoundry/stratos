@@ -1,0 +1,9 @@
+.mat-snack-bar-container.stepper-snack-bar {
+  .mat-simple-snackbar {
+    & > span {
+      max-height: 150px;
+      overflow-y: auto;
+      word-break: break-word;
+    }
+  }
+}

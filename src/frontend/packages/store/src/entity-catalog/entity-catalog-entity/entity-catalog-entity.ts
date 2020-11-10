@@ -179,11 +179,10 @@ export class StratosBaseCatalogEntity<
   }
 
   public getGuidFromEntity(entity: Y) {
-    if (!this.builders.entityBuilder || !this.builders.entityBuilder.getGuid || !this.builders.entityBuilder.getMetadata) {
-      return null;
+    if (this.builders.entityBuilder && this.builders.entityBuilder.getGuid) {
+      return this.builders.entityBuilder.getGuid(entity);
     }
-    const metadata = this.builders.entityBuilder.getMetadata(entity);
-    return this.builders.entityBuilder.getGuid(metadata);
+    return null;
   }
 
   public getEndpointGuidFromEntity(entity: Y & EntityPipelineEntity) {
@@ -328,11 +327,6 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
-    getLines: () => [
-      ['Address', (metadata) => metadata.address],
-      ['User', (metadata) => metadata.user],
-      ['Admin', (metadata) => metadata.admin]
-    ]
   };
   // This is needed here for typing
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;

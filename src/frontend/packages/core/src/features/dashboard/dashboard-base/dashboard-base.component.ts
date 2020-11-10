@@ -17,7 +17,7 @@ import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-ca
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
-import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
@@ -42,6 +42,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public noMargin$: Observable<boolean>;
   private closeSub: Subscription;
   private mobileSub: Subscription;
+  private sidePanelSub: Subscription;
   private drawer: MatDrawer;
   public iconModeOpen = false;
   public sideNavWidth = 54;
@@ -52,6 +53,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
 
   @ViewChild('content') public content;
+
+  // Slide-in side panel mode
+  sidePanelMode: SidePanelMode = 0;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -93,6 +97,10 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
         }
       })
     );
+
+    this.sidePanelSub = this.sidePanelService.previewMode$.subscribe(mode => {
+      this.sidePanelMode = mode
+    });
 
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
@@ -154,6 +162,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
     this.sidePanelService.unsetContainer();
+    this.sidePanelSub.unsubscribe();
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {

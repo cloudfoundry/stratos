@@ -2,12 +2,12 @@ import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList }
 import { combineLatest, Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
@@ -56,6 +56,9 @@ export class MetaCardComponent implements OnDestroy {
   statusBackground = false;
 
   @Input()
+  mode: string;
+
+  @Input()
   clickAction: () => void = null;
 
   @Input()
@@ -72,7 +75,7 @@ export class MetaCardComponent implements OnDestroy {
           tap(entity => this.favorite = getFavoriteFromEntity(
             entity,
             entityConfig.schema.entityType,
-            this.favoritesConfigMapper,
+            this.userFavoriteManager,
             entityConfig.schema.endpointType
           ))
         ).subscribe();
@@ -114,7 +117,7 @@ export class MetaCardComponent implements OnDestroy {
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,
-    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userFavoriteManager: UserFavoriteManager,
   ) { }
 
   ngOnDestroy() {

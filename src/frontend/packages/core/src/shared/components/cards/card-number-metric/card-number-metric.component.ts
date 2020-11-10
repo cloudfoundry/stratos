@@ -35,6 +35,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() labelAtTop = false;
   @Input() link: () => void | string;
   @Output() showAlerts = new EventEmitter<any>();
+  @Input() mode: string;
 
   @Input('alerts')
   set alerts(alerts) {

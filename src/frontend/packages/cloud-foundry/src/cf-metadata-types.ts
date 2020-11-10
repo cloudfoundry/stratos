@@ -9,7 +9,6 @@ export interface ISpaceFavMetadata extends IFavoriteMetadata {
 
 export interface IOrgFavMetadata extends IFavoriteMetadata {
   guid: string;
-  status: string;
   name: string;
   cfGuid: string;
 }

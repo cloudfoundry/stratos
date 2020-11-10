@@ -62,6 +62,7 @@ describe('Delete Space', () => {
 
       // Find the Org and click on it
       const list = new ListComponent();
+      list.header.refresh();
       return list.cards.findCardByTitle(orgName, MetaCardTitleType.CUSTOM, true).then(card => {
         expect(card).toBeDefined();
         card.click();

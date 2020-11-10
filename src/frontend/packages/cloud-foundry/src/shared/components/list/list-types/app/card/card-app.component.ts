@@ -7,11 +7,11 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
@@ -38,9 +38,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   constructor(
     private store: Store<CFAppState>,
     private appStateService: ApplicationStateService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
-
-
+    private userFavoriteManager: UserFavoriteManager
   ) {
     super();
   }
@@ -54,7 +52,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
       this.row.entity.space_guid
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
+    this.favorite = getFavoriteFromEntity(this.row, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

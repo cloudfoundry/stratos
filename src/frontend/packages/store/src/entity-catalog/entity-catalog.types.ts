@@ -1,3 +1,4 @@
+import { Compiler, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -19,11 +20,11 @@ import {
   PaginationPageIteratorConfig,
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EndpointAuthTypeConfig } from '../extension-types';
-import { FavoritesConfigMapper } from '../favorite-config-mapper';
 import { EntitySchema } from '../helpers/entity-schema';
 import { EndpointModel } from '../types/endpoint.types';
 import { StratosStatus } from '../types/shared.types';
 import { UserFavorite } from '../types/user-favorites.types';
+import { UserFavoriteManager } from '../user-favorite-manager';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -58,6 +59,20 @@ export interface IStratosEntityWithIcons {
 export interface IEntityMetadata {
   name: string;
   [key: string]: string;
+}
+
+export interface HomeCardShortcut {
+  title: string;
+  link: string[];
+  icon: string;
+  iconFont?: string;
+}
+
+// Metadata for Home Card
+export interface HomeCardMetadata {
+  component?: (compiler: Compiler, injector: Injector) => any;
+  shortcuts?: (endpointID: string) => HomeCardShortcut[];
+  fullView?: boolean;
 }
 
 /**
@@ -146,7 +161,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
-    entity: any, entityKey: string, favoritesConfigMapper: FavoritesConfigMapper
+    entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
   /**
    * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
@@ -161,6 +176,11 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    * Note - These should be restricted by type
    */
   readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+
+  /**
+   * Metadata for the card to show on the Home Page for this endpoint type
+   */
+  readonly homeCard?: HomeCardMetadata;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -209,15 +229,17 @@ export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEnti
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
-  getStatusObservable?(entity: Y): Observable<StratosStatus>;
   // TODO This should be used in the entities schema.
-  getGuid(entityMetadata: T): string;
+  getGuid(entity: Y): string;
   getLink?(entityMetadata: T): string;
-  getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,
   };
+  /**
+   * Checks if the given entity is stil valid (e.g. has not been deleted)
+   */
+  getIsValid?(entityMetadata: T): Observable<boolean>;
   /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions

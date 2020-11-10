@@ -1,6 +1,6 @@
 <ng-template #content>
   <div class="number-metric-card">
-    <mat-card *ngIf="!textOnly; else textOnlyTemplate" class="number-metric-card__container">
+    <mat-card *ngIf="!textOnly; else textOnlyTemplate" class="number-metric-card__container" [ngClass]="{'number-metric-card__plain': mode === 'plain'}">
       <app-card-status [status$]="status$"></app-card-status>
       <mat-icon *ngIf="icon" [fontSet]="iconFont" class="number-metric-card__icon">{{ icon }}</mat-icon>
       <div class="number-metric-card__container-inner"

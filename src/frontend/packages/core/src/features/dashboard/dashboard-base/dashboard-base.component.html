@@ -33,7 +33,7 @@
                 </div>
               </div>
             </div>
-            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}">
+            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}" cdkScrollable>
               <router-outlet></router-outlet>
             </div>
           </div>
@@ -42,9 +42,10 @@
     </mat-drawer-content>
   </mat-drawer-container>
   <mat-drawer class="dashboard__side-help-outer" #sideHelp
-    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async)}" [autoFocus]="false" mode="over"
+    [ngClass]="{'dashboard__side_preview': sidePanelMode >= 0}" [autoFocus]="false" mode="over"
     position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
-    <div class="dashboard__side-help">
+    <div class="dashboard__side-help"
+      [ngClass]="{'dashboard__side-narrow': sidePanelMode === 2}">
       <template #previewPanelContainer></template>
     </div>
   </mat-drawer>

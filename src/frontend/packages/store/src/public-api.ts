@@ -24,3 +24,6 @@ export { BaseEntityValues } from './types/entity.types';
 export { WrapperRequestActionSuccess } from './types/request.types';
 
 export { flattenPagination, PaginationFlattener } from './helpers/paginated-request-helpers';
+
+// Operators
+export { entityFetchedWithoutError } from './operators';

@@ -1,0 +1,47 @@
+:host {
+  display: flex;
+}
+.recent-apps-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  &__plain {
+    box-shadow: none;
+  }
+
+  &__content {
+    display: flex;
+    overflow-y: auto;
+  }
+
+  &__header {
+    display: flex;
+    flex: 1;
+    height: 40px;
+    justify-content: space-between;
+
+    mat-card-title {
+      margin-bottom: 0;
+    }
+
+    app-polling-indicator {
+      margin-right: -10px;
+      margin-top: -10px;
+    }
+  }
+
+  &__scroller {
+    height: 100%;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+}
+
+// Remove box shadow in plain mode
+.recent-apps-card.mat-card.recent-apps-card__plain {
+  box-shadow: none;
+  padding: 0 1em;
+}

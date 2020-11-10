@@ -1,6 +1,7 @@
 @mixin app-card-number-metric-theme($theme, $app-theme) {
   $status-colors: map-get($app-theme, status);
   $subdued: mat-color($app-theme, subdued-color);
+  $foreground: map-get($theme, foreground);
 
   $status-colors: map-get($app-theme, status);
   $status-warning: map-get($status-colors, warning);
@@ -27,4 +28,9 @@
       background-color: $status-warning;
     }
   }
+
+  .number-metric-card__plain.mat-card {
+    border: 1px solid mat-color($foreground, divider);
+  }
+  
 }

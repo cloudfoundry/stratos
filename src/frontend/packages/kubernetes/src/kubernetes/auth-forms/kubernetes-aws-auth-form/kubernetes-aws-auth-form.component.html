@@ -7,7 +7,11 @@
       <input matInput placeholder="Access Key ID" formControlName="access_key">
     </mat-form-field>
     <mat-form-field>
-      <input matInput placeholder="Secret Access Key" type="password" formControlName="secret_key">
+      <input matInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
+        formControlName="secret_key">
+      <span matSuffix>
+        <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+      </span>
     </mat-form-field>
   </div>
 </div>
