@@ -8,7 +8,7 @@ image_resource:
   type: docker-image
   source:
    # Generated using scripts/Dockerfile.stratos-ci
-   repository: splatform/stratos-ci-concourse
+   repository: ghcr.io/cf-stratos/stratos-ci-concourse
 
 run:
   path: sh
