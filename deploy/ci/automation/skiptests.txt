@@ -4,7 +4,9 @@ CF/Org Level/Remove user roles (only spaces)
 Cf Users List
 Autoscaler/Autoscaler Event Page
 Autoscaler/Autoscaler Detach Policy
+Autoscaler/'Autoscaler Edit Policy
 Service Instance from Marketplace
 CF - Org - Invite User
 CF - Space - Invite User
 CF - Invite User Configuration
+Application Deploy Docker

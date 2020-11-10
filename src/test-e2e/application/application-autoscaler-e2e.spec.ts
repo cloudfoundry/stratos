@@ -348,7 +348,7 @@ describe('Autoscaler -', () => {
     });
   });
 
-  describe('Autoscaler Edit Policy -', () => {
+  describe('Autoscaler Edit Policy', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy: CreateAutoscalerPolicy;
 

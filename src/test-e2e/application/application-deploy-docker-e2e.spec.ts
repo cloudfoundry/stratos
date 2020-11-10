@@ -10,7 +10,7 @@ import { ApplicationPageSummaryTab } from './po/application-page-summary.po';
 let applicationE2eHelper: ApplicationE2eHelper;
 let cfHelper: CFHelpers;
 
-describe('Application Deploy Docker -', () => {
+describe('Application Deploy Docker', () => {
 
   const testAppStack = e2e.secrets.getDefaultCFEndpoint().testDeployAppStack;
   let defaultStack = '';
