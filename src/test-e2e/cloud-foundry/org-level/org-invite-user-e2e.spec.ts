@@ -5,7 +5,7 @@ import { SideNavMenuItem } from '../../po/side-nav.po';
 import { setupInviteUserTests } from '../invite-users-e2e.helper';
 import { CfOrgLevelPage } from './cf-org-level-page.po';
 
-describe('CF - Org - Invite User - ', () => {
+describe('CF - Org - Invite User', () => {
   let orgPage: CfOrgLevelPage;
 
   const navToOrgUserList = (cfHelper: CFHelpers, defaultCf: E2EConfigCloudFoundry) => {

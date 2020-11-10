@@ -5,5 +5,5 @@ Cf Users List
 Autoscaler/Autoscaler Event Page
 Autoscaler/Autoscaler Detach Policy
 Service Instance from Marketplace
-CF - Org - Invite User -
-CF - Space - Invite User -
+CF - Org - Invite User
+CF - Space - Invite User
