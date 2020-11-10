@@ -7,3 +7,4 @@ Autoscaler/Autoscaler Detach Policy
 Service Instance from Marketplace
 CF - Org - Invite User
 CF - Space - Invite User
+CF - Invite User Configuration

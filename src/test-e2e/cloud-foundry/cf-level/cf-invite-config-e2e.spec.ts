@@ -11,7 +11,7 @@ import { ConfigInviteClientDialog } from './config-invite-client-dialog.po';
  * Test the invite user config process.
  * Note - We test non-admin disabled case in `src/test-e2e/cloud-foundry/cf-level/cf-top-level-e2e.spec.ts`
  */
-describe('CF - Invite User Configuration - ', () => {
+describe('CF - Invite User Configuration', () => {
   let defaultCf: E2EConfigCloudFoundry = e2e.secrets.getDefaultCFEndpoint();
 
   let cfPage: CfTopLevelPage;
