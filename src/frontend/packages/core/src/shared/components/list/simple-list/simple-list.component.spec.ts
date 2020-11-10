@@ -35,7 +35,6 @@ describe('SimpleListComponent', () => {
     endpoint,
   }, {
     entityBuilder: {
-      getLines: () => ([]),
       getMetadata: () => ({ name: 'test' }),
       getGuid: () => 'test',
     },
