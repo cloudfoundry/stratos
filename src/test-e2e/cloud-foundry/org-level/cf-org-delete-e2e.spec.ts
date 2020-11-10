@@ -4,6 +4,7 @@ import { e2e } from '../../e2e';
 import { CFHelpers } from '../../helpers/cf-e2e-helpers';
 import { ConsoleUserType, E2EHelpers } from '../../helpers/e2e-helpers';
 import { CFPage } from '../../po/cf-page.po';
+import { ListComponent } from '../../po/list.po';
 import { SideNavMenuItem } from '../../po/side-nav.po';
 import { CfTopLevelPage } from '../cf-level/cf-top-level-page.po';
 
@@ -51,6 +52,8 @@ describe('Delete Organization', () => {
       cfPage.waitForPageOrChildPage();
       cfPage.loadingIndicator.waitUntilNotShown();
       cfPage.goToOrgTab();
+      const list = new ListComponent();
+      list.header.refresh();
       cfPage.deleteOrg(orgName);
       expect(element(by.tagName('app-cards')).getText()).not.toContain(orgName);
     });
