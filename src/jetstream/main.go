@@ -957,11 +957,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	staticDir, staticDirErr := getStaticFiles(p.Env().String("UI_PATH", "./ui"))
 
-	api := e.Group("/api")
-	api.Use(p.setSecureCacheContentMiddleware)
-
 	// Verify Session
-	api.GET("/v1/auth/verify", p.verifySession)
+	e.GET("/api/v1/auth/verify", p.verifySession)
 
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
@@ -1013,7 +1010,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
 
 	// API endpoints with Swagger documentation and accessible with an API key
-	stableAPIGroup := api.Group("/v1")
+	stableAPIGroup := e.Group("/api/v1")
 	stableAPIGroup.Use(p.apiKeyMiddleware)
 	stableAPIGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
 	stableAPIGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))

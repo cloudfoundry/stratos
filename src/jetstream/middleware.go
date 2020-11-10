@@ -24,6 +24,9 @@ const cfSessionCookieName = "JSESSIONID"
 // Header to communicate the configured Cookie Domain
 const StratosDomainHeader = "x-stratos-domain"
 
+// Header to communicate whether SSO Login is enabled and if so, any configured options
+const StratosSSOHeader = "x-stratos-sso-login"
+
 // Header to communicate any error during SSO
 const StratosSSOErrorHeader = "x-stratos-sso-error"
 
@@ -38,6 +41,17 @@ const APIKeyAuthScheme = "Bearer"
 
 func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error, doNotLog bool, msg string) error {
 	log.Debug("handleSessionError")
+
+	// Add header so front-end knows SSO login is enabled
+	if config.SSOLogin {
+		// A non-empty SSO Header means SSO is enabled
+		// Use the string "enabled" or send the options string if we have one
+		options := "enabled"
+		if len(config.SSOOptions) > 0 {
+			options = config.SSOOptions
+		}
+		c.Response().Header().Set(StratosSSOHeader, options)
+	}
 
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(

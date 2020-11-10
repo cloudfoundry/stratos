@@ -33,9 +33,6 @@ const (
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"
 	jetStreamSessionContextUpdatedKey = "jetstream-session-updated"
-
-	// Header to communicate whether SSO Login is enabled and if so, any configured options
-	stratosSSOHeader = "x-stratos-sso-login"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
@@ -301,17 +298,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	}
 
 	if jsonErr != nil {
-		// Add header so front-end knows SSO login is enabled
-		if p.Config.SSOLogin {
-			// A non-empty SSO Header means SSO is enabled
-			// Use the string "enabled" or send the options string if we have one
-			options := "enabled"
-			if len(p.Config.SSOOptions) > 0 {
-				options = config.SSOOptions
-			}
-			c.Response().Header().Set(stratosSSOHeader, options)
-		}
-
 		return jsonErr
 	}
 
