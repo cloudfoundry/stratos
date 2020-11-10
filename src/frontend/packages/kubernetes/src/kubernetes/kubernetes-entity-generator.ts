@@ -1,7 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { OperatorFunction } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { entityFetchedWithoutError } from '@stratosui/store';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -310,17 +309,6 @@ function generateNodesEntity(endpointDefinition: StratosEndpointExtensionDefinit
   });
   return kubeEntityCatalog.node;
 }
-
-
-function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
-  return input$ => input$.pipe(
-    pairwise(),
-    filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
-    map(([, newV]) => newV),
-    map(f => !(f as any).error)
-  )
-};
-
 
 function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {

@@ -1,7 +1,8 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of, OperatorFunction } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { entityFetchedWithoutError } from '@stratosui/store';
+import { combineLatest, Observable, of } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../core/src/core/utils.service';
@@ -441,16 +442,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateCFMetrics(endpointDefinition)
   ];
 }
-
-// Helper operator
-function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
-  return input$ => input$.pipe(
-    pairwise(),
-    filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
-    map(([, newV]) => newV),
-    map(f => !(f as any).error)
-  )
-};
 
 function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
