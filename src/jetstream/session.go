@@ -277,30 +277,10 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return info, err
 	}
 
-	var jsonErr error
-
 	info, sessionVerifyErr := collectErrors(p, c)
 	if sessionVerifyErr != nil {
 		p.clearSessionCookie(c, true)
 
-		jsonErr = c.JSON(
-			http.StatusOK,
-			SessionInfoEnvelope{
-				Status: "error",
-				Error:  sessionVerifyErr.Error(),
-			},
-		)
-	} else {
-		jsonErr = c.JSON(
-			http.StatusOK,
-			SessionInfoEnvelope{
-				Status: "ok",
-				Data:   info,
-			},
-		)
-	}
-
-	if jsonErr != nil {
 		// Add header so front-end knows SSO login is enabled
 		if p.Config.SSOLogin {
 			// A non-empty SSO Header means SSO is enabled
@@ -312,8 +292,20 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			c.Response().Header().Set(stratosSSOHeader, options)
 		}
 
-		return jsonErr
+		return c.JSON(
+			http.StatusOK,
+			SessionInfoEnvelope{
+				Status: "error",
+				Error:  sessionVerifyErr.Error(),
+			},
+		)
 	}
 
-	return nil
+	return c.JSON(
+		http.StatusOK,
+		SessionInfoEnvelope{
+			Status: "ok",
+			Data:   info,
+		},
+	)
 }
