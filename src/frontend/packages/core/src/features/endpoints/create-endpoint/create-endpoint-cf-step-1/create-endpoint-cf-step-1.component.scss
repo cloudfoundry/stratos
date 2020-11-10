@@ -7,6 +7,17 @@ mat-checkbox {
   padding-top: 40px;
 }
 
+form.stepper-form {
+  max-width: unset;
+  mat-form-field,
+  mat-checkbox {
+    max-width: 450px;
+  }
+  P {
+    max-width: unset;
+  }
+}
+
 .create-endpoint {
   &__section {
     margin-top: 40px;
@@ -17,5 +28,22 @@ mat-checkbox {
   }
   &__sso {
     margin-top: 40px;
+  }
+  &__advanced {
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    margin-left: 24px;
+    overflow: hidden;
+    h1 {
+      font-size: 14px;
+    }
+    p {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+  }
+  &__shown {
+    height: auto;
   }
 }
