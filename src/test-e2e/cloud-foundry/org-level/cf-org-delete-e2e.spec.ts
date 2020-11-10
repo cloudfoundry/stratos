@@ -35,9 +35,6 @@ describe('Delete Organization', () => {
       return cfHelper.baseAddOrg(cfGuid, orgName).then(org => {
         orgGuid = org.metadata.guid;
         return cfHelper.baseAddSpace(cfGuid, orgGuid, spaceName);
-      }).catch(e => {
-        console.error('Failed to create org/space');
-        console.error(e);
       });
     });
   });
