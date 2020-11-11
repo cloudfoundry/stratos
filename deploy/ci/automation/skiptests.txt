@@ -2,9 +2,7 @@ Create Service Instance
 Application Deploy/Redeploy
 CF/Org Level/Remove user roles (only spaces)
 Cf Users List
-Autoscaler/Autoscaler Event Page
-Autoscaler/Autoscaler Detach Policy
-Autoscaler/'Autoscaler Edit Policy
+Autoscaler
 Service Instance from Marketplace
 CF - Org - Invite User
 CF - Space - Invite User
