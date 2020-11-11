@@ -42,9 +42,30 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     return this.gitHubURL;
   }
 
-  getAPIUrl(): Observable<string> {
+  getAPIUrl(): Observable<{
+    url: string,
+    requestArgs:
+  }> {
+    // TODO: RC
+    // If endpoint has user.... return jetstream url and cnsi-list in header... otherwise endpoint url... otherwise if no endpoint public
+    if (this.endpointGuid) {
+      return of(this.getPublicApiUrl());
+    }
+    return this.getEndpoint(this.endpointGuid).pipe(
+      map(endpoint => {
+        if (endpoint.user) {
+
+        }
+      }),
+      map(getFullEndpointApiUrl),
+      tap(url => { console.log('getAPIUrl: ', url); })
+    );
     return super.getAPIUrl() || of(this.getPublicApiUrl());
   }
+
+  // 'x-cap-cnsi-list': cfGuid
+  // const requestArgs  = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint :'' } };
+
 
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     return this.getAPIUrl().pipe(

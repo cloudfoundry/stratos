@@ -31,7 +31,6 @@ export class NewApplicationBaseStepComponent {
     if (tile) {
       const baseUrl = 'applications';
       const type = tile.data.type;
-      const endpointGuid = tile.data.endpointGuid;
       const query = {
         [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
       };

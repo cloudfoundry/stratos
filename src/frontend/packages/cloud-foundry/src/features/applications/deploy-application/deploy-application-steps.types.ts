@@ -92,24 +92,23 @@ export class ApplicationDeploySourceTypes {
   ) {
     this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(e => !!e),
+      first(),
       map(endpoints => endpoints.reduce((res, e) => {
-        const newType = this.isGitSourceTypeFromEndpoint(e);
+        const newType = this.createGitSourceTypeFromEndpoint(e);
         if (newType) {
           res.push(newType);
         }
         return res;
-      }, [...this.types]))
+      }, [...this.types])),
+      publishReplay(1),
+      refCount()
     );
   }
 
-  private createGitSourceTypeFromEndpoint(endpoint: EndpointModel, type: DEPLOY_TYPES_IDS): SourceType {
-    // By this point we know that
-    return;;
-  }
 
   // TODO: RC handle permissions denied when fetching repo and guide user to add creds
 
-  private isGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
+  private createGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
     // We need to show any git of types lab and hub and that uses a custom url (github.com and gitlab.com use standard options)
     if (endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
       return;
@@ -125,7 +124,18 @@ export class ApplicationDeploySourceTypes {
         type: DEPLOY_TYPES_IDS.GITLAB
       } : null;
     // I.E. It's a custom/new git addres
-    if (!!scm && getFullEndpointApiUrl(endpoint) !== scm.getPublicApiUrl()) {
+    if (!scm) {
+      // Unknown git type
+      return;
+    }
+
+    const endpointUrl = getFullEndpointApiUrl(endpoint);
+    if (endpointUrl === scm.getPublicApiUrl()) {
+      // We've got creds for a pulbic git type, ensure we use them
+      // Sneakily update the existing reference // TODO: RC fix
+      this.types.find(t => t.id === type).endpointGuid = endpoint.guid;
+    } else {
+      // This is a custom instance of a git type, use similar settings to the public
       return {
         ...this.types.find(t => t.id === type),
         name: `Private - ${endpoint.name}`,
@@ -133,7 +143,6 @@ export class ApplicationDeploySourceTypes {
       };
     }
   };
-
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];

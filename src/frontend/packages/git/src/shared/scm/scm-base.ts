@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../store/src/public-api';
@@ -14,7 +14,8 @@ export abstract class BaseSCM {
       return null;
     }
     return this.getEndpoint(this.endpointGuid).pipe(
-      map(getFullEndpointApiUrl)
+      map(getFullEndpointApiUrl),
+      tap(url => { console.log('getAPIUrl: ', url); })
     );
   }
 

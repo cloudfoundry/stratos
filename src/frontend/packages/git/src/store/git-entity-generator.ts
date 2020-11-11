@@ -8,6 +8,7 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { EndpointAuthTypeConfig } from '../../../store/src/extension-types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
 import {
@@ -21,6 +22,23 @@ import {
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
+
+const enum GitEndpointAuthTypes {
+  GITHUB_TOKEN = 'github-token',
+  GITLAB_TOKEN = 'gitlab-token',
+}
+
+const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
+  [GitEndpointAuthTypes.GITHUB_TOKEN]: {
+    ...BaseEndpointAuth.Token,
+    help: '/core/assets/connect/github.md'
+  },
+  [GitEndpointAuthTypes.GITLAB_TOKEN]: {
+    ...BaseEndpointAuth.UsernamePassword,
+    help: '/core/assets/connect/github.md'
+  },
+};
+// TODO: RC custom field text
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -65,7 +83,8 @@ class GitEntityCatalog {
           label: 'Github',
           labelShort: 'Github',
           authTypes: [
-            BaseEndpointAuth.UsernamePassword // TODO: RC this isn't username password
+            BaseEndpointAuth.UsernamePassword, // TODO: RC this isn't username password,
+            gitAuthTypeMap[GitEndpointAuthTypes.GITHUB_TOKEN]
           ],
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
           renderPriority: 50,
@@ -76,7 +95,8 @@ class GitEntityCatalog {
           label: 'Gitlab',
           labelShort: 'Gitlab',
           authTypes: [
-            BaseEndpointAuth.UsernamePassword // TODO: RC this isn't username password
+            BaseEndpointAuth.UsernamePassword, // TODO: RC this isn't username password
+            gitAuthTypeMap[GitEndpointAuthTypes.GITLAB_TOKEN]
           ],
           logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
           renderPriority: 51,

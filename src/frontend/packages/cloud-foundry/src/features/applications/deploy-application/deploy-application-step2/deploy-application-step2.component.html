@@ -13,9 +13,9 @@
             <div class="github-project-details">
               <div>
                 <mat-form-field>
-                  <!-- TODO: RC appGithubProjectExists endpoint guid -->
                   <input type="text" matInput [matAutocomplete]="auto" [disabled]="isRedeploy" [(ngModel)]="repository"
-                    placeholder="Project" name="projectName" [appGithubProjectExists]="sourceType.id + ','" required>
+                    placeholder="Project" name="projectName"
+                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required>
                   <!-- Repository auto complete helper -->
                   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
                     <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo">{{repo}}</mat-option>
