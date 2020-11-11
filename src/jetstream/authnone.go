@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -42,14 +42,14 @@ func (a *noAuth) Logout(c echo.Context) error {
 
 //GetUsername gets the user name for the specified local user
 func (a *noAuth) GetUsername(userid string) (string, error) {
-	return "admin", nil
+	return interfaces.DefaultAdminUserName, nil
 }
 
 //GetUser gets the user guid for the specified local user
 func (a *noAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	var scopes []string
 	scopes = make([]string, 1)
-	scopes[0] = "password.write"
+	scopes[0] = "stratos.noauth"
 
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   noAuthUserID,
@@ -88,7 +88,6 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 
 //VerifySession for no authentication - always passes
 func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
-	a.p.ensureXSRFToken(c)
 	return nil
 }
 
