@@ -23,15 +23,21 @@ RUN CERTS_PATH=/home/stratos/dev-certs ./generate_cert.sh
 FROM splatform/stratos-bk-base:leap15_2
 ARG CANARY_BUILD
 
-COPY --from=jetstream-builder /home/stratos/deploy/db /src/deploy/db
-COPY --from=jetstream-builder /home/stratos/dev-certs /srv/dev-certs
-COPY --from=jetstream-builder /home/stratos/ui /srv/ui
-COPY --from=jetstream-builder /home/stratos/jetstream /srv/jetstream
+# Add a jetstream user so we don't run as root
+RUN useradd -M -U -u 2000 jetstream
+RUN usermod -aG users jetstream
+
+# Ensure that the /srv folder is in the users group so that the jetstream user can write to it
+RUN mkdir -p /srv && chgrp users /srv && chmod 775 /srv
+
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/dev-certs /srv/dev-certs
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/ui /srv/ui
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/jetstream /srv/jetstream
 RUN chmod +x /srv/jetstream
-COPY --from=jetstream-builder /home/stratos/config.properties /srv/config.properties
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/config.properties /srv/config.properties
 
 # User Invite templates
-COPY --from=jetstream-builder /home/stratos/src/jetstream/templates /srv/templates
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/src/jetstream/templates /srv/templates
 
 # Enable persistence features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEATURES=true\n" >> /srv/config.properties ; fi
@@ -40,13 +46,6 @@ RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEA
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nENABLE_TECH_PREVIEW=true\n" >> /srv/config.properties ; fi
 
 EXPOSE 5443
-
-# Add a jetstream user so we don't run as root
-RUN useradd -M -U -u 2000 jetstream
-RUN usermod -aG users jetstream
-
-# Ensure that the /srv folder is in the users group so that the jetstream user can write to it
-RUN chgrp users /srv && chmod 775 /srv
 
 USER jetstream
 
