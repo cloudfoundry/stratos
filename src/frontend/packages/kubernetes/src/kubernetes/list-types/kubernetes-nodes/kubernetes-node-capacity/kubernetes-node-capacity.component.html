@@ -1,0 +1,19 @@
+<div class="kube-node-capacity">
+  <div class="legend-items-container">
+    <div class="legend-items">
+      <div class="legend-item" tabindex="-1">
+        <div class="item-value">{{ getMemory(row.status.capacity.memory) | bytesToHumanSize }}</div>
+        <div class="item-label">Memory</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend-items-container">
+    <div class="legend-items">
+      <div class="legend-item" tabindex="-1">
+        <div class="item-value">{{ row.status.capacity.cpu }}</div>
+        <div class="item-label">CPU</div>
+      </div>
+    </div>
+  </div>
+</div>

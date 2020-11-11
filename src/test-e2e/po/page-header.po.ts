@@ -50,17 +50,25 @@ export class PageHeader extends Component {
     browser.wait(this.until.textToBePresentInElement(this.getTitle(), text), 10000, `Failed to wait for page header with text ${text}`);
   }
 
-  logout(): promise.Promise<any> {
+  getUserMenu(): ElementFinder {
     return this.locator.element(by.id('userMenu'))
+  }
+
+  clickUserMenuItem(itemText: string): promise.Promise<any> {
+    return this.getUserMenu()
       .click()
       .then(() => {
         // browser.driver.sleep(2000);
         const menu = new MenuComponent();
         menu.waitUntilShown();
-        menu.clickItem('Logout');
+        menu.clickItem(itemText);
         // browser.driver.sleep(2000);
         return browser.waitForAngular();
       });
+  }
+
+  logout(): promise.Promise<any> {
+    return this.clickUserMenuItem('Logout');
   }
 
 }

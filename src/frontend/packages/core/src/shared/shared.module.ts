@@ -54,8 +54,10 @@ import {
   TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
+import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
+import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
@@ -116,6 +118,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
 
@@ -310,16 +313,19 @@ import { UserPermissionDirective } from './user-permission.directive';
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent
+    MaxListMessageComponent,
+    ...listTableCells
   ],
   providers: [
     ListConfig,
     EndpointListHelper,
     EndpointsListConfigService,
+    ApiKeyListConfigService,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
+    SessionService
   ]
 })
 export class SharedModule { }

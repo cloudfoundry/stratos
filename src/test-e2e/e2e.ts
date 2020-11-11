@@ -21,7 +21,7 @@ export class E2E {
   */
   public static customization: CustomizationsMetadata = {
     alwaysShowNavForEndpointTypes: (epType) => true
-  }
+  };
 
   // General helpers
   public helper = new E2EHelpers();
@@ -198,7 +198,7 @@ export class E2ESetup {
       E2E.debugLog('Create session as user: ' + (userType === ConsoleUserType.admin ? 'admin' : 'user'));
       return this.reqHelper.createSession(req, userType);
     });
-  }
+  };
 
   private getReq(userType: ConsoleUserType) {
     if (userType === ConsoleUserType.admin) {

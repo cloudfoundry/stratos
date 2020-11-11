@@ -1,0 +1,9 @@
+<div *ngIf="hasUser">
+  <mat-select [(value)]="selected" (selectionChange)="valueChanged($event.value)">
+    <mat-option [value]="''">Register Only</mat-option>
+    <mat-option *ngFor="let user of row._users" [value]="user.name">{{ user.name }}</mat-option>
+  </mat-select>
+</div>
+<div *ngIf="!hasUser">
+  No user found, register only
+</div>

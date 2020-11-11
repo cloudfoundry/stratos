@@ -2,7 +2,7 @@ import { by, element, ElementFinder, promise } from 'protractor';
 
 import { Component } from '../../po/component.po';
 
-export class MessageNoAutoscalePolicy extends Component {
+export class MessageNoContentPo extends Component {
 
   constructor(locator: ElementFinder = element(by.tagName('app-no-content-message'))) {
     super(locator);

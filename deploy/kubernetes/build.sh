@@ -19,7 +19,7 @@ BOLD="\033[1m"
 PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
-BASE_IMAGE_TAG=leap15_1
+BASE_IMAGE_TAG=leap15_2
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
@@ -137,8 +137,8 @@ __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 STRATOS_PATH=${__DIRNAME}/../../
 source "${STRATOS_PATH}/deploy/common-build.sh"
 
-if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh" ]; then
-  source "${STRATOS_PATH}/custom-src/deploy/kubernetes/custom-build.sh"
+if [ -f "${STRATOS_PATH}/deploy/kubernetes/custom/custom-build.sh" ]; then
+  source "${STRATOS_PATH}/deploy/kubernetes/custom/custom-build.sh"
   HAS_CUSTOM_BUILD="true"
 fi
 
@@ -169,10 +169,9 @@ function patchDockerfile {
   if [ "${DOCKER_REG_DEFAULTS}" == "false" ]; then
     sed -i.bak "s@splatform@${DOCKER_REGISTRY}/${DOCKER_ORG}@g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   fi
-  sed -i.bak "s/opensuse/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
+  sed -i.bak "s/leap15_2/${BASE_IMAGE_TAG}/g" "${FOLDER}/${PATCHED_DOCKER_FILE}"
   popd > /dev/null 2>&1
 }
-
 
 #
 # MAIN -------------------------------------------------------------------------------------------
@@ -184,7 +183,9 @@ popd > /dev/null 2>&1
 echo "Base path: ${STRATOS_PATH}"
 
 # cleanup output, intermediate artifacts
-cleanup
+if [ "${CHART_ONLY}" == "false" ]; then
+  cleanup
+fi
 
 # Clean any old patched docker files left if previously errored
 # rm -rf ${STRATOS_PATH}/deploy/Dockerfile.*.patched
@@ -213,6 +214,14 @@ if [ "${CHART_ONLY}" == "false" ]; then
   log "-- Building/publishing the runtime container image for the Console web server (frontend)"
   patchAndPushImage stratos-console deploy/Dockerfile.ui "${STRATOS_PATH}" prod-build
 
+  # Build and push an image for the Kubernetes Terminal
+  log "-- Building/publishing Kubernetes Terminal"
+  patchAndPushImage stratos-kube-terminal Dockerfile.kubeterminal "${STRATOS_PATH}/deploy/containers/kube-terminal"
+  
+  # Analzyers container
+  log "-- Building/publishing Stratos Analyzers"
+  patchAndPushImage stratos-analyzers Dockerfile "${STRATOS_PATH}/src/jetstream/plugins/analysis/container"
+ 
   # Build any custom images added by a fork
   if [ "${HAS_CUSTOM_BUILD}" == "true" ]; then
     custom_image_build
@@ -237,9 +246,9 @@ rm -rf "${DEST_HELM_CHART_PATH}/**/*.orig"
 
 # Run customization script if there is one
 # This can do things like provide a custom __stratos.tpl file
-if [ -f "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
+if [ -f "${STRATOS_PATH}/deploy/kubernetes/custom/customize-helm.sh" ]; then
   printf "${YELLOW}${BOLD}Applying Helm Chart customizations${RESET}\n"
-  "${STRATOS_PATH}/custom-src/deploy/kubernetes/customize-helm.sh" "${DEST_HELM_CHART_PATH}"
+  "${STRATOS_PATH}/deploy/kubernetes/custom/customize-helm.sh" "${DEST_HELM_CHART_PATH}"
 fi
 
 # Fetch subcharts
@@ -295,5 +304,5 @@ printf "${RESET}"
 echo
 echo "To deploy using Helm, execute the following:"
 echo 
-echo "    helm install helm-chart --namespace console --name my-console"
+echo "    helm install my-console ./helm-chart --namespace console"
 echo

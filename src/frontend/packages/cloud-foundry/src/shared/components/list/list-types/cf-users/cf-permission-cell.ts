@@ -1,4 +1,4 @@
-import { Input, Directive } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -11,7 +11,7 @@ import { ConfirmationDialogService } from '../../../../../../../core/src/shared/
 import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
 import { selectSessionData } from '../../../../../../../store/src/reducers/auth.reducer';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
+import { IUserRole } from '../../../../../features/cf/cf.helpers';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 
@@ -28,7 +28,7 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
 }
 
 @Directive()
-export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
+export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
   @Input('row')

@@ -17,6 +17,13 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     line-height: $desktop-menu-item-height;
     min-width: 128px;
     padding: 0 24px;
+
+    &.hasIcon {
+      padding-left: 16px;
+      .mat-icon {
+        margin-right: 12px;
+      }
+    }
   }
 
   .mat-menu-panel {
@@ -56,6 +63,10 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     font-size: $desktop-font-size;
   }
 
+  .mat-slide-toggle-label {
+    font-size: $desktop-font-size;
+  }
+
   // Allow a slightly-wider snackbar on desktop
   .mat-snack-bar-container {
     max-width: 40vw;
@@ -92,6 +103,7 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
         line-height: normal;
       }
     }
+
   }
 
   // Smaller page header
@@ -107,4 +119,28 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
     flex: 0 0 $desktop-page-header-height;
     height: $desktop-page-header-height;
   }
+
+  mat-drawer.dashboard__side_preview {
+    top: $desktop-page-header-height;
+    height: calc(100vw - #{$desktop-page-header-height} - 1px);
+  }
+
+  app-profile-info .user-profile {
+    top: $desktop-page-header-height;
+  }
+
+  // Smaller dialog titles & content
+  .mat-dialog-title {
+    font-size: 18px;
+  }
+  .mat-dialog-content {
+    font-size: 16px;
+  }
+
+  // Reduced padding on steppers - the stepper already had padding applied because they are included in the dashboard, which
+  // has padding via the '.dashboard__content` class - so we end up with double padding - this removes the extra level of padding
+  .steppers__inner {
+    padding: 0;
+  }
+
 }

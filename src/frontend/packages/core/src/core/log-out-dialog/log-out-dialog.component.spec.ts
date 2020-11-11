@@ -56,7 +56,7 @@ describe('LogOutDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should naivgate after countdown', fakeAsync(() => {
+  it('should navigate after countdown', fakeAsync(() => {
     const spy = spyOn(router, 'navigate');
 
     component.data = {

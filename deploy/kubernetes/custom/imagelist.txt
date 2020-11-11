@@ -1,0 +1,1 @@
+stratos-kube-terminal:_VERSION_

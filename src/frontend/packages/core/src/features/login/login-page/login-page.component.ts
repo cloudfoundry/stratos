@@ -29,6 +29,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   loggedIn: boolean;
   loggingIn: boolean;
+  isLoginFlow: boolean;
   verifying: boolean;
   error: boolean;
 
@@ -36,6 +37,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ssoOptions: string;
 
   busy$: Observable<boolean>;
+  initialLoad$: Observable<boolean>;
 
   redirect: RouterRedirect;
 
@@ -43,33 +45,43 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   subscription: Subscription;
 
+  showPassword = false;
+
   ngOnInit() {
     this.ssoLogin = false;
     this.store.dispatch(new VerifySession());
     const auth$ = this.store.select(s => ({ auth: s.auth, endpoints: s.endpoints }));
+    this.initialLoad$ = auth$.pipe(
+      map(({ auth, }) =>
+        auth.verifying && !auth.loggingIn || // checking if user is logged in but not in processed of logging in
+        (auth.sessionData && auth.sessionData.valid) && !this.isLoginFlow // logged in but haven't hit log in
+      ),
+    );
+
     this.busy$ = auth$.pipe(
-      map(
-        ({ auth, endpoints }) => !auth.error || !(auth.sessionData && auth.sessionData.valid) &&
-          (auth.sessionData && auth.sessionData.valid) || auth.verifying || auth.loggingIn || endpoints.loading
+      map(({ auth, endpoints }) =>
+        !auth.error ||
+        !(auth.sessionData && auth.sessionData.valid) && (auth.sessionData && auth.sessionData.valid) ||
+        auth.verifying ||
+        auth.loggingIn ||
+        endpoints.loading
       ),
       startWith(true)
     );
-    this.subscription =
-      auth$
-        .pipe(
-          tap(({ auth }) => {
-            this.redirect = auth.redirect;
-            this.handleOther(auth);
-          }),
-          takeWhile(({ auth }) => {
-            const loggedIn = !auth.loggingIn && auth.loggedIn;
-            const validSession = auth.sessionData && auth.sessionData.valid;
-            return !(loggedIn && validSession);
-          }),
-        )
-        .subscribe({
-          complete: () => this.handleSuccess()
-        });
+    this.subscription = auth$.pipe(
+      tap(({ auth }) => {
+        this.redirect = auth.redirect;
+        this.handleOther(auth);
+      }),
+      takeWhile(({ auth }) => {
+        const loggedIn = !auth.loggingIn && auth.loggedIn;
+        const validSession = auth.sessionData && auth.sessionData.valid;
+        return !(loggedIn && validSession);
+      }),
+    )
+      .subscribe({
+        complete: () => this.handleSuccess()
+      });
   }
 
   ngOnDestroy() {
@@ -107,6 +119,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   private handleOther(auth: AuthState) {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
+    this.isLoginFlow = this.isLoginFlow || auth.loggingIn;
     this.verifying = auth.verifying;
     this.ssoOptions = auth.sessionData && auth.sessionData.ssoOptions;
     this.ssoLogin = !!this.ssoOptions;

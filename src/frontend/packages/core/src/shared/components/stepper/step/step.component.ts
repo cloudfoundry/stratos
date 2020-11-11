@@ -21,7 +21,7 @@ export interface StepOnNextResult {
   data?: any;
 }
 
-export type StepOnNextFunction = () => Observable<StepOnNextResult>;
+export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
 
 @Component({
   selector: 'app-step',

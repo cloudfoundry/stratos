@@ -28,7 +28,17 @@
                 "input": "custom-src/frontend/assets/custom",
                 "output": "/core/assets/custom"
               },
-              "src/frontend/packages/core/favicon.ico"
+              "src/frontend/packages/core/favicon.ico",
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-monaco-editor/assets/monaco",
+                "output": "/core/assets/monaco"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@cfstratos/monaco-yaml/lib",
+                "output": "/core/assets/monaco/vs/language/yaml"
+              }
             ],
             "styles": [
               "src/frontend/packages/core/src/styles.scss",
@@ -182,11 +192,7 @@
             ],
             "tslintConfig": "src/frontend/packages/core/tslint.json",
             "files": [
-              "src/frontend/packages/core/src/**/*.ts",
-              "src/frontend/packages/core/src/custom/**/*.ts"
-            ],
-            "exclude": [
-              "!src/frontend/packages/core/**"
+              "src/frontend/packages/core/src/**/*.ts"
             ]
           }
         }
@@ -227,9 +233,6 @@
             "tslintConfig": "src/frontend/packages/store/tslint.json",
             "files": [
               "src/frontend/packages/store/src/**/*.ts"
-            ],
-            "exclude": [
-              "!src/frontend/packages/store/**"
             ]
           }
         }
@@ -301,9 +304,6 @@
             "tslintConfig": "src/frontend/packages/cloud-foundry/tslint.json",
             "files": [
               "src/frontend/packages/cloud-foundry/src/**/*.ts"
-            ],
-            "exclude": [
-              "!src/frontend/packages/cloud-foundry/**"
             ]
           }
         }
@@ -344,14 +344,40 @@
             "tslintConfig": "src/frontend/packages/cf-autoscaler/tslint.json",
             "files": [
               "src/frontend/packages/cf-autoscaler/src/**/*.ts"
+            ]
+          }
+        }
+      }
+    },
+    "kubernetes": {
+      "root": "src/frontend/packages/kubernetes",
+      "sourceRoot": "src/frontend/packages/kubernetes/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "architect": {
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/kubernetes/src/test.ts",
+            "tsConfig": "src/frontend/packages/kubernetes/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/kubernetes/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "src/tsconfig.json"
             ],
-            "exclude": [
-              "!src/frontend/packages/cf-autoscaler/**"
+            "tslintConfig": "src/frontend/packages/kubernetes/tslint.json",
+            "files": [
+              "src/frontend/packages/kubernetes/src/**/*.ts"
             ]
           }
         }
       }
     }
+
   },
   "defaultProject": "stratos",
   "schematics": {

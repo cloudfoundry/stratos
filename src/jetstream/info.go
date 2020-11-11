@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Endpoint - This represents the CNSI endpoint
@@ -59,6 +59,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	s.Configuration.TechPreview = p.Config.EnableTechPreview
 	s.Configuration.ListMaxSize = p.Config.UIListMaxSize
 	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
+	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {

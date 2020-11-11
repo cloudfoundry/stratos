@@ -1,0 +1,65 @@
+@mixin app-chart-values-editor-theme($theme, $app-theme) {
+
+  $background: map-get($theme, background);
+  $foreground: map-get($theme, foreground);
+
+  $app-background: map-get($app-theme, app-background-color);
+
+  // Fixes some layout issues with Angular Json Schema Form due to use of Angular flex-layout
+
+  // Also tweaks sizing and spacing of elements
+
+  $vert-padding: 10px;
+  $toolbar-icon-size: 16px;
+  $toolbar-item-height: 24px;
+  $toolbar-item-font-size: 12px;
+
+  // We discourage use of !important, but this is only way to override
+  // the angular flex settings in the ajsf library - otherwise the layout is wrong
+  .form-flex-column {
+    flex-flow: column !important;
+  }
+
+  .legend {
+    font-size: 14px;
+    padding: $vert-padding 0;
+  }
+
+  .editor-loading, .editor-yaml-error {
+    background-color: $app-background;
+  }
+          
+  // Make controls in the editor toolbar smaller
+  .editor-toolbar {
+    height: 40px;
+
+    .mat-button-toggle-button {
+      display: flex;
+    }
+    .mat-button-toggle-label-content {
+      font-size: $toolbar-item-font-size;
+      line-height: $toolbar-item-height;
+      padding: 0 8px;
+
+      .mat-icon {
+        font-size: $toolbar-icon-size;
+        height: $toolbar-icon-size;
+        width: $toolbar-icon-size;
+      }
+    }
+    .mat-button {
+      font-size: $toolbar-item-font-size;
+      line-height: $toolbar-item-height;
+      padding: 0 12px;
+    }
+
+  }
+
+  // Override hover color for context menu to align with Stratos theme
+  // Monaco doesn't seem to expose this as a theme colour
+  .monaco-editor .monaco-menu .action-item.focused a.action-menu-item {
+    background: mat-color($background, 'hover') !important;
+    color: mat-color($foreground, 'text') !important;
+  }
+
+}

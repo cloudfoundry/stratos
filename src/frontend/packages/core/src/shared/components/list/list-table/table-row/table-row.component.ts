@@ -38,13 +38,16 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
   @Input() minRowHeight: string;
   @Input() inExpandedRow: boolean;
   @Input() rowId: string;
+  @Input() prominentErrorBar: boolean;
 
   public inErrorState$: Observable<boolean>;
   public inWarningState$: Observable<boolean>;
+  public inInfoState$: Observable<boolean>;
   public errorMessage$: Observable<string>;
   public isBlocked$: Observable<boolean>;
   public isHighlighted$: Observable<boolean>;
   public isDeleting$: Observable<boolean>;
+  public isWarningIcon$: Observable<boolean>;
   public defaultMinRowHeight = '50px';
 
   private expandedComponentRef: ComponentRef<any>;
@@ -64,6 +67,9 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
       this.inWarningState$ = this.rowState.pipe(
         map(state => state.warning)
       );
+      this.inInfoState$ = this.rowState.pipe(
+        map(state => state.info)
+      );
       this.errorMessage$ = this.rowState.pipe(
         map(state => state.message)
       );
@@ -75,6 +81,9 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
       );
       this.isDeleting$ = this.rowState.pipe(
         map(state => state.deleting)
+      );
+      this.isWarningIcon$ = this.rowState.pipe(
+        map(state => state.error || state.warning)
       );
     }
 

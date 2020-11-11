@@ -16,7 +16,6 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -784,9 +783,9 @@ func TestVerifySession(t *testing.T) {
 			So(contentType, ShouldEqual, "application/json; charset=UTF-8")
 		})
 
-		var expectedScopes = "\"scopes\":[\"openid\",\"scim.read\",\"cloud_controller.admin\",\"uaa.user\",\"cloud_controller.read\",\"password.write\",\"routing.router_groups.read\",\"cloud_controller.write\",\"doppler.firehose\",\"scim.write\"]"
+		var expectedScopes = `"scopes":["openid","scim.read","cloud_controller.admin","uaa.user","cloud_controller.read","password.write","routing.router_groups.read","cloud_controller.write","doppler.firehose","scim.write"]`
 
-		var expectedBody = "{\"version\":{\"proxy_version\":\"dev\",\"database_version\":20161117141922},\"user\":{\"guid\":\"asd-gjfg-bob\",\"name\":\"admin\",\"admin\":false," + expectedScopes + "},\"endpoints\":{\"cf\":{}},\"plugins\":null,\"config\":{\"enableTechPreview\":false}}"
+		var expectedBody = `{"status":"ok","error":"","data":{"version":{"proxy_version":"dev","database_version":20161117141922},"user":{"guid":"asd-gjfg-bob","name":"admin","admin":false,` + expectedScopes + `},"endpoints":{"cf":{}},"plugins":null,"config":{"enableTechPreview":false,"APIKeysEnabled":"admin_only"}}}`
 
 		Convey("Should contain expected body", func() {
 			So(res, ShouldNotBeNil)
@@ -809,7 +808,7 @@ func TestVerifySessionNoDate(t *testing.T) {
 			"username": "admin",
 			"password": "changeme",
 		})
-		_, _, ctx, pp, db, _ := setupHTTPTest(req)
+		res, _, ctx, pp, db, _ := setupHTTPTest(req)
 		defer db.Close()
 
 		//Init the auth service
@@ -830,20 +829,16 @@ func TestVerifySessionNoDate(t *testing.T) {
 		})
 
 		err = pp.verifySession(ctx)
-		Convey("Should fail to verify session.", func() {
-
-			So(err, ShouldNotBeNil)
+		Convey("Should not fail to verify session.", func() {
+			So(err, ShouldBeNil)
 		})
 
-		errHTTP, ok := err.(*echo.HTTPError)
-		Convey("should be able to cast error to HTTPError", func() {
-			So(ok, ShouldBeTrue)
+		var expectedBody = `{"status":"error","error":"Could not find session date","data":null}`
+		Convey("Should contain expected body", func() {
+			So(res, ShouldNotBeNil)
+			So(strings.TrimSpace(res.Body.String()), ShouldEqual, expectedBody)
 		})
 
-		var expectedCode = 403
-		Convey("Request should have expected code", func() {
-			So(errHTTP.Code, ShouldEqual, expectedCode)
-		})
 	})
 
 }
@@ -857,7 +852,7 @@ func TestVerifySessionExpired(t *testing.T) {
 			"username": "admin",
 			"password": "changeme",
 		})
-		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		res, _, ctx, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
 		if e := pp.InitStratosAuthService(interfaces.Remote); e != nil {
@@ -883,24 +878,15 @@ func TestVerifySessionExpired(t *testing.T) {
 				AddRow(mockUAAToken, mockUAAToken, sessionValues["exp"], false))
 		err := pp.verifySession(ctx)
 
-		Convey("Should fail to verify session", func() {
-			So(err, ShouldNotBeNil)
+		Convey("Should not fail to verify session", func() {
+			So(err, ShouldBeNil)
 		})
 
-		errHTTP, ok := err.(*echo.HTTPError)
-		Convey("should be able to cast error to HTTPError", func() {
-			So(ok, ShouldBeTrue)
+		var expectedBody = `{"status":"error","error":"Could not verify user","data":null}`
+		Convey("Should contain expected body", func() {
+			So(res, ShouldNotBeNil)
+			So(strings.TrimSpace(res.Body.String()), ShouldEqual, expectedBody)
 		})
-
-		var expectedCode = 403
-		Convey("Request should have expected code", func() {
-			So(errHTTP.Code, ShouldEqual, expectedCode)
-		})
-		//
-		//Convey("Should meet expectations", func() {
-		//	So(mock.ExpectationsWereMet(), ShouldBeNil)
-		//})
-
 	})
 
 }

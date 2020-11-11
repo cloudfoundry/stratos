@@ -10,7 +10,6 @@ import {
   StratosCatalogEntity,
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from '../entity-catalog/entity-catalog.types';
-import { PaginationFlattenerConfig } from '../helpers/paginated-request-helpers';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import {
@@ -69,7 +68,6 @@ function getRequestObservable(
 }
 export interface PaginatedRequestPipelineConfig<T extends AppState = InternalAppState> extends BasePipelineConfig<T> {
   action: PaginatedAction;
-  pageFlattenerConfig: PaginationFlattenerConfig;
 }
 export const basePaginatedRequestPipeline: EntityRequestPipeline = (
   store: Store<AppState>,
@@ -109,7 +107,7 @@ export const basePaginatedRequestPipeline: EntityRequestPipeline = (
     );
 
   // Keep, helpful for debugging below chain via tap
-  // const debug = (val, location) => console.log(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
+  // const debug = (val, location) => console.warn(`${entity.endpointType}:${entity.entityKey}:${location}: `, val);
 
   return getRequestObjectObservable(request).pipe(
     first(),

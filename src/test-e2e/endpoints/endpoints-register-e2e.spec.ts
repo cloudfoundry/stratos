@@ -167,7 +167,6 @@ describe('Endpoints', () => {
           // Handle the error case for invalid certificate - could be unknown authority or bad certificate
           // so check for correct message at the start and the helpful message for the user to correct the problem
           expect(snackBar.hasMessage('SSL error - x509: certificate')).toBeTruthy();
-          /* tslint:disable-line:max-line-length*/
           expect(snackBar.messageContains('Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted'))
             .toBeTruthy();
         });

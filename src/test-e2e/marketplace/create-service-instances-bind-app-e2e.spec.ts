@@ -26,8 +26,7 @@ describe('Create Service Instance with binding', () => {
   });
 
   beforeAll(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    createServiceInstance.softNavigateTo();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance, servicesHelperE2E);
     createMarketplaceServiceInstance.waitForPage();
@@ -50,7 +49,7 @@ describe('Create Service Instance with binding', () => {
         .then(metaCardRows => {
           expect(metaCardRows[1].value).toBe(servicesSecrets.publicService.name);
           expect(metaCardRows[2].value).toBe('shared');
-          expect(metaCardRows[4].value).toBe('1');
+          expect(metaCardRows[5].value).toBe('1');
         });
 
     });

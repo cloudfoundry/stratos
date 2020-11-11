@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { APIKeyAuthGuardService } from './core/apiKey-auth-guard.service';
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
@@ -10,6 +11,8 @@ import { PageNotFoundComponentComponent } from './core/page-not-found-component/
 import { CustomRoutingImportModule } from './custom-import.module';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
+import { LoginPageComponent } from './features/login/login-page/login-page.component';
+import { LogoutPageComponent } from './features/login/logout-page/logout-page.component';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { DomainMismatchComponent } from './features/setup/domain-mismatch/domain-mismatch.component';
 import { LocalAccountWizardComponent } from './features/setup/local-account-wizard/local-account-wizard.component';
@@ -40,7 +43,19 @@ const appRoutes: Routes = [
   },
   { path: 'upgrade', component: UpgradePageComponent },
   { path: 'domainMismatch', component: DomainMismatchComponent },
-  { path: 'login', loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule) },
+  {
+    path: 'login',
+    children: [
+      {
+        path: '',
+        component: LoginPageComponent
+      },
+      {
+        path: 'logout',
+        component: LogoutPageComponent
+      },
+    ]
+  },
   {
     path: '',
     component: DashboardBaseComponent,
@@ -58,7 +73,6 @@ const appRoutes: Routes = [
           }
         }
       },
-      { path: 'entity-list', loadChildren: () => import('./api-driven-views/api-driven-views.module').then(m => m.ApiDrivenViewsModule) },
       {
         path: 'endpoints',
         data: {
@@ -81,6 +95,11 @@ const appRoutes: Routes = [
       },
       { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
       { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
+      {
+        path: 'api-keys',
+        loadChildren: () => import('./features/api-keys/api-keys.module').then(m => m.ApiKeysModule),
+        canActivate: [APIKeyAuthGuardService]
+      },
       { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
       {
         path: 'errors/:endpointId',

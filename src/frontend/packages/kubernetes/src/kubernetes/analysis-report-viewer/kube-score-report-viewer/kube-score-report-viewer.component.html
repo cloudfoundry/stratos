@@ -1,0 +1,18 @@
+<div *ngFor="let group of processed" class="report__group">
+  <div class="report__group-name">{{ group._name }}</div>
+  <div *ngFor="let check of group._checks" class="report__checks">
+    <div class="report__check">
+      <div [ngSwitch]="check.Grade" class="report__icon">
+        <mat-icon class="text-success" *ngSwitchCase="10">check_circle</mat-icon>
+        <mat-icon class="text-info" *ngSwitchCase="7">info</mat-icon>
+        <mat-icon class="text-warning" *ngSwitchCase="5">warning</mat-icon>
+        <mat-icon class="text-danger" *ngSwitchCase="1">error</mat-icon>
+        <mat-icon class="text-tentative" *ngSwitchDefault>help_outline</mat-icon>
+      </div>
+    <div class="report__check-name">{{ check.Check.Name }}</div>
+    </div>
+    <div *ngFor="let comment of check.Comments" class="report__comment">
+      <div>{{ comment.Summary }}</div>
+    </div>
+  </div>
+</div>

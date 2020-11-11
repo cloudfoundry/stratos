@@ -9,11 +9,9 @@ import { CFAppState } from '../../../cf-app-state';
 import { environment } from './../../../../../core/src/environments/environment.prod';
 import { selectNewAppState } from './../../../store/effects/create-app-effects';
 
-/* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => AppNameUniqueDirective), multi: true
 };
-/* tslint:enable */
 
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
 
@@ -65,7 +63,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     this.appApplicationNameUnique.set(false);
   }
 
-  public validate(control: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
+  public validate(control: AbstractControl): Observable<{ appNameTaken: boolean; } | null> {
     if (!control.dirty) {
       return observableOf(null);
     }

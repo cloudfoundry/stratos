@@ -14,6 +14,14 @@ export interface ActionState {
   message: string;
 }
 
+// Status of an action
+export interface ActionStatus {
+  busy: boolean;
+  error: boolean;
+  message?: string;
+  completed: boolean;
+}
+
 /**
  * Multi action lists can have different entity types per page
  * We use schemaKey to track this type

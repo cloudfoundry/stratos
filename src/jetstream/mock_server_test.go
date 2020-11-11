@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
@@ -152,6 +152,13 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	initialisedEndpoint := initCFPlugin(pp)
 	pp.Plugins = make(map[string]interfaces.StratosPlugin)
 	pp.Plugins["cf"] = initialisedEndpoint
+
+	pp.SessionStoreOptions = new(sessions.Options)
+	pp.SessionStoreOptions.Domain = "example.org"
+	pp.SessionStoreOptions.HttpOnly = false
+	pp.SessionStoreOptions.Secure = false
+	pp.SessionStoreOptions.Path = "/"
+
 	return pp
 }
 

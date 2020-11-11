@@ -11,9 +11,10 @@ export class AppVariablesUpdate implements Action {
 
   type = AppVariables.UPDATE;
   updatedApplication: UpdateApplication;
+  guid: string;
 
   constructor(public cfGuid: string, public appGuid: string) {
-    this.guid = 'n/a' // No such thing as an individual app variable guid
+    this.guid = 'n/a'; // No such thing as an individual app variable guid
   }
 
   protected createUpdateApplication(allEnvVars: ListAppEnvVar[], selectedItems: ListAppEnvVar[]): UpdateApplication {
@@ -28,7 +29,6 @@ export class AppVariablesUpdate implements Action {
     }
     return updateApp;
   }
-  guid: string;
 }
 
 export class AppVariablesDelete extends AppVariablesUpdate {

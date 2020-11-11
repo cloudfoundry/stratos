@@ -12,7 +12,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 
@@ -223,7 +223,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 
-	log.Debug("Waiting for close ackhowledgement from the client")
+	log.Debug("Waiting for close acknowledgement from the client")
 
 	wait := 30 * time.Second
 	clientWebSocket.SetReadDeadline(time.Now().Add(wait))

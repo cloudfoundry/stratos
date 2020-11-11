@@ -50,6 +50,7 @@ function tryGetExistingBuild() {
   fi
 }
 
+# Need S3 endpoint - if we don't have it, we don't have the Travis env vars
 if [ -n "${AWS_ENDPOINT}" ]; then
   tryGetExistingBuild
 fi
@@ -60,22 +61,21 @@ else
   set -e
 
   # Get go
-  curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-  chmod +x ~/bin/gimme
-  eval "$(gimme 1.12.4)"
-  go version
+  source "${DIRNAME}/install-go.sh"
 
   npm run build
   npm run build-backend
 
-  set +e
-  tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
+  # Only try to upload if we have the S3 configuration
+  if [ -n "${AWS_ENDPOINT}" ]; then
+    set +e
+    tar cvfz ${GZIP_NAME} dist/* src/jetstream/jetstream
 
-  # Upload
-  mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
+    # Upload
+    mc cp -q --insecure ${GZIP_NAME} ${MC_HOST}/${S3_BUILDS_BUCKET}
 
-  # Ignore error from uploading - should not fail build if we can't upload the build archive
-  # This just means we won't be able to us this cache next build
-  exit 0
-
+    # Ignore error from uploading - should not fail build if we can't upload the build archive
+    # This just means we won't be able to us this cache next build
+    echo "Uploaded builds"
+  fi
 fi

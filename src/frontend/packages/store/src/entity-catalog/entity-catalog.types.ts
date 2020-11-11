@@ -1,7 +1,8 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { GeneralEntityAppState } from '../app-state';
+import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
+import { AppState, GeneralEntityAppState } from '../app-state';
 import {
   ApiErrorMessageHandler,
   EntitiesFetchHandler,
@@ -68,6 +69,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly type?: string;
   readonly schema: T;
   readonly label?: string;
+  readonly labelShort?: string;
   readonly labelPlural?: string;
   readonly renderPriority?: number;
   /**
@@ -78,6 +80,7 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly subTypes?: Omit<IStratosBaseEntityDefinition, 'schema' | 'subTypes'>[];
   readonly paginationConfig?: PaginationPageIteratorConfig;
   readonly tableConfig?: EntityTableConfig<any>;
+  readonly registrationComponent?: any;
   /**
    * Hook that will fire before an entity is emitted by an entity service. This could be used, for example, entity validation
    */
@@ -118,6 +121,10 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly urlValidation?: boolean;
   readonly unConnectable?: boolean;
   /**
+   * How many endpoints of this type can be registered, 0 - many
+   */
+  readonly registeredLimit?: (store: Store<AppState>) => Observable<number> | number;
+  /**
    * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
    */
   readonly techPreview?: boolean;
@@ -144,11 +151,16 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   /**
    * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
    */
-  readonly userRolesFetch?: EntityUserRolesFetch
+  readonly userRolesFetch?: EntityUserRolesFetch;
   /**
    * Allows the user roles to be stored, updated and removed in the current user permissions section of the store
    */
-  readonly userRolesReducer?: EntityUserRolesReducer
+  readonly userRolesReducer?: EntityUserRolesReducer;
+  /**
+   * A list of actions that will be displayed in the endpoints lists
+   * Note - These should be restricted by type
+   */
+  readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -204,7 +216,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getLines?(): EntityRowBuilder<T>[];
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
-    plural: string
+    plural: string,
   };
   /**
    * Actions that don't effect an individual entity i.e. create new

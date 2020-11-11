@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -17,12 +18,11 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell } from '../../../../../../../store/src/types/metric.types';
-import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
-import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
+import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellsDataSource } from './cf-cells-data-source';
 
-// tslint:disable:max-line-length
 
 // tslint:enable:max-line-length
 

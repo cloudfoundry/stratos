@@ -8,7 +8,7 @@ import { ApplicationService } from '../../../../../cloud-foundry/src/features/ap
 import { ApplicationServiceMock } from '../../../../../cloud-foundry/test-framework/application-service-helper';
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-step1.component';

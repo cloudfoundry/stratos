@@ -37,7 +37,7 @@
         </mat-header-row>
         <app-table-row class="app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"
           [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
-          [rowId]="dataSource.trackBy(null, row)">
+          [rowId]="dataSource.trackBy(null, row)" [prominentErrorBar]="prominentErrorBar">
         </app-table-row>
       </mat-table>
     </mat-card-content>

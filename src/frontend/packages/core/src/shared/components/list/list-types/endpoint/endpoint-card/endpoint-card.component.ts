@@ -9,10 +9,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
 import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { AppState } from '../../../../../../../../store/src/app-state';
 import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import {
@@ -93,13 +93,18 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
     this.pDs = ds;
+
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
     if (ds && !ds.dsEndpointType && !this.cardMenu) {
-      this.cardMenu = this.endpointListHelper.endpointActions().map(endpointAction => ({
-        label: endpointAction.label,
-        action: () => endpointAction.action(this.pRow),
-        can: endpointAction.createVisible(this.rowObs)
-      }));
+      this.cardMenu = this.endpointListHelper.endpointActions(true).map(endpointAction => {
+        const separator = endpointAction.label === '-';
+        return {
+          label: endpointAction.label,
+          action: () => endpointAction.action(this.pRow),
+          can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : null,
+          separator
+        };
+      });
 
       // Add a copy address to clipboard
       this.cardMenu.push(createMetaCardMenuItemSeparator());

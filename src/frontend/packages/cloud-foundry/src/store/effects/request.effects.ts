@@ -3,7 +3,6 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
-import { LoggerService } from '../../../../core/src/core/logger.service';
 import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
@@ -26,7 +25,6 @@ export class CfValidateEffects {
   constructor(
     private actions$: Actions,
     private store: Store<CFAppState>,
-    private logger: LoggerService,
   ) { }
 
   /**
@@ -89,7 +87,7 @@ export class CfValidateEffects {
         })
       )
         .pipe(catchError(error => {
-          this.logger.warn(`Entity validation process failed`, error);
+          console.warn(`Entity validation process failed`, error);
           this.update(apiAction, false, error.message);
           return [];
         }));

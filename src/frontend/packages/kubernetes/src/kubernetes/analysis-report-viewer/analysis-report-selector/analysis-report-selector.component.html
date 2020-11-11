@@ -1,0 +1,22 @@
+<ng-container *ngIf="canShow$ | async">
+  <div *ngIf="analyzers$ | async as analyzers">
+    <mat-menu #appMenu="matMenu">
+      <button (click)="onSelected(analyzer)" mat-menu-item
+        *ngFor="let analyzer of analyzers">{{ analyzer.title }}</button>
+      <mat-divider class="analysis-menu-divider" *ngIf="analyzers.length > 0"></mat-divider>
+      <button (click)="refreshReports($event)" mat-menu-item>Refresh</button>
+    </mat-menu>
+
+    <!--
+      See #417
+      Note - it would be good to only show if there's no reports `*ngIf="analyzers.length > 0"`. However this causes
+      issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and 
+      doesn't contain the new report. This leaves user with no way to see report/refresh reports list
+    -->
+    <button mat-button [matMenuTriggerFor]="appMenu" class="analysis-menu-divider__overlay">
+      <span>{{ prompt }}</span>
+      <span *ngIf="selection">: {{ selection.title }}</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+  </div>
+</ng-container>

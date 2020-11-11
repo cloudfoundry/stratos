@@ -66,9 +66,9 @@ export interface StratosExtensionRoutes {
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[] },
-  tabs: {} as { [key: string]: IPageSideNavTab[] },
-  actions: {} as { [key: string]: StratosActionMetadata[] },
+  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
+  tabs: {} as { [key: string]: IPageSideNavTab[], },
+  actions: {} as { [key: string]: StratosActionMetadata[], },
 };
 
 /**
@@ -117,6 +117,10 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
   });
   extensionMetadata.actions[action].push(props);
 }
+
+// Empty module used to support the registration of Extension Components
+@NgModule()
+export class ExtEmptyModule { }
 
 // Injectable Extension Service
 @Injectable({
@@ -167,7 +171,8 @@ export class ExtensionService {
 
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
-      const loginRoute = routeConfig.find(r => r.path === 'login') || {};
+      const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
+      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
       loginRoute.component = extensionMetadata.loginComponent;
       needsReset = true;
     }
@@ -200,7 +205,3 @@ export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
 }
-
-// Empty module used to support the registration of Extension Components
-@NgModule()
-export class ExtEmptyModule { }

@@ -64,6 +64,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public columnNames: string[];
 
   @Input() minRowHeight: string;
+  @Input() prominentErrorBar = true;
 
   ngOnInit() {
     if (this.addSelect || this.expandComponent || this.addActions) {

@@ -12,9 +12,14 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("metrics", nil, Init)
+}
 
 // MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
@@ -129,15 +134,21 @@ func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord interfaces.C
 func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 
-	connectType := ec.FormValue("connect_type")
+	params := new(interfaces.LoginToCNSIParams)
+	err := interfaces.BindOnce(params, ec)
+	if err != nil {
+		return nil, false, err
+	}
+
+	connectType := params.ConnectType
 	auth := &MetricsAuth{
 		Type: connectType,
 	}
 
 	switch connectType {
 	case interfaces.AuthConnectTypeCreds:
-		auth.Username = ec.FormValue("username")
-		auth.Password = ec.FormValue("password")
+		auth.Username = params.Username
+		auth.Password = params.Password
 		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
 			return nil, false, errors.New("Need username and password")
 		}
@@ -348,9 +359,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	for _, values := range info.Endpoints {
 		for _, endpoint := range values {
 			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint)
 			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
-
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
@@ -390,7 +399,11 @@ func compareURL(a, b string) bool {
 
 	aPort := getPort(ua)
 	bPort := getPort(ub)
-	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && ua.Path == ub.Path
+
+	aPath := trimPath(ua.Path)
+	bPath := trimPath(ub.Path)
+
+	return ua.Scheme == ub.Scheme && ua.Hostname() == ub.Hostname() && aPort == bPort && aPath == bPath
 }
 
 func getPort(u *url.URL) string {
@@ -407,6 +420,13 @@ func getPort(u *url.URL) string {
 	}
 
 	return port
+}
+
+func trimPath(path string) string {
+	if strings.HasSuffix(path, "/") {
+		return path[:len(path)-1]
+	}
+	return path
 }
 
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {

@@ -1,13 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import moment from 'moment';
 import { NEVER, Observable, Subject } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, share, switchMap, map, first, startWith, debounceTime } from 'rxjs/operators';
+import { catchError, debounceTime, first, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { LoggerService } from '../../../../../../../../core/src/core/logger.service';
 import { AnsiColorizer } from '../../../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
 import { ApplicationService } from '../../../../application.service';
 
@@ -39,7 +38,6 @@ export class LogStreamTabComponent implements OnInit {
   constructor(
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private logService: LoggerService
   ) {
     this.filter = this.jsonFilter.bind(this);
   }
@@ -55,7 +53,7 @@ export class LogStreamTabComponent implements OnInit {
         }/apps/${this.applicationService.appGuid}/stream`;
 
       const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
-        this.logService.error(
+        console.error(
           'Error while connecting to socket: ' + JSON.stringify(e)
         );
         return [];
@@ -110,7 +108,7 @@ export class LogStreamTabComponent implements OnInit {
       const messageString = this.colorizer.colorize(atob(messageObj.message), msgColour, bold) + '\n';
       return timeStamp + ': ' + messageSource + ' ' + messageString;
     } catch (error) {
-      this.logService.error('Failed to filter jsonMessage from WebSocket: ' + JSON.stringify(error));
+      console.error('Failed to filter jsonMessage from WebSocket: ' + JSON.stringify(error));
       return jsonString;
     }
   }

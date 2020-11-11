@@ -1,8 +1,8 @@
+import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
-import { Injectable } from "@angular/core";
 
 
 @Injectable()

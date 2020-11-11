@@ -64,11 +64,29 @@ interface ICoreListDataSource<T> extends DataSource<T> {
   trackBy(index: number, item: T);
 }
 
-export interface ITableListDataSource<T> extends ICoreListDataSource<T> {
+interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
+  isTableLoading$?: Observable<boolean>;
+
+  selectAllChecked?: boolean; // Select items - remove once ng-content can exist in md-table
+  selectAllIndeterminate?: boolean; // Select all checkbox as indeterminate
+  selectedRows?: Map<string, T>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$?: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectAllFilteredRows?: () => void; // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle?: (row: T, multiMode?: boolean) => void; // Select items - remove once ng-content can exist in md-table
+  selectClear?: () => void;
+
+  editRow?: T; // Edit items - remove once ng-content can exist in md-table
+  startEdit?: (row: T) => void; // Edit items - remove once ng-content can exist in md-table
+  saveEdit?: () => void; // Edit items - remove once ng-content can exist in md-table
+  cancelEdit?: () => void; // Edit items - remove once ng-content can exist in md-table
+  getRowUniqueId?: getRowUniqueId<T>;
+}
+
+export interface ITableListDataSource<T> extends ICoreTableListDataSource<T> {
   isTableLoading$: Observable<boolean>;
 }
 
-export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalogEntityConfig {
+export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableListDataSource<T>, EntityCatalogEntityConfig {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((
@@ -94,20 +112,11 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, EntityCatalo
   filter$: Observable<ListFilter>;
   sort$: Observable<ListSort>;
 
-  editRow: T; // Edit items - remove once ng-content can exist in md-table
 
-  selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
-  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+
   getRowUniqueId: getRowUniqueId<T>;
   entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
-  selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T, multiMode?: boolean); // Select items - remove once ng-content can exist in md-table
-  selectClear();
 
-  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
-  saveEdit(); // Edit items - remove once ng-content can exist in md-table
-  cancelEdit(); // Edit items - remove once ng-content can exist in md-table
   destroy();
   /**
    * Set's data source specific text filter param

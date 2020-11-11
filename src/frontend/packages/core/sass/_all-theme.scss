@@ -18,7 +18,7 @@
 @import '../src/shared/components/list/list-table/table-row/table-row.component.theme';
 @import '../src/shared/components/no-content-message/no-content-message.component.theme';
 @import '../src/shared/components/boolean-indicator/boolean-indicator.component.theme';
-
+@import '../src/shared/components/json-viewer/json-viewer.component.theme';
 @import '../src/shared/components/loading-page/loading-page.component.theme';
 @import '../src/shared/components/log-viewer/log-viewer.component.theme';
 @import '../src/shared/components/chips/chips.component.theme';
@@ -48,13 +48,13 @@
 @import '../src/shared/components/sidepanel-preview/sidepanel-preview.component.theme';
 @import '../src/shared/components/user-avatar/user-avatar.component.theme';
 @import './components/text-status.theme';
+@import './components/text-area.theme';
 @import './components/hyperlinks.theme';
 @import './mat-desktop';
 @import './fonts';
 @import './ansi-colors';
 @import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
 @import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
-
 
 @import '../../core/src/features/error-page/error-page/error-page.component.theme';
 @import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
@@ -84,6 +84,7 @@
   @include app-mat-snack-bar-theme($theme, $app-theme);
   @include ngx-charts-gauge($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
+  @include app-text-area($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
   @include app-usage-gauge-theme($theme, $app-theme);
   @include app-ssh-viewer-theme($theme, $app-theme);
@@ -127,5 +128,6 @@
   @include restore-endpoints-theme($theme, $app-theme);
   @include metrics-component-theme($theme, $app-theme);
   @include intro-screen-theme($theme, $app-theme);
+  @include app-json-view-theme($theme, $app-theme);
 
 }
