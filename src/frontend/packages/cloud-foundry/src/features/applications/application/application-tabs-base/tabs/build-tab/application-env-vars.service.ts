@@ -18,6 +18,7 @@ export interface EnvVarStratosProjectSource {
   timestamp: number;
   project?: string;
   scm?: string;
+  endpoint: string;
   branch?: string;
   url?: string;
   commit?: string;

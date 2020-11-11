@@ -69,7 +69,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private listActionCompare: IListAction<GitCommit> = {
     action: (compareToCommit) => {
-      window.open(this.getCompareURL(compareToCommit.sha), '_blank');
+      this.getCompareURL(compareToCommit.sha).pipe(first()).subscribe(url => window.open(url, '_blank'));
     },
     label: 'Compare',
     description: '',
@@ -126,7 +126,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.projectName = stratosProject.deploySource.project;
       this.deployedCommitSha = stratosProject.deploySource.commit;
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
-      this.scm = this.scmService.getSCM(scmType as GitSCMType);
+      this.scm = this.scmService.getSCM(scmType as GitSCMType, stratosProject.deploySource.endpoint);
 
       gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
         scm: this.scm,
@@ -146,7 +146,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     });
   }
 
-  private getCompareURL(sha: string): string {
+  private getCompareURL(sha: string): Observable<string> {
     return this.scm.getCompareCommitURL(this.projectName, this.deployedCommitSha, sha);
   }
 

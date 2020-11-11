@@ -66,13 +66,13 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     this.addAboutInfoComponent();
     this.addSupportInfo();
 
-
+    // TODO: RC DELETE ME
     gitEntityCatalog.branch.api.getMultiple(
-      'Z6KJAVYeHPkiEPuZty0-kArqors',
+      '',
       null,
       {
         projectName: 'richard-cox/my-private-repo',
-        scm: this.gitSCMService.getSCM('github')
+        scm: this.gitSCMService.getSCM('github', 'Z6KJAVYeHPkiEPuZty0-kArqors')
       }
     ).pipe(
       catchError(err => {

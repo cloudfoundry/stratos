@@ -14,6 +14,11 @@ const GITLAB_PER_PAGE_PARAM_VALUE = 100;
 
 export class GitLabSCM extends BaseSCM implements GitSCM {
 
+  constructor(endpointGuid: string) {
+    super();
+    this.endpointGuid = endpointGuid;
+  }
+
   getType(): GitSCMType {
     return 'gitlab';
   }
@@ -33,16 +38,16 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     return gitLabAPIUrl;
   }
 
-  getAPIUrl(endpointGuid: string): Observable<string> {
-    return super.getAPIUrl(endpointGuid) || of(this.getPublicApiUrl());
+  getAPIUrl(): Observable<string> {
+    return super.getAPIUrl() || of(this.getPublicApiUrl());
   }
 
-  getRepository(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitRepo> {
+  getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
     const obs$ = parts.length !== 2 ?
       observableOf(null) :
-      this.getAPIUrl(endpointGuid).pipe(map(apiUrl => httpClient.get(`${apiUrl}/projects/${parts.join('%2F')}`)));
+      this.getAPIUrl().pipe(map(apiUrl => httpClient.get(`${apiUrl}/projects/${parts.join('%2F')}`)));
 
     return obs$.pipe(
       map((data: any) => {
@@ -56,9 +61,9 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  getBranch(httpClient: HttpClient, endpointGuid: string, projectName: string, branchName: string): Observable<GitBranch> {
+  getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.getAPIUrl(endpointGuid).pipe(
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => httpClient.get(`${apiUrl}/projects/${prjNameEncoded}/repository/branches/${branchName}`)),
       map((data: any) => {
         const nb = { ...data };
@@ -68,9 +73,9 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  getBranches(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitBranch[]> {
+  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.getAPIUrl(endpointGuid).pipe(
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => httpClient.get(
         `${apiUrl}/projects/${prjNameEncoded}/repository/branches`, {
         params: {
@@ -89,17 +94,19 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  getCommit(httpClient: HttpClient, endpointGuid: string, projectName: string, commitSha: string): Observable<GitCommit> {
-    return this.getCommitApiUrl(endpointGuid, projectName, commitSha).pipe(
-      switchMap(commitUrl => httpClient.get(commitUrl)),
-      map(data => {
-        return this.convertCommit(endpointGuid, projectName, data);
-      })
+  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
+    return combineLatest([
+      this.getCommitURL(projectName, commitSha),
+      this.getCommitApiUrl(projectName, commitSha)
+    ]).pipe(
+      switchMap(([commitUrl, commitApi]) => httpClient.get(commitApi).pipe(
+        map(data => this.convertCommit(commitUrl, projectName, data))
+      )),
     );
   }
 
-  getCommitApiUrl(projectName: string, endpointGuid: string, commitSha: string): Observable<string> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCommitApiUrl(projectName: string, commitSha: string): Observable<string> {
+    return this.getAPIUrl().pipe(
       map(apiUrl => {
         const prjNameEncoded = encodeURIComponent(projectName);
         return `${apiUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
@@ -107,52 +114,55 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  getCommits(httpClient: HttpClient, endpointGuid: string, projectName: string, commitSha: string): Observable<GitCommit[]> {
+  getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]> {
     const prjNameEncoded = encodeURIComponent(projectName);
-    return this.getAPIUrl(endpointGuid).pipe(
-      switchMap(apiUrl => httpClient.get(
+    return combineLatest([
+      this.getCommitURL(projectName, commitSha),
+      this.getAPIUrl()
+    ]).pipe(
+      switchMap(([commitUrl, apiUrl]) => httpClient.get(
         `${apiUrl}/projects/${prjNameEncoded}/repository/commits?ref_name=${commitSha}`, {
         params: {
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
         }
-      }
-      )),
-      map((data: any) => {
-        const commits = [];
-        data.forEach(c => commits.push(this.convertCommit(endpointGuid, projectName, c)));
-        return commits;
-      })
+      }).pipe(
+        map((data: any) => {
+          const commits = [];
+          data.forEach(c => commits.push(this.convertCommit(commitUrl, projectName, c)));
+          return commits;
+        })
+      ))
     );
   }
 
   // TODO: RC these are links to sites... shouldn't use api urls
-  getCloneURL(endpointGuid: string, projectName: string): Observable<string> {
+  getCloneURL(projectName: string): Observable<string> {
     const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
-    return this.getAPIUrl(endpointGuid).pipe(
+    return this.getAPIUrl().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}.git`)
     );
   }
 
-  getCommitURL(endpointGuid: string, projectName: string, commitSha: string): Observable<string> {
+  getCommitURL(projectName: string, commitSha: string): Observable<string> {
     const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
-    return this.getAPIUrl(endpointGuid).pipe(
+    return this.getAPIUrl().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/commit/${commitSha}`)
     );
   }
 
-  getCompareCommitURL(endpointGuid: string, projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
+  getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
     const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
-    return this.getAPIUrl(endpointGuid).pipe(
+    return this.getAPIUrl().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 
-  getMatchingRepositories(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<string[]> {
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
     const prjParts = projectName.split('/');
 
     const obs$ = prjParts.length > 1 ?
-      this.getMatchingUserGroupRepositories(httpClient, endpointGuid, prjParts) :
-      this.getAPIUrl(endpointGuid).pipe(
+      this.getMatchingUserGroupRepositories(httpClient, prjParts) :
+      this.getAPIUrl().pipe(
         switchMap(apiUrl => httpClient.get(`${apiUrl}/projects?search=${projectName}`, {
           params: {
             [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
@@ -165,8 +175,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  private getMatchingUserGroupRepositories(httpClient: HttpClient, endpointGuid: string, prjParts: string[]): Observable<any[]> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  private getMatchingUserGroupRepositories(httpClient: HttpClient, prjParts: string[]): Observable<any[]> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => combineLatest([
         httpClient.get<[]>(`${apiUrl}/users/${prjParts[0]}/projects/?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
         httpClient.get<[]>(`${apiUrl}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`).pipe(catchError(() => of([]))),
@@ -212,7 +222,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     };
   }
 
-  parseErrorString(error: any, message: string): string {
+  parseErrorAsString(error: any): string {
+    // TODO: RC create issue
     return 'Git request failed';
   }
 

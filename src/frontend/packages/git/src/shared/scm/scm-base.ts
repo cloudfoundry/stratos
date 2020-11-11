@@ -7,20 +7,13 @@ import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catal
 
 export abstract class BaseSCM {
 
-  private pEndpointGuid: string;
-  setEndpointGuid(endpointGuid: string) {
-    this.pEndpointGuid = endpointGuid;
-  }
-  getEndpointGuid(endpointGuid: string): string {
-    return endpointGuid || this.pEndpointGuid;
-  }
+  public endpointGuid: string;
 
-  protected getAPIUrl(endpointGuid: string): Observable<string> {
-    const guid = endpointGuid || this.pEndpointGuid;
-    if (!guid) {
+  protected getAPIUrl(): Observable<string> {
+    if (!this.endpointGuid) {
       return null;
     }
-    return this.getEndpoint(guid).pipe(
+    return this.getEndpoint(this.endpointGuid).pipe(
       map(getFullEndpointApiUrl)
     );
   }
@@ -29,5 +22,22 @@ export abstract class BaseSCM {
     return stratosEntityCatalog.endpoint.store.getEntityService(endpointGuid).waitForEntity$.pipe(
       map(e => e.entity)
     );
+  }
+
+  protected parseErrorAsString(res: any): string {
+    const response = this.parseHttpPipeError(res);
+    return response.message || '';
+  }
+
+  private parseHttpPipeError(res: any): { message?: string; } {
+    if (!res.status) {
+      return res;
+    }
+    try {
+      return res.json ? res.json() : res;
+    } catch (e) {
+      console.warn('Failed to parse response body', e);
+    }
+    return {};
   }
 }

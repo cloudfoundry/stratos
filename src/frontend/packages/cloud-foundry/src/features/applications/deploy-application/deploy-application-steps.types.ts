@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { GitSCMService } from '../../../../../git/src/public_api';
+import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../../../git/src/store/git-entity-factory';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
+import { EndpointModel } from '../../../../../store/src/public-api';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
@@ -22,16 +25,17 @@ export enum DEPLOY_TYPES_IDS {
 }
 
 export const AUTO_SELECT_DEPLOY_TYPE_URL_PARAM = 'auto-select-deploy';
+export const AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM = 'auto-select-deploy-endpoint';
 
 @Injectable()
 export class ApplicationDeploySourceTypes {
 
   private types: SourceType[] = [
     {
-      name: 'Public GitHub',
+      name: 'GitHub',
       id: DEPLOY_TYPES_IDS.GITHUB,
       group: 'gitscm',
-      helpText: 'Please select the public GitHub project and branch you would like to deploy from.',
+      helpText: 'Please select the GitHub project and branch you would like to deploy from.',
       graphic: {
         // TODO: Move cf assets to CF package (#3769)
         location: '/core/assets/endpoint-icons/github-logo.png',
@@ -39,10 +43,10 @@ export class ApplicationDeploySourceTypes {
       }
     },
     {
-      name: 'Public GitLab',
+      name: 'GitLab',
       id: DEPLOY_TYPES_IDS.GITLAB,
       group: 'gitscm',
-      helpText: 'Please select the public GitLab project and branch you would like to deploy from.',
+      helpText: 'Please select the GitLab project and branch you would like to deploy from.',
       graphic: {
         location: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg'
       }
@@ -79,23 +83,66 @@ export class ApplicationDeploySourceTypes {
       graphic: { matIcon: 'folder' }
     },
   ];
+  public types$: Observable<SourceType[]>;
+
 
   constructor(
     private perms: CurrentUserPermissionsService,
-    private store: Store<CFAppState>,
-  ) { }
-
-  getTypes(): SourceType[] {
-    return [
-      ...this.types
-    ];
+    private scmService: GitSCMService
+  ) {
+    this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+      filter(e => !!e),
+      map(endpoints => endpoints.reduce((res, e) => {
+        const newType = this.isGitSourceTypeFromEndpoint(e);
+        if (newType) {
+          res.push(newType);
+        }
+        return res;
+      }, [...this.types]))
+    );
   }
 
+  private createGitSourceTypeFromEndpoint(endpoint: EndpointModel, type: DEPLOY_TYPES_IDS): SourceType {
+    // By this point we know that
+    return;;
+  }
 
-  getAutoSelectedType(activatedRoute: ActivatedRoute): SourceType {
+  // TODO: RC handle permissions denied when fetching repo and guide user to add creds
+
+  private isGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
+    // We need to show any git of types lab and hub and that uses a custom url (github.com and gitlab.com use standard options)
+    if (endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
+      return;
+    }
+
+    const { scm, type } = endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+      {
+        scm: this.scmService.getSCM('github', null),
+        type: DEPLOY_TYPES_IDS.GITHUB
+      } :
+      endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITLAB ? {
+        scm: this.scmService.getSCM('gitlab', null),
+        type: DEPLOY_TYPES_IDS.GITLAB
+      } : null;
+    // I.E. It's a custom/new git addres
+    if (!!scm && getFullEndpointApiUrl(endpoint) !== scm.getPublicApiUrl()) {
+      return {
+        ...this.types.find(t => t.id === type),
+        name: `Private - ${endpoint.name}`,
+        endpointGuid: endpoint.guid
+      };
+    }
+  };
+
+
+  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
-    return typeId ? this.getTypes().find(source => source.id === typeId) : null;
-  }
+    if (!typeId) {
+      return of(null);
+    }
+    const endpointGuid = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM];
+    return this.types$.pipe(map(types => types.find(source => source.id === typeId && source.endpointGuid === endpointGuid)));
+  };
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
     if (sourceId === DEPLOY_TYPES_IDS.DOCKER_IMG) {

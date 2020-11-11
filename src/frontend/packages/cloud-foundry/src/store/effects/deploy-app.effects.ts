@@ -34,11 +34,11 @@ export class DeployAppEffects {
       return state.projectExists && state.projectExists.checking;
     }),
     switchMap(([action, state]: [CheckProjectExists, any]) => {
-      return action.scm.getRepository(this.httpClient, action.endpointGuid, action.projectName).pipe(
+      return action.scm.getRepository(this.httpClient, action.projectName).pipe(
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => observableOf(err.status === 404 ?
           new ProjectDoesntExist(action.projectName) :
-          new ProjectFetchFail(action.projectName, this.gitSCMService.parseErrorAsString(err, action.scm.getType()))
+          new ProjectFetchFail(action.projectName, action.scm.parseErrorAsString(err))
         ))
       );
     })

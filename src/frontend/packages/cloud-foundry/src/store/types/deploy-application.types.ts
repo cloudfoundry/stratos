@@ -6,6 +6,7 @@ import { NewAppCFDetails } from './create-application.types';
 export interface SourceType {
   name: string;
   id: string;
+  endpointGuid?: string;
   helpText?: string;
   disabledText?: string;
   group?: string;
@@ -69,6 +70,7 @@ export interface DockerAppDetails {
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
+  endpoint: string;
   commit?: string;
   branchName?: string;
   url?: string;

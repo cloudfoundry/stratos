@@ -10,18 +10,17 @@ import {
 
 export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: (
-    endpointGuid: string,
     meta: GitMeta
   ) => FetchGitHubRepoInfo;
 }
 
 export const gitRepoActionBuilders: GitRepoActionBuilders = {
   getRepoInfo: (
-    endpointGuid: string,
     meta: GitMeta
-  ) => new FetchGitHubRepoInfo(meta, endpointGuid)
+  ) => new FetchGitHubRepoInfo(meta, meta.scm.endpointGuid)
 };
 
+// TODO: RC RC tidy all file
 // export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
 //   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
 //   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;
@@ -41,12 +40,12 @@ export const gitCommitActionBuilders: GitCommitActionBuilders = {
     guid: string,
     endpointGuid: string,
     meta: GitMeta
-  ) => new FetchCommit(meta.scm, endpointGuid, meta.commitSha, meta.projectName),
+  ) => new FetchCommit(meta.scm, meta.scm.endpointGuid, meta.commitSha, meta.projectName),
   getMultiple: (
     commitSha: string,
     endpointGuid: string,
     commitMeta: GitMeta
-  ) => new FetchCommits(commitMeta.scm, endpointGuid, commitMeta.projectName, commitSha)
+  ) => new FetchCommits(commitMeta.scm, commitMeta.scm.endpointGuid, commitMeta.projectName, commitSha)
 };
 
 export interface GitBranchActionBuilders extends OrchestratedActionBuilders {
@@ -73,10 +72,10 @@ export const gitBranchActionBuilders: GitBranchActionBuilders = {
     guid: string,
     endpointId: string,
     meta: GitMeta
-  ) => new FetchBranchForProject(meta.scm, endpointId, meta.projectName, guid, meta.branchName),
+  ) => new FetchBranchForProject(meta.scm, meta.scm.endpointGuid, meta.projectName, guid, meta.branchName),
   getMultiple: (
     endpointGuid: string = null,
     paginationKey: string = null,
     meta?: GitMeta
-  ) => new FetchBranchesForProject(meta.scm, endpointGuid, meta.projectName)
+  ) => new FetchBranchesForProject(meta.scm, meta.scm.endpointGuid, meta.projectName)
 };

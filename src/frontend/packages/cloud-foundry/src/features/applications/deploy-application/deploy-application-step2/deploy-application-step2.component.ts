@@ -62,7 +62,6 @@ export class DeployApplicationStep2Component
   @Input() isRedeploy = false;
 
   commitInfo: GitCommit;
-  sourceTypes: SourceType[];
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
@@ -127,24 +126,27 @@ export class DeployApplicationStep2Component
     private httpClient: HttpClient,
     private appDeploySourceTypes: ApplicationDeploySourceTypes
   ) {
-    this.sourceTypes = appDeploySourceTypes.getTypes();
   }
 
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
-      this.store.dispatch(new SaveAppDetails({
-        projectName: this.repository,
-        branch: this.repositoryBranch,
-        url: this.scm.getCloneURL(this.repository),
-        commit: this.isRedeploy ? this.commitInfo.sha : undefined
-      }, null));
+      this.scm.getCloneURL(this.repository).pipe(first()).subscribe(commitUrl => {
+        this.store.dispatch(new SaveAppDetails({
+          projectName: this.repository,
+          branch: this.repositoryBranch,
+          url: commitUrl,
+          commit: this.isRedeploy ? this.commitInfo.sha : undefined,
+          endpoint: this.sourceType.endpointGuid
+        }, null));
+      });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.store.dispatch(new SaveAppDetails({
         projectName: this.gitUrl,
         branch: {
           name: this.gitUrlBranchName
-        }
+        },
+        endpoint: this.sourceType.endpointGuid
       }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
       this.store.dispatch(new SaveAppDetails(null, {
@@ -156,13 +158,15 @@ export class DeployApplicationStep2Component
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   };
 
+  // TODO: RC test redeploy app from previous/other commit
   ngOnInit() {
     this.sourceType$ = combineLatest(
-      of(this.appDeploySourceTypes.getAutoSelectedType(this.route)),
+      this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.store.select(selectSourceType),
-      of(this.sourceTypes[this.INITIAL_SOURCE_TYPE])
+      this.appDeploySourceTypes.types$.pipe(first(), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
-      map(([sourceFromStore, sourceFromParam, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
+      // TODO: RC test
+      map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
     );
 
@@ -304,10 +308,11 @@ export class DeployApplicationStep2Component
 
     const setSourceTypeModel$ = this.store.select(selectSourceType).pipe(
       filter(p => !!p),
-      tap(p => {
-        this.sourceType = this.sourceTypes.find(s => s.id === p.id);
+      withLatestFrom(this.appDeploySourceTypes.types$),
+      tap(([p, sourceTypes]) => {
+        this.sourceType = sourceTypes.find(s => s.id === p.id && s.endpointGuid === p.endpointGuid);
 
-        const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType);
+        const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
         if (!!newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
@@ -317,7 +322,7 @@ export class DeployApplicationStep2Component
             this.repositoryBranch = null;
             this.store.dispatch(new SetBranch(null));
             this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null }, null));
+            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpoint: this.sourceType.endpointGuid }, null));
           }
           this.scm = newScm;
         }

@@ -11,25 +11,24 @@ export interface SCMIcon {
 
 // Interface that a Git SCM provider must implement
 export interface GitSCM {
-  setEndpointGuid(endpointGuid: string);
-  getEndpointGuid(endpointGuid: string): string;
+  endpointGuid: string;
   getType(): GitSCMType;
   getLabel(): string;
   getIcon(): SCMIcon;
   getPublicApiUrl(): string;
   getAPIUrl(endpointGuid: string): Observable<string>;
-  getRepository(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitRepo>;
-  getBranch(httpClient: HttpClient, endpointGuid: string, projectName: string, branchId: string): Observable<GitBranch>;
-  getBranches(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitBranch[]>;
-  getCommit(httpClient: HttpClient, endpointGuid: string, projectName: string, commitSha: string): Observable<GitCommit>;
+  getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo>;
+  getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
+  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
+  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
   convertCommit(apiUrl: string, projectName: string, commit: any): GitCommit;
-  getCommits(httpClient: HttpClient, endpointGuid: string, projectName: string, commitSha: string): Observable<GitCommit[]>;
-  getCloneURL(endpointGuid: string, projectName: string): Observable<string>;
-  getCommitURL(endpointGuid: string, projectName: string, commitSha: string): Observable<string>;
-  getCommitApiUrl(endpointGuid: string, projectName: string, commitSha: string): Observable<string>;
-  getCompareCommitURL(endpointGuid: string, projectName: string, commitSha1: string, commitSha2: string): Observable<string>;
-  getMatchingRepositories(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<string[]>;
-  parseErrorString(error: any, message: string): string;
+  getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]>;
+  getCloneURL(projectName: string): Observable<string>;
+  getCommitURL(projectName: string, commitSha: string): Observable<string>;
+  getCommitApiUrl(projectName: string, commitSha: string): Observable<string>;
+  getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string>;
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]>;
+  parseErrorAsString(error: any): string;
 }
 
 export interface GitMeta {

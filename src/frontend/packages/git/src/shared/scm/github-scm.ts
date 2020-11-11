@@ -17,9 +17,10 @@ import { GitSCMType } from './scm.service';
 
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
-  constructor(public gitHubURL: string) {
+  constructor(public gitHubURL: string, endpointGuid: string) {
     super();
     this.gitHubURL = this.gitHubURL || getGitHubAPIURL();
+    this.endpointGuid = endpointGuid;
   }
 
   getType(): GitSCMType {
@@ -41,24 +42,24 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     return this.gitHubURL;
   }
 
-  getAPIUrl(endpointGuid: string): Observable<string> {
-    return super.getAPIUrl(endpointGuid) || of(this.getPublicApiUrl());
+  getAPIUrl(): Observable<string> {
+    return super.getAPIUrl() || of(this.getPublicApiUrl());
   }
 
-  getRepository(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitRepo> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => httpClient.get<GitRepo>(`${apiUrl}/repos/${projectName}`))
     );
   }
 
-  getBranch(httpClient: HttpClient, endpointGuid: string, projectName: string, branchName: string): Observable<GitBranch> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => httpClient.get<GitBranch>(`${apiUrl}/repos/${projectName}/branches/${branchName}`))
     );
   }
 
-  getBranches(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<GitBranch[]> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => {
         const url = `${apiUrl}/repos/${projectName}/branches`;
         const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
@@ -72,20 +73,20 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  getCommit(httpClient: HttpClient, endpointGuid: string, projectName: string, commitSha: string): Observable<GitCommit> {
-    return this.getCommitApiUrl(endpointGuid, projectName, commitSha).pipe(
+  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
+    return this.getCommitApiUrl(projectName, commitSha).pipe(
       switchMap(commitUrl => httpClient.get<GitCommit>(commitUrl))
     );
   }
 
-  getCommitApiUrl(projectName: string, endpointGuid: string, commitSha: string) {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCommitApiUrl(projectName: string, commitSha: string) {
+    return this.getAPIUrl().pipe(
       map(apiUrl => `${apiUrl}/repos/${projectName}/commits/${commitSha}`)
     );
   }
 
-  getCommits(httpClient: HttpClient, endpointGuid: string, projectName: string, ref: string): Observable<GitCommit[]> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => httpClient.get<GitCommit[]>(
         `${apiUrl}/repos/${projectName}/commits?sha=${ref}`, {
         params: {
@@ -97,26 +98,26 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   // TODO: RC these are links to sites... shouldn't use api urls
-  getCloneURL(endpointGuid: string, projectName: string): Observable<string> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCloneURL(projectName: string): Observable<string> {
+    return this.getAPIUrl().pipe(
       map(apiUrl => `https://github.com/${projectName}`)
     );
   }
 
-  getCommitURL(endpointGuid: string, projectName: string, commitSha: string): Observable<string> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCommitURL(projectName: string, commitSha: string): Observable<string> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => `https://github.com/${projectName}/commit/${commitSha}`)
     );
   }
 
-  getCompareCommitURL(endpointGuid: string, projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 
-  getMatchingRepositories(httpClient: HttpClient, endpointGuid: string, projectName: string): Observable<string[]> {
-    return this.getAPIUrl(endpointGuid).pipe(
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
+    return this.getAPIUrl().pipe(
       switchMap(apiUrl => {
         const prjParts = projectName.split('/');
         let url = `${apiUrl}/search/repositories?q=${projectName}+in:name+fork:true`;
@@ -142,7 +143,9 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     return commit;
   }
 
-  parseErrorString(error: any, message: string): string {
+  parseErrorAsString(error: any): string {
+    // TODO: RC test
+    const message = super.parseErrorAsString(error);
     return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
       'Git ' + message.substring(0, message.indexOf('(')) :
       'Git request failed';

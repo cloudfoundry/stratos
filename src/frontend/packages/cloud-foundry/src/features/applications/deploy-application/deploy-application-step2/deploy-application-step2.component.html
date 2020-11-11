@@ -7,13 +7,15 @@
           *ngIf="sourceType.id === DEPLOY_TYPES_IDS.FILE || sourceType.id === DEPLOY_TYPES_IDS.FOLDER"
           [sourceType]="sourceType.id" required name="fsLocalSource" [(ngModel)]="fsSourceData">
         </app-deploy-application-fs>
+        <!-- // TODO: RC -->
         <div *ngIf="sourceType.id.indexOf('git') === 0">
           <div *ngIf="sourceType.group === 'gitscm'">
             <div class="github-project-details">
               <div>
                 <mat-form-field>
+                  <!-- TODO: RC appGithubProjectExists endpoint guid -->
                   <input type="text" matInput [matAutocomplete]="auto" [disabled]="isRedeploy" [(ngModel)]="repository"
-                    placeholder="Project" name="projectName" [appGithubProjectExists]="sourceType.id" required>
+                    placeholder="Project" name="projectName" [appGithubProjectExists]="sourceType.id + ','" required>
                   <!-- Repository auto complete helper -->
                   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
                     <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo">{{repo}}</mat-option>

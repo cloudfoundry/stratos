@@ -46,7 +46,7 @@ export class GitEffects {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
       const entityConfig = entityCatalog.getEntity(action);
-      return action.meta.scm.getRepository(this.httpClient, action.endpointGuid, action.meta.projectName).pipe(
+      return action.meta.scm.getRepository(this.httpClient, action.meta.projectName).pipe(
         mergeMap(repoDetails => {
           const mappedData: NormalizedResponse = {
             entities: { [entityConfig.entityKey]: {} },
@@ -59,7 +59,7 @@ export class GitEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.meta.scm.getType()), action, actionType)
+          new WrapperRequestActionFailed(action.meta.scm.parseErrorAsString(err), action, actionType)
         ]
         ));
     }));
@@ -70,7 +70,7 @@ export class GitEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return action.scm.getBranches(this.httpClient, action.endpointGuid, action.projectName).pipe(
+      return action.scm.getBranches(this.httpClient, action.projectName).pipe(
         mergeMap(branches => {
           const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
@@ -91,7 +91,7 @@ export class GitEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), action, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -101,7 +101,7 @@ export class GitEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return action.scm.getBranch(this.httpClient, action.endpointGuid, action.projectName, action.branchName).pipe(
+      return action.scm.getBranch(this.httpClient, action.projectName, action.branchName).pipe(
         mergeMap(branch => {
           const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
@@ -117,7 +117,7 @@ export class GitEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), action, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -127,7 +127,7 @@ export class GitEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return action.scm.getCommit(this.httpClient, action.endpointGuid, action.projectName, action.commitSha).pipe(
+      return action.scm.getCommit(this.httpClient, action.projectName, action.commitSha).pipe(
         mergeMap(commit => {
           const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
@@ -140,7 +140,7 @@ export class GitEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), action, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -150,7 +150,7 @@ export class GitEffects {
     mergeMap(action => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return action.scm.getCommits(this.httpClient, action.endpointGuid, action.projectName, action.sha).pipe(
+      return action.scm.getCommits(this.httpClient, action.projectName, action.sha).pipe(
         mergeMap((commits: GitCommit[]) => {
           const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
@@ -165,7 +165,7 @@ export class GitEffects {
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), action, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 

@@ -133,7 +133,7 @@ export class BuildTabComponent implements OnInit {
 
           if (deploySource.type === 'gitscm') {
             const scmType = deploySource.scm as GitSCMType;
-            const scm = this.scmService.getSCM(scmType);
+            const scm = this.scmService.getSCM(scmType, deploySource.endpoint);
             deploySource.label = scm.getLabel();
             deploySource.commitURL = scm.getCommitURL(deploySource.project, deploySource.commit);
             deploySource.icon = scm.getIcon();
