@@ -14,3 +14,4 @@ Create Service Instance with binding
 Delete Service Instance
 Manage Space
 Manage Space Quota
+Create Service Instance of Private Service
