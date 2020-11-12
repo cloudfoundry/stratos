@@ -63,6 +63,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpoint: StratosCatalogEndpointEntity;
   show = false;
 
+  showAdvancedOptions = false;
+
   constructor(
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService
@@ -139,5 +141,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     // Only allow SSL if the endpoint type is Cloud Foundry
     this.endpointTypeSupportsSSO = endpoint.definition.type === 'cf';
+  }
+
+  toggleAdvancedOptions() {
+    this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 }

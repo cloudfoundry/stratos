@@ -108,7 +108,20 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
 
   // Smaller page header
   .page-header .page-header__toolbar {
+    font-size: 18px;
     height: $desktop-page-header-height;
+
+    h1 {
+      font-size: 18px;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      height: 20px;
+      line-height: 20px;
+      width: 20px;
+    }
+
   }
 
   .dashboard .dashboard__inner {
