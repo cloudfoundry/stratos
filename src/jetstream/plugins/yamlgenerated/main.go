@@ -23,7 +23,6 @@ type GeneratedPlugin struct {
 
 func (gp GeneratedPlugin) Init() error { return gp.initMethod() }
 func (gp GeneratedPlugin) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
-	//return nil, errors.New("Not implemented")
 	return gp.middlewarePlugin()
 }
 func (gp GeneratedPlugin) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -36,12 +35,7 @@ func (gp GeneratedPlugin) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 type GeneratedEndpointPlugin struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
-}
-
-type GeneratedEndpointPluginAuth struct {
-	Type     string
-	Username string
-	Password string
+	authType     string
 }
 
 func (gep GeneratedEndpointPlugin) GetType() string {
@@ -64,28 +58,41 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 	}
 
 	connectType := params.ConnectType
-	auth := &GeneratedEndpointPluginAuth{
-		Type: connectType,
-	}
 
-	switch connectType {
+	var tr *interfaces.TokenRecord
+
+	switch gep.authType {
 	case interfaces.AuthConnectTypeCreds:
-		auth.Username = params.Username
-		auth.Password = params.Password
-		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
+		if connectType != interfaces.AuthTypeHttpBasic {
+			return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.GetType(), interfaces.AuthConnectTypeCreds)
+		}
+
+		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return nil, false, errors.New("Need username and password")
 		}
+
+		authString := fmt.Sprintf("%s:%s", params.Username, params.Password)
+		base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
+
+		tr = &interfaces.TokenRecord{
+			AuthType:     interfaces.AuthTypeHttpBasic,
+			AuthToken:    base64EncodedAuthString,
+			RefreshToken: params.Username,
+		}
+	case interfaces.AuthConnectTypeBearer:
+		if connectType != interfaces.AuthTypeBearer {
+			return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.endpointType, interfaces.AuthConnectTypeCreds)
+		}
+
+		authString := ec.FormValue("token")
+		base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
+
+		tr = &interfaces.TokenRecord{
+			AuthType:  interfaces.AuthTypeBearer,
+			AuthToken: base64EncodedAuthString,
+		}
 	default:
-		return nil, false, fmt.Errorf("Only username/password or no authentication is accepted for %s endpoints", gep.GetType())
-	}
-
-	authString := fmt.Sprintf("%s:%s", auth.Username, auth.Password)
-	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
-
-	tr := &interfaces.TokenRecord{
-		AuthType:     interfaces.AuthTypeHttpBasic,
-		AuthToken:    base64EncodedAuthString,
-		RefreshToken: auth.Username,
+		return nil, false, fmt.Errorf("Only '%s' authentication is supported for %s endpoints", gep.authType, gep.GetType())
 	}
 
 	return tr, false, nil
@@ -113,7 +120,8 @@ func (gep GeneratedEndpointPlugin) UpdateMetadata(info *interfaces.Info, userGUI
 }
 
 type PluginConfig struct {
-	Name string `yaml:"name"`
+	Name     string `yaml:"name"`
+	AuthType string `yaml:"auth_type"`
 }
 
 func MakePluginsFromConfig() {
@@ -138,6 +146,7 @@ func MakePluginsFromConfig() {
 
 		gep := GeneratedEndpointPlugin{}
 		gep.endpointType = plugin.Name
+		gep.authType = plugin.AuthType
 
 		gp := GeneratedPlugin{}
 		gp.initMethod = func() error { return nil }
