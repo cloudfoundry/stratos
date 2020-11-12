@@ -13,7 +13,7 @@ chmod +x ./git-resource/assets/check
 echo "#!/bin/bash" >  ./git-resource/test/all.sh
 echo "#!/bin/bash" >  ./git-resource/integration-tests/integration.sh
 
-docker build ./git-resource -t splatform/stratos-git-tag-resource:latest
-docker push splatform/stratos-git-tag-resource:latest
+docker build ./git-resource -t ghcr.io/cf-stratos/stratos-git-tag-resource:latest
+docker push ghcr.io/cf-stratos/stratos-git-tag-resource:latest
 rm -rf ./tmp
 echo "All done"

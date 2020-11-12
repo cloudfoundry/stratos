@@ -1,5 +1,33 @@
 # Change Log
 
+## 4.3.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.2.1...4.3.0)
+
+This release contains a number of fixes and improvements:
+
+**Improvements:**
+
+- Lists: Highlight filters that are set in the list header [\#4748](https://github.com/cloudfoundry/stratos/issues/4748)
+- Helm Chart List: Show which endpoint a chart comes from  [\#4717](https://github.com/cloudfoundry/stratos/issues/4717)
+- Add new darker/lighter background colour to all textareas [\#4689](https://github.com/cloudfoundry/stratos/issues/4689)
+- Improve Helm Chart List Repo Filter   [\#4655](https://github.com/cloudfoundry/stratos/issues/4655)
+- Improve password input fields to include a reveal button to view password [\#4219](https://github.com/cloudfoundry/stratos/issues/4219)
+
+**Fixes:**
+
+- CF events list actee filter fails to show clear button [\#4747](https://github.com/cloudfoundry/stratos/issues/4747)
+- Stratos DB Migration fails on Postgres [\#4736](https://github.com/cloudfoundry/stratos/issues/4736)
+- Workload Summary: Shrinking the windows hides header content [\#4707](https://github.com/cloudfoundry/stratos/issues/4707)
+- Dyanmic sizing of endpoint cards in register endpoint stepper sometimes fails [\#4706](https://github.com/cloudfoundry/stratos/issues/4706)
+- Helm: Can't use a custom TLS secret when deploying Stratos [\#4704](https://github.com/cloudfoundry/stratos/issues/4704)
+- Helm Install: Errors can incorrectly show up as endpoint errors [\#4673](https://github.com/cloudfoundry/stratos/issues/4673)
+- Helm Install: Trim error message in snackbar [\#4672](https://github.com/cloudfoundry/stratos/issues/4672)
+- Icon font's show text before icon on slow loading instances [\#4668](https://github.com/cloudfoundry/stratos/issues/4668)
+- 'Are you logged in' dialog seen on logging out page [\#4468](https://github.com/cloudfoundry/stratos/issues/4468)
+
+
+
 ## 4.2.1
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.2.0...4.2.1)
