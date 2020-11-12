@@ -62,7 +62,11 @@ function getRequestObservable(
       action.endpointGuid,
       action.externalRequest
     );
-    return initialRequest.pipe(map(response => singleRequestToPaged(response)));
+    return initialRequest.pipe(
+      map(response => {
+        return action.externalRequest ? response : singleRequestToPaged(response);
+      })
+    );
   }
   return paginationPageIterator.mergeAllPagesEntities();
 }

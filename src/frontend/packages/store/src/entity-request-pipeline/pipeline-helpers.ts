@@ -18,6 +18,7 @@ export function singleRequestToPaged(response: JetstreamResponse<any>): PagedJet
   if (!response) {
     return null;
   }
+
   return Object.keys(response).reduce((mapped, endpointKey) => {
     const page = response[endpointKey];
     return page ? {

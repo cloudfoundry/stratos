@@ -20,13 +20,13 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
   animations: [
     trigger(
       'cardEnter', [
-        transition('* => *', [
-          query(':enter', [
-            style({ opacity: 0, transform: 'translateY(10px)' }),
-            animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-          ], { optional: true })
-        ])
-      ]
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(10px)' }),
+          animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        ], { optional: true })
+      ])
+    ]
     )
   ],
   providers: [{
@@ -62,6 +62,7 @@ export class ApplicationWallComponent implements OnDestroy {
       this.cfOrgSpaceService,
       applicationEntityType,
       CfAppsDataSource.paginationKey).subscribe();
+
   }
 
   ngOnDestroy(): void {

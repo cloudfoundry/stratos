@@ -68,10 +68,10 @@ export class ActionBuilderConfigMapper {
     }
     if (configOrBuilder instanceof PaginationRequestActionConfig) {
       return (...args: Parameters<GetMultipleActionBuilder>) => {
-        const [endpointGuid, ...meta] = args;
+        const [endpointGuid, paginationKey, ...meta] = args;
         return new BasePaginationRequestAction(
           schemaGetter(configOrBuilder.schemaKey),
-          configOrBuilder.paginationKey || args[1],
+          configOrBuilder.getPaginationKey(...args),
           endpointGuid,
           entityType,
           endpointType,
@@ -90,7 +90,8 @@ export class ActionBuilderConfigMapper {
       ...config,
       // The passed httpMethod takes precedence when we're mapping the update action.
       // This is because some apis might use POST for updates.
-      httpMethod: key === 'update' ? config.httpMethod || ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] :
+      httpMethod: key === 'update' ?
+        config.httpMethod || ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] :
         ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] || config.httpMethod,
     };
   }

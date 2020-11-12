@@ -49,7 +49,7 @@ import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: 'guid' });
@@ -61,13 +61,13 @@ entityCache[appStatsEntityType] = AppStatSchema;
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
 
-const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'entityId' });
+const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitBranchesEntityType] = GithubBranchSchema;
 
-const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);
+const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.guid });
+const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: 'guid' });
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);

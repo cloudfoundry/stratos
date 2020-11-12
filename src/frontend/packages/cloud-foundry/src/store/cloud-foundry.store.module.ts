@@ -8,7 +8,6 @@ import { AppEffects } from './effects/app.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
-import { GithubEffects } from './effects/github.effects';
 import { CfValidateEffects } from './effects/request.effects';
 import { RouteEffect } from './effects/route.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
@@ -22,7 +21,6 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
       CreateAppPageEffects,
       AppVariablesEffect,
       DeployAppEffects,
-      GithubEffects,
       CloudFoundryEffects,
       RouteEffect,
       ServiceInstanceEffects,

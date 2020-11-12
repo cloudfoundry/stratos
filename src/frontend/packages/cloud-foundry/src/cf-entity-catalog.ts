@@ -41,9 +41,11 @@ import { DomainActionBuilders } from './entity-action-builders/domin.action-buil
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import {
   GitBranchActionBuilders,
+  GitBranchActionBuildersConfig,
   GitCommitActionBuilders,
   GitCommitActionBuildersConfig,
   GitRepoActionBuilders,
+  GitRepoActionBuildersConfig,
 } from './entity-action-builders/git-action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
@@ -182,12 +184,14 @@ export class CfEntityCatalog {
   public gitRepo: StratosBaseCatalogEntity<
     IBasicCFMetaData,
     GitRepo,
+    GitRepoActionBuildersConfig,
     GitRepoActionBuilders
   >;
 
   public gitBranch: StratosBaseCatalogEntity<
     IBasicCFMetaData,
     GitBranch,
+    GitBranchActionBuildersConfig,
     GitBranchActionBuilders
   >;
 

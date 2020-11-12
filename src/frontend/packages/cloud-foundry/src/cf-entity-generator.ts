@@ -14,12 +14,16 @@ import {
 import {
   EndpointHealthCheck,
   IStratosEntityDefinition,
+  NonJetstreamRequestHandler,
   StratosEndpointExtensionDefinition,
 } from '../../store/src/entity-catalog/entity-catalog.types';
 import {
   JetstreamError,
 } from '../../store/src/entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 import { ActionDispatcher, JetstreamResponse } from '../../store/src/entity-request-pipeline/entity-request-pipeline.types';
+import {
+  PaginationPageIteratorConfig,
+} from '../../store/src/entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import { EntitySchema } from '../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../store/src/helpers/stratos-entity-factory';
 import { RequestInfoState } from '../../store/src/reducers/api-request-reducer/types';
@@ -115,12 +119,14 @@ import { FeatureFlagActionBuilders, featureFlagActionBuilders } from './entity-a
 import {
   GitBranchActionBuilders,
   gitBranchActionBuilders,
+  GitBranchActionBuildersConfig,
   GitCommitActionBuilders,
   gitCommitActionBuilders,
   GitCommitActionBuildersConfig,
   GitMeta,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
+  GitRepoActionBuildersConfig,
 } from './entity-action-builders/git-action-builder';
 import {
   OrganizationActionBuilders,
@@ -165,6 +171,7 @@ import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-
 import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
+import { getBranchGuid, getCommitGuid, getRepositoryGuid } from './shared/data-services/scm/scm';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
@@ -623,7 +630,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
         return {
           ...data,
           cfGuid: endpointGuid,
-          guid: `${action.guid}-${guid}`
+          guid: `${action.guid}-${guid}` // TODO: RC test. see map-multi-endpoint.pipes.ts. prob need to grab from schema?? data.guid??
         };
       }
       return data;
@@ -905,6 +912,22 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
   return cfEntityCatalog.domain;
 }
 
+// TODO: RC Document - List use initialParams from action to set starting sort order and field. With generic actions we don't have these
+// TODO: RC Document - paginationConfig getEntitiesFromResponse is needed (to override parent) however others are not but required by typing
+
+// TODO: RC Document - PaginationPageIteratorConfig - will be different for github & gitlab
+// TODO: RC Document - PaginationPageIteratorConfig - github requires info from HEADER, all we have here is RESPONSE
+
+// TODO: RC Test - Gitlab
+const basicGitPaginationConfig: PaginationPageIteratorConfig<any, any> = {
+  getEntitiesFromResponse: response => response, // Required to override default cf one
+  getTotalPages: response => 1,
+  getTotalEntities: response => response.length,
+  getPaginationParameters: (page: number) => ({}),
+  canIgnoreMaxedState: (store: Store<AppState>) => of(true),
+  maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => of(null),
+};
+
 function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: gitCommitEntityType,
@@ -913,13 +936,17 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
     labelPlural: 'Git Commits',
     endpoint: endpointDefinition,
     nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       const metadata = (action.metadata as GitMeta[])[0];
       return {
         ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid
+        // For single entity requests we already ahve the guid... for multi entity requests we need to create it
+        // This should come from the schema... however we need to bring the entity type
+        guid: action.guid || getCommitGuid(metadata.scm.getType(), metadata.projectName, data.sha)
       };
     },
+    paginationConfig: basicGitPaginationConfig,
   };
   cfEntityCatalog.gitCommit = new StratosCatalogEntity<IBasicCFMetaData, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
     definition,
@@ -940,17 +967,44 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
   return cfEntityCatalog.gitCommit;
 }
 
+// TODO: RC Document - entity definitions need nonJetstreamRequest AND nonJetstreamRequestHandler
+// TODO: RC Document - nonJetstreamRequestHandler isSuccess ... not sure what the point of this is if it only looks at body of response
+// TODO: RC Document - nonJetstreamRequestHandler getErrorCode ... not sure what the point of this is if it only looks at body of response
+// TODO: RC Document - guids in generic action single/paginated requests need to come from somewhere.
+// - Previously the custom actions created unique guids for these
+// - need a way for generic action to calculate this (normally would look at schema, but for git we need the scm)
+// - see #4245
+
+
+// TODO: RC errorMessageHandler createFailedGithubRequestMessage
+const nonchalantGitRequestHandler: NonJetstreamRequestHandler<any> = {
+  isSuccess: (request) => !!request,
+  getErrorCode: (request) => '400'
+};
+
 function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
     type: gitRepoEntityType,
     schema: cfEntityFactory(gitRepoEntityType),
     label: 'Git Repository',
     labelPlural: 'Git Repositories',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      const metadata = (action.metadata as GitMeta[])[0];
+      const res = {
+        ...data,
+        guid: action.guid || getRepositoryGuid(metadata.scm.getType(), metadata.projectName),
+      };
+      return res;
+    },
+    paginationConfig: basicGitPaginationConfig,
   };
   cfEntityCatalog.gitRepo = new StratosCatalogEntity<
     IBasicCFMetaData,
     GitRepo,
+    GitRepoActionBuildersConfig,
     GitRepoActionBuilders
   >(
     definition,
@@ -970,9 +1024,23 @@ function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDef
     schema: cfEntityFactory(gitBranchesEntityType),
     label: 'Git Branch',
     labelPlural: 'Git Branches',
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    nonJetstreamRequest: true,
+    nonJetstreamRequestHandler: nonchalantGitRequestHandler,
+    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      const metadata = (action.metadata as GitMeta[])[0];
+      const res = {
+        ...data,
+        guid: action.guid || getBranchGuid(metadata.scm.getType(), metadata.projectName, data.name),
+        projectId: metadata.projectName,
+      };
+      // This is a gitlab --> common github commit format fix
+      res.commit.sha = res.commit.sha || res.commit.id;
+      return res;
+    },
+    paginationConfig: basicGitPaginationConfig,
   };
-  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuilders>(
+  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuildersConfig, GitBranchActionBuilders>(
     definition,
     {
       dataReducers: [

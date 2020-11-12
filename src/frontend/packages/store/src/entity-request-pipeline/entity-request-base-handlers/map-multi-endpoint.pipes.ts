@@ -21,13 +21,31 @@ function createErrorMessage(definition: IStratosEntityDefinition, errors: Jetstr
   return errorMessageHandler(errors);
 }
 
+function mapEntities<T = any>(
+  entities: T[],
+  action: EntityRequestAction,
+): T[] {
+  const innerCatalogEntity = entityCatalog.getEntity(action);
+  const entitySuccessMapper = getSuccessMapper(innerCatalogEntity);
+  return entities.map(entity => {
+    return entitySuccessMapper(
+      entity,
+      action.endpointGuid,
+      action.guid,
+      innerCatalogEntity.entityKey, // TODO: RC check
+      action.endpointType,
+      action
+    );
+  });
+}
+
 function getEntities(
   endpointResponse: {
     normalizedEntities: NormalizedResponse<any>;
     endpointGuid: string;
   },
   action: EntityRequestAction
-): { [entityKey: string]: any[] } {
+): { [entityKey: string]: any[]; } {
   return Object.keys(endpointResponse.normalizedEntities.entities).reduce(
     (newEntities, entityKey) => {
       const innerCatalogEntity = entityCatalog.getEntityFromKey(entityKey) as StratosBaseCatalogEntity;
@@ -56,17 +74,33 @@ function getEntities(
     }, {});
 }
 
+function getSchema(
+  action: EntityRequestAction,
+  catalogueEntity: StratosBaseCatalogEntity
+) {
+  // Can patchActionWithForcedConfig be done outside of the pipe?
+  // This pipe shouldn't have to worry about the multi entity lists.
+  const patchedAction = patchActionWithForcedConfig(action);
+  const schema = patchedAction.entity || catalogueEntity.getSchema(patchedAction.schemaKey);
+  return Array.isArray(schema) ? schema[0] : schema;
+}
+
 // TODO: Type the output of this pipe. #3976
 function getNormalizedEntityData(
   entities: any[],
   action: EntityRequestAction,
   catalogueEntity: StratosBaseCatalogEntity) {
-  // Can patchActionWithForcedConfig be done outside of the pipe?
-  // This pipe shouldn't have to worry about the multi entity lists.
-  const patchedAction = patchActionWithForcedConfig(action);
-  const schema = patchedAction.entity || catalogueEntity.getSchema(patchedAction.schemaKey);
-  const arraySafeSchema = Array.isArray(schema) ? schema[0] : schema;
+  const arraySafeSchema = getSchema(action, catalogueEntity);
   return normalize(entities, Array.isArray(entities) ? [arraySafeSchema] : arraySafeSchema);
+}
+
+function canNormalizeBeforeMap(
+  action: EntityRequestAction,
+  catalogueEntity: StratosBaseCatalogEntity
+): boolean {
+  const arraySafeSchema = getSchema(action, catalogueEntity);
+  // If there's items in the schema then we're safe to normalize before the map
+  return Object.keys(arraySafeSchema.schema).length > 0;
 }
 
 export function mapMultiEndpointResponses(
@@ -74,7 +108,7 @@ export function mapMultiEndpointResponses(
   catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes,
   multiEndpointResponses: HandledMultiEndpointResponse,
-  actionDispatcher: (actionToDispatch: Action) => void
+  actionDispatcher: (actionToDispatch: Action) => void,
 ): PipelineResult {
   const endpointErrorHandler = endpointErrorsHandlerFactory(actionDispatcher);
   endpointErrorHandler(
@@ -91,27 +125,49 @@ export function mapMultiEndpointResponses(
       errorMessage
     };
   } else {
+
     const responses = multiEndpointResponses.successes
-      .map((responseData: MultiEndpointResponse<any>) => ({
-        normalizedEntities: getNormalizedEntityData(responseData.entities, action, catalogEntity),
-        endpointGuid: responseData.endpointGuid,
-        totalResults: responseData.totalResults,
-        totalPages: responseData.totalPages
-      }))
-      .map(endpointResponse => {
-        const entities = getEntities(endpointResponse, action);
-        const parentEntities = entities[catalogEntity.entityKey];
-        return {
-          response: {
-            entities,
-            // If we changed the guid of the entities then make sure this is reflected in the result array.
-            result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result,
-          },
-          totalPages: endpointResponse.totalPages,
-          totalResults: endpointResponse.totalResults,
-          success: null
-        };
-      });
+      .map((responseData: MultiEndpointResponse<any>) => {
+        // TODO: RC Document - Chicken and egg problem.
+        // - Normal flow - normalize a list of entities... and then in getEntities for all entity types and their entities, run through entity success mapper
+        // - Alternative flow - to ensure the normalize process can key entities correctly run through success mapper BEFORE noramalizing
+
+        if (canNormalizeBeforeMap(action, catalogEntity)) {
+          const endpointResponse = {
+            normalizedEntities: getNormalizedEntityData(responseData.entities, action, catalogEntity),
+            endpointGuid: responseData.endpointGuid,
+            totalResults: responseData.totalResults,
+            totalPages: responseData.totalPages
+          };
+          const entities = getEntities(endpointResponse, action);
+          const parentEntities = entities[catalogEntity.entityKey];
+          return {
+            response: {
+              entities,
+              // If we changed the guid of the entities then make sure this is reflected in the result array.
+              result: parentEntities ? Object.keys(parentEntities) : endpointResponse.normalizedEntities.result,
+            },
+            totalPages: endpointResponse.totalPages,
+            totalResults: endpointResponse.totalResults,
+            success: null
+          };
+        } else {
+          const entities = mapEntities(responseData.entities, action);
+          const endpointResponse = {
+            normalizedEntities: getNormalizedEntityData(entities, action, catalogEntity),
+            endpointGuid: responseData.endpointGuid,
+            totalResults: responseData.totalResults,
+            totalPages: responseData.totalPages
+          };
+          return {
+            response: endpointResponse.normalizedEntities,
+            totalPages: endpointResponse.totalPages,
+            totalResults: endpointResponse.totalResults,
+            success: null
+          };
+        }
+      })
+      ;
     const response = multiEndpointResponseMergePipe(responses);
     return {
       ...response,

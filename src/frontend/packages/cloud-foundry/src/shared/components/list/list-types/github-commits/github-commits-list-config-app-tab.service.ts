@@ -20,7 +20,7 @@ import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/sel
 import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { GitSCM } from '../../../../data-services/scm/scm';
+import { getBranchGuid, GitSCM } from '../../../../data-services/scm/scm';
 import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
@@ -127,20 +127,22 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.deployedCommitSha = stratosProject.deploySource.commit;
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
-
-      cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
-        scm: this.scm,
-        projectName: this.projectName,
-        branchName: stratosProject.deploySource.branch
-      })
-        .waitForEntity$.pipe(
-          first(),
-        ).subscribe(branch => {
-          this.branchName = branch.entity.name;
-          this.dataSource = new GithubCommitsDataSource(
-            this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
-          this.initialised.next(true);
-        });
+      cfEntityCatalog.gitBranch.store.getFromProject.getEntityService(
+        getBranchGuid(this.scm.getType(), this.projectName, stratosProject.deploySource.branch),
+        undefined,
+        {
+          scm: this.scm,
+          projectName: this.projectName,
+          branchName: stratosProject.deploySource.branch
+        }
+      ).waitForEntity$.pipe(
+        first(),
+      ).subscribe(branch => {
+        this.branchName = branch.entity.name;
+        this.dataSource = new GithubCommitsDataSource(
+          this.store, this, this.scm, this.projectName, this.branchName, this.deployedCommitSha);
+        this.initialised.next(true);
+      });
 
       this.setDeployedCommitDetails();
     });

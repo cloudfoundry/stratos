@@ -41,11 +41,14 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
         highlighted: true
       }
     } : {});
+    // TODO: RC Document generic actions for single entities don't return an array for the schema (which is correct)
+    // but for typing everywhere it's an array.
+    const schema = new CFEntitySchema(gitCommitEntityType);
     super({
       store,
       action,
-      schema: new CFEntitySchema(gitCommitEntityType),
-      getRowUniqueId: (object: GitCommit) => object.sha,
+      schema,
+      getRowUniqueId: (object) => schema.getId(object),
       paginationKey,
       isLocal: true,
       transformEntities: [],

@@ -67,7 +67,7 @@ export class PipelineHttpClient {
   ): Observable<R> {
     return this.makeRequest<R>(hr, endpointConfig.definition, endpointGuids, externalRequest).pipe(
       filter(event => event instanceof HttpResponse),
-      map((response: HttpResponse<R>) => response.body)
+      map((response: HttpResponse<R>) => response.body) // TODO: RC Having access to the actual response here would be helpful
     );
   }
 

@@ -8,7 +8,6 @@ import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
-  GithubFlattenerForArrayPaginationConfig,
   GithubFlattenerPaginationConfig,
 } from './github-pagination.helper';
 import { GitSCM, SCMIcon } from './scm';
@@ -39,36 +38,40 @@ export class GitHubSCM implements GitSCM {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}`) as Observable<GitRepo>;
   }
 
+  getRepositoryApiUrl(projectName: string): string {
+    return `${this.gitHubURL}/repos/${projectName}`;
+  }
+
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
     return httpClient.get(`${this.gitHubURL}/repos/${projectName}/branches/${branchName}`) as Observable<GitBranch>;
   }
 
-  getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    const url = `${this.gitHubURL}/repos/${projectName}/branches`;
-    const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url)
-    const firstRequest = config.fetch(...config.buildFetchParams(1))
-    return flattenPagination(
-      null,
-      firstRequest,
-      config
-    )
+  getBranchApiUrl(projectName: string, branchName: string): string {
+    return `${this.gitHubURL}/repos/${projectName}/branches/${branchName}`;
   }
 
-  getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
-    return httpClient.get<GitCommit>(this.getCommitApiUrl(projectName, commitSha)) as Observable<GitCommit>;
+  // getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
+  //   const url = `${this.gitHubURL}/repos/${projectName}/branches`;
+  //   const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
+  //   const firstRequest = config.fetch(...config.buildFetchParams(1));
+  //   return flattenPagination(
+  //     null,
+  //     firstRequest,
+  //     config
+  //   );
+  // }
+
+  getBranchesApiUrl(projectName: string): string {
+    // TODO: RC Fix This is broken, flatten pagination is not here, flatten config in entity needs access to header
+    return `${this.gitHubURL}/repos/${projectName}/branches`;
   }
 
   getCommitApiUrl(projectName: string, commitSha: string) {
     return `${this.gitHubURL}/repos/${projectName}/commits/${commitSha}`;
   }
 
-  getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return httpClient.get<GitCommit[]>(
-      `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}`, {
-      params: {
-        [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
-      }
-    });
+  getCommitsApiUrl(projectName: string, ref: string): string {
+    return `${this.gitHubURL}/repos/${projectName}/commits?sha=${ref}&${GITHUB_PER_PAGE_PARAM}=${GITHUB_PER_PAGE_PARAM_VALUE.toString()}`;
   }
 
   getCloneURL(projectName: string): string {
@@ -84,14 +87,15 @@ export class GitHubSCM implements GitSCM {
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
+    // TODO: RC Fix how to integrate with generics?
     const prjParts = projectName.split('/');
     let url = `${this.gitHubURL}/search/repositories?q=${projectName}+in:name+fork:true`;
     if (prjParts.length > 1) {
       url = `${this.gitHubURL}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
     }
 
-    const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url)
-    const firstRequest = config.fetch(...config.buildFetchParams(1))
+    const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url);
+    const firstRequest = config.fetch(...config.buildFetchParams(1));
     return flattenPagination(
       null,
       firstRequest,
@@ -100,7 +104,7 @@ export class GitHubSCM implements GitSCM {
       map(repos => {
         return repos.map(item => item.full_name);
       })
-    )
+    );
   }
 
   public convertCommit(projectName: string, commit: any): GitCommit {
