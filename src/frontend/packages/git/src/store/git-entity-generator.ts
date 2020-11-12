@@ -1,5 +1,3 @@
-import { Validators } from '@angular/forms';
-
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
@@ -32,12 +30,13 @@ const enum GitEndpointAuthTypes {
 
 const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   [GitEndpointAuthTypes.GITHUB_TOKEN]: {
-    ...BaseEndpointAuth.Token,
+    ...BaseEndpointAuth.UsernamePassword,
+    name: 'Username and Token',
     help: '/core/assets/connect/github.md'
   },
   [GitEndpointAuthTypes.GITLAB_TOKEN]: {
     ...BaseEndpointAuth.Token,
-    help: '/core/assets/connect/github.md'
+    help: '/core/assets/connect/gitlab.md'
   },
 };
 // TODO: RC custom field text
@@ -85,14 +84,6 @@ class GitEntityCatalog {
           label: 'Github',
           labelShort: 'Github',
           authTypes: [
-            {
-              ...BaseEndpointAuth.UsernamePassword,
-              name: 'Username and Token',
-              form: {
-                username: ['', Validators.required],
-                password: ['Token', Validators.required],
-              },
-            }, // TODO: RC this isn't username password,
             gitAuthTypeMap[GitEndpointAuthTypes.GITHUB_TOKEN]
           ],
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
@@ -104,7 +95,6 @@ class GitEntityCatalog {
           label: 'Gitlab',
           labelShort: 'Gitlab',
           authTypes: [
-            BaseEndpointAuth.UsernamePassword, // TODO: RC this isn't username password
             gitAuthTypeMap[GitEndpointAuthTypes.GITLAB_TOKEN]
           ],
           logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
