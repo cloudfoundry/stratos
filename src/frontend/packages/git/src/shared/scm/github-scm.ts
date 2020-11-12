@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { flattenPagination } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
@@ -12,14 +12,13 @@ import {
   GithubFlattenerPaginationConfig,
 } from './github-pagination.helper';
 import { GitSCM, SCMIcon } from './scm';
-import { BaseSCM } from './scm-base';
+import { BaseSCM, GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
 
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
-  constructor(public gitHubURL: string, endpointGuid: string) {
-    super();
-    this.gitHubURL = this.gitHubURL || getGitHubAPIURL();
+  constructor(gitHubURL: string, endpointGuid: string) {
+    super(gitHubURL || getGitHubAPIURL());
     this.endpointGuid = endpointGuid;
   }
 
@@ -38,53 +37,23 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     };
   }
 
-  getPublicApiUrl(): string {
-    return this.gitHubURL;
-  }
-
-  getAPIUrl(): Observable<{
-    url: string,
-    requestArgs: string;
-  }> {
-    // TODO: RC
-    // // If endpoint has user.... return jetstream url and cnsi-list in header... otherwise endpoint url... otherwise if no endpoint public
-    // if (this.endpointGuid) {
-    //   return of(this.getPublicApiUrl());
-    // }
-    // return this.getEndpoint(this.endpointGuid).pipe(
-    //   map(endpoint => {
-    //     if (endpoint.user) {
-
-    //     }
-    //   }),
-    //   map(getFullEndpointApiUrl),
-    //   tap(url => { console.log('getAPIUrl: ', url); })
-    // );
-    // return super.getAPIUrl() || of(this.getPublicApiUrl());
-    return of(null);
-  }
-
-  // 'x-cap-cnsi-list': cfGuid
-  // const requestArgs  = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint :'' } };
-
-
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => httpClient.get<GitRepo>(`${apiUrl}/repos/${projectName}`))
+    return this.getAPI().pipe(
+      switchMap(api => httpClient.get<GitRepo>(`${api.url}/repos/${projectName}`, api.requestArgs))
     );
   }
 
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => httpClient.get<GitBranch>(`${apiUrl}/repos/${projectName}/branches/${branchName}`))
+    return this.getAPI().pipe(
+      switchMap(api => httpClient.get<GitBranch>(`${api}/repos/${projectName}/branches/${branchName}`, api.requestArgs))
     );
   }
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => {
-        const url = `${apiUrl}/repos/${projectName}/branches`;
-        const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url);
+    return this.getAPI().pipe(
+      switchMap(api => {
+        const url = `${api.url}/repos/${projectName}/branches`;
+        const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
           null,
@@ -96,21 +65,25 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit> {
-    return this.getCommitApiUrl(projectName, commitSha).pipe(
-      switchMap(commitUrl => httpClient.get<GitCommit>(commitUrl))
+    return this.getCommitApi(projectName, commitSha).pipe(
+      switchMap(commit => httpClient.get<GitCommit>(commit.url, commit.requestArgs))
     );
   }
 
-  getCommitApiUrl(projectName: string, commitSha: string) {
-    return this.getAPIUrl().pipe(
-      map(apiUrl => `${apiUrl}/repos/${projectName}/commits/${commitSha}`)
+  getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest> {
+    return this.getAPI().pipe(
+      map(api => ({
+        ...api,
+        url: `${api}/repos/${projectName}/commits/${commitSha}`,
+      }))
     );
   }
 
   getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => httpClient.get<GitCommit[]>(
-        `${apiUrl}/repos/${projectName}/commits?sha=${ref}`, {
+    return this.getAPI().pipe(
+      switchMap(api => httpClient.get<GitCommit[]>(
+        `${api}/repos/${projectName}/commits?sha=${ref}`, {
+        ...api.requestArgs,
         params: {
           [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
         }
@@ -121,33 +94,33 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   // TODO: RC these are links to sites... shouldn't use api urls
   getCloneURL(projectName: string): Observable<string> {
-    return this.getAPIUrl().pipe(
-      map(apiUrl => `https://github.com/${projectName}`)
+    return this.getAPI().pipe(
+      map(api => `https://github.com/${projectName}`)
     );
   }
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => `https://github.com/${projectName}/commit/${commitSha}`)
+    return this.getAPI().pipe(
+      switchMap(api => `https://github.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
+    return this.getAPI().pipe(
+      switchMap(api => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
-    return this.getAPIUrl().pipe(
-      switchMap(apiUrl => {
+    return this.getAPI().pipe(
+      switchMap(api => {
         const prjParts = projectName.split('/');
-        let url = `${apiUrl}/search/repositories?q=${projectName}+in:name+fork:true`;
+        let url = `${api.url}/search/repositories?q=${projectName}+in:name+fork:true`;
         if (prjParts.length > 1) {
-          url = `${apiUrl}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
+          url = `${api.url}/search/repositories?q=${prjParts[1]}+in:name+fork:true+user:${prjParts[0]}`;
         }
 
-        const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url);
+        const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
           null,
@@ -161,7 +134,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  public convertCommit(apiUrl: string, projectName: string, commit: any): GitCommit {
+  public convertCommit(api: string, projectName: string, commit: any): GitCommit {
     return commit;
   }
 

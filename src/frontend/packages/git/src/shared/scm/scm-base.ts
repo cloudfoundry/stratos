@@ -1,21 +1,50 @@
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
+import { HttpOptions } from '../../../../core/src/core/core.types';
+import { environment } from '../../../../core/src/environments/environment';
 import { EndpointModel } from '../../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+
+
+const { proxyAPIVersion } = environment;
+const commonPrefix = `/api/${proxyAPIVersion}/proxy`;
+
+export interface GitApiRequest {
+  url: string,
+  requestArgs: HttpOptions;
+}
 
 export abstract class BaseSCM {
 
   public endpointGuid: string;
 
-  protected getAPIUrl(): Observable<string> {
-    if (!this.endpointGuid) {
-      return null;
-    }
+  constructor(public publicApiUrl: string) { }
+
+  public getPublicApi(): string {
+    return this.publicApiUrl;
+  }
+
+  public getAPI(): Observable<GitApiRequest> {
     return this.getEndpoint(this.endpointGuid).pipe(
-      map(getFullEndpointApiUrl),
-      tap(url => { console.log('getAPIUrl: ', url); })
+      map(endpoint => {
+        if (!endpoint.user) {
+          return {
+            url: this.getPublicApi(),
+            requestArgs: {}
+          };
+        }
+        return {
+          url: `${commonPrefix}/${endpoint.guid}`,
+          requestArgs: {
+            ... new HttpOptions(),
+            header: {
+              'x-cap-passthrough': 'true',
+            }
+          }
+        };
+      }),
+      first()
     );
   }
 

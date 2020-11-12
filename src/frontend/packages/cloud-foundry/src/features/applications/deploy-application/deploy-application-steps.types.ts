@@ -130,7 +130,7 @@ export class ApplicationDeploySourceTypes {
     }
 
     const endpointUrl = getFullEndpointApiUrl(endpoint);
-    if (endpointUrl === scm.getPublicApiUrl()) {
+    if (endpointUrl === scm.getPublicApi()) {
       // We've got creds for a pulbic git type, ensure we use them
       // Sneakily update the existing reference // TODO: RC fix
       this.types.find(t => t.id === type).endpointGuid = endpoint.guid;

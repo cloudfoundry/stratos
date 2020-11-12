@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import { GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
 
 export interface SCMIcon {
@@ -15,8 +16,8 @@ export interface GitSCM {
   getType(): GitSCMType;
   getLabel(): string;
   getIcon(): SCMIcon;
-  getPublicApiUrl(): string;
-  getAPIUrl(endpointGuid: string): Observable<string>;
+  getPublicApi(): string;
+  getAPI(): Observable<GitApiRequest>;
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo>;
   getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
@@ -25,7 +26,7 @@ export interface GitSCM {
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]>;
   getCloneURL(projectName: string): Observable<string>;
   getCommitURL(projectName: string, commitSha: string): Observable<string>;
-  getCommitApiUrl(projectName: string, commitSha: string): Observable<string>;
+  getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest>;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string>;
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]>;
   parseErrorAsString(error: any): string;

@@ -71,7 +71,7 @@ export class GitRegistrationComponent {
         types: {
           [GitTypeKeys.GITHUB_COM]: {
             label: 'github.com',
-            url: gitSCMService.getSCM('github', null).getPublicApiUrl(),
+            url: gitSCMService.getSCM('github', null).getPublicApi(),
             description: `Your credentials will be used to fetch information from the public ${githubLabel} instance`,
           },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
@@ -87,7 +87,7 @@ export class GitRegistrationComponent {
         types: {
           [GitTypeKeys.GITLAB_COM]: {
             label: 'gitlab.com',
-            url: gitSCMService.getSCM('gitlab', null).getPublicApiUrl(),
+            url: gitSCMService.getSCM('gitlab', null).getPublicApi(),
             description: `Your credentials will be used to fetch information from the public ${gitlabLabel} instance`,
           },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {

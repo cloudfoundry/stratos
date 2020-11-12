@@ -2,6 +2,8 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { PaginationFlattener } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
+import { HttpOptions } from '../../../../core/src/core/core.types';
+
 // --------------- Note ----------------
 // There are two types of pagination github uses
 // 1) Pagination info is in the body of the response (GithubPaginationResponse / GithubFlattenerPaginationConfig)
@@ -39,6 +41,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
   constructor(
     private httpClient: HttpClient,
     public url: string,
+    private options: HttpOptions,
   ) { }
 
   getTotalPages = (res: GithubPaginationResponse<T>): number => {
@@ -61,6 +64,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
     return this.httpClient.get<GithubPaginationResponse<T>>(
       this.url,
       {
+        ...this.options,
         params: {
           ...args[0]
         },
@@ -87,6 +91,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
   constructor(
     private httpClient: HttpClient,
     public url: string,
+    private options: HttpOptions,
   ) { }
 
   getTotalPages = (res: HttpResponse<GithubPaginationArrayResponse<T>>): number => {
@@ -132,6 +137,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
     return this.httpClient.get<GithubPaginationArrayResponse<T>>(
       this.url,
       {
+        ...this.options,
         params: {
           ...args[0]
         },
