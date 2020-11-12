@@ -1,3 +1,5 @@
+import { Validators } from '@angular/forms';
+
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
   StratosBaseCatalogEntity,
@@ -34,7 +36,7 @@ const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
     help: '/core/assets/connect/github.md'
   },
   [GitEndpointAuthTypes.GITLAB_TOKEN]: {
-    ...BaseEndpointAuth.UsernamePassword,
+    ...BaseEndpointAuth.Token,
     help: '/core/assets/connect/github.md'
   },
 };
@@ -83,7 +85,14 @@ class GitEntityCatalog {
           label: 'Github',
           labelShort: 'Github',
           authTypes: [
-            BaseEndpointAuth.UsernamePassword, // TODO: RC this isn't username password,
+            {
+              ...BaseEndpointAuth.UsernamePassword,
+              name: 'Username and Token',
+              form: {
+                username: ['', Validators.required],
+                password: ['Token', Validators.required],
+              },
+            }, // TODO: RC this isn't username password,
             gitAuthTypeMap[GitEndpointAuthTypes.GITHUB_TOKEN]
           ],
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
