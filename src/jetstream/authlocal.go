@@ -104,9 +104,10 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	var scopes []string
-	scopes = make([]string, 2)
+	scopes = make([]string, 3)
 	scopes[0] = user.Scope
 	scopes[1] = "password.write"
+	scopes[2] = "scim.write"
 
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   userGUID,
