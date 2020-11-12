@@ -698,6 +698,15 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
+	// Generic Token Bearer Auth
+	pp.AddAuthProvider(interfaces.AuthTypeBearer, interfaces.AuthProvider{
+		Handler: pp.doTokenBearerFlowRequest,
+		UserInfo: func(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+			// don't fetch user info for the generic token auth
+			return &interfaces.ConnectedUser{}, false
+		},
+	})
+
 	// OIDC
 	pp.AddAuthProvider(interfaces.AuthTypeOIDC, interfaces.AuthProvider{
 		Handler: pp.DoOidcFlowRequest,
