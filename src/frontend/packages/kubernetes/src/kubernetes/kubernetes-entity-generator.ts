@@ -1,6 +1,5 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { of } from 'rxjs';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -323,11 +322,6 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     definition, {
       actionBuilders: kubeNamespaceActionBuilders,
       entityBuilder: {
-        getIsValid: (favourite) => {
-          console.log('get is Valid for a namespace');
-          console.log(favourite);
-          return of(false)
-        },
         getMetadata: (namespace: any) => {
           return {
             endpointId: namespace.kubeGuid,
@@ -395,8 +389,6 @@ function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
   entityType: string,
   favoritesConfigMapper: FavoritesConfigMapper
 ): UserFavorite<T> {
-  console.log('Hello');
-  console.log(entity);
   return favoritesConfigMapper.getFavoriteFromEntity<T>(
     entityType,
     KUBERNETES_ENDPOINT_TYPE,

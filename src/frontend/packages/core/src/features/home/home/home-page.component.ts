@@ -60,7 +60,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   ];
 
   @ViewChild('endpointsPanel') endpointsPanel;
-
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
   @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
 
@@ -68,7 +67,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   cardsToLoad: HomePageEndpointCardComponent[] = [];
   isLoadingACard = false;
 
-  private sub: Subscription;
+  private viewMonitorSub: Subscription;
   private cardChangesSub: Subscription;
   private checkLayout = new BehaviorSubject<boolean>(true);
 
@@ -136,7 +135,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     }), startWith(0));
 
     // Load cards as they come into view
-    this.sub = combineLatest([scroll$, check$]).pipe(debounceTime(200)).subscribe(([scrollTop, check]) => {
+    this.viewMonitorSub = combineLatest([scroll$, check$]).pipe(debounceTime(200)).subscribe(([scrollTop, check]) => {
       // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible and shoule be loaded
       // Only load the first one - after that one has loaded, we'll call this method again and check for the next one
       const remaining = [];
@@ -151,11 +150,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         if ((cardTop >= scrollTop && cardTop <= scrollBottom) || (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
           const card = this.endpointCards.toArray()[index];
           this.cardsToLoad.push(card);
-          this.processCardsToLoad();
         } else {
           remaining.push(index);
         }
       };
+      this.processCardsToLoad();
       this.notLoadedCardIndices = remaining;
     })
   }
@@ -169,8 +168,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.sub) {
-      this.sub.unsubscribe();
+    if (this.viewMonitorSub) {
+      this.viewMonitorSub.unsubscribe();
     }
     if (this.cardChangesSub) {
       this.cardChangesSub.unsubscribe();

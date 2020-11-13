@@ -24,7 +24,7 @@ import {
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout } from './../../../../../core/src/features/home/home.types';
+import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
 import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
 
 
@@ -40,7 +40,7 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
     CloudFoundryEndpointService
   ]
 })
-export class CFHomeCardComponent {
+export class CFHomeCardComponent implements HomePageEndpointCard {
 
   _layout: HomePageCardLayout;
 

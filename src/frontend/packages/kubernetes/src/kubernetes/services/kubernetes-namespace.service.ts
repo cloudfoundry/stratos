@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
@@ -23,11 +23,6 @@ export class KubernetesNamespaceService {
     this.kubeGuid = kubeEndpointService.kubeGuid;
 
     const namespaceEntity = kubeEntityCatalog.namespace.store.getEntityService(this.namespaceName, this.kubeGuid);
-
-    this.namespace$ = namespaceEntity.entityObs$.pipe(
-      filter(p => !!p && !!p.entity),
-      map(p => p.entity),
-    );
-
+    this.namespace$ = namespaceEntity.waitForEntity$.pipe(map(e => e.entity));
   }
 }
