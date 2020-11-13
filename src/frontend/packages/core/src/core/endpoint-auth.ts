@@ -2,17 +2,17 @@ import { Validators } from '@angular/forms';
 
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import {
-    CredentialsAuthFormComponent,
+  CredentialsAuthFormComponent,
 } from '../features/endpoints/connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { NoneAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/none-auth-form.component';
 import { SSOAuthFormComponent } from '../features/endpoints/connect-endpoint-dialog/auth-forms/sso-auth-form.component';
 import {
-    TokenEndpointComponent,
+  TokenEndpointComponent,
 } from '../features/endpoints/connect-endpoint-dialog/auth-forms/token-endpoint/token-endpoint.component';
 
 export enum EndpointAuthTypeNames {
   CREDS = 'creds',
-  TOKEN = 'bearer',// TODO: RC
+  TOKEN = 'bearer', // TODO: RC This is only supported for generic endpoints
   SSO = 'sso',
   NONE = 'none'
 }

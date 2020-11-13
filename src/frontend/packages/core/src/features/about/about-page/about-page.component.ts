@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { catchError, filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
-import { gitEntityCatalog, GitSCMService } from '../../../../../git/src/public_api';
+import { GitSCMService } from '../../../../../git/src/public_api';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
@@ -65,21 +65,6 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
     this.addAboutInfoComponent();
     this.addSupportInfo();
-
-    // TODO: RC DELETE ME
-    gitEntityCatalog.branch.api.getMultiple(
-      '',
-      null,
-      {
-        projectName: 'richard-cox/my-private-repo',
-        scm: this.gitSCMService.getSCM('github', 'Z6KJAVYeHPkiEPuZty0-kArqors')
-      }
-    ).pipe(
-      catchError(err => {
-        console.error(err);
-        return null;
-      })
-    ).subscribe(res => console.log(res));
   }
 
   ngOnDestroy() {

@@ -61,11 +61,11 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 
 	var tr *interfaces.TokenRecord
 
-	switch gep.authType {
+	switch connectType {
 	case interfaces.AuthConnectTypeCreds:
-		if connectType != interfaces.AuthTypeHttpBasic {
-			return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.GetType(), interfaces.AuthConnectTypeCreds)
-		}
+		// if connectType != interfaces.AuthTypeHttpBasic {
+		// 	return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.GetType(), interfaces.AuthConnectTypeCreds)
+		// }
 
 		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return nil, false, errors.New("Need username and password")
@@ -80,9 +80,9 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 			RefreshToken: params.Username,
 		}
 	case interfaces.AuthConnectTypeBearer:
-		if connectType != interfaces.AuthTypeBearer {
-			return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.endpointType, interfaces.AuthConnectTypeCreds)
-		}
+		// if connectType != interfaces.AuthTypeBearer {
+		// 	return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.endpointType, interfaces.AuthConnectTypeCreds)
+		// }
 
 		authString := ec.FormValue("token")
 		base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))

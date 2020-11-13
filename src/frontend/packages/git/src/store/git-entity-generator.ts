@@ -1,4 +1,5 @@
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
+import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -43,7 +44,6 @@ const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
     help: '/core/assets/connect/gitlab.md'
   },
 };
-// TODO: RC custom field text
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -72,6 +72,7 @@ class GitEntityCatalog {
   >;
 
   constructor() {
+    // TODO: RC Add ('<username>' | Token) info in endpoint card details section (see metrics, cf endpoint definitions)
     const definition: StratosEndpointExtensionDefinition = {
       type: GIT_ENDPOINT_TYPE,
       label: 'Git',
@@ -82,6 +83,7 @@ class GitEntityCatalog {
       authTypes: [],
       registrationComponent: GitRegistrationComponent,
       registeredLimit: () => 0,
+      urlValidationRegexString: urlValidationExpression,
       subTypes: [
         {
           type: GIT_ENDPOINT_SUB_TYPES.GITHUB,

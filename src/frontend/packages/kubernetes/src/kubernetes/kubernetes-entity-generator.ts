@@ -144,7 +144,6 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     icon: 'kubernetes',
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/custom/kubernetes.svg',
-    urlValidation: undefined,
     authTypes: [
       kubeAuthTypeMap[KubeEndpointAuthTypes.CERT_AUTH],
       kubeAuthTypeMap[KubeEndpointAuthTypes.CONFIG],

@@ -224,7 +224,6 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: any): string {
-    // TODO: RC create issue
     return 'Git request failed';
   }
 

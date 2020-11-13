@@ -117,7 +117,6 @@ describe('EntityCatalogService', () => {
       type: SUBTYPE_TYPE,
       logoUrl: 'image/url',
       tokenSharing: true,
-      urlValidation: false,
       unConnectable: true,
       urlValidationRegexString: 'redjecks',
       authTypes: []
