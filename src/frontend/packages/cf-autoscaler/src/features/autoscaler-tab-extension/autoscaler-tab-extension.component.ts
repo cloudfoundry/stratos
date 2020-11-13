@@ -77,8 +77,8 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
       switchMap(app => cups.can(
         CfCurrentUserPermissions.APPLICATION_EDIT,
         endpointGuid,
-        app.entity.entity.space.entity.organization_guid,
-        app.entity.entity.space.metadata.guid
+        app.entity.entity.space?.entity.organization_guid,
+        app.entity.entity.space?.metadata.guid
       )),
     );
 
