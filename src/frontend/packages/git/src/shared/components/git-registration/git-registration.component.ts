@@ -52,6 +52,8 @@ export class GitRegistrationComponent {
 
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
+
+    // TODO: RC fix - should only allow github.com to be registered once (cannot register multiple endpoints with same url).
     // Set a default/starting option
     this.gitTypes = {
       [GIT_ENDPOINT_SUB_TYPES.GITHUB]: {

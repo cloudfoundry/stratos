@@ -92,24 +92,24 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   }
 
-  // TODO: RC gitlab - fetch username via api and send as part of deploy
-
-  // TODO: RC these are links to sites... shouldn't use api urls... need to fetch using api
-  // fetch commit, get url (but do via gitEntityCatalog so it's cached? use deploySource url?
-
+  // TODO: RC fix - these are links are web addresses... shouldn't use api urls... need to fetch using api.
+  // fetch project/commit.. get url from there
   getCloneURL(projectName: string): Observable<string> {
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}`)
     );
   }
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
@@ -143,7 +143,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: any): string {
-    // TODO: RC test
+    // TODO: RC improve - handle permissions errors
     const message = super.parseErrorAsString(error);
     return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
       'Git ' + message.substring(0, message.indexOf('(')) :

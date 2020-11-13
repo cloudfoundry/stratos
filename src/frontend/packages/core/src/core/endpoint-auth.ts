@@ -12,7 +12,7 @@ import {
 
 export enum EndpointAuthTypeNames {
   CREDS = 'creds',
-  TOKEN = 'bearer', // TODO: RC This is only supported for generic endpoints
+  TOKEN = 'bearer', // TODO: RC Understand - this is listed here in generic land... but is it only supported in yaml only endpoints?
   SSO = 'sso',
   NONE = 'none'
 }

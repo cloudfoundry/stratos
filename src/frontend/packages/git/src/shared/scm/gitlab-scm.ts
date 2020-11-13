@@ -131,23 +131,24 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  // TODO: RC these are links to sites... shouldn't use api urls
+  // TODO: RC fix - these are links are web addresses... shouldn't use api urls... need to fetch using api.
+  // fetch project/commit.. get url from there
   getCloneURL(projectName: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}.git`)
     );
   }
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
@@ -204,7 +205,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     const avatarURL = `https://secure.gravatar.com/avatar/${emailMD5}?s=120&d=identicon`;
 
     return {
-      // html_url: this.getCommitURL(endpointGuid, projectName, commit.id), // TODO: RC add back & fix
+      // TODO: RC Fix - this needs to be brought back in... but requires switching to async type
+      // html_url: this.getCommitURL(endpointGuid, projectName, commit.id),
       author: {
         id: null,
         login: null,
@@ -227,6 +229,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: any): string {
+    // TODO: RC improve - handle permissions errors
     return 'Git request failed';
   }
 

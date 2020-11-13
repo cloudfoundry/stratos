@@ -10,6 +10,8 @@ export interface SCMIcon {
   fontName: string;
 }
 
+// TODO: RC Test (all currently entirely untried) github enterprise, gitlab.com, gitlab enterprioe
+
 // Interface that a Git SCM provider must implement
 export interface GitSCM {
   endpointGuid: string;

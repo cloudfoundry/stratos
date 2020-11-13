@@ -105,9 +105,6 @@ export class ApplicationDeploySourceTypes {
     );
   }
 
-
-  // TODO: RC handle permissions denied when fetching repo and guide user to add creds
-
   private createGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
     // We need to show any git of types lab and hub and that uses a custom url (github.com and gitlab.com use standard options)
     if (endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
@@ -131,8 +128,8 @@ export class ApplicationDeploySourceTypes {
 
     const endpointUrl = getFullEndpointApiUrl(endpoint);
     if (endpointUrl === scm.getPublicApi()) {
-      // We've got creds for a pulbic git type, ensure we use them
-      // Sneakily update the existing reference // TODO: RC fix
+      // We've got creds for a public git type, use those to avoid rate limiting of anonymous requests
+      // Sneakily update the existing reference // TODO: RC improve - ugly update of item in array
       this.types.find(t => t.id === type).endpointGuid = endpoint.guid;
     } else {
       // This is a custom instance of a git type, use similar settings to the public

@@ -11,7 +11,9 @@ import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
-// TODO: RC Name/location
+// TODO: RC Decide - this whole base endpoint tile manager was used to show sub type sin their own list. We no longer do this now...
+// so could revert
+
 export interface ICreateEndpointTilesData extends ITileData {
   type: string;
   parentType: string;
@@ -24,7 +26,6 @@ type ExpandedEndpoint<T = number> = {
 
 type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
 
-// TODO: RC location. Name (this is specific to endpoints)
 export abstract class BaseEndpointTileManager {
   protected store: Store<GeneralEntityAppState>;
 

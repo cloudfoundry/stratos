@@ -71,10 +71,8 @@ class GitEntityCatalog {
     GitBranchActionBuilders
   >;
 
-  // TODO: RC Test github/gitlab enterprise registration & connect
-
   constructor() {
-    // TODO: RC Add ('<username>' | Token) info in endpoint card details section (see metrics, cf endpoint definitions)
+    // TODO: RC improvement - Add ('<username>' | Token) info in endpoint card details section (see metrics, cf endpoint definitions)
     const definition: StratosEndpointExtensionDefinition = {
       type: GIT_ENDPOINT_TYPE,
       label: 'Git',
@@ -129,7 +127,7 @@ class GitEntityCatalog {
       labelPlural: 'Git Commits',
       endpoint: endpointDefinition,
       nonJetstreamRequest: true,
-      // TODO: RC remove generic request
+      // TODO: RC tidy - remove unused code... work out if get commit can be made generic again... thisneeds to be async
       // successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       //   const metadata = (action.metadata as GitMeta[])[0];
       //   return {

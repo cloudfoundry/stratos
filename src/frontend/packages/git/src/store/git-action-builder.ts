@@ -20,7 +20,7 @@ export const gitRepoActionBuilders: GitRepoActionBuilders = {
   ) => new FetchGitHubRepoInfo(meta, meta.scm.endpointGuid)
 };
 
-// TODO: RC RC tidy all file
+// TODO: RC tidy - remove unused code... work out if get commit can be made generic again
 // export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
 //   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
 //   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;

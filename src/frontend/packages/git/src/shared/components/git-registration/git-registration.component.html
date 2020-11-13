@@ -19,7 +19,6 @@
       </p>
     </div>
   </app-step>
-  <!-- TODO: RC only allow one selection of github.com -->
   <app-step [title]="'Register'" [valid]="step1.validate | async" [onNext]="step1.onNext" [nextButtonText]="'Register'">
     <app-create-endpoint-cf-step-1 #step1 [fixedUrl]="gitTypes[epSubType].types[selectedType].url">
     </app-create-endpoint-cf-step-1>
