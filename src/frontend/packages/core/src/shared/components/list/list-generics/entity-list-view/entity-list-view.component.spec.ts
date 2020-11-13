@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { STRATOS_ENDPOINT_TYPE, systemInfoEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
-import { endpointEntitySchema } from '../../../../../base-entity-schemas';
 import { EntityListViewComponent } from './entity-list-view.component';
 
 describe('EntityListViewComponent', () => {
@@ -21,10 +21,12 @@ describe('EntityListViewComponent', () => {
     fixture = TestBed.createComponent(EntityListViewComponent);
     component = fixture.componentInstance;
     component.config = {
-      endpointGuid: '',
-      entityConfig: endpointEntitySchema,
+      entityConfig: {
+        entityType: systemInfoEntityType,
+        endpointType: STRATOS_ENDPOINT_TYPE,
+      },
     };
-    expect(() => fixture.detectChanges()).toThrowError('List Error: stratosEndpoint has no action builder for the getMultiple action.');
+    expect(() => fixture.detectChanges()).toThrowError('List Error: stratosSystemInfo has no action builder for the getMultiple action.');
   });
 
   it('should create', () => {

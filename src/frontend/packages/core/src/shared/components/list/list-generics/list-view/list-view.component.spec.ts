@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from '@stratos/store/testing';
 
+import { createBasicStoreModule } from '../../../../../../../store/testing/public-api';
 import { CoreTestingModule } from '../../../../../../test-framework/core-test.modules';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';

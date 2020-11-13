@@ -5,8 +5,9 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
-  CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+  CloudFoundryOrganizationServiceMock,
+} from '../../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfSpacesListConfigService } from './cf-spaces-list-config.service';
 
 describe('CfOrgsSpaceListConfigService', () => {
@@ -15,7 +16,7 @@ describe('CfOrgsSpaceListConfigService', () => {
       providers: [
         ...generateTestCfEndpointServiceProvider(),
         CfSpacesListConfigService,
-        CloudFoundryOrganizationService
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
       ],
       imports: generateCfBaseTestModules()
 
