@@ -144,12 +144,6 @@ export class UserFavoriteManager {
     )
   }
 
-  public getEndpointIDFromFavoriteID(id: string): string {
-    const p = id.split('-');
-    const idParts = p.slice(0, p.length - 2);
-    return idParts.join('-');
-  }
-
   /**
    * For a given favorite, return the corresponding metadata
    */

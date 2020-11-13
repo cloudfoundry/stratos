@@ -240,7 +240,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     Object.keys(favorites).forEach(fav => {
       if (!favorites[fav].ethereal) {
-        const id = this.userFavoriteManager.getEndpointIDFromFavoriteID(fav);
+        const id = favorites[fav].endpoint.endpointId;
         if (!!endpoints[id] && !processed[id]) {
           processed[id] = true;
           result.push(endpoints[id]);
@@ -250,7 +250,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     Object.keys(favorites).forEach(fav => {
       if (favorites[fav].ethereal) {
-        const id = this.userFavoriteManager.getEndpointIDFromFavoriteID(fav);
+        const id = favorites[fav].endpoint.endpointId;
         if (!!endpoints[id] && !processed[id]) {
           processed[id] = true;
           result.push(endpoints[id]);

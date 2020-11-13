@@ -237,6 +237,8 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
     singular: string,
     plural: string,
   };
+  // Is the underlying entity for the favorite valid?
+  getIsValid?(entityMetadata): Observable<boolean>;
   /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions

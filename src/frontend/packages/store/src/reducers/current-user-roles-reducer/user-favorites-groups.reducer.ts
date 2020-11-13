@@ -131,6 +131,9 @@ function addFavoriteToGroup(favoriteGroup: IUserFavoriteGroup = getDefaultFavori
   };
   const { guid } = favorite;
   const isEndpoint = isEndpointTypeFavorite(favorite);
+  if (isEndpoint) {
+    fg.endpoint = favorite;
+  }
   if (!isEndpoint && guid && !fg.entitiesIds.includes(guid)) {
     fg.entitiesIds.push(guid);
   }
