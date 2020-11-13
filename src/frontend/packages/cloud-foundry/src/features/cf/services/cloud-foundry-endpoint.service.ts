@@ -134,6 +134,12 @@ export class CloudFoundryEndpointService {
     return fetchTotalResults(action, store, pmf);
   }
 
+  // Fetch the cound of organisations in a Cloud Foundry
+  public static fetchOrgCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string): Observable<number> {
+    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
+    return fetchTotalResults(getAllOrgsAction, store, pmf);
+  }
+
   public static fetchOrgs(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string):
     Observable<APIResource<IOrganization>[]> {
     const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
@@ -154,15 +160,7 @@ export class CloudFoundryEndpointService {
     private cfUserService: CfUserService,
     private pmf: PaginationMonitorFactory,
   ) {
-    if (this.activeRouteCfOrgSpace) {
-      this.init(this.activeRouteCfOrgSpace);
-    }
-  }
-
-  public init(config: ActiveRouteCfOrgSpace) {
-    this.activeRouteCfOrgSpace = config;
-    this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
-
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 
     this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid)

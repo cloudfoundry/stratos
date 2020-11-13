@@ -13,7 +13,7 @@ import { filter, observeOn, publishReplay, refCount, tap } from 'rxjs/operators'
 
 // Side Panel Modes
 export enum SidePanelMode {
-  // Modal = spans the full height of the window and overlaps the top bat
+  // Modal = spans the full height of the window and overlaps the title bar
   Modal = 0,
   // Normal = 600px width and height not overlapping title bar
   Normal = 1,
@@ -65,7 +65,7 @@ export class SidePanelService {
   }
 
   /**
-   * Show the preview panel in the given mode - does not overlap title bar and colours are more muted
+   * Show the preview panel in the given mode
    */
   public showMode(
     mode: SidePanelMode, component: object, props?: { [key: string]: any }, componentFactoryResolver?: ComponentFactoryResolver) {

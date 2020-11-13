@@ -42,7 +42,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public noMargin$: Observable<boolean>;
   private closeSub: Subscription;
   private mobileSub: Subscription;
-  private sidePanelSub: Subscription;
   private drawer: MatDrawer;
   public iconModeOpen = false;
   public sideNavWidth = 54;
@@ -55,7 +54,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild('content') public content;
 
   // Slide-in side panel mode
-  sidePanelMode: SidePanelMode = 0;
+  sidePanelMode: SidePanelMode = SidePanelMode.Modal;
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -97,10 +96,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
         }
       })
     );
-
-    this.sidePanelSub = this.sidePanelService.previewMode$.subscribe(mode => {
-      this.sidePanelMode = mode
-    });
 
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
@@ -162,7 +157,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.mobileSub.unsubscribe();
     this.closeSub.unsubscribe();
     this.sidePanelService.unsetContainer();
-    this.sidePanelSub.unsubscribe();
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
