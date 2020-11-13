@@ -18,7 +18,7 @@ import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { SetHomeCardLayoutAction } from '../../../../../store/src/actions/dashboard-actions';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../../store/src/app-state';
+import { AppState } from '../../../../../store/src/app-state';
 import { EndpointModel, entityCatalog } from '../../../../../store/src/public-api';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
@@ -95,12 +95,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.layouts$ = of(this.layouts);
     this.layout$ = this.layout.asObservable();
-    this.allEndpointIds$ = this.endpointsService.endpoints$.pipe(
+    this.allEndpointIds$ = this.endpointsService.connectedEndpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
-
-    const connected$ = this.endpointsService.endpoints$;
+    const connected$ = this.endpointsService.connectedEndpoints$;
 
     // Only show endpoints that have Home Card metadata
     this.endpoints$ = combineLatest([connected$, userFavoriteManager.getAllFavorites()]).pipe(
@@ -235,7 +234,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // 1. Endpoint has been added as a favourite
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
-  private orderEndpoints(endpoints: IRequestEntityTypeState<EndpointModel>, favorites: IUserFavoritesGroups): EndpointModel[] {
+  private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups): EndpointModel[] {
     const processed = {};
     const result = [];
 
@@ -259,7 +258,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     });
 
-    Object.values(endpoints).forEach(ep => {
+    endpoints.forEach(ep => {
       if (!processed[ep.guid]) {
         processed[ep.guid] = true;
         result.push(ep);
@@ -272,8 +271,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Automatic layout - select the best layout based on the available endpoints
   private automaticLayout(): Observable<HomePageCardLayout> {
-    return this.endpointsService.endpoints$.pipe(
-      map(eps => Object.values(eps)),
+    return this.endpointsService.connectedEndpoints$.pipe(
       map(eps => eps.filter(ep => {
         const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
         return !!defn.definition.homeCard;
