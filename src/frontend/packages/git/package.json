@@ -1,0 +1,16 @@
+{
+  "name": "@stratosui/git",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
+    "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
+  },
+  "stratos": {
+    "module": "GitPackageModule",
+    "routingModule": "GitRoutingModule",
+    "theming": "sass/_all-theme#apply-theme-git",
+    "assets": {
+      "assets": "core/assets"
+    }
+  }
+}

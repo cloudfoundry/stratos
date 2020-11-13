@@ -1,10 +1,12 @@
 package cfapppush
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,6 +71,11 @@ const (
 )
 
 const (
+	SCM_TYPE_GITHUB = "github"
+	SCM_TYPE_GITLAB = "gitlab"
+)
+
+const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
@@ -82,6 +89,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	// App ID is this is a redeploy
 	appID := echoContext.QueryParam("app")
+	userGUID := echoContext.Get("user_id").(string)
 
 	log.Debug("UpgradeToWebSocket")
 	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
@@ -121,7 +129,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	// Get the source, depending on the source type
 	switch msg.Type {
 	case SOURCE_GITSCM:
-		stratosProject, appDir, err = getGitSCMSource(clientWebSocket, tempDir, msg)
+		stratosProject, appDir, err = cfAppPush.getGitSCMSource(clientWebSocket, tempDir, msg, userGUID)
 	case SOURCE_FOLDER:
 		stratosProject, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
@@ -369,7 +377,7 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	return stratosProject, tempDir, nil
 }
 
-func getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
+func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage, userGUID string) (StratosProject, string, error) {
 	var (
 		err error
 	)
@@ -380,7 +388,57 @@ func getGitSCMSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		return StratosProject{}, tempDir, err
 	}
 
-	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, info.URL)
+	loggerURL := info.URL
+
+	if len(info.EndpointGUID) != 0 {
+		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
+		if isTokenFound != true {
+			err := fmt.Errorf("No token found for endpoint %s", info.EndpointGUID)
+			log.Errorf("%+v", err)
+			return StratosProject{}, tempDir, err
+		}
+
+		authTokenDecodedBytes, err := base64.StdEncoding.DecodeString(tokenRecord.AuthToken)
+		if err != nil {
+			return StratosProject{}, tempDir, errors.New("Failed to decode auth token")
+		}
+
+		parsedURL, err := url.Parse(info.URL)
+		if err != nil {
+			return StratosProject{}, tempDir, errors.New("Failed to parse SCM URL")
+		}
+
+		var (
+			username string
+			password string
+		)
+
+		switch info.SCM {
+		case SCM_TYPE_GITHUB:
+			// GitHub API uses basic HTTP auth, username and password are stored in the DB
+			pieces := strings.SplitN(string(authTokenDecodedBytes), ":", 2)
+			username, password = pieces[0], pieces[1]
+		case SCM_TYPE_GITLAB:
+			// GitLab API uses bearer token auth, the username is supplied by the frontend
+			username = info.Username
+			password = string(authTokenDecodedBytes)
+		default:
+			return StratosProject{}, tempDir, fmt.Errorf("Unknown SCM type '%s'", info.SCM)
+		}
+
+		if len(username) == 0 {
+			return StratosProject{}, tempDir, errors.New("Username is empty")
+		}
+
+		// mask the credentials for the logs
+		parsedURL.User = url.UserPassword("REDACTED", "REDACTED")
+		loggerURL = parsedURL.String()
+
+		parsedURL.User = url.UserPassword(username, password)
+		info.URL = parsedURL.String()
+	}
+
+	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
 	cloneDetails := CloneDetails{
 		Url:    info.URL,
 		Branch: info.Branch,

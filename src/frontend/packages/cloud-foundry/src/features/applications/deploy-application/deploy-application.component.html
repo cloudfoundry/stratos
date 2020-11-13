@@ -1,5 +1,5 @@
 <app-page-header>
-  <h1>{{ getTitle() }}</h1>
+  <h1>{{ getTitle() | async }}</h1>
 </app-page-header>
 
 <app-steppers cancel="/applications">
@@ -29,8 +29,8 @@
     <app-deploy-application-options-step #step4></app-deploy-application-options-step>
   </app-step>
   <app-step [title]="deployButtonText" [valid]="step3.valid$ | async" [canClose]="step3.closeable$ | async"
-    disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext" [showBusy]="step3.busy"
-    finishButtonText="Go to App Summary">
+    disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext"
+    [showBusy]="step3.busy" finishButtonText="Go to App Summary">
     <app-deploy-application-step3 [appGuid]="appGuid" #step3></app-deploy-application-step3>
   </app-step>
 </app-steppers>

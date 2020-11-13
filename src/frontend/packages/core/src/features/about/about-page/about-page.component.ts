@@ -12,6 +12,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { GitSCMService } from '../../../../../git/src/public_api';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { SessionData } from '../../../../../store/src/types/auth.types';
@@ -39,7 +40,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
-    cs: CustomizationService
+    cs: CustomizationService,
+    private gitSCMService: GitSCMService,
   ) {
     this.customizations = cs.get();
   }

@@ -1,5 +1,6 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
@@ -30,7 +31,6 @@ import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationService } from '../../application.service';
@@ -51,7 +51,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE))
   );
 
-  isBusyUpdating$: Observable<{ updating: boolean }>;
+  isBusyUpdating$: Observable<{ updating: boolean; }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
@@ -130,7 +130,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
-          const scm = scmService.getSCM(gitscm as GitSCMType);
+          const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
           const iconInfo = scm.getIcon();
           // Add tab or update existing tab
           const tab = this.tabLinks.find(t => t.link === 'gitscm');

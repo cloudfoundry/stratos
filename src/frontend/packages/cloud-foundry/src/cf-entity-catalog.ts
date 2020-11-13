@@ -39,12 +39,6 @@ import { CfEventActionBuilders } from './entity-action-builders/cf-event.action-
 import { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import {
-  GitBranchActionBuilders,
-  GitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
-  GitRepoActionBuilders,
-} from './entity-action-builders/git-action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 import { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
@@ -62,7 +56,6 @@ import { UserProvidedServiceActionBuilder } from './entity-action-builders/user-
 import { UserActionBuilders } from './entity-action-builders/user.action-builders';
 import { AppStat } from './store/types/app-metadata.types';
 import { CfUser } from './store/types/cf-user.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 
 /**
  * A strongly typed collection of Cloud Foundry Catalog Entities.
@@ -170,25 +163,6 @@ export class CfEntityCatalog {
     IBasicCFMetaData,
     APIResource<IDomain>,
     DomainActionBuilders
-  >;
-
-  public gitCommit: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitCommit,
-    GitCommitActionBuildersConfig,
-    GitCommitActionBuilders
-  >;
-
-  public gitRepo: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitRepo,
-    GitRepoActionBuilders
-  >;
-
-  public gitBranch: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitBranch,
-    GitBranchActionBuilders
   >;
 
   public event: StratosBaseCatalogEntity<

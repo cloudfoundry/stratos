@@ -1,0 +1,31 @@
+<app-steppers [cancel]="'/endpoints'">
+  <app-step [title]="'Type'">
+    <div class="select-step">
+      <h3>Select the type of {{gitTypes[epSubType].label}} to register</h3>
+      <p *ngIf="gitTypes[epSubType].description as description">
+        {{ description }}.
+      </p>
+      <form class="stepper-form">
+        <mat-form-field>
+          <mat-select [(ngModel)]="selectedType" name="gitTypes">
+            <mat-option *ngFor="let gitTypeEntry of gitTypes[epSubType].types | keyvalue" [value]="gitTypeEntry.key">
+              {{ gitTypeEntry.value.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+      <p *ngIf="gitTypes[epSubType].types[selectedType].description as subDescription">
+        {{ subDescription }}
+      </p>
+    </div>
+  </app-step>
+  <app-step [title]="'Register'" [valid]="step1.validate | async" [onNext]="step1.onNext" [nextButtonText]="'Register'">
+    <app-create-endpoint-cf-step-1 #step1 [fixedUrl]="gitTypes[epSubType].types[selectedType].url">
+    </app-create-endpoint-cf-step-1>
+  </app-step>
+  <app-step [title]="'Connect (Optional)'" [valid]="connect.doConnect ? connect.valid : true" [onNext]="connect.onNext"
+    [onEnter]="connect.onEnter" [disablePrevious]="true" [hideCloseButton]="true"
+    [finishButtonText]="connect.doConnect ? 'Connect' : 'Finish'">
+    <app-create-endpoint-connect #connect></app-create-endpoint-connect>
+  </app-step>
+</app-steppers>

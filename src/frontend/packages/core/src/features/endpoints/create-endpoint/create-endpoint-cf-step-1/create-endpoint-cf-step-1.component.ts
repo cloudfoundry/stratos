@@ -1,5 +1,5 @@
-import { AfterContentInit, Component, Input, ViewChild } from '@angular/core';
-import { NgForm, NgModel } from '@angular/forms';
+import { AfterContentInit, Component, Input } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
@@ -25,7 +25,24 @@ import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 })
 export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
 
+  registerForm: FormGroup;
+
+
   @Input() finalStep: boolean;
+  private pFixedUrl: string;
+  @Input()
+  get fixedUrl(): string {
+    return this.pFixedUrl;
+  }
+  set fixedUrl(url: string) {
+    this.pFixedUrl = url;
+    this.registerForm.controls.urlField.setValue(this.pFixedUrl);
+    if (this.pFixedUrl) {
+      this.registerForm.controls.urlField.disable();
+    } else {
+      this.registerForm.controls.urlField.enable();
+    }
+  };
 
   existingEndpoints: Observable<{
     names: string[],
@@ -33,16 +50,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   }>;
 
   validate: Observable<boolean>;
-
-  @ViewChild('form', { static: true }) form: NgForm;
-  @ViewChild('nameField', { static: true }) nameField: NgModel;
-  @ViewChild('urlField', { static: true }) urlField: NgModel;
-  @ViewChild('skipSllField', { static: true }) skipSllField: NgModel;
-  @ViewChild('ssoAllowedField') ssoAllowedField: NgModel;
-
-  // Optional Client ID and Client Secret
-  @ViewChild('clientIDField') clientIDField: NgModel;
-  @ViewChild('clientSecretField') clientSecretField: NgModel;
 
   urlValidation: string;
 
@@ -56,9 +63,20 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   showAdvancedOptions = false;
 
   constructor(
+    private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService
   ) {
+    this.registerForm = this.fb.group({
+      nameField: ['', [Validators.required]],
+      urlField: ['', [Validators.required]],
+      skipSllField: [false, []],
+      ssoAllowedField: [false, []],
+      // Optional Client ID and Client Secret
+      clientIDField: ['', []],
+      clientSecretField: [false, []],
+    });
+
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.map(ep => ep.name),
@@ -80,26 +98,26 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
-      this.nameField.value,
-      this.urlField.value,
-      !!this.skipSllField.value,
-      this.clientIDField ? this.clientIDField.value : '',
-      this.clientSecretField ? this.clientSecretField.value : '',
-      this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
+      this.registerForm.controls.nameField.value,
+      this.registerForm.controls.urlField.value,
+      this.registerForm.controls.skipSllField.value,
+      this.registerForm.controls.clientIDField.value,
+      this.registerForm.controls.clientSecretField.value,
+      this.registerForm.controls.ssoAllowedField.value,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-      map(([oldVal, newVal]) => newVal),
+      map(([, newVal]) => newVal),
       map(result => {
         const data: ConnectEndpointConfig = {
           guid: result.message,
-          name: this.nameField.value,
+          name: this.registerForm.controls.nameField.value,
           type,
           subType,
-          ssoAllowed: this.ssoAllowedField ? !!this.ssoAllowedField.value : false
+          ssoAllowed: this.registerForm.controls.ssoAllowedField ? !!this.registerForm.controls.ssoAllowedField : false
         };
         if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${this.nameField.value}'`);
+          this.snackBarService.show(`Successfully registered '${this.registerForm.controls.nameField.value}'`);
         }
         const success = !result.error;
         return {
@@ -110,13 +128,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         };
       })
     );
-  }
+  };
 
 
   ngAfterContentInit() {
-    this.validate = this.form.statusChanges.pipe(
+    this.validate = this.registerForm.statusChanges.pipe(
       map(() => {
-        return this.form.valid;
+        return this.registerForm.valid;
       }));
   }
 

@@ -44,6 +44,7 @@ interface GitSCMSourceInfo extends DeploySource {
   url: string;
   commit: string;
   scm: string;
+  endpointGuid: string;
 }
 
 // Structure used to provide metadata about the Git Url source
@@ -229,7 +230,7 @@ export class DeployApplicationDeployer {
       type: SocketEventTypes.OVERRIDES_SUPPLIED
     };
     return JSON.stringify(msg);
-  }
+  };
 
   sendProjectInfo = (appSource: DeployApplicationSource) => {
     if (appSource.type.group === 'gitscm') {
@@ -242,7 +243,7 @@ export class DeployApplicationDeployer {
       return this.sendDockerImageMetadata(appSource);
     }
     return '';
-  }
+  };
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
     const gitscm: GitSCMSourceInfo = {
@@ -251,7 +252,8 @@ export class DeployApplicationDeployer {
       type: appSource.type.group,
       commit: appSource.gitDetails.commit,
       url: appSource.gitDetails.url,
-      scm: appSource.type.id
+      scm: appSource.type.id,
+      endpointGuid: appSource.gitDetails.endpointGuid
     };
 
     const msg = {
@@ -260,7 +262,7 @@ export class DeployApplicationDeployer {
       type: SocketEventTypes.SOURCE_GITSCM
     };
     return JSON.stringify(msg);
-  }
+  };
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
     const gitUrl: GitUrlSourceInfo = {
@@ -275,7 +277,7 @@ export class DeployApplicationDeployer {
       type: SocketEventTypes.SOURCE_GITURL
     };
     return JSON.stringify(msg);
-  }
+  };
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
     const dockerInfo: DockerImageSourceInfo = {
@@ -291,7 +293,7 @@ export class DeployApplicationDeployer {
       type: SocketEventTypes.SOURCE_DOCKER_IMG
     };
     return JSON.stringify(msg);
-  }
+  };
 
   sendCloseAcknowledgement = () => {
     const msg = {
@@ -300,7 +302,7 @@ export class DeployApplicationDeployer {
       type: SocketEventTypes.CLOSE_ACK
     };
     return JSON.stringify(msg);
-  }
+  };
 
   processWebSocketMessage = (log) => {
     switch (log.type) {
@@ -376,7 +378,7 @@ export class DeployApplicationDeployer {
       default:
       // noop
     }
-  }
+  };
 
   private sendNextFile() {
     // Update for the previous file transfer
