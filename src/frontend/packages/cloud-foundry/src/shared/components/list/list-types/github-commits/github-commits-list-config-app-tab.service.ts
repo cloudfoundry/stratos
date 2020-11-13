@@ -126,7 +126,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.projectName = stratosProject.deploySource.project;
       this.deployedCommitSha = stratosProject.deploySource.commit;
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
-      this.scm = this.scmService.getSCM(scmType as GitSCMType, stratosProject.deploySource.endpoint);
+      this.scm = this.scmService.getSCM(scmType as GitSCMType, stratosProject.deploySource.endpointGuid);
 
       gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
         scm: this.scm,

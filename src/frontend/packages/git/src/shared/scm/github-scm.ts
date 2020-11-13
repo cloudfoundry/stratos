@@ -45,7 +45,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
     return this.getAPI().pipe(
-      switchMap(api => httpClient.get<GitBranch>(`${api}/repos/${projectName}/branches/${branchName}`, api.requestArgs))
+      switchMap(api => httpClient.get<GitBranch>(`${api.url}/repos/${projectName}/branches/${branchName}`, api.requestArgs))
     );
   }
 
@@ -74,7 +74,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     return this.getAPI().pipe(
       map(api => ({
         ...api,
-        url: `${api}/repos/${projectName}/commits/${commitSha}`,
+        url: `${api.url}/repos/${projectName}/commits/${commitSha}`,
       }))
     );
   }
@@ -82,7 +82,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
     return this.getAPI().pipe(
       switchMap(api => httpClient.get<GitCommit[]>(
-        `${api}/repos/${projectName}/commits?sha=${ref}`, {
+        `${api.url}/repos/${projectName}/commits?sha=${ref}`, {
         ...api.requestArgs,
         params: {
           [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
@@ -92,7 +92,11 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   }
 
-  // TODO: RC these are links to sites... shouldn't use api urls
+  // TODO: RC gitlab - fetch username via api and send as part of deploy
+
+  // TODO: RC these are links to sites... shouldn't use api urls... need to fetch using api
+  // fetch commit, get url (but do via gitEntityCatalog so it's cached? use deploySource url?
+
   getCloneURL(projectName: string): Observable<string> {
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}`)
@@ -101,13 +105,13 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
     return this.getAPI().pipe(
-      switchMap(api => `https://github.com/${projectName}/commit/${commitSha}`)
+      map(api => `https://github.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
     return this.getAPI().pipe(
-      switchMap(api => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
+      map(api => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 

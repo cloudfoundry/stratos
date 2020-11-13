@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
@@ -28,7 +28,7 @@ export abstract class BaseSCM {
   public getAPI(): Observable<GitApiRequest> {
     return this.getEndpoint(this.endpointGuid).pipe(
       map(endpoint => {
-        if (!endpoint.user) {
+        if (!endpoint || !endpoint.user) {
           return {
             url: this.getPublicApi(),
             requestArgs: {}
@@ -49,9 +49,11 @@ export abstract class BaseSCM {
   }
 
   protected getEndpoint(endpointGuid: string): Observable<EndpointModel> {
-    return stratosEntityCatalog.endpoint.store.getEntityService(endpointGuid).waitForEntity$.pipe(
-      map(e => e.entity)
-    );
+    return endpointGuid ?
+      stratosEntityCatalog.endpoint.store.getEntityService(endpointGuid).waitForEntity$.pipe(
+        map(e => e.entity)
+      ) :
+      of(null);
   }
 
   protected parseErrorAsString(res: any): string {

@@ -35,7 +35,7 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
           scm: appSource.type.id as GitSCMType,
           projectName: appSource.gitDetails.projectName,
           sha: appSource.gitDetails.branch.name,
-          endpointGuid: appSource.gitDetails.endpoint
+          endpointGuid: appSource.gitDetails.endpointGuid
         } : null;
       }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),

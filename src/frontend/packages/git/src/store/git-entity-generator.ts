@@ -71,6 +71,8 @@ class GitEntityCatalog {
     GitBranchActionBuilders
   >;
 
+  // TODO: RC Test github/gitlab enterprise registration & connect
+
   constructor() {
     // TODO: RC Add ('<username>' | Token) info in endpoint card details section (see metrics, cf endpoint definitions)
     const definition: StratosEndpointExtensionDefinition = {

@@ -75,7 +75,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
         // Fallback to type if scm is not set (legacy support)
         const scmType = stProject.deploySource.scm || stProject.deploySource.type;
-        const scm = this.scmService.getSCM(scmType as GitSCMType, stProject.deploySource.endpoint);
+        const scm = this.scmService.getSCM(scmType as GitSCMType, stProject.deploySource.endpointGuid);
 
         const gitRepInfoMeta: GitMeta = { projectName: stProject.deploySource.project, scm };
         this.gitSCMRepoEntityService = gitEntityCatalog.repo.store.getRepoInfo.getEntityService(gitRepInfoMeta);

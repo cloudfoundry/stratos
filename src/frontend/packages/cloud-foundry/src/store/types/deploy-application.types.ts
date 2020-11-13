@@ -70,7 +70,7 @@ export interface DockerAppDetails {
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
-  endpoint: string;
+  endpointGuid: string;
   commit?: string;
   branchName?: string;
   url?: string;

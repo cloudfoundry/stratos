@@ -137,7 +137,7 @@ export class DeployApplicationStep2Component
           branch: this.repositoryBranch,
           url: commitUrl,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
-          endpoint: this.sourceType.endpointGuid
+          endpointGuid: this.sourceType.endpointGuid
         }, null));
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
@@ -146,7 +146,7 @@ export class DeployApplicationStep2Component
         branch: {
           name: this.gitUrlBranchName
         },
-        endpoint: this.sourceType.endpointGuid
+        endpointGuid: this.sourceType.endpointGuid
       }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
       this.store.dispatch(new SaveAppDetails(null, {
@@ -322,7 +322,7 @@ export class DeployApplicationStep2Component
             this.repositoryBranch = null;
             this.store.dispatch(new SetBranch(null));
             this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpoint: this.sourceType.endpointGuid }, null));
+            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpointGuid: this.sourceType.endpointGuid }, null));
           }
           this.scm = newScm;
         }
