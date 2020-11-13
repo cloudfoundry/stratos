@@ -247,7 +247,7 @@ function cfShortcuts(id: string) {
     },
     {
       title: 'View Applications',
-      link: ['/cloud-foundry', id, 'organizations'],
+      link: ['/applications', id],
       icon: 'apps'
     },
     {
@@ -275,7 +275,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
     homeCard: {
-      component: (compiler: Compiler, injector: Injector) => import('./features/home/cfhome-card/cfhome-card.module').then((m) => {
+      component: (compiler: Compiler, injector: Injector) => import('./features/home/cfhome-card/cfhome-card.module').then(m => {
         return compiler.compileModuleAndAllComponentsAsync(m.CFHomeCardModule).then(cm => {
           const mod = cm.ngModuleFactory.create(injector);
           return mod.instance.createHomeCard(mod.componentFactoryResolver);

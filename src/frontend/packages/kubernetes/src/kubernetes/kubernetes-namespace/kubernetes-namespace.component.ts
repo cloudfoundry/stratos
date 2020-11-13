@@ -66,7 +66,6 @@ export class KubernetesNamespaceComponent {
   }
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
-    // tap(a => console.log(a)),
     filter(app => !!app),
     map(namespace => getFavoriteFromEntity<IAppFavMetadata>(
       {

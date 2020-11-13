@@ -37,11 +37,10 @@
     overflow-y: auto;
     width: 100%;
   }
-
 }
 
 // Remove box shadow in plain mode
-.recent-apps-card.mat-card.recent-apps-card__plain {
+mat-card.recent-apps-card.mat-card.recent-apps-card__plain {
   box-shadow: none;
   padding: 0 1em;
 }

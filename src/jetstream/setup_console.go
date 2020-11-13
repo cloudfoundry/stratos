@@ -257,7 +257,9 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 
 	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
-		if val == interfaces.Local {
+		if val == interfaces.AuthNone {
+			return consoleConfig, nil
+		} else if val == interfaces.Local {
 			//Auth endpoint type is set to "local", so load the local user config
 			err := initialiseLocalUsersConfiguration(consoleConfig, p)
 			if err != nil {
@@ -417,7 +419,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 
 	// If setup is complete, then store the config
 	if consoleConfig.IsSetupComplete() {
-		showStratosConfig(consoleConfig)
+		showStratosConfig(portalProxy, consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType

@@ -24,7 +24,7 @@ import {
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout } from './../../../../../core/src/features/home/home.types';
+import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
 import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
 
 
@@ -40,7 +40,7 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
     CloudFoundryEndpointService
   ]
 })
-export class CFHomeCardComponent {
+export class CFHomeCardComponent implements HomePageEndpointCard {
 
   _layout: HomePageCardLayout;
 
@@ -124,7 +124,7 @@ export class CFHomeCardComponent {
     this.cardLoaded = true;
     this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
     this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
-    this.orgCount$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.guid).pipe(map(orgs => orgs.length));
+    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid);
 
     this.appLink = () => goToAppWall(this.store, this.guid);;
 
@@ -182,10 +182,8 @@ export class CFHomeCardComponent {
           first()
         ).subscribe(a => {
           this.fetchAppStats();
-          this.fetchAppStats();
         });
       } else {
-        this.fetchAppStats();
         this.fetchAppStats();
       }
     } else {
@@ -194,10 +192,7 @@ export class CFHomeCardComponent {
   }
 
   private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    if (!apps) {
-      return [];
-    }
-    return [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
+    return !apps ? [] :[...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
   }
 
 }

@@ -17,7 +17,6 @@ import { filter, first, map, timeout } from 'rxjs/operators';
 
 import {
   EntityCatalogSchemas,
-  HomeCardShortcut,
   IStratosEndpointDefinition,
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
@@ -67,8 +66,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
 
   favorites$: Observable<any>;
-
-  shortcuts: HomeCardShortcut[];
 
   layout$ = new BehaviorSubject<HomePageCardLayout>(null);
 
@@ -125,23 +122,18 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (this.entity) {
       this.definition = this.entity.definition;
       this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
-
-      // Get the list of shortcuts for the endpoint for the given endpoint ID
-      if (this.definition.homeCard && this.definition.homeCard.shortcuts) {
-        this.shortcuts = this.definition.homeCard.shortcuts(this.endpoint.guid);
-      }
-
-      this.fullView = this.definition.homeCard && this.definition.homeCard.fullView;
+      this.fullView = this.definition?.homeCard?.fullView;
       this.link = this.favorite.getLink();
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
       filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
-        let shortcuts: HomeCardShortcut[] = this.shortcuts || [];
-
+        // Get the list of shortcuts for the endpoint for the given endpoint ID
+        const allShortcuts = this.definition?.homeCard?.shortcuts(this.endpoint.guid) || [];
+        let shortcuts = allShortcuts;
         const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
-        const totalShortcuts = shortcuts.length;
+        const totalShortcuts = allShortcuts.length;
         this.hiddenFavorites = favs.length - max;
 
         // Based on the layout, adjust the numbers returned
@@ -152,7 +144,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
             favs = favs.slice(0, max);
           }
           if (totalShortcuts > MAX_SHORTCUTS) {
-            shortcuts = this.shortcuts.slice(0, MAX_SHORTCUTS);
+            shortcuts = allShortcuts.slice(0, MAX_SHORTCUTS);
           }
           // We only want to display 5 things
           if (favs.length + totalShortcuts > MAX_LINKS) {
@@ -160,7 +152,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
             if (limit === 1) {
               limit = 0;
             }
-            shortcuts = this.shortcuts.slice(0, limit);
+            shortcuts = allShortcuts.slice(0, limit);
           }
         } else {
           // Full card view - move the shortcuts into the main left panel if we have more
@@ -189,9 +181,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Layout has changed
   public updateLayout() {
     this.layout$.next(this.layout);
-
     if (this.ref && this.ref.instance) {
-      (this.ref.instance as any).layout = this._layout;
+      this.ref.instance.layout = this._layout;
     }
   }
 
@@ -199,25 +190,25 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.customCard.clear();
     const component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
     this.ref = this.customCard.createComponent(component);
-    (this.ref.instance as any).endpoint = this.endpoint;
-    (this.ref.instance as any).layout = this._layout;
-    this.loadCard();
+    this.ref.instance.endpoint = this.endpoint;
+    this.ref.instance.layout = this._layout;
+    this.loadCardIfReady();
   }
 
   // Load the card
   public load() {
     this.canLoad = true;
-    this.loadCard();
+    this.loadCardIfReady();
   }
 
   // Ask the card to load itself
-  loadCard() {
+  loadCardIfReady() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
       this.status.next(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
-      // Timeout after 10 seconds
-      this.sub = loadObs.pipe(timeout(10000), filter(v => v === true), first()).subscribe(() => {
+      // Timeout after 15 seconds
+      this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next();
         setTimeout(() => this.status.next(Status.OK), 0);
         this.sub.unsubscribe();

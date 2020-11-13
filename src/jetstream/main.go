@@ -363,7 +363,7 @@ func main() {
 		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
 	} else {
 		needSetupMiddleware = false
-		showStratosConfig(portalProxy.Config.ConsoleConfig)
+		showStratosConfig(portalProxy, portalProxy.Config.ConsoleConfig)
 		showSSOConfig(portalProxy)
 	}
 
@@ -431,21 +431,13 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	return nil
 }
 
-func showStratosConfig(config *interfaces.ConsoleConfig) {
+func showStratosConfig(portalProxy *portalProxy, config *interfaces.ConsoleConfig) {
 	log.Infof("Stratos is initialized with the following setup:")
 	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
-	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
-		if val == interfaces.Local {
-			log.Infof("... Local User              : %s", config.LocalUser)
-			log.Infof("... Local User Scope        : %s", config.LocalUserScope)
-		} else { //Auth type is set to remote
-			log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
-			log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
-			log.Infof("... Console Client          : %s", config.ConsoleClient)
-			log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
-			log.Infof("... Use SSO Login           : %t", config.UseSSO)
-		}
-	}
+
+	// Ask the auto provider to display their config
+	portalProxy.StratosAuthService.ShowConfig(config)
+
 	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
 }
@@ -598,7 +590,7 @@ func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.P
 		if endpointTypeSupported {
 			pc.AuthEndpointType = string(val)
 		} else {
-			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: %v is not valid. Must be set to local or remote (defaults to remote)", val)
+			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: '%v' is not valid. Must be set to local or remote (defaults to remote)", pc.AuthEndpointType)
 		}
 	}
 
@@ -957,8 +949,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	staticDir, staticDirErr := getStaticFiles(p.Env().String("UI_PATH", "./ui"))
 
+	api := e.Group("/api")
+	api.Use(p.setSecureCacheContentMiddleware)
+
 	// Verify Session
-	e.GET("/api/v1/auth/verify", p.verifySession)
+	api.GET("/v1/auth/verify", p.verifySession)
 
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
@@ -1010,7 +1005,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	apiKeyGroupConfig := MiddlewareConfig{Skipper: p.apiKeySkipper}
 
 	// API endpoints with Swagger documentation and accessible with an API key
-	stableAPIGroup := e.Group("/api/v1")
+	stableAPIGroup := api.Group("/v1")
 	stableAPIGroup.Use(p.apiKeyMiddleware)
 	stableAPIGroup.Use(p.sessionMiddlewareWithConfig(apiKeyGroupConfig))
 	stableAPIGroup.Use(p.xsrfMiddlewareWithConfig(apiKeyGroupConfig))

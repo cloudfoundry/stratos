@@ -36,7 +36,7 @@ jobs:
           labels: |
             ready for review
           draft: false
-          base: ${{env.GITHUB_REF}}
+          base: ${GITHUB_REF##*/}
       - name: Check output
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"

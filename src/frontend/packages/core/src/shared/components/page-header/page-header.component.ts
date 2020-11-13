@@ -107,6 +107,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public username$: Observable<string>;
   public user$: Observable<UserProfileInfo>;
   public allowGravatar$: Observable<boolean>;
+  public canLogout$: Observable<boolean>;
 
   public actionsKey: string;
 
@@ -151,6 +152,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private userProfileService: UserProfileService,
     private cups: CurrentUserPermissionsService,
     private endpointsService: EndpointsService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -188,6 +190,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     ]).pipe(
       map(([disabled, permission]) => !disabled && permission)
     );
+
+    this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
+      map(noLogout => !noLogout)
+    );
+
   }
 
   ngOnDestroy() {
