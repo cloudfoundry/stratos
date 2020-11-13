@@ -22,6 +22,7 @@ import { StepOnNextFunction } from '../../../shared/components/stepper/step/step
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   editProfileForm: FormGroup;
+  showPassword: boolean[] = [];
 
   needsPasswordForEmailChange: boolean;
 
@@ -104,7 +105,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   }
 
   confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const same = control.value === this.editProfileForm.value.newPassword;
       return same ? null : { passwordMatch: { value: control.value } };
     };
@@ -133,5 +134,5 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       delay(300), // Ensure that the profile is updated before fetching to refresh local copy
       tap(() => this.userProfileService.fetchUserProfile())
     );
-  }
+  };
 }

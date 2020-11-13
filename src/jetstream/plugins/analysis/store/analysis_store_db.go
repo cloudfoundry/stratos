@@ -10,14 +10,14 @@ import (
 )
 
 var (
-	listReports                = `SELECT id, endpoint_type, endpoint, user, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE user = $1 AND endpoint = $2`
-	listCompletedReportsByPath = `SELECT id, endpoint_type, endpoint, user, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'completed' AND user = $1 AND endpoint = $2 AND path = $3 ORDER BY created DESC`
-	getReport                  = `SELECT id, endpoint_type, endpoint, user, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE user = $1 AND id=$2`
-	deleteReport               = `DELETE FROM analysis WHERE user = $1 AND id = $2`
-	saveReport                 = `INSERT INTO analysis (id, user, endpoint_type, endpoint, name, path, type, format, created, acknowledged, status, duration, result) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
-	updateReport               = `UPDATE analysis SET type = $1, format = $2, acknowledged = $3, status = $4, duration = $5, result = $6, name = $7, path = $8, result = $9 WHERE user = $10 AND id = $11`
-	getLatestReport            = `SELECT id, endpoint_type, endpoint, user, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'completed' AND user = $1 AND endpoint = $2 AND path = $3 ORDER BY created DESC`
-	listRunningReports         = `SELECT id, endpoint_type, endpoint, user, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'running' ORDER BY created DESC`
+	listReports                = `SELECT id, endpoint_type, endpoint, user_guid, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE user_guid = $1 AND endpoint = $2`
+	listCompletedReportsByPath = `SELECT id, endpoint_type, endpoint, user_guid, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'completed' AND user_guid = $1 AND endpoint = $2 AND path = $3 ORDER BY created DESC`
+	getReport                  = `SELECT id, endpoint_type, endpoint, user_guid, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE user_guid = $1 AND id=$2`
+	deleteReport               = `DELETE FROM analysis WHERE user_guid = $1 AND id = $2`
+	saveReport                 = `INSERT INTO analysis (id, user_guid, endpoint_type, endpoint, name, path, type, format, created, acknowledged, status, duration, result) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+	updateReport               = `UPDATE analysis SET type = $1, format = $2, acknowledged = $3, status = $4, duration = $5, result = $6, name = $7, path = $8, result = $9 WHERE user_guid = $10 AND id = $11`
+	getLatestReport            = `SELECT id, endpoint_type, endpoint, user_guid, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'completed' AND user_guid = $1 AND endpoint = $2 AND path = $3 ORDER BY created DESC`
+	listRunningReports         = `SELECT id, endpoint_type, endpoint, user_guid, name, path, type, format, created, acknowledged, status, duration, result FROM analysis WHERE status = 'running' ORDER BY created DESC`
 	deleteForEndpoint          = `DELETE FROM analysis WHERE endpoint = $1`
 )
 

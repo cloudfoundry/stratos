@@ -510,3 +510,47 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		done <- cnsiRequest
 	}
 }
+
+func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
+	log.Debug("ProxySingleRequest")
+
+	cnsi := c.Param("uuid")
+
+	uri := url.URL{}
+	uri.Path = c.Param("*")
+	uri.RawQuery = c.Request().URL.RawQuery
+
+	header := getEchoHeaders(c)
+	header.Del("Cookie")
+	header.Del(APIKeyHeader)
+
+	portalUserGUID, err := getPortalUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	req, body, err := getRequestParts(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	done := make(chan *interfaces.CNSIRequest)
+	cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req.Method, &uri, body, header)
+	if buildErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
+	}
+	cnsiRequest.LongRunning = false
+
+	go p.doRequest(&cnsiRequest, done)
+	res := <-done
+
+	c.Response().WriteHeader(res.StatusCode)
+
+	// we don't care if this fails
+	_, writeErr := c.Response().Write(res.Response)
+	if writeErr != nil {
+		log.Errorf("Failed to write passthrough response %v", err)
+	}
+
+	return nil
+}

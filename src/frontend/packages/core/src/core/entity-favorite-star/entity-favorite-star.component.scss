@@ -1,6 +1,8 @@
 $size: 24px;
 .favorite-star {
+  align-items: center;
   cursor: pointer;
+  display: flex;
   height: $size;
   width: $size;
 }

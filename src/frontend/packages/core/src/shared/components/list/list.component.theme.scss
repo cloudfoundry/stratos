@@ -5,6 +5,7 @@
   $foreground-colors: map-get($theme, foreground);
   $background-colors: map-get($theme, background);
   $is-dark: map-get($theme, is-dark);
+  $accent: map-get($theme, accent);
 
   $header-selected-color: #fff;
   @if $is-dark == true {
@@ -24,6 +25,19 @@
           flex-wrap: wrap;
         }
       }
+
+      @include accent(mat-color($accent));
+      .sort {
+        @include accent(unset)
+      }
     }
+  }
+}
+
+@mixin accent($colour) {
+  .mat-select-value-text,
+  .mat-input-element.ng-dirty,
+  .mat-chip {
+    color: $colour;
   }
 }

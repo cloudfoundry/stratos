@@ -27,6 +27,7 @@ const (
 	versionRequestRegex    = "^/pp/v1/version$"
 	pingRequestRegex       = "^/pp/v1/ping$"
 	backendRequestRegex    = "^/pp/v1/"
+	apiRequestRegex        = "^/api/v1/"
 	systemGroupName        = "env"
 )
 
@@ -384,7 +385,8 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
-			if !isBackendRequest {
+			isAPIRequest, _ := regexp.MatchString(apiRequestRegex, requestURLPath)
+			if !(isBackendRequest || isAPIRequest) {
 				return h(c)
 			}
 
