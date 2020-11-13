@@ -54,6 +54,11 @@ func (e *SessionValueNotFound) Error() string {
 	return fmt.Sprintf("Session value not found %s", e.msg)
 }
 
+func (p *portalProxy) NewSession(c echo.Context) (*sessions.Session, error) {
+	req := c.Request()
+	return p.SessionStore.New(req, p.SessionCookieName)
+}
+
 func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
 	log.Debug("getSession")
 	req := c.Request()
@@ -109,6 +114,7 @@ func (p *portalProxy) GetSessionStringValue(c echo.Context, key string) (string,
 }
 
 func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) error {
+	log.Debug("SaveSession")
 	// Update the cached session and mark that it has been updated
 
 	// We're not calling the real session save, so we need to set the session expiry ourselves
@@ -148,6 +154,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 	log.Debug("setSessionValues")
 	session, err := p.GetSession(c)
 	if err != nil {
+		log.Debug("No session - can not set session values")
 		return err
 	}
 
@@ -240,6 +247,8 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
+
+	p.StratosAuthService.BeforeVerifySession(c)
 
 	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
 		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")

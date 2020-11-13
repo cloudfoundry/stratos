@@ -168,6 +168,7 @@ type ProxyRequestInfo struct {
 }
 
 type SessionStorer interface {
+	New(r *http.Request, name string) (*sessions.Session, error)
 	Get(r *http.Request, name string) (*sessions.Session, error)
 	Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error
 }
@@ -248,6 +249,8 @@ const (
 	Remote AuthEndpointType = "remote"
 	//Local - String representation of remote auth endpoint type
 	Local AuthEndpointType = "local"
+	//AuthNone - String representation of no authentication
+	AuthNone AuthEndpointType = "none"
 )
 
 //AuthEndpointTypes - Allows lookup of internal string representation by the
@@ -255,6 +258,7 @@ const (
 var AuthEndpointTypes = map[string]AuthEndpointType{
 	"remote": Remote,
 	"local":  Local,
+	"none":   AuthNone,
 }
 
 // ConsoleConfig is essential configuration settings
@@ -276,6 +280,11 @@ const defaultAdminScope = "stratos.admin"
 
 // IsSetupComplete indicates if we have enough config
 func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
+
+	// No auth, then setup is complete
+	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == AuthNone {
+		return true
+	}
 
 	// Local user - check setup complete
 	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
