@@ -13,4 +13,8 @@ export class CredentialsAuthFormComponent implements IAuthForm {
   showPassword = false;
 
   @Input() formGroup: FormGroup;
+  @Input() config = {
+    usernameText: 'Username',
+    passwordText: 'Password'
+  };
 }

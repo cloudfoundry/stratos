@@ -32,7 +32,11 @@ const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   [GitEndpointAuthTypes.GITHUB_TOKEN]: {
     ...BaseEndpointAuth.UsernamePassword,
     name: 'Username and Token',
-    help: '/core/assets/connect/github.md'
+    help: '/core/assets/connect/github.md',
+    config: {
+      usernameText: 'Username',
+      passwordText: 'Token'
+    }
   },
   [GitEndpointAuthTypes.GITLAB_TOKEN]: {
     ...BaseEndpointAuth.Token,

@@ -7,7 +7,6 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  Type,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
@@ -111,7 +110,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     this.authChanged();
 
     // Template container reference is not available at construction
-    this.createComponent(this.autoSelected.component);
+    this.createComponent(this.autoSelected);
 
     this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
       const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
@@ -147,15 +146,15 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.endpointForm.addControl('authValues', this.fb.group(authType.form));
 
       // Update the auth form component
-      this.createComponent(authType.component);
+      this.createComponent(authType);
     }
     this.bodyContent = '';
     this.authType.next(authType);
   }
 
   // Dynamically create the component for the selected auth type
-  createComponent(component: Type<IAuthForm>) {
-    if (!component || !this.container) {
+  createComponent(authType: EndpointAuthTypeConfig) {
+    if (!authType.component || !this.container) {
       return;
     }
 
@@ -163,9 +162,10 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.authFormComponentRef.destroy();
     }
 
-    const factory = this.resolver.resolveComponentFactory<IAuthForm>(component);
+    const factory = this.resolver.resolveComponentFactory<IAuthForm>(authType.component);
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(factory);
     this.authFormComponentRef.instance.formGroup = this.endpointForm;
+    this.authFormComponentRef.instance.config = authType.config;
     this.pDisabled ? this.endpointForm.disable() : this.endpointForm.enable();
   }
 
