@@ -86,7 +86,7 @@ export class DeployApplicationStep2Component
   commitSubscription: Subscription;
 
   sourceType: SourceType;
-  repositoryBranch: GitBranch = { name: null, commit: null };
+  repositoryBranch: GitBranch = null; // TODO: RC test
   repository: string;
 
   scm: GitSCM;
@@ -144,7 +144,10 @@ export class DeployApplicationStep2Component
       this.store.dispatch(new SaveAppDetails({
         projectName: this.gitUrl,
         branch: {
-          name: this.gitUrlBranchName
+          name: this.gitUrlBranchName,
+          guid: null,
+          projectName: null,
+          scmType: null
         },
         endpointGuid: this.sourceType.endpointGuid
       }, null));

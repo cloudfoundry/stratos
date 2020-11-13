@@ -23,6 +23,9 @@ export interface GitRepo {
   full_name: string;
   default_branch: string;
   description: string;
+  scmType: string;
+  projectName: string;
+  guid: string;
 }
 
 export interface GitUser {
@@ -35,8 +38,9 @@ export interface GitUser {
 export interface GitBranch {
   name: string;
   commit?: GitCommit;
-  projectId?: string;
-  entityId?: string;
+  scmType: string;
+  projectName: string;
+  guid: string;
 }
 
 export interface GitCommit {
@@ -52,6 +56,8 @@ export interface GitCommit {
     };
     message: string;
   };
-  guid?: string;
+  guid: string;
+  scmType: string;
+  projectName: string;
 }
 

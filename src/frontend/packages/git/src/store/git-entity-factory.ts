@@ -1,20 +1,20 @@
 import { schema } from 'normalizr';
 
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
+import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
 export const GIT_ENDPOINT_TYPE = 'git';
 
 export enum GIT_ENDPOINT_SUB_TYPES {
-  // PUBLIC_GIT = 'public_git',
-  // PRIVATE_GIT = 'private_git',
   GITHUB = 'github',
   GITLAB = 'gitlab',
-  // PUBLIC_GITHUB = 'public_github',
-  // PRIVATE_GITHUB = 'private_github',
-  // PUBLIC_GITLAB = 'public_gitlab',
-  // PRIVATE_GITLAB = 'private_gitlab',
 }
+
+export const getCommitGuid = (scmType: string, projectName: string, sha: string): string => scmType + '--' + projectName + '--' + sha;
+export const getRepositoryGuid = (scmType: string, projectName: string): string => scmType + '--' + projectName;
+export const getBranchGuid = (scmType: string, projectName: string, branchName: string): string => scmType + '--' + projectName + '--' + branchName;
+
 
 const entityCache: {
   [key: string]: EntitySchema;
@@ -37,13 +37,26 @@ export class GitEntitySchema extends EntitySchema {
   }
 }
 
-const GithubBranchSchema = new GitEntitySchema(gitBranchesEntityType, { idAttribute: 'entityId' });
+// , { idAttribute: 'entityId' }
+const GithubBranchSchema = new GitEntitySchema(gitBranchesEntityType, {
+  idAttribute: (branch: GitBranch) => {
+    return getCommitGuid(branch.scmType, branch.projectName, branch.name);
+  }
+});
 entityCache[gitBranchesEntityType] = GithubBranchSchema;
 
-const GithubRepoSchema = new GitEntitySchema(gitRepoEntityType);
+const GithubRepoSchema = new GitEntitySchema(gitRepoEntityType, {
+  idAttribute: (repo: GitRepo) => {
+    return getRepositoryGuid(repo.scmType, repo.projectName);
+  }
+});
 entityCache[gitRepoEntityType] = GithubRepoSchema;
 
-const GithubCommitSchema = new GitEntitySchema(gitCommitEntityType, { idAttribute: commit => commit.guid });
+const GithubCommitSchema = new GitEntitySchema(gitCommitEntityType, {
+  idAttribute: (commit: GitCommit) => {
+    return getCommitGuid(commit.scmType, commit.projectName, commit.sha);
+  }
+});
 entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 
