@@ -6,6 +6,7 @@ Autoscaler
 Service Instance from Marketplace
 CF - Org - Invite User
 CF - Space - Invite User
+CF - Space Level - Remove user
 CF - Invite User Configuration
 Application Deploy Docker
 Create Service Instance with binding
