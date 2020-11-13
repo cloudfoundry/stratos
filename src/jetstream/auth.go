@@ -36,6 +36,11 @@ func (p *portalProxy) InitStratosAuthService(t interfaces.AuthEndpointType) erro
 			databaseConnectionPool: p.DatabaseConnectionPool,
 			p:                      p,
 		}
+	case interfaces.AuthNone:
+		auth = &noAuth{
+			databaseConnectionPool: p.DatabaseConnectionPool,
+			p:                      p,
+		}
 	default:
 		err := fmt.Errorf("Invalid auth endpoint type: %v", t)
 		return err

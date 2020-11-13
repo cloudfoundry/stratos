@@ -3,10 +3,14 @@
   $background-color: map-get($app-theme, app-background-color);
   $darker-background-color: darken($background-color, 4%);
   $foreground: map-get($theme, foreground);
+  $header-border: map-get($app-theme, header-border-color);
 
   .sidepanel-preview__header {
     background-color: $darker-background-color;
-    border-top: 1px solid mat-color($foreground, divider);
+
+    @if not $header-border or $header-border == 'none' {
+      border-top: 1px solid mat-color($foreground, divider);
+    }
   }
 
   .sidepanel-preview__content {

@@ -33,6 +33,9 @@ const (
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"
 	jetStreamSessionContextUpdatedKey = "jetstream-session-updated"
+
+	// Header to communicate whether SSO Login is enabled and if so, any configured options
+	stratosSSOHeader = "x-stratos-sso-login"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
@@ -49,6 +52,11 @@ type SessionInfoEnvelope struct {
 
 func (e *SessionValueNotFound) Error() string {
 	return fmt.Sprintf("Session value not found %s", e.msg)
+}
+
+func (p *portalProxy) NewSession(c echo.Context) (*sessions.Session, error) {
+	req := c.Request()
+	return p.SessionStore.New(req, p.SessionCookieName)
 }
 
 func (p *portalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
@@ -106,6 +114,7 @@ func (p *portalProxy) GetSessionStringValue(c echo.Context, key string) (string,
 }
 
 func (p *portalProxy) SaveSession(c echo.Context, session *sessions.Session) error {
+	log.Debug("SaveSession")
 	// Update the cached session and mark that it has been updated
 
 	// We're not calling the real session save, so we need to set the session expiry ourselves
@@ -145,6 +154,7 @@ func (p *portalProxy) setSessionValues(c echo.Context, values map[string]interfa
 	log.Debug("setSessionValues")
 	session, err := p.GetSession(c)
 	if err != nil {
+		log.Debug("No session - can not set session values")
 		return err
 	}
 
@@ -238,6 +248,8 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 func (p *portalProxy) verifySession(c echo.Context) error {
 	log.Debug("verifySession")
 
+	p.StratosAuthService.BeforeVerifySession(c)
+
 	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
 		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 		if err != nil {
@@ -274,32 +286,35 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return info, err
 	}
 
-	var jsonErr error
-
 	info, sessionVerifyErr := collectErrors(p, c)
 	if sessionVerifyErr != nil {
 		p.clearSessionCookie(c, true)
 
-		jsonErr = c.JSON(
+		// Add header so front-end knows SSO login is enabled
+		if p.Config.SSOLogin {
+			// A non-empty SSO Header means SSO is enabled
+			// Use the string "enabled" or send the options string if we have one
+			options := "enabled"
+			if len(p.Config.SSOOptions) > 0 {
+				options = p.Config.SSOOptions
+			}
+			c.Response().Header().Set(stratosSSOHeader, options)
+		}
+
+		return c.JSON(
 			http.StatusOK,
 			SessionInfoEnvelope{
 				Status: "error",
 				Error:  sessionVerifyErr.Error(),
 			},
 		)
-	} else {
-		jsonErr = c.JSON(
-			http.StatusOK,
-			SessionInfoEnvelope{
-				Status: "ok",
-				Data:   info,
-			},
-		)
 	}
 
-	if jsonErr != nil {
-		return jsonErr
-	}
-
-	return nil
+	return c.JSON(
+		http.StatusOK,
+		SessionInfoEnvelope{
+			Status: "ok",
+			Data:   info,
+		},
+	)
 }
