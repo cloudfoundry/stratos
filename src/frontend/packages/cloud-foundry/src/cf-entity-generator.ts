@@ -246,11 +246,6 @@ function cfShortcuts(id: string) {
       iconFont: 'stratos-icons'
     },
     {
-      title: 'View Applications',
-      link: ['/cloud-foundry', id, 'organizations'],
-      icon: 'apps'
-    },
-    {
       title: 'Deploy an Application',
       link: ['/applications', 'new', id],
       icon: 'publish'
