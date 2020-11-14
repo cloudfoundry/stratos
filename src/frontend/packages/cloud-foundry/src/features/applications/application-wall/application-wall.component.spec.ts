@@ -30,6 +30,7 @@ describe('ApplicationWallComponent', () => {
           useValue: {
             snapshot: {
               params: {},
+              queryParams: {}
             }
           }
         }
