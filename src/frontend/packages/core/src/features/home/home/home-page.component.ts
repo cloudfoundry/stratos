@@ -1,11 +1,9 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { DOCUMENT } from '@angular/common';
 import {
   AfterViewInit,
   Component,
   ElementRef,
   HostListener,
-  Inject,
   OnDestroy,
   OnInit,
   QueryList,
@@ -76,7 +74,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     private store: Store<AppState>,
     public userFavoriteManager: UserFavoriteManager,
     private scrollDispatcher: ScrollDispatcher,
-    @Inject(DOCUMENT) private document
   ) {
     // Redirect to /applications if not enabled
     endpointsService.disablePersistenceFeatures$.pipe(
@@ -107,7 +104,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         const ordered = this.orderEndpoints(endpoints, favGroups);
         return ordered.filter(ep => {
           const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
-          return !!defn.definition.homeCard;
+          const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
+          return connected;
         });
       })
     );
@@ -237,13 +235,15 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups): EndpointModel[] {
     const processed = {};
     const result = [];
+    const epMap = {};
+    endpoints.forEach(ep => epMap[ep.guid] = ep);
 
     Object.keys(favorites).forEach(fav => {
       if (!favorites[fav].ethereal) {
         const id = favorites[fav].endpoint.endpointId;
-        if (!!endpoints[id] && !processed[id]) {
+        if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(endpoints[id]);
+          result.push(epMap[id]);
         }
       }
     });
@@ -251,9 +251,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     Object.keys(favorites).forEach(fav => {
       if (favorites[fav].ethereal) {
         const id = favorites[fav].endpoint.endpointId;
-        if (!!endpoints[id] && !processed[id]) {
+        if (!!epMap[id] && !processed[id]) {
           processed[id] = true;
-          result.push(endpoints[id]);
+          result.push(epMap[id]);
         }
       }
     });
@@ -265,8 +265,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     })
 
-    // Filter out the disconnected ones
-    return result.filter(ep => ep.connectionStatus === 'connected');
+    return result;
   }
 
   // Automatic layout - select the best layout based on the available endpoints
