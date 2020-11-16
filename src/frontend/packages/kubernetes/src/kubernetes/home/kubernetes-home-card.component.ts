@@ -17,17 +17,17 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   @Input() endpoint: EndpointModel;
 
-  _layout: HomePageCardLayout;
+  pLayout: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
-    return this._layout;
+    return this.pLayout;
   }
 
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this._layout = value;
+      this.pLayout = value;
     }
-  };
+  }
 
   public shortcuts: HomeCardShortcut[];
 

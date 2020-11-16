@@ -121,7 +121,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     ).subscribe(id => {
       const selected = this.layouts.find(hpcl => hpcl && hpcl.id === id) || this.layouts[0];
       this.onChangeLayout(selected);
-    })
+    });
   }
 
   ngOnInit() {
@@ -150,10 +150,10 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         } else {
           remaining.push(index);
         }
-      };
+      }
       this.processCardsToLoad();
       this.notLoadedCardIndices = remaining;
-    })
+    });
   }
 
   processCardsToLoad() {
@@ -182,7 +182,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   setCardsToLoad(cards: any[]) {
     this.notLoadedCardIndices = [];
-    for(let i=0;i< cards.length; i++) {
+    for (let i = 0; i < cards.length; i++) {
       this.notLoadedCardIndices.push(i);
     }
     setTimeout(() => this.checkCardsInView(), 1);
@@ -263,7 +263,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         processed[ep.guid] = true;
         result.push(ep);
       }
-    })
+    });
 
     return result;
   }
@@ -276,7 +276,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
         return !!defn.definition.homeCard;
       })),
       map(eps => {
-        switch(eps.length) {
+        switch (eps.length) {
           case 1:
             return this.getLayout(1, 1);
           case 2:

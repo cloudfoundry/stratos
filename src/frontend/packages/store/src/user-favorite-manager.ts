@@ -138,10 +138,10 @@ export class UserFavoriteManager {
             // Ensure we actually have a UserFavorite object and not a struct
             result.push(this.getUserFavoriteFromObject(f));
           }
-        })
+        });
         return result;
       })
-    )
+    );
   }
 
   /**

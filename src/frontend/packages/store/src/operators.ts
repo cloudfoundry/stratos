@@ -11,5 +11,5 @@ export function entityFetchedWithoutError<T>(): OperatorFunction<T, boolean> {
     filter(([oldV, newV]) => (oldV as any).fetching && !(newV as any).fetching),
     map(([, newV]) => newV),
     map(f => !(f as any).error)
-  )
-};
+  );
+}

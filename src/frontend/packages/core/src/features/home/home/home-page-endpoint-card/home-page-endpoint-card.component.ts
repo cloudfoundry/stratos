@@ -50,22 +50,22 @@ enum Status {
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('customCard', {read:ViewContainerRef}) customCard: ViewContainerRef;
+  @ViewChild('customCard', {read: ViewContainerRef}) customCard: ViewContainerRef;
 
   @Input() endpoint: EndpointModel;
 
-  _layout: HomePageCardLayout;
+  pLayout: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
-    return this._layout;
+    return this.pLayout;
   }
 
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this._layout = value;
+      this.pLayout = value;
     }
     this.updateLayout();
-  };
+  }
 
   @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
 
@@ -115,7 +115,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   ngAfterViewInit() {
     // Dynamically load the component for the Home Card for this endopoint
-    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
+    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
@@ -128,8 +128,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type);
     // Favorites for this endpoint
     this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid);
-
-    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type)
+    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
       this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
@@ -198,7 +197,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   public updateLayout() {
     this.layout$.next(this.layout);
     if (this.ref && this.ref.instance) {
-      this.ref.instance.layout = this._layout;
+      this.ref.instance.layout = this.pLayout;
     }
   }
 
@@ -214,7 +213,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
     this.ref = this.customCard.createComponent(component);
     this.ref.instance.endpoint = this.endpoint;
-    this.ref.instance.layout = this._layout;
+    this.ref.instance.layout = this.pLayout;
     this.loadCardIfReady();
   }
 
