@@ -22,7 +22,7 @@ export interface IStratosRolesState {
 export interface ICurrentUserRolesState {
   internal: IStratosRolesState;
   endpoints: {
-    [endpointType: string]: any
-  }
+    [endpointType: string]: any;
+  };
   state: RolesRequestState;
 }

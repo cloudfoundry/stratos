@@ -1,0 +1,14 @@
+.default-home-card {
+  margin: 1em;
+
+  &__address {
+    display: flex;
+    min-height: 24px;
+    &__value {
+      align-items: center;
+      display: flex;
+      margin-right: 28px;
+      word-break: break-all;
+    }
+  }
+}

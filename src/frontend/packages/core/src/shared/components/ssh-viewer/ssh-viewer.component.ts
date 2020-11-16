@@ -122,7 +122,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
               this.xterm.write(String.fromCharCode(parseInt(c, 16)));
             }
           } else {
-            console.error('Error: ', this.errorMessage)
+            console.error('Error: ', this.errorMessage);
             const eMsg = this.errorMessage;
             this.errorMessage = eMsg;
           }

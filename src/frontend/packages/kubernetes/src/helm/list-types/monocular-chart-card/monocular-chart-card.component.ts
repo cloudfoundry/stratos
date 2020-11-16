@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -13,8 +13,6 @@ import { MonocularChart } from '../../store/helm.types';
   styleUrls: ['./monocular-chart-card.component.scss']
 })
 export class MonocularChartCardComponent extends CardCell<MonocularChart> {
-
-  @Input() row: MonocularChart;
 
   public artifactHubAndHelmRepoTypes$: Observable<boolean>;
 

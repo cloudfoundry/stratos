@@ -104,7 +104,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         // See note for this.serviceBrokerName$
         this.serviceName$ = this.service$.pipe(
           map(getServiceName)
-        )
+        );
       }
 
       this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
@@ -144,11 +144,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
-  }
+  };
   brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.SCOPE,
     altScope: true
-  }
+  };
 
   private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -157,13 +157,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       this.serviceInstanceEntity.entity.cfGuid,
       false
     );
-  }
+  };
 
   private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
-  )
+  );
 
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
@@ -171,7 +171,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     {
       [CSI_CANCEL_URL]: '/services'
     }
-  )
+  );
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 

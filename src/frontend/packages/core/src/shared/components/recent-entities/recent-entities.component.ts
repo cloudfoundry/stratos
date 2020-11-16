@@ -21,7 +21,7 @@ class RenderableRecent {
   public iconFont: string;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
-    this.icon = catalogEntity.definition.icon;;
+    this.icon = catalogEntity.definition.icon;
     this.iconFont = catalogEntity.definition.iconFont;
     if (!entity.endpointId) {
       console.error(`Entity ${entity.guid} does not contain a value for endpointId - recent metadata is malformed`);

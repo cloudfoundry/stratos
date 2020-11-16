@@ -23,12 +23,10 @@ export interface TableCellServiceBrokerComponentConfig {
   templateUrl: './table-cell-service-broker.component.html',
   styleUrls: ['./table-cell-service-broker.component.scss']
 })
-export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource<IService>> {
+export class TableCellServiceBrokerComponent extends
+  TableCellCustom<APIResource<IService>,
+  TableCellServiceBrokerComponentConfig> {
 
-  @Input()
-  config: TableCellServiceBrokerComponentConfig;
-
-  pRow: APIResource<IService>;
   @Input()
   set row(row: APIResource<IService>) {
     this.pRow = row;
@@ -72,9 +70,5 @@ export class TableCellServiceBrokerComponent extends TableCellCustom<APIResource
     link: string[],
   }>;
   public broker$: Observable<APIResource<IServiceBroker>>;
-
-  constructor() {
-    super();
-  }
 
 }

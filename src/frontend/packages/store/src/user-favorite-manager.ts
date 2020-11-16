@@ -138,16 +138,10 @@ export class UserFavoriteManager {
             // Ensure we actually have a UserFavorite object and not a struct
             result.push(this.getUserFavoriteFromObject(f));
           }
-        })
+        });
         return result;
       })
-    )
-  }
-
-  public getEndpointIDFromFavoriteID(id: string): string {
-    const p = id.split('-');
-    const idParts = p.slice(0, p.length - 2);
-    return idParts.join('-');
+    );
   }
 
   /**
@@ -200,6 +194,22 @@ export class UserFavoriteManager {
       endpoint.guid,
       endpoint
     );
+  }
+
+  // Determine is an endpoint has any entities that can be favorited
+  public endpointHasEntitiesThatCanFavorite(endpointType: string) {
+    const entities = entityCatalog.getAllEntitiesForEndpointType(endpointType);
+    let total = 0;
+    entities.forEach(e => {
+      const defn = e.builders?.entityBuilder;
+      if (defn) {
+        const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+        if (canFavorite) {
+          total++;
+        }
+      }
+    });
+    return total > 0;
   }
 
 }

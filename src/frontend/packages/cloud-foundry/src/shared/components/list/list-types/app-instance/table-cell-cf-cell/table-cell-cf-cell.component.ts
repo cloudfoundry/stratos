@@ -21,8 +21,8 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
 
   @Input('config')
   set config(config: {
-    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>
-    cfGuid: string
+    metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>;
+    cfGuid: string;
   }) {
     if (!config) {
       return;

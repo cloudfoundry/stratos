@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/public-api';
+import { UserFavorite } from './../../../../store/src/types/user-favorites.types';
 
 // Layout for a home page card
 
@@ -13,17 +14,6 @@ export class HomePageCardLayout {
   constructor(public x: number, public y: number, public title?: string) {
     this.id = x + y * 1000;
   }
-
-  public static fromLayout(layout: string, title?: string): HomePageCardLayout {
-    const parts = layout.split('-');
-    const x = parseInt(parts[0], 10);
-    let y = 1;
-    if (parts.length > 1) {
-      y = parseInt(parts[1], 10);
-    }
-
-    return new HomePageCardLayout(x, y, title ? title : `${x}-${y} Layout`);
-  }
 }
 
 export abstract class HomePageEndpointCard {
@@ -33,7 +23,6 @@ export abstract class HomePageEndpointCard {
 }
 
 export interface LinkMetadata {
-  favs: any[],
-  shortcuts: HomeCardShortcut[]
+  favs: UserFavorite[];
+  shortcuts: HomeCardShortcut[];
 }
-

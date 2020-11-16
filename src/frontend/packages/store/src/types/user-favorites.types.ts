@@ -109,7 +109,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     return {
       icon: defn.icon || 'help',
       iconFont: defn.iconFont
-    }
+    };
   }
 
   private buildFavoriteStoreEntityGuid() {

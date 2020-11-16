@@ -57,7 +57,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean }>;
+  public isBusyUpdating$: Observable<{ updating: boolean, }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(
@@ -78,7 +78,7 @@ export class BuildTabComponent implements OnInit {
 
   sshStatus$: Observable<string>;
 
-  deploySource$: Observable<{ type: string, [name: string]: any }>;
+  deploySource$: Observable<{ type: string, [name: string]: any, }>;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
@@ -115,7 +115,7 @@ export class BuildTabComponent implements OnInit {
         this.applicationService.cfGuid,
         space.metadata.guid)
       )
-    )
+    );
 
     const deploySource$ = observableCombineLatest(
       this.applicationService.applicationStratProject$,
@@ -159,7 +159,7 @@ export class BuildTabComponent implements OnInit {
         }
       }),
       startWith({ type: 'loading' })
-    )
+    );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
       switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
@@ -187,7 +187,7 @@ export class BuildTabComponent implements OnInit {
   private dispatchAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
     cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
-  }
+  };
 
   restartApplication() {
     this.confirmDialog.open(appRestartConfirmation, () => {

@@ -66,6 +66,11 @@ const applicationsRoutes: Routes = [
         }
       },
       {
+        path: ':endpointId',
+        component: ApplicationWallComponent,
+        pathMatch: 'full'
+      },
+      {
         path: ':endpointId/:id',
         component: ApplicationBaseComponent,
         children: [

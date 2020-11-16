@@ -61,7 +61,7 @@ export class CardCfRecentAppsComponent implements OnInit {
     if (!this.allApps$) {
       this.allApps$ = this.appsPagObs.entities$;
       this.loading$ = this.appsPagObs.fetchingEntities$;
-      this.hasEntities$ = this.appsPagObs.hasEntities$
+      this.hasEntities$ = this.appsPagObs.hasEntities$;
     } else {
       this.hasEntities$ = of(true);
     }
@@ -84,7 +84,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   }
 
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
-    if(!this.noStats) {
+    if (!this.noStats) {
       recentApps.forEach(app => {
         if (app.entity.state === 'STARTED') {
           cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);

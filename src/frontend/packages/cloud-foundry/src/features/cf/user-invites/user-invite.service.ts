@@ -49,7 +49,7 @@ export enum UserInviteSendSpaceRoles {
 interface UserInviteSend {
   org: string;
   space: string;
-  spaceRoles: { [spaceRole: string]: boolean };
+  spaceRoles: { [spaceRole: string]: boolean, };
   emails: string[];
 }
 
@@ -69,7 +69,7 @@ export class UserInviteConfigureService {
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
       map(v => {
-        stratosEntityCatalog.systemInfo.api.getSystemInfo()
+        stratosEntityCatalog.systemInfo.api.getSystemInfo();
         return {
           error: false
         };
@@ -98,7 +98,7 @@ export class UserInviteConfigureService {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
         map(v => {
-          stratosEntityCatalog.systemInfo.api.getSystemInfo()
+          stratosEntityCatalog.systemInfo.api.getSystemInfo();
           return {
             error: false,
             errorMessage: ''

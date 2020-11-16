@@ -13,4 +13,4 @@ export class AnalysisStatusCellComponent extends TableCellCustom<any> {
     this.row = {};
   }
 
- }
+}

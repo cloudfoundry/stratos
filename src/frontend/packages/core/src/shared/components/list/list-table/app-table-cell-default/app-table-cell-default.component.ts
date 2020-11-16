@@ -15,7 +15,6 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   public cellDefinition: ICellDefinition<T>;
 
-  private pRow: T;
   @Input('row')
   get row() { return this.pRow; }
   set row(row: T) {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -26,7 +26,6 @@ import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-lab
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
 
-  @Input() row: APIResource<IApp>;
   applicationState$: Observable<ApplicationStateData>;
 
   appStatus$: Observable<StratosStatus>;
