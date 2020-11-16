@@ -39,7 +39,7 @@ export class CompactAppCardComponent implements OnInit {
 
   ) { }
   ngOnInit() {
-    if(this.activeRouteCfOrgSpace) {
+    if (this.activeRouteCfOrgSpace) {
       this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);
       if (!this.endpoint) {
         this.endpoint = this.activeRouteCfOrgSpace.cfGuid;
@@ -47,7 +47,7 @@ export class CompactAppCardComponent implements OnInit {
     }
 
     if (!this.app) {
-      return
+      return;
     }
 
     const initState = this.appStateService.get(this.app.entity, null);
