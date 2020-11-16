@@ -107,7 +107,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   helmEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/monocular/charts`,
+    (metadata) => `/monocular/charts/${metadata.name}`,
   );
   return helmEntityCatalog.endpoint;
 }
