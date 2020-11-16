@@ -194,5 +194,4 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
     return !apps ? [] : [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
   }
-
 }
