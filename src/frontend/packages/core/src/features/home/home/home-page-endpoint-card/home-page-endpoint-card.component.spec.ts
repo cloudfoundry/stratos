@@ -42,7 +42,7 @@ describe('HomePageEndpointCardComponent', () => {
 
   afterEach(() => {
     component.ngOnDestroy();
-  })
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

@@ -23,7 +23,6 @@ export abstract class HomePageEndpointCard {
 }
 
 export interface LinkMetadata {
-  favs: IHydrationResults[],
-  shortcuts: HomeCardShortcut[]
+  favs: IHydrationResults[];
+  shortcuts: HomeCardShortcut[];
 }
-

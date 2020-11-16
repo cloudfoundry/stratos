@@ -42,18 +42,18 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
 })
 export class CFHomeCardComponent implements HomePageEndpointCard {
 
-  _layout: HomePageCardLayout;
+  pLayout: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
-    return this._layout;
+    return this.pLayout;
   }
 
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this._layout = value;
+      this.pLayout = value;
     }
     this.updateLayout();
-  };
+  }
 
   @Input() set endpoint(value: EndpointModel) {
     this.guid = value.guid;
@@ -89,7 +89,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     appDeploySourceTypes: ApplicationDeploySourceTypes,
   ) {
     // Set a default layout
-    this._layout = new HomePageCardLayout(1, 1);
+    this.pLayout = new HomePageCardLayout(1, 1);
 
     // Get source types for if we are showing tiles to deploy an application
     this.sourceTypes = appDeploySourceTypes.getTypes();
@@ -110,7 +110,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     if (tile) {
       const query = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
-        [AUTO_SELECT_CF_URL_PARAM]:this.guid
+        [AUTO_SELECT_CF_URL_PARAM]: this.guid
       };
       if (tile.data.subType) {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
@@ -126,7 +126,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
     this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid);
 
-    this.appLink = () => goToAppWall(this.store, this.guid);;
+    this.appLink = () => goToAppWall(this.store, this.guid);
 
     const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
 
@@ -192,8 +192,6 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   }
 
   private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    return !apps ? [] :[...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
+    return !apps ? [] : [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
   }
-
 }
-
