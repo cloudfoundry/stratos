@@ -207,12 +207,12 @@ export class ChartsService {
   }
 
   getVersionFromEndpoint(endpoint: string, repo: string, chartName: string, version: string): Observable<ChartVersion> {
-    const requestArgs  = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint :'' } };
+    const requestArgs = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint : '' } };
     return this.http.get(
       `${this.hostname}/v1/charts/${repo}/${chartName}/versions/${version}`, requestArgs).pipe(
-      map(this.extractData),
-      catchError(this.handleError)
-    );
+        map(this.extractData),
+        catchError(this.handleError)
+      );
   }
 
   /**

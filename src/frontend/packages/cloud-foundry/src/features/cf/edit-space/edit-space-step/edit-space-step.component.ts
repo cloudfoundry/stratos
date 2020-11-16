@@ -70,7 +70,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
         .indexOf(spaceName ? spaceName : this.spaceName) === -1;
     }
     return true;
-  }
+  };
 
   submit: StepOnNextFunction = () => {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
@@ -97,7 +97,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
         return this.updateSpaceQuota();
       }),
     );
-  }
+  };
 
   updateSpace() {
     return cfEntityCatalog.space.api.update<ActionState>(this.spaceGuid, this.cfGuid, {
@@ -114,7 +114,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
     const mon = spaceQuotaGuid ?
       cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
-      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid)
+      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
     return mon.pipe(
       pairwise(),
       filter(([oldS, newS]) => oldS.busy && !newS.busy),

@@ -153,10 +153,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
               redirect: !o.error
             };
           })
-        )
+        );
       })
-    )
-  }
+    );
+  };
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.formChangeSub);

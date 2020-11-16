@@ -196,7 +196,7 @@ export class ListServiceBindingsForInstance
     );
     this.initialParams.q = [
       new QParam('service_instance_guid', serviceInstanceGuid, QParamJoiners.in).toString(),
-    ]
+    ];
   }
   actions = getActions('Service Instances', 'Get all service bindings for instance');
   entity = [cfEntityFactory(serviceBindingNoBindingsEntityType)];

@@ -21,6 +21,8 @@ describe('Space Routes List -', () => {
 
   const timeAllowed = 50000;
 
+  const pageSizeSelectName = 'mat-select-4';
+
   function createRouteHosts(count: number): string[] {
     const routeHosts = [];
     for (let i = 0; i < count; i++) {
@@ -190,7 +192,7 @@ describe('Space Routes List -', () => {
       expect(routesList.pagination.isPresent()).toBeTruthy();
 
       expect(routesList.table.getRowCount()).toBe(initialPageSize);
-      expect(routesList.pagination.getPageSize()).toEqual(initialPageSize.toString());
+      expect(routesList.pagination.getPageSize(pageSizeSelectName)).toEqual(initialPageSize.toString());
       expect(routesList.pagination.getTotalResults()).toBeGreaterThan(initialPageSize);
       expect(routesList.pagination.getTotalResults()).toBeLessThanOrEqual(11);
 
@@ -232,7 +234,7 @@ describe('Space Routes List -', () => {
 
     it('Change Page Size', () => {
 
-      routesList.pagination.setPageSize('80');
+      routesList.pagination.setPageSize('80', pageSizeSelectName);
       expect(routesList.table.getRowCount()).toBeGreaterThan(initialPageSize);
 
       expect(routesList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
@@ -240,7 +242,7 @@ describe('Space Routes List -', () => {
       expect(routesList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
       expect(routesList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
 
-      routesList.pagination.setPageSize(initialPageSize.toString());
+      routesList.pagination.setPageSize(initialPageSize.toString(), pageSizeSelectName);
       expect(routesList.table.getRowCount()).toBe(initialPageSize);
 
     });

@@ -80,11 +80,11 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
 // Simple URL compare that ignores tailing forward slashes
 function compareUrl(a: string, b: string): boolean {
   if (a && a.endsWith('/')) {
-    a = a.substr(0, a.length -1);
+    a = a.substr(0, a.length - 1);
   }
 
   if (b && b.endsWith('/')) {
-    b = b.substr(0, b.length -1);
+    b = b.substr(0, b.length - 1);
   }
 
   return a === b;

@@ -144,7 +144,7 @@ export class CloudFoundryEndpointService {
 
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
 
-    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid)
+    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid);
     this.constructCoreObservables();
     this.constructSecondaryObservable();
   }

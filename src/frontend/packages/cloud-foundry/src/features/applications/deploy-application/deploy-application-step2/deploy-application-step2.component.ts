@@ -157,7 +157,7 @@ export class DeployApplicationStep2Component
       }));
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
-  }
+  };
 
   ngOnInit() {
     this.sourceType$ = combineLatest(
@@ -219,7 +219,7 @@ export class DeployApplicationStep2Component
     }
 
     this.store.dispatch(new SetAppSourceDetails(sourceType));
-  }
+  };
 
   ngAfterContentInit() {
     this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
@@ -288,7 +288,7 @@ export class DeployApplicationStep2Component
             const commitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, {
               projectName: projectInfo.full_name,
               scm: this.scm, commitSha
-            })
+            });
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();

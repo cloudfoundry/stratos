@@ -23,7 +23,7 @@ export const enum CreateServiceFormMode {
  * Where should the user be taken on cancel (and success). If not supplied will fall back on previous location and then deduced from
  * params
  */
-export const CSI_CANCEL_URL = 'cancel'
+export const CSI_CANCEL_URL = 'cancel';
 
 /**
  * Used when `CSI_CANCEL_URL` is not supplied

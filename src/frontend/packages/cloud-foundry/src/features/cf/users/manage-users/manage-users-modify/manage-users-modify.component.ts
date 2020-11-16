@@ -304,7 +304,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.store.select(selectCfUsersIsRemove).pipe(first()),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
-      map(([isRemove,]) => {
+      map(([isRemove]) => {
         if (isRemove) {
           // If we're going to eventually remove the roles flip the add to remove
           this.store.dispatch(new UsersRolesFlipSetRoles());

@@ -210,7 +210,7 @@ describe('Application Deploy -', () => {
 
       const currentUser = e2e.secrets.getDefaultCFEndpoint().creds.nonAdmin.username;
 
-      const checkEventTableItem = (data: { [columnHeader: string]: string }[], text) => {
+      const checkEventTableItem = (data: { [columnHeader: string]: string, }[], text) => {
         const item = data.find(i => i.type === text);
         expect(item).toBeDefined();
         expect(item.actor).toBe(`person\n${currentUser}`);
@@ -357,15 +357,15 @@ describe('Application Deploy -', () => {
 
       return deployApp.stepper.getStepperForm().getFieldsMapped().then(fields => {
         fields.forEach(field => {
-          switch (field.placeholder) {
-            case 'Project':
+          switch (field.name) {
+            case 'projectName':
               expect(field.value).toBe(testApp);
               break;
-            case 'Branch':
+            case 'repositoryBranch':
               expect(field.text).toBe('master');
               break;
             default:
-              fail(`Unknown field: ${field.placeholder}`);
+              fail(`Unknown field: '${field.name}'`);
               break;
           }
         });

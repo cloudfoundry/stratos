@@ -120,7 +120,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
           ...creds,
           authHeader: 'basic ' + btoa(`${creds.username}:${creds.password}`),
           fullUrl: `${creds.url}/v1/apps/${creds.app_id}/metrics`
-        }
+        };
       }),
       publishReplay(1),
       refCount()

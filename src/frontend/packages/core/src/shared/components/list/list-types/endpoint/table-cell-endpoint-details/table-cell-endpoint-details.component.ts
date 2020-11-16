@@ -39,7 +39,6 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     super();
   }
 
-  private pRow: EndpointModel;
   @Input('row')
   set row(row: EndpointModel) {
     this.pRow = row;
@@ -60,7 +59,6 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
       this.cell.isTable = true;
     }
   }
-
   get row(): EndpointModel {
     return this.pRow;
   }

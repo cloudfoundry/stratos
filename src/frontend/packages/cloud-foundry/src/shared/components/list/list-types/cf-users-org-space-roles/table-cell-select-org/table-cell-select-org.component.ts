@@ -31,7 +31,9 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfRolesService: CfRolesService,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {
