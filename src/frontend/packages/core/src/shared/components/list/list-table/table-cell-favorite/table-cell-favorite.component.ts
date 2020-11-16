@@ -13,7 +13,8 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
   templateUrl: './table-cell-favorite.component.html',
   styleUrls: ['./table-cell-favorite.component.scss']
 })
-export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends TableCellCustom<T> {
+export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
+  TableCellCustom<T, TableCellFavoriteComponentConfig<T, Y>> {
 
   constructor() {
     super();
@@ -22,17 +23,13 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends 
   public favorite: UserFavorite<Y>;
   public canFavorite = false;
 
-  private pC: TableCellFavoriteComponentConfig<T, Y>;
   @Input('config')
-  get config() { return this.pC; }
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
-    this.pC = config;
+    this.pConfig = config;
     this.createUserFavorite();
   }
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
   set row(row: T) {
     this.pRow = row;
     this.createUserFavorite();

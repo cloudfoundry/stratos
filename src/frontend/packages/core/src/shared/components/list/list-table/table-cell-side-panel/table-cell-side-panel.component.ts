@@ -15,11 +15,10 @@ export interface TableCellSidePanelConfig<T> {
   templateUrl: './table-cell-side-panel.component.html',
   styleUrls: ['./table-cell-side-panel.component.scss']
 })
-export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T> {
+export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 
   public actualConfig: TableCellSidePanelConfig<A>;
 
-  private pRow: T;
   @Input('row')
   get row(): T { return this.pRow; }
   set row(row: T) {
@@ -27,7 +26,6 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
     this.updateConfig();
   }
 
-  private pConfig: object | CellConfigFunction<T>;
   @Input('config')
   get config() { return this.pConfig; }
   set config(config: object | CellConfigFunction<T>) {

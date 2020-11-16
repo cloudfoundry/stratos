@@ -24,7 +24,7 @@ import { eventReturnUrlParam } from '../../event-page/events-page/events-page.co
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;
   public backParams$: Observable<object>;
-  public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[]; }>;
+  public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[], }>;
   public icon = StratosStatus.ERROR;
   public jsonDownloadHref$: Observable<SafeUrl>;
 

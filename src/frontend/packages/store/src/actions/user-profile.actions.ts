@@ -12,7 +12,7 @@ abstract class BaseProfileAction implements EntityRequestAction {
   guid = BaseProfileAction.guid;
   entityType = userProfileEntityType;
   endpointType = STRATOS_ENDPOINT_TYPE;
-  entity = [stratosEntityFactory(userProfileEntityType)]
+  entity = [stratosEntityFactory(userProfileEntityType)];
   constructor(public type: string) { }
 }
 
@@ -24,14 +24,14 @@ export class FetchUserProfileAction extends BaseProfileAction {
 
 export class UpdateUserProfileAction extends BaseProfileAction {
   constructor(public profile: UserProfileInfo, public password: string) {
-    super(UPDATE_USERPROFILE)
+    super(UPDATE_USERPROFILE);
   }
-  updatingKey = rootUpdatingKey
+  updatingKey = rootUpdatingKey;
 }
 
 export class UpdateUserPasswordAction extends BaseProfileAction {
   constructor(public id: string, public passwordChanges: UserProfilePasswordUpdate) {
     super(UPDATE_USERPASSWORD);
   }
-  updatingKey = 'password'
+  updatingKey = 'password';
 }

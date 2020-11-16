@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/public-api';
-import { UserFavorite } from './../../../../store/src/types/user-favorites.types';
+import { IHydrationResults } from '../../../../store/src/types/user-favorite-manager.types';
 
 // Layout for a home page card
 
@@ -23,6 +23,7 @@ export abstract class HomePageEndpointCard {
 }
 
 export interface LinkMetadata {
-  favs: UserFavorite[],
+  favs: IHydrationResults[],
   shortcuts: HomeCardShortcut[]
 }
+

@@ -36,8 +36,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public isMobile$: Observable<boolean>;
   public sideNavMode$: Observable<string>;
   public sideNavMode: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean; }>;
-  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object; }>;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }>;
+  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object, }>;
   private dashboardState$: Observable<DashboardState>;
   public noMargin$: Observable<boolean>;
   private closeSub: Subscription;

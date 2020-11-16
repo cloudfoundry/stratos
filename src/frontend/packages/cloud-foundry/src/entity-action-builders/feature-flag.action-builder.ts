@@ -6,7 +6,7 @@ export interface FeatureFlagActionBuilders extends OrchestratedActionBuilders {
     endpointGuid,
     paginationKey?,
   ) => GetAllFeatureFlags;
-};
+}
 
 export const featureFlagActionBuilders: FeatureFlagActionBuilders = {
   getMultiple: (

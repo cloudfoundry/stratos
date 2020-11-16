@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -28,17 +28,13 @@ export class TableCellServiceComponent extends TableCellCustom<APIResource<IServ
   // tslint:disable-next-line:ban-types
   isUserProvidedServiceInstance: Boolean;
 
-  @Input() row: APIResource<IServiceInstance>;
-  @Input() entityKey: string;
-
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
-  }
+  };
   brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.SCOPE,
     altScope: true
-  }
-
+  };
 
   ngOnInit() {
     this.isUserProvidedServiceInstance =

@@ -21,7 +21,7 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
     endpointGuid: string,
     guid: string,
     data: IUserProvidedServiceInstanceData,
-    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) => CreateUserProvidedServiceInstance,
+    proxyPaginationEntityConfig?: EntityCatalogEntityConfig) => CreateUserProvidedServiceInstance;
   remove: (
     guid: string,
     endpointGuid: string,

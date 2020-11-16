@@ -14,6 +14,7 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
+import { FavoritesConfigMapper } from '../../../store/src/favorite-config-mapper';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';

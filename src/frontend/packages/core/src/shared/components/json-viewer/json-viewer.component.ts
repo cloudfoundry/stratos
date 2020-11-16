@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 
 export interface Segment {
   key: string;
@@ -22,7 +22,7 @@ export class JsonViewerComponent implements OnChanges {
   // Whether to expand all initially
   @Input() expanded = true;
   /**
-   * @deprecated It will be always true and deleted in version 3.0.0
+   * deprecated It will be always true and deleted in version 3.0.0
    */
   @Input() cleanOnChange = true;
 
@@ -52,7 +52,7 @@ export class JsonViewerComponent implements OnChanges {
     }
 
     if (typeof this.json === 'object') {
-      Object.keys(this.json).forEach( key => {
+      Object.keys(this.json).forEach(key => {
         this.segments.push(this.parseKeyValue(key, this.json[key]));
       });
     } else {

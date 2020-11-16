@@ -27,10 +27,10 @@ export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
             ...response.report.popeye
           }
         }
-      }
+      };
       // Make the response easier to render
       response.report.popeye.sanitizers = response.report.popeye.sanitizers.reduce((ss, oldS) => {
-        const s = { ...oldS }
+        const s = { ...oldS };
         const groups = [];
         let totalIssues = 0;
         if (s.issues) {

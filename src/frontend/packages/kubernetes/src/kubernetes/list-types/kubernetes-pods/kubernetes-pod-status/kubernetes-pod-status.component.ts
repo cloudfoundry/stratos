@@ -13,7 +13,6 @@ export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod>
 
   public style = 'border-success';
 
-  private pRow: KubernetesPod;
   @Input('row')
   get row(): KubernetesPod { return this.pRow; }
   set row(row: KubernetesPod) {

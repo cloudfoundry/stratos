@@ -62,14 +62,14 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   validateNameTaken = (spaceName: string = null) => {
     return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
-  }
+  };
 
   validate = () => !!this.createSpaceForm && this.createSpaceForm.valid;
 
   spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } =>
+    return (formField: AbstractControl): { [key: string]: any, } =>
       !this.validateNameTaken(formField.value) ? { spaceNameTaken: { value: formField.value } } : null;
-  }
+  };
 
   submit: StepOnNextFunction = () => {
     const id = `${this.orgGuid}-${this.spaceName.value}`;
@@ -86,7 +86,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       map(([, newS]) => newS),
       this.map('Failed to create space: ')
     );
-  }
+  };
 
   ngOnDestroy() {
     this.quotaSubscription.unsubscribe();

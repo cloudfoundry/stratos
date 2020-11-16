@@ -42,12 +42,12 @@ interface CustomHelmReleaseGraphNode {
 }
 
 interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
-  missing: boolean,
-  dash: number,
-  fill: string,
-  text: string,
-  icon: any,
-  alerts: [],
+  missing: boolean;
+  dash: number;
+  fill: string;
+  text: string;
+  icon: any;
+  alerts: [];
   alertSummary: {};
 }
 

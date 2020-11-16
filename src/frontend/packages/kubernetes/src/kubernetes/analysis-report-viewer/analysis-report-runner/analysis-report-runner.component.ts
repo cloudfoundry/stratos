@@ -34,7 +34,7 @@ export class AnalysisReportRunnerComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.namespace) {
-      this.analyzers$ = this.analysisService.namespaceAnalyzers$
+      this.analyzers$ = this.analysisService.namespaceAnalyzers$;
     } else {
       this.analyzers$ = this.analysisService.analyzers$;
     }

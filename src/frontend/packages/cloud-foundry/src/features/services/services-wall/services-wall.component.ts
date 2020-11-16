@@ -36,7 +36,7 @@ export class ServicesWallComponent implements OnDestroy {
   canCreateServiceInstance: CfCurrentUserPermissions;
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
-  location: { [CSI_CANCEL_URL]: string };
+  location: { [CSI_CANCEL_URL]: string, };
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
@@ -62,7 +62,7 @@ export class ServicesWallComponent implements OnDestroy {
 
     this.location = {
       [CSI_CANCEL_URL]: `/services`
-    }
+    };
   }
 
   ngOnDestroy(): void {
