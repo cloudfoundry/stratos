@@ -142,10 +142,10 @@ export class UserFavoriteManager {
           if (f.endpointId === endpointID && f.entityId) {
             result.push(f);
           }
-        })
+        });
         return result;
       })
-    )
+    );
   }
 
   public getEndpointIDFromFavoriteID(id: string): string {
