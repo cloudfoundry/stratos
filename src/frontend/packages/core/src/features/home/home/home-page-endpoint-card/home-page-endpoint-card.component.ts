@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Compiler,
   Component,
+  ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
   Injector,
@@ -25,6 +26,9 @@ import { SidePanelMode, SidePanelService } from '../../../../shared/services/sid
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
+import {
+  DefaultEndpointHomeComponent,
+} from './../default-endpoint-home-component/default-endpoint-home-component.component';
 
 const MAX_FAVS_NORMAL = 15;
 const MAX_FAVS_COMPACT = 5;
@@ -95,11 +99,16 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Should the Home Card use the whole width, or do we show the links panel as well?
   fullView = false;
 
+  // Does the endpoint haev entities that can be favourited
+  // If not, then don't show favorites, as there can never be any
+  hasFavEntities = false;
+
   constructor(
     private userFavoriteManager: UserFavoriteManager,
     private sidePanelService: SidePanelService,
     private compiler: Compiler,
     private injector: Injector,
+    private componentFactoryResolver: ComponentFactoryResolver,
   ) {
     this.status$ = this.status.asObservable();
   }
@@ -111,10 +120,12 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.createCard(endpointEntity);
     } else {
       console.warn(`No endpoint home card for ${this.endpoint.guid}`);
+      this.createCard(undefined);
     }
   }
 
   ngOnInit() {
+    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type);
     // Favorites for this endpoint
     this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid);
 
@@ -161,6 +172,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
             this.showShortcutsOnSide = false;
           }
         }
+
+        // If nothing can be favorited and there are no shotrcuts then hide the right-hand side panel
+        if (!this.hasFavEntities && shortcuts.length === 0) {
+          setTimeout(() => this.fullView = true, 0);
+        }
         return {
           favs,
           shortcuts
@@ -188,7 +204,14 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   async createCard(endpointEntity: any) {
     this.customCard.clear();
-    const component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+
+    let component;
+    if (!endpointEntity) {
+      component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
+    } else {
+      component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+    }
+
     this.ref = this.customCard.createComponent(component);
     this.ref.instance.endpoint = this.endpoint;
     this.ref.instance.layout = this._layout;
@@ -211,7 +234,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next();
         setTimeout(() => this.status.next(Status.OK), 0);
-        this.sub.unsubscribe();
       }, () => {
         this.loaded.next();
         this.status.next(Status.Error);

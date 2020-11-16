@@ -61,8 +61,8 @@ export function userFavoriteGroupsReducer(
 function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
   const { favorites } = action;
   return favorites.reduce((favoriteGroups, favorite) => {
-    const userFavorute = deriveEndpointFavoriteFromFavorite(favorite);
-    favoriteGroups[userFavorute.guid] = addFavoriteToGroup(favoriteGroups[userFavorute.guid], userFavorute);
+    const userFavorite = deriveEndpointFavoriteFromFavorite(favorite);
+    favoriteGroups[userFavorite.guid] = addFavoriteToGroup(favoriteGroups[userFavorite.guid], favorite);
     return favoriteGroups;
   }, {} as IUserFavoritesGroups);
 }
