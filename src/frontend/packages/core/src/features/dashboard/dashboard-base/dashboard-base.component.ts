@@ -17,7 +17,7 @@ import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-ca
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
-import { SidePanelService } from '../../../shared/services/side-panel.service';
+import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
@@ -52,6 +52,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
 
   @ViewChild('content') public content;
+
+  // Slide-in side panel mode
+  sidePanelMode: SidePanelMode = SidePanelMode.Modal;
 
   constructor(
     public pageHeaderService: PageHeaderService,

@@ -23,14 +23,16 @@ class RenderableRecent {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
     this.icon = catalogEntity.definition.icon;
     this.iconFont = catalogEntity.definition.iconFont;
-
+    if (!entity.endpointId) {
+      console.error(`Entity ${entity.guid} does not contain a value for endpointId - recent metadata is malformed`);
+    }
     if (entity.entityType === endpointEntityType) {
       this.subText$ = observableOf(entity.prettyType);
     } else {
       this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          if (Object.keys(endpoints).length > 1) {
-            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
+          if (entity.endpointId && Object.keys(endpoints).length > 1) {
+            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
           }
           return entity.prettyType;
         })

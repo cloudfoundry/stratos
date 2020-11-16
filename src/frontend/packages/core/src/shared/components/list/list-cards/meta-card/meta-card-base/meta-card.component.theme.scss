@@ -10,4 +10,22 @@
   .meta-card__header__popup-separator {
     background-color: mat-color($foreground, divider);
   }
+
+  .mat-card.meta-card__plain {
+    border: 1px solid mat-color($foreground, divider);
+
+    .meta-card__title {
+      margin: 0;
+
+      h3 {
+        font-size: 14px;
+      }
+      .fav-meta-card__type {
+        font-size: 12px;
+      }
+    }
+    .meta-card__favorite {
+      align-self: center;
+    }
+  }
 }
