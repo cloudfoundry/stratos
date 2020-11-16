@@ -243,7 +243,7 @@ func NewConfigFileLookup(path string) env.Lookup {
 		return env.NoopLookup
 	}
 
-	log.Infof("Loaded configuration from file: %s", path)
+	log.Debugf("Loaded configuration from file: %s", path)
 
 	return func(k string) (string, bool) {
 		v, ok := loadedConfig[k]

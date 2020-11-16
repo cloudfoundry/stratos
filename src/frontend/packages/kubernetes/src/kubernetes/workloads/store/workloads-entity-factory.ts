@@ -58,7 +58,7 @@ entityCache[helmReleaseHistoryEntityType] = new KubernetesEntitySchema(
 Object.entries(entityCache).forEach(([key, workloadSchema]) => addKubernetesEntitySchema(key, workloadSchema));
 
 
-export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema; } => {
+export const createHelmReleaseEntities = (): { [cacheName: string]: EntitySchema, } => {
   return entityCache;
 };
 

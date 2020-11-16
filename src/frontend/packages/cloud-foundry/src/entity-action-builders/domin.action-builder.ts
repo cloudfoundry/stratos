@@ -19,7 +19,7 @@ export interface DomainActionBuilders extends OrchestratedActionBuilders {
     paginationKey?: string,
     meta?: CFBasePipelineRequestActionMeta
   ) => GetAllOrganizationDomains;
-};
+}
 
 export const domainActionBuilders: DomainActionBuilders = {
   get: (
@@ -43,5 +43,3 @@ export const domainActionBuilders: DomainActionBuilders = {
     }
   ) => new GetAllOrganizationDomains(orgGuid, endpointGuid, paginationKey, meta.includeRelations, meta.populateMissing)
 };
-
-

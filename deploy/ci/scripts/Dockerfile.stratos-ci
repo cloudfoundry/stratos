@@ -1,7 +1,7 @@
-# Publihsed as splatform/stratos-ci-concourse
+# Published as ghcr.io/cf-stratos/stratos-ci-concourse
 
 # Use:
-# docker build -f Dockerfile.stratos-ci . -t splatform/stratos-ci-concourse:latest
+# docker build -f Dockerfile.stratos-ci . -t ghcr.io/cf-stratos/stratos-ci-concourse:latest
 
 # Default Image used to run tasks - contains Helm
 

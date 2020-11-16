@@ -38,6 +38,14 @@ type mockPGStore struct {
 	StoredSession *sessions.Session
 }
 
+func (m *mockPGStore) New(r *http.Request, name string) (*sessions.Session, error) {
+	session := &sessions.Session{
+		Values:  make(map[interface{}]interface{}),
+		Options: &sessions.Options{},
+	}
+	return session, nil
+}
+
 func (m *mockPGStore) Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error {
 	m.StoredSession = session
 	return nil

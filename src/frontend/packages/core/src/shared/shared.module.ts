@@ -34,9 +34,6 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
-import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
-import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
@@ -195,9 +192,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
-    FavoritesGlobalListComponent,
-    FavoritesMetaCardComponent,
-    FavoritesEntityListComponent,
     MultilineTitleComponent,
     TileSelectorComponent,
     MarkdownPreviewComponent,
@@ -289,8 +283,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
-    FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent,
     MultilineTitleComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,

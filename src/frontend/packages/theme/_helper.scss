@@ -33,11 +33,37 @@ $oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-w
 }
 
 @function stratos-default-dark-theme() {
-  @return stratos-theme-helper($oss-dark-theme);
+  $theme: stratos-theme-helper($oss-dark-theme);
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: #333,
+    header-border-color: #555,   
+    user-avatar-header-invert-colors: false,
+    user-avatar-header-background-color: #888,
+  ));
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+
+  @return $theme;  
+
 }
 
 @function stratos-default-light-theme() {
-  @return stratos-theme-helper($oss-theme);
+  $theme: stratos-theme-helper($oss-theme);
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: #fff,
+    header-foreground-color: #444,
+    header-border-color: #d8d8d8,   
+    user-avatar-header-invert-colors: false,
+    user-avatar-header-background-color: #888,
+  ));
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+
+  @return $theme;  
 }
 
 // Creates the app theme and applies it to the application
@@ -75,6 +101,7 @@ $oss-dark-theme: mat-dark-theme($oss-dark-primary, $oss-dark-accent, $oss-dark-w
       ansi-colors: $ansi-color-palette,
       header-background-color: mat-color($primary),
       header-foreground-color: mat-contrast($primary, 500),
+      header-border-color: none,
       stratos-title-show-text: false,
       // Does the header background color span across the top, or is the sidenav background color used for the top-left portion
       header-background-span: false,

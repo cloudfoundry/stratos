@@ -29,7 +29,7 @@ import { WorkloadsStoreModule } from './store/workloads.store.module';
 import { UpgradeReleaseComponent } from './upgrade-release/upgrade-release.component';
 import { WorkloadsRouting } from './workloads.routing';
 
-// Default config for the Monaco edfior
+// Default config for the Monaco editor
 const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: '/core/assets', // configure base path for monaco editor
   defaultOptions: { scrollBeyondLastLine: false }

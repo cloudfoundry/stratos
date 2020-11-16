@@ -152,7 +152,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         stratosEntityCatalog.endpoint.store.getPaginationMonitor().currentPage$,
         stratosEntityCatalog.endpoint.store.getPaginationMonitor().pagination$
       ]).pipe(
-        debounceTime(100),// This can get pretty spammy, to help protect resetEndpointTypeFilter allow a pause
+        debounceTime(100), // This can get pretty spammy, to help protect resetEndpointTypeFilter allow a pause
         filter(([endpoints, pagination]) => !!endpoints),
         map(([endpoints, pagination]) => {
           // Provide a list of endpoint types only if there are more than two registered endpoint types

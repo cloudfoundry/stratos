@@ -11,6 +11,18 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "moment-timezone",
+              "js-yaml",
+              "webcola",
+              "dagre",
+              "lodash/isEqual",
+              "ajv",
+              "lodash/filter",
+              "lodash/map",
+              "lodash/uniqueId",
+              "lodash/cloneDeep"
+            ],
             "customWebpackConfig": {
               "path": "./dist-devkit/build/main.js"
             },

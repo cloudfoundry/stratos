@@ -62,6 +62,7 @@ describe('API Keys -', () => {
         page.addKeyButton().click();
 
         const dialog = new ApiKeyAddDialogPo();
+        dialog.waitUntilShown('API Key Add Dialog');
         expect(dialog.isDisplayed()).toBeTruthy();
         expect(dialog.canClose()).toBeTruthy();
         expect(dialog.canCreate()).toBeFalsy();

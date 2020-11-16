@@ -4,6 +4,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { CoreModule } from './core/core.module';
+import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { LoggedInService } from './logged-in.service';
 
 describe('LoggedInService', () => {
@@ -12,6 +13,7 @@ describe('LoggedInService', () => {
     TestBed.configureTestingModule({
       providers: [
         LoggedInService,
+        CurrentUserPermissionsService,
       ],
       imports: [
         CoreModule,

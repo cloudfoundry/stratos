@@ -1,26 +1,3 @@
-@import '../../../../sass/mixins';
-$page-padding: 20px;
-.favorites-list {
-  display: flex;
-  flex: 2;
-  flex-direction: column;
-  &__header {
-    align-items: center;
-    display: flex;
-    margin-bottom: 12px;
-  }
-}
-.recent-list {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  margin: 0 -#{$page-padding} -#{$page-padding};
-  padding: 20px;
-  @include breakpoint(tablet) {
-    margin: -#{$page-padding} -#{$page-padding} -#{$page-padding} $page-padding;
-  }
-}
-
 .home-page {
   display: flex;
   flex-direction: column;
@@ -36,14 +13,52 @@ $page-padding: 20px;
       margin-bottom: 12px;
     }
   }
+  &__card {
+    height: 100%;
+    &:last-child {
+      margin-bottom: 20px;
+    }
+  }
+  // Grid layout
+  &__list {
+    display: grid;
+    flex: 1;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    grid-auto-rows: min-content;
+  }
+  &__list-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  &__list-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 
-  @include breakpoint(tablet) {
-    flex-direction: row;
+.layout-menu {
+  display: flex;
+  &__label {
+    flex: 1
+  }
+  mat-icon.layout-menu__icon {
+    flex: 0 0 20px;
+    display: flex;
+    align-self: center;
+    margin: 0 0 0 10px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    opacity: 0;
+  }
+  mat-icon.layout-menu__icon.layout-menu__tick {
+    opacity: 1;
   }
 
-  &__scroller {
-    margin: 0 -#{$page-padding} -#{$page-padding};
-    overflow: auto;
-    padding: 0 $page-padding $page-padding;
+  &__tick {
+    font-weight: bold;
+  }
+  &__sep {
+    margin: 10px 0;
   }
 }

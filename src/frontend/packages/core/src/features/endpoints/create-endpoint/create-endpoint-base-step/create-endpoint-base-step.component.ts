@@ -95,7 +95,7 @@ export class CreateEndpointBaseStepComponent {
       }));
     }
   }
-  constructor(public store: Store<GeneralEntityAppState>, ) {
+  constructor(public store: Store<GeneralEntityAppState>) {
     // Need to filter the endpoint types on the tech preview flag
     this.tileSelectorConfig$ = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types

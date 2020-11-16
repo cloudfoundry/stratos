@@ -79,4 +79,12 @@
   &.smaller {
     @include create(160px, 60px);
   }
+
+  &.compact {
+    @include create(160px, 60px);
+    h3 {
+      font-size: 14px;
+      margin: 10px;
+    }
+  }
 }

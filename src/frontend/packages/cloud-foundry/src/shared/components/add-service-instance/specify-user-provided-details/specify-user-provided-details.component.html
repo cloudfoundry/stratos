@@ -41,7 +41,7 @@
     </mat-chip-list>
   </mat-form-field>
   <mat-form-field class="">
-    <textarea matInput formControlName="credentials" placeholder="Credentials" matAutosizeMinRows="2"
+    <textarea matInput formControlName="credentials" placeholder="Credentials (JSON)" matAutosizeMinRows="2"
       matAutosizeMaxRows="5"></textarea>
     <mat-error *ngIf="createEditServiceInstance.controls.credentials.hasError('notValidJson')">
       Not valid JSON.

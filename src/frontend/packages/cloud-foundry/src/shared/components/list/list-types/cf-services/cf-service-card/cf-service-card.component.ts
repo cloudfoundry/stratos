@@ -32,10 +32,10 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   tags: AppChip<ServiceTag>[] = [];
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
-  }
+  };
   brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.SCOPE
-  }
+  };
 
   @Input() disableCardClick = false;
 
@@ -69,5 +69,5 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({
       path: ['marketplace', this.serviceEntity.entity.cfGuid, this.serviceEntity.metadata.guid]
-    }))
+    }));
 }

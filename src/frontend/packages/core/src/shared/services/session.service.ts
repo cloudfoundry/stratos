@@ -15,6 +15,6 @@ export class SessionService {
     return this.store.select(selectSessionData()).pipe(
       first(),
       map(sessionData => sessionData.config.enableTechPreview || false)
-    )
+    );
   }
 }

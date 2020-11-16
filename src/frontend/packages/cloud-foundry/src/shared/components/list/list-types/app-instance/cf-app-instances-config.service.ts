@@ -235,7 +235,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       switchMap(([org, space]) =>
         cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
       )
-    )
+    );
   }
 
   getGlobalActions = () => null;

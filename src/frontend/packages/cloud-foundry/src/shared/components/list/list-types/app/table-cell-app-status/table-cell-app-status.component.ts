@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
+import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
@@ -13,12 +13,11 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
 })
-export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
 
-  @Input() row;
   applicationState: ApplicationStateData;
   @Input('config')
-  set config(value: { hideIcon: boolean, initialStateOnly: boolean }) {
+  set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     value = value || {
       hideIcon: false,
       initialStateOnly: false
@@ -28,14 +27,9 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
   public fetchAppState$: Observable<ApplicationStateData>;
   public hideIcon = false;
-  public initialStateOnly = false
-    ;
-  constructor(
-    private store: Store<CFAppState>,
-    private appStateService: ApplicationStateService,
+  public initialStateOnly = false;
 
-
-  ) {
+  constructor(private appStateService: ApplicationStateService) {
     super();
   }
 

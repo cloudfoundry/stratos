@@ -21,7 +21,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 
   @Input() endpoint;
   @Input() path;
-  @Input() prompt = 'Overlay Analysis';
+  @Input() prompt = 'Overlay';
   @Input() allowNone = true;
   @Input() autoSelect;
 

@@ -41,7 +41,7 @@ export interface KubePodActionBuilders extends OrchestratedActionBuilders {
     podName: string,
     kubeGuid: string,
     extraArgs: { namespace: string, }
-  ) => GetKubernetesPod,
+  ) => GetKubernetesPod;
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
