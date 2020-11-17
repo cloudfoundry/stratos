@@ -21,6 +21,11 @@ type GeneratedPlugin struct {
 	routePlugin      func() (interfaces.RoutePlugin, error)
 }
 
+var authTypeToConnectTypeMap = map[string]string{
+	interfaces.AuthTypeHttpBasic: interfaces.AuthConnectTypeCreds,
+	interfaces.AuthTypeBearer:    interfaces.AuthConnectTypeBearer,
+}
+
 func (gp GeneratedPlugin) Init() error { return gp.initMethod() }
 func (gp GeneratedPlugin) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return gp.middlewarePlugin()
@@ -35,7 +40,7 @@ func (gp GeneratedPlugin) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 type GeneratedEndpointPlugin struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
-	authType     string
+	authTypes    map[string]string
 }
 
 func (gep GeneratedEndpointPlugin) GetType() string {
@@ -57,16 +62,24 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 		return nil, false, err
 	}
 
-	connectType := params.ConnectType
+	authType, ok := gep.authTypes[cnsiRecord.SubType]
+	if !ok {
+		return nil, false, fmt.Errorf("Unknown subtype %q for endpoint type %q", cnsiRecord.SubType, gep.GetType())
+	}
+
+	expectedConnectType, ok := authTypeToConnectTypeMap[authType]
+	if !ok {
+		return nil, false, fmt.Errorf("Unknown authentication type %q for plugin %q", authType, gep.GetType())
+	}
+
+	if expectedConnectType != params.ConnectType {
+		return nil, false, fmt.Errorf("Only %q connect type is supported for %q.%q endpoints", expectedConnectType, gep.GetType(), cnsiRecord.SubType)
+	}
 
 	var tr *interfaces.TokenRecord
 
-	switch connectType {
+	switch params.ConnectType {
 	case interfaces.AuthConnectTypeCreds:
-		// if connectType != interfaces.AuthTypeHttpBasic {
-		// 	return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.GetType(), interfaces.AuthConnectTypeCreds)
-		// }
-
 		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return nil, false, errors.New("Need username and password")
 		}
@@ -80,19 +93,14 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 			RefreshToken: params.Username,
 		}
 	case interfaces.AuthConnectTypeBearer:
-		// if connectType != interfaces.AuthTypeBearer {
-		// 	return nil, false, fmt.Errorf("Plugin %s supports only '%s' connect type", gep.endpointType, interfaces.AuthConnectTypeCreds)
-		// }
-
 		authString := ec.FormValue("token")
 		base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 		tr = &interfaces.TokenRecord{
-			AuthType:  interfaces.AuthTypeBearer,
-			AuthToken: base64EncodedAuthString,
+			AuthType:     interfaces.AuthTypeBearer,
+			AuthToken:    base64EncodedAuthString,
+			RefreshToken: "token", // DB needs a non-empty value
 		}
-	default:
-		return nil, false, fmt.Errorf("Only '%s' authentication is supported for %s endpoints", gep.authType, gep.GetType())
 	}
 
 	return tr, false, nil
@@ -120,8 +128,8 @@ func (gep GeneratedEndpointPlugin) UpdateMetadata(info *interfaces.Info, userGUI
 }
 
 type PluginConfig struct {
-	Name     string `yaml:"name"`
-	AuthType string `yaml:"auth_type"`
+	Name      string            `yaml:"name"`
+	AuthTypes map[string]string `yaml:"auth_types"`
 }
 
 func MakePluginsFromConfig() {
@@ -142,11 +150,16 @@ func MakePluginsFromConfig() {
 	}
 
 	for _, plugin := range config {
+		if len(plugin.Name) == 0 {
+			log.Errorf("Plugin must have a name")
+			return
+		}
+
 		log.Debugf("Generating plugin %s", plugin.Name)
 
 		gep := GeneratedEndpointPlugin{}
 		gep.endpointType = plugin.Name
-		gep.authType = plugin.AuthType
+		gep.authTypes = plugin.AuthTypes
 
 		gp := GeneratedPlugin{}
 		gp.initMethod = func() error { return nil }
