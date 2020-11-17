@@ -98,7 +98,7 @@ export class CatalogTabComponent implements OnInit {
 
   ngOnInit() {
     const { repo } = this.activatedRoute.snapshot.params;
-    if (repo.length > 0) {
+    if (repo &&  repo.length > 0) {
       setTimeout(() => this.filterCharts(repo), 0);
     }
   }
