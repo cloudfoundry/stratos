@@ -2,6 +2,11 @@ import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entit
 import { IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
 
+// Map of endpoint ID to current namespace for that endpoint
+export interface KubernetesCurrentNamespace {
+  [endpoint: string]: string;
+}
+
 export interface KubernetesInfo {
   nodes: {};
   pods: {};
@@ -42,9 +47,11 @@ export interface KubeResourceEntityDefinition {
   iconFont?: string;
   type: string;
   kubeCatalogEntity: string;
-  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity,
+  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity;
   route?: string;
   listColumns?: SimpleKubeListColumn[];
+  // Should this entity be hidden in the auto-generated navigation?
+  hidden?: boolean;
 }
 
 export interface KubeService extends BasicKubeAPIResource {

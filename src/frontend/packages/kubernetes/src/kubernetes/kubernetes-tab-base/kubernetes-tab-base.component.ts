@@ -52,7 +52,7 @@ export class KubernetesTabBaseComponent implements OnInit {
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Cluster' },
       { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
-      { link: 'namespaces', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
+      { link: 'resource/namespace', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
       ...this.getTabsFromEntityConfig(false),
       { link: '-', label: 'Resources' },
       ...this.getTabsFromEntityConfig(true)
@@ -70,7 +70,7 @@ export class KubernetesTabBaseComponent implements OnInit {
       const catalogEntity = kubeEntityCatalog[key];
       if (catalogEntity) {
         const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-        if (defn.apiNamespaced === namespaced) {
+        if (defn.apiNamespaced === namespaced && !defn.hidden) {
           tabsFromRouterConfig.push({
             link: defn.route || `resource/${key}`,
             label: defn.labelTab || defn.labelPlural,
@@ -79,7 +79,7 @@ export class KubernetesTabBaseComponent implements OnInit {
           });
         }
       }
-    })
+    });
 
     tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
     return tabsFromRouterConfig;
@@ -99,7 +99,7 @@ export class KubernetesTabBaseComponent implements OnInit {
           const defn = catalogEntity.definition as KubeResourceEntityDefinition;
           if (defn.apiNamespaced === namespaced) {
             tabsFromRouterConfig.push({
-              link: defn.route ? defn.route: `resource/${r.path}`,
+              link: defn.route ? defn.route : `resource/${r.path}`,
               label: defn.labelTab || defn.labelPlural,
               icon: defn.icon,
               iconFont: defn.iconFont,
@@ -107,7 +107,7 @@ export class KubernetesTabBaseComponent implements OnInit {
           }
         }
       }
-    })
+    });
 
     tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
     return tabsFromRouterConfig;

@@ -26,6 +26,7 @@ import {
   KubedashConfigurationComponent,
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
+import { KubernetesListConfigService } from './kubernetes-list-service';
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
@@ -101,6 +102,7 @@ import {
   KubernetesPodStatusComponent,
 } from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { KubernetesPodsListConfig } from './list-types/kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import {
   KubeServiceCardComponent,
@@ -234,5 +236,10 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     AnalysisStatusCellComponent,
   ]
 })
-export class KubernetesModule { }
+export class KubernetesModule {
+
+  constructor(listConfigService: KubernetesListConfigService) {
+    listConfigService.set('pods', new KubernetesPodsListConfig());
+  }
+}
 

@@ -31,7 +31,6 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
   public showNamespaceLink = true;
 
   constructor(
-    private kubeId: string,
     hideColumns: string[] = [
       BaseKubernetesPodsListConfigService.namespaceColumnId,
       BaseKubernetesPodsListConfigService.nodeColumnId
@@ -74,7 +73,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'metadata.namespace',
-        getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
+        getLink: row => this.showNamespaceLink ? `/kubernetes/${row.metadata.kubeId}/namespaces/${row.metadata.namespace}` : null
       },
       sort: {
         type: 'sort',
@@ -88,7 +87,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: BaseKubernetesPodsListConfigService.nodeColumnId, headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
-        getLink: pod => `/kubernetes/${this.kubeId}/nodes/${pod.spec.nodeName}/summary`
+        getLink: pod => `/kubernetes/${pod.metadata.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
@@ -159,9 +158,23 @@ export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfi
     store: Store<AppState>,
     kubeId: BaseKubeGuid,
   ) {
-    super(kubeId.guid, []);
+    super([]);
     this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
+
+}
+
+
+export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
+  private podsDataSource: KubernetesPodsDataSource;
+
+  constructor() {
+    super([]);
+    delete(this.getDataSource);
+    console.log(this);
+  }
+
+  getDataSource = () => this.podsDataSource;
 
 }
 

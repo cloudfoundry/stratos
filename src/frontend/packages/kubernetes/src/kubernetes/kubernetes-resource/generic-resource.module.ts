@@ -6,12 +6,14 @@ import { SharedModule } from '../../../../core/src/public-api';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { MDAppModule } from './../../../../core/src/core/md.module';
 import { KubernetesResourceRoutingModule } from './generic-resource.routing';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list/kubernetes-resource-list.component';
 
 @NgModule({
   imports: [
     CoreModule,
+    MDAppModule,
     CommonModule,
     SharedModule,
     KubernetesResourceRoutingModule,

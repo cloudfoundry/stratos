@@ -197,7 +197,7 @@ class KubeResourceEntityHelper {
       schema: kubernetesEntityFactory(defn.type),
       iconFont: defn.iconFont || 'stratos-icons',
       labelPlural: defn.labelPlural || `${defn.label}s`
-    }
+    };
 
     if (defn.getKubeCatalogEntity) {
       console.log(defn);
@@ -292,7 +292,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     ...generateKubeResourceEntities(endpointDefinition),
     generateDeploymentsEntity(endpointDefinition),
     generateNodesEntity(endpointDefinition),
-    generateNamespacesEntity(endpointDefinition),
+    // generateNamespacesEntity(endpointDefinition),
     generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
     generateAnalysisReportsEntity(endpointDefinition),
@@ -368,7 +368,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
             name: namespace.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
+        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}`,
         getGuid: metadata => metadata.guid,
       }
     });
@@ -433,7 +433,9 @@ function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
     entity.kubeGuid,
     entity
   );
-  
+}
+
+
 // =============================================================================================================
 // Kubernetes Resources using generic resource pattern
 // =============================================================================================================
@@ -441,6 +443,27 @@ function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
 function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensionDefinition) {
 
   const entities = new KubeResourceEntityHelper(endpointDefinition);
+
+  entities.add<KubernetesNamespace>({
+    type: kubernetesNamespacesEntityType,
+    icon: 'namespace',
+    label: 'Namespace',
+    apiVersion: '/api/v1',
+    apiName: 'namespaces',
+    apiNamespaced: false,
+    kubeCatalogEntity: 'namespace',
+    hidden: true,
+    getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
+      definition, { actionBuilders: kubeNamespaceActionBuilders }
+    ),
+    listColumns: [
+      {
+        header: 'Status',
+        field: 'status.phase',
+        sort: true
+      }
+    ]
+  });
 
   entities.add<KubernetesPod>({
     type: kubernetesPodsEntityType,
@@ -450,7 +473,7 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     apiName: 'pods',
     apiNamespaced: true,
     kubeCatalogEntity: 'pod',
-    route: 'pods',
+    // route: 'pods',
     getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(
       definition, { actionBuilders: kubePodActionBuilders }
     )
