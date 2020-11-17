@@ -1,11 +1,11 @@
 <div class="organizations">
   <app-page-sub-nav>
     <button class="create" mat-button name="add-org" *ngIf="canAddOrg$ | async"
-      routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
+      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/add-org">
       <span class="create-button-contents">
         <mat-icon>add</mat-icon> Create
       </span>
     </button>
   </app-page-sub-nav>
-  <app-list></app-list>
+  <app-list-view [config]="provider"></app-list-view>
 </div>

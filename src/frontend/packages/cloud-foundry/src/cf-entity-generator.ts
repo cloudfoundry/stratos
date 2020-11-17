@@ -1254,7 +1254,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           ['Created', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -1329,3 +1329,4 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
   );
   return cfEntityCatalog.metric;
 }
+
