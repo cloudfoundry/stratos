@@ -60,9 +60,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: new UserFavorite('endpoint1', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: []
         }
       }
@@ -79,9 +78,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {},
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -100,9 +98,8 @@ describe('userFavoritesReducer', () => {
         ...defaultState,
         groups: {
           [endpointFav.guid]: {
+            endpoint: {} as UserFavorite,
             ethereal: false,
-            search: null,
-            typeFilter: null,
             entitiesIds: []
           }
         }
@@ -114,9 +111,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {},
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -151,26 +147,23 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: new UserFavorite('endpoint1', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
         },
         [endpointFav2.guid]: {
+          endpoint: new UserFavorite('endpoint2', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav2.guid,
             fav21.guid
           ]
         },
         [endpoint3Fav.guid]: {
+          endpoint: {},
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav3.guid
           ]
@@ -188,9 +181,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {} as UserFavorite,
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -202,9 +194,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {},
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
           ]
         }
@@ -221,9 +212,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {} as UserFavorite,
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
