@@ -200,7 +200,6 @@ class KubeResourceEntityHelper {
     };
 
     if (defn.getKubeCatalogEntity) {
-      console.log(defn);
       kubeEntityCatalog[defn.kubeCatalogEntity] = defn.getKubeCatalogEntity(d);
     } else {
       kubeEntityCatalog[defn.kubeCatalogEntity] = new StratosCatalogEntity<IFavoriteMetadata, T, KubeResourceActionBuilders>(d, {
@@ -473,7 +472,7 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     apiName: 'pods',
     apiNamespaced: true,
     kubeCatalogEntity: 'pod',
-    // route: 'pods',
+    listConfig: 'k8s-pods',
     getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(
       definition, { actionBuilders: kubePodActionBuilders }
     )

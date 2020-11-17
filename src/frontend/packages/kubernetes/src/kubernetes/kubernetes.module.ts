@@ -239,7 +239,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
 export class KubernetesModule {
 
   constructor(listConfigService: KubernetesListConfigService) {
-    listConfigService.set('pods', new KubernetesPodsListConfig());
+    listConfigService.set('k8s-pods', new KubernetesPodsListConfig());
   }
 }
 

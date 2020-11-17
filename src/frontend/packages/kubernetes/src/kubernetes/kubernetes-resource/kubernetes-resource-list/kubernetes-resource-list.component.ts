@@ -104,10 +104,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
       action = catalogEntity.actions.getMultiple(this.kubeId.guid);
     }
     const provider = new ActionListConfigProvider<KubeAPIResource>(this.store, action);
-
-    console.log(this.entityCatalogKey);
-    let listConfig: any = this.listConfigService.get(this.entityCatalogKey);
-    console.log(listConfig);
+    const listConfigName = catalogEntity.definition ? catalogEntity.definition.listConfig : null;
+    let listConfig: any = this.listConfigService.get(listConfigName);
     if (!listConfig) {
       listConfig = {
         pageSizeOptions: defaultHelmKubeListPageSize,
@@ -123,7 +121,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
 
     provider.updateListConfig(listConfig);
-
     this.provider = provider;
   }
 

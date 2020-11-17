@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-
-import { IListConfig } from '../../../core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
 interface KubernetesListConfig {
-  [name: string]: IListConfig<any>;
+  [name: string]: ISimpleListConfig<any>;
 }
 
 // Holder for list configurations
@@ -17,11 +16,11 @@ export class KubernetesListConfigService {
 
   private configs: KubernetesListConfig = {};
 
-  set(name: string, config: IListConfig<any>) {
+  set(name: string, config: ISimpleListConfig<any>) {
     this.configs[name] = config;
   }
 
-  get<T= any>(name: string): IListConfig<T> {
-    return this.configs[name];
+  get<T= any>(name: string): ISimpleListConfig<T> {
+    return name ? this.configs[name] : undefined;
   }
 }

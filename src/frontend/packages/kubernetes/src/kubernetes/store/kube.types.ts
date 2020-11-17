@@ -52,6 +52,8 @@ export interface KubeResourceEntityDefinition {
   listColumns?: SimpleKubeListColumn[];
   // Should this entity be hidden in the auto-generated navigation?
   hidden?: boolean;
+  // Name fo a list config that can be obtained from the list config service
+  listConfig?: string;
 }
 
 export interface KubeService extends BasicKubeAPIResource {

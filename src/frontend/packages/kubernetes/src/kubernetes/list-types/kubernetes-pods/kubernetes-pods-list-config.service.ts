@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  IListDataSource,
-} from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { of } from 'rxjs';
 
 import {
@@ -10,7 +7,11 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import {
+  IListConfig,
+  ISimpleListConfig,
+  ListViewTypes,
+} from '../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/src/public-api';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
@@ -24,7 +25,7 @@ import { KubernetesPodContainersComponent } from './kubernetes-pod-containers/ku
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
-export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
+export abstract class BaseKubernetesPodsListConfigService implements ISimpleListConfig<KubernetesPod> {
 
   static namespaceColumnId = 'namespace';
   static nodeColumnId = 'node';
@@ -97,14 +98,6 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       cellFlex: '2',
     },
     {
-      columnId: 'ready',
-      headerCell: () => 'Ready',
-      cellDefinition: {
-        getValue: pod => `${pod.expandedStatus.readyContainers}/${pod.expandedStatus.totalContainers}`
-      },
-      cellFlex: '1'
-    },
-    {
       columnId: 'expandedStatus',
       headerCell: () => 'Status',
       cellComponent: KubernetesPodStatusComponent,
@@ -138,7 +131,6 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     filter: 'Filter by Name',
     noEntries: 'There are no pods'
   };
-  abstract getDataSource: () => IListDataSource<KubernetesPod>;
   expandComponent = KubernetesPodContainersComponent;
 
   getGlobalActions = () => null;
@@ -149,7 +141,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
 }
 
 @Injectable()
-export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService {
+export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
   private podsDataSource: KubernetesPodsDataSource;
 
   getDataSource = () => this.podsDataSource;
@@ -164,17 +156,8 @@ export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfi
 
 }
 
-
 export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
-  private podsDataSource: KubernetesPodsDataSource;
-
   constructor() {
     super([]);
-    delete(this.getDataSource);
-    console.log(this);
   }
-
-  getDataSource = () => this.podsDataSource;
-
 }
-
