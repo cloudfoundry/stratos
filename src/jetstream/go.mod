@@ -78,7 +78,7 @@ require (
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.5.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/apiextensions-apiserver v0.0.0 // indirect
