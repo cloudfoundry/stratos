@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
 import { GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
 
@@ -30,7 +30,7 @@ export interface GitSCM {
   getCommitURL(projectName: string, commitSha: string): Observable<string>;
   getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest>;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string>;
-  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]>;
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]>;
   parseErrorAsString(error: any): string;
 }
 

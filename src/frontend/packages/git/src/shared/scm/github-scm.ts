@@ -5,6 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
 import { getGitHubAPIURL } from '../github.helpers';
+import { GitSuggestedRepo } from './../../store/git.public-types';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
@@ -95,27 +96,27 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   // TODO: RC fix - these are links are web addresses... shouldn't use api urls... need to fetch using api.
   // fetch project/commit.. get url from there
   getCloneURL(projectName: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}`)
     );
   }
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(api => `https://github.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 
-  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]> {
     return this.getAPI().pipe(
       switchMap(api => {
         const prjParts = projectName.split('/');
@@ -133,7 +134,15 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
         );
       }),
       map(repos => {
-        return repos.map(item => item.full_name);
+        console.log(repos);
+        const ret = repos.map(item => {
+          return {
+            name: item.full_name,
+            private: item.private
+          };
+        });
+        console.log(ret);
+        return ret;
       })
     );
   }

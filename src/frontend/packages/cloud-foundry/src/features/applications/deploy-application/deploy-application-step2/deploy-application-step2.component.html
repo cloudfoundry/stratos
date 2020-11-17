@@ -18,7 +18,12 @@
                     [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required>
                   <!-- Repository auto complete helper -->
                   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-                    <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo">{{repo}}</mat-option>
+                    <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo.name">
+                      <div class="git-repo-suggestion">
+                        <div class="git-repo-suggestion__label">{{repo.name}}</div>
+                        <mat-icon class="git-repo-suggestion__icon" *ngIf="repo.private">lock</mat-icon>
+                      </div>
+                    </mat-option>
                   </mat-autocomplete>
 
                   <mat-error

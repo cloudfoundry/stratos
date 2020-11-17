@@ -36,3 +36,18 @@
     }
   }
 }
+
+.mat-option .git-repo-suggestion {
+  align-items: center;
+  display: flex;
+  &__label {
+    flex: 1;
+  }
+  &__icon {
+    font-size: 18px;
+    height: 18px;
+    line-height: 18px;
+    margin-right: 0;
+    width: 18px;
+  }
+}

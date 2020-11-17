@@ -48,6 +48,7 @@ import {
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
+import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
 
 
 
@@ -94,7 +95,7 @@ export class DeployApplicationStep2Component
   cachedSuggestions = {};
 
   // We don't have any repositories to suggest initially - need user to start typing
-  suggestedRepos$: Observable<string[]>;
+  suggestedRepos$: Observable<GitSuggestedRepo[]>;
 
   // Git URL
   gitUrl: string;
@@ -354,9 +355,9 @@ export class DeployApplicationStep2Component
     );
   }
 
-  updateSuggestedRepositories(name: string): Observable<string[]> {
+  updateSuggestedRepositories(name: string): Observable<GitSuggestedRepo[]> {
     if (!name || name.length < 3) {
-      return observableOf([] as string[]);
+      return observableOf([] as GitSuggestedRepo[]);
     }
 
     const cacheName = this.scm.getType() + ':' + name;
@@ -368,7 +369,7 @@ export class DeployApplicationStep2Component
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
-      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
+      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions),
     );
   }
 

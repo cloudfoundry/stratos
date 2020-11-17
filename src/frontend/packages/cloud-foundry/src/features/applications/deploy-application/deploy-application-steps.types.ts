@@ -105,6 +105,10 @@ export class ApplicationDeploySourceTypes {
     );
   }
 
+  public getTypes(): SourceType[] {
+    return this.types;
+  }
+
   private createGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
     // We need to show any git of types lab and hub and that uses a custom url (github.com and gitlab.com use standard options)
     if (endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
@@ -139,7 +143,7 @@ export class ApplicationDeploySourceTypes {
         endpointGuid: endpoint.guid
       };
     }
-  };
+  }
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
@@ -148,7 +152,7 @@ export class ApplicationDeploySourceTypes {
     }
     const endpointGuid = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM];
     return this.types$.pipe(map(types => types.find(source => source.id === typeId && source.endpointGuid === endpointGuid)));
-  };
+  }
 
   canDeployType(cfId: string, sourceId: string): Observable<boolean> {
     if (sourceId === DEPLOY_TYPES_IDS.DOCKER_IMG) {

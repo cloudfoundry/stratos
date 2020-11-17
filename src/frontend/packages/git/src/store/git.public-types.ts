@@ -26,6 +26,12 @@ export interface GitRepo {
   scmType: string;
   projectName: string;
   guid: string;
+  private: boolean;
+}
+
+export interface GitSuggestedRepo {
+  name: string;
+  private: boolean;
 }
 
 export interface GitUser {

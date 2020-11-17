@@ -3,7 +3,7 @@ import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
-import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
 import { GitSCM, SCMIcon } from './scm';
 import { BaseSCM, GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
@@ -134,27 +134,27 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   // TODO: RC fix - these are links are web addresses... shouldn't use api urls... need to fetch using api.
   // fetch project/commit.. get url from there
   getCloneURL(projectName: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}.git`)
     );
   }
 
   getCommitURL(projectName: string, commitSha: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/commit/${commitSha}`)
     );
   }
 
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string> {
-    const prjNameEncoded = encodeURIComponent(projectName);// TODO: RC understand - this should be used??
+    const prjNameEncoded = encodeURIComponent(projectName); // TODO: RC understand - this should be used??
     return this.getAPI().pipe(
       map(apiUrl => `https://gitlab.com/${projectName}/compare/${commitSha1}...${commitSha2}`)
     );
   }
 
-  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]> {
+  getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]> {
     const prjParts = projectName.split('/');
 
     const obs$ = prjParts.length > 1 ?
@@ -169,7 +169,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       );
 
     return obs$.pipe(
-      map((repos: any[]) => repos.map(item => item.path_with_namespace)),
+      map((repos: any[]) => repos.map(item => ({ name: item.path_with_namespace, private: false })))
     );
   }
 
