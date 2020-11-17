@@ -1312,3 +1312,4 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
   );
   return cfEntityCatalog.metric;
 }
+

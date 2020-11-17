@@ -5,7 +5,6 @@ import {
   generateCfBaseTestModules,
   generateTestCfEndpointServiceProvider,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CloudFoundryOrganizationsComponent } from './cloud-foundry-organizations.component';
 
 describe('CloudFoundryOrganizationsComponent', () => {
@@ -15,7 +14,7 @@ describe('CloudFoundryOrganizationsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationsComponent],
-      providers: [CfOrgsListConfigService, generateTestCfEndpointServiceProvider(), TabNavService],
+      providers: [generateTestCfEndpointServiceProvider(), TabNavService],
       imports: generateCfBaseTestModules()
     })
       .compileComponents();
