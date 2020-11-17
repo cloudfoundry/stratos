@@ -458,7 +458,7 @@ export class CfUserService {
     );
   };
 
-  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string,): PaginatedAction => {
+  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string): PaginatedAction => {
     return cfEntityCatalog.user.actions.getAllInSpace(
       spaceGuid,
       cfGuid,
