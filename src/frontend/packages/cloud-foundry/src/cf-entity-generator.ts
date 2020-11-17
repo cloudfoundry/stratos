@@ -1324,3 +1324,4 @@ function generateAutoscalerInfoEntity(endpointDefinition: StratosEndpointExtensi
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AutoscalerInfo>>(definition);
 }
+
