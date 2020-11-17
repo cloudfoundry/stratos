@@ -26,6 +26,7 @@ import {
   KubeAPIResource,
   KubeResourceEntityDefinition,
   KubernetesCurrentNamespace,
+  SimpleColumnValueGetter,
   SimpleKubeListColumn,
 } from '../../store/kube.types';
 import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
@@ -194,17 +195,21 @@ export class KubernetesResourceListComponent implements OnDestroy {
     const tableCell: ITableColumn<KubeAPIResource> = {
       columnId: cell.header.toLowerCase(),
       headerCell: () => cell.header,
-      cellDefinition: {
-        valuePath: cell.field
-      },
+      cellDefinition: {},
       cellFlex: cell.flex || '1'
     };
 
-    if (cell.sort) {
+    if (typeof(cell.field) === 'string') {
+      tableCell.cellDefinition.valuePath = cell.field as string;
+    } else {
+      tableCell.cellDefinition.getValue = cell.field as SimpleColumnValueGetter<KubeAPIResource>;
+    }
+
+    if (cell.sort && typeof(cell.field) === 'string') {
       tableCell.sort = {
         type: 'sort',
         orderKey: tableCell.columnId,
-        field: cell.field
+        field: cell.field as string
       };
     }
 

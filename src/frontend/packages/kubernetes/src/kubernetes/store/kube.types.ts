@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
@@ -556,8 +558,10 @@ export interface KubernetesConfigMap extends BasicKubeAPIResource {
   test?: string;
 }
 
-export interface SimpleKubeListColumn {
-  field: string;
+export type SimpleColumnValueGetter<T> = (row: T) => string | Observable<string>;
+
+export interface SimpleKubeListColumn<T = any> {
+  field: string | SimpleColumnValueGetter<T>;
   header: string;
   flex?: string;
   sort?: boolean;

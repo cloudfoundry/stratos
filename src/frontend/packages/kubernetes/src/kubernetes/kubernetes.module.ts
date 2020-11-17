@@ -107,6 +107,7 @@ import { KubernetesServicePortsComponent } from './list-types/kubernetes-service
 import {
   KubeServiceCardComponent,
 } from './list-types/kubernetes-services/kubernetes-service-card/kubernetes-service-card.component';
+import { KubernetesServicesListConfig } from './list-types/kubernetes-services/kubernetes-service-list-config.service';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
@@ -238,6 +239,7 @@ export class KubernetesModule {
 
   constructor(listConfigService: KubernetesListConfigService) {
     listConfigService.set('k8s-pods', new KubernetesPodsListConfig());
+    listConfigService.set('k8s-services', new KubernetesServicesListConfig());
   }
 }
 

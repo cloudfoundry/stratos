@@ -44,6 +44,7 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
+import { KubernetesService } from './services/kubernetes.service';
 import {
   createKubeResourceActionBuilder,
   KubeResourceActionBuilders,
@@ -292,7 +293,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     generateDeploymentsEntity(endpointDefinition),
     generateNodesEntity(endpointDefinition),
     // generateNamespacesEntity(endpointDefinition),
-    generateServicesEntity(endpointDefinition),
+    //generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
     generateAnalysisReportsEntity(endpointDefinition),
     generateMetricEntity(endpointDefinition),
@@ -478,13 +479,33 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     )
   });
 
+  entities.add<KubernetesService>({
+    type: kubernetesServicesEntityType,
+    icon: 'service',
+    label: 'Service',
+    apiVersion: '/api/v1',
+    apiName: 'service',
+    apiNamespaced: true,
+    kubeCatalogEntity: 'service',
+    listConfig: 'k8s-services',
+    getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubeServiceActionBuilders>(
+      definition, { actionBuilders: kubeServiceActionBuilders }
+    )
+  });
+
   entities.add<KubernetesConfigMap>({
     type: kubernetesConfigMapEntityType,
     icon: 'config_maps',
     label: 'Config Map',
     apiVersion: '/api/v1',
     apiName: 'configmaps',
-    kubeCatalogEntity: 'configMap'
+    kubeCatalogEntity: 'configMap',
+    listColumns: [
+      {
+        header: 'Data Keys',
+        field: (row: KubernetesConfigMap) => `${Object.keys(row.data).length}`
+      },
+    ]
   });
 
   entities.add<KubeAPIResource>({
@@ -493,7 +514,13 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     label: 'Secret',
     apiVersion: '/api/v1',
     apiName: 'secrets',
-    kubeCatalogEntity: 'secrets'
+    kubeCatalogEntity: 'secrets',
+    listColumns: [
+      {
+        header: 'Data Keys',
+        field: (row: KubernetesConfigMap) => `${Object.keys(row.data).length}`
+      },
+    ]
   });
 
   entities.add<KubeAPIResource>({
@@ -505,6 +532,11 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     apiName: 'persistentvolumeclaims',
     kubeCatalogEntity: 'pvcs',
     listColumns: [
+      {
+        header: 'Storage Class',
+        field: 'spec.storageClassName',
+        sort: true
+      },
       {
         header: 'Phase',
         field: 'status.phase',
@@ -561,7 +593,14 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     label: 'Replica Set',
     apiVersion: '/apis/apps/v1',
     apiName: 'replicasets',
-    kubeCatalogEntity: 'replicaSets'
+    kubeCatalogEntity: 'replicaSets',
+    listColumns: [
+      {
+        header: 'Replicas',
+        field: 'spec.replicas',
+        sort: true
+      },
+    ]
   });
 
   entities.add<KubeAPIResource>({
@@ -590,6 +629,15 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     apiVersion: '/apis/rbac.authorization.k8s.io/v1',
     apiName: 'roles',
     kubeCatalogEntity: 'role'
+  });
+
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesJob',
+    icon: 'job',
+    label: 'Job',
+    apiVersion: '/apis/batch/v1',
+    apiName: 'jobs',
+    kubeCatalogEntity: 'job'
   });
 
   return entities.entities;
