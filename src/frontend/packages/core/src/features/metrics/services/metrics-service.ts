@@ -22,7 +22,7 @@ export class MetricsService {
   haveNoConnectedMetricsEndpoints$: Observable<boolean>;
 
   constructor() {
-    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor()
+    this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor();
 
     this.setupObservables();
   }

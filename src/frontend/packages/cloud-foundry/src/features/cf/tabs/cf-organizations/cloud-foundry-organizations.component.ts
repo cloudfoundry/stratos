@@ -1,10 +1,16 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  ActionListConfigProvider,
+} from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
+import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { ListView } from '../../../../../../store/src/actions/list.actions';
+import { APIResource } from '../../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../../cf-api.types';
 import { CfOrgCardComponent } from '../../../../shared/components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
-import { CfOrgsListConfigService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
@@ -12,20 +18,59 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   selector: 'app-cloud-foundry-organizations',
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
-  providers: [
-    {
-      provide: ListConfig,
-      useClass: CfOrgsListConfigService
-    }
-  ]
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;
+
+  public provider: ActionListConfigProvider<APIResource<IOrganization>>;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    private store: Store<any>,
   ) {
     this.canAddOrg$ = currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
+
+    this.provider = this.createProvider(this.cfEndpointService.cfGuid);
   }
-  cardComponent = CfOrgCardComponent;
+
+  private createProvider(cfGuid: string): ActionListConfigProvider<APIResource<IOrganization>> {
+    const action = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
+    const provider = new ActionListConfigProvider<APIResource<IOrganization>>(this.store, action);
+
+    provider.updateListConfig({
+      cardComponent: CfOrgCardComponent,
+      viewType: ListViewTypes.CARD_ONLY,
+      defaultView: 'cards' as ListView,
+      getColumns: () => [{
+        columnId: 'name',
+        headerCell: () => 'Name',
+        sort: {
+          type: 'sort',
+          orderKey: 'name',
+          field: 'entity.name'
+        }
+      }, {
+        columnId: 'createdAt',
+        headerCell: () => 'Creation',
+        sort: {
+          type: 'sort',
+          orderKey: 'createdAt',
+          field: 'metadata.created_at'
+        },
+      }],
+      text: {
+        title: null,
+        filter: 'Search by name',
+        noEntries: 'There are no organizations'
+      },
+    });
+
+    provider.updateDataSourceConfig({
+      transformEntities: [{ type: 'filter', field: 'entity.name' }] // Note - this will go away once fixed in default case
+    });
+
+    return provider;
+  }
 }
+

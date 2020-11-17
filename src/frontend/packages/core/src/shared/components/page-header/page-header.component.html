@@ -78,9 +78,9 @@
                     <button mat-menu-item routerLink="/api-keys" *ngIf="canAPIKeys$ | async">
                       <span>API Keys</span>
                     </button>
-                    <div class="page-header__menu-separator"></div>
+                    <div class="page-header__menu-separator" *ngIf="canLogout$ | async"></div>
                   </div>
-                  <button mat-menu-item (click)="logout()">
+                  <button mat-menu-item (click)="logout()" *ngIf="canLogout$ | async">
                     <span>Logout</span>
                   </button>
                 </div>

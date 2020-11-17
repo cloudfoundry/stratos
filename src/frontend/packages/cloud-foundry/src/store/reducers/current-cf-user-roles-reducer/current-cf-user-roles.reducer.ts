@@ -42,7 +42,7 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
 ): IAllCfRolesState => {
   switch (action.type) {
     case GET_CURRENT_CF_USER_RELATION_SUCCESS:
-      const gcursAction = action as GetCurrentCfUserRelationsComplete
+      const gcursAction = action as GetCurrentCfUserRelationsComplete;
       return currentUserBaseCFRolesReducer(state, gcursAction);
     case SESSION_VERIFIED:
       return cfRoleInfoFromSessionReducer(state, action as VerifiedSession);
@@ -67,7 +67,7 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
       return currentUserCfRolesRequestStateReducer(state, action as GetCfUserRelations);
   }
   return null;
-}
+};
 
 export function currentUserCfRolesRequestStateReducer(cf: IAllCfRolesState = {}, action: GetCfUserRelations) {
   const cfGuid = (action as GetCfUserRelations).cfGuid;
@@ -76,7 +76,7 @@ export function currentUserCfRolesRequestStateReducer(cf: IAllCfRolesState = {},
     RolesRequestStateStage.START :
     action.type === GET_CURRENT_CF_USER_RELATIONS_SUCCESS ? RolesRequestStateStage.SUCCESS :
       action.type === GET_CURRENT_CF_USER_RELATIONS_FAILED ? RolesRequestStateStage.FAILURE :
-        RolesRequestStateStage.OTHER
+        RolesRequestStateStage.OTHER;
   return {
     ...cf,
     [cfGuid]: {

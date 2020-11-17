@@ -17,16 +17,16 @@ export class ChartDetailsInfoComponent implements OnInit {
   versions: ChartVersion[];
   schema: any = null;
 
-  _currentVersion: ChartVersion;
+  private pCurrentVersion: ChartVersion;
 
   get currentVersion(): ChartVersion {
-    return this._currentVersion;
+    return this.pCurrentVersion;
   }
 
-  @Input() set currentVersion (version: ChartVersion) {
-    this._currentVersion = version;
+  @Input() set currentVersion(version: ChartVersion) {
+    this.pCurrentVersion = version;
     if (version) {
-      this.getSchema(this._currentVersion, this.chart);
+      this.getSchema(this.pCurrentVersion, this.chart);
     }
   }
 

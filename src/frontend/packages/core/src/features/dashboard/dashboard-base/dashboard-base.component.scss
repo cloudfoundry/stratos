@@ -63,6 +63,10 @@ $app-header-height: 56px;
       min-width: auto;
     }
   }
+  &__side-narrow {
+    max-width: 400px;
+    min-width: 400px;
+  }
 }
 
 .page-content {
@@ -82,7 +86,7 @@ $app-header-height: 56px;
   $breadcrumb-opacity: .7;
   $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
-  $font-size: 20px;
+  $font-size: 18px;
 
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, .1);

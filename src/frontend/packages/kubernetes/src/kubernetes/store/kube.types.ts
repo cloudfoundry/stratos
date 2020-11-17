@@ -261,7 +261,7 @@ export interface PodStatus {
   hostIP?: string;
   podIP?: string;
   podIPs?: {
-    ip: string
+    ip: string;
   }[];
   startTime?: Date;
   containerStatuses?: ContainerStatus[];
@@ -338,7 +338,7 @@ export interface KubernetesConfigMap {
     data: {
       [key: string]: any,
     },
-    kind: string
+    kind: string;
   };
   metadata: KubeServiceMetadata;
 }
@@ -522,8 +522,8 @@ export interface KubeStatus {
   status: string;
   message: string;
   reason: string;
-  details: {}
-  code: number
+  details: {};
+  code: number;
 }
 
 // Analysis Reports

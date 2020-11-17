@@ -5,6 +5,11 @@
   $user-avatar-underflow-invert-colors: map-get($app-theme, user-avatar-underflow-invert-colors);
   $user-avatar-header-invert-colors: map-get($app-theme, user-avatar-header-invert-colors);
 
+  $user-avatar-header-background-color: map-get($app-theme, user-avatar-header-background-color);
+  @if not $user-avatar-header-background-color or $user-avatar-header-background-color == 'none' {
+    $user-avatar-header-background-color: map-get($app-theme, user-avatar-background-color);
+  }
+
   .user-avatar {
     &__initials {
       background-color: $user-avatar-background-color;
@@ -25,9 +30,14 @@
     .user-avatar {
       .user-avatar__initials.user-avatar__header {
         background-color: $user-avatar-foreground-color;
-        color: $user-avatar-background-color;
+        color: $user-avatar-header-background-color;
+      }
+    }
+  } @else {
+    .user-avatar {
+      .user-avatar__initials.user-avatar__header {
+        background-color: $user-avatar-header-background-color;
       }
     }
   }
-
 }

@@ -22,6 +22,8 @@ describe('Org Spaces List -', () => {
 
   const timeAllowed = 60000;
 
+  const pageSizeSelectName = 'mat-select-4';
+
   function createSpaceNames(count: number): string[] {
     const spaceNames = [];
     for (let i = 0; i < count; i++) {
@@ -220,7 +222,7 @@ describe('Org Spaces List -', () => {
       expect(spaceList.pagination.isPresent()).toBeTruthy();
 
       expect(spaceList.cards.getCardCount()).toBe(9);
-      expect(spaceList.pagination.getPageSize()).toEqual('9');
+      expect(spaceList.pagination.getPageSize(pageSizeSelectName)).toEqual('9');
       expect(spaceList.pagination.getTotalResults()).toBeGreaterThan(9);
       expect(spaceList.pagination.getTotalResults()).toBeLessThanOrEqual(18);
 
@@ -260,7 +262,7 @@ describe('Org Spaces List -', () => {
 
     it('Change Page Size', () => {
 
-      spaceList.pagination.setPageSize('80');
+      spaceList.pagination.setPageSize('80', pageSizeSelectName);
       expect(spaceList.cards.getCardCount()).toBeGreaterThan(9);
 
       expect(spaceList.pagination.getNavFirstPage().getComponent().isEnabled()).toBeFalsy();
@@ -268,7 +270,7 @@ describe('Org Spaces List -', () => {
       expect(spaceList.pagination.getNavNextPage().getComponent().isEnabled()).toBeFalsy();
       expect(spaceList.pagination.getNavLastPage().getComponent().isEnabled()).toBeFalsy();
 
-      spaceList.pagination.setPageSize('9');
+      spaceList.pagination.setPageSize('9', pageSizeSelectName);
       expect(spaceList.cards.getCardCount()).toBe(9);
 
     });

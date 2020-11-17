@@ -219,7 +219,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       }),
       distinctUntilChanged(),
     );
-  };
+  }
 
   /**
    * @param permissionConfig Single permission to be checked
@@ -493,6 +493,6 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
 
   public getFallbackCheck(endpointGuid: string, endpointType: string) {
     return endpointType === CF_ENDPOINT_TYPE ? this.getCfAdminCheck(endpointGuid) : null;
-  };
+  }
 
 }

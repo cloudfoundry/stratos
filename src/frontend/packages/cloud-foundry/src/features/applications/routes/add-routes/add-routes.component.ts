@@ -163,7 +163,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       return this.mapRouteSubmit();
     }
-  }
+  };
 
   onSubmit(): Observable<StepOnNextResult> {
     const domainGuid = this.domainFormGroup.value.domain.metadata.guid;
@@ -231,7 +231,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         if (requestState.error) {
           return { success: false, message: `Failed to associate route with app: ${requestState.error}` };
         }
-        cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid)
+        cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid);
         this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
         return { success: true };
       })

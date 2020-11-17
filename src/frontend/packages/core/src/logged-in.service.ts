@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { fromEvent, interval, merge, Subscription } from 'rxjs';
+import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
 import { VerifySession } from '../../store/src/actions/auth.actions';
@@ -12,6 +12,8 @@ import { selectDashboardState } from '../../store/src/selectors/dashboard.select
 import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
+import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
 
 @Injectable()
 export class LoggedInService {
@@ -19,9 +21,9 @@ export class LoggedInService {
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
     private dialog: MatDialog,
-    private ngZone: NgZone
-  ) {
-  }
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+  ) { }
 
   private userInteractionChecker: Subscription;
 
@@ -53,24 +55,25 @@ export class LoggedInService {
       return fromEvent(document, eventName);
     });
 
-    this.sub = this.store.select(s => s.auth)
-      .subscribe((auth: AuthState) => {
-        if (auth.loggedIn && auth.sessionData && auth.sessionData.valid && !auth.error) {
-          if (!this.sessionChecker || this.sessionChecker.closed) {
-            this.openSessionCheckerPoll();
-          }
-          if (!this.userInteractionChecker) {
-            this.userInteractionChecker = merge(...eventStreams).subscribe(() => {
-              this.lastUserInteraction = Date.now();
-            });
-          }
-        } else {
-          this.closeSessionCheckerPoll();
-          if (this.userInteractionChecker) {
-            this.userInteractionChecker.unsubscribe();
-          }
+    const auth$ = this.store.select(s => s.auth);
+    const canNotLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
+    this.sub = combineLatest([auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
+      if (!canNotLogout && auth.loggedIn && auth.sessionData && auth.sessionData.valid && !auth.error) {
+        if (!this.sessionChecker || this.sessionChecker.closed) {
+          this.openSessionCheckerPoll();
         }
-      });
+        if (!this.userInteractionChecker) {
+          this.userInteractionChecker = merge(...eventStreams).subscribe(() => {
+            this.lastUserInteraction = Date.now();
+          });
+        }
+      } else {
+        this.closeSessionCheckerPoll();
+        if (this.userInteractionChecker) {
+          this.userInteractionChecker.unsubscribe();
+        }
+      }
+    });
   }
 
   destroy() {

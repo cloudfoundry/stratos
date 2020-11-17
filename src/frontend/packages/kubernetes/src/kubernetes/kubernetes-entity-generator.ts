@@ -1,3 +1,4 @@
+import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
@@ -7,12 +8,14 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
+import { FavoritesConfigMapper } from '../../../store/src/favorite-config-mapper';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -76,6 +79,13 @@ import {
   KubeService,
 } from './store/kube.types';
 import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
+
+
+export interface IKubeResourceFavMetadata extends IFavoriteMetadata {
+  guid: string;
+  kubeGuid: string;
+  name: string;
+}
 
 const enum KubeEndpointAuthTypes {
   CERT_AUTH = 'kube-cert-auth',
@@ -147,6 +157,23 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   }
 };
 
+function k8sShortcuts(id: string) {
+  return [
+    {
+      title: 'View Nodes',
+      link: ['/kubernetes', id, 'nodes'],
+      icon: 'node',
+      iconFont: 'stratos-icons'
+    },
+    {
+      title: 'View Namespaces',
+      link: ['/kubernetes', id, 'namespaces'],
+      icon: 'namespace',
+      iconFont: 'stratos-icons'
+    }
+  ];
+}
+
 class KubeResourceEntityHelper {
 
   constructor(private endpointDefinition: StratosEndpointExtensionDefinition) { }
@@ -201,6 +228,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
       BaseEndpointAuth.UsernamePassword,
       kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN],
     ],
+    favoriteFromEntity: getFavoriteFromKubeEntity,
     renderPriority: 4,
     subTypes: [
       {
@@ -246,7 +274,17 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
         authTypes: [BaseEndpointAuth.UsernamePassword, kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN]],
         logoUrl: '/core/assets/custom/k3s.svg',
         renderPriority: 6
-      }]
+      }],
+      homeCard: {
+        component: (compiler: Compiler, injector: Injector) => import('./home/kubernetes-home-card.module').then((m) => {
+          return compiler.compileModuleAndAllComponentsAsync(m.KubernetesHomeCardModule).then(cm => {
+            const mod = cm.ngModuleFactory.create(injector);
+            return mod.instance.createHomeCard(mod.componentFactoryResolver);
+          });
+        }),
+        fullView: true
+        // shortcuts: k8sShortcuts
+      }
   };
   return [
     generateEndpointEntity(endpointDefinition),
@@ -313,11 +351,27 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
   const definition: IStratosEntityDefinition = {
     type: kubernetesNamespacesEntityType,
     schema: kubernetesEntityFactory(kubernetesNamespacesEntityType),
-    endpoint: endpointDefinition
+    endpoint: endpointDefinition,
+    label: 'Namespace',
+    icon: 'namespace',
+    iconFont: 'stratos-icons',
   };
-  kubeEntityCatalog.namespace = new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(definition, {
-    actionBuilders: kubeNamespaceActionBuilders
-  });
+  kubeEntityCatalog.namespace = new StratosCatalogEntity<IKubeResourceFavMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
+    definition, {
+      actionBuilders: kubeNamespaceActionBuilders,
+      entityBuilder: {
+        getMetadata: (namespace: any) => {
+          return {
+            endpointId: namespace.kubeGuid,
+            guid: namespace.metadata.uid,
+            kubeGuid: namespace.kubeGuid,
+            name: namespace.metadata.name,
+          };
+        },
+        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
+        getGuid: metadata => metadata.guid,
+      }
+    });
   return kubeEntityCatalog.namespace;
 }
 
@@ -368,6 +422,18 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
   return new StratosCatalogEntity(definition);
 }
 
+function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
+  entity,
+  entityType: string,
+  favoritesConfigMapper: FavoritesConfigMapper
+): UserFavorite<T> {
+  return favoritesConfigMapper.getFavoriteFromEntity<T>(
+    entityType,
+    KUBERNETES_ENDPOINT_TYPE,
+    entity.kubeGuid,
+    entity
+  );
+  
 // =============================================================================================================
 // Kubernetes Resources using generic resource pattern
 // =============================================================================================================

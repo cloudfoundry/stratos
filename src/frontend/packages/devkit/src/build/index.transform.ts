@@ -11,7 +11,7 @@ import { StratosConfig } from '../lib/stratos.config';
  */
 export class IndexHtmlHandler {
 
-  constructor(public config: StratosConfig) {}
+  constructor(public config: StratosConfig) { }
 
   public apply(src: string): string {
 
@@ -21,12 +21,12 @@ export class IndexHtmlHandler {
 
     // // Git Information
     const gitMetadata = this.config.gitMetadata;
-    src = src.replace(/@@stratos_git_project@@/g, gitMetadata.project );
-    src = src.replace(/@@stratos_git_branch@@/g, gitMetadata.branch );
-    src = src.replace(/@@stratos_git_commit@@/g, gitMetadata.commit );
+    src = src.replace(/@@stratos_git_project@@/g, gitMetadata.project);
+    src = src.replace(/@@stratos_git_branch@@/g, gitMetadata.branch);
+    src = src.replace(/@@stratos_git_commit@@/g, gitMetadata.commit);
 
     // // Date and Time that the build was made (approximately => it is when this script is run)
-    src = src.replace(/@@stratos_build_date@@/g, new Date().toString() );
+    src = src.replace(/@@stratos_build_date@@/g, new Date().toString());
 
     // Loading view (provided by theme)
 
@@ -72,7 +72,7 @@ interface TargetOptions {
 const indexTransform = (options: TargetOptions, content: string) => {
 
   // Get the Stratos config - don't log a second time
-  const sConfig = new StratosConfig(__dirname, this.options, false);
+  const sConfig = new StratosConfig(__dirname, null, false);
 
   const handler = new IndexHtmlHandler(sConfig);
   const modified = handler.apply(content);

@@ -67,7 +67,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
-  public tags: { label: string }[] = [];
+  public tags: { label: string, }[] = [];
   public valid = new BehaviorSubject(false);
   private subscriptions: Subscription[] = [];
   private tagsChanged = new BehaviorSubject(true);
@@ -170,7 +170,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
       this.tags = [];
     }
-  }
+  };
 
   private serviceInstancesForApplication() {
     return this.store.select(selectCreateServiceInstance).pipe(
@@ -237,13 +237,13 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
         params
       },
     );
-  }
+  };
 
   public onNext = (): Observable<StepOnNextResult> => {
     return this.isUpdate ?
       this.onNextUpdate() :
       this.formMode === CreateServiceFormMode.CreateServiceInstance ? this.onNextCreate() : this.onNextBind();
-  }
+  };
 
   private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();
@@ -284,7 +284,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
             // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid)
+            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid);
             return { success: true, redirect: true };
           }
         })

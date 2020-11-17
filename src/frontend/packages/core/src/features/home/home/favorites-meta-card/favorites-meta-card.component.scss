@@ -1,0 +1,41 @@
+.mat-card.fav-meta-card {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fav-meta-card {
+  align-items: center;
+  display: flex;
+  outline: none;
+  padding: 8px 10px;
+  &__clickable {
+    cursor: pointer;
+  }
+  &__icon {
+    margin-right: 4px;
+    opacity: .7;
+  }
+  &__icon-panel {
+    align-self: center;
+    display: flex;
+    justify-content: left;
+    width: 32px;
+  }
+  &__info {
+    flex: 1;
+  }
+  &__name {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+  &__type {
+    font-size: 12px;
+    opacity: .6;
+  }
+  &__star {
+    flex: 0;
+    opacity: .7;
+  }
+}

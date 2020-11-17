@@ -1,4 +1,4 @@
-<div *ngIf="tile" class="tile-selector-parent" [ngClass]="{'smaller': smaller}">
+<div *ngIf="tile" class="tile-selector-parent" [ngClass]="{'smaller': smaller, 'compact': compact}">
   <div class="tile-selector" [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}"
     (click)="onClick(tile)">
     <div class="tile-selector__header">

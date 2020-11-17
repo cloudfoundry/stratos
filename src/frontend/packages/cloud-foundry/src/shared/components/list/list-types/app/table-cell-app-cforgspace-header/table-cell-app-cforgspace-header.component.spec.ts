@@ -12,13 +12,16 @@ import {
   ApplicationStateComponent,
 } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { IApp } from '../../../../../../cf-api.types';
 import { ApplicationStateService } from '../../../../../services/application-state.service';
 import { TableCellAppStatusComponent } from '../table-cell-app-status/table-cell-app-status.component';
+import { TableCellAppCfOrgSpaceHeaderComponent } from './table-cell-app-cforgspace-header.component';
 
-describe('TableCellAppStatusComponent', () => {
-  let component: TableCellAppStatusComponent<any>;
-  let fixture: ComponentFixture<TableCellAppStatusComponent<any>>;
+describe('TableCellAppCfOrgSpaceHeaderComponent', () => {
+  let component: TableCellAppCfOrgSpaceHeaderComponent;
+  let fixture: ComponentFixture<TableCellAppCfOrgSpaceHeaderComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -42,9 +45,9 @@ describe('TableCellAppStatusComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellAppStatusComponent);
+    fixture = TestBed.createComponent(TableCellAppCfOrgSpaceHeaderComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {}, metadata: {} };
+    component.row = { entity: {}, metadata: {} } as APIResource<IApp>;
     fixture.detectChanges();
   });
 

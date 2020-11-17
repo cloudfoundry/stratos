@@ -13,11 +13,12 @@ export class TileSelectorComponent {
   public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
   @Input() smallerTiles = false;
+  @Input() compactTiles = false;
   private pDynamicSmallerTiles = 0;
   @Input() set dynamicSmallerTiles(tiles: number) {
     this.pDynamicSmallerTiles = tiles;
     this.updateSmallerTiles();
-  };
+  }
   @Input() set options(options: ITileConfig[]) {
     if (!options) {
       return;

@@ -139,6 +139,9 @@ export class FavoritesConfigMapper {
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
     const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
     const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(metadata);
+    if (!endpointId) {
+      console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
+    }
     return new UserFavorite<T>(
       endpointId,
       endpointType,
