@@ -25,7 +25,7 @@ import {
   AppAutoscalerPolicyLocal,
   AppSpecificDate,
 } from '../../../store/app-autoscaler.types';
-import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 @Component({
@@ -36,7 +36,7 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy implements OnInit {
+export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup;
@@ -102,9 +102,9 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
       })),
       first(),
     );
-  }
+  };
 
-  private getStateResult(info: RequestInfoState): { error: boolean, message: string } {
+  private getStateResult(info: RequestInfoState): { error: boolean, message: string, } {
     if (this.isCreate) {
       return {
         error: info.error,
@@ -129,7 +129,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
     const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
     this.currentPolicy.schedules.specific_date.push(newSchedule);
     this.editSpecificDate(this.currentPolicy.schedules.specific_date.length - 1);
-  }
+  };
 
   removeSpecificDate(index: number) {
     if (this.editIndex === index) {
@@ -170,7 +170,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   validateSpecificDateInitialMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
         this.editSpecificDateForm.get('instance_min_count').value, this.editSpecificDateForm.get('instance_max_count').value + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
@@ -178,7 +178,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   validateSpecificDateStartDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -211,7 +211,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
   }
 
   validateSpecificDateEndDateTime(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (!this.editSpecificDateForm) {
         return null;
       }
@@ -251,7 +251,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicy imp
 }
 
 export function validateRecurringSpecificMin(editForm, editMutualValidation): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } => {
+  return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
     const lastValid = editMutualValidation.limit;
@@ -267,7 +267,7 @@ export function validateRecurringSpecificMin(editForm, editMutualValidation): Va
 }
 
 export function validateRecurringSpecificMax(editForm, editMutualValidation): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } => {
+  return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);
     const lastValid = editMutualValidation.limit;

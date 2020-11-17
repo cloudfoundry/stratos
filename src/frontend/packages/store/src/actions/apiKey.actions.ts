@@ -2,14 +2,14 @@ import { apiKeyEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '.
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { EntityRequestAction } from '../types/request.types';
 
-export const API_KEY_ADD = '[API Key] Add API Key'
-export const API_KEY_DELETE = '[API Key] Delete API Key'
-export const API_KEY_GET_ALL = '[API Key] Get All API Key'
+export const API_KEY_ADD = '[API Key] Add API Key';
+export const API_KEY_DELETE = '[API Key] Delete API Key';
+export const API_KEY_GET_ALL = '[API Key] Get All API Key';
 
 abstract class BaseApiKeyAction implements EntityRequestAction {
   entityType = apiKeyEntityType;
   endpointType = STRATOS_ENDPOINT_TYPE;
-  entity = [stratosEntityFactory(apiKeyEntityType)]
+  entity = [stratosEntityFactory(apiKeyEntityType)];
   constructor(public type: string) { }
 }
 
@@ -24,7 +24,7 @@ export class AddApiKey extends BaseApiKeyAction implements SingleApiKeyAction {
   constructor(public comment: string) {
     super(API_KEY_ADD);
   }
-  guid = 'ADD'
+  guid = 'ADD';
 }
 
 export class DeleteApiKey extends BaseApiKeyAction implements SingleApiKeyAction {
@@ -40,5 +40,5 @@ export class GetAllApiKeys extends BaseApiKeyAction implements PaginationApiKeyA
   }
   flattenPagination = true;
   paginationKey: string;
-  initialParams: PaginationParam
+  initialParams: PaginationParam;
 }

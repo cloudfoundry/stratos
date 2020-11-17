@@ -105,7 +105,7 @@ export class StepperComponent extends Component {
     return element(by.css('.steppers__header--active .steppers__header-text')).getText();
   }
 
-  getStep(stepName) {
+  getStep(stepName: string) {
     return this.locator.element(by.cssContainingText('.steppers__header', stepName));
   }
 

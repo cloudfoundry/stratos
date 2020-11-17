@@ -112,7 +112,7 @@ describe('PaginationReducer', () => {
 
     const paginationReducer = getReducer();
 
-    const endpointType = 'EndpointType'
+    const endpointType = 'EndpointType';
     const entityType = 'EntityKey';
     const entityKey = EntityCatalogHelpers.buildEntityKey(entityType, endpointType);
     const paginationKey = 'PaginationKey';
@@ -182,7 +182,7 @@ describe('PaginationReducer', () => {
 
     const paginationReducer = getReducer();
 
-    const endpointType = 'EndpointType'
+    const endpointType = 'EndpointType';
     const entityType = 'EntityKey';
     const entityKey = EntityCatalogHelpers.buildEntityKey(entityType, endpointType);
     const paginationKey = 'PaginationKey';

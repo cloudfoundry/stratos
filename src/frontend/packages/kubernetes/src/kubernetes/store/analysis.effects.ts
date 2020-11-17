@@ -253,6 +253,4 @@ export class AnalysisEffects {
         break;
     }
   }
-
-
 }

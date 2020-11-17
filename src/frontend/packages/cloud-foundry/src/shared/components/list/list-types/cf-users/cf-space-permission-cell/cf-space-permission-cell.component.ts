@@ -83,7 +83,7 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
       filter(org => !!org),
       first(),
       map((orgs: APIResource<IOrganization>[]) => {
-        const orgNames: { [orgGuid: string]: string; } = {};
+        const orgNames: { [orgGuid: string]: string, } = {};
         orgs.forEach(org => {
           orgNames[org.metadata.guid] = org.entity.name;
         });

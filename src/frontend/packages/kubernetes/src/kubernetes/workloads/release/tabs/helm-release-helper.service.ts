@@ -68,7 +68,7 @@ export class Version {
           if (this.prerelease && !other.prerelease) {
             return false;
           }
-          if(!this.prerelease && other.prerelease) {
+          if (!this.prerelease && other.prerelease) {
             return true;
           }
           if (this.prerelease && other.prerelease) {
@@ -298,14 +298,14 @@ export class HelmReleaseHelperService {
     for (let w of a.description.split(' ')) {
       w = w.toLowerCase();
       if (w.length > 3 && w !== 'helm' && w !== 'chart') {
-        words[w] = true
+        words[w] = true;
       }
     }
 
     let common = 0;
     for (let w of b.description.split(' ')) {
       w = w.toLowerCase();
-      if(words[w]) {
+      if (words[w]) {
         common++;
       }
     }

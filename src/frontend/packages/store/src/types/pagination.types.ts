@@ -66,7 +66,7 @@ export class PaginationEntityState {
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {
-  return obj && Object.keys(obj).indexOf('paginationKey') >= 0 ? obj as PaginatedAction : null;
+  return obj && Object.keys(obj).indexOf('paginationKey') >= 0 && Object.keys(obj).indexOf('type') >= 0 ? obj as PaginatedAction : null;
 }
 
 export interface BasePaginatedAction extends BasePipelineRequestAction, Action {

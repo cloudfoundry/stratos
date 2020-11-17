@@ -74,11 +74,11 @@ export class AddServiceInstanceBaseStepComponent {
   }
 
   private createServiceTileUrl(): string {
-    return this.bindApp ? `/applications/${this.cfId}/${this.appId}/bind` : '/services/new'
+    return this.bindApp ? `/applications/${this.cfId}/${this.appId}/bind` : '/services/new';
   }
 
   private createCancelUrl(): string {
-    return this.bindApp ? `/applications/${this.cfId}/${this.appId}/services` : '/services'
+    return this.bindApp ? `/applications/${this.cfId}/${this.appId}/services` : '/services';
   }
 
 

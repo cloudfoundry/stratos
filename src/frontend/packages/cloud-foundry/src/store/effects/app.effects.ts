@@ -24,7 +24,7 @@ export class AppEffects {
   @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
-      cfEntityCatalog.appSummary.api.get(action.apiAction.guid, action.apiAction.endpointGuid)
+      cfEntityCatalog.appSummary.api.get(action.apiAction.guid, action.apiAction.endpointGuid);
     }),
   );
 

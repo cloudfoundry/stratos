@@ -19,8 +19,8 @@ export class ServicesWallService {
 
   initServicesObservable = () => {
     const paginationKey = createEntityRelationPaginationKey(endpointEntityType);
-    return cfEntityCatalog.service.store.getPaginationService(null, paginationKey, {}).entities$
-  }
+    return cfEntityCatalog.service.store.getPaginationService(null, paginationKey, {}).entities$;
+  };
 
   getServicesInCf = (cfGuid: string) => this.services$.pipe(
     filter(p => !!p && p.length > 0),
@@ -28,7 +28,7 @@ export class ServicesWallService {
     filter(p => !!p),
     publishReplay(1),
     refCount()
-  )
+  );
 
   getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
     return createEntityRelationPaginationKey(serviceEntityType, `${cfGuid}-${spaceGuid}`);
@@ -37,5 +37,5 @@ export class ServicesWallService {
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
     const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
     return cfEntityCatalog.service.store.getAllInSpace.getPaginationService(cfGuid, paginationKey, spaceGuid).entities$;
-  }
+  };
 }

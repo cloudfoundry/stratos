@@ -40,23 +40,23 @@ export interface HelmReleasePod extends HelmReleaseEntity, KubernetesPod { }
 export interface HelmReleaseService extends HelmReleaseEntity, KubeService { }
 
 export interface HelmReleaseGraph extends HelmReleaseEntity {
-  nodes: { [key: string]: HelmReleaseGraphNode };
-  links: { [key: string]: HelmReleaseGraphLink };
+  nodes: { [key: string]: HelmReleaseGraphNode, };
+  links: { [key: string]: HelmReleaseGraphLink, };
 }
 
 export interface HelmReleaseGraphNode {
   id: string;
   label: string;
-  data: HelmReleaseGraphNodeData
+  data: HelmReleaseGraphNodeData;
 }
 
 export interface HelmReleaseGraphNodeData {
-  kind: string,
-  status: string,
+  kind: string;
+  status: string;
   metadata: {
     name: string,
-    namespace: string
-  }
+    namespace: string,
+  };
 }
 
 export interface HelmReleaseGraphLink {
@@ -67,9 +67,9 @@ export interface HelmReleaseGraphLink {
 }
 
 export interface HelmReleaseResources extends HelmReleaseEntity {
-  data: HelmReleaseResource[],
-  kind: string
-};
+  data: HelmReleaseResource[];
+  kind: string;
+}
 
 export interface HelmReleaseRevision {
   first_deployed: string;
@@ -81,8 +81,8 @@ export interface HelmReleaseRevision {
 }
 
 export interface HelmReleaseHistory extends HelmReleaseEntity {
-  revisions: HelmReleaseRevision[],
-};
+  revisions: HelmReleaseRevision[];
+}
 
 export interface HelmReleaseKubeAPIResource extends KubeAPIResource {
   apiVersion: string;

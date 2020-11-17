@@ -56,6 +56,9 @@ export class MetaCardComponent implements OnDestroy {
   statusBackground = false;
 
   @Input()
+  mode: string;
+
+  @Input()
   clickAction: () => void = null;
 
   @Input()

@@ -78,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         return observableOf({ success: false, message: err.message });
       })
     );
-  }
+  };
 
   validate(): boolean {
     return this.setDomainHost.valid;
@@ -93,9 +93,9 @@ export class CreateApplicationStep3Component implements OnInit {
     const obs$ = cfEntityCatalog.application.api.create<RequestInfoState>(
       newAppGuid,
       cloudFoundry, {
-        name,
-        space_guid: space
-      });
+      name,
+      space_guid: space
+    });
     return this.wrapObservable(obs$, 'Could not create application');
   }
 
@@ -117,7 +117,7 @@ export class CreateApplicationStep3Component implements OnInit {
           domain_guid: selectedDomainGuid,
           host: hostName
         }
-      )
+      );
       return this.wrapObservable(obs$, 'Application created. Could not create route');
     }
     return observableOf({
@@ -137,7 +137,7 @@ export class CreateApplicationStep3Component implements OnInit {
         deleting: null,
         response: null
       }))
-    )
+    );
     return this.wrapObservable(obs$, 'Application and route created. Could not associated route with app');
   }
 

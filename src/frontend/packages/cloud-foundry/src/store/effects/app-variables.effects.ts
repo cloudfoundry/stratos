@@ -23,5 +23,5 @@ export class AppVariablesEffect {
       null,
       [AppMetadataTypes.ENV_VARS]
     ))
-  )
+  );
 }

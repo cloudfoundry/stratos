@@ -83,3 +83,17 @@
     outline: 0;
   }
 }
+
+.mat-card.meta-card__plain {
+  border-radius: 0;
+  box-shadow: none;
+  padding: 5px 10px;
+
+  .meta-card__header {
+    padding: 0;
+  }
+
+  .meta-card__title {
+    margin: 0;
+  }
+}

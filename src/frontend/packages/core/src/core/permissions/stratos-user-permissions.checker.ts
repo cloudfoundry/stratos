@@ -73,7 +73,7 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  constructor(private store: Store<GeneralEntityAppState>,) {
+  constructor(private store: Store<GeneralEntityAppState>) {
     super();
   }
 
@@ -158,7 +158,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
   public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
     return null;
-  };
+  }
 
   private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
     return configs.reduce((grouped, config) => {

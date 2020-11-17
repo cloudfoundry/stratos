@@ -64,7 +64,7 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean; }>;
+  public isBusyUpdating$: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(

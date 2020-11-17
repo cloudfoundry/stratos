@@ -51,7 +51,7 @@ export abstract class BaseEndpointAction implements EntityRequestAction {
   public entityType = endpointEntityType;
   public endpointType = STRATOS_ENDPOINT_TYPE;
   public subType = '';
-  public entity = [stratosEntityFactory(endpointEntityType)]
+  public entity = [stratosEntityFactory(endpointEntityType)];
   constructor(public type: string) { }
   actions: string[];
 }
@@ -100,7 +100,7 @@ export class GetEndpoint extends SingleBaseEndpointAction {
     super(
       GET_ENDPOINT,
       guid
-    )
+    );
   }
   actions = [
     GET_ENDPOINT,
@@ -117,7 +117,7 @@ export class GetAllEndpoints extends MultipleBaseEndpointAction {
     super(
       GET_ENDPOINTS,
       GetAllEndpoints.storeKey
-    )
+    );
   }
   actions = [
     GET_ENDPOINTS,
@@ -134,13 +134,13 @@ export class GetAllEndpoints extends MultipleBaseEndpointAction {
 
 export class GetAllEndpointsSuccess extends GetAllEndpoints {
   constructor(public payload: NormalizedResponse<EndpointModel>, public login = false) {
-    super(login)
+    super(login);
   }
   type = GET_ENDPOINTS_SUCCESS;
 }
 
 export class ConnectEndpoint extends SingleBaseEndpointAction {
-  static UpdatingKey = 'connectingKey'
+  static UpdatingKey = 'connectingKey';
   constructor(
     guid: string,
     // Note - should not be called endpointType
@@ -161,11 +161,11 @@ export class ConnectEndpoint extends SingleBaseEndpointAction {
     CONNECT_ENDPOINTS,
     CONNECT_ENDPOINTS_SUCCESS,
     CONNECT_ENDPOINTS_FAILED
-  ]
+  ];
 }
 
 export class DisconnectEndpoint extends SingleBaseEndpointAction {
-  static UpdatingKey = 'disconnecting'
+  static UpdatingKey = 'disconnecting';
   constructor(
     guid: string,
     // Note - should not be called endpointType
@@ -222,7 +222,7 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
       registerEndpointType
     );
   }
-  updatingKey = 'registering'
+  updatingKey = 'registering';
   actions = [
     REGISTER_ENDPOINTS,
     REGISTER_ENDPOINTS_SUCCESS,
@@ -248,7 +248,7 @@ export class UpdateEndpoint extends SingleBaseEndpointAction {
       updateEndpointType
     );
   }
-  updatingKey = 'updating'
+  updatingKey = 'updating';
   actions = [
     UPDATE_ENDPOINT,
     UPDATE_ENDPOINT_SUCCESS,
