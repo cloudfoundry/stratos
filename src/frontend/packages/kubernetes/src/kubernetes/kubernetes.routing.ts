@@ -34,7 +34,6 @@ import {
 import { KubernetesAnalysisTabComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
-import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
 const kubernetes: Routes = [{
@@ -123,11 +122,6 @@ const kubernetes: Routes = [{
     {
       path: 'namespaces',
       component: KubernetesNamespacesTabComponent
-    },
-    {
-      path: 'pods',
-      component: KubernetesPodsTabComponent,
-      data: { entityCatalogKey: 'pod' }
     },
     {
       path: 'analysis',

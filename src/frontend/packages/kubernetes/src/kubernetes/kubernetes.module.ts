@@ -123,7 +123,6 @@ import {
 import { KubernetesAnalysisTabComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
-import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
 /* tslint:disable:max-line-length */
@@ -142,7 +141,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodesTabComponent,
     KubernetesTabBaseComponent,
     KubernetesNodeCapacityComponent,
-    KubernetesPodsTabComponent,
     KubernetesPodTagsComponent,
     KubernetesNamespacesTabComponent,
     KubernetesDashboardTabComponent,
