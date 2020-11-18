@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
 
+import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
 
 describe('KubernetesResourceListComponent', () => {
@@ -11,7 +11,7 @@ describe('KubernetesResourceListComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesResourceListComponent ],
-      imports: [ RouterTestingModule ],
+      imports: [ KubernetesBaseTestModules ],
       providers: [
       {
         provide: ActivatedRoute,
