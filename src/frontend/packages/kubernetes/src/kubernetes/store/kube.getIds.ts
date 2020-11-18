@@ -31,7 +31,7 @@ export const getGuidFromResource = (entity: BasicKubeAPIResource): string => {
 
   // Resource with namespace
   if (entity.metadata.namespace) {
-    return deliminate(entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name)
+    return deliminate(entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
   }
 
   // Named resource (no namespace)
@@ -41,7 +41,7 @@ export const getGuidFromResource = (entity: BasicKubeAPIResource): string => {
 
   // Cluster-level resource (e.g. Kubernetes dashboard)
   return entity.metadata.kubeId;
-}
+};
 
 // ======================================================================================================================================
 // LEGACY - Remove those not needed

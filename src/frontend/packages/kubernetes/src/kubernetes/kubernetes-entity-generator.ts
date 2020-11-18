@@ -293,7 +293,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     generateDeploymentsEntity(endpointDefinition),
     generateNodesEntity(endpointDefinition),
     // generateNamespacesEntity(endpointDefinition),
-    //generateServicesEntity(endpointDefinition),
+    // generateServicesEntity(endpointDefinition),
     generateDashboardEntity(endpointDefinition),
     generateAnalysisReportsEntity(endpointDefinition),
     generateMetricEntity(endpointDefinition),

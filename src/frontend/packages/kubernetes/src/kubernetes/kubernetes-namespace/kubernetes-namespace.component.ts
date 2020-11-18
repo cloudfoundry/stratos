@@ -6,16 +6,16 @@ import { filter, map } from 'rxjs/operators';
 import { IAppFavMetadata } from '../../../../cloud-foundry/src/cf-metadata-types';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 import { KubeResourceEntityDefinition } from '../store/kube.types';
+import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 
 @Component({
   selector: 'app-kubernetes-namespace',
@@ -101,7 +101,7 @@ export class KubernetesNamespaceComponent {
           });
         }
       }
-    })
+    });
 
     tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
     return tabsFromRouterConfig;

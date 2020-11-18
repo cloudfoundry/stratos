@@ -78,7 +78,7 @@ export interface KubeDashboardStatus {
   kubeGuid: string;
   metadata?: {
     kubeId: string;
-  }
+  };
   installed: boolean;
   stratosInstalled: boolean;
   running: boolean;
@@ -275,7 +275,7 @@ export class KubernetesEffects {
   @Effect()
   fetchKubeResources$ = this.actions$.pipe(
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES),
-    flatMap((action: GetKubernetesResources)=> {
+    flatMap((action: GetKubernetesResources) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
       if (catalog && catalog.definition) {
         const defn = catalog.definition as IKubeResourceEntityDefinition;
@@ -294,7 +294,7 @@ export class KubernetesEffects {
   @Effect()
   fetchKubeResourcesInNamespace$ = this.actions$.pipe(
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES_IN_NAMESPACE),
-    flatMap((action: GetKubernetesResourcesInNamespace)=> {
+    flatMap((action: GetKubernetesResourcesInNamespace) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
       if (catalog && catalog.definition) {
         const defn = catalog.definition as IKubeResourceEntityDefinition;

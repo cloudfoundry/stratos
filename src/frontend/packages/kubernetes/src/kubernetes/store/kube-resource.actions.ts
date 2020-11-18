@@ -49,7 +49,7 @@ export class GetKubernetesResources implements KubePaginationAction {
 
   constructor(public entityType: string, public kubeGuid: string) {
     this.paginationKey = getPaginationKey(entityType, 'k8s', kubeGuid);
-    this.entity = [kubernetesEntityFactory(entityType)]
+    this.entity = [kubernetesEntityFactory(entityType)];
   }
   type = GET_KUBE_RESOURCES;
   endpointType = KUBERNETES_ENDPOINT_TYPE;

@@ -7,15 +7,15 @@ export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
     resourceName: string,
     kubeGuid: string,
     extraArgs: { namespace: string }
-  ) => GetKubernetesResource,
+  ) => GetKubernetesResource;
   getMultiple: (
     kubeGuid: string,
     paginationKey?: string,
-  ) => GetKubernetesResources,
+  ) => GetKubernetesResources;
   getInNamespace: (
     kubeGuid: string,
     namespace: string
-  ) => GetKubernetesResourcesInNamespace
+  ) => GetKubernetesResourcesInNamespace;
 }
 
 export function createKubeResourceActionBuilder(entityType: string): KubeResourceActionBuilders {
