@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
 
@@ -14,6 +15,7 @@ describe('KubernetesResourceListComponent', () => {
       imports: [ KubernetesBaseTestModules ],
       providers: [
         KubeBaseGuidMock,
+        TabNavService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -22,7 +24,6 @@ describe('KubernetesResourceListComponent', () => {
                 entityCatalogKey: 'test'
               },
               params: {
-                endpointId: 'anything'
               },
               queryParams: {}
             }

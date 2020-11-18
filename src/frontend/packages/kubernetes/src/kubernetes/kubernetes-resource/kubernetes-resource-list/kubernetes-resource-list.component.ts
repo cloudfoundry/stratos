@@ -33,7 +33,6 @@ import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
 
 const namespaceColumnId = 'namespace';
 
-
 @Component({
   selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
@@ -70,10 +69,16 @@ export class KubernetesResourceListComponent implements OnDestroy {
       this.entityCatalogKey = routeParts[routeParts.length - 1];
     }
 
+    const catalogEntity = kubeEntityCatalog[this.entityCatalogKey];
+    if (!catalogEntity) {
+      console.error(`Can not find catalog entity for Kubernetes entity ${this.entityCatalogKey}`);
+      return;
+    }
+
     const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(kubeId.guid);
     this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
 
-    this.createProvider();
+    this.createProvider(catalogEntity);
 
     // Watch for namespace changes
     this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
@@ -82,7 +87,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     ).subscribe(ns => {
       this.selectedNamespace = ns === '*' ? undefined : ns;
       if (this.isNamespacedView) {
-        this.createProvider();
+        this.createProvider(catalogEntity);
       }
     });
   }
@@ -93,12 +98,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
   }
 
-  private createProvider() {
-    const catalogEntity = kubeEntityCatalog[this.entityCatalogKey];
-    if (!catalogEntity) {
-      console.error(`Can not find catalog entity for Kubernetes entity ${this.entityCatalogKey}`);
-      return;
-    }
+  private createProvider(catalogEntity: any) {
     this.isNamespacedView = !!catalogEntity.definition.apiNamespaced;
     let action;
     if (this.selectedNamespace && this.isNamespacedView) {
@@ -106,6 +106,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     } else {
       action = catalogEntity.actions.getMultiple(this.kubeId.guid);
     }
+
     const provider = new ActionListConfigProvider<KubeAPIResource>(this.store, action);
     const listConfigName = catalogEntity.definition ? catalogEntity.definition.listConfig : null;
     let listConfig: any = this.listConfigService.get(listConfigName);
