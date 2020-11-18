@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DefaultEndpointHomeComponentComponent } from './default-endpoint-home-component.component';
+import { DefaultEndpointHomeComponent } from './default-endpoint-home-component.component';
 
 describe('DefaultEndpointHomeComponentComponent', () => {
-  let component: DefaultEndpointHomeComponentComponent;
-  let fixture: ComponentFixture<DefaultEndpointHomeComponentComponent>;
+  let component: DefaultEndpointHomeComponent;
+  let fixture: ComponentFixture<DefaultEndpointHomeComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DefaultEndpointHomeComponentComponent ]
+      declarations: [ DefaultEndpointHomeComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DefaultEndpointHomeComponentComponent);
+    fixture = TestBed.createComponent(DefaultEndpointHomeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
