@@ -36,7 +36,7 @@ require (
 	github.com/elazarl/goproxy/ext v0.0.0-20200315184450-1f3cb6622dad // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/mock v1.2.0
+	github.com/golang/mock v1.4.4
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/martian v2.1.0+incompatible
@@ -78,7 +78,7 @@ require (
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.5.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/apiextensions-apiserver v0.0.0 // indirect
