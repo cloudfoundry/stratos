@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo/v4"
@@ -128,8 +129,8 @@ func (gep GeneratedEndpointPlugin) UpdateMetadata(info *interfaces.Info, userGUI
 }
 
 type PluginConfig struct {
-	Name      string            `yaml:"name"`
-	AuthTypes map[string]string `yaml:"auth_types"`
+	Name     string `yaml:"name"`
+	AuthType string `yaml:"auth_type"`
 }
 
 func MakePluginsFromConfig() {
@@ -149,6 +150,8 @@ func MakePluginsFromConfig() {
 		return
 	}
 
+	plugins := make(map[string]map[string]string)
+
 	for _, plugin := range config {
 		if len(plugin.Name) == 0 {
 			log.Errorf("Plugin must have a name")
@@ -157,9 +160,25 @@ func MakePluginsFromConfig() {
 
 		log.Debugf("Generating plugin %s", plugin.Name)
 
+		pieces := strings.SplitN(plugin.Name, ".", 2)
+		endpointType, endpointSubtype := pieces[0], ""
+
+		if len(pieces) > 1 {
+			endpointSubtype = pieces[1]
+		}
+
+		_, ok := plugins[endpointType]
+		if !ok {
+			plugins[endpointType] = make(map[string]string)
+		}
+
+		plugins[endpointType][endpointSubtype] = plugin.AuthType
+	}
+
+	for endpointType, authTypes := range plugins {
 		gep := GeneratedEndpointPlugin{}
-		gep.endpointType = plugin.Name
-		gep.authTypes = plugin.AuthTypes
+		gep.endpointType = endpointType
+		gep.authTypes = authTypes
 
 		gp := GeneratedPlugin{}
 		gp.initMethod = func() error { return nil }
@@ -168,10 +187,10 @@ func MakePluginsFromConfig() {
 		gp.routePlugin = func() (interfaces.RoutePlugin, error) { return nil, errors.New("Not implemented") }
 
 		interfaces.AddPlugin(
-			plugin.Name,
+			endpointType,
 			[]string{},
 			func(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-				log.Debugf("%s -- initializing", plugin.Name)
+				log.Debugf("%s -- initializing", endpointType)
 
 				gep.portalProxy = portalProxy
 				return gp, nil

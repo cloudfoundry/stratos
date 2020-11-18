@@ -1,5 +1,5 @@
-- name: git
-  auth_types:
-    github: HttpBasic
-    gitlab: Bearer
+- name: git.github
+  auth_type: HttpBasic
+- name: git.gitlab
+  auth_type: Bearer
 
