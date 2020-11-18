@@ -41,7 +41,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     } else {
       this.registerForm.controls.urlField.enable();
     }
-  };
+  }
 
   existingEndpoints: Observable<{
     names: string[],

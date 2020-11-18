@@ -79,7 +79,7 @@ export abstract class BaseEndpointTileManager {
     }
     // Both A & B are equal. Unlikely.
     return 0;
-  };
+  }
 
   /**
    *
@@ -162,5 +162,5 @@ export abstract class BaseEndpointTileManager {
   private filterByEndpointCount(endpointType: ExpandedEndpoint): boolean {
     // Check that the limit is not exceeded by endpoints already registered
     return endpointType.current < endpointType.limit;
-  };
+  }
 }

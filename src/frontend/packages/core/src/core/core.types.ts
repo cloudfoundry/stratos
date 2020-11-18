@@ -19,4 +19,4 @@ export class HttpOptions {
   reportProgress?: boolean;
   // responseType?: 'json';
   withCredentials?: boolean;
-};
+}

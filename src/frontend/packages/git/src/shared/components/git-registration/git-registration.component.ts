@@ -11,17 +11,17 @@ interface EndpointSubTypes {
 }
 
 interface GithubTypes {
-  label: string,
-  description: string,
+  label: string;
+  description: string;
   types: {
     [key: string]: GithubType;
   };
-};
+}
 
 interface GithubType {
-  url: string,
-  label: string,
-  description: string,
+  url: string;
+  label: string;
+  description: string;
 }
 
 enum GitTypeKeys {

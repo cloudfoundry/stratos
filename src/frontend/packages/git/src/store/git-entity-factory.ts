@@ -13,8 +13,7 @@ export enum GIT_ENDPOINT_SUB_TYPES {
 
 export const getCommitGuid = (scmType: string, projectName: string, sha: string): string => scmType + '--' + projectName + '--' + sha;
 export const getRepositoryGuid = (scmType: string, projectName: string): string => scmType + '--' + projectName;
-export const getBranchGuid = (scmType: string, projectName: string, branchName: string): string => scmType + '--' + projectName + '--' + branchName;
-
+export const getBranchGuid = (scmType: string, projectName: string, brName: string): string => scmType + '--' + projectName + '--' + brName;
 
 const entityCache: {
   [key: string]: EntitySchema;

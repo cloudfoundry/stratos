@@ -11,7 +11,7 @@ const { proxyAPIVersion } = environment;
 const commonPrefix = `/api/${proxyAPIVersion}/proxy`;
 
 export interface GitApiRequest {
-  url: string,
+  url: string;
   requestArgs: HttpOptions;
 }
 

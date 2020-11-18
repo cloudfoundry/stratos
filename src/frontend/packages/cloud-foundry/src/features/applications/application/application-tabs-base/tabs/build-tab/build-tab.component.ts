@@ -50,9 +50,9 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
 );
 
 interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
-  label?: string,
-  icon?: SCMIcon,
-  commitURL?: string,
+  label?: string;
+  icon?: SCMIcon;
+  commitURL?: string;
 }
 
 @Component({
