@@ -30,7 +30,9 @@ import {
   SimpleKubeListColumn,
 } from '../../store/kube.types';
 import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
-import { KubernetesBaseResourceListConfigService } from './kubernetes-resource-list';
+
+const namespaceColumnId = 'namespace';
+
 
 @Component({
   selector: 'app-kubernetes-resource-list',
@@ -155,14 +157,14 @@ export class KubernetesResourceListComponent implements OnDestroy {
       },
       // Namespace
       {
-        columnId: KubernetesBaseResourceListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
+        columnId: namespaceColumnId, headerCell: () => 'Namespace',
         cellDefinition: {
           valuePath: 'metadata.namespace',
           getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
         },
         sort: {
           type: 'sort',
-          orderKey: KubernetesBaseResourceListConfigService.namespaceColumnId,
+          orderKey: namespaceColumnId,
           field: 'metadata.namespace'
         },
         cellFlex: '2',
@@ -178,7 +180,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
     if (hideNamespaceColumn) {
       // Hide the namespace column
-      columns = columns.filter(column => column.columnId !== KubernetesBaseResourceListConfigService.namespaceColumnId);
+      columns = columns.filter(column => column.columnId !== namespaceColumnId);
     }
 
     if (definition && definition.listColumns) {
@@ -186,7 +188,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
 
     columns.push(createKubeAgeColumn());
-
     return columns;
   }
 
