@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { CreateEndpointModule } from '../../../core/src/features/endpoints/create-endpoint/create-endpoint.module';
 import { CoreModule, MDAppModule, SharedModule } from '../../../core/src/public-api';
+import { GitEndpointDetailsComponent } from './components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from './components/git-registration/git-registration.component';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import {
@@ -24,10 +25,12 @@ import { GitSCMService } from './scm/scm.service';
     TableCellCommitAuthorComponent,
     GithubCommitAuthorComponent,
     GitRegistrationComponent,
+    GitEndpointDetailsComponent,
   ],
   exports: [
     GithubCommitAuthorComponent,
-    GitRegistrationComponent
+    GitRegistrationComponent,
+    GitEndpointDetailsComponent,
   ],
   entryComponents: [
     TableCellCommitAuthorComponent,

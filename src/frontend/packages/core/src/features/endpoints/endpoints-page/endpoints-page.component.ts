@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
@@ -62,7 +63,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private ngZone: NgZone,
     private resolver: ComponentFactoryResolver,
     private snackBarService: SnackBarService,
-    cs: CustomizationService
+    cs: CustomizationService,
+    private http: HttpClient,
   ) {
     this.customizations = cs.get();
 
@@ -81,6 +83,16 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       }),
       first()
     ).subscribe();
+
+
+    console.log('Test');
+
+    this.http.get('/api/v1/proxy/Z6KJAVYeHPkiEPuZty0-kArqors/user').subscribe(data => {
+      console.log('Git hub user');
+      console.log(data);
+    });
+
+
   }
 
   subs: Subscription[] = [];

@@ -11,6 +11,7 @@ import {
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig } from '../../../store/src/extension-types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
 import {
   GitBranchActionBuilders,
@@ -84,6 +85,7 @@ class GitEntityCatalog {
       registrationComponent: GitRegistrationComponent,
       registeredLimit: () => 0,
       urlValidationRegexString: urlValidationExpression,
+      listDetailsComponent: GitEndpointDetailsComponent,
       subTypes: [
         {
           type: GIT_ENDPOINT_SUB_TYPES.GITHUB,
