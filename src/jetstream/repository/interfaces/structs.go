@@ -79,11 +79,15 @@ const (
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
+	// AuthTypeBearer is authentication with an API token
+	AuthTypeBearer = "Bearer"
 )
 
 const (
 	// AuthConnectTypeCreds means authenticate with username/password credentials
 	AuthConnectTypeCreds = "creds"
+	// AuthConnectTypeBearer is authentication with an API token
+	AuthConnectTypeBearer = "bearer"
 	// AuthConnectTypeNone means no authentication
 	AuthConnectTypeNone = "none"
 )
