@@ -15,13 +15,13 @@ export interface SpaceQuotaDefinitionActionBuilders extends OrchestratedActionBu
     guid: string,
     endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
-  ) => GetSpaceQuotaDefinition
+  ) => GetSpaceQuotaDefinition;
   create: (
     id: string,
     endpointGuid: string,
     args: {
-      orgGuid: string
-      createQuota: QuotaFormValues
+      orgGuid: string;
+      createQuota: QuotaFormValues;
     },
   ) => CreateSpaceQuotaDefinition;
   update: (
@@ -58,8 +58,8 @@ export const spaceQuotaDefinitionActionBuilders: SpaceQuotaDefinitionActionBuild
     id: string,
     endpointGuid: string,
     args: {
-      orgGuid: string
-      createQuota: QuotaFormValues
+      orgGuid: string;
+      createQuota: QuotaFormValues;
     }
   ) => new CreateSpaceQuotaDefinition(id, endpointGuid, args.orgGuid, args.createQuota),
   update: (

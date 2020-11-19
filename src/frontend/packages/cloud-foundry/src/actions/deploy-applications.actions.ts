@@ -61,7 +61,7 @@ export class ProjectExists implements Action {
 
 export class FetchBranchForProject implements EntityRequestAction {
   constructor(public scm: GitSCM, public projectName: string, public guid: string, public branchName: string) {
-    this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`
+    this.guid = this.guid || `${scm.getType()}-${this.projectName}-${this.branchName}`;
   }
   actions = [
     FETCH_BRANCH_START,

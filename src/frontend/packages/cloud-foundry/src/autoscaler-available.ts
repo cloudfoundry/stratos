@@ -17,10 +17,6 @@ export const fetchAutoscalerInfo = (
   esf: EntityServiceFactory): Observable<EntityInfo<APIResource<AutoscalerInfo>>> => {
   const action = new GetAppAutoscalerInfoAction(endpointGuid);
   const entityService = esf.create<APIResource<AutoscalerInfo>>(endpointGuid, action);
-  console.log(endpointGuid);
-  console.log(action);
-
-  console.log('Fetching autoscaler info');
   return entityService.entityObs$.pipe(
     filter(entityInfo =>
       !!entityInfo &&

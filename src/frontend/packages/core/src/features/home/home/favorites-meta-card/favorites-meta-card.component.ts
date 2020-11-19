@@ -45,7 +45,7 @@ export class FavoritesMetaCardComponent {
       this.favorite = favoriteEntity;
       this.favoriteType = this.favorite.getPrettyTypeName();
       this.icon = this.favorite.getIcon();
-      this.name = this.favorite.metadata.name
+      this.name = this.favorite.metadata.name;
       this.routerLink = this.favorite.getLink();
     }
   }
@@ -66,7 +66,7 @@ export class FavoritesMetaCardComponent {
           'Remove',
           true
         );
-        this.confirmDialog.open(confirmation, () => { this.userFavoriteManager.toggleFavorite(this.favorite); })
+        this.confirmDialog.open(confirmation, () => { this.userFavoriteManager.toggleFavorite(this.favorite); });
       } else {
         // Navigate to the favorite
         this.router.navigate([this.routerLink]);

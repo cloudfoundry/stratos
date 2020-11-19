@@ -1,5 +1,6 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,6 +13,7 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { goToAppWall } from '../../cf/cf.helpers';
 
 @Component({
   selector: 'app-application-wall',
@@ -48,7 +50,15 @@ export class ApplicationWallComponent implements OnDestroy {
     public cloudFoundryService: CloudFoundryService,
     private store: Store<CFAppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
+    activatedRoute: ActivatedRoute,
   ) {
+    // If we have an endpoint ID, select it and redirect
+    const { endpointId } = activatedRoute.snapshot.params;
+    if (endpointId) {
+      goToAppWall(this.store, endpointId);
+      return;
+    }
+
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
@@ -65,6 +75,8 @@ export class ApplicationWallComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.initCfOrgSpaceService.unsubscribe();
+    if (this.initCfOrgSpaceService) {
+      this.initCfOrgSpaceService.unsubscribe();
+    }
   }
 }

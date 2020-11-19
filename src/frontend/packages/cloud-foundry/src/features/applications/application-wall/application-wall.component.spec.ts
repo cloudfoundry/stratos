@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -24,6 +25,15 @@ describe('ApplicationWallComponent', () => {
         DatePipe,
         TabNavService,
         CloudFoundryService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: {},
+              queryParams: {}
+            }
+          }
+        }
       ]
     })
       .compileComponents();

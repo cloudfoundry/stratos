@@ -14,7 +14,7 @@ export class FavoritesSidePanelComponent implements PreviewableComponent {
   name: string;
 
   setProps(props: { [key: string]: any; }): void {
-    this.favorites$ = props.favorites$
+    this.favorites$ = props.favorites$;
     this.name = props.endpoint.name;
   }
 

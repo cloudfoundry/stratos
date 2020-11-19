@@ -21,7 +21,7 @@ export interface ICurrentUserPermissionsChecker {
    * If this is not supported by the the checker null is returned. If another checker also lays claim to the same string the check will
    * always return denied
    */
-  getPermissionConfig: (action: string) => PermissionConfigType
+  getPermissionConfig: (action: string) => PermissionConfigType;
   /**
    * Simple checks are used when the permission config contains a single thing to check
    */

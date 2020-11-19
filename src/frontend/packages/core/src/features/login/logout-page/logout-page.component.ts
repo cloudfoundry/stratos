@@ -25,7 +25,7 @@ export class LogoutPageComponent implements OnInit {
     // Dispatch the logout action after 1 second - give the logging out screen time to show
     setTimeout(() => {
       this.store.dispatch(new Logout());
-    }, 1000)
+    }, 1000);
   }
 
   reload() {

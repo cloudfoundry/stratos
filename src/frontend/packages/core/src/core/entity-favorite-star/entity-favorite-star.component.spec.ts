@@ -33,7 +33,9 @@ describe('EntityFavoriteStarComponent', () => {
       declarations: [
         DialogConfirmComponent
       ],
-      imports: [...BaseTestModulesNoShared,],
+      imports: [
+        ...BaseTestModulesNoShared
+      ],
     })
       .compileComponents();
   }));

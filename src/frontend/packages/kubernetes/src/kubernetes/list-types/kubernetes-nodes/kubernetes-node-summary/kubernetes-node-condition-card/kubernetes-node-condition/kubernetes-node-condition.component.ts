@@ -22,7 +22,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
   overrideCondition$: Observable<boolean>;
 
   @Input()
-  type = 'yes-no'
+  type = 'yes-no';
 
   @Input()
   inverse = false;
@@ -61,7 +61,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     );
     this.hasCondition$ = this.condition$.pipe(
       map(() => true)
-    )
+    );
   }
 
   shouldBeGreen(condition: KubernetesCondition) {

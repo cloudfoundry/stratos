@@ -26,7 +26,6 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
   }>(null);
   initialValue$ = this.initialValue.asObservable();
 
-  private pRow: KubeConfigFileCluster;
   @Input()
   set row(row: KubeConfigFileCluster) {
     if (!this.pRow) {

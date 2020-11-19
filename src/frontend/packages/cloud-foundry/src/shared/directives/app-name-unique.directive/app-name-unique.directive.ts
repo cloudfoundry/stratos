@@ -63,7 +63,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     this.appApplicationNameUnique.set(false);
   }
 
-  public validate(control: AbstractControl): Observable<{ appNameTaken: boolean; } | null> {
+  public validate(control: AbstractControl): Observable<{ appNameTaken: boolean, } | null> {
     if (!control.dirty) {
       return observableOf(null);
     }

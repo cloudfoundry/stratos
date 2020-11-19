@@ -24,7 +24,7 @@ import {
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout } from './../../../../../core/src/features/home/home.types';
+import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
 import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
 
 
@@ -40,20 +40,20 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
     CloudFoundryEndpointService
   ]
 })
-export class CFHomeCardComponent {
+export class CFHomeCardComponent implements HomePageEndpointCard {
 
-  _layout: HomePageCardLayout;
+  pLayout: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
-    return this._layout;
+    return this.pLayout;
   }
 
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
-      this._layout = value;
+      this.pLayout = value;
     }
     this.updateLayout();
-  };
+  }
 
   @Input() set endpoint(value: EndpointModel) {
     this.guid = value.guid;
@@ -89,7 +89,7 @@ export class CFHomeCardComponent {
     appDeploySourceTypes: ApplicationDeploySourceTypes,
   ) {
     // Set a default layout
-    this._layout = new HomePageCardLayout(1, 1);
+    this.pLayout = new HomePageCardLayout(1, 1);
 
     // Get source types for if we are showing tiles to deploy an application
     this.sourceTypes = appDeploySourceTypes.getTypes();
@@ -110,7 +110,7 @@ export class CFHomeCardComponent {
     if (tile) {
       const query = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
-        [AUTO_SELECT_CF_URL_PARAM]:this.guid
+        [AUTO_SELECT_CF_URL_PARAM]: this.guid
       };
       if (tile.data.subType) {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
@@ -124,9 +124,9 @@ export class CFHomeCardComponent {
     this.cardLoaded = true;
     this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
     this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
-    this.orgCount$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.guid).pipe(map(orgs => orgs.length));
+    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid);
 
-    this.appLink = () => goToAppWall(this.store, this.guid);;
+    this.appLink = () => goToAppWall(this.store, this.guid);
 
     const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
 
@@ -182,10 +182,8 @@ export class CFHomeCardComponent {
           first()
         ).subscribe(a => {
           this.fetchAppStats();
-          this.fetchAppStats();
         });
       } else {
-        this.fetchAppStats();
         this.fetchAppStats();
       }
     } else {
@@ -194,11 +192,6 @@ export class CFHomeCardComponent {
   }
 
   private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    if (!apps) {
-      return [];
-    }
-    return [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
+    return !apps ? [] : [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
   }
-
 }
-

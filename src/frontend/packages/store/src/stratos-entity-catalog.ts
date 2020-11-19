@@ -20,25 +20,25 @@ export class StratosEntityCatalog {
     undefined,
     EndpointModel,
     EndpointActionBuilder
-  >
+  >;
 
   systemInfo: StratosCatalogEntity<
     undefined,
     SystemInfo,
     SystemInfoActionBuilder
-  >
+  >;
 
   userFavorite: StratosCatalogEntity<
     undefined,
     UserFavorite,
     UserFavoriteActionBuilder
-  >
+  >;
 
   userProfile: StratosCatalogEntity<
     undefined,
     UserProfileInfo,
     UserProfileActionBuilder
-  >
+  >;
 
   metricsEndpoint: StratosCatalogEndpointEntity;
 
@@ -46,7 +46,7 @@ export class StratosEntityCatalog {
     undefined,
     ApiKey,
     ApiKeyActionBuilder
-  >
+  >;
 }
 
 export const stratosEntityCatalog = new StratosEntityCatalog();

@@ -14,7 +14,7 @@ describe('ChartDetailsVersionsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ChartDetailsVersionsComponent, PanelComponent],
       imports: [RouterTestingModule],
-      providers: [{ provide: ChartsService, useValue: new MockChartService() },]
+      providers: [{ provide: ChartsService, useValue: new MockChartService() }]
     })
       .compileComponents();
   }));

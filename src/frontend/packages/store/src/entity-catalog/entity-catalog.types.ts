@@ -1,7 +1,8 @@
-import { Compiler, Injector } from '@angular/core';
+import { Compiler, ComponentFactory, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
 import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
 import { AppState, GeneralEntityAppState } from '../app-state';
 import {
@@ -70,7 +71,7 @@ export interface HomeCardShortcut {
 
 // Metadata for Home Card
 export interface HomeCardMetadata {
-  component?: (compiler: Compiler, injector: Injector) => any;
+  component?: (compiler: Compiler, injector: Injector) => Promise<ComponentFactory<HomePageEndpointCard>>;
   shortcuts?: (endpointID: string) => HomeCardShortcut[];
   fullView?: boolean;
 }
@@ -236,10 +237,8 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
     singular: string,
     plural: string,
   };
-  /**
-   * Checks if the given entity is stil valid (e.g. has not been deleted)
-   */
-  getIsValid?(entityMetadata: T): Observable<boolean>;
+  // Is the underlying entity for the favorite valid?
+  getIsValid?(entityMetadata): Observable<boolean>;
   /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions

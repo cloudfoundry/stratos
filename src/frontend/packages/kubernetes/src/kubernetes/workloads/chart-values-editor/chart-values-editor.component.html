@@ -2,11 +2,13 @@
   <div *ngIf="initing || (loading$ | async)" class="editor-loading">
     <div>
       <div class="editor-loading__msg">Loading ...</div>
-      <mat-progress-bar class="editor-loading__progress-bar" [color]="'primary'" mode="indeterminate"></mat-progress-bar>      
+      <mat-progress-bar class="editor-loading__progress-bar" [color]="'primary'" mode="indeterminate">
+      </mat-progress-bar>
     </div>
   </div>
   <mat-toolbar class="editor-toolbar">
-    <mat-button-toggle-group [value]="mode" name="editMode" aria-label="Edit Mode" (change)="editModeChanged($event)"  *ngIf="schema; else editorOnly">
+    <mat-button-toggle-group [value]="mode" name="editMode" aria-label="Edit Mode" (change)="editModeChanged($event)"
+      *ngIf="schema; else editorOnly">
       <mat-button-toggle value="form">Form</mat-button-toggle>
       <mat-button-toggle value="editor">YAML</mat-button-toggle>
     </mat-button-toggle-group>
@@ -29,7 +31,7 @@
       <button mat-button [matMenuTriggerFor]="appMenu">
         <span>Values</span>
         <mat-icon>arrow_drop_down</mat-icon>
-      </button> 
+      </button>
     </div>
 
     <div class="editor-toolbar-buttons">
@@ -40,7 +42,7 @@
         <mat-icon>map</mat-icon>
       </mat-button-toggle>
     </div>
-      
+
   </mat-toolbar>
   <div [ngClass]="{'editor-hidden': mode !== 'form'}" class="editor-form">
     <div class="editor-yaml-error" *ngIf="yamlError">
@@ -51,13 +53,16 @@
         <div class="editor-yaml-error__text">
           <div>Error - YAML is not valid</div>
           <div>Use the YAML editor to correct it so the values can be loaded into the form</div>
-          </div>
+        </div>
       </div>
     </div>
-    <json-schema-form *ngIf="hasSchema" (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="schema" framework="material-design" [data]="initialFormData"></json-schema-form>
+    <json-schema-form *ngIf="hasSchema" (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
+      [options]="{ addSubmit: false }" [schema]="schema" framework="material-design" [data]="initialFormData">
+    </json-schema-form>
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
-    <ngx-monaco-editor #monacoEditor class="editor-monaco-edit "[options]="editorOptions" [model]="model" [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
+    <ngx-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
+      [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
   </div>
 
 </mat-card>

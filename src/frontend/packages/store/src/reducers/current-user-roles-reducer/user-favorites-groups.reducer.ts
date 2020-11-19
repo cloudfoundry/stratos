@@ -61,8 +61,8 @@ export function userFavoriteGroupsReducer(
 function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
   const { favorites } = action;
   return favorites.reduce((favoriteGroups, favorite) => {
-    const { guid } = deriveEndpointFavoriteFromFavorite(favorite);
-    favoriteGroups[guid] = addFavoriteToGroup(favoriteGroups[guid], favorite);
+    const userFavorite = deriveEndpointFavoriteFromFavorite(favorite);
+    favoriteGroups[userFavorite.guid] = addFavoriteToGroup(favoriteGroups[userFavorite.guid], favorite);
     return favoriteGroups;
   }, {} as IUserFavoritesGroups);
 }
@@ -129,8 +129,12 @@ function addFavoriteToGroup(favoriteGroup: IUserFavoriteGroup = getDefaultFavori
       ...favoriteGroup.entitiesIds
     ]
   };
+
   const { guid } = favorite;
   const isEndpoint = isEndpointTypeFavorite(favorite);
+  if (isEndpoint) {
+    fg.endpoint = favorite;
+  }
   if (!isEndpoint && guid && !fg.entitiesIds.includes(guid)) {
     fg.entitiesIds.push(guid);
   }
