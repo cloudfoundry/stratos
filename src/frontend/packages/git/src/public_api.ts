@@ -1,5 +1,5 @@
 /*
- * Public API Surface ofgit
+ * Public API Surface of git
  */
 
 export * from './git-package.module';
