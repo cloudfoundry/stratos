@@ -27,7 +27,6 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
             return [
               ...generateCFEntities(),
               ...generateStratosEntities(),
-              //...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
             ];
           }
         }
