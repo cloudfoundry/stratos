@@ -4,6 +4,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { AppComponent } from './app.component';
+import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 
@@ -15,7 +16,8 @@ describe('AppComponent', () => {
         AppComponent
       ],
       providers: [
-        LoggedInService
+        LoggedInService,
+        CurrentUserPermissionsService,
       ],
       imports: [
         SharedModule,

@@ -16,18 +16,23 @@
   <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint
   </mat-checkbox>
   <div *ngIf="showAdvancedFields" class="create-endpoint__section">
-    <h1 class="create-endpoint__section-title">Advanced Information (Optional)</h1>
-    <mat-form-field>
-      <input matInput id="client_id" name="client_id" ngModel #clientIDField="ngModel" placeholder="Client ID">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel"
-        placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
-      <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
-        [attr.aria-pressed]="!show">
-        <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
-      </button>
-    </mat-form-field>
+    <mat-checkbox matInput (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
+    <div [ngClass]="{'create-endpoint__shown': showAdvancedOptions}" class="create-endpoint__advanced">
+      <h1>Advanced Options</h1>
+      <p>Client ID and Client Secret do not normally need to be specified.</p>
+      <p>Note that these are not administrator credentials and only need to be specified if your endpoint uses non-standard configuration.</p>
+      <mat-form-field>
+        <input matInput id="client_id" name="client_id" ngModel #clientIDField="ngModel" placeholder="Client ID">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput id="client_secret" name="client_secret" ngModel #clientSecretField="ngModel"
+          placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+        <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+          [attr.aria-pressed]="!show">
+          <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
   </div>
   <div *ngIf="endpointTypeSupportsSSO" class="create-endpoint__sso">
     <mat-checkbox matInput name="ssoAllowed" #ssoAllowedField="ngModel" ngModel>Allow SSO login to this endpoint

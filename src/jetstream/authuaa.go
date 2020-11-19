@@ -30,6 +30,14 @@ type uaaAuth struct {
 	skipSSLValidation      bool
 }
 
+func (a *uaaAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
+	log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
+	log.Infof("... Console Client          : %s", config.ConsoleClient)
+	log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login           : %t", config.UseSSO)
+}
+
 //Login provides UAA-auth specific Stratos login
 func (a *uaaAuth) Login(c echo.Context) error {
 	log.Debug("UAA Login")
@@ -113,6 +121,8 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	return uaaEntry, nil
 
 }
+
+func (a *uaaAuth) BeforeVerifySession(c echo.Context) {}
 
 //VerifySession verifies the session the specified UAA user and refreshes the token if necessary
 func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {

@@ -14,6 +14,7 @@
   $username-background: $menu-background-color;
   $header-background: map-get($app-theme, header-background-color);
   $header-foreground: map-get($app-theme, header-foreground-color);
+  $header-border: map-get($app-theme, header-border-color);
   $underflow-background: map-get($app-theme, underflow-background-color);
   $underflow-foreground: map-get($app-theme, underflow-foreground-color);
 
@@ -28,6 +29,9 @@
     &__toolbar {
       background-color: $header-background;
       color: $header-foreground;
+      @if $header-border and $header-border != 'none' {
+        border-bottom: 1px solid $header-border;
+      }
     }
     &__warning-count {
       background-color: mat-color($primary);
