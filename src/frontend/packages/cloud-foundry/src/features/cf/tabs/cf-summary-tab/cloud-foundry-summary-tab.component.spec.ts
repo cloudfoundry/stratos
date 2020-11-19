@@ -6,12 +6,8 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
-import {
-  CardCfRecentAppsComponent,
-} from '../../../../shared/components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import {
-  CompactAppCardComponent,
-} from '../../../../shared/components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
+import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from '../../../home/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 
 describe('CloudFoundrySummaryTabComponent', () => {

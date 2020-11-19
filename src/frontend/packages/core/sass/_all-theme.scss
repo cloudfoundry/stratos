@@ -53,13 +53,11 @@
 @import './mat-desktop';
 @import './fonts';
 @import './ansi-colors';
-@import '../src/shared/components/favorites-global-list/favorites-global-list.component.theme';
-@import '../src/shared/components/favorites-meta-card/favorites-meta-card.component.theme';
-
-@import '../../core/src/features/error-page/error-page/error-page.component.theme';
-@import '../../core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
-@import '../../core/src/features/metrics/metrics/metrics.component.theme';
-
+@import '../src/features/home/home/favorites-meta-card/favorites-meta-card.component.theme';
+@import '../src/features/home//home/home-page-endpoint-card/home-page-endpoint-card.component.theme';
+@import '../src/features/error-page/error-page/error-page.component.theme';
+@import '../src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.theme';
+@import '../src/features/metrics/metrics/metrics.component.theme';
 
 // Creates the app theme and applies it to the application
 // $theme = Angular Material Theme
@@ -116,7 +114,6 @@
   @include stateful-icon($theme, $app-theme);
   @include app-simple-usage-chart($theme, $app-theme);
   @include home-page-theme($theme, $app-theme);
-  @include favorites-global-list-theme($theme, $app-theme);
   @include favorites-meta-card-theme($theme, $app-theme);
   @include page-side-nav-theme($theme, $app-theme);
   @include entity-summary-title-theme($theme, $app-theme);
@@ -129,5 +126,6 @@
   @include metrics-component-theme($theme, $app-theme);
   @include intro-screen-theme($theme, $app-theme);
   @include app-json-view-theme($theme, $app-theme);
+  @include home-page-endpoint-card-theme($theme, $app-theme);
 
 }

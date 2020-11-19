@@ -1,4 +1,3 @@
-import { GRAVATAR_ENABLED, SetGravatarEnabledAction } from './../actions/dashboard-actions';
 import {
   CLOSE_SIDE_NAV,
   DISABLE_SIDE_NAV_MOBILE_MODE,
@@ -14,6 +13,12 @@ import {
   TIMEOUT_SESSION,
   TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
+import {
+  GRAVATAR_ENABLED,
+  HOME_CARD_LAYOUT,
+  SetGravatarEnabledAction,
+  SetHomeCardLayoutAction,
+} from './../actions/dashboard-actions';
 
 export interface DashboardState {
   timeoutSession: boolean;
@@ -25,6 +30,7 @@ export interface DashboardState {
   themeKey: string;
   headerEventMinimized: boolean;
   gravatarEnabled: boolean;
+  homeLayout: number;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -37,6 +43,7 @@ export const defaultDashboardState: DashboardState = {
   themeKey: null,
   headerEventMinimized: false,
   gravatarEnabled: false,
+  homeLayout: 0,
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -78,7 +85,13 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         ...state,
         gravatarEnabled: gravatarAction.enableGravatar
       };
-    case HYDRATE_DASHBOARD_STATE:
+      case HOME_CARD_LAYOUT:
+        const layoutAction = action as SetHomeCardLayoutAction;
+        return {
+          ...state,
+          homeLayout: layoutAction.id
+        };
+      case HYDRATE_DASHBOARD_STATE:
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,

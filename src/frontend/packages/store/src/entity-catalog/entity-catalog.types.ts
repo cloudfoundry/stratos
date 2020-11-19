@@ -1,6 +1,8 @@
+import { Compiler, ComponentFactory, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
 import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
 import { AppState, GeneralEntityAppState } from '../app-state';
 import {
@@ -58,6 +60,20 @@ export interface IStratosEntityWithIcons {
 export interface IEntityMetadata {
   name: string;
   [key: string]: string;
+}
+
+export interface HomeCardShortcut {
+  title: string;
+  link: string[];
+  icon: string;
+  iconFont?: string;
+}
+
+// Metadata for Home Card
+export interface HomeCardMetadata {
+  component?: (compiler: Compiler, injector: Injector) => Promise<ComponentFactory<HomePageEndpointCard>>;
+  shortcuts?: (endpointID: string) => HomeCardShortcut[];
+  fullView?: boolean;
 }
 
 /**
@@ -161,6 +177,11 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    * Note - These should be restricted by type
    */
   readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+
+  /**
+   * Metadata for the card to show on the Home Page for this endpoint type
+   */
+  readonly homeCard?: HomeCardMetadata;
 }
 
 export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
@@ -209,7 +230,6 @@ export type EntityRowBuilder<T> = [string, (entity: T, store?: Store<GeneralEnti
 
 export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
-  getStatusObservable?(entity: Y): Observable<StratosStatus>;
   // TODO This should be used in the entities schema.
   getGuid(entityMetadata: T): string;
   getLink?(entityMetadata: T): string;

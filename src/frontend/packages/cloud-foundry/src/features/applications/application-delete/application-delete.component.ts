@@ -61,7 +61,7 @@ import { ApplicationService } from '../application.service';
   ]
 })
 export class ApplicationDeleteComponent<T> {
-  relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[] }>;
+  relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;
   public deleteStarted = false;
   public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
@@ -303,20 +303,20 @@ export class ApplicationDeleteComponent<T> {
         if (success) {
           if (this.selectedRoutes && this.selectedRoutes.length) {
             this.selectedRoutes.forEach(route => {
-              cfEntityCatalog.route.api.delete(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid)
+              cfEntityCatalog.route.api.delete(route.metadata.guid, this.applicationService.cfGuid, this.applicationService.appGuid);
             });
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
             this.selectedServiceInstances.forEach(instance => {
               if (isUserProvidedServiceInstance(instance.entity.service_instance.entity)) {
-                cfEntityCatalog.userProvidedService.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid)
+                cfEntityCatalog.userProvidedService.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid);
               } else {
-                cfEntityCatalog.serviceInstance.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid)
+                cfEntityCatalog.serviceInstance.api.remove(instance.entity.service_instance_guid, this.applicationService.cfGuid);
               }
             });
           }
         }
       })
     );
-  }
+  };
 }

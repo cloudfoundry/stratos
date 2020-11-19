@@ -87,7 +87,7 @@ export class GitLabSCM implements GitSCM {
     );
   }
 
-  getCommitApiUrl(projectName: string, commitSha: string,): string {
+  getCommitApiUrl(projectName: string, commitSha: string): string {
     const prjNameEncoded = encodeURIComponent(projectName);
     return `${gitLabAPIUrl}/projects/${prjNameEncoded}/repository/commits/${commitSha}`;
   }

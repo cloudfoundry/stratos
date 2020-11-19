@@ -6,4 +6,7 @@
     background-color: darken(mat-color($background-colors, background), 5%);
     border-left: 1px solid mat-color($foreground, divider);
   }
+  .layout-menu__sep {
+    border-bottom: 1px solid mat-color($foreground, divider);;
+  }
 }

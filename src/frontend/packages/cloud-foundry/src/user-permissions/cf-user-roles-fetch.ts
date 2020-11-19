@@ -145,7 +145,7 @@ function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppSta
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
 
-  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any; }) {
+  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any, }) {
     super(httpClient, url, requestOptions, 'page');
   }
   public getTotalPages = (res: CFResponse) => res.total_pages;

@@ -22,6 +22,7 @@ import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { selectPaginationState } from '../../../../../store/src/selectors/pagination.selectors';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 
 @Component({
@@ -78,6 +79,11 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Has the endpoint ID been specified in the URL?
+    const endpoint = this.activatedRoute.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
+    if (endpoint) {
+      this.cfOrgSpaceService.cf.select.next(endpoint);
+    }
 
     if (this.appGuid) {
       this.deployButtonText = 'Redeploy';

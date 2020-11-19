@@ -1,3 +1,4 @@
+import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import moment from 'moment';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -222,6 +223,33 @@ export interface CFBasePipelineRequestActionMeta {
   flatten?: boolean;
 }
 
+function cfShortcuts(id: string) {
+  return [
+    {
+      title: 'View Organizations',
+      link: ['/cloud-foundry', id, 'organizations'],
+      icon: 'organization',
+      iconFont: 'stratos-icons'
+    },
+    {
+      title: 'View Applications',
+      link: ['/applications', id],
+      icon: 'apps'
+    },
+    {
+      title: 'Deploy an Application',
+      link: ['/applications', 'new', id],
+      icon: 'publish'
+    },
+    {
+      title: 'View Cloud Foundry Info',
+      link: ['/cloud-foundry', id],
+      icon: 'cloud_foundry',
+      iconFont: 'stratos-icons'
+    },
+  ];
+}
+
 export function generateCFEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     urlValidationRegexString: urlValidationExpression,
@@ -232,6 +260,16 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     iconFont: 'stratos-icons',
     logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
     authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.SSO],
+    homeCard: {
+      component: (compiler: Compiler, injector: Injector) => import('./features/home/cfhome-card/cfhome-card.module').then(m => {
+        return compiler.compileModuleAndAllComponentsAsync(m.CFHomeCardModule).then(cm => {
+          const mod = cm.ngModuleFactory.create(injector);
+          return mod.instance.createHomeCard(mod.componentFactoryResolver);
+        });
+      }),
+      shortcuts: cfShortcuts,
+      fullView: false,
+    },
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
     healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
@@ -1122,7 +1160,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           ['Created', (meta) => meta.createdAt]
         ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -1197,3 +1235,4 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
   );
   return cfEntityCatalog.metric;
 }
+

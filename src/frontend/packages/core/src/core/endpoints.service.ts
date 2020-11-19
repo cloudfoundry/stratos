@@ -24,6 +24,7 @@ export class EndpointsService implements CanActivate {
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
   disablePersistenceFeatures$: Observable<boolean>;
+  connectedEndpoints$: Observable<EndpointModel[]>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint) {
@@ -44,18 +45,17 @@ export class EndpointsService implements CanActivate {
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
-    this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
-      !!Object.values(endpoints).find(endpoint => {
+    this.connectedEndpoints$ = this.endpoints$.pipe(map(endpoints =>
+      Object.values(endpoints).filter(endpoint => {
         const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
         if (!epType || !epType.definition) {
           return false;
         }
         const epEntity = epType.definition;
-        return epEntity.unConnectable ||
-          endpoint.connectionStatus === 'connected' ||
-          endpoint.connectionStatus === 'checking';
-      }))
-    );
+        return epEntity.unConnectable || endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking';
+      })
+    ));
+    this.haveConnected$ = this.connectedEndpoints$.pipe(map(endpoints => endpoints.length > 0));
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
       map((auth) => auth.sessionData &&

@@ -22,10 +22,12 @@ import {
 export enum StratosCurrentUserPermissions {
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password',
+  EDIT_PROFILE = 'edit-profile',
   /**
    * Does the user have permission to view/create/delete their own API Keys?
    */
-  API_KEYS = 'api-keys'
+  API_KEYS = 'api-keys',
+  CAN_NOT_LOGOUT = 'no-logout'
 }
 
 export enum StratosPermissionStrings {
@@ -36,7 +38,9 @@ export enum StratosPermissionStrings {
 
 export enum StratosScopeStrings {
   STRATOS_CHANGE_PASSWORD = 'password.write',
-  SCIM_READ = 'scim.read'
+  SCIM_READ = 'scim.read',
+  SCIM_WRITE = 'scim.write',
+  STRATOS_NOAUTH = 'stratos.noauth'
 }
 
 export enum StratosPermissionTypes {
@@ -57,11 +61,19 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
     StratosPermissionTypes.STRATOS_SCOPE,
     StratosScopeStrings.STRATOS_CHANGE_PASSWORD
   ),
-  [StratosCurrentUserPermissions.API_KEYS]: new PermissionConfig(StratosPermissionTypes.API_KEY, '')
+  [StratosCurrentUserPermissions.EDIT_PROFILE]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.SCIM_WRITE
+  ),
+  [StratosCurrentUserPermissions.API_KEYS]: new PermissionConfig(StratosPermissionTypes.API_KEY, ''),
+  [StratosCurrentUserPermissions.CAN_NOT_LOGOUT]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.STRATOS_NOAUTH
+  ),
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  constructor(private store: Store<GeneralEntityAppState>,) {
+  constructor(private store: Store<GeneralEntityAppState>) {
     super();
   }
 
@@ -146,7 +158,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
   public getFallbackCheck(endpointGuid: string, endpointType: string): Observable<boolean> {
     return null;
-  };
+  }
 
   private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
     return configs.reduce((grouped, config) => {

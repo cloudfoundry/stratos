@@ -13,7 +13,6 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
 
   public status: string;
   public lastDeployed: string;
-  private pRow: HelmRelease;
   public icon: string;
 
   @Input('row')

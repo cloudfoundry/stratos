@@ -11,10 +11,21 @@ import { TableCellCustom } from '../../list.types';
 export class TableCellEditComponent<T> extends TableCellCustom<T> {
 
   @Input()
-  row: T;
+  get row(): T {
+    return this.pRow;
+  }
+  set row(row: T) {
+    this.pRow = row;
+  }
 
   @Input()
-  dataSource: IListDataSource<T>;
+  set dataSource(dataSource: IListDataSource<T>) {
+    this.pDataSource = dataSource;
+  }
+  get dataSource(): IListDataSource<T> {
+    return this.pDataSource;
+  }
+
 
   @Input()
   subtle: boolean;
@@ -22,6 +33,6 @@ export class TableCellEditComponent<T> extends TableCellCustom<T> {
   isEditing(): boolean {
     return this.dataSource.editRow ?
       this.dataSource.getRowUniqueId(this.row) === this.dataSource.getRowUniqueId(this.dataSource.editRow) :
-      false
+      false;
   }
 }

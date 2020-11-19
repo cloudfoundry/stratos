@@ -1,5 +1,5 @@
 <mat-card class="meta-card {{status$ && statusBackground? (status$ | async): '' }}"
-  [ngClass]="{'meta-card-pointer': clickAction}" (click)="clickAction ? clickAction() : null">
+  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}" (click)="clickAction ? clickAction() : null">
   <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
     <div class="meta-card__deleting-overlay-inner">
       <div class="meta-card__deleting-text">Deleting</div>

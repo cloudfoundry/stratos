@@ -15,7 +15,7 @@ describe('CatalogTabComponent', () => {
         ...HelmBaseTestModules
       ],
       declarations: [CatalogTabComponent],
-      providers: [{ provide: ChartsService, useValue: new MockChartService() },]
+      providers: [{ provide: ChartsService, useValue: new MockChartService() }]
     })
       .compileComponents();
   }));

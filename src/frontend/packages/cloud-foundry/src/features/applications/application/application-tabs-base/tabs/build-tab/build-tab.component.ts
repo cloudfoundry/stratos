@@ -57,7 +57,7 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean; }>;
+  public isBusyUpdating$: Observable<{ updating: boolean }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(
@@ -78,7 +78,7 @@ export class BuildTabComponent implements OnInit {
 
   sshStatus$: Observable<string>;
 
-  deploySource$: Observable<{ type: string, [name: string]: any; }>;
+  deploySource$: Observable<{ type: string, [name: string]: any }>;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(

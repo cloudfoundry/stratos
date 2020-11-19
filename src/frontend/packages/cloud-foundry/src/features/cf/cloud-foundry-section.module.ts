@@ -10,6 +10,7 @@ import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import {
   CFEndpointsListConfigService,
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
+import { CFHomeCardModule } from '../home/cfhome-card/cfhome-card.module';
 import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import {
   CreateOrganizationStepComponent,
@@ -138,7 +139,8 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
     CloudFoundrySectionRoutingModule,
     RouterModule,
     NgxChartsModule,
-    CloudFoundrySharedModule
+    CloudFoundrySharedModule,
+    CFHomeCardModule,
   ],
   declarations: [
     CloudFoundryBaseComponent,

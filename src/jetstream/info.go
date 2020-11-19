@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 // Endpoint - This represents the CNSI endpoint
@@ -97,7 +98,14 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			endpoint.SystemSharedToken = token.SystemShared
 		}
 		cnsiType := cnsi.CNSIType
-		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
+
+		_, ok = s.Endpoints[cnsiType]
+		if ok {
+			s.Endpoints[cnsiType][cnsi.GUID] = endpoint
+		} else {
+			// definitions of YAML-defined plugins may be removed
+			log.Warnf("Unknown endpoint type %q encountered in the DB", cnsiType)
+		}
 	}
 
 	// Allow plugin to modify the info data

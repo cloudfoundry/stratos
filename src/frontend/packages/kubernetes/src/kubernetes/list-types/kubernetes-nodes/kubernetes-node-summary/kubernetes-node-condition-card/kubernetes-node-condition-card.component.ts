@@ -26,10 +26,10 @@ export class KubernetesNodeConditionCardComponent {
 
     this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
       map(node => node.disruptiveUpdates)
-    )
+    );
 
     this.caaspNodSecurity$ = this.caaspNode$.pipe(
       map(node => node.securityUpdates)
-    )
+    );
   }
 }

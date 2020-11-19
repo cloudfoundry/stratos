@@ -1,4 +1,4 @@
-<app-page-header tabsHeader="Namespace" [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
+<app-page-header tabsHeader="Namespace" [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" [favorite]="favorite$ | async">
   <h1>{{ kubeNamespaceService.namespaceName }}</h1>
   <div class="page-header-right">
   </div>
