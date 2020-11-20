@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 
-import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
@@ -17,7 +16,7 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
 export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   TableCellCustom<T, TableCellFavoriteComponentConfig<T, Y>> {
 
-  constructor(private favoritesConfigMapper: FavoritesConfigMapper) {
+  constructor() {
     super();
   }
 
@@ -39,7 +38,7 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   private createUserFavorite() {
     if (this.row && this.config) {
       this.favorite = this.config.createUserFavorite(this.row);
-      this.canFavorite = !!this.favoritesConfigMapper.getMapperFunction(this.favorite);
+      this.canFavorite = this.favorite.canFavorite();
     }
   }
 }

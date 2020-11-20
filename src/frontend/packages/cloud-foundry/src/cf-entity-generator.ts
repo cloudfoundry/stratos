@@ -1,6 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import moment from 'moment';
+import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -509,7 +509,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         name: `Application environment variables (${ent.metadata.guid}).`,
         guid: ent.metadata.guid
       }),
-      getGuid: metadata => metadata.guid,
+      getGuid: ent => ent.metadata.guid,
     },
   });
   return cfEntityCatalog.appEnvVar;
@@ -534,7 +534,7 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
         name: ent.name,
         guid: ent.guid
       }),
-      getGuid: metadata => metadata.guid,
+      getGuid: ent => ent.guid,
     }
   });
   return cfEntityCatalog.appSummary;
@@ -596,7 +596,7 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
           guid: info.entity.name,
           name: info.entity.name,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: info => info.entity.name
       }
     }
   );
@@ -628,7 +628,7 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
           name: ent.entity.name,
           guid: ent.metadata.guid,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       },
     }
   );
@@ -677,7 +677,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
         name: ent.guid,
         guid: ent.guid
       }),
-      getGuid: metadata => metadata.name,
+      getGuid: ent => ent.guid,
     }
   });
   return cfEntityCatalog.appStats;
@@ -782,7 +782,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
           name: ent.metadata.guid,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       }
     }
   );
@@ -813,7 +813,7 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
           name: ent.entity.label,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       },
     }
   );
@@ -844,7 +844,7 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       }
     }
   );
@@ -880,7 +880,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       }
     }
   );
@@ -905,7 +905,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       }
     }
   );
@@ -936,7 +936,7 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.metadata.guid,
       }
     }
   );
@@ -971,7 +971,7 @@ function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDef
           name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
           guid: ent.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: ent => ent.guid,
       }
     }
   );
@@ -1047,7 +1047,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
               name: event.metadata.guid,
             };
           },
-          getGuid: metadata => metadata.guid,
+          getGuid: event => event.metadata.guid,
         }
       }
     );
@@ -1079,7 +1079,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
           guid: app.metadata.guid,
           name: app.entity.domain_url,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: app => app.metadata.guid,
       }
     }
   );
@@ -1110,7 +1110,7 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
           guid: app.metadata.guid,
           name: app.entity.name,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: app => app.metadata.guid,
       }
     }
   );
@@ -1205,14 +1205,11 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
-          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
-        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ])
+        getLink: (metadata) => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
+        getGuid: app => app.metadata.guid,
+        getIsValid: (metadata) => cfEntityCatalog.application.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
       },
       actionBuilders: applicationActionBuilder
     },
@@ -1248,13 +1245,10 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
-          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid,
+        getIsValid: (metadata) => cfEntityCatalog.space.api.get(metadata.guid, metadata.cfGuid).pipe(entityFetchedWithoutError())
       }
     }
   );
@@ -1288,27 +1282,16 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       entityBuilder: {
         getMetadata: org => ({
           guid: org.metadata.guid,
-          status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
-          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
-        getGuid: metadata => metadata.guid
+        getGuid: entity => entity.metadata.guid,
+        getIsValid: (metadata) => cfEntityCatalog.org.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
       }
     }
   );
   return cfEntityCatalog.org;
-}
-
-function getOrgStatus(org: APIResource<IOrganization>) {
-  if (!org || !org.entity || !org.entity.status) {
-    return 'Unknown';
-  }
-  return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
 }
 
 function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {

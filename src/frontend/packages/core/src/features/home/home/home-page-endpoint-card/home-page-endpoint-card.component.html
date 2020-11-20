@@ -11,11 +11,13 @@
       </h2>
       <div class="home-endpoint-card__type">{{ definition.label }}</div>
     </div>
-    <div *ngIf="isLoading">
-      <mat-progress-spinner class="home-endpoint-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    </div>
-    <div *ngIf="isError" class="home-endpoint-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
-      <mat-icon>warning</mat-icon>
+    <div *ngIf="(status$ | async) as status">
+      <div *ngIf="status === 1">
+        <mat-progress-spinner class="home-endpoint-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+      </div>
+      <div *ngIf="status === 2" class="home-endpoint-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
+        <mat-icon>warning</mat-icon>
+      </div>
     </div>
     <div class="home-endpoint-card__header-star">
       <app-entity-favorite-star [confirmRemoval]="true" class="home-endpoint-card__star" [favorite]="favorite"></app-entity-favorite-star>

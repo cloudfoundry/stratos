@@ -12,10 +12,10 @@ import {
 import { environment } from '../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
-import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { IOrgFavMetadata } from '../../../../../cf-metadata-types';
@@ -94,12 +94,12 @@ export class CloudFoundryOrganizationBaseComponent {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
-    favoritesConfigMapper: FavoritesConfigMapper
+    userFavoriteManager: UserFavoriteManager
   ) {
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromEntity<IOrgFavMetadata>(org.entity, organizationEntityType, favoritesConfigMapper, CF_ENDPOINT_TYPE))
+      map(org => getFavoriteFromEntity<IOrgFavMetadata>(org.entity, organizationEntityType, userFavoriteManager, CF_ENDPOINT_TYPE))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
