@@ -136,6 +136,11 @@ const kubernetes: Routes = [{
       component: KubernetesAnalysisInfoComponent
     },
     {
+      path: 'resource/namespace/:namespaceName/analysis',
+      pathMatch: 'full',
+      component: KubernetesNamespaceAnalysisReportComponent
+    },
+    {
       path: 'resource/:resource',
       loadChildren: () => import('./kubernetes-resource/generic-resource.module').then(m => m.KubernetesGenericResourceModule),
     },

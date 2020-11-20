@@ -26,13 +26,16 @@ import {
   KubedashConfigurationComponent,
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
-import { KubernetesListConfigService } from './kubernetes-list-service';
+import { kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
 import {
   KubernetesNamespacePodsComponent,
 } from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
+import {
+  KubernetesNamespacePreviewComponent,
+} from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
 import {
   KubernetesNamespaceServicesComponent,
 } from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
@@ -52,6 +55,7 @@ import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.compo
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
+import { KubernetesUIConfigService } from './kubernetes-ui-service';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AnalysisStatusCellComponent } from './list-types/analysis-status-cell/analysis-status-cell.component';
@@ -193,6 +197,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeScoreReportViewerComponent,
     AnalysisStatusCellComponent,
     KubernetesNamespaceAnalysisReportComponent,
+    KubernetesNamespacePreviewComponent,
   ],
   providers: [
     KubernetesService,
@@ -233,13 +238,16 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     ResourceAlertPreviewComponent,
     ResourceAlertViewComponent,
     AnalysisStatusCellComponent,
+    KubernetesNamespacePreviewComponent,
   ]
 })
 export class KubernetesModule {
 
-  constructor(listConfigService: KubernetesListConfigService) {
-    listConfigService.set('k8s-pods', new KubernetesPodsListConfig());
-    listConfigService.set('k8s-services', new KubernetesServicesListConfig());
+  constructor(uiConfigService: KubernetesUIConfigService) {
+    uiConfigService.listConfig.set('k8s-pods', new KubernetesPodsListConfig());
+    uiConfigService.listConfig.set('k8s-services', new KubernetesServicesListConfig());
+
+    uiConfigService.previewComponent.set(kubernetesNamespacesEntityType, KubernetesNamespacePreviewComponent);
   }
 }
 

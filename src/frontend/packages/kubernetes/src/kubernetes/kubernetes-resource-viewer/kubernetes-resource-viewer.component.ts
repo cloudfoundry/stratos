@@ -1,18 +1,36 @@
-import { Component } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  ComponentRef,
+  OnDestroy,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import moment from 'moment';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
+import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BasicKubeAPIResource, KubeAPIResource, KubeStatus } from '../store/kube.types';
+import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
+import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
+
+export interface KubernetesResourceViewerComponentConfig {
+  resource: BasicKubeAPIResource;
+}
 
 export interface KubernetesResourceViewerConfig {
   title: string;
   analysis?: any;
   resource$: Observable<BasicKubeAPIResource>;
   resourceKind: string;
+  component?: any;
+  definition?: any;
 }
 
 interface KubernetesResourceViewerResource {
@@ -31,11 +49,12 @@ interface KubernetesResourceViewerResource {
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss']
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent {
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
 
   constructor(
     private endpointsService: EndpointsService,
-    private kubeEndpointService: KubernetesEndpointService
+    private kubeEndpointService: KubernetesEndpointService,
+    private resolver: ComponentFactoryResolver
   ) {
   }
 
@@ -47,6 +66,42 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
 
   private analysis;
   public alerts;
+
+  public favorite: UserFavorite<IFavoriteMetadata>;
+
+  // Custom component
+  @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer;
+  componentRef: ComponentRef<PreviewableComponent>;
+
+  component: any;
+
+  data: any;
+
+  ngOnDestroy() {
+    this.removeCustomComponent();
+  }
+
+  removeCustomComponent() {
+    if (this.customComponentContainer) {
+      this.customComponentContainer.clear();
+    }
+    if (this.componentRef) {
+      this.componentRef.destroy();
+    }
+  }
+
+  createCustomComponent() {
+    this.removeCustomComponent();
+    if (this.component &&  this.customComponentContainer) {
+      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
+      this.componentRef = this.customComponentContainer.createComponent(factory);
+      this.componentRef.instance.setProps(this.data);
+    }
+  }
+
+  ngAfterViewInit() {
+    this.createCustomComponent();
+  }
 
   setProps(props: KubernetesResourceViewerConfig) {
     this.title = props.title;
@@ -97,6 +152,15 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
         resource.kind = item['kind'] || fallback.kind || props.resourceKind;
         /* tslint:disable-next-line:no-string-literal  */
         resource.apiVersion = item['apiVersion'] || fallback.apiVersion || this.getVersionFromSelfLink(item.metadata['selfLink']);
+
+        this.component = props.component;
+        this.data = {
+          endpointId: this.getEndpointId(item),
+          resource: item
+        };
+        this.createCustomComponent();
+
+        this.setFavorite(props);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
         if (item.metadata) {
@@ -150,6 +214,17 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent {
     } else {
       this.alerts = null;
     }
+  }
+
+  private setFavorite(props: KubernetesResourceViewerConfig) {
+    console.log('set favorite');
+    console.log(props);
+    const defn = props.definition as KubeResourceEntityDefinition;
+    console.log(defn);
+
+    const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
+
+    console.log(entityDefn);
   }
 
 }

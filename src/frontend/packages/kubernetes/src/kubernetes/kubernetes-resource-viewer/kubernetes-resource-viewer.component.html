@@ -1,4 +1,4 @@
-<app-sidepanel-preview title="{{title}}">
+<app-sidepanel-preview class="resource-preview" title="{{title}}" [favorite]="favorite">
 
   <div *ngIf="resource$ | async as resource">
     <div class="resource-preview__side-by-side">
@@ -30,6 +30,9 @@
     <app-metadata-item class="resource-preview__labels" label="Alerts" *ngIf="alerts">
       <app-resource-alert-view [showHeader]="false" [alerts]="alerts"></app-resource-alert-view>
     </app-metadata-item>
+
+    <!-- Custom component if there is one -->
+    <ng-template #customComponent></ng-template>
 
     <app-json-viewer #viewer [json]="resource.jsonView" [expanded]="false"></app-json-viewer>
   </div>

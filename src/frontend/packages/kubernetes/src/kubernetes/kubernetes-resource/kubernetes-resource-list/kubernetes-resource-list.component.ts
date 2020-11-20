@@ -14,12 +14,12 @@ import {
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
-import { KubernetesListConfigService } from '../../kubernetes-list-service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
 } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+import { KubernetesUIConfigService } from '../../kubernetes-ui-service';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import {
@@ -59,7 +59,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     route: ActivatedRoute,
     router: Router,
     private kubeId: BaseKubeGuid,
-    private listConfigService: KubernetesListConfigService
+    private uiConfigService: KubernetesUIConfigService
   ) {
     // Entity Catalog Key can be specified in the route config
     this.entityCatalogKey = route.snapshot.data.entityCatalogKey;
@@ -109,7 +109,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
     const provider = new ActionListConfigProvider<KubeAPIResource>(this.store, action);
     const listConfigName = catalogEntity.definition ? catalogEntity.definition.listConfig : null;
-    let listConfig: any = this.listConfigService.get(listConfigName);
+    let listConfig: any = this.uiConfigService.listConfig.get(listConfigName);
     if (!listConfig) {
       listConfig = {
         pageSizeOptions: defaultHelmKubeListPageSize,
@@ -133,6 +133,10 @@ export class KubernetesResourceListComponent implements OnDestroy {
   }
 
   private getColumns(definition: KubeResourceEntityDefinition): ITableColumn<KubeAPIResource>[] {
+    console.log(definition.type);
+    const component = this.uiConfigService.previewComponent.get(definition.type);
+    console.log(definition);
+
     let columns: Array<ITableColumn<KubeAPIResource>> = [
       // Name
       {
@@ -151,7 +155,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
           sidePanelConfig: {
             title: resource.metadata.name,
             resourceKind: definition.label,
-            resource$: of(resource)
+            resource$: of(resource),
+            component,
+            definition,
           }
         });
         }

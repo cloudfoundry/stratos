@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { SidePanelService } from '../../services/side-panel.service';
 
 @Component({
@@ -11,6 +12,9 @@ export class SidepanelPreviewComponent {
 
   @Input()
   title: string;
+
+  @Input()
+  favorite: UserFavorite<IFavoriteMetadata>;
 
   constructor(public sidePanelService: SidePanelService) { }
 }
