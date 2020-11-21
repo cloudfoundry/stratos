@@ -10,4 +10,6 @@ import { IAuthForm } from '../../../../../../../store/src/extension-types';
 })
 export class TokenEndpointComponent implements IAuthForm {
   @Input() formGroup: FormGroup;
+
+  @Input() config: any = {};
 }

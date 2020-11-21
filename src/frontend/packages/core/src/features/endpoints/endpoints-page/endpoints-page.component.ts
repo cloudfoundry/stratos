@@ -83,16 +83,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       }),
       first()
     ).subscribe();
-
-
-    console.log('Test');
-
-    this.http.get('/api/v1/proxy/Z6KJAVYeHPkiEPuZty0-kArqors/user').subscribe(data => {
-      console.log('Git hub user');
-      console.log(data);
-    });
-
-
   }
 
   subs: Subscription[] = [];

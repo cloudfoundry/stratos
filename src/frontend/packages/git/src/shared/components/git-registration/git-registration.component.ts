@@ -1,8 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
+import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
+import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
+import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
 
@@ -21,7 +31,9 @@ interface GithubTypes {
 interface GithubType {
   url: string;
   label: string;
-  description: string;
+  description: string[];
+  name?: string;
+  exists?: boolean;
 }
 
 enum GitTypeKeys {
@@ -36,24 +48,33 @@ enum GitTypeKeys {
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
 })
-export class GitRegistrationComponent {
+export class GitRegistrationComponent implements OnDestroy {
 
   public gitTypes: EndpointSubTypes;
 
-  public selectedType: GitTypeKeys;
-
   public epSubType: GIT_ENDPOINT_SUB_TYPES;
+
+  registerForm: FormGroup;
+
+  private sub: Subscription;
+
+  public showEndpointFields = false;
+
+  validate: Observable<boolean>;
+
+  urlValidation: string;
+
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
+    private fb: FormBuilder,
+    private snackBarService: SnackBarService,
+    private endpointsService: EndpointsService,
   ) {
-    // this.epType = getIdFromRoute(activatedRoute, 'type');
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
-
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
 
-    // TODO: RC fix - should only allow github.com to be registered once (cannot register multiple endpoints with same url).
     // Set a default/starting option
     this.gitTypes = {
       [GIT_ENDPOINT_SUB_TYPES.GITHUB]: {
@@ -63,12 +84,19 @@ export class GitRegistrationComponent {
           [GitTypeKeys.GITHUB_COM]: {
             label: 'github.com',
             url: gitSCMService.getSCM('github', null).getPublicApi(),
-            description: `Your credentials will be used to fetch information from the public ${githubLabel} instance`,
+            name: 'GitHub',
+            description: [
+              `Registering github.com allows you to connect with a Personal Access Token and access your public and private GitHub repositories.`,
+              'Note: Stratos allows you to access github.com without registering this endpoint, but you are limited to accessing your public repositories.'
+          ],
           },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
             label: 'Github Enterprise',
             url: null,
-            description: `Your credentials will be used to fetch information from a private ${githubLabel} instance`,
+            description: [
+              `Register your own GitHub Enterprise server.`,
+              'Registering an endpoint allows you to access your public repositories. Connect with a Personal Access Token to additionally access your private repositories'
+            ],
           }
         }
       },
@@ -79,17 +107,105 @@ export class GitRegistrationComponent {
           [GitTypeKeys.GITLAB_COM]: {
             label: 'gitlab.com',
             url: gitSCMService.getSCM('gitlab', null).getPublicApi(),
-            description: `Your credentials will be used to fetch information from the public ${gitlabLabel} instance`,
+            name: 'GitLab',
+            description: [`Your credentials will be used to fetch information from the public ${gitlabLabel} instance`],
           },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {
             label: 'Gitlab Enterprise',
             url: null,
-            description: `Your credentials will be used to fetch information from a private ${gitlabLabel} instance`,
+            description: [`Your credentials will be used to fetch information from a private ${gitlabLabel} instance`],
           }
         }
       }
     };
-    this.selectedType = Object.keys(this.gitTypes[this.epSubType].types)[0] as GitTypeKeys;
 
+    // Check the endpoints and turn off any options for endpoints that are already registered
+    this.endpointsService.endpoints$.pipe(first()).subscribe(eps => {
+      Object.values(this.gitTypes[this.epSubType].types).forEach(typ => {
+        typ.exists = !typ.url ? false : !!Object.values(eps).find(ep => typ.url === getFullEndpointApiUrl(ep));
+      });
+      this.init();
+    });
   }
+
+  private init() {
+    // Find first type that is enabled
+    const defaultSelection = Object.keys(this.gitTypes[this.epSubType].types).find(key => {
+      const item = this.gitTypes[this.epSubType].types[key];
+      return !item.exists;
+    });
+
+    this.registerForm = this.fb.group({
+      selectedType: [defaultSelection, []],
+      nameField: ['', [Validators.required]],
+      urlField: ['', [Validators.required]],
+      skipSllField: [false, []],
+    });
+    this.updateType();
+
+    // Check for changes to the from selected type
+    this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => this.updateType(changes));
+
+    this.validate = this.registerForm.statusChanges.pipe(map(() => {
+      const typ = this.registerForm.value.selectedType;
+      const defn = this.gitTypes[this.epSubType].types[typ];
+      return !!defn.url || this.registerForm.valid;
+    }));
+
+    // Ensure the form validity is updates once the dust settles
+    setTimeout(() => this.registerForm.updateValueAndValidity(), 0);
+  }
+
+  private updateType(value?: string) {
+    const typ = value || this.registerForm.value.selectedType;
+    const defn = this.gitTypes[this.epSubType].types[typ];
+    this.showEndpointFields = !defn.url;
+
+    const entityDefn = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, this.epSubType);
+    this.urlValidation = entityDefn.definition?.urlValidationRegexString;
+  }
+
+  ngOnDestroy() {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+  }
+
+  // Perform the endpoint registration
+  onNext: StepOnNextFunction = () => {
+    const typ = this.registerForm.value.selectedType;
+    const defn = this.gitTypes[this.epSubType].types[typ];
+    const name = defn.name || this.registerForm.controls.nameField.value;
+    const url = defn.url || this.registerForm.controls.urlField.value;
+    let skipSSL = false;
+    if (!!defn.name && !!defn.url) {
+      skipSSL = this.registerForm.controls.skipSllField.value;
+    }
+
+    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false)
+    .pipe(
+      pairwise(),
+      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      map(([, newVal]) => newVal),
+      map(result => {
+        const data: ConnectEndpointConfig = {
+          guid: result.message,
+          name: this.registerForm.controls.nameField.value,
+          type: GIT_ENDPOINT_TYPE,
+          subType: this.epSubType,
+          ssoAllowed: false
+        };
+        if (!result.error) {
+          this.snackBarService.show(`Successfully registered '${name}'`);
+        }
+        const success = !result.error;
+        return {
+          success,
+          redirect: false,
+          message: success ? '' : result.message,
+          data
+        };
+      })
+    );
+  };
 }

@@ -1,5 +1,10 @@
-- name: git.github
-  auth_type: HttpBasic
-- name: git.gitlab
+- name: git
+  sub_type: github
+  auth_type: Token
+  user_info: /user
+  user_info_path: login
+- name: git
+  sub_type: gitlab
   auth_type: Bearer
-
+  user_info: /user
+  user_info_path: username

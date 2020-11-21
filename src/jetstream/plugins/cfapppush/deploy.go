@@ -392,7 +392,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 	if len(info.EndpointGUID) != 0 {
 		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
-		if isTokenFound != true {
+		if !isTokenFound {
 			err := fmt.Errorf("No token found for endpoint %s", info.EndpointGUID)
 			log.Errorf("%+v", err)
 			return StratosProject{}, tempDir, err
@@ -415,12 +415,12 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 		switch info.SCM {
 		case SCM_TYPE_GITHUB:
-			// GitHub API uses basic HTTP auth, username and password are stored in the DB
-			pieces := strings.SplitN(string(authTokenDecodedBytes), ":", 2)
-			username, password = pieces[0], pieces[1]
+			// GitHub API uses token auth: username and password are stored in the token information
+			username = tokenRecord.RefreshToken
+			password = string(authTokenDecodedBytes)
 		case SCM_TYPE_GITLAB:
-			// GitLab API uses bearer token auth, the username is supplied by the frontend
-			username = info.Username
+			// GitLab API uses token auth: username and password are stored in the token information
+			username = tokenRecord.RefreshToken
 			password = string(authTokenDecodedBytes)
 		default:
 			return StratosProject{}, tempDir, fmt.Errorf("Unknown SCM type '%s'", info.SCM)

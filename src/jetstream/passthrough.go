@@ -398,6 +398,24 @@ func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUr
 	return responses[req.ResultGUID], err
 }
 
+// Convenience helper for a single request using a token
+func (p *portalProxy) DoProxySingleRequestWithToken(cnsiGUID string, token *interfaces.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*interfaces.CNSIRequest, error) {
+	proxyURL, err := url.Parse(requestURL)
+	if err != nil {
+		return nil, err
+	}
+
+	done := make(chan *interfaces.CNSIRequest)
+	cnsiRequest, buildErr := p.buildCNSIRequest(cnsiGUID, "", method, proxyURL, body, headers)
+	if buildErr != nil {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
+	}
+	cnsiRequest.Token = token
+	go p.doRequest(&cnsiRequest, done)
+	res := <-done
+	return res, nil
+}
+
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 
@@ -453,16 +471,21 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		return
 	}
 
-	// get a cnsi token record and a cnsi record
-	tokenRec, _, err := p.getCNSIRequestRecords(cnsiRequest)
-	if err != nil {
-		cnsiRequest.Error = err
-		if done != nil {
-			cnsiRequest.StatusCode = 400
-			cnsiRequest.Status = "Unable to retrieve CNSI token record"
-			done <- cnsiRequest
+	var tokenRec interfaces.TokenRecord
+	if cnsiRequest.Token != nil {
+		tokenRec = *cnsiRequest.Token
+	} else {
+		// get a cnsi token record and a cnsi record
+		tokenRec, _, err = p.getCNSIRequestRecords(cnsiRequest)
+		if err != nil {
+			cnsiRequest.Error = err
+			if done != nil {
+				cnsiRequest.StatusCode = 400
+				cnsiRequest.Status = "Unable to retrieve CNSI token record"
+				done <- cnsiRequest
+			}
+			return
 		}
-		return
 	}
 
 	// Copy original headers through, except custom portal-proxy Headers

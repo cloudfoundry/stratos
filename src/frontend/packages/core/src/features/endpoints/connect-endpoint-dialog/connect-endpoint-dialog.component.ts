@@ -1,6 +1,7 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { delay, first, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
@@ -17,10 +18,12 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.servic
 export class ConnectEndpointDialogComponent implements OnDestroy {
 
   public valid = false;
-  public helpDocumentUrl: string;
   public connectService: ConnectEndpointService;
 
   private hasConnected: Subscription;
+
+  public helpDocument = new BehaviorSubject<string>(null);
+  public helpDocument$: Observable<string>;
 
   constructor(
     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
@@ -35,10 +38,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.snackBarService.show(`Connected endpoint '${this.data.name}'`);
       this.dialogRef.close();
     });
+    // delay(0) fixes expression changed error
+    this.helpDocument$ = this.helpDocument.asObservable().pipe(startWith(''), delay(0));
   }
 
-  showHelp() {
-    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
+  showHelp(helpDocumentUrl: string) {
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: helpDocumentUrl });
   }
 
   ngOnDestroy(): void {
@@ -46,4 +51,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.hasConnected.unsubscribe();
   }
 
+  public setHelpLink(link: string) {
+    this.helpDocument.next(link);
+  }
+
+  public connect() {
+    this.connectService.submit().pipe(first()).subscribe();
+  }
 }

@@ -74,7 +74,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private resolver: ComponentFactoryResolver,
-
   ) { }
 
   private init(config: ConnectEndpointConfig) {

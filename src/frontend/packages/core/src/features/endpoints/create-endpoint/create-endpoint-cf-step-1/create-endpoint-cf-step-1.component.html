@@ -8,7 +8,7 @@
   </mat-form-field>
   <mat-form-field novalidate>
     <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls" [disabled]="!!fixedUrl">
+      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
     <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
     <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>

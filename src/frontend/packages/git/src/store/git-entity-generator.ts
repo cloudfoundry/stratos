@@ -32,17 +32,18 @@ const enum GitEndpointAuthTypes {
 
 const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   [GitEndpointAuthTypes.GITHUB_TOKEN]: {
-    ...BaseEndpointAuth.UsernamePassword,
-    name: 'Username and Token',
+    ...BaseEndpointAuth.Token,
     help: '/core/assets/connect/github.md',
     config: {
-      usernameText: 'Username',
-      passwordText: 'Token'
+      title: 'Personal Access Token'
     }
   },
   [GitEndpointAuthTypes.GITLAB_TOKEN]: {
-    ...BaseEndpointAuth.Token,
-    help: '/core/assets/connect/gitlab.md'
+    ...BaseEndpointAuth.Bearer,
+    help: '/core/assets/connect/gitlab.md',
+    config: {
+      title: 'Personal Access Token'
+    }
   },
 };
 
@@ -73,7 +74,6 @@ class GitEntityCatalog {
   >;
 
   constructor() {
-    // TODO: RC improvement - Add ('<username>' | Token) info in endpoint card details section (see metrics, cf endpoint definitions)
     const definition: StratosEndpointExtensionDefinition = {
       type: GIT_ENDPOINT_TYPE,
       label: 'Git',

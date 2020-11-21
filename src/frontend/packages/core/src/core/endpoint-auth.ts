@@ -10,9 +10,11 @@ import {
   TokenEndpointComponent,
 } from '../features/endpoints/connect-endpoint-dialog/auth-forms/token-endpoint/token-endpoint.component';
 
+// Possible auth types - depends on each back-end plugin as to which are supported
 export enum EndpointAuthTypeNames {
   CREDS = 'creds',
-  TOKEN = 'bearer', // TODO: RC Understand - this is listed here in generic land... but is it only supported in yaml only endpoints?
+  BEARER = 'bearer',
+  TOKEN = 'token',
   SSO = 'sso',
   NONE = 'none'
 }
@@ -28,6 +30,17 @@ export abstract class BaseEndpointAuth {
     types: new Array<EndpointType>(),
     component: CredentialsAuthFormComponent,
   };
+
+  static readonly Bearer: EndpointAuthTypeConfig = {
+    name: 'Token',
+    value: EndpointAuthTypeNames.BEARER,
+    form: {
+      token: ['', Validators.required],
+    },
+    types: new Array<EndpointType>(),
+    component: TokenEndpointComponent
+  };
+
   static readonly Token: EndpointAuthTypeConfig = {
     name: 'Token',
     value: EndpointAuthTypeNames.TOKEN,

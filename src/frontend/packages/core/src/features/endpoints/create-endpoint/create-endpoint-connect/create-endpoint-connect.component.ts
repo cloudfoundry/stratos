@@ -37,16 +37,18 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     this.connectService = new ConnectEndpointService(this.endpointsService, data);
   }
 
-  onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(
-    map(res => ({
-      success: res.success,
-      message: res.errorMessage,
-      redirect: res.success
-    }))
-  ) : of({
-    success: true,
-    redirect: true
-  })
+  onNext = (): Observable<StepOnNextResult> => {
+    return this.doConnect ? this.connectService.submit().pipe(
+      map(res => ({
+        success: res.success,
+        message: res.errorMessage,
+        redirect: res.success
+      }))
+    ) : of({
+      success: true,
+      redirect: true
+    });
+  }
 
   ngOnDestroy() {
     if (this.connectService) {

@@ -26,7 +26,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   registerForm: FormGroup;
 
-
   @Input() finalStep: boolean;
   private pFixedUrl: string;
   @Input()
@@ -97,12 +96,12 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
-      this.registerForm.controls.nameField.value,
-      this.registerForm.controls.urlField.value,
-      this.registerForm.controls.skipSllField.value,
-      this.registerForm.controls.clientIDField.value,
-      this.registerForm.controls.clientSecretField.value,
-      this.registerForm.controls.ssoAllowedField.value,
+      this.registerForm.value.nameField,
+      this.registerForm.value.urlField,
+      this.registerForm.value.skipSllField,
+      this.registerForm.value.clientIDField,
+      this.registerForm.value.clientSecretField,
+      this.registerForm.value.ssoAllowedField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -110,13 +109,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       map(result => {
         const data: ConnectEndpointConfig = {
           guid: result.message,
-          name: this.registerForm.controls.nameField.value,
+          name: this.registerForm.value.nameField,
           type,
           subType,
-          ssoAllowed: this.registerForm.controls.ssoAllowedField ? !!this.registerForm.controls.ssoAllowedField : false
+          ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
         };
         if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${this.registerForm.controls.nameField.value}'`);
+          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField}'`);
         }
         const success = !result.error;
         return {
@@ -128,7 +127,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       })
     );
   };
-
 
   ngAfterContentInit() {
     this.validate = this.registerForm.statusChanges.pipe(
