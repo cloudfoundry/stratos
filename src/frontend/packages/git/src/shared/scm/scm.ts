@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
 import { GitSCMType } from './scm.service';
 
 export interface SCMIcon {
@@ -25,4 +25,12 @@ export interface GitSCM {
   getCommitApiUrl(projectName: string, commitSha: string): string;
   getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): string;
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<string[]>;
+  parseErrorString(error: any, message: string): string;
+}
+
+export interface GitMeta {
+  projectName: string;
+  scm: GitSCM; // FIXME: Remove from action, see #4245
+  commitSha?: string;
+  branchName?: string;
 }

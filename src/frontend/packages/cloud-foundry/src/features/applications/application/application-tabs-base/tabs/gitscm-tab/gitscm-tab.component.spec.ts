@@ -6,15 +6,15 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
+import {
+  GithubCommitAuthorComponent,
+} from '../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
+import { GitSCMService } from '../../../../../../../../git/src/shared/scm/scm.service';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../application.service';
-import {
-  GithubCommitAuthorComponent,
-} from './../../../../../../shared/components/github-commit-author/github-commit-author.component';
-import { GitSCMService } from './../../../../../../shared/data-services/scm/scm.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
 
 describe('GitSCMTabComponent', () => {

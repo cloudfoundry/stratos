@@ -5,6 +5,7 @@ import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router
 import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
@@ -30,7 +31,6 @@ import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
-import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
 import { environment } from './environments/environment';
@@ -152,7 +152,7 @@ export class AppModule {
     });
     eventService.addEventConfig<{
       count: number,
-      endpoint: EndpointModel
+      endpoint: EndpointModel;
     }>({
       eventTriggered: (state: GeneralEntityAppState) => {
         const eventState = internalEventStateSelector(state);

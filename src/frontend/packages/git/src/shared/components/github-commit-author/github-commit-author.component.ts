@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
-
-import { GitCommit } from '../../../store/types/git.types';
+import { GitCommit } from '@stratosui/git';
 
 @Component({
   selector: 'app-github-commit-author',

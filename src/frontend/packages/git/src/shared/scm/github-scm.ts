@@ -3,8 +3,8 @@ import { flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { getGitHubAPIURL } from '../../../../../core/src/core/github.helpers';
-import { GitBranch, GitCommit, GitRepo } from '../../../store/types/git.types';
+import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
+import { getGitHubAPIURL } from '../github.helpers';
 import {
   GITHUB_PER_PAGE_PARAM,
   GITHUB_PER_PAGE_PARAM_VALUE,
@@ -107,4 +107,9 @@ export class GitHubSCM implements GitSCM {
     return commit;
   }
 
+  parseErrorString(error: any, message: string): string {
+    return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
+      'Git ' + message.substring(0, message.indexOf('(')) :
+      'Git request failed';
+  }
 }

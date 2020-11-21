@@ -68,9 +68,6 @@ import {
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
-  gitBranchesEntityType,
-  gitCommitEntityType,
-  gitRepoEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -113,16 +110,6 @@ import {
 } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders, domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders, featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import {
-  GitBranchActionBuilders,
-  gitBranchActionBuilders,
-  GitCommitActionBuilders,
-  gitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
-  GitMeta,
-  GitRepoActionBuilders,
-  gitRepoActionBuilders,
-} from './entity-action-builders/git-action-builder';
 import {
   OrganizationActionBuilders,
   organizationActionBuilders,
@@ -178,7 +165,6 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
@@ -418,9 +404,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateStackEntity(endpointDefinition),
     generateRouteEntity(endpointDefinition),
     generateEventEntity(endpointDefinition),
-    generateGitBranchEntity(endpointDefinition),
-    generateGitRepoEntity(endpointDefinition),
-    generateGitCommitEntity(endpointDefinition),
     generateCFDomainEntity(endpointDefinition),
     generateCFUserEntity(endpointDefinition),
     generateCFServiceInstanceEntity(endpointDefinition),
@@ -943,84 +926,7 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
   return cfEntityCatalog.domain;
 }
 
-function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitCommitEntityType,
-    schema: cfEntityFactory(gitCommitEntityType),
-    label: 'Git Commit',
-    labelPlural: 'Git Commits',
-    endpoint: endpointDefinition,
-    nonJetstreamRequest: true,
-    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
-      const metadata = (action.metadata as GitMeta[])[0];
-      return {
-        ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid
-      };
-    },
-  };
-  cfEntityCatalog.gitCommit = new StratosCatalogEntity<IBasicCFMetaData, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitCommitActionBuilders,
-      entityBuilder: {
-        getMetadata: ent => ({
-          name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
-          guid: ent.guid
-        }),
-        getGuid: metadata => metadata.guid,
-      }
-    }
-  );
-  return cfEntityCatalog.gitCommit;
-}
 
-function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitRepoEntityType,
-    schema: cfEntityFactory(gitRepoEntityType),
-    label: 'Git Repository',
-    labelPlural: 'Git Repositories',
-    endpoint: endpointDefinition
-  };
-  cfEntityCatalog.gitRepo = new StratosCatalogEntity<
-    IBasicCFMetaData,
-    GitRepo,
-    GitRepoActionBuilders
-  >(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitRepoActionBuilders,
-    }
-  );
-  return cfEntityCatalog.gitRepo;
-}
-
-function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitBranchesEntityType,
-    schema: cfEntityFactory(gitBranchesEntityType),
-    label: 'Git Branch',
-    labelPlural: 'Git Branches',
-    endpoint: endpointDefinition
-  };
-  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuilders>(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitBranchActionBuilders,
-    }
-  );
-  return cfEntityCatalog.gitBranch;
-}
 
 function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
