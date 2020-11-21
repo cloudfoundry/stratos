@@ -1,10 +1,9 @@
 /*
- * Public API Surface of cloud-foundry
+ * Public API Surface of git
  */
 
 export * from './git-package.module';
 export * from './git-routing.module';
-// export * from './core/autoscaler-helpers/autoscaler-available';
 
 export * from './store/git.public-types';
 export * from './shared/scm/scm.service';
