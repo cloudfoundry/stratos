@@ -74,7 +74,7 @@ export class ApplicationPollingService {
     ).subscribe(resource => {
       cfEntityCatalog.appSummary.api.get(appGuid, cfGuid);
       if (resource && resource.entity && resource.entity.entity && resource.entity.entity.state === 'STARTED') {
-        cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid)
+        cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
       }
     });
   }

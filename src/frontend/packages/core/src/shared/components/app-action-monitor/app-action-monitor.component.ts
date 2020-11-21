@@ -79,7 +79,9 @@ export class AppActionMonitorComponent<T> implements OnInit {
     const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
-      cellConfig: this.getCellConfig || defaultGetCellConfig,
+      cellConfig: {
+        getConfig: this.getCellConfig || defaultGetCellConfig
+      },
       cellFlex: '0 0 24px'
     };
 
@@ -95,7 +97,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       connect: () => this.replayData$,
       disconnect: () => { },
       trackBy: (index, item) => {
-        const fn = monitorColumn.cellConfig(item).getId;
+        const fn = monitorColumn.cellConfig.getConfig(item).getId;
         if (fn) {
           return fn(item);
         } else if (this.getId) {
@@ -106,7 +108,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       isTableLoading$: observableOf(false),
       getRowState: (row) => {
         // Get the row state of the ENTITY
-        const cellConfig = monitorColumn.cellConfig(row);
+        const cellConfig = monitorColumn.cellConfig.getConfig(row);
         const monitorState = new ActionMonitorComponentState(
           this.entityMonitorFactory,
           cellConfig.getId(row),

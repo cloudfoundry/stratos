@@ -1,0 +1,51 @@
+<mat-card class="home-endpoint-card">
+  <mat-card-header class="home-endpoint-card__header" *ngIf="endpoint && definition">
+    <div class="home-endpoint-card__logo-panel" [routerLink]="link">
+      <img class="home-endpoint-card__logo" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
+    </div>
+    <div class="home-endpoint-card__header-text-panel" [routerLink]="link">
+      <h2 class="home-endpoint-card__header-text">
+        <div class="home-endpoint-card__panel" *ngIf="endpoint">
+          <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
+        </div>
+      </h2>
+      <div class="home-endpoint-card__type">{{ definition.label }}</div>
+    </div>
+    <div *ngIf="isLoading">
+      <mat-progress-spinner class="home-endpoint-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    </div>
+    <div *ngIf="isError" class="home-endpoint-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
+      <mat-icon>warning</mat-icon>
+    </div>
+    <div class="home-endpoint-card__header-star">
+      <app-entity-favorite-star [confirmRemoval]="true" class="home-endpoint-card__star" [favorite]="favorite"></app-entity-favorite-star>
+    </div>
+  </mat-card-header>
+  <mat-card-content class="home-endpoint-card__content">
+    <div class="home-card">
+      <div class="home-card__left">
+        <div>
+        <ng-template #customCard></ng-template>
+      </div>
+        <div *ngIf="!showShortcutsOnSide" class="home-card__shortcuts-left">
+          <app-home-shortcuts *ngIf="links$ | async as links" [shortcuts]="links.shortcuts"></app-home-shortcuts>
+        </div>
+      </div>
+      <div class="home-card__right" *ngIf="!fullView" [ngClass]="{'home-card__right-2': layout && layout.x < 3}">
+        <div *ngIf="links$ | async as links">
+          <div class="home-card__fav-title-panel">
+            <div class="home-card__fav-title">Favorites</div>
+            <div *ngIf="hiddenFavorites > 0" class="home-card__fav-more"><a (click)="showFavoritesPanel()">{{hiddenFavorites}} more ...</a></div>
+          </div>
+          <div class="home-card__fav" *ngIf="links.favs.length > 0">
+            <app-favorites-meta-card *ngFor="let entity of links.favs" class="home-card__fav-card" [favoriteEntity]="entity"></app-favorites-meta-card>
+          </div>
+          <div class="home-card__fav" *ngIf="links.favs.length === 0">
+            <div class="home-card__fav-none">No favorites</div>
+          </div>
+          <app-home-shortcuts *ngIf="showShortcutsOnSide" [shortcuts]="links.shortcuts"></app-home-shortcuts>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

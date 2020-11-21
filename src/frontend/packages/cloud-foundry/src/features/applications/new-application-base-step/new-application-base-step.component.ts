@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -13,10 +14,14 @@ import {
   AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
 } from '../deploy-application/deploy-application-steps.types';
 
-interface IAppTileData extends ITileData {
+export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
+
+
+export interface IAppTileData extends ITileData {
   type: string;
   subType?: string;
 }
+
 @Component({
   selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
@@ -38,6 +43,12 @@ export class NewApplicationBaseStepComponent {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
         query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
       }
+      const endpoint = this.activatedRoute.snapshot.params.endpointId;
+      if (endpoint) {
+        query[AUTO_SELECT_CF_URL_PARAM] = endpoint;
+        query[BASE_REDIRECT_QUERY] += `/${endpoint}`;
+      }
+
       this.store.dispatch(new RouterNav({
         path: `${baseUrl}/${type}`,
         query
@@ -47,7 +58,7 @@ export class NewApplicationBaseStepComponent {
 
   constructor(
     private store: Store<CFAppState>,
-    appDeploySourceTypes: ApplicationDeploySourceTypes) {
+    appDeploySourceTypes: ApplicationDeploySourceTypes,
     this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
       map(types => {
         return [

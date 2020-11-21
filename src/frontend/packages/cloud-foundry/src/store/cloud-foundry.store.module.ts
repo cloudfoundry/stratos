@@ -30,7 +30,8 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
       CfValidateEffects,
       UsersRolesEffects
     ]),
-    GitPackageModule,// Brings in GitSCMService
+    // Brings in GitSCMService
+    GitPackageModule,
   ],
   providers: [
     {

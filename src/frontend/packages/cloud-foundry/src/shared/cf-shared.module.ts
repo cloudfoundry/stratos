@@ -31,8 +31,6 @@ import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-inf
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
-import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import {
@@ -295,8 +293,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CardCfUserInfoComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
-    CardCfRecentAppsComponent,
-    CompactAppCardComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
@@ -343,8 +339,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CardCfUserInfoComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
-    CardCfRecentAppsComponent,
-    CompactAppCardComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,

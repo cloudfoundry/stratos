@@ -63,6 +63,10 @@ $app-header-height: 56px;
       min-width: auto;
     }
   }
+  &__side-narrow {
+    max-width: 400px;
+    min-width: 400px;
+  }
 }
 
 .page-content {

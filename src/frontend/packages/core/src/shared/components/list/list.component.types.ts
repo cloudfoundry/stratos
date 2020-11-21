@@ -1,4 +1,4 @@
-import { Injectable, Type } from '@angular/core';
+import { Type } from '@angular/core';
 import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -97,7 +97,7 @@ export interface IListConfig<T> {
    */
   expandComponent?: ListExpandedComponentType<T>;
   /**
-   * Hide the fresh button
+   * Set to true to hide the list refresh button
    */
   hideRefresh?: boolean;
   /**
@@ -153,8 +153,7 @@ export interface IListMultiFilterConfigItem {
 export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
 export const defaultPaginationPageSizeOptionsTable = [defaultClientPaginationPageSize, 20, 80];
 
-@Injectable()
-export class ListConfig<T> implements IListConfig<T> {
+export class ListConfig<T, A = T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
@@ -167,7 +166,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = (): ListDataSource<T> => null;
+  getDataSource = (): ListDataSource<T, A> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getFilters = (): IListFilter[] => [];
   getInitialised = () => observableOf(true);

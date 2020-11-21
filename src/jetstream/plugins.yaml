@@ -1,6 +1,5 @@
-- name: git
-- name: private_github
+- name: git.private_github
   auth_type: HttpBasic
-- name: private_gitlab
+- name: git.private_gitlab
   auth_type: Bearer
 
