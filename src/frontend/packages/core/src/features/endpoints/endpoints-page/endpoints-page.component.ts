@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
@@ -64,7 +63,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private resolver: ComponentFactoryResolver,
     private snackBarService: SnackBarService,
     cs: CustomizationService,
-    private http: HttpClient,
   ) {
     this.customizations = cs.get();
 
