@@ -24,20 +24,5 @@ export class GitSCMService {
       case 'gitlab':
         return new GitLabSCM(endpointGuid);
     }
-    return this.getSCM(type).parseErrorString(res, message);
   }
-
-  private parseHttpPipeError(res: any): { message?: string; } {
-    if (!res.status) {
-      return res;
-    }
-    try {
-      return res.json ? res.json() : res;
-    } catch (e) {
-      console.warn('Failed to parse response body', e);
-    }
-    return {};
-  }
-
-
 }

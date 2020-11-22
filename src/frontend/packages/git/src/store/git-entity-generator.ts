@@ -20,7 +20,7 @@ import {
   gitCommitActionBuilders,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
-} from './git-action-builder';
+} from './git-action-builders';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
