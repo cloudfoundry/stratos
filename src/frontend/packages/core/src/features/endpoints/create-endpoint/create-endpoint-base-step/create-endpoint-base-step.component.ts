@@ -29,7 +29,8 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
       }));
     }
   }
-  constructor(store: Store<GeneralEntityAppState>,) {
+
+  constructor(store: Store<GeneralEntityAppState>) {
     const types = store.select(selectSessionData()).pipe(
       // Get a list of all known endpoint types
       map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
@@ -37,5 +38,4 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
     super(types, store);
     this.store = store;
   }
-
 }
