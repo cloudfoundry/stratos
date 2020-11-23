@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -24,7 +24,7 @@ const REPO_FILTER_NAME = 'repository';
   }]
 
 })
-export class CatalogTabComponent implements OnInit {
+export class CatalogTabComponent {
 
   public repos$: Observable<{
     artifactHubRepos: string[],
@@ -92,15 +92,13 @@ export class CatalogTabComponent implements OnInit {
     helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
       first()
     ).subscribe(pagination => {
-      this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+      const { repo } = this.activatedRoute.snapshot.params;
+      if (repo &&  repo.length > 0) {
+        this.filterCharts(repo);
+      } else {
+        this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+      }
     });
-  }
-
-  ngOnInit() {
-    const { repo } = this.activatedRoute.snapshot.params;
-    if (repo &&  repo.length > 0) {
-      setTimeout(() => this.filterCharts(repo), 0);
-    }
   }
 
   /**
