@@ -88,7 +88,7 @@ export class GitRegistrationComponent implements OnDestroy {
             description: [
               `Registering github.com allows you to connect with a Personal Access Token and access your public and private GitHub repositories.`,
               'Note: Stratos allows you to access github.com without registering this endpoint, but you are limited to accessing your public repositories.'
-          ],
+            ],
           },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
             label: 'Github Enterprise',
@@ -108,11 +108,13 @@ export class GitRegistrationComponent implements OnDestroy {
             label: 'gitlab.com',
             url: gitSCMService.getSCM('gitlab', null).getPublicApi(),
             name: 'GitLab',
+            // TODO: RC update as per above
             description: [`Your credentials will be used to fetch information from the public ${gitlabLabel} instance`],
           },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {
             label: 'Gitlab Enterprise',
             url: null,
+            // TODO: RC update as per above
             description: [`Your credentials will be used to fetch information from a private ${gitlabLabel} instance`],
           }
         }
@@ -121,8 +123,8 @@ export class GitRegistrationComponent implements OnDestroy {
 
     // Check the endpoints and turn off any options for endpoints that are already registered
     this.endpointsService.endpoints$.pipe(first()).subscribe(eps => {
-      Object.values(this.gitTypes[this.epSubType].types).forEach(typ => {
-        typ.exists = !typ.url ? false : !!Object.values(eps).find(ep => typ.url === getFullEndpointApiUrl(ep));
+      Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
+        type.exists = !type.url ? false : !!Object.values(eps).find(ep => type.url === getFullEndpointApiUrl(ep));
       });
       this.init();
     });
@@ -183,29 +185,29 @@ export class GitRegistrationComponent implements OnDestroy {
     }
 
     return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false)
-    .pipe(
-      pairwise(),
-      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-      map(([, newVal]) => newVal),
-      map(result => {
-        const data: ConnectEndpointConfig = {
-          guid: result.message,
-          name: this.registerForm.controls.nameField.value,
-          type: GIT_ENDPOINT_TYPE,
-          subType: this.epSubType,
-          ssoAllowed: false
-        };
-        if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${name}'`);
-        }
-        const success = !result.error;
-        return {
-          success,
-          redirect: false,
-          message: success ? '' : result.message,
-          data
-        };
-      })
-    );
+      .pipe(
+        pairwise(),
+        filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+        map(([, newVal]) => newVal),
+        map(result => {
+          const data: ConnectEndpointConfig = {
+            guid: result.message,
+            name,
+            type: GIT_ENDPOINT_TYPE,
+            subType: this.epSubType,
+            ssoAllowed: false
+          };
+          if (!result.error) {
+            this.snackBarService.show(`Successfully registered '${name}'`);
+          }
+          const success = !result.error;
+          return {
+            success,
+            redirect: false,
+            message: success ? '' : result.message,
+            data
+          };
+        })
+      );
   };
 }

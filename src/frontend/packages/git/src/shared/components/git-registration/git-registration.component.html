@@ -1,14 +1,16 @@
 <app-steppers [cancel]="'/endpoints'">
-  <app-step title="Register" [onNext]="onNext" [valid]="validate | async">
+  <app-step title="Register" [onNext]="onNext" nextButtonText="Register" [valid]="validate | async">
     <div class="select-step">
       <h3>Select the type of {{gitTypes[epSubType].label}} to register</h3>
       <form class="stepper-form" *ngIf="registerForm" [formGroup]="registerForm">
         <mat-radio-group class="select-step__radio-group" formControlName="selectedType" name="gitTypes">
           <div *ngFor="let gitTypeEntry of gitTypes[epSubType].types | keyvalue">
-            <mat-radio-button class="select-step__radio-button" [value]="gitTypeEntry.key" [disabled]="gitTypeEntry.value.exists">
+            <mat-radio-button class="select-step__radio-button" [value]="gitTypeEntry.key"
+              [disabled]="gitTypeEntry.value.exists">
               {{ gitTypeEntry.value.label }}
             </mat-radio-button>
-            <div *ngIf="gitTypeEntry.value.description" class="select-step__description" [ngClass]="{'select-step__off': gitTypeEntry.value.exists}">
+            <div *ngIf="gitTypeEntry.value.description" class="select-step__description"
+              [ngClass]="{'select-step__off': gitTypeEntry.value.exists}">
               <p *ngFor="let p of gitTypeEntry.value.description">{{p}}</p>
             </div>
           </div>
@@ -22,8 +24,9 @@
             <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
           </mat-form-field>
           <mat-form-field novalidate>
-            <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-              pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
+            <input matInput id="url" name="url" formControlName="urlField" type="url" required
+              placeholder="Endpoint Address" pattern="{{urlValidation}}"
+              [appUnique]="(existingEndpoints | async)?.urls">
             <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
             <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
             <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
