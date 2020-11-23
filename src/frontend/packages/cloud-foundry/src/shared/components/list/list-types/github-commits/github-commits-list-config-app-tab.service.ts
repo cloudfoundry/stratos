@@ -15,6 +15,7 @@ import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { getCommitGuid } from '../../../../../../../git/src/store/git-entity-factory';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import {
   CheckProjectExists,
@@ -152,7 +153,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
-    gitEntityCatalog.commit.store.getEntityMonitor(scmType + '-' + this.projectName + '-' + this.deployedCommitSha).entity$.pipe(
+    // TODO: RC Test
+    gitEntityCatalog.commit.store.getEntityMonitor(getCommitGuid(scmType, this.projectName, this.deployedCommitSha)).entity$.pipe(
       filter(deployedCommit => !!deployedCommit),
       first(),
     ).subscribe(deployedCommit => {

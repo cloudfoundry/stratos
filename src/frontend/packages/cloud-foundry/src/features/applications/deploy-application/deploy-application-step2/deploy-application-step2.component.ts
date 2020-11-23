@@ -46,6 +46,7 @@ import {
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
@@ -262,7 +263,7 @@ export class DeployApplicationStep2Component
             projectName: state.name
           }).entities$
         ),
-        // Find the specific branch we're interested inS
+        // Find the specific branch we're interested in
         withLatestFrom(deployBranchName$),
         filter(([, branchName]) => !!branchName),
         tap(([branches, branchName]) => {
@@ -270,7 +271,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([p, q]) => p),
+        map(([p,]) => p),
         publishReplay(1),
         refCount()
       );
@@ -288,11 +289,10 @@ export class DeployApplicationStep2Component
 
 
           if (this.isRedeploy) {
+            // TODO: RC test
             const commitSha = commit || branch.commit.sha;
-            // FIXME: This method to create entity id's should be standardised.... #4245
-            const repoEntityID = `${this.scm.getType()}-${projectInfo.full_name}`;
-            const commitEntityID = `${repoEntityID}-${commitSha}`;
-            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitEntityID, null, {
+            const commitGuid = getCommitGuid(this.scm.getType(), projectInfo.full_name, commitSha);
+            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitGuid, null, {
               projectName: projectInfo.full_name,
               scm: this.scm, commitSha
             });
