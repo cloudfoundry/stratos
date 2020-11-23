@@ -82,7 +82,7 @@ export class DeployApplicationStep2Component
   // @Input('fsSourceData') fsSourceData;
 
   // ---- GIT ----------
-  repositoryBranches$: Observable<any>;
+  repositoryBranches$: Observable<GitBranch[]>;
 
   projectInfo$: Observable<GitRepo>;
   commitSubscription: Subscription;
@@ -280,16 +280,14 @@ export class DeployApplicationStep2Component
       this.repositoryBranches$,
       deployBranchName$,
       this.projectInfo$,
-      deployCommit$
+      deployCommit$,
     ).pipe(
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
-        if (branch && !!projectInfo && branch.projectId === projectInfo.full_name) {
+        if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
 
-
           if (this.isRedeploy) {
-            // TODO: RC test
             const commitSha = commit || branch.commit.sha;
             const commitGuid = getCommitGuid(this.scm.getType(), projectInfo.full_name, commitSha);
             const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitGuid, null, {

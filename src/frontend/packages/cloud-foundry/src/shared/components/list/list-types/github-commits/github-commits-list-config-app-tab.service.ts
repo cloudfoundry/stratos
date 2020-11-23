@@ -49,7 +49,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         new SetAppSourceDetails({
           name: this.scm.getLabel(),
           id: this.scm.getType(),
-          group: 'gitscm'
+          group: 'gitscm',
+          endpointGuid: this.scm.endpointGuid,
         })
       );
       // Set branch
