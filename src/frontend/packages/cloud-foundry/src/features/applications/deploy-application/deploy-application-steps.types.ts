@@ -6,7 +6,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { SourceType } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { PermissionConfig } from '../../../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { GitSCMService } from '../../../../../git/src/public_api';
+import { GitSCM, GitSCMService } from '../../../../../git/src/public_api';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../../../git/src/store/git-entity-factory';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../../store/src/public-api';
@@ -30,7 +30,7 @@ export const AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM = 'auto-select-deploy-endpoi
 @Injectable()
 export class ApplicationDeploySourceTypes {
 
-  private types: SourceType[] = [
+  private baseTypes: SourceType[] = [
     {
       name: 'GitHub',
       id: DEPLOY_TYPES_IDS.GITHUB,
@@ -93,29 +93,72 @@ export class ApplicationDeploySourceTypes {
     this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(e => !!e),
       first(),
-      map(endpoints => endpoints.reduce((res, e) => {
+      map(endpoints => {
+        // Supplement the base github/gitlab with endpoint guid if added by the user. This means we cna use their creds when requesting info
+        // to avoid rate limiting
+        return { endpoints, types: this.baseTypes.map(t => this.updateGitSourceTypeFromEndpoint(t, endpoints)) };
+      }),
+      map(({ endpoints, types }) => endpoints.reduce((res, e) => {
+        // Supplement the base types with git sources that were manually added by the user as github/gitlab endpoints
         const newType = this.createGitSourceTypeFromEndpoint(e);
         if (newType) {
           res.push(newType);
         }
         return res;
-      }, [...this.types])),
+      }, [...types])),
       publishReplay(1),
       refCount()
     );
   }
 
-  public getTypes(): SourceType[] {
-    return this.types;
+  /**
+   * Supplement the base github/gitlab type with endpoint guid if added by the user. This means we cna use their creds when requesting info
+   * to avoid rate limiting
+   */
+  private updateGitSourceTypeFromEndpoint(type: SourceType, endpoints: EndpointModel[]): SourceType {
+    const endpoint = endpoints.find(e =>
+      (e.cnsi_type === GIT_ENDPOINT_TYPE) &&
+      ((type.id === DEPLOY_TYPES_IDS.GITHUB && e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB) ||
+        (type.id === DEPLOY_TYPES_IDS.GITLAB && e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITLAB))
+    );
+
+    return endpoint ? {
+      ...type,
+      endpointGuid: endpoint.guid
+    } : type;
   }
 
+  /**
+   * Supplement the base types with git sources manually added by the user as github/gitlab endpoints
+   */
   private createGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
-    // We need to show any git of types lab and hub and that uses a custom url (github.com and gitlab.com use standard options)
-    if (endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
+    const { scm, type } = this.getScmFromEndpoint(endpoint);
+    // I.E. It's a custom/new git address
+    if (!scm) {
+      // Unknown git type
       return;
     }
 
-    const { scm, type } = endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+    const endpointUrl = getFullEndpointApiUrl(endpoint);
+    if (endpointUrl !== scm.getPublicApi()) {
+      // This is a custom instance of a git type, use similar settings to the public
+      return {
+        ...this.baseTypes.find(t => t.id === type),
+        name: `Private - ${endpoint.name}`,
+        endpointGuid: endpoint.guid
+      };
+    }
+  }
+
+  private getScmFromEndpoint(endpoint: EndpointModel): { scm: GitSCM, type: DEPLOY_TYPES_IDS; } {
+    if (!endpoint || endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
+      return {
+        scm: null,
+        type: null
+      };
+    }
+
+    return endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
       {
         scm: this.scmService.getSCM('github', null),
         type: DEPLOY_TYPES_IDS.GITHUB
@@ -123,27 +166,12 @@ export class ApplicationDeploySourceTypes {
       endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITLAB ? {
         scm: this.scmService.getSCM('gitlab', null),
         type: DEPLOY_TYPES_IDS.GITLAB
-      } : null;
-    // I.E. It's a custom/new git addres
-    if (!scm) {
-      // Unknown git type
-      return;
-    }
-
-    const endpointUrl = getFullEndpointApiUrl(endpoint);
-    if (endpointUrl === scm.getPublicApi()) {
-      // We've got creds for a public git type, use those to avoid rate limiting of anonymous requests
-      // Sneakily update the existing reference // TODO: RC improve - ugly update of item in array
-      this.types.find(t => t.id === type).endpointGuid = endpoint.guid;
-    } else {
-      // This is a custom instance of a git type, use similar settings to the public
-      return {
-        ...this.types.find(t => t.id === type),
-        name: `Private - ${endpoint.name}`,
-        endpointGuid: endpoint.guid
-      };
-    }
+      } : {
+          scm: null,
+          type: null
+        };
   }
+
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
