@@ -205,10 +205,26 @@ class KubeResourceEntityHelper {
       kubeEntityCatalog[defn.kubeCatalogEntity] = defn.getKubeCatalogEntity(d);
     } else {
       kubeEntityCatalog[defn.kubeCatalogEntity] = new StratosCatalogEntity<IFavoriteMetadata, T, KubeResourceActionBuilders>(d, {
-        actionBuilders: createKubeResourceActionBuilder(d.type)
+        actionBuilders: createKubeResourceActionBuilder(d.type),
       });
     }
 
+    if (defn.canFavorite) {
+      kubeEntityCatalog[defn.kubeCatalogEntity].builders.entityBuilder = {
+        getIsValid: (fav) => kubeEntityCatalog[defn.kubeCatalogEntity].api.get(fav.name, fav.kubeGuid).pipe(entityFetchedWithoutError()),
+        getMetadata: (resource: any) => {
+          return {
+            endpointId: resource.kubeGuid,
+            guid: resource.metadata.uid,
+            kubeGuid: resource.kubeGuid,
+            name: resource.metadata.name,
+          };
+        },
+        // TODO - not always API name
+        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
+        getGuid: resource => resource.metadata.uid,
+      };
+    }
     this.entities.push(kubeEntityCatalog[defn.kubeCatalogEntity]);
     return this;
   }
@@ -455,6 +471,7 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     apiNamespaced: false,
     kubeCatalogEntity: 'namespace',
     hidden: true,
+    canFavorite: true,
     getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
       definition, { actionBuilders: kubeNamespaceActionBuilders }
     ),

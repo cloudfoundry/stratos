@@ -21,6 +21,8 @@ import {
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
+import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-catalog';
+import { KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType } from './../../kubernetes-entity-factory';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers/kubernetes-pod-containers.component';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
@@ -59,7 +61,8 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
         sidePanelConfig: {
           title: pod.metadata.name,
           resourceKind: 'pod',
-          resource$: of(pod)
+          resource$: of(pod),
+          definition: entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType)
         }
       })
     },

@@ -56,6 +56,8 @@ export interface KubeResourceEntityDefinition {
   hidden?: boolean;
   // Name fo a list config that can be obtained from the list config service
   listConfig?: string;
+  // Allow this entity to be favorited?
+  canFavorite?: boolean;
 }
 
 export interface KubeService extends BasicKubeAPIResource {

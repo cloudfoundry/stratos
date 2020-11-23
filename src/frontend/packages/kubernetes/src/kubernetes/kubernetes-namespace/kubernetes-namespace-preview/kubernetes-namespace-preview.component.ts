@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
@@ -19,7 +19,6 @@ import { KubernetesService } from '../../services/kubernetes.service';
     {
       provide: BaseKubeGuid,
       useFactory: (activatedRoute: ActivatedRoute) => {
-        console.log(activatedRoute);
         return {
           guid: activatedRoute.snapshot.params.endpointId
         };
@@ -40,23 +39,12 @@ export class KubernetesNamespacePreviewComponent implements PreviewableComponent
 
   link: string;
 
-  props: any;
-
-  constructor(public store: Store<AppState>) {
-    // this.analysisService.hideAnalysis$
-
-    // isAnalysisEnabled
-    this.showAnalysis$ = of(true);
-
+  constructor(store: Store<AppState>) {
+    this.showAnalysis$ = KubernetesAnalysisService.isAnalysisEnabled(store);
   }
 
   setProps(props: { [key: string]: any; }): void {
     const { resource, endpointId } = props;
-    console.log(resource);
-    console.log(props);
     this.link = `/kubernetes/${endpointId}/resource/namespace/${resource.metadata.name}/analysis`;
-    console.log(this.link);
   }
 }
-
-// {  link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },

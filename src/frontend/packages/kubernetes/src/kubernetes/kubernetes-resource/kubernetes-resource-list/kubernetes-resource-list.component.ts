@@ -133,10 +133,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
   }
 
   private getColumns(definition: KubeResourceEntityDefinition): ITableColumn<KubeAPIResource>[] {
-    console.log(definition.type);
     const component = this.uiConfigService.previewComponent.get(definition.type);
-    console.log(definition);
-
     let columns: Array<ITableColumn<KubeAPIResource>> = [
       // Name
       {

@@ -1,4 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import { kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
 import { GetHelmReleasePods, GetHelmReleaseServices } from '../../workloads/store/workloads.actions';
 import {
   DeleteAnalysisReport,
@@ -7,6 +8,7 @@ import {
   GetAnalysisReportsByPath,
   RunAnalysisReport,
 } from '../analysis.actions';
+import { DeleteKubernetesResource } from '../kube-resource.actions';
 import {
   CreateKubernetesNamespace,
   GeKubernetesDeployments,
@@ -112,12 +114,19 @@ export interface KubeNamespaceActionBuilders extends OrchestratedActionBuilders 
     kubeGuid: string,
     paginationKey?: string,
   ) => GetKubernetesNamespaces;
+  deleteResource: (
+    kubeGuid: string,
+    resourceName: string,
+    namespace?: string
+  ) => DeleteKubernetesResource;
 }
 
 export const kubeNamespaceActionBuilders: KubeNamespaceActionBuilders = {
   get: (namespace: string, kubeGuid: string) => new GetKubernetesNamespace(namespace, kubeGuid),
   create: (namespace: string, kubeGuid: string) => new CreateKubernetesNamespace(namespace, kubeGuid),
-  getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid)
+  getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid),
+  deleteResource: (resName: string, kubeGuid: string, namespace: string) =>
+  new DeleteKubernetesResource(kubernetesNamespacesEntityType, kubeGuid, resName, namespace)
 };
 
 export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {
@@ -138,7 +147,7 @@ export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {
 export const kubeServiceActionBuilders: KubeServiceActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesServices(kubeGuid),
   getInNamespace: (namespace: string, kubeGuid: string) => new GetKubernetesServicesInNamespace(kubeGuid, namespace),
-  getInWorkload: (releaseTitle: string, kubeGuid: string) => new GetHelmReleaseServices(kubeGuid, releaseTitle)
+  getInWorkload: (releaseTitle: string, kubeGuid: string) => new GetHelmReleaseServices(kubeGuid, releaseTitle),
 };
 
 export interface KubeDashboardActionBuilders extends OrchestratedActionBuilders {

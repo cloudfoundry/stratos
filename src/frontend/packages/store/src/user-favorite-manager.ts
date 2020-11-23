@@ -161,8 +161,8 @@ export class UserFavoriteManager {
     const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
     const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
-    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(entity);
+    const metadata = catalogEntity.builders.entityBuilder?.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder?.getGuid(entity);
     if (!endpointId) {
       console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
     }
@@ -212,4 +212,12 @@ export class UserFavoriteManager {
     return total > 0;
   }
 
+  public canFavoriteEntityType(entityDefn: StratosBaseCatalogEntity) {
+    const defn = entityDefn.builders?.entityBuilder;
+    if (defn) {
+      const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+      return canFavorite;
+    }
+    return false;
+  }
 }

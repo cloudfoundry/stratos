@@ -1,3 +1,4 @@
+import { Portal } from '@angular/cdk/portal';
 import { Component, Input } from '@angular/core';
 
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
@@ -15,6 +16,8 @@ export class SidepanelPreviewComponent {
 
   @Input()
   favorite: UserFavorite<IFavoriteMetadata>;
+
+  @Input() header: Portal<any>;
 
   constructor(public sidePanelService: SidePanelService) { }
 }

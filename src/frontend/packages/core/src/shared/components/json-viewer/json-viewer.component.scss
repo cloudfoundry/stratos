@@ -99,3 +99,16 @@ $type-colors: (
     cursor: pointer;
   }
 }
+
+// Smaller text
+.ngx-json-viewer.small-text {
+  font-size: 12px;
+
+  * {
+    font-size: 12px;
+  }
+
+  .segment .children {
+    margin-left: 0;
+  }
+}

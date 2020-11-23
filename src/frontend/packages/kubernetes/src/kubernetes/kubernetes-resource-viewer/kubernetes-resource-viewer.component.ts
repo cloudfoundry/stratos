@@ -1,3 +1,4 @@
+import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
   Component,
@@ -5,6 +6,7 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
+  TemplateRef,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
@@ -13,12 +15,17 @@ import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
+import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
+import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
+import { SidePanelService } from './../../../../core/src/shared/services/side-panel.service';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
+import { UserFavoriteManager } from './../../../../store/src/user-favorite-manager';
 
 export interface KubernetesResourceViewerComponentConfig {
   resource: BasicKubeAPIResource;
@@ -54,9 +61,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   constructor(
     private endpointsService: EndpointsService,
     private kubeEndpointService: KubernetesEndpointService,
-    private resolver: ComponentFactoryResolver
-  ) {
-  }
+    private resolver: ComponentFactoryResolver,
+    private userFavoriteManager: UserFavoriteManager,
+    private viewContainerRef: ViewContainerRef,
+    private confirmDialog: ConfirmationDialogService,
+    private sidePanelService: SidePanelService,
+  ) { }
 
   public title: string;
   public resource$: Observable<KubernetesResourceViewerResource>;
@@ -76,6 +86,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   component: any;
 
   data: any;
+
+  @ViewChild('header') templatePortalContent: TemplateRef<unknown>;
+  headerContent: Portal<any>;
 
   ngOnDestroy() {
     this.removeCustomComponent();
@@ -101,6 +114,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   ngAfterViewInit() {
     this.createCustomComponent();
+    this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef);
   }
 
   setProps(props: KubernetesResourceViewerConfig) {
@@ -156,11 +170,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         this.component = props.component;
         this.data = {
           endpointId: this.getEndpointId(item),
-          resource: item
+          resource: item,
+          definition: props.definition
         };
         this.createCustomComponent();
 
-        this.setFavorite(props);
+        this.setFavorite(props.definition, item);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
         if (item.metadata) {
@@ -203,7 +218,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   private getEndpointId(res): string {
-    return this.kubeEndpointService.kubeGuid || res.endpointId || res.metadata.kubeId;
+    return this.kubeEndpointService?.kubeGuid || res.endpointId || res.metadata?.kubeId;
   }
 
   private applyAnalysis(resource) {
@@ -216,15 +231,41 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     }
   }
 
-  private setFavorite(props: KubernetesResourceViewerConfig) {
-    console.log('set favorite');
-    console.log(props);
-    const defn = props.definition as KubeResourceEntityDefinition;
-    console.log(defn);
-
-    const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
-
-    console.log(entityDefn);
+  private setFavorite(defn: KubeResourceEntityDefinition, item: any) {
+    if (defn) {
+      const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
+      const canFav = this.userFavoriteManager.canFavoriteEntityType(entityDefn);
+      if (canFav) {
+        this.favorite = this.userFavoriteManager.getFavoriteFromEntity(defn.type, KUBERNETES_ENDPOINT_TYPE, this.getEndpointId(item), item);
+      }
+    }
   }
 
+  // Warn about deletion and then delete the resource if confirmed
+  public deleteWarn() {
+    const defn = this.data.definition;
+    this.sidePanelService.hide();
+    const confirmation = new ConfirmationDialogConfig(
+      `Delete ${defn.label}`,
+      `Are you sure you want to delete "${this.data.resource.metadata.name}" ?`,
+      'Delete',
+      true,
+    );
+    this.confirmDialog.openWithCancel(confirmation,
+      () => {
+        // TODO: Subscribe only until done
+        kubeEntityCatalog[defn.kubeCatalogEntity].api.deleteResource(
+          this.data.resource.metadata.name,
+          this.data.endpointId,
+          this.data.resource.metadata.namespace
+        ).subscribe(a => {
+          console.log('delete progress');
+          console.log(a);
+        });
+      },
+      () => {
+        this.sidePanelService.open();
+      }
+    );
+  }
 }
