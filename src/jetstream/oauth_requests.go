@@ -54,16 +54,10 @@ func (p *portalProxy) DoOAuthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (interfaces.TokenRecord, interfaces.CNSIRecord, error) {
+func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
 	log.Debug("getCNSIRequestRecords")
 
-	var t interfaces.TokenRecord
 	var ok bool
-
-	c, err := p.GetCNSIRecord(r.GUID)
-	if err != nil {
-		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s: %s", r.GUID, err)
-	}
 
 	if r.Token != nil {
 		t = *r.Token
@@ -73,6 +67,11 @@ func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (interfac
 		if !ok {
 			return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
 		}
+	}
+
+	c, err = p.GetCNSIRecord(r.GUID)
+	if err != nil {
+		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s: %s", r.GUID, err)
 	}
 
 	return t, c, nil

@@ -107,7 +107,6 @@ github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1/go.mod h1:sAoA1zHC
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cloudfoundry-community/go-cfenv v1.17.0 h1:qfxEfn8qKkaHY3ZEk/Y2noY79HBASvNgmtHK9x4+6GY=
 github.com/cloudfoundry-community/go-cfenv v1.17.0/go.mod h1:2UgWvQTRXUuIZ/x3KnW6fk6CgPBhcV4UQb/UGIrUyyI=
-github.com/cloudfoundry-incubator/stratos v2.0.0-beta-001+incompatible h1:UUxNbLjhv2cfymub5yNN1tjjqYkteHBBagb4jcbXEIQ=
 github.com/cloudfoundry/bosh-cli v5.4.0+incompatible h1:KpT2PBB7nP1QnK8guXeZ/D2k7FZYAOxcveKgYTDEDBI=
 github.com/cloudfoundry/bosh-cli v5.4.0+incompatible/go.mod h1:rzIB+e1sn7wQL/TJ54bl/FemPKRhXby5BIMS3tLuWFM=
 github.com/cloudfoundry/bosh-utils v0.0.0-20190206192830-9a0affed2bf1 h1:TxcGamw+BaxXTFwZFORzkWNMCHAWjhThxnI24CLS7iE=
