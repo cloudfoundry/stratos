@@ -1,7 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import moment from 'moment';
-import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
