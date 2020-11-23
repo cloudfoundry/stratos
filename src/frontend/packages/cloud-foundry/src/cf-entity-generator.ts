@@ -1,5 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
+import moment from 'moment';
 import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -68,9 +69,6 @@ import {
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
-  gitBranchesEntityType,
-  gitCommitEntityType,
-  gitRepoEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -113,16 +111,6 @@ import {
 } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders, domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders, featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import {
-  GitBranchActionBuilders,
-  gitBranchActionBuilders,
-  GitCommitActionBuilders,
-  gitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
-  GitMeta,
-  GitRepoActionBuilders,
-  gitRepoActionBuilders,
-} from './entity-action-builders/git-action-builder';
 import {
   OrganizationActionBuilders,
   organizationActionBuilders,
@@ -178,7 +166,6 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
@@ -418,9 +405,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateStackEntity(endpointDefinition),
     generateRouteEntity(endpointDefinition),
     generateEventEntity(endpointDefinition),
-    generateGitBranchEntity(endpointDefinition),
-    generateGitRepoEntity(endpointDefinition),
-    generateGitCommitEntity(endpointDefinition),
     generateCFDomainEntity(endpointDefinition),
     generateCFUserEntity(endpointDefinition),
     generateCFServiceInstanceEntity(endpointDefinition),
@@ -509,7 +493,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
         name: `Application environment variables (${ent.metadata.guid}).`,
         guid: ent.metadata.guid
       }),
-      getGuid: ent => ent.metadata.guid,
+      getGuid: metadata => metadata.guid,
     },
   });
   return cfEntityCatalog.appEnvVar;
@@ -534,7 +518,7 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
         name: ent.name,
         guid: ent.guid
       }),
-      getGuid: ent => ent.guid,
+      getGuid: metadata => metadata.guid,
     }
   });
   return cfEntityCatalog.appSummary;
@@ -596,7 +580,7 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
           guid: info.entity.name,
           name: info.entity.name,
         }),
-        getGuid: info => info.entity.name
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -628,7 +612,7 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
           name: ent.entity.name,
           guid: ent.metadata.guid,
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       },
     }
   );
@@ -677,7 +661,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
         name: ent.guid,
         guid: ent.guid
       }),
-      getGuid: ent => ent.guid,
+      getGuid: metadata => metadata.name,
     }
   });
   return cfEntityCatalog.appStats;
@@ -782,7 +766,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
           name: ent.metadata.guid,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -813,7 +797,7 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
           name: ent.entity.label,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       },
     }
   );
@@ -844,7 +828,7 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -880,7 +864,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -905,7 +889,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -936,91 +920,14 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
           name: ent.entity.name,
           guid: ent.metadata.guid
         }),
-        getGuid: ent => ent.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
   return cfEntityCatalog.domain;
 }
 
-function generateGitCommitEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitCommitEntityType,
-    schema: cfEntityFactory(gitCommitEntityType),
-    label: 'Git Commit',
-    labelPlural: 'Git Commits',
-    endpoint: endpointDefinition,
-    nonJetstreamRequest: true,
-    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
-      const metadata = (action.metadata as GitMeta[])[0];
-      return {
-        ...metadata.scm.convertCommit(metadata.projectName, data),
-        guid: action.guid
-      };
-    },
-  };
-  cfEntityCatalog.gitCommit = new StratosCatalogEntity<IBasicCFMetaData, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitCommitActionBuilders,
-      entityBuilder: {
-        getMetadata: ent => ({
-          name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
-          guid: ent.guid
-        }),
-        getGuid: ent => ent.guid,
-      }
-    }
-  );
-  return cfEntityCatalog.gitCommit;
-}
 
-function generateGitRepoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitRepoEntityType,
-    schema: cfEntityFactory(gitRepoEntityType),
-    label: 'Git Repository',
-    labelPlural: 'Git Repositories',
-    endpoint: endpointDefinition
-  };
-  cfEntityCatalog.gitRepo = new StratosCatalogEntity<
-    IBasicCFMetaData,
-    GitRepo,
-    GitRepoActionBuilders
-  >(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitRepoActionBuilders,
-    }
-  );
-  return cfEntityCatalog.gitRepo;
-}
-
-function generateGitBranchEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: gitBranchesEntityType,
-    schema: cfEntityFactory(gitBranchesEntityType),
-    label: 'Git Branch',
-    labelPlural: 'Git Branches',
-    endpoint: endpointDefinition
-  };
-  cfEntityCatalog.gitBranch = new StratosCatalogEntity<IBasicCFMetaData, GitBranch, GitBranchActionBuilders>(
-    definition,
-    {
-      dataReducers: [
-        endpointDisconnectRemoveEntitiesReducer()
-      ],
-      actionBuilders: gitBranchActionBuilders,
-    }
-  );
-  return cfEntityCatalog.gitBranch;
-}
 
 function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition: IStratosEntityDefinition = {
@@ -1047,7 +954,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
               name: event.metadata.guid,
             };
           },
-          getGuid: event => event.metadata.guid,
+          getGuid: metadata => metadata.guid,
         }
       }
     );
@@ -1079,7 +986,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
           guid: app.metadata.guid,
           name: app.entity.domain_url,
         }),
-        getGuid: app => app.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -1110,7 +1017,7 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
           guid: app.metadata.guid,
           name: app.entity.name,
         }),
-        getGuid: app => app.metadata.guid,
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -1205,11 +1112,14 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         getMetadata: app => ({
           guid: app.metadata.guid,
           cfGuid: app.entity.cfGuid,
+          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
-        getLink: (metadata) => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
-        getGuid: app => app.metadata.guid,
-        getIsValid: (metadata) => cfEntityCatalog.application.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
+        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
+        getGuid: metadata => metadata.guid,
+        getLines: () => ([
+          ['Created', (meta) => meta.createdAt]
+        ])
       },
       actionBuilders: applicationActionBuilder
     },
@@ -1245,10 +1155,13 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
           cfGuid: space.entity.cfGuid,
+          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
+        getLines: () => ([
+          ['Created', (meta) => meta.createdAt]
+        ]),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: entity => entity.metadata.guid,
-        getIsValid: (metadata) => cfEntityCatalog.space.api.get(metadata.guid, metadata.cfGuid).pipe(entityFetchedWithoutError())
+        getGuid: metadata => metadata.guid,
       }
     }
   );
@@ -1282,16 +1195,27 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       entityBuilder: {
         getMetadata: org => ({
           guid: org.metadata.guid,
+          status: getOrgStatus(org),
           name: org.entity.name,
           cfGuid: org.entity.cfGuid,
+          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
         getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getGuid: entity => entity.metadata.guid,
-        getIsValid: (metadata) => cfEntityCatalog.org.api.get(metadata.guid, metadata.cfGuid, {}).pipe(entityFetchedWithoutError())
+        getLines: () => ([
+          ['Created', (meta) => meta.createdAt]
+        ]),
+        getGuid: metadata => metadata.guid
       }
     }
   );
   return cfEntityCatalog.org;
+}
+
+function getOrgStatus(org: APIResource<IOrganization>) {
+  if (!org || !org.entity || !org.entity.status) {
+    return 'Unknown';
+  }
+  return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
 }
 
 function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {

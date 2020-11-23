@@ -26,7 +26,6 @@ import {
 } from './cf-api.types';
 import { AppStats } from './store/types/app-metadata.types';
 import { CfUser } from './store/types/cf-user.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 
 export const applicationEntityType = 'application';
 export const stackEntityType = 'stack';
@@ -41,9 +40,6 @@ export const cfUserEntityType = 'user';
 export const appSummaryEntityType = 'applicationSummary';
 export const appStatsEntityType = 'applicationStats';
 export const appEnvVarsEntityType = 'environmentVars';
-export const gitBranchesEntityType = 'gitBranches';
-export const gitRepoEntityType = 'gitRepo';
-export const gitCommitEntityType = 'gitCommits';
 export const serviceEntityType = 'service';
 export const serviceBindingEntityType = 'serviceBinding';
 export const servicePlanEntityType = 'servicePlan';
@@ -70,9 +66,6 @@ interface CFEntityValues {
   cfOrganization: IRequestEntityTypeState<APIResource<IOrganization>>;
   cfRoute: IRequestEntityTypeState<APIResource<IRoute>>;
   cfEvent: IRequestEntityTypeState<APIResource>;
-  cfGitBranches: IRequestEntityTypeState<APIResource<GitBranch>>;
-  cfGitRepo: IRequestEntityTypeState<APIResource<GitRepo>>;
-  cfGitCommits: IRequestEntityTypeState<APIResource<GitCommit>>;
   cfDomain: IRequestEntityTypeState<APIResource<IDomain>>;
   cfUser: IRequestEntityTypeState<APIResource<CfUser>>;
   cfServiceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;

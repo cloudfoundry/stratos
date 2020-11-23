@@ -8,7 +8,6 @@ import { generateCFEntities } from './cf-entity-generator';
 import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
-import { GitSCMService } from './shared/data-services/scm/scm.service';
 import { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
@@ -29,7 +28,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
     ServiceActionHelperService,
     LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService,
-    GitSCMService,
   ]
 })
 export class CloudFoundryPackageModule { }

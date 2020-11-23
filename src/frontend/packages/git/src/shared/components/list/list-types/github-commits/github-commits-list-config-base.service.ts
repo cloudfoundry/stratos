@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { AppState } from '../../../../../../../store/src/app-state';
+import { GitCommit } from '../../../../../store/git.public-types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
+
 
 @Injectable()
 export abstract class GithubCommitsListConfigServiceBase implements IListConfig<GitCommit> {
@@ -82,7 +83,7 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
   protected initialised = new BehaviorSubject<boolean>(false);
 
   constructor(
-    protected store: Store<CFAppState>,
+    protected store: Store<AppState>,
     private datePipe: DatePipe,
   ) { }
 

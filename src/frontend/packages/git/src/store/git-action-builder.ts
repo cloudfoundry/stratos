@@ -4,9 +4,8 @@ import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
 } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { FetchBranchesForProject, FetchBranchForProject, FetchCommits } from '../actions/deploy-applications.actions';
-import { FetchGitHubRepoInfo } from '../actions/github.actions';
-import { GitSCM } from '../shared/data-services/scm/scm';
+import { GitMeta } from '../shared/scm/scm';
+import { FetchBranchesForProject, FetchBranchForProject, FetchCommits, FetchGitHubRepoInfo } from './git.actions';
 
 export interface GitRepoActionBuilders extends OrchestratedActionBuilders {
   getRepoInfo: (
@@ -19,13 +18,6 @@ export const gitRepoActionBuilders: GitRepoActionBuilders = {
     meta: GitMeta
   ) => new FetchGitHubRepoInfo(meta)
 };
-
-export interface GitMeta {
-  projectName: string;
-  scm: GitSCM; // FIXME: Remove from action, see #4245
-  commitSha?: string;
-  branchName?: string;
-}
 
 export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
