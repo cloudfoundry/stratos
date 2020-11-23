@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
@@ -38,8 +39,7 @@ export class CatalogTabComponent {
   public collapsed = true;
   public hide = true;
 
-  constructor(private store: Store<AppState>) {
-
+  constructor(private store: Store<AppState>, private activatedRoute: ActivatedRoute) {
     // Determine the starting state of the filter by repo section
     stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(entities => !!entities),
@@ -92,7 +92,12 @@ export class CatalogTabComponent {
     helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
       first()
     ).subscribe(pagination => {
-      this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+      const { repo } = this.activatedRoute.snapshot.params;
+      if (repo &&  repo.length > 0) {
+        this.filterCharts(repo);
+      } else {
+        this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+      }
     });
   }
 
@@ -101,7 +106,6 @@ export class CatalogTabComponent {
    */
   public filterCharts(repoName: string) {
     this.filteredRepo = repoName;
-
     helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(first()).subscribe(pagination => {
       const action = helmEntityCatalog.chart.actions.getMultiple();
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
