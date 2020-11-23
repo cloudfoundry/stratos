@@ -65,6 +65,30 @@ export class KubernetesEndpointService {
   kubeDashboardConfigured$: Observable<boolean>;
   kubeTerminalEnabled$: Observable<boolean>;
 
+  public static hasKubeTerminalEnabled(store: Store<AppState>): Observable<boolean> {
+    return store.select('auth').pipe(
+      filter(auth => !!auth.sessionData['plugin-config']),
+      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+    );
+  }
+
+  public static kubeDashboardConfigured(store: Store<AppState>, kubeGuid: string): Observable<boolean> {
+    const kubeDashboardEnabled$ = store.select('auth').pipe(
+      filter(auth => !!auth.sessionData['plugin-config']),
+      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+    );
+
+    const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(kubeGuid).waitForEntity$.pipe(
+      map(status => status.entity),
+      filter(status => !!status)
+    );
+
+    return kubeDashboardEnabled$.pipe(
+      switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)),
+      map(status => status && status.installed && !!status.serviceAccount && !!status.service),
+    );
+  }
+
   constructor(
     public baseKube: BaseKubeGuid,
     private store: Store<AppState>,
@@ -235,10 +259,7 @@ export class KubernetesEndpointService {
 
     this.services$ = this.getObservable<KubeService>(kubeEntityCatalog.service.store.getPaginationService(this.kubeGuid));
 
-    this.kubeDashboardEnabled$ = this.store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
-    );
+    this.kubeDashboardEnabled$ = KubernetesEndpointService.hasKubeTerminalEnabled(this.store);
 
     this.kubeTerminalEnabled$ = this.store.select('auth').pipe(
       filter(auth => !!auth.sessionData['plugin-config']),
@@ -281,5 +302,4 @@ export class KubernetesEndpointService {
   private getObservable<T>(obs: PaginationObservables<T>): Observable<T[]> {
     return obs.entities$.pipe(filter(p => !!p), first());
   }
-
 }
