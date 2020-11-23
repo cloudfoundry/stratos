@@ -32,7 +32,11 @@ describe('GithubCommitAuthorComponent', () => {
         id: 12798864,
         avatar_url: 'https://host/path',
         html_url: 'https://host/author_name',
-      }
+      },
+      guid: '',
+      scmType: 'github',
+      projectName: 'test'
+
     };
     fixture.detectChanges();
     element = fixture.nativeElement;
