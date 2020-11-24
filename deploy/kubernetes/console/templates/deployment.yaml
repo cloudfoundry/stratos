@@ -251,9 +251,9 @@ spec:
           value: {{default "false" .Values.console.ssoLogin | quote}}
         - name: SSO_OPTIONS
           value: {{default "" .Values.console.ssoOptions | quote}}
-        - name: SSO_ACCEPTLIST
-        {{- if .Values.console.ssoAcceptList }}
-          value: {{ default "" .Values.console.ssoAcceptList | quote }}
+        - name: SSO_ALLOWLIST
+        {{- if .Values.console.ssoAllowList }}
+          value: {{ default "" .Values.console.ssoAllowList | quote }}
         {{- else }}
           value: {{ default "" .Values.console.ssoWhiteList | quote }}
         {{- end }}

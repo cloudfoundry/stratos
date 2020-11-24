@@ -58,7 +58,7 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |imagePullPolicy|Image pull policy|IfNotPresent|
 |console.sessionStoreSecret|Secret to use when encrypting session tokens|auto-generated random value|
 |console.ssoLogin|Whether to enable SSO Login and use the UAA Login UI instead of the built-in one|false|
-|console.ssoAcceptList|List of permitted redirect URLs for SSO authentication||
+|console.ssoAllowList|List of permitted redirect URLs for SSO authentication||
 |console.backendLogLevel|Log level for backend (info, debug)|info|
 |console.service.externalIPs|External IPs to add to the console service|[]|
 |console.service.loadBalancerIP|IP address to assign to the load balancer for the metrics service (if supported)||
