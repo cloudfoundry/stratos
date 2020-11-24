@@ -119,7 +119,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
-      console.warn(`No endpoint home card for ${this.endpoint.guid}`);
       this.createCard(undefined);
     }
   }

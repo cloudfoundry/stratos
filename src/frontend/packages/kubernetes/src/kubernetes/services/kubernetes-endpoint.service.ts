@@ -72,7 +72,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  public static kubeDashboardConfigured(store: Store<AppState>, kubeGuid: string): Observable<boolean> {
+  public static getKubeDashboardStatus(store: Store<AppState>, kubeGuid: string): Observable<KubeDashboardStatus> {
     const kubeDashboardEnabled$ = store.select('auth').pipe(
       filter(auth => !!auth.sessionData['plugin-config']),
       map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
@@ -83,8 +83,11 @@ export class KubernetesEndpointService {
       filter(status => !!status)
     );
 
-    return kubeDashboardEnabled$.pipe(
-      switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)),
+    return kubeDashboardEnabled$.pipe(switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)));
+  }
+
+  public static kubeDashboardConfigured(store: Store<AppState>, kubeGuid: string): Observable<boolean> {
+    return KubernetesEndpointService.getKubeDashboardStatus(store, kubeGuid).pipe(
       map(status => status && status.installed && !!status.serviceAccount && !!status.service),
     );
   }
@@ -266,18 +269,8 @@ export class KubernetesEndpointService {
       map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
     );
 
-    const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(this.kubeGuid).waitForEntity$.pipe(
-      map(status => status.entity),
-      filter(status => !!status)
-    );
-
-    this.kubeDashboardStatus$ = this.kubeDashboardEnabled$.pipe(
-      switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)),
-    );
-
-    this.kubeDashboardConfigured$ = this.kubeDashboardStatus$.pipe(
-      map(status => status && status.installed && !!status.serviceAccount && !!status.service),
-    );
+    this.kubeDashboardStatus$ = KubernetesEndpointService.getKubeDashboardStatus(this.store, this.kubeGuid);
+    this.kubeDashboardConfigured$ = KubernetesEndpointService.kubeDashboardConfigured(this.store, this.kubeGuid);
 
     this.kubeDashboardLabel$ = this.kubeDashboardStatus$.pipe(
       map(status => {

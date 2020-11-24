@@ -33,6 +33,9 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../entity-catalog.types';
+import {
+  FavoritesSidePanelComponent,
+} from './../../../../core/src/features/home/home/favorites-side-panel/favorites-side-panel.component';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
 import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
@@ -327,7 +330,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
-    getLink?: (entity: UserFavorite<IEndpointFavMetadata>) => string
+    getLink?: (FavoritesSidePanelComponent: UserFavorite<IEndpointFavMetadata>) => string
   ) {
     const fullEntity: IStratosEndpointDefinition = {
       ...entity,

@@ -13,9 +13,12 @@ export interface IFavoritesInfo {
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
-export interface IFavoriteTypeInfo {
+export interface IFavoriteTypeInfo<T= IFavoriteMetadata> {
   endpointType: string;
   entityType: string;
+  entityId: string;
+  endpointId: string;
+  metadata: T;
 }
 
 export interface IFavoriteMetadata {
@@ -43,11 +46,14 @@ export interface FavoriteIconData {
 
 const favoriteGuidSeparator = '-';
 
-export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo {
+export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo<T> {
   public guid: string;
 
   private catalogEntity: StratosBaseCatalogEntity;
   private entityBuilder: IStratosEntityBuilder<IEntityMetadata>;
+
+  public entityId: string;
+  public metadata: T;
 
   constructor(
     public endpointId: string,
@@ -56,9 +62,13 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     entityType should correspond to a type in the requestData part of the store.
     */
     public entityType: string,
-    public entityId?: string,
-    public metadata: T = null
+    entityId?: string,
+    metadata?: T
   ) {
+    // Make sure these default to undefined
+    this.entityId = entityId;
+    this.metadata = metadata;
+
     // Set the guid for this favorite
     this.buildFavoriteStoreEntityGuid();
     this.catalogEntity = entityCatalog.getEntity(this.endpointType, this.entityType);

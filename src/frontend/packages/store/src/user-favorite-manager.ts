@@ -112,7 +112,7 @@ export class UserFavoriteManager {
     });
   }
 
-  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: UserFavorite<T>): UserFavorite<T> => {
+  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> => {
     return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
   }
 
