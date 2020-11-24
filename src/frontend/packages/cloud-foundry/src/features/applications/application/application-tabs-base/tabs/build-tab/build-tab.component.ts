@@ -171,16 +171,14 @@ export class BuildTabComponent implements OnInit {
             projectName: deploySource.project,
             scm,
             commitSha: deploySource.commit
-          }).waitForEntity$);
+          }).entityObs$);
         } else {
           res.push(of(null));
         }
         return observableCombineLatest(res);
       }),
       map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, EntityInfo<GitCommit>]) => {
-        if (commit) {
-          deploySource.commitURL = commit.entity.html_url;
-        }
+        deploySource.commitURL = commit?.entity?.html_url;
         return deploySource;
       }),
       startWith({ type: 'loading' })
