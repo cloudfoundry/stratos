@@ -45,37 +45,29 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private listActionRedeploy: IListAction<GitCommit> = {
     action: (commitEntity) => {
       // set CF data
-      this.store.dispatch(
-        new StoreCFSettings({
-          cloudFoundry: this.cfGuid,
-          org: this.orgGuid,
-          space: this.spaceGuid
-        })
-      );
+      this.store.dispatch(new StoreCFSettings({
+        cloudFoundry: this.cfGuid,
+        org: this.orgGuid,
+        space: this.spaceGuid
+      }));
       // Set Project data
-      this.store.dispatch(
-        new CheckProjectExists(this.scm, this.projectName)
-      );
+      this.store.dispatch(new CheckProjectExists(this.scm, this.projectName));
       // Set Source type
-      this.store.dispatch(
-        new SetAppSourceDetails({
-          name: this.scm.getLabel(),
-          id: this.scm.getType(),
-          group: 'gitscm',
-          endpointGuid: this.scm.endpointGuid,
-        })
-      );
+      this.store.dispatch(new SetAppSourceDetails({
+        name: this.scm.getLabel(),
+        id: this.scm.getType(),
+        group: 'gitscm',
+        endpointGuid: this.scm.endpointGuid,
+      }));
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
       // Set Commit
       this.store.dispatch(new SetDeployCommit(commitEntity.sha));
 
-      this.store.dispatch(
-        new RouterNav({
-          path: ['/applications/deploy'],
-          query: { appGuid: this.appGuid }
-        })
-      );
+      this.store.dispatch(new RouterNav({
+        path: ['/applications/deploy'],
+        query: { appGuid: this.appGuid }
+      }));
     },
     label: 'Deploy',
     description: ``,

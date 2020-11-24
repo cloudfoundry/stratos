@@ -126,6 +126,6 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     const message = super.parseErrorAsString(error);
     return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
       'Git ' + message.substring(0, message.indexOf('(')) :
-      'Git request failed';
+      'Git request failed' + (error.status ? `(${error.status})` : '');
   }
 }

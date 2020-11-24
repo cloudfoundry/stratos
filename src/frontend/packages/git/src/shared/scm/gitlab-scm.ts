@@ -209,7 +209,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   }
 
   parseErrorAsString(error: any): string {
-    return 'Git request failed';
+    return 'Git request failed' + (error.status ? `(${error.status})` : '');
   }
 
 }

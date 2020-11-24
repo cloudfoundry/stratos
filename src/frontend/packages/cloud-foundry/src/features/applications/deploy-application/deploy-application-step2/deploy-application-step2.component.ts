@@ -140,10 +140,9 @@ export class DeployApplicationStep2Component
         this.store.dispatch(new SaveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
-          url: repo.entity.full_name,
+          url: repo.entity.clone_url,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
-
         }, null));
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
