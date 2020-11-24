@@ -226,7 +226,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 
 func (m *MetricsSpecification) addAuth(req *http.Request, auth *MetricsAuth) {
 	if auth.Type == interfaces.AuthConnectTypeCreds {
-		req.SetBasicAuth(auth.Username, auth.Password)
+		req.SetBasicAuth(url.QueryEscape(auth.Username), url.QueryEscape(auth.Password))
 	}
 }
 
