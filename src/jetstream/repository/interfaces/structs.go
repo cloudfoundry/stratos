@@ -339,6 +339,7 @@ type CNSIRequest struct {
 	Body         []byte       `json:"-"`
 	Header       http.Header  `json:"-"`
 	URL          *url.URL     `json:"-"`
+	UnescapePath bool         `json:"-"`
 	StatusCode   int          `json:"statusCode"`
 	Status       string       `json:"status"`
 	PassThrough  bool         `json:"-"`
@@ -346,7 +347,7 @@ type CNSIRequest struct {
 	Response     []byte       `json:"-"`
 	Error        error        `json:"-"`
 	ResponseGUID string       `json:"-"`
-	Token        *TokenRecord `json:"-"` // Optional Token record to use insead of looking up
+	Token        *TokenRecord `json:"-"` // Optional Token record to use instead of looking up
 }
 
 type PortalConfig struct {

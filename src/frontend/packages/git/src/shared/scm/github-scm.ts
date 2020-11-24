@@ -114,15 +114,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
           config
         );
       }),
-      map(repos => {
-        const ret = repos.map(item => {
-          return {
-            name: item.full_name,
-            private: item.private
-          };
-        });
-        return ret;
-      })
+      map(repos => repos.map(item => ({ name: item.full_name, private: item.private })))
     );
   }
 

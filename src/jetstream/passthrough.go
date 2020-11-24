@@ -462,7 +462,16 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if len(cnsiRequest.Body) > 0 {
 		body = bytes.NewReader(cnsiRequest.Body)
 	}
-	req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
+
+	// cnsiRequest.URL.String() uses encoded version of path.. which re-encodes content when it shouldn't
+	// (for example gitlab intentionally encoded path of `projects/richard-cox%2Fcf-quick-app` becomes
+	// `projects/richard-cox%252Fcf-quick-app` which results in 404). Provide a way to override this functionality with UnescapePath
+	url := cnsiRequest.URL.String()
+	if cnsiRequest.UnescapePath {
+		url = strings.ReplaceAll(url, cnsiRequest.URL.EscapedPath(), cnsiRequest.URL.Path)
+	}
+
+	req, err = http.NewRequest(cnsiRequest.Method, url, body)
 	if err != nil {
 		cnsiRequest.Error = err
 		if done != nil {
@@ -562,7 +571,8 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	if buildErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 	}
-	cnsiRequest.LongRunning = false
+	cnsiRequest.LongRunning = false // FIXME: Should come from header. Would this have knock on effects (only handled in other cases)?
+	cnsiRequest.UnescapePath = true
 
 	go p.doRequest(&cnsiRequest, done)
 	res := <-done

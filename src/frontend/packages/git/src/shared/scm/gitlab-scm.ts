@@ -39,7 +39,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
 
     const obs$ = parts.length !== 2 ?
       observableOf(null) :
-      this.getAPI().pipe(map(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
+      this.getAPI().pipe(switchMap(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
 
     return obs$.pipe(
       map((data: any) => {
@@ -130,23 +130,16 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]> {
     const prjParts = projectName.split('/');
 
-    const obs$ = prjParts.length > 1 ?
+    const obs$: Observable<GitRepo[]> = prjParts.length > 1 ?
       this.getMatchingUserGroupRepositories(httpClient, prjParts) :
-      this.getAPI().pipe(
-        switchMap(api => httpClient.get(`${api.url}/projects?search=${projectName}`, {
-          ...api.requestArgs,
-          params: {
-            [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
-          }
-        }))
-      );
+      this.getMatchingProjects(httpClient, projectName);
 
     return obs$.pipe(
-      map((repos: any[]) => repos.map(item => ({ name: item.path_with_namespace, private: false })))
+      map(repos => repos.map(item => ({ name: item.full_name, private: item.private })))
     );
   }
 
-  private getMatchingUserGroupRepositories(httpClient: HttpClient, prjParts: string[]): Observable<any[]> {
+  private getMatchingUserGroupRepositories(httpClient: HttpClient, prjParts: string[]): Observable<GitRepo[]> {
     return this.getAPI().pipe(
       switchMap(api => combineLatest([
         httpClient.get<[]>(`${api.url}/users/${prjParts[0]}/projects/?search=${prjParts[1]}`, api.requestArgs).pipe(
@@ -156,7 +149,19 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
           catchError(() => of([]))
         ),
       ])),
-      map(([a, b]: [any[], any[]]) => a.concat(b)),
+      map(([a, b]: [any[], any[]]) => a.concat(b).map(this.convertProject)),
+    );
+  }
+
+  private getMatchingProjects(httpClient: HttpClient, exactProjectName: string): Observable<GitRepo[]> {
+    return this.getAPI().pipe(
+      switchMap(api => httpClient.get(`${api.url}/projects?search=${exactProjectName}`, {
+        ...api.requestArgs,
+        params: {
+          [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
+        }
+      })),
+      map((projects: any[]) => projects.map(this.convertProject))
     );
   }
 
@@ -171,6 +176,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
         avatar_url: prj.avatar_url || '/core/assets/gitlab-logo.svg'
       },
       clone_url: prj.http_url_to_repo,
+      // visibility is undefined if not using PAT (everything is public). if PAT is used then values include public, private and internal
+      private: prj.visibility !== undefined && prj.visibility !== 'public'
     };
   }
 
