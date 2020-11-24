@@ -14,7 +14,6 @@ import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboar
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
@@ -98,7 +97,7 @@ export class CloudFoundryOrganizationBaseComponent {
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromEntity<IFavoriteMetadata>(org.entity, organizationEntityType, userFavoriteManager, CF_ENDPOINT_TYPE))
+      map(org => userFavoriteManager.getFavorite<IFavoriteMetadata>(org.entity, organizationEntityType, CF_ENDPOINT_TYPE))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
