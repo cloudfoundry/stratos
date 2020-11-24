@@ -20,6 +20,7 @@ export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
 export interface IAppTileData extends ITileData {
   type: string;
   subType?: string;
+  endpointGuid?: string;
 }
 
 @Component({

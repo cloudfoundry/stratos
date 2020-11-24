@@ -14,6 +14,7 @@ import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   ApplicationDeploySourceTypes,
+  AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
   AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
 } from '../../applications/deploy-application/deploy-application-steps.types';
 import {
@@ -95,7 +96,11 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
         new ITileConfig<IAppTileData>(
           type.name,
           type.graphic,
-          { type: 'deploy', subType: type.id },
+          {
+            type: 'deploy',
+            subType: type.id,
+            endpointGuid: type.endpointGuid
+          },
         )
       ))
     );
@@ -111,6 +116,9 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
       };
       if (tile.data.subType) {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
+      }
+      if (tile.data.endpointGuid) {
+        query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
       }
       this.store.dispatch(new RouterNav({ path: `applications/${type}`, query }));
     }
