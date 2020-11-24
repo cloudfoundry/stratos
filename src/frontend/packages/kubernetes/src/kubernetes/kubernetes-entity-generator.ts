@@ -323,7 +323,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     definition, {
       actionBuilders: kubeNamespaceActionBuilders,
       entityBuilder: {
-        getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.name, favorite.kubeGuid).pipe(entityFetchedWithoutError()),
+        getIsValid: (fav) => kubeEntityCatalog.namespace.api.get(fav.metadata.name, fav.endpointId).pipe(entityFetchedWithoutError()),
         getMetadata: (namespace: any) => {
           return {
             endpointId: namespace.kubeGuid,
@@ -332,7 +332,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
             name: namespace.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}`,
+        getLink: favorite => `/kubernetes/${favorite.endpointId}/namespaces/${favorite.metadata.name}`,
         getGuid: namespace => namespace.metadata.uid,
       }
     });

@@ -5,11 +5,10 @@ import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
-import { IAppFavMetadata } from '../../../../../../../../cloud-foundry/src/cf-metadata-types';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
@@ -32,7 +31,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   entityConfig: ComponentEntityMonitorConfig;
   cfOrgSpace: CfOrgSpaceLabelService;
 
-  public favorite: UserFavorite<IAppFavMetadata>;
+  public favorite: UserFavorite<IFavoriteMetadata>;
 
   constructor(
     private store: Store<CFAppState>,

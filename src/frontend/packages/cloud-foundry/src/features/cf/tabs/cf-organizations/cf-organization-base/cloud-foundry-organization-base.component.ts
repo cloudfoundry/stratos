@@ -13,12 +13,11 @@ import { environment } from '../../../../../../../core/src/environments/environm
 import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
-import { UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
-import { IOrgFavMetadata } from '../../../../../cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import {
@@ -89,7 +88,7 @@ export class CloudFoundryOrganizationBaseComponent {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
-  public favorite$: Observable<UserFavorite<IOrgFavMetadata>>;
+  public favorite$: Observable<UserFavorite<IFavoriteMetadata>>;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
@@ -99,7 +98,7 @@ export class CloudFoundryOrganizationBaseComponent {
     this.schema = cfEntityFactory(organizationEntityType);
     this.favorite$ = cfOrgService.org$.pipe(
       first(),
-      map(org => getFavoriteFromEntity<IOrgFavMetadata>(org.entity, organizationEntityType, userFavoriteManager, CF_ENDPOINT_TYPE))
+      map(org => getFavoriteFromEntity<IFavoriteMetadata>(org.entity, organizationEntityType, userFavoriteManager, CF_ENDPOINT_TYPE))
     );
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),

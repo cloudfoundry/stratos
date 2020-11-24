@@ -6,7 +6,6 @@ import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/o
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -26,6 +25,7 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
@@ -48,7 +48,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
+    map(app => getFavoriteFromEntity<IFavoriteMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean; }>;

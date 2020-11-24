@@ -232,13 +232,13 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
   getGuid(entity: Y): string;
-  getLink?(entityMetadata: T): string;
+  getLink?(favorite: UserFavorite<T>): string;
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,
   };
   // Is the underlying entity for the favorite valid?
-  getIsValid?(entityMetadata): Observable<boolean>;
+  getIsValid?(favorite: UserFavorite<T>): Observable<boolean>;
   /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions

@@ -23,10 +23,6 @@ export interface IFavoriteMetadata {
   [key: string]: string;
 }
 export interface IEndpointFavMetadata extends IFavoriteMetadata {
-  guid: string;
-  address: string;
-  user: string;
-  admin: string;
   subType: string;
 }
 
@@ -95,7 +91,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
 
   // Get the link to navigate to the view for the given entity backing this user favorite
   public getLink(): string {
-    return this.entityBuilder.getLink ? this.entityBuilder.getLink(this.metadata) : null;
+    return this.entityBuilder.getLink ? this.entityBuilder.getLink(this) : null;
   }
 
   // Get the type name, e.g. 'Application'
