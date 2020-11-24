@@ -26,7 +26,14 @@ export class MonocularChartsDataSource extends ListDataSource<MonocularChart> {
         { type: 'filter', field: 'name' },
         (entities: MonocularChart[], paginationState: PaginationEntityState) => {
           const repository = paginationState.clientPagination.filter.items.repository;
-          return repository ? entities.filter(e => repository === e.attributes.repo.name) : entities;
+          const isHub = repository === 'Artifact Hub';
+          if (!repository) {
+            return entities;
+          } else if (isHub) {
+            return entities.filter(e => !!e.monocularEndpointId);
+          } else {
+            return entities.filter(e => repository === e.attributes.repo.name);
+          }
         }
       ]
     });

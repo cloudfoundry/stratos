@@ -122,6 +122,13 @@ $desktop-toggle-button-item-height: $desktop-menu-item-height - 2px;
       width: 20px;
     }
 
+    .page-header__notification-button .mat-badge-medium.mat-badge-overlap .mat-badge-content {
+      height: 18px;
+      line-height: 18px;
+      right: -8px;
+      top: -8px;
+      width: 18px;
+    }
   }
 
   .dashboard .dashboard__inner {
