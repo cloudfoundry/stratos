@@ -32,7 +32,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     private domSanitizer: DomSanitizer
   ) { }
 
-  setProps(props: { [key: string]: any }) {
+  setProps(props: { [key: string]: any; }) {
     this.setDocumentUrl = props.documentUrl;
   }
 
@@ -65,6 +65,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
         window.setTimeout(() => {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
+          titleElement.remove();
           this.title = titleText;
         }, 100);
       } else {
