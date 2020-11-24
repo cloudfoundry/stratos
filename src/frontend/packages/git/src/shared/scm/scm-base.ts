@@ -49,11 +49,18 @@ export abstract class BaseSCM {
   }
 
   protected getEndpoint(endpointGuid: string): Observable<EndpointModel> {
-    return endpointGuid ?
-      stratosEntityCatalog.endpoint.store.getEntityService(endpointGuid).waitForEntity$.pipe(
-        map(e => e.entity)
-      ) :
-      of(null);
+    if (!endpointGuid) {
+      return of(null);
+    }
+    // Ensure that we have fetched the endpoints before attempting to get the required endpoint.
+    // Why this way instead of just fetching the endpoint directly?
+    // There are cases where we have an endpoint guid but the endpoint won't be in the store (user views an app deployed from private github
+    // endpoint that has since been removed).
+    // Normally we'd get the entity directly and use a waitForEntity here... but that blocks and will fire again if the endpoint is added
+    // We can't just use a entityObs$ because that fires a null for genuine endpoints on refresh
+    return stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+      map(endpoints => endpoints?.find(e => e.guid === endpointGuid))
+    );
   }
 
   protected parseErrorAsString(res: any): string {
