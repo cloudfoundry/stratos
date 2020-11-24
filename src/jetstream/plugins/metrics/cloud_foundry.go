@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	cellQueryWhiteList = []string{
+	cellQueryAcceptList = []string{
 		"firehose_value_metric_rep_unhealthy_cell",
 		"firehose_value_metric_rep_garden_health_check_failed",
 		"firehose_value_metric_rep_capacity_remaining_containers",
@@ -185,8 +185,8 @@ func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []
 }
 
 func isAllowedCellMetricsQuery(query string) bool {
-	for _, whiteListQuery := range cellQueryWhiteList {
-		if strings.Index(query, whiteListQuery) == 0 {
+	for _, acceptListQuery := range cellQueryAcceptList {
+		if strings.Index(query, acceptListQuery) == 0 {
 			return true
 		}
 	}

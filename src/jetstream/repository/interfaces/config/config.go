@@ -103,14 +103,18 @@ func Load(intf interface{}, envLookup env.Lookup) error {
 	return nil
 }
 
-func setFieldValue(value reflect.Value, field reflect.Value, tag string, envLookup env.Lookup) error {
-	val, ok := envLookup(tag)
-
-	if !ok {
-		return nil
+func setFieldValue(value reflect.Value, field reflect.Value, tags string, envLookup env.Lookup) error {
+	// Allow multiple values, separated by ',' to allow fallbacks
+	tagList := strings.Split(tags, ",")
+	for _, tag := range tagList {
+		val, ok := envLookup(strings.TrimSpace(tag))
+		if ok {
+			log.Info(val)
+			return SetStructFieldValue(value, field, val)
+		}
 	}
 
-	return SetStructFieldValue(value, field, val)
+	return nil
 }
 
 func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) error {

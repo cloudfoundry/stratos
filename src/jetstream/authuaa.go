@@ -442,11 +442,11 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 //SSO Login will be refactored at a later date
 
 // ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
-// We use a single callback so this can be whitelisted in the client
+// We use a single callback so this can be accept-listed in the client
 func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	state := c.QueryParam("state")
 
-	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	stateErr := validateSSORedirectState(state, p.Config.SSOAcceptList)
 	if stateErr != nil {
 		return stateErr
 	}
@@ -526,7 +526,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	state := c.QueryParam("state")
-	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	stateErr := validateSSORedirectState(state, p.Config.SSOAcceptList)
 	if stateErr != nil {
 		return stateErr
 	}
@@ -536,7 +536,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	return nil
 }
 
-func validateSSORedirectState(state string, whiteListStr string) error {
+func validateSSORedirectState(state string, acceptListStr string) error {
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
@@ -544,7 +544,7 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	if !safeSSORedirectState(state, whiteListStr) {
+	if !safeSSORedirectState(state, acceptListStr) {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: Disallowed redirect state",
@@ -555,17 +555,17 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 	return nil
 }
 
-func safeSSORedirectState(state string, whiteListStr string) bool {
-	if len(whiteListStr) == 0 {
+func safeSSORedirectState(state string, acceptListStr string) bool {
+	if len(acceptListStr) == 0 {
 		return true
 	}
 
-	whiteList := strings.Split(whiteListStr, ",")
-	if len(whiteList) == 0 {
+	acceptList := strings.Split(acceptListStr, ",")
+	if len(acceptList) == 0 {
 		return true
 	}
 
-	for _, n := range whiteList {
+	for _, n := range acceptList {
 		if stringutils.CompareURL(state, n) {
 			return true
 		}

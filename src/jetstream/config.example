@@ -25,8 +25,8 @@ LOG_TO_JSON=false
 LOG_API_REQUESTS=true
 
 SSO_LOGIN=false
-# Whitelist for the SSO redirect url. Paths can contain wildcard `*`
-SSO_WHITELIST=
+# Accept-list for the SSO redirect url. Paths can contain wildcard `*`
+SSO_ACCEPTLIST=
 
 # Enable feature in tech preview
 ENABLE_TECH_PREVIEW=false
