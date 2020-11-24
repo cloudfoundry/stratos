@@ -1,7 +1,7 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GitSCMService, GitSCMType } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { gitEntityCatalog, GitSCMService, GitSCMType } from '@stratosui/git';
+import { combineLatest, combineLatest as observableCombineLatest, Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
@@ -122,8 +122,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
-    this.stratosProjectSub = this.applicationService.applicationStratProject$
-      .subscribe(stratProject => {
+    this.stratosProjectSub = this.applicationService.applicationStratProject$.pipe(
+      switchMap(stratProject => {
         if (
           stratProject &&
           stratProject.deploySource &&
@@ -131,6 +131,21 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
           const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
+          return combineLatest(
+            of(scm),
+            gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
+              projectName: stratProject.deploySource.project,
+              scm,
+              branchName: stratProject.deploySource.branch,
+              commitSha: stratProject.deploySource.commit
+            }).waitForEntity$
+          );
+        }
+        return of([]);
+      }),
+    )
+      .subscribe(([scm, repo]) => {
+        if (scm && repo) {
           const iconInfo = scm.getIcon();
           // Add tab or update existing tab
           const tab = this.tabLinks.find(t => t.link === 'gitscm');

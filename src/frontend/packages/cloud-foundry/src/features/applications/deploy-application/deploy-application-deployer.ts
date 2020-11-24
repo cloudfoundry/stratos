@@ -333,19 +333,19 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
         this.onClose(log, 'Deploy Failed - Invalid manifest!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!');
+          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided.');
         break;
       case SocketEventTypes.CLOSE_NO_MANIFEST:
         this.onClose(log, 'Deploy Failed - No manifest present!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!');
+          'Failed to deploy app! Please make sure that a valid manifest.yaml is present.');
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
         this.onClose(log, 'Deploy Failed - Failed to clone repository!',
-          'Failed to deploy app! Please make sure the repository is public!');
+          'Failed to deploy app! Please make sure the repository is public.');
         break;
       case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
         this.onClose(log, 'Deploy Failed - Failed to located branch!',
-          'Failed to deploy app! Please make sure that branch exists!');
+          'Failed to deploy app! Please make sure that the branch exists.');
         break;
       case SocketEventTypes.CLOSE_FAILURE:
       case SocketEventTypes.CLOSE_PUSH_ERROR:
