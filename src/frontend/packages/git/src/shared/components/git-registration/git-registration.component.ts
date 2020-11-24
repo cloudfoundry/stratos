@@ -86,8 +86,8 @@ export class GitRegistrationComponent implements OnDestroy {
             url: gitSCMService.getSCM('github', null).getPublicApi(),
             name: 'GitHub',
             description: [
-              `Registering github.com allows you to connect with a Personal Access Token and access your public and private GitHub repositories.`,
-              'Note: Stratos allows you to access github.com without registering this endpoint, but you are limited to accessing your public repositories.'
+              `Registering github.com allows you to connect with a Personal Access Token and access your public and private ${githubLabel} repositories.`,
+              'Note: Stratos allows you to access github.com without registering this endpoint, but you are limited to accessing public repositories.'
             ],
           },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
@@ -95,7 +95,7 @@ export class GitRegistrationComponent implements OnDestroy {
             url: null,
             description: [
               `Register your own GitHub Enterprise server.`,
-              'Registering an endpoint allows you to access your public repositories. Connect with a Personal Access Token to additionally access your private repositories'
+              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories'
             ],
           }
         }
@@ -108,14 +108,18 @@ export class GitRegistrationComponent implements OnDestroy {
             label: 'gitlab.com',
             url: gitSCMService.getSCM('gitlab', null).getPublicApi(),
             name: 'GitLab',
-            // TODO: RC update as per above
-            description: [`Your credentials will be used to fetch information from the public ${gitlabLabel} instance`],
+            description: [
+              `Registering gitlab.com allows you to connect with a Personal Access Token and access your public and private ${gitlabLabel} repositories.`,
+              'Note: Stratos allows you to access gitlab.com without registering this endpoint, but you are limited to accessing public repositories.'
+            ],
           },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {
             label: 'Gitlab Enterprise',
             url: null,
-            // TODO: RC update as per above
-            description: [`Your credentials will be used to fetch information from a private ${gitlabLabel} instance`],
+            description: [
+              `Register your own Gitlab Enterprise server.`,
+              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories'
+            ],
           }
         }
       }

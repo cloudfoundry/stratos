@@ -129,7 +129,7 @@ class GitEntityCatalog {
       labelPlural: 'Git Commits',
       endpoint: endpointDefinition,
       nonJetstreamRequest: true,
-      // TODO: RC tidy - remove unused code... work out if get commit can be made generic again... thisneeds to be async
+      // FIXME: This is code from when the git commit get function used generic actions/pipeline. Need to revisit this at some point
       // successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       //   const metadata = (action.metadata as GitMeta[])[0];
       //   return {

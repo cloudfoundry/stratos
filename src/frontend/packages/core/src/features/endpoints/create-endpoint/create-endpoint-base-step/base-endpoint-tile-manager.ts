@@ -11,9 +11,6 @@ import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 
-// TODO: RC Decide - this whole base endpoint tile manager was used to show sub type sin their own list. We no longer do this now...
-// so could revert
-
 export interface ICreateEndpointTilesData extends ITileData {
   type: string;
   parentType: string;
@@ -26,6 +23,10 @@ type ExpandedEndpoint<T = number> = {
 
 type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
 
+/**
+ * Provides set of endpoint tiles that can power an `app-tile-selector` component
+ * Handles sorting, hiding, filtering, etc
+ */
 export abstract class BaseEndpointTileManager {
   protected store: Store<GeneralEntityAppState>;
 
@@ -81,9 +82,6 @@ export abstract class BaseEndpointTileManager {
     return 0;
   }
 
-  /**
-   *
-   */
   constructor(
     types$: Observable<StratosCatalogEndpointEntity[]>,
     store: Store<GeneralEntityAppState>
@@ -159,6 +157,7 @@ export abstract class BaseEndpointTileManager {
     const res = registeredLimit(this.store);
     return typeof res === 'number' ? of(res) : res;
   }
+
   private filterByEndpointCount(endpointType: ExpandedEndpoint): boolean {
     // Check that the limit is not exceeded by endpoints already registered
     return endpointType.current < endpointType.limit;

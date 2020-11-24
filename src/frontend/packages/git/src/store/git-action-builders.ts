@@ -20,7 +20,7 @@ export const gitRepoActionBuilders: GitRepoActionBuilders = {
   ) => new FetchGitHubRepoInfo(meta, meta.scm.endpointGuid)
 };
 
-// TODO: RC tidy - remove unused code... work out if get commit can be made generic again
+// FIXME: This is code from when the git commit get function used generic actions/pipeline. Need to revisit this at some point
 // export interface GitCommitActionBuildersConfig extends OrchestratedActionBuilderConfig {
 //   get: EntityRequestActionConfig<KnownEntityActionBuilder<GitMeta>>;
 //   getMultiple: (commitSha: string, endpointGuid: string, projectMeta: GitMeta) => FetchCommits;

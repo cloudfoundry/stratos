@@ -27,6 +27,8 @@ export interface GitRepo {
   projectName: string;
   guid: string;
   private: boolean;
+  clone_url: string;
+  html_url: string;
 }
 
 export interface GitSuggestedRepo {

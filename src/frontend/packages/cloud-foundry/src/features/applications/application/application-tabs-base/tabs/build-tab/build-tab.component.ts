@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { GitCommit, gitEntityCatalog, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -167,15 +167,19 @@ export class BuildTabComponent implements OnInit {
           const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid);
           deploySource.label = scm.getLabel();
           deploySource.icon = scm.getIcon();
-          res.push(scm.getCommitURL(deploySource.project, deploySource.commit));
+          res.push(gitEntityCatalog.commit.store.getEntityService(null, scm.endpointGuid, {
+            projectName: deploySource.project,
+            scm,
+            commitSha: deploySource.commit
+          }).waitForEntity$);
         } else {
           res.push(of(null));
         }
         return observableCombineLatest(res);
       }),
-      map(([deploySource, commitUrl]: [CustomEnvVarStratosProjectSource, string]) => {
-        if (commitUrl) {
-          deploySource.commitURL = commitUrl;
+      map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, EntityInfo<GitCommit>]) => {
+        if (commit) {
+          deploySource.commitURL = commit.entity.html_url;
         }
         return deploySource;
       }),

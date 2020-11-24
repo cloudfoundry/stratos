@@ -6,6 +6,7 @@ import {
   gitEntityCatalog,
   GithubCommitsDataSource,
   GithubCommitsListConfigServiceBase,
+  GitMeta,
   GitSCM,
   GitSCMService,
   GitSCMType,
@@ -29,6 +30,17 @@ import { ApplicationService } from '../../../../../features/applications/applica
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
+
+  constructor(
+    store: Store<CFAppState>,
+    datePipe: DatePipe,
+    private scmService: GitSCMService,
+    private applicationService: ApplicationService,
+  ) {
+    super(store, datePipe);
+    this.setGuids();
+    this.setGithubDetails();
+  }
 
   private listActionRedeploy: IListAction<GitCommit> = {
     action: (commitEntity) => {
@@ -97,17 +109,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   private deployedCommit: GitCommit;
   private deployedTime: number;
   private scm: GitSCM;
-
-  constructor(
-    store: Store<CFAppState>,
-    datePipe: DatePipe,
-    private scmService: GitSCMService,
-    private applicationService: ApplicationService,
-  ) {
-    super(store, datePipe);
-    this.setGuids();
-    this.setGithubDetails();
-  }
+  private scmMeta: GitMeta;
 
   private setGuids() {
     this.applicationService.waitForAppEntity$.pipe(
@@ -129,12 +131,13 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.deployedCommitSha = stratosProject.deploySource.commit;
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType, stratosProject.deploySource.endpointGuid);
-
-      gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
+      this.scmMeta = {
         scm: this.scm,
         projectName: this.projectName,
         branchName: stratosProject.deploySource.branch
-      })
+      };
+
+      gitEntityCatalog.branch.store.getEntityService(undefined, undefined, this.scmMeta)
         .waitForEntity$.pipe(
           first(),
         ).subscribe(branch => {
@@ -149,12 +152,14 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   }
 
   private getCompareURL(sha: string): Observable<string> {
-    return this.scm.getCompareCommitURL(this.projectName, this.deployedCommitSha, sha);
+    return gitEntityCatalog.repo.store.getRepoInfo.getEntityService(this.scmMeta).waitForEntity$.pipe(
+      first(),
+      map(project => this.scm.getCompareCommitURL(project.entity.html_url, this.deployedCommitSha, sha))
+    );
   }
 
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
-    // TODO: RC Test
     gitEntityCatalog.commit.store.getEntityMonitor(getCommitGuid(scmType, this.projectName, this.deployedCommitSha)).entity$.pipe(
       filter(deployedCommit => !!deployedCommit),
       first(),

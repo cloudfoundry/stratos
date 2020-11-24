@@ -88,7 +88,7 @@ export class DeployApplicationStep2Component
   commitSubscription: Subscription;
 
   sourceType: SourceType;
-  repositoryBranch: GitBranch = null; // TODO: RC test
+  repositoryBranch: GitBranch = null;
   repository: string;
 
   scm: GitSCM;
@@ -133,15 +133,17 @@ export class DeployApplicationStep2Component
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
-      // TODO: RC fix - gitlab type should also add username to package that we send to jetstream
-      // Think this is the best place for it?
-      this.scm.getCloneURL(this.repository).pipe(first()).subscribe(commitUrl => {
+      gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
+        projectName: this.repository,
+        scm: this.scm,
+      }).waitForEntity$.pipe(first()).subscribe(repo => {
         this.store.dispatch(new SaveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
-          url: commitUrl,
+          url: repo.entity.full_name,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
-          endpointGuid: this.sourceType.endpointGuid
+          endpointGuid: this.sourceType.endpointGuid,
+
         }, null));
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
@@ -165,14 +167,12 @@ export class DeployApplicationStep2Component
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   };
 
-  // TODO: RC test redeploy app to previous/other commit
   ngOnInit() {
     this.sourceType$ = combineLatest(
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.store.select(selectSourceType),
       this.appDeploySourceTypes.types$.pipe(first(), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
-      // TODO: RC test - order of these has been fixed... (items in ctor now match above)
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
     );

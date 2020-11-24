@@ -10,8 +10,6 @@ export interface SCMIcon {
   fontName: string;
 }
 
-// TODO: RC Test (all currently entirely untried) github enterprise, gitlab.com, gitlab enterprioe
-
 // Interface that a Git SCM provider must implement
 export interface GitSCM {
   endpointGuid: string;
@@ -24,12 +22,10 @@ export interface GitSCM {
   getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;
   getCommit(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit>;
-  convertCommit(apiUrl: string, projectName: string, commit: any): GitCommit;
+  convertCommit(commit: any): GitCommit;
   getCommits(httpClient: HttpClient, projectName: string, commitSha: string): Observable<GitCommit[]>;
-  getCloneURL(projectName: string): Observable<string>;
-  getCommitURL(projectName: string, commitSha: string): Observable<string>;
   getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest>;
-  getCompareCommitURL(projectName: string, commitSha1: string, commitSha2: string): Observable<string>;
+  getCompareCommitURL(projectUrl: string, commitSha1: string, commitSha2: string): string;
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]>;
   parseErrorAsString(error: any): string;
 }
