@@ -14,6 +14,7 @@ export interface IFavoritesInfo {
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
 export interface IFavoriteTypeInfo<T= IFavoriteMetadata> {
+  guid: string;
   endpointType: string;
   entityType: string;
   entityId: string;
@@ -92,6 +93,18 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
         `${favoriteGuidSeparator}${parts[parts.length - 2]}${favoriteGuidSeparator}${parts[parts.length - 1]}`,
         '');
     }
+  }
+
+  // Get payload for this entity that can be sent to the backend
+  public getPayload(): IFavoriteTypeInfo<T> {
+    return {
+      endpointId: this.endpointId,
+      endpointType: this.endpointType,
+      entityType: this.entityType,
+      entityId: this.entityId,
+      guid: this.guid,
+      metadata: this.metadata
+    };
   }
 
   public canFavorite(): boolean {

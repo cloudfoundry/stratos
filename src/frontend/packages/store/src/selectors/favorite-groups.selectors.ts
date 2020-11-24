@@ -5,6 +5,7 @@ import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from '../helpers/stratos-entity-factory';
 import { IUserFavoriteGroup, IUserFavoritesGroups, IUserFavoritesGroupsState } from '../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';
+import { getEndpointIDFromFavorite } from '../user-favorite-helpers';
 
 const favoritesEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
 
@@ -24,8 +25,9 @@ export const favoriteGroupsSelector = compose(
 );
 
 const favoriteGroupSelector = (favorite: UserFavorite<IFavoriteMetadata>) => {
+  const endpointFavoriteGuid = getEndpointIDFromFavorite(favorite);
   return (groups: IUserFavoritesGroups): IUserFavoriteGroup => {
-    return groups[favorite.endpointId];
+    return groups[endpointFavoriteGuid];
   };
 };
 
