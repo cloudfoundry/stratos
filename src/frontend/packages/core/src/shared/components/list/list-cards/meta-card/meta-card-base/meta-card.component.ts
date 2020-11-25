@@ -7,6 +7,7 @@ import { MenuItem } from '../../../../../../../../store/src/types/menu-item.type
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';

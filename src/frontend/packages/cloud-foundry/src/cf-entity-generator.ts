@@ -158,7 +158,8 @@ import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } fro
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
 import { endpointDisconnectRemoveEntitiesReducer } from './store/reducers/endpoint-disconnect-application.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
-import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
+import { updateOrganizationSpaceRedu        getLink: favorite => `/kubernetes/${favorite.endpointId}/namespaces/${favorite.metadata.name}`,
+cer } from './store/reducers/organization-space.reducer';
 import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';

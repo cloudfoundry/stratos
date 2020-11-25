@@ -21,6 +21,7 @@ import { MenuItem } from '../../../../../../../../store/src/types/menu-item.type
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';

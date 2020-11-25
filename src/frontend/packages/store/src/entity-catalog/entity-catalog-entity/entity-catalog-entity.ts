@@ -330,7 +330,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
-    getLink?: (FavoritesSidePanelComponent: UserFavorite<IEndpointFavMetadata>) => string
+    getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string
   ) {
     const fullEntity: IStratosEndpointDefinition = {
       ...entity,

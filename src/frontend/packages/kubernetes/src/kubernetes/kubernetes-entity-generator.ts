@@ -15,6 +15,7 @@ import {
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -253,7 +254,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   kubeEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/kubernetes/${metadata.guid}`
+    favorite => `/kubernetes/${favorite.endpointId}`
   );
   return kubeEntityCatalog.endpoint;
 }
