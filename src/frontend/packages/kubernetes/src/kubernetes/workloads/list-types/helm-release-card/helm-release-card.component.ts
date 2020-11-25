@@ -17,7 +17,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
 
   @Input('row')
   set row(row: HelmRelease) {
-    this.pRow = row;
+    super.row = row;
     if (row) {
       this.status = row.status.charAt(0).toUpperCase() + row.status.substring(1);
       this.lastDeployed = this.datePipe.transform(row.info.last_deployed, 'medium');
@@ -31,7 +31,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
     }
   }
   get row(): HelmRelease {
-    return this.pRow;
+    return super.row;
   }
 
 

@@ -29,11 +29,13 @@ export class TableCellServiceInstanceAppsAttachedComponent
 
   @Input('config')
   set config(config: any) {
+    super.config = config;
     this.config$.next(config);
   }
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
+    super.row = row;
     this.row$.next(row);
   }
 

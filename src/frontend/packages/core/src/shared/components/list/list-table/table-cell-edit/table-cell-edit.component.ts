@@ -12,20 +12,19 @@ export class TableCellEditComponent<T> extends TableCellCustom<T> {
 
   @Input()
   get row(): T {
-    return this.pRow;
+    return super.row;
   }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
   }
 
   @Input()
   set dataSource(dataSource: IListDataSource<T>) {
-    this.pDataSource = dataSource;
+    super.dataSource = dataSource;
   }
   get dataSource(): IListDataSource<T> {
-    return this.pDataSource;
+    return super.dataSource;
   }
-
 
   @Input()
   subtle: boolean;

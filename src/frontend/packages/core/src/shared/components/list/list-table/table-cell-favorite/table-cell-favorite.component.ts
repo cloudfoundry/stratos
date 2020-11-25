@@ -26,13 +26,13 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
 
   @Input('config')
   set config(config: TableCellFavoriteComponentConfig<T, Y>) {
-    this.pConfig = config;
+    super.config = config;
     this.createUserFavorite();
   }
 
   @Input('row')
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     this.createUserFavorite();
   }
 

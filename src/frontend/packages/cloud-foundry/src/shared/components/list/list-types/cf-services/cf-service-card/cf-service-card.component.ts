@@ -41,6 +41,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
 
   @Input('row')
   set row(row: APIResource<IService>) {
+    super.row = row;
     if (row) {
       this.serviceEntity = row;
       this.extraInfo = null;
