@@ -7,7 +7,7 @@ import {
 } from '../../actions/user-favourites.actions';
 import { getDefaultFavoriteGroupsState, IUserFavoritesGroupsState } from '../../types/favorite-groups.types';
 import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
-import { deriveEndpointFavoriteFromFavorite } from '../../user-favorite-helpers';
+import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
 
 const endpointFavorite = () => new UserFavorite<IEndpointFavMetadata>(
@@ -60,9 +60,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: new UserFavorite('endpoint1', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: []
         }
       }
@@ -71,17 +70,16 @@ describe('userFavoritesReducer', () => {
 
   it(' [empty state] should add new entity and mark endpoint group as ethereal', () => {
     const fav = favorite();
-    const endpointFav = deriveEndpointFavoriteFromFavorite(fav);
+    const endpointFavGuid = getEndpointIDFromFavorite(fav);
     const action = new SaveUserFavoriteSuccessAction(fav);
     const newState = userFavoriteGroupsReducer(undefined, action);
     const defaultState = getDefaultFavoriteGroupsState();
     expect(newState).toEqual({
       ...defaultState,
       groups: {
-        [endpointFav.guid]: {
+        [endpointFavGuid]: {
+          endpoint: {},
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -100,9 +98,8 @@ describe('userFavoritesReducer', () => {
         ...defaultState,
         groups: {
           [endpointFav.guid]: {
+            endpoint: {} as UserFavorite,
             ethereal: false,
-            search: null,
-            typeFilter: null,
             entitiesIds: []
           }
         }
@@ -114,9 +111,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {},
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -145,32 +141,29 @@ describe('userFavoritesReducer', () => {
     const action = new GetUserFavoritesSuccessAction(favs);
     const newState = userFavoriteGroupsReducer(undefined, action);
 
-    const endpoint3Fav = deriveEndpointFavoriteFromFavorite(fav3);
+    const endpoint3FavGuid = getEndpointIDFromFavorite(fav3);
     const defaultState = getDefaultFavoriteGroupsState();
     expect(newState).toEqual({
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: new UserFavorite('endpoint1', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
         },
         [endpointFav2.guid]: {
+          endpoint: new UserFavorite('endpoint2', 'cf', 'endpoint'),
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav2.guid,
             fav21.guid
           ]
         },
-        [endpoint3Fav.guid]: {
+        [endpoint3FavGuid]: {
+          endpoint: {},
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav3.guid
           ]
@@ -188,9 +181,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {} as UserFavorite,
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]
@@ -202,9 +194,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {},
           ethereal: false,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
           ]
         }
@@ -221,9 +212,8 @@ describe('userFavoritesReducer', () => {
       ...defaultState,
       groups: {
         [endpointFav.guid]: {
+          endpoint: {} as UserFavorite,
           ethereal: true,
-          search: null,
-          typeFilter: null,
           entitiesIds: [
             fav.guid
           ]

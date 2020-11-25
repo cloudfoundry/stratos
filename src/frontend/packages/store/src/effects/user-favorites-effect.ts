@@ -45,7 +45,7 @@ export class UserFavoritesEffect {
     mergeMap(action => {
       const actionType = 'update';
       this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
+      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite.getPayload()).pipe(
         switchMap(newFavorite => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           this.store.dispatch(new SaveUserFavoriteSuccessAction(newFavorite));
