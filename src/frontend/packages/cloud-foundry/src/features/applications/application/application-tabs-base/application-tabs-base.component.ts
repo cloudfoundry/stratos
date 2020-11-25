@@ -27,7 +27,6 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
-import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
