@@ -481,19 +481,24 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	}
 
 	var tokenRec interfaces.TokenRecord
+	var noToken bool
 	if cnsiRequest.Token != nil {
 		tokenRec = *cnsiRequest.Token
 	} else {
 		// get a cnsi token record and a cnsi record
 		tokenRec, _, err = p.getCNSIRequestRecords(cnsiRequest)
 		if err != nil {
-			cnsiRequest.Error = err
-			if done != nil {
-				cnsiRequest.StatusCode = 400
-				cnsiRequest.Status = "Unable to retrieve CNSI token record"
-				done <- cnsiRequest
+			if cnsiRequest.AllowNoToken {
+				noToken = true
+			} else {
+				cnsiRequest.Error = err
+				if done != nil {
+					cnsiRequest.StatusCode = 400
+					cnsiRequest.Status = "Unable to retrieve CNSI token record"
+					done <- cnsiRequest
+				}
+				return
 			}
-			return
 		}
 	}
 
@@ -505,12 +510,29 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		req.Header.Set(longRunningTimeoutHeader, "true")
 	}
 
-	// Find the auth provider for the auth type - default ot oauthflow
-	authHandler := p.GetAuthProvider(tokenRec.AuthType)
-	if authHandler.Handler != nil {
-		res, err = authHandler.Handler(cnsiRequest, req)
+	if noToken {
+		var client http.Client
+		var cnsi interfaces.CNSIRecord
+		cnsi, err = p.GetCNSIRecord(cnsiRequest.GUID)
+		if err != nil {
+			cnsiRequest.Error = err
+			if done != nil {
+				cnsiRequest.StatusCode = 400
+				cnsiRequest.Status = "Unable to retrieve CNSI record"
+				done <- cnsiRequest
+			}
+			return
+		}
+		client = p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
+		res, err = client.Do(req)
 	} else {
-		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
+		// Find the auth provider for the auth type - default ot oauthflow
+		authHandler := p.GetAuthProvider(tokenRec.AuthType)
+		if authHandler.Handler != nil {
+			res, err = authHandler.Handler(cnsiRequest, req)
+		} else {
+			res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
+		}
 	}
 
 	if err != nil {
@@ -572,11 +594,13 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 	}
 	cnsiRequest.LongRunning = false // FIXME: Should come from header. Would this have knock on effects (only handled in other cases)?
-	cnsiRequest.UnescapePath = true
+	cnsiRequest.UnescapePath = true // TODO: RC should this come from a header?
+	cnsiRequest.AllowNoToken = true // TODO: RC should this come from a header?
 
 	go p.doRequest(&cnsiRequest, done)
 	res := <-done
 
+	// FIXME: cnsiRequest.Status info is lost for failures, only get a status code
 	c.Response().WriteHeader(res.StatusCode)
 
 	// we don't care if this fails

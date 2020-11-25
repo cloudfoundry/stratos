@@ -28,12 +28,14 @@ export abstract class BaseSCM {
   public getAPI(): Observable<GitApiRequest> {
     return this.getEndpoint(this.endpointGuid).pipe(
       map(endpoint => {
-        if (!endpoint || !endpoint.user) {
+        if (!endpoint) {
+          // No endpoint, use the default or overwritten public api associated with this type
           return {
             url: this.getPublicApi(),
             requestArgs: {}
           };
         }
+        // We have an endpoint so always proxy via backend
         return {
           url: `${commonPrefix}/${endpoint.guid}`,
           requestArgs: {

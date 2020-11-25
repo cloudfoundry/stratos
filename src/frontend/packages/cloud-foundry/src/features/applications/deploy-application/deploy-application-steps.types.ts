@@ -9,7 +9,6 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { GitSCM, GitSCMService } from '../../../../../git/src/public_api';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../../../git/src/store/git-entity-factory';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { EndpointModel } from '../../../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -90,88 +89,70 @@ export class ApplicationDeploySourceTypes {
     private perms: CurrentUserPermissionsService,
     private scmService: GitSCMService
   ) {
+    const scms: { [deployId: string]: GitSCM; } = {
+      [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', null),
+      [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', null)
+    };
+
     this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(e => !!e),
-      first(),
       map(endpoints => {
-        // Supplement the base github/gitlab with endpoint guid if added by the user. This means we cna use their creds when requesting info
-        // to avoid rate limiting
-        return { endpoints, types: this.baseTypes.map(t => this.updateGitSourceTypeFromEndpoint(t, endpoints)) };
+        const newTypes: SourceType[] = [];
+
+        // Add all the base types... also update git types if the user has provided credentials for it
+        this.baseTypes.forEach(t => {
+          const scm = scms[t.id];
+          if (scm) {
+            // Find the endpoint that's associated with this git type
+            const eType = GIT_ENDPOINT_TYPE;
+            const eSubType: GIT_ENDPOINT_SUB_TYPES = scm.getType() === DEPLOY_TYPES_IDS.GITHUB ?
+              GIT_ENDPOINT_SUB_TYPES.GITHUB :
+              GIT_ENDPOINT_SUB_TYPES.GITLAB;
+            for (const e of endpoints) {
+              const url = getFullEndpointApiUrl(e);
+              if (
+                e.cnsi_type === eType &&
+                e.sub_type === eSubType &&
+                url === scm.getPublicApi() // Must match the endpoint associated with github.com/gitlab.com types (not enterprise)
+              ) {
+                newTypes.push({
+                  ...t,
+                  endpointGuid: e.guid
+                });
+                return;
+              }
+            }
+          }
+          newTypes.push(t);
+        });
+
+        // Add all enterprise github/gitlab types
+        endpoints.forEach(e => {
+          if (e.cnsi_type !== GIT_ENDPOINT_TYPE) {
+            return;
+          }
+          const deployId: DEPLOY_TYPES_IDS = e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+            DEPLOY_TYPES_IDS.GITHUB :
+            DEPLOY_TYPES_IDS.GITLAB;
+          const scm = scms[deployId];
+          const url = getFullEndpointApiUrl(e);
+          // If this isn't the public api one... it must be enterprise
+          if (url !== scm.getPublicApi()) {
+            const index = newTypes.findIndex(nt => nt.id === deployId);
+            newTypes.splice(index + 1, 0, {
+              ...this.baseTypes[index], // Use similar settings to the original one but with more info
+              name: e.name,
+              endpointGuid: e.guid
+            });
+          }
+        });
+
+        return newTypes;
       }),
-      map(({ endpoints, types }) => endpoints.reduce((res, e) => {
-        // Supplement the base types with git sources that were manually added by the user as github/gitlab endpoints
-        const newType = this.createGitSourceTypeFromEndpoint(e);
-        if (newType) {
-          res.push(newType);
-        }
-        return res;
-      }, [...types])),
       publishReplay(1),
       refCount()
     );
   }
-
-  /**
-   * Supplement the base github/gitlab type with endpoint guid if added by the user. This means we cna use their creds when requesting info
-   * to avoid rate limiting
-   */
-  private updateGitSourceTypeFromEndpoint(type: SourceType, endpoints: EndpointModel[]): SourceType {
-    const endpoint = endpoints.find(e =>
-      (e.cnsi_type === GIT_ENDPOINT_TYPE) &&
-      ((type.id === DEPLOY_TYPES_IDS.GITHUB && e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB) ||
-        (type.id === DEPLOY_TYPES_IDS.GITLAB && e.sub_type === GIT_ENDPOINT_SUB_TYPES.GITLAB))
-    );
-
-    return endpoint ? {
-      ...type,
-      endpointGuid: endpoint.guid
-    } : type;
-  }
-
-  /**
-   * Supplement the base types with git sources manually added by the user as github/gitlab endpoints
-   */
-  private createGitSourceTypeFromEndpoint(endpoint: EndpointModel): SourceType {
-    const { scm, type } = this.getScmFromEndpoint(endpoint);
-    // I.E. It's a custom/new git address
-    if (!scm) {
-      // Unknown git type
-      return;
-    }
-
-    const endpointUrl = getFullEndpointApiUrl(endpoint);
-    if (endpointUrl !== scm.getPublicApi()) {
-      // This is a custom instance of a git type, use similar settings to the public
-      return {
-        ...this.baseTypes.find(t => t.id === type),
-        name: `Private - ${endpoint.name}`,
-        endpointGuid: endpoint.guid
-      };
-    }
-  }
-
-  private getScmFromEndpoint(endpoint: EndpointModel): { scm: GitSCM, type: DEPLOY_TYPES_IDS; } {
-    if (!endpoint || endpoint.cnsi_type !== GIT_ENDPOINT_TYPE || !endpoint.user) {
-      return {
-        scm: null,
-        type: null
-      };
-    }
-
-    return endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
-      {
-        scm: this.scmService.getSCM('github', null),
-        type: DEPLOY_TYPES_IDS.GITHUB
-      } :
-      endpoint.sub_type === GIT_ENDPOINT_SUB_TYPES.GITLAB ? {
-        scm: this.scmService.getSCM('gitlab', null),
-        type: DEPLOY_TYPES_IDS.GITLAB
-      } : {
-          scm: null,
-          type: null
-        };
-  }
-
 
   getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
