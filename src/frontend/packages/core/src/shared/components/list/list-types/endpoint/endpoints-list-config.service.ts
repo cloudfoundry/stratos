@@ -7,13 +7,13 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { FavoritesConfigMapper } from '../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
+import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
@@ -114,11 +114,11 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
-    favoritesConfigMapper: FavoritesConfigMapper,
+    userFavoriteManager: UserFavoriteManager
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
-      (row: EndpointModel) => favoritesConfigMapper.getFavoriteEndpointFromEntity(row)
+      (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
 
