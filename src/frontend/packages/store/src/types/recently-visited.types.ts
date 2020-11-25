@@ -8,7 +8,6 @@ export interface IRecentlyVisitedEntity extends IFavoriteTypeInfo {
   date: number;
   entityId: string;
   prettyType: string;
-  prettyEndpointType: string;
   endpointId: string;
   routerLink?: string;
 }

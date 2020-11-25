@@ -1,37 +1,29 @@
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { IEntityMetadata } from './entity-catalog/entity-catalog.types';
-import { FavoritesConfigMapper } from './favorite-config-mapper';
+import { endpointEntityType } from './helpers/stratos-entity-factory';
 import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
+import { UserFavoriteManager } from './user-favorite-manager';
 
-export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-  return !favorite.entityId;
-}
-
-// Uses the endpoint definition to get the helper that can look up an entitty
+// Uses the endpoint definition to get the helper that can look up an entity
 export function getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityType: string,
-  favoritesConfigMapper: FavoritesConfigMapper,
+  userFavoriteManager: UserFavoriteManager,
   endpointType: string
 ): UserFavorite<T> {
   // Use entity catalog to get favorite for the given endpoint type
   const endpoint = entityCatalog.getEndpoint(endpointType);
   if (endpoint && endpoint.definition && endpoint.definition.favoriteFromEntity) {
-    return endpoint.definition.favoriteFromEntity(entity, entityType, favoritesConfigMapper);
+    return endpoint.definition.favoriteFromEntity(entity, entityType, userFavoriteManager);
   }
 
   return null;
 }
 
-export function deriveEndpointFavoriteFromFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-  if (favorite.entityType !== 'endpoint') {
-    const endpointFav = {
-      ...favorite
-    };
-    endpointFav.entityId = null;
-    endpointFav.entityType = 'endpoint';
-    endpointFav.guid = UserFavorite.buildFavoriteStoreEntityGuid(endpointFav);
-    return endpointFav;
+
+export function getEndpointIDFromFavorite(favorite: UserFavorite<IFavoriteMetadata>): string {
+  if (favorite.entityType !== endpointEntityType) {
+    return new UserFavorite<IFavoriteMetadata>(favorite.endpointId, favorite.endpointType, endpointEntityType, null, {name: ''}).guid;
   }
-  return favorite;
+  return favorite.guid;
 }

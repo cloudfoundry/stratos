@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { AppState } from 'frontend/packages/store/src/app-state';
 import { combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -35,14 +37,10 @@ export class KubernetesHomeCardComponent implements OnInit {
   public nodeCount$: Observable<number>;
   public namespaceCount$: Observable<number>;
 
-  constructor(private kubeEndpointService: KubernetesEndpointService) { }
+  constructor(private store: Store<AppState>)  { }
 
   ngOnInit() {
     const guid = this.endpoint.guid;
-    if (guid) {
-      this.kubeEndpointService.initialize(this.endpoint.guid);
-    }
-
     this.shortcuts = [
       {
         title: 'View Nodes',
@@ -73,7 +71,7 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
     this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
 
-    this.kubeEndpointService.kubeTerminalEnabled$.pipe(first()).subscribe(hasKubeTerminal => {
+    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(first()).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
         this.shortcuts.push(
           {
@@ -86,7 +84,7 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    this.kubeEndpointService.kubeDashboardConfigured$.pipe(first()).subscribe(hasKubeDashboard => {
+    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(first()).subscribe(hasKubeDashboard => {
       if (hasKubeDashboard) {
         this.shortcuts.push(
           {

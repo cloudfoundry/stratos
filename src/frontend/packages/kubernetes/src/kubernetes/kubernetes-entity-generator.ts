@@ -1,5 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
+import { entityFetchedWithoutError } from '@stratosui/store';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -13,9 +14,9 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
-import { FavoritesConfigMapper } from '../../../store/src/favorite-config-mapper';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -232,7 +233,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
             return mod.instance.createHomeCard(mod.componentFactoryResolver);
           });
         }),
-        fullView: true
+        fullView: false
         // shortcuts: k8sShortcuts
       }
   };
@@ -254,7 +255,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   kubeEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/kubernetes/${metadata.guid}`
+    favorite => `/kubernetes/${favorite.endpointId}`
   );
   return kubeEntityCatalog.endpoint;
 }
@@ -322,6 +323,7 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
     definition, {
       actionBuilders: kubeNamespaceActionBuilders,
       entityBuilder: {
+        getIsValid: (fav) => kubeEntityCatalog.namespace.api.get(fav.metadata.name, fav.endpointId).pipe(entityFetchedWithoutError()),
         getMetadata: (namespace: any) => {
           return {
             endpointId: namespace.kubeGuid,
@@ -330,8 +332,8 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
             name: namespace.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/namespaces/${metadata.name}y`,
-        getGuid: metadata => metadata.guid,
+        getLink: favorite => `/kubernetes/${favorite.endpointId}/namespaces/${favorite.metadata.name}`,
+        getGuid: namespace => namespace.metadata.uid,
       }
     });
   return kubeEntityCatalog.namespace;
@@ -387,9 +389,9 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
 function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityType: string,
-  favoritesConfigMapper: FavoritesConfigMapper
+  userFavoriteManager: UserFavoriteManager
 ): UserFavorite<T> {
-  return favoritesConfigMapper.getFavoriteFromEntity<T>(
+  return userFavoriteManager.getFavoriteFromEntity<T>(
     entityType,
     KUBERNETES_ENDPOINT_TYPE,
     entity.kubeGuid,
