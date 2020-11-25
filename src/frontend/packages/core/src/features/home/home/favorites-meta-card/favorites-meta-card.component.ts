@@ -56,7 +56,7 @@ export class FavoritesMetaCardComponent {
     }
     const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
     const isValidObs = (entityDef.builders.entityBuilder && entityDef.builders.entityBuilder.getIsValid) ?
-    entityDef.builders.entityBuilder.getIsValid(this.favorite.metadata) : of(true);
+    entityDef.builders.entityBuilder.getIsValid(this.favorite) : of(true);
     isValidObs.pipe(first()).subscribe(isValid => {
       this.valid = isValid;
       if (!isValid) {

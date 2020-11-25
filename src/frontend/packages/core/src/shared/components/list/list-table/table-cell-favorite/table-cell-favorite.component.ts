@@ -36,8 +36,8 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   }
 
   private createUserFavorite() {
-    if (this.row && this.config) {
-      this.favorite = this.config.createUserFavorite(this.row);
+    if (this.pRow && this.pConfig) {
+      this.favorite = this.pConfig.createUserFavorite(this.pRow);
       this.canFavorite = this.favorite.canFavorite();
     }
   }

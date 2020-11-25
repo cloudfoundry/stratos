@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { IAppFavMetadata } from '../../../../cloud-foundry/src/cf-metadata-types';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
@@ -13,6 +12,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { IFavoriteMetadata } from './../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 
 @Component({
@@ -67,7 +67,7 @@ export class KubernetesNamespaceComponent {
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
     filter(app => !!app),
-    map(namespace => getFavoriteFromEntity<IAppFavMetadata>(
+    map(namespace => getFavoriteFromEntity<IFavoriteMetadata>(
       {
         kubeGuid: this.kubeEndpointService.baseKube.guid,
         ...namespace,

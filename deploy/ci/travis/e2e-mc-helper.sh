@@ -11,8 +11,6 @@ else
   chmod +x mc
   cp mc ~/bin
 
-  mc -install -y >/dev/null 2>&1
-
   echo "Configuring mc client"
   mc config host add s3 ${AWS_ENDPOINT} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} --insecure
 

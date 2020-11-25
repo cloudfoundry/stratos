@@ -22,6 +22,7 @@ import {
   KubernetesStatefulSet,
   KubeService,
 } from './store/kube.types';
+import { KubeDashboardStatus } from './store/kubernetes.effects';
 
 /**
  * A strongly typed collection of Kube Catalog Entities.
@@ -35,7 +36,7 @@ export class KubeEntityCatalog {
   public node: StratosCatalogEntity<IFavoriteMetadata, KubernetesNode, KubeNodeActionBuilders>;
   public namespace: StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>;
   public service: StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>;
-  public dashboard: StratosCatalogEntity<IFavoriteMetadata, any, KubeDashboardActionBuilders>;
+  public dashboard: StratosCatalogEntity<IFavoriteMetadata, KubeDashboardStatus, KubeDashboardActionBuilders>;
   public analysisReport: StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>;
 }
 

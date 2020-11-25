@@ -22,9 +22,6 @@ import {
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
-  gitBranchesEntityType,
-  gitCommitEntityType,
-  gitRepoEntityType,
   organizationEntityType,
   privateDomainsEntityType,
   quotaDefinitionEntityType,
@@ -49,7 +46,7 @@ import { getAPIResourceGuid } from './store/selectors/api.selectors';
 import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 // Auto scaler Info
@@ -66,15 +63,6 @@ entityCache[appStatsEntityType] = AppStatSchema;
 
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
-
-const GithubBranchSchema = new CFEntitySchema(gitBranchesEntityType, {}, { idAttribute: 'entityId' });
-entityCache[gitBranchesEntityType] = GithubBranchSchema;
-
-const GithubRepoSchema = new CFEntitySchema(gitRepoEntityType);
-entityCache[gitRepoEntityType] = GithubRepoSchema;
-
-const GithubCommitSchema = new CFEntitySchema(gitCommitEntityType, {}, { idAttribute: commit => commit.guid });
-entityCache[gitCommitEntityType] = GithubCommitSchema;
 
 const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);
 entityCache[cfInfoEntityType] = CFInfoSchema;

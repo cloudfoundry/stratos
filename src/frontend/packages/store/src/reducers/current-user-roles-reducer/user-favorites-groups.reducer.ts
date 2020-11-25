@@ -15,7 +15,7 @@ import {
   IUserFavoritesGroupsState,
 } from '../../types/favorite-groups.types';
 import { IFavoriteMetadata, UserFavorite } from '../../types/user-favorites.types';
-import { deriveEndpointFavoriteFromFavorite, isEndpointTypeFavorite } from '../../user-favorite-helpers';
+import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 
 export function userFavoriteGroupsReducer(
   state: IUserFavoritesGroupsState = getDefaultFavoriteGroupsState(),
@@ -61,25 +61,26 @@ export function userFavoriteGroupsReducer(
 function buildFavoritesGroups(action: GetUserFavoritesSuccessAction) {
   const { favorites } = action;
   return favorites.reduce((favoriteGroups, favorite) => {
-    const userFavorite = deriveEndpointFavoriteFromFavorite(favorite);
-    favoriteGroups[userFavorite.guid] = addFavoriteToGroup(favoriteGroups[userFavorite.guid], favorite);
+    const endpointGuid = getEndpointIDFromFavorite(favorite);
+    favoriteGroups[endpointGuid] = addFavoriteToGroup(favoriteGroups[endpointGuid], favorite);
     return favoriteGroups;
   }, {} as IUserFavoritesGroups);
 }
 
 function removeFavoriteFromGroup(state: IUserFavoritesGroups, action: RemoveUserFavoriteSuccessAction): IUserFavoritesGroups {
   const { favorite } = action;
-  const endpointFavorite = deriveEndpointFavoriteFromFavorite(favorite);
-  const userGroup = state[endpointFavorite.guid] || getDefaultFavoriteGroup();
-  if (isEndpointTypeFavorite(favorite)) {
+  const endpointGuid = getEndpointIDFromFavorite(favorite);
+  const userGroup = state[endpointGuid] || getDefaultFavoriteGroup();
+  // Favorite will not have and entityId if it is for an endpoint
+  if (!favorite.entityId) {
     if (!groupHasEntities(userGroup)) {
-      return removeGroup(state, endpointFavorite.guid);
+      return removeGroup(state, endpointGuid);
     }
     // The endpoint has been removed but dependant entities are still within the group
     // The group is now ethereal
     return {
       ...state,
-      [endpointFavorite.guid]: {
+      [endpointGuid]: {
         ...userGroup,
         ethereal: true
       }
@@ -87,11 +88,11 @@ function removeFavoriteFromGroup(state: IUserFavoritesGroups, action: RemoveUser
   } else {
     const entitiesIds = userGroup.entitiesIds.filter(id => id !== favorite.guid);
     if (!entitiesIds.length && userGroup.ethereal) {
-      return removeGroup(state, endpointFavorite.guid);
+      return removeGroup(state, endpointGuid);
     }
     return {
       ...state,
-      [endpointFavorite.guid]: {
+      [endpointGuid]: {
         ...userGroup,
         entitiesIds
       }
@@ -113,7 +114,7 @@ function groupHasEntities(group: IUserFavoriteGroup) {
 
 function addEntityFavorite(favoriteGroups: IUserFavoritesGroups, action: SaveUserFavoriteSuccessAction): IUserFavoritesGroups {
   const { favorite } = action;
-  const { guid } = deriveEndpointFavoriteFromFavorite(favorite);
+  const guid = getEndpointIDFromFavorite(favorite);
   const group = favoriteGroups[guid];
   const newGroup = addFavoriteToGroup(group, favorite);
   return {
@@ -131,7 +132,7 @@ function addFavoriteToGroup(favoriteGroup: IUserFavoriteGroup = getDefaultFavori
   };
 
   const { guid } = favorite;
-  const isEndpoint = isEndpointTypeFavorite(favorite);
+  const isEndpoint = !favorite.entityId;
   if (isEndpoint) {
     fg.endpoint = favorite;
   }

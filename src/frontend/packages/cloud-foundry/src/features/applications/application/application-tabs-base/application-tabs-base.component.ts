@@ -1,11 +1,11 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { filter, first, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
-import { IAppFavMetadata } from '../../../../../../cloud-foundry/src/cf-metadata-types';
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import {
   getActionsFromExtensions,
@@ -25,12 +25,12 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
+import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { ApplicationStateData } from '../../../../shared/services/application-state.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationService } from '../../application.service';
@@ -48,10 +48,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromEntity<IAppFavMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
+    map(app => getFavoriteFromEntity<IFavoriteMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
   );
 
-  isBusyUpdating$: Observable<{ updating: boolean }>;
+  isBusyUpdating$: Observable<{ updating: boolean; }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 

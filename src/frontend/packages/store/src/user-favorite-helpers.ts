@@ -1,13 +1,10 @@
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { IEntityMetadata } from './entity-catalog/entity-catalog.types';
+import { endpointEntityType } from './helpers/stratos-entity-factory';
 import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 import { UserFavoriteManager } from './user-favorite-manager';
 
-export function isEndpointTypeFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-  return !favorite.entityId;
-}
-
-// Uses the endpoint definition to get the helper that can look up an entitty
+// Uses the endpoint definition to get the helper that can look up an entity
 export function getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata>(
   entity,
   entityType: string,
@@ -23,11 +20,10 @@ export function getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadat
   return null;
 }
 
-export function deriveEndpointFavoriteFromFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
-  if (favorite.entityType !== 'endpoint') {
-    return new UserFavorite<IFavoriteMetadata>(
-      favorite.endpointId, favorite.endpointType, 'endpoint', null, favorite.metadata
-    );
+
+export function getEndpointIDFromFavorite(favorite: UserFavorite<IFavoriteMetadata>): string {
+  if (favorite.entityType !== endpointEntityType) {
+    return new UserFavorite<IFavoriteMetadata>(favorite.endpointId, favorite.endpointType, endpointEntityType, null, {name: ''}).guid;
   }
-  return favorite;
+  return favorite.guid;
 }

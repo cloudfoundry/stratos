@@ -13,9 +13,13 @@ export interface IFavoritesInfo {
 /**
  * A user favorite blueprint. Can be used to fetch the full entity from a particular endpoint.
  */
-export interface IFavoriteTypeInfo {
+export interface IFavoriteTypeInfo<T= IFavoriteMetadata> {
+  guid: string;
   endpointType: string;
   entityType: string;
+  entityId: string;
+  endpointId: string;
+  metadata: T;
 }
 
 export interface IFavoriteMetadata {
@@ -23,10 +27,6 @@ export interface IFavoriteMetadata {
   [key: string]: string;
 }
 export interface IEndpointFavMetadata extends IFavoriteMetadata {
-  guid: string;
-  address: string;
-  user: string;
-  admin: string;
   subType: string;
 }
 
@@ -47,11 +47,14 @@ export interface FavoriteIconData {
 
 const favoriteGuidSeparator = '-';
 
-export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo {
+export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implements IFavoriteTypeInfo<T> {
   public guid: string;
 
   private catalogEntity: StratosBaseCatalogEntity;
   private entityBuilder: IStratosEntityBuilder<IEntityMetadata>;
+
+  public entityId: string;
+  public metadata: T;
 
   constructor(
     public endpointId: string,
@@ -60,9 +63,13 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     entityType should correspond to a type in the requestData part of the store.
     */
     public entityType: string,
-    public entityId?: string,
-    public metadata: T = null
+    entityId?: string,
+    metadata?: T
   ) {
+    // Make sure these default to undefined
+    this.entityId = entityId;
+    this.metadata = metadata;
+    if (this.catalogEntity && this.catalogEntity.builders && this.catalogEntity.builders.entityBuilder) {
     // Set the guid for this favorite
     this.buildFavoriteStoreEntityGuid();
     this.catalogEntity = entityCatalog.getEntity(this.endpointType, this.entityType);
@@ -88,6 +95,18 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     }
   }
 
+  // Get payload for this entity that can be sent to the backend
+  public getPayload(): IFavoriteTypeInfo<T> {
+    return {
+      endpointId: this.endpointId,
+      endpointType: this.endpointType,
+      entityType: this.entityType,
+      entityId: this.entityId,
+      guid: this.guid,
+      metadata: this.metadata
+    };
+  }
+
   public canFavorite(): boolean {
     // What do we need to be able to favorite an entity?
     return !!this.entityBuilder.getGuid && !!this.entityBuilder.getMetadata && !!this.entityBuilder.getLink;
@@ -95,7 +114,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
 
   // Get the link to navigate to the view for the given entity backing this user favorite
   public getLink(): string {
-    return this.entityBuilder.getLink ? this.entityBuilder.getLink(this.metadata) : null;
+    return this.entityBuilder.getLink ? this.entityBuilder.getLink(this) : null;
   }
 
   // Get the type name, e.g. 'Application'
