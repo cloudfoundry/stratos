@@ -125,7 +125,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.applicationService.cfGuid,
       this.entityServiceFactory
     ).pipe(
-      filter((info:any) => !!info && !!info.entity && !!info.entity.entity),
+      filter((info: any) => !!info && !!info.entity && !!info.entity.entity),
       map(info => {
         const build = info.entity.entity.build;
         const buildParts = build.split('.');
