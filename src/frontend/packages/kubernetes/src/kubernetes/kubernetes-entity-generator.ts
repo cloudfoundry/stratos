@@ -255,7 +255,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   kubeEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/kubernetes/${metadata.guid}`
+    favorite => `/kubernetes/${favorite.endpointId}`
   );
   return kubeEntityCatalog.endpoint;
 }
