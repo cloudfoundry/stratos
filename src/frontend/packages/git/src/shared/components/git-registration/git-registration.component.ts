@@ -75,6 +75,9 @@ export class GitRegistrationComponent implements OnDestroy {
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
 
+    const publicGithubUrl = gitSCMService.getSCM('github', null).getPublicApi();
+    const publicGitlabUrl = gitSCMService.getSCM('gitlab', null).getPublicApi();
+
     // Set a default/starting option
     this.gitTypes = {
       [GIT_ENDPOINT_SUB_TYPES.GITHUB]: {
@@ -83,7 +86,7 @@ export class GitRegistrationComponent implements OnDestroy {
         types: {
           [GitTypeKeys.GITHUB_COM]: {
             label: 'github.com',
-            url: gitSCMService.getSCM('github', null).getPublicApi(),
+            url: publicGithubUrl,
             name: 'GitHub',
             description: [
               `Registering github.com allows you to connect with a Personal Access Token and access your public and private ${githubLabel} repositories.`,
@@ -95,7 +98,8 @@ export class GitRegistrationComponent implements OnDestroy {
             url: null,
             description: [
               `Register your own GitHub Enterprise server.`,
-              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories'
+              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
+              `The Endpoint Address will be similar to github.com's - \`${publicGithubUrl}\``
             ],
           }
         }
@@ -106,7 +110,7 @@ export class GitRegistrationComponent implements OnDestroy {
         types: {
           [GitTypeKeys.GITLAB_COM]: {
             label: 'gitlab.com',
-            url: gitSCMService.getSCM('gitlab', null).getPublicApi(),
+            url: publicGitlabUrl,
             name: 'GitLab',
             description: [
               `Registering gitlab.com allows you to connect with a Personal Access Token and access your public and private ${gitlabLabel} repositories.`,
@@ -118,7 +122,8 @@ export class GitRegistrationComponent implements OnDestroy {
             url: null,
             description: [
               `Register your own Gitlab Enterprise server.`,
-              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories'
+              'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
+              `The Endpoint Address will be similar to gitlab.com's - \`${publicGitlabUrl}\``
             ],
           }
         }
@@ -183,10 +188,10 @@ export class GitRegistrationComponent implements OnDestroy {
     const defn = this.gitTypes[this.epSubType].types[typ];
     const name = defn.name || this.registerForm.controls.nameField.value;
     const url = defn.url || this.registerForm.controls.urlField.value;
-    let skipSSL = false;
-    if (!!defn.name && !!defn.url) {
-      skipSSL = this.registerForm.controls.skipSllField.value;
-    }
+    // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
+    const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
+      this.registerForm.controls.skipSllField.value :
+      false;
 
     return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false)
       .pipe(
