@@ -36,7 +36,6 @@ export class GitEntitySchema extends EntitySchema {
   }
 }
 
-// , { idAttribute: 'entityId' }
 const GithubBranchSchema = new GitEntitySchema(gitBranchesEntityType, {
   idAttribute: (branch: GitBranch) => {
     return getCommitGuid(branch.scmType, branch.projectName, branch.name);

@@ -204,7 +204,8 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       sha: commit.id,
       guid: commit.guid,
       projectName: commit.projectName,
-      scmType: commit.scmType
+      scmType: commit.scmType,
+      endpointGuid: null,
     };
   }
 
