@@ -69,7 +69,6 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     // Make sure these default to undefined
     this.entityId = entityId;
     this.metadata = metadata;
-    if (this.catalogEntity && this.catalogEntity.builders && this.catalogEntity.builders.entityBuilder) {
     // Set the guid for this favorite
     this.buildFavoriteStoreEntityGuid();
     this.catalogEntity = entityCatalog.getEntity(this.endpointType, this.entityType);
