@@ -75,7 +75,7 @@ import (
 // server to come online before we bail out.
 const (
 	TimeoutBoundary      = 10
-	SessionExpiry        = 20 * 60 // Session cookies expire after 20 minutes
+	DefaultSessionExpiry = 20 // Session cookies expire after 20 minutes
 	UpgradeVolume        = "UPGRADE_VOLUME"
 	UpgradeLockFileName  = "UPGRADE_LOCK_FILENAME"
 	LogToJSON            = "LOG_TO_JSON"
@@ -252,14 +252,12 @@ func main() {
 	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", strconv.Itoa(SessionExpiry))
 	sessionExpiry, err := strconv.Atoi(sSessionExpiry)
 	if err != nil {
-		sessionExpiry = SessionExpiry
+		sessionExpiry = DefaultSessionExpiry
 	}
 
 	log.Infof("Session expiration (minutes): %d", sessionExpiry)
-	// Convert to seconds
-	sessionExpiry *= 60
-	// Initialize session store for Gorilla sessions
-	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry, envLookup)
+	// Initialize session store for Gorilla sessions (session expiry * 60 to convert to seconds)
+	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, sessionExpiry*60, envLookup)
 	if err != nil {
 		log.Fatal(err)
 	}
