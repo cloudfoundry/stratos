@@ -8,11 +8,30 @@
       padding-left: 24px;
     }
   }
-  .gitscm-tab__avatar {
+  &__avatar {
     img {
       float: right;
       height: 84px;
       width: 84px;
+    }
+  }
+
+  &__repo {
+    &__name {
+      align-items: center;
+      display: flex;
+      word-break: break-all;
+      a {
+        flex: 1;
+      }
+      &--icon {
+        font-size: 18px;
+        height: 18px;
+        line-height: 18px;
+        margin-right: 0;
+        padding-left: 5px;
+        width: 18px;
+      }
     }
   }
 }

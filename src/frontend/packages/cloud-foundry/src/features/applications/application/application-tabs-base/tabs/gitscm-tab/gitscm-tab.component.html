@@ -11,24 +11,28 @@
               <a href="{{(gitSCMRepo$ | async)?.html_url}}" target="_blank">{{stratosProject.deploySource.project }}</a>
             </app-metadata-item>
             <app-metadata-item label="Branch">
-              <a href="{{(gitSCMRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}" target="_blank">
+              <a href="{{(gitSCMRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}"
+                target="_blank">
                 {{ stratosProject.deploySource.branch}}
               </a>
             </app-metadata-item>
             <div class="gitscm-tab__deployment__commit">
               <div>
                 <app-metadata-item label="Commit">
-                  <a href="{{(commit$ | async)?.html_url}}" target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
+                  <a href="{{(commit$ | async)?.html_url}}"
+                    target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
                 </app-metadata-item>
               </div>
               <div class="gitscm-tab__deployment__commit-warning" *ngIf="!(isHead$ | async) && (initialised$ | async)">
                 <div>
                   <mat-icon color="warn">warning</mat-icon>
                 </div>
-                <div class="gitscm-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was deployed. Redeploy to update</div>
+                <div class="gitscm-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}}
+                  branch has been updated since this app was deployed. Redeploy to update</div>
               </div>
             </div>
-            <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+            <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}
+            </app-metadata-item>
           </div>
         </mat-card-content>
       </mat-card>
@@ -39,20 +43,25 @@
           <mat-card-title>Repository Details</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-
           <div *ngIf="gitSCMRepo$ | async as gitSCMRepo">
             <div class="gitscm-tab__avatar">
               <img src={{gitSCMRepo.owner.avatar_url}}>
             </div>
             <div>
               <app-metadata-item label="Full Name">
-                <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                <div class="gitscm-tab__repo__name">
+                  <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                  <mat-icon class="gitscm-tab__repo__name--icon" *ngIf="gitSCMRepo.private" matTooltip="Private Repo">
+                    lock</mat-icon>
+                </div>
               </app-metadata-item>
               <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}</app-metadata-item>
               <app-metadata-item label="Description">{{ gitSCMRepo.description }}</app-metadata-item>
               <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item *ngIf="gitSCMRepo.pushed_at" label="Last Pushed:">{{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item *ngIf="gitSCMRepo.last_activity_at" label="Last Actvity:">{{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item *ngIf="gitSCMRepo.pushed_at" label="Last Pushed:">
+                {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item *ngIf="gitSCMRepo.last_activity_at" label="Last Actvity:">
+                {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
             </div>
           </div>
         </mat-card-content>
