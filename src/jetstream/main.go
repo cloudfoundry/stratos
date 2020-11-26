@@ -249,7 +249,7 @@ func main() {
 	}
 
 	// Allow the Session expiry time to be configured
-	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", strconv.Itoa(SessionExpiry))
+	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", strconv.Itoa(DefaultSessionExpiry))
 	sessionExpiry, err := strconv.Atoi(sSessionExpiry)
 	if err != nil {
 		sessionExpiry = DefaultSessionExpiry
