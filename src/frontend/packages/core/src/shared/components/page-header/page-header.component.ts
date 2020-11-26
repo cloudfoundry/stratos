@@ -22,6 +22,7 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
 import { EndpointsService } from './../../../core/endpoints.service';
+import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
@@ -38,6 +39,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private pTabs: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
+
+  public environment = environment;
 
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
