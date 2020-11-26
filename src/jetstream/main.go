@@ -447,7 +447,7 @@ func showSSOConfig(portalProxy *portalProxy) {
 	log.Infof("SSO Configuration:")
 	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
 	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
-	log.Infof("... SSO Redirect Whitelist  : %s", portalProxy.Config.SSOWhiteList)
+	log.Infof("... SSO Redirect Allow-list : %s", portalProxy.Config.SSOAllowList)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {

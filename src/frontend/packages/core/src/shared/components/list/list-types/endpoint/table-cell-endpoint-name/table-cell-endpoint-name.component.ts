@@ -23,6 +23,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {
+    super.row = row;
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
     this.endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(id).entity$.pipe(

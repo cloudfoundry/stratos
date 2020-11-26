@@ -24,6 +24,7 @@ export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> i
     metricEntityService: EntityService<IMetrics<IMetricMatrixResult<IMetricCell>>>;
     cfGuid: string;
   }) {
+    super.config = config;
     if (!config) {
       return;
     }

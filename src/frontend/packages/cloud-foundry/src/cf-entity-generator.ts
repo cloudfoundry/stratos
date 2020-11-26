@@ -1,6 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import moment from 'moment';
+import { entityFetchedWithoutError } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -28,6 +28,7 @@ import { selectSessionData } from '../../store/src/reducers/auth.reducer';
 import { APIResource, EntityInfo } from '../../store/src/types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pagination.types';
 import { ICFAction } from '../../store/src/types/request.types';
+import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
 import {
   IService,
@@ -90,7 +91,7 @@ import {
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
 import { getFavoriteFromCfEntity } from './cf-favorites-helpers';
-import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
+import { ISpaceFavMetadata } from './cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
 import {
   AppEnvVarActionBuilders,
@@ -435,7 +436,7 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     labelPlural: 'Organization Quotas',
   };
   cfEntityCatalog.quotaDefinition = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IOrgQuotaDefinition>,
     QuotaDefinitionActionBuilder
   >(definition, {
@@ -478,7 +479,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     labelPlural: 'App Env Vars',
   };
   cfEntityCatalog.appEnvVar = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource,
     AppEnvVarActionBuilders,
     AppEnvVarActionBuilders
@@ -490,9 +491,8 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
     entityBuilder: {
       getMetadata: ent => ({
         name: `Application environment variables (${ent.metadata.guid}).`,
-        guid: ent.metadata.guid
       }),
-      getGuid: metadata => metadata.guid,
+      getGuid: entity => entity.metadata.guid
     },
   });
   return cfEntityCatalog.appEnvVar;
@@ -506,7 +506,7 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     label: 'App Summary',
     labelPlural: 'App Summaries',
   };
-  cfEntityCatalog.appSummary = new StratosCatalogEntity<IBasicCFMetaData, IAppSummary, AppSummaryActionBuilders>(definition, {
+  cfEntityCatalog.appSummary = new StratosCatalogEntity<IFavoriteMetadata, IAppSummary, AppSummaryActionBuilders>(definition, {
     dataReducers: [
       updateAppSummaryRoutesReducer,
       endpointDisconnectRemoveEntitiesReducer()
@@ -515,9 +515,8 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     entityBuilder: {
       getMetadata: ent => ({
         name: ent.name,
-        guid: ent.guid
       }),
-      getGuid: metadata => metadata.guid,
+      getGuid: entity => entity.guid,
     }
   });
   return cfEntityCatalog.appSummary;
@@ -532,7 +531,7 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
     labelPlural: 'Space Quotas',
   };
   cfEntityCatalog.spaceQuota = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<ISpaceQuotaDefinition>,
     SpaceQuotaDefinitionActionBuilders>(definition, {
       dataReducers: [
@@ -551,7 +550,7 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
     label: 'Private Domain',
     labelPlural: 'Private Domains',
   };
-  cfEntityCatalog.privateDomain = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IPrivateDomain>>(definition, {
+  cfEntityCatalog.privateDomain = new StratosCatalogEntity<IFavoriteMetadata, APIResource<IPrivateDomain>>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
@@ -567,7 +566,7 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
     labelPlural: 'Cloud Foundry Infos',
     endpoint: endpointDefinition
   };
-  cfEntityCatalog.cfInfo = new StratosCatalogEntity<IBasicCFMetaData, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
+  cfEntityCatalog.cfInfo = new StratosCatalogEntity<IFavoriteMetadata, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
     cfInfoDefinition,
     {
       dataReducers: [
@@ -576,10 +575,9 @@ function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefini
       actionBuilders: cfInfoDefinitionActionBuilders,
       entityBuilder: {
         getMetadata: info => ({
-          guid: info.entity.name,
           name: info.entity.name,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -595,7 +593,7 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
     endpoint: endpointDefinition,
   };
   cfEntityCatalog.userProvidedService = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IUserProvidedServiceInstance>,
     UserProvidedServiceActionBuilder
   >(
@@ -609,9 +607,8 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name,
-          guid: ent.metadata.guid,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       },
     }
   );
@@ -650,7 +647,7 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       return data;
     },
   };
-  cfEntityCatalog.appStats = new StratosCatalogEntity<IBasicCFMetaData, AppStat, AppStatsActionBuilders>(definition, {
+  cfEntityCatalog.appStats = new StratosCatalogEntity<IFavoriteMetadata, AppStat, AppStatsActionBuilders>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
@@ -658,9 +655,8 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
     entityBuilder: {
       getMetadata: ent => ({
         name: ent.guid,
-        guid: ent.guid
       }),
-      getGuid: metadata => metadata.name,
+      getGuid: entity => entity.guid
     }
   });
   return cfEntityCatalog.appStats;
@@ -672,7 +668,7 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
     schema: cfEntityFactory(buildpackEntityType),
     endpoint: endpointDefinition
   };
-  cfEntityCatalog.buildPack = new StratosCatalogEntity<IBasicCFMetaData, APIResource<IBuildpack>, BuildpackActionBuilders>(definition, {
+  cfEntityCatalog.buildPack = new StratosCatalogEntity<IFavoriteMetadata, APIResource<IBuildpack>, BuildpackActionBuilders>(definition, {
     dataReducers: [
       endpointDisconnectRemoveEntitiesReducer()
     ],
@@ -688,7 +684,7 @@ function generateCFServiceBrokerEntity(endpointDefinition: StratosEndpointExtens
     endpoint: endpointDefinition
   };
   cfEntityCatalog.serviceBroker = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceBroker>,
     ServiceBrokerActionBuilders>(definition, {
       dataReducers: [
@@ -706,7 +702,7 @@ function generateCFServicePlanVisibilityEntity(endpointDefinition: StratosEndpoi
     endpoint: endpointDefinition
   };
   cfEntityCatalog.servicePlanVisibility = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServicePlanVisibility>,
     ServicePlanVisibilityActionBuilders
   >(definition, {
@@ -727,7 +723,7 @@ function generateCFSecurityGroupEntity(endpointDefinition: StratosEndpointExtens
     endpoint: endpointDefinition
   };
   cfEntityCatalog.securityGroup = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<ISecurityGroup>,
     SecurityGroupBuilders>(definition, {
       dataReducers: [
@@ -750,7 +746,7 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
     endpoint: endpointDefinition
   };
   cfEntityCatalog.serviceBinding = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceBinding>,
     ServiceBindingActionBuilders
   >(
@@ -763,9 +759,8 @@ function generateCFServiceBindingEntity(endpointDefinition: StratosEndpointExten
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.metadata.guid,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -781,7 +776,7 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
     endpoint: endpointDefinition
   };
   cfEntityCatalog.service = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IService>,
     ServiceActionBuilders
   >(
@@ -794,9 +789,8 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.label,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       },
     }
   );
@@ -812,7 +806,7 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
     endpoint: endpointDefinition
   };
   cfEntityCatalog.servicePlan = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServicePlan>,
     ServicePlanActionBuilders
   >(
@@ -825,9 +819,8 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -847,7 +840,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
     endpoint: endpointDefinition,
   };
   cfEntityCatalog.serviceInstance = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceInstance>,
     ServiceInstanceActionBuilders
   >(
@@ -861,9 +854,8 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -878,7 +870,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     labelPlural: 'Users',
     endpoint: endpointDefinition,
   };
-  cfEntityCatalog.user = new StratosCatalogEntity<IBasicCFMetaData, APIResource<CfUser>, UserActionBuilders>(
+  cfEntityCatalog.user = new StratosCatalogEntity<IFavoriteMetadata, APIResource<CfUser>, UserActionBuilders>(
     definition,
     {
       actionBuilders: userActionBuilders,
@@ -886,9 +878,8 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -904,7 +895,7 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
     endpoint: endpointDefinition
   };
   cfEntityCatalog.domain = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IDomain>,
     DomainActionBuilders
   >(
@@ -917,9 +908,8 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name,
-          guid: ent.metadata.guid
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -937,7 +927,7 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
     endpoint: endpointDefinition
   };
   cfEntityCatalog.event = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<CfEvent>,
     CfEventActionBuilders>(
       definition,
@@ -949,11 +939,10 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
         entityBuilder: {
           getMetadata: event => {
             return {
-              guid: event.metadata.guid,
               name: event.metadata.guid,
             };
           },
-          getGuid: metadata => metadata.guid,
+          getGuid: entity => entity.metadata.guid
         }
       }
     );
@@ -969,7 +958,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
     endpoint: endpointDefinition
   };
   cfEntityCatalog.route = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IRoute>,
     RoutesActionBuilders
   >(
@@ -982,10 +971,9 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
       ],
       entityBuilder: {
         getMetadata: app => ({
-          guid: app.metadata.guid,
           name: app.entity.domain_url,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -1001,7 +989,7 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
     endpoint: endpointDefinition
   };
   cfEntityCatalog.stack = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IStack>,
     StackActionBuilders
   >(
@@ -1013,10 +1001,9 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
       actionBuilders: stackActionBuilders,
       entityBuilder: {
         getMetadata: app => ({
-          guid: app.metadata.guid,
           name: app.entity.name,
         }),
-        getGuid: metadata => metadata.guid,
+        getGuid: entity => entity.metadata.guid
       }
     }
   );
@@ -1051,7 +1038,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
     }
   };
   cfEntityCatalog.featureFlag = new StratosCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     IFeatureFlag,
     FeatureFlagActionBuilders>(
       featureFlagDefinition,
@@ -1062,10 +1049,9 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
         actionBuilders: featureFlagActionBuilders,
         entityBuilder: {
           getMetadata: ff => ({
-            guid: ff.guid,
             name: ff.name,
           }),
-          getGuid: metadata => metadata.guid,
+          getGuid: entity => entity.guid,
         }
       }
     );
@@ -1075,7 +1061,7 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
 function generateCfEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   cfEntityCatalog.cfEndpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/cloud-foundry/${metadata.guid}`
+    favorite => `/cloud-foundry/${favorite.endpointId}`
   );
   return cfEntityCatalog.cfEndpoint;
 }
@@ -1097,7 +1083,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
   };
 
   cfEntityCatalog.application = new StratosCatalogEntity<
-    IAppFavMetadata,
+    IFavoriteMetadata,
     APIResource<IApp>,
     ApplicationActionBuilders
   >(
@@ -1109,16 +1095,11 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
       ],
       entityBuilder: {
         getMetadata: app => ({
-          guid: app.metadata.guid,
-          cfGuid: app.entity.cfGuid,
-          createdAt: moment(app.metadata.created_at).format('LLL'),
           name: app.entity.name,
         }),
-        getLink: metadata => `/applications/${metadata.cfGuid}/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ])
+        getLink: favorite => `/applications/${favorite.endpointId}/${favorite.entityId}/summary`,
+        getGuid: entity => entity.metadata.guid,
+        getIsValid: (fav) => cfEntityCatalog.application.api.get(fav.entityId, fav.endpointId, {}).pipe(entityFetchedWithoutError())
       },
       actionBuilders: applicationActionBuilder
     },
@@ -1150,17 +1131,12 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
       ],
       entityBuilder: {
         getMetadata: space => ({
-          guid: space.metadata.guid,
           orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
           name: space.entity.name,
-          cfGuid: space.entity.cfGuid,
-          createdAt: moment(space.metadata.created_at).format('LLL'),
         }),
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
-        getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.orgGuid}/spaces/${metadata.guid}/summary`,
-        getGuid: metadata => metadata.guid,
+        getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`,
+        getGuid: entity => entity.metadata.guid,
+        getIsValid: (fav) => cfEntityCatalog.space.api.get(fav.entityId, fav.endpointId).pipe(entityFetchedWithoutError())
       }
     }
   );
@@ -1178,7 +1154,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     iconFont: 'stratos-icons'
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
-    IOrgFavMetadata,
+    IFavoriteMetadata,
     APIResource<IOrganization>,
     OrganizationActionBuilders
   >(
@@ -1193,28 +1169,15 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       ],
       entityBuilder: {
         getMetadata: org => ({
-          guid: org.metadata.guid,
-          status: getOrgStatus(org),
           name: org.entity.name,
-          cfGuid: org.entity.cfGuid,
-          createdAt: moment(org.metadata.created_at).format('LLL'),
         }),
-        getLink: metadata => `/cloud-foundry/${metadata.cfGuid}/organizations/${metadata.guid}`,
-        getLines: () => ([
-          ['Created', (meta) => meta.createdAt]
-        ]),
-        getGuid: metadata => metadata.guid
+        getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.entityId}`,
+        getGuid: entity => entity.metadata.guid,
+        getIsValid: (favorite) => cfEntityCatalog.org.api.get(favorite.entityId, favorite.endpointId, {}).pipe(entityFetchedWithoutError())
       }
     }
   );
   return cfEntityCatalog.org;
-}
-
-function getOrgStatus(org: APIResource<IOrganization>) {
-  if (!org || !org.entity || !org.entity.status) {
-    return 'Unknown';
-  }
-  return org.entity.status.charAt(0).toUpperCase() + org.entity.status.slice(1);
 }
 
 function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -1225,7 +1188,7 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
     labelPlural: 'CF Metrics',
     endpoint: endpointDefinition,
   };
-  cfEntityCatalog.metric = new StratosCatalogEntity<IBasicCFMetaData>(
+  cfEntityCatalog.metric = new StratosCatalogEntity<IFavoriteMetadata>(
     definition,
     {
       dataReducers: [

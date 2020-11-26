@@ -372,7 +372,7 @@ type PortalConfig struct {
 	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
 	SSOLogin                           bool     `configName:"SSO_LOGIN"`
 	SSOOptions                         string   `configName:"SSO_OPTIONS"`
-	SSOWhiteList                       string   `configName:"SSO_WHITELIST"`
+	SSOAllowList                       string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
 	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
 	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
 	LogLevel                           string   `configName:"LOG_LEVEL"`

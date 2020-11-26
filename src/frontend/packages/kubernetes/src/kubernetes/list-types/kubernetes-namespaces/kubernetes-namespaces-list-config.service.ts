@@ -1,16 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
+import {
+  createTableColumnFavorite,
+} from '../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/src/public-api';
+import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesNamespace } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
+import { KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType } from './../../kubernetes-entity-factory';
 import { KubeNamespacePodCountComponent } from './kube-namespace-pod-count/kube-namespace-pod-count.component';
 import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/kubernetes-namespace-link.component';
 import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
@@ -31,17 +34,6 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
-    // FIXME: Hide link until the link is fixed
-    // {
-    //   columnId: 'view', headerCell: () => 'Dashboard',
-    //   cellDefinition: {
-    //     getValue: () => 'View',
-    //     getLink: (row: KubernetesNamespace) => {
-    //       return `/kubernetes/${this.kubeId.guid}/dashboard/overview?namespace=${row.metadata.name}`;
-    //     },
-    //   },
-    //   cellFlex: '3',
-    // },
     {
       columnId: 'pods', headerCell: () => 'Pods',
       cellComponent: KubeNamespacePodCountComponent,
@@ -59,7 +51,12 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
       },
       cellFlex: '5',
     },
-    createKubeAgeColumn()
+    createKubeAgeColumn(),
+    createTableColumnFavorite((row: KubernetesNamespace): UserFavorite<IFavoriteMetadata> => {
+      return new UserFavorite(row.metadata.kubeId, KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType, row.metadata.name,
+        {name: row.metadata.name}
+      );
+    }),
   ];
 
   pageSizeOptions = defaultHelmKubeListPageSize;
@@ -69,7 +66,6 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
     filter: 'Filter by Name',
     noEntries: 'There are no namespaces'
   };
-  private initialised$: Observable<boolean>;
 
   getGlobalActions = () => null;
   getMultiActions = () => [];
@@ -77,26 +73,12 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
   getColumns = () => this.columns;
   getDataSource = () => this.podsDataSource;
   getMultiFiltersConfigs = () => [];
-  getInitialised = () => this.initialised$;
 
   constructor(
     store: Store<AppState>,
     private kubeId: BaseKubeGuid,
-    kubeService: KubernetesEndpointService
   ) {
     this.podsDataSource = new KubernetesNamespacesDataSource(store, this.kubeId, this);
-
-    const hasDashboard = kubeService.kubeDashboardConfigured$.pipe(
-      first(),
-      tap((enabled) => {
-        if (!enabled) {
-          this.columns = this.columns.filter(column => column.columnId !== 'view');
-        }
-      })
-    );
-    this.initialised$ = hasDashboard.pipe(
-      map(() => true)
-    );
   }
 
 }

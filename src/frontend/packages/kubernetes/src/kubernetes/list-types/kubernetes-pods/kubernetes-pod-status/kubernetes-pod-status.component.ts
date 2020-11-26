@@ -14,13 +14,13 @@ export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod>
   public style = 'border-success';
 
   @Input('row')
-  get row(): KubernetesPod { return this.pRow; }
   set row(row: KubernetesPod) {
-    this.pRow = row;
+    super.row = row;
     if (row) {
       this.updateStatus();
     }
   }
+  get row(): KubernetesPod { return super.row; }
 
   private updateStatus() {
     const status = this.convertStatus(this.row.expandedStatus.status);

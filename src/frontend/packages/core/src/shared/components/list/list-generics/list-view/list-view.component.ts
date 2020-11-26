@@ -1,4 +1,13 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Injector,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 
 import { ListComponent } from '../../list.component';
 import { IListConfig, ListConfig } from '../../list.component.types';
@@ -13,7 +22,7 @@ import { ListConfigProvider } from '../list-config-provider.types';
     ListComponent
   ]
 })
-export class ListViewComponent<T> implements OnInit {
+export class ListViewComponent<T> implements OnInit, OnDestroy {
 
   @Input() config: ListConfigProvider<T>;
 
@@ -28,9 +37,7 @@ export class ListViewComponent<T> implements OnInit {
   ) { }
 
   ngOnInit() {
-
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ListComponent);
-
     const viewContainerRef = this.listHost.viewContainerRef;
     this.componentRef = viewContainerRef.createComponent(
       componentFactory,
@@ -46,10 +53,9 @@ export class ListViewComponent<T> implements OnInit {
     });
   }
 
-  ngDestroy() {
+  ngOnDestroy() {
     if (this.componentRef) {
       this.componentRef.destroy();
     }
   }
-
 }

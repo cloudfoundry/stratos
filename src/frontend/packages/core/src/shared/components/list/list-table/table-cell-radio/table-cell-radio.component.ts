@@ -10,11 +10,10 @@ import { TableCellCustom } from '../../list.types';
 export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
   disable: boolean;
 
-  private r: T;
   @Input('row')
-  get row() { return this.r; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.r = row;
+    super.row = row;
     if (row) {
       this.updateDisabled();
     }

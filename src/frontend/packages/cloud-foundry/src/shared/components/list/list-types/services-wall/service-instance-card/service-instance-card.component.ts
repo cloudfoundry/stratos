@@ -39,7 +39,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
-
+    super.row = row;
     if (row) {
       this.serviceInstanceEntity = row;
       const schema = cfEntityFactory(serviceInstancesEntityType);

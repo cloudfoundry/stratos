@@ -13,6 +13,7 @@ export class TableCellConfirmOrgSpaceComponent extends TableCellCustom<CfRoleCha
   chipsConfig: AppChip<CfRoleChangeWithNames>[];
   @Input('row')
   set row(row: CfRoleChangeWithNames) {
+    super.row = row;
     const chipConfig = new AppChip<CfRoleChangeWithNames>();
     chipConfig.key = row;
     chipConfig.value = row.spaceGuid ? `Space: ${row.spaceName}` : `Org: ${row.orgName}`;

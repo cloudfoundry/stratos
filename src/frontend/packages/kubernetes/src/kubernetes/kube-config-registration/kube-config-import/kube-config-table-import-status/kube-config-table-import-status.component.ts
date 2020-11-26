@@ -16,12 +16,9 @@ export class KubeConfigTableImportStatusComponent extends TableCellCustom<KubeCo
 
   public state: Observable<IActionMonitorComponentState>;
 
-  constructor() {
-    super();
-  }
-
   @Input()
   set config(element) {
+    super.config = element;
     if (!this.state) {
       this.state = element(this.row);
     }
