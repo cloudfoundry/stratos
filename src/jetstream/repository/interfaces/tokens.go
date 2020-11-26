@@ -1,5 +1,8 @@
 package interfaces
 
+// SystemSharedUserGUID - User ID for the system shared user for endpoints. Also used by front end
+const SystemSharedUserGUID = "00000000-1111-2222-3333-444444444444"
+
 // Token -
 type Token struct {
 	UserGUID  string

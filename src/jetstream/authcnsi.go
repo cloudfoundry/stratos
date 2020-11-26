@@ -12,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
 // CFAdminIdentifier - The scope that Cloud Foundry uses to convey administrative level perms
@@ -163,7 +162,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 
 		// We are all good to go - change the userID, so we record this token against the system-shared user and not this specific user
 		// This is how we identify system-shared endpoint tokens
-		userID = tokens.SystemSharedUserGuid
+		userID = interfaces.SystemSharedUserGUID
 	}
 
 	// Ask the endpoint type to connect
@@ -282,7 +281,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 
 func santizeInfoForSystemSharedTokenUser(cnsiUser *interfaces.ConnectedUser, isSysystemShared bool) {
 	if isSysystemShared {
-		cnsiUser.GUID = tokens.SystemSharedUserGuid // Used by front end also
+		cnsiUser.GUID = interfaces.SystemSharedUserGUID // Used by front end also
 		cnsiUser.Scopes = make([]string, 0)
 		cnsiUser.Name = "system_shared"
 	}
@@ -371,7 +370,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 		if !user.Admin {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Can not disconnect System Shared endpoint - user is not an administrator")
 		}
-		userGUID = tokens.SystemSharedUserGuid
+		userGUID = interfaces.SystemSharedUserGUID
 	}
 
 	// Clear the token

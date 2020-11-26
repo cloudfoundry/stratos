@@ -18,7 +18,6 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 )
@@ -72,7 +71,7 @@ const mockCNSIGUID = "some-guid-1234"
 const mockCFGUID = "some-cf-guid-1234"
 const mockCEGUID = "some-hce-guid-1234"
 const mockUserGUID = "asd-gjfg-bob"
-const mockAdminGUID = tokens.SystemSharedUserGuid
+const mockAdminGUID = interfaces.SystemSharedUserGUID
 const mockTokenGUID = "mock-token-guid"
 
 const mockURLString = "http://localhost:9999/some/fake/url/"

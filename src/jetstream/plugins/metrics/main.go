@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -457,7 +456,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	allUserAccessibleEndpoints := userEndpoints
 
 	// Get Endpoints that are shared in the system
-	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(tokens.SystemSharedUserGuid)
+	systemSharedEndpoints, err := m.portalProxy.ListEndpointsByUser(interfaces.SystemSharedUserGUID)
 
 	if err != nil {
 		return nil, err
