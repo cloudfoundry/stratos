@@ -120,7 +120,6 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.createCard(endpointEntity);
     } else {
       this.createCard(undefined);
-      this.createCard(undefined);
     }
   }
 
