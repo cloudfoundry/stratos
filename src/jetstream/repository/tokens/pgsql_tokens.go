@@ -72,7 +72,7 @@ type PgsqlTokenRepository struct {
 }
 
 // NewPgsqlTokenRepository - get a reference to the token data source
-func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
+func NewPgsqlTokenRepository(dcp *sql.DB) (interfaces.TokenRepository, error) {
 	log.Debug("NewPgsqlTokenRepository")
 	return &PgsqlTokenRepository{db: dcp}, nil
 }

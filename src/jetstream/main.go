@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -41,6 +42,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/factory"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
@@ -246,6 +248,16 @@ func main() {
 		}
 	}
 
+	// Allow the Session expiry time to be configured
+	sSessionExpiry := envLookup.String("SESSION_STORE_EXPIRY", strconv.Itoa(SessionExpiry))
+	sessionExpiry, err := strconv.Atoi(sSessionExpiry)
+	if err != nil {
+		sessionExpiry = SessionExpiry
+	}
+
+	log.Infof("Session expiration (minutes): %d", sessionExpiry)
+	// Convert to seconds
+	sessionExpiry *= 60
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry, envLookup)
 	if err != nil {
@@ -282,6 +294,10 @@ func main() {
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	portalProxy.SessionDataStore = sessionDataStore
+
+	store := factory.NewDefaultStoreFactory(databaseConnectionPool)
+	portalProxy.SetStoreFactory(store)
+
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -1222,4 +1238,14 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
+}
+
+// GetStoreFactory gets the store factory
+func (portalProxy *portalProxy) GetStoreFactory() interfaces.StoreFactory {
+	return factory.GetStoreFactory()
+}
+
+// SetStoreFactory sets the store factory
+func (portalProxy *portalProxy) SetStoreFactory(f interfaces.StoreFactory) interfaces.StoreFactory {
+	return factory.SetStoreFactory(f)
 }
