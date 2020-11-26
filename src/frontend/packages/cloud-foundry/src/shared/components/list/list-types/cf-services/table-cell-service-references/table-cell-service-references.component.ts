@@ -15,16 +15,13 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<APIReso
 
   @Input()
   set row(pService: APIResource<IService>) {
+    super.row = pService;
     if (!!pService && !!pService.entity.extra && !this.extraInfo) {
       try {
         this.extraInfo = JSON.parse(pService.entity.extra);
       } catch { }
     }
 
-  }
-
-  constructor() {
-    super();
   }
 
   hasDocumentationUrl() {

@@ -15,10 +15,10 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
 
   @Input()
   get row(): EndpointModel {
-    return this.pRow;
+    return super.row;
   }
   set row(row: EndpointModel) {
-    this.pRow = row;
+    super.row = row;
   }
 
   constructor() {

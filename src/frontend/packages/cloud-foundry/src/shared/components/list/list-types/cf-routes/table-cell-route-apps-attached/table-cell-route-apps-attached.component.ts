@@ -19,16 +19,14 @@ export class TableCellRouteAppsAttachedComponent extends TableCellCustom<any> im
 
   @Input('config')
   set config(config: any) {
+    super.config = config;
     this.config$.next(config);
   }
 
   @Input('row')
   set row(route: APIResource<CfRoute>) {
+    super.row = route;
     this.row$.next(route);
-  }
-
-  constructor() {
-    super();
   }
 
   ngOnInit(): void {
