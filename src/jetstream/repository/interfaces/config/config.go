@@ -109,7 +109,6 @@ func setFieldValue(value reflect.Value, field reflect.Value, tags string, envLoo
 	for _, tag := range tagList {
 		val, ok := envLookup(strings.TrimSpace(tag))
 		if ok {
-			log.Info(val)
 			return SetStructFieldValue(value, field, val)
 		}
 	}
