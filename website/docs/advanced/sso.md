@@ -69,6 +69,13 @@ When set, any requests to log in with a different `state` will be denied.
 
 In order for the SSO `state` to match an entry from the allow-list the schema, hostname, port and path must match exactly. A wildcard `*` can be provided for the path to match anything.
 
+
+## Advanced Configuration
+
+Further configuration of SSO is provided through the `SSO_OPTIONS` environment variable.
+
+Setting this variable to `nosplash` will skip the need for users to press the Login button - users will jump straight to the configured SSO endpoint when accessing Stratos instead of first seeing the Stratos login page.
+
 ## Troubleshooting
 
 1. User has selected the incorrect application authorities when logging in to Stratos via SSO for the first time.
