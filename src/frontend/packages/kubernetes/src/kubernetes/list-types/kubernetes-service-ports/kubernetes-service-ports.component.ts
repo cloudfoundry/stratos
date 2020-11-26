@@ -9,12 +9,11 @@ import { KubeService } from '../../store/kube.types';
   styleUrls: ['./kubernetes-service-ports.component.scss']
 })
 export class KubernetesServicePortsComponent extends CardCell<KubeService> {
-
   @Input()
   get row(): KubeService {
-    return this.pRow;
+    return super.row;
   }
   set row(row: KubeService) {
-    this.pRow = row;
+    super.row = row;
   }
 }

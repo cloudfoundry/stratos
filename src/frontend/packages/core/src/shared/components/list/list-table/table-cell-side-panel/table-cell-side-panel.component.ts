@@ -20,16 +20,16 @@ export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCust
   public actualConfig: TableCellSidePanelConfig<A>;
 
   @Input('row')
-  get row(): T { return this.pRow; }
+  get row(): T { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     this.updateConfig();
   }
 
   @Input('config')
-  get config() { return this.pConfig; }
+  get config() { return super.config; }
   set config(config: object | CellConfigFunction<T>) {
-    this.pConfig = config;
+    super.config = config;
     this.updateConfig();
   }
 

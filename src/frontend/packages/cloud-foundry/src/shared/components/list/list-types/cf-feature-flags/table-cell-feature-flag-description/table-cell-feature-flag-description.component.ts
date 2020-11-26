@@ -15,6 +15,7 @@ export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IF
 
   @Input()
   set row(row: IFeatureFlag) {
+    super.row = row;
     this.description = row ? FeatureFlagDescriptions[row.name] : null;
   }
 

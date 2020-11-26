@@ -16,18 +16,18 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCel
 
 
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (this.config) {
       this.icon = this.config.getIcon(row);
     }
   }
 
   @Input('config')
-  get config() { return this.pConfig; }
+  get config() { return super.config; }
   set config(config: TableCellIconComponentConfig<T>) {
-    this.pConfig = config;
+    super.config = config;
     if (!config) {
       return;
     }

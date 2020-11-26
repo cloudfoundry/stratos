@@ -68,10 +68,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input('row')
   set row(row: EndpointModel) {
+    super.row = row;
     if (!row) {
       return;
     }
-    this.pRow = row;
 
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
@@ -85,12 +85,12 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   }
   get row(): EndpointModel {
-    return this.pRow;
+    return super.row;
   }
 
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
-    this.pDataSource = ds;
+    super.dataSource = ds;
 
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
     if (ds && !ds.dsEndpointType && !this.cardMenu) {
@@ -98,7 +98,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         const separator = endpointAction.label === '-';
         return {
           label: endpointAction.label,
-          action: () => endpointAction.action(this.pRow),
+          action: () => endpointAction.action(this.row),
           can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : null,
           separator
         };
@@ -142,7 +142,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   updateInnerComponent() {
-    if (!this.endpointDetails || !this.pRow) {
+    if (!this.endpointDetails || !this.row) {
       return;
     }
     const e = this.endpointCatalogEntity.definition;
@@ -158,10 +158,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
 
     if (this.component) {
-      this.component.row = this.pRow;
+      this.component.row = this.row;
       this.component.isTable = false;
     }
-    this.component.row = this.pRow;
+    this.component.row = this.row;
     this.componentRef.changeDetectorRef.detectChanges();
 
 

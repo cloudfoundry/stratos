@@ -20,9 +20,9 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   rowState: Observable<RowState>;
 
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (row) {
       this.initialise(row);
     }
