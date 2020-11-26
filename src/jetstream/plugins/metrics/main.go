@@ -198,7 +198,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	defer res.Body.Close()
 
 	// If we got anything other than a 200, then we did not find the Stratos Metrics metadata file
-	if err == nil && res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusOK {
 		log.Debug("Did not find Stratos Metrics metadata file")
 		log.Debug("Checking if this is a prometheus endpoint")
 		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
