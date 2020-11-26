@@ -18,6 +18,7 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
 
   @Input()
   set row(pService: APIResource<IService>) {
+    super.row = pService;
     if (!pService || !!this.cfOrgSpace) {
       return;
     }

@@ -41,8 +41,7 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
 
   @Input('row')
   set row(row: EndpointModel) {
-    this.pRow = row;
-
+    super.row = row;
     const e = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type).definition;
     if (!e || !e.listDetailsComponent) {
       return;
@@ -55,12 +54,12 @@ export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointM
     }
 
     if (this.cell) {
-      this.cell.row = this.pRow;
+      this.cell.row = this.row;
       this.cell.isTable = true;
     }
   }
   get row(): EndpointModel {
-    return this.pRow;
+    return super.row;
   }
 
   ngOnDestroy(): void {

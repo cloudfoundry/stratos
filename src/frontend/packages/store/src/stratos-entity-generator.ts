@@ -150,7 +150,7 @@ function generateMetricsEndpoint() {
     authTypes: [],
     renderPriority: 1
   },
-    metadata => `/endpoints/metrics/${metadata.guid}`
+    entity => `/endpoints/metrics/${entity.endpointId}`
   );
   return stratosEntityCatalog.metricsEndpoint;
 }

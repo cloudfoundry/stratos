@@ -367,7 +367,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, fmt.Errorf(msg, err)
 	}
 
-	req.SetBasicAuth(client, clientSecret)
+	req.SetBasicAuth(url.QueryEscape(client), url.QueryEscape(clientSecret))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	var h = p.GetHttpClientForRequest(req, skipSSLValidation)

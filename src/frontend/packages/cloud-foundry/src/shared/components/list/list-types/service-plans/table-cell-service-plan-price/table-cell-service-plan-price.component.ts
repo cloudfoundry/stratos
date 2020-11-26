@@ -14,10 +14,9 @@ export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIReso
   isFree: boolean;
   canShowCosts: boolean;
 
-  private pServicePlan;
   @Input()
   set row(servicePlan: APIResource<IServicePlan>) {
-    this.pServicePlan = servicePlan;
+    super.row = servicePlan;
     if (!servicePlan) {
       return;
     }
@@ -25,6 +24,6 @@ export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIReso
     this.canShowCosts = canShowServicePlanCosts(servicePlan);
   }
   get row(): APIResource<IServicePlan> {
-    return this.pServicePlan;
+    return super.row;
   }
 }

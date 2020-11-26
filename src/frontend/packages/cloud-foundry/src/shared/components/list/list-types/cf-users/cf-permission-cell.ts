@@ -33,6 +33,7 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
 
   @Input('row')
   set row(row: APIResource<CfUser>) {
+    super.row = row;
     this.rowSubject.next(row);
     this.guid = row.metadata.guid;
     this.userEntity.next(row.entity);
@@ -40,6 +41,7 @@ export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIRe
 
   @Input()
   set config(config: any) {
+    super.config = config;
     this.configSubject.next(config);
   }
 
