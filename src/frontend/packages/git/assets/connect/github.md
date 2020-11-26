@@ -1,6 +1,6 @@
 # Connect to Github with your credentials
 
-Connect to a Github instance with a Personal Access Token will allow you to access your private repositories.
+Connect to a Github instance with a Personal Access Token to allow access to your private repositories.
 
 To generate a Personal Access Token to go
 

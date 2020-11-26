@@ -313,7 +313,7 @@ export class DeployApplicationStep2Component
       filter(p => !!p),
       withLatestFrom(this.appDeploySourceTypes.types$),
       tap(([p, sourceTypes]) => {
-        this.sourceType = sourceTypes.find(s => s.id === p.id && s.endpointGuid === p.endpointGuid);
+        this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
 
         const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
         if (!!newScm) {
