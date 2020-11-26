@@ -52,6 +52,7 @@ export class GitEffects {
           repoDetails.scmType = action.meta.scm.getType();
           repoDetails.projectName = action.meta.projectName;
           repoDetails.guid = action.guid;
+          repoDetails.endpointGuid = action.meta.scm.endpointGuid;
           mappedData.entities[entityConfig.entityKey][repoDetails.guid] = repoDetails;
           mappedData.result.push(repoDetails.guid);
           return [
@@ -82,6 +83,7 @@ export class GitEffects {
             b.scmType = action.scm.getType();
             b.projectName = action.projectName;
             b.guid = action.entity[0].getId(b);
+            b.endpointGuid = action.scm.endpointGuid;
             mappedData.entities[entityKey][b.guid] = b;
             mappedData.result.push(b.guid);
           });
@@ -110,6 +112,7 @@ export class GitEffects {
           branch.scmType = action.scm.getType();
           branch.projectName = action.projectName;
           branch.guid = action.guid;
+          branch.endpointGuid = action.scm.endpointGuid;
           mappedData.entities[entityKey][branch.guid] = branch;
           mappedData.result.push(branch.guid);
           return [
@@ -134,7 +137,11 @@ export class GitEffects {
             entities: { [entityKey]: {} },
             result: []
           };
-          this.addCommit(entityKey, mappedData, this.updateCommit(action.scm.getType(), action.projectName, commit, action));
+          this.addCommit(
+            entityKey,
+            mappedData,
+            this.updateCommit(action.scm.getType(), action.projectName, commit, action.scm.endpointGuid, action)
+          );
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
@@ -158,7 +165,12 @@ export class GitEffects {
             result: []
           };
           commits.forEach(commit => {
-            this.addCommit(entityKey, mappedData, this.updateCommit(action.scm.getType(), action.projectName, commit, action));
+            this.addCommit(entityKey, mappedData, this.updateCommit(action.scm.getType(),
+              action.projectName,
+              commit,
+              action.scm.endpointGuid,
+              action
+            ));
           });
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
@@ -169,11 +181,12 @@ export class GitEffects {
         ]));
     }));
 
-  updateCommit(scmType: string, projectName: string, commit: GitCommit, action: EntityRequestAction): GitCommit {
+  updateCommit(scmType: string, projectName: string, commit: GitCommit, endpointGuid: string, action: EntityRequestAction): GitCommit {
     const newCommit = {
       ...commit,
       scmType,
       projectName,
+      endpointGuid,
     };
     newCommit.guid = action.entity[0].getId(newCommit);
 

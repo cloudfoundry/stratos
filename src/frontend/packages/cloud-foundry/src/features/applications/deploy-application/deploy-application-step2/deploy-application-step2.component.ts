@@ -152,7 +152,8 @@ export class DeployApplicationStep2Component
           name: this.gitUrlBranchName,
           guid: null,
           projectName: null,
-          scmType: null
+          scmType: null,
+          endpointGuid: null,
         },
         endpointGuid: null
       }, null));

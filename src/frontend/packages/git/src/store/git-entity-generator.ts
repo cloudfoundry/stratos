@@ -1,6 +1,12 @@
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+} from '../../../store/src/actions/endpoint.actions';
+import { IRequestEntityTypeState } from '../../../store/src/app-state';
+import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
@@ -21,8 +27,33 @@ import {
   gitRepoActionBuilders,
 } from './git-action-builders';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
-import { GitBranch, GitCommit, GitRepo } from './git.public-types';
+import { GitBranch, GitCommit, GitEntity, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
+
+
+function endpointDisconnectRemoveEntitiesReducer() {
+  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
+    switch (action.type) {
+      case DISCONNECT_ENDPOINTS_SUCCESS:
+      case UNREGISTER_ENDPOINTS_SUCCESS:
+        return deleteEndpointEntities(state, action.guid);
+    }
+    return state;
+  };
+}
+
+function deleteEndpointEntities(
+  state: IRequestEntityTypeState<GitEntity>,
+  endpointGuid: string
+) {
+  return Object.keys(state).reduce((newEntities, guid) => {
+    const entity = state[guid];
+    if (entity.endpointGuid !== endpointGuid) {
+      newEntities[guid] = entity;
+    }
+    return newEntities;
+  }, {});
+}
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -119,7 +150,7 @@ class GitEntityCatalog {
       //   const metadata = (action.metadata as GitMeta[])[0];
       //   return {
       //     ...metadata.scm.convertCommit(endpointGuid, metadata.projectName, data),
-      //     guid: action.guid
+      //     guid: action.guid // This works for single requests... but not for multiple
       //   };
       // },
     };
@@ -127,6 +158,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitCommitActionBuilders,
         entityBuilder: {
@@ -156,6 +188,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitRepoActionBuilders,
       }
@@ -174,6 +207,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitBranchActionBuilders,
       }
