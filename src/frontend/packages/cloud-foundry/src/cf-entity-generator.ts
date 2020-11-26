@@ -1139,7 +1139,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
         getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`,
         getGuid: entity => entity.metadata.guid,
         getIsValid: (fav) => cfEntityCatalog.space.api.get(fav.entityId, fav.endpointId).pipe(entityFetchedWithoutError())
-        getIsValid: (metadata) => cfEntityCatalog.space.api.get(metadata.guid, metadata.cfGuid).pipe(entityFetchedWithoutError())
       }
     }
   );
