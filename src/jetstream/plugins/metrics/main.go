@@ -171,7 +171,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	log.Debug("Looking for Stratos metrics metadata resource....")
 
 	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
-	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos__", cnsiRecord.APIEndpoint)
+	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos", cnsiRecord.APIEndpoint)
 	req, err := http.NewRequest("GET", metricsMetadataEndpoint, nil)
 	if err != nil {
 		msg := "Failed to create request for the Metrics Endpoint: %v"
