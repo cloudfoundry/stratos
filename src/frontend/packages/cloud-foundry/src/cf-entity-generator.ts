@@ -273,7 +273,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
     healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
-    getEndpointIdFromEntity: (entity: CfAPIResource) => entity?.entity.cfGuid,
+    getEndpointIdFromEntity: (entity: CfAPIResource) => entity.entity.cfGuid,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },

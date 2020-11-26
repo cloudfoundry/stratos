@@ -183,7 +183,7 @@ export class UserFavoriteManager {
   ) {
     // We need to get the endpoint ID for the entity
     const endpointCatalogEntity = entityCatalog.getEndpoint(endpointType);
-    if (endpointCatalogEntity && endpointCatalogEntity.definition.getEndpointIdFromEntity) {
+    if (entity && endpointCatalogEntity && endpointCatalogEntity.definition.getEndpointIdFromEntity) {
       const id = endpointCatalogEntity.definition.getEndpointIdFromEntity(entity);
       return this.getFavoriteFromEntity<Y>(entityType, endpointType, id, entity);
     }
