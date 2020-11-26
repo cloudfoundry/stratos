@@ -1,96 +1,100 @@
-<app-tile-grid class="gitscm-tab" *ngIf="stratosProject$ | async as stratosProject">
-  <app-tile-group>
-    <app-tile>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Deployment Information</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="gitscm-tab__deployment">
-            <app-metadata-item label="Repository">
-              <a href="{{(gitSCMRepo$ | async)?.html_url}}" target="_blank">{{stratosProject.deploySource.project }}</a>
-            </app-metadata-item>
-            <app-metadata-item label="Branch">
-              <a href="{{(gitSCMRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}"
-                target="_blank">
-                {{ stratosProject.deploySource.branch}}
-              </a>
-            </app-metadata-item>
-            <div class="gitscm-tab__deployment__commit">
-              <div>
-                <app-metadata-item label="Commit">
-                  <a href="{{(commit$ | async)?.html_url}}"
-                    target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
-                </app-metadata-item>
-              </div>
-              <div class="gitscm-tab__deployment__commit-warning" *ngIf="!(isHead$ | async) && (initialised$ | async)">
+<app-loading-page [isLoading]="isLoading$" text="Retrieving Git Details">
+  <app-tile-grid class="gitscm-tab" *ngIf="hasRepo$ | async as hasRepo">
+    <app-tile-group>
+      <app-tile *ngIf="applicationService.applicationStratProject$ | async as stratosProject">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Deployment Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="gitscm-tab__deployment">
+              <app-metadata-item label="Repository">
+                <a href="{{(gitSCMRepo$ | async)?.html_url}}"
+                  target="_blank">{{stratosProject.deploySource.project }}</a>
+              </app-metadata-item>
+              <app-metadata-item label="Branch">
+                <a href="{{(gitSCMRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}"
+                  target="_blank">
+                  {{ stratosProject.deploySource.branch}}
+                </a>
+              </app-metadata-item>
+              <div class="gitscm-tab__deployment__commit">
                 <div>
-                  <mat-icon color="warn">warning</mat-icon>
+                  <app-metadata-item label="Commit">
+                    <a href="{{(commit$ | async)?.html_url}}"
+                      target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
+                  </app-metadata-item>
                 </div>
-                <div class="gitscm-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}}
-                  branch has been updated since this app was deployed. Redeploy to update</div>
+                <div class="gitscm-tab__deployment__commit-warning" *ngIf="(isHead$ | async) === false">
+                  <div>
+                    <mat-icon color="warn">warning</mat-icon>
+                  </div>
+                  <div class="gitscm-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}}
+                    branch has been updated since this app was deployed. Redeploy to update</div>
+                </div>
+              </div>
+              <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}
+              </app-metadata-item>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+      <app-tile *ngIf="gitSCMRepo$ | async as gitSCMRepo">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Repository Details</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div>
+              <div class="gitscm-tab__avatar">
+                <img src={{gitSCMRepo.owner.avatar_url}}>
+              </div>
+              <div>
+                <app-metadata-item label="Full Name">
+                  <div class="gitscm-tab__repo__name">
+                    <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                    <mat-icon class="gitscm-tab__repo__name--icon" *ngIf="gitSCMRepo.private" matTooltip="Private Repo">
+                      lock</mat-icon>
+                  </div>
+                </app-metadata-item>
+                <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
+                </app-metadata-item>
+                <app-metadata-item label="Description">{{ gitSCMRepo.description }}</app-metadata-item>
+                <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
+                <app-metadata-item *ngIf="gitSCMRepo.pushed_at" label="Last Pushed:">
+                  {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
+                <app-metadata-item *ngIf="gitSCMRepo.last_activity_at" label="Last Actvity:">
+                  {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
               </div>
             </div>
-            <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}
-            </app-metadata-item>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </app-tile>
-    <app-tile>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Repository Details</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div *ngIf="gitSCMRepo$ | async as gitSCMRepo">
-            <div class="gitscm-tab__avatar">
-              <img src={{gitSCMRepo.owner.avatar_url}}>
-            </div>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+      <app-tile *ngIf="commit$ | async as commitInfo">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Commit Details</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
             <div>
-              <app-metadata-item label="Full Name">
-                <div class="gitscm-tab__repo__name">
-                  <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
-                  <mat-icon class="gitscm-tab__repo__name--icon" *ngIf="gitSCMRepo.private" matTooltip="Private Repo">
-                    lock</mat-icon>
-                </div>
-              </app-metadata-item>
-              <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}</app-metadata-item>
-              <app-metadata-item label="Description">{{ gitSCMRepo.description }}</app-metadata-item>
-              <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item *ngIf="gitSCMRepo.pushed_at" label="Last Pushed:">
-                {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item *ngIf="gitSCMRepo.last_activity_at" label="Last Actvity:">
-                {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
+              <div class="gitscm-tab__avatar">
+                <img src={{commitInfo.author.avatar_url}}>
+              </div>
+              <div>
+                <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
+                <app-metadata-item label="SHA">
+                  <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
+                </app-metadata-item>
+                <app-metadata-item label="Author">
+                  <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
+                </app-metadata-item>
+                <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}</app-metadata-item>
+              </div>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </app-tile>
-    <app-tile>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Commit Details</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div *ngIf="commit$ | async as commitInfo">
-            <div class="gitscm-tab__avatar">
-              <img src={{commitInfo.author.avatar_url}}>
-            </div>
-            <div>
-              <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
-              <app-metadata-item label="SHA">
-                <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
-              </app-metadata-item>
-              <app-metadata-item label="Author">
-                <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
-              </app-metadata-item>
-              <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}</app-metadata-item>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </app-tile>
-  </app-tile-group>
-  <app-list *ngIf="gitSCMRepo$ | async as gitSCMRepo"></app-list>
-</app-tile-grid>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+    </app-tile-group>
+    <app-list *ngIf="gitSCMRepo$ | async as gitSCMRepo"></app-list>
+  </app-tile-grid>
+</app-loading-page>
