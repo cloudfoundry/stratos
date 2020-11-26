@@ -4,6 +4,7 @@ import {
   EndpointListDetailsComponent,
 } from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
+import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 
 
 @Component({
@@ -19,7 +20,7 @@ export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
   set row(row: EndpointModel) {
     if (row && row.user) {
       this.name = row.user.name === '**token**' ? 'Unknown' : row.user.name;
-      if (row.sub_type === 'github') {
+      if (row.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB) {
         this.avatar = `https://avatars.githubusercontent.com/${row.user.name}`;
       }
     } else {
