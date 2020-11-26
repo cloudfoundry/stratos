@@ -270,7 +270,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([p,]) => p),
+        map(([branches, branchName]) => branches),
         publishReplay(1),
         refCount()
       );
