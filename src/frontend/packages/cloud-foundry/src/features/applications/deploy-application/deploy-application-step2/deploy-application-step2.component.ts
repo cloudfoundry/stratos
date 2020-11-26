@@ -154,7 +154,7 @@ export class DeployApplicationStep2Component
           projectName: null,
           scmType: null
         },
-        endpointGuid: this.sourceType.endpointGuid
+        endpointGuid: null
       }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
       this.store.dispatch(new SaveAppDetails(null, {

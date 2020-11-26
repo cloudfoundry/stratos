@@ -32,7 +32,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     private domSanitizer: DomSanitizer
   ) { }
 
-  setProps(props: { [key: string]: any; }) {
+  setProps(props: { [key: string]: any, }) {
     this.setDocumentUrl = props.documentUrl;
   }
 

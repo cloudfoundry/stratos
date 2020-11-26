@@ -9,7 +9,6 @@ import {
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointAuthTypeConfig } from '../../../store/src/extension-types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
@@ -24,28 +23,6 @@ import {
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
-
-const enum GitEndpointAuthTypes {
-  GITHUB_TOKEN = 'github-token',
-  GITLAB_TOKEN = 'gitlab-token',
-}
-
-const gitAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
-  [GitEndpointAuthTypes.GITHUB_TOKEN]: {
-    ...BaseEndpointAuth.Token,
-    help: '/core/assets/connect/github.md',
-    config: {
-      title: 'Personal Access Token'
-    }
-  },
-  [GitEndpointAuthTypes.GITLAB_TOKEN]: {
-    ...BaseEndpointAuth.Bearer,
-    help: '/core/assets/connect/gitlab.md',
-    config: {
-      title: 'Personal Access Token'
-    }
-  },
-};
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -91,9 +68,13 @@ class GitEntityCatalog {
           type: GIT_ENDPOINT_SUB_TYPES.GITHUB,
           label: 'Github',
           labelShort: 'Github',
-          authTypes: [
-            gitAuthTypeMap[GitEndpointAuthTypes.GITHUB_TOKEN]
-          ],
+          authTypes: [{
+            ...BaseEndpointAuth.Token,
+            help: '/core/assets/connect/github.md',
+            config: {
+              title: 'Personal Access Token'
+            }
+          }],
           logoUrl: '/core/assets/endpoint-icons/github-logo.png',
           renderPriority: 50,
           registeredLimit: () => Number.MAX_SAFE_INTEGER,
@@ -102,9 +83,13 @@ class GitEntityCatalog {
           type: GIT_ENDPOINT_SUB_TYPES.GITLAB,
           label: 'Gitlab',
           labelShort: 'Gitlab',
-          authTypes: [
-            gitAuthTypeMap[GitEndpointAuthTypes.GITLAB_TOKEN]
-          ],
+          authTypes: [{
+            ...BaseEndpointAuth.Bearer,
+            help: '/core/assets/connect/gitlab.md',
+            config: {
+              title: 'Personal Access Token'
+            }
+          }],
           logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
           renderPriority: 51,
           registeredLimit: () => Number.MAX_SAFE_INTEGER,

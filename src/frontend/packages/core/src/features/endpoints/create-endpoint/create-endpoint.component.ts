@@ -51,10 +51,6 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
     if (this.component) {
       const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
       this.componentRef = this.customComponentContainer.createComponent(factory);
-      // this.customComponentContainer.createEmbeddedView TemplateRef<any>
-      // const componentRefa = factory.create(this.injector);
-      // this.customComponentContainer. .attachView(componentRefa.hostView);
-
     }
   }
 
