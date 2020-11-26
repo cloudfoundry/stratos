@@ -3,13 +3,18 @@
   <div class="page-header-right">
     <div *ngIf="layouts$ | async as layouts">
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <div  *ngFor="let layout of layouts">
+        <div *ngFor="let layout of layouts">
           <button *ngIf="layout" (click)="onChangeLayout(layout)" mat-menu-item class="layout-menu">
             <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">{{ layout.title }}</div>
             <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done</mat-icon>
           </button>
           <div *ngIf="!layout" class="layout-menu__sep"></div>
         </div>
+        <div class="layout-menu__sep"></div>
+        <button (click)="toggleShowAllEndpoints()" mat-menu-item class="layout-menu">
+          <div class="layout-menu__label">Show all endpoints</div>
+          <mat-icon [ngClass]="{'layout-menu__tick' : showAllEndpoints}" class="layout-menu__icon">done</mat-icon>
+        </button>
       </mat-menu>
       <button mat-button [matMenuTriggerFor]="appMenu">
         <mat-icon>view_week</mat-icon>

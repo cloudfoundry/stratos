@@ -18,9 +18,11 @@ import { SetHomeCardLayoutAction } from '../../../../../store/src/actions/dashbo
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { EndpointModel, entityCatalog } from '../../../../../store/src/public-api';
+import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { SetDashboardStateValueAction } from './../../../../../store/src/actions/dashboard-actions';
 import { IUserFavoritesGroups } from './../../../../../store/src/types/favorite-groups.types';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
@@ -41,6 +43,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private layout = new BehaviorSubject<HomePageCardLayout>(null);
   public layout$: Observable<HomePageCardLayout>;
 
+  private showMode = new BehaviorSubject<boolean>(null);
+  public showAllEndpoints = false;
+
   public haveThingsToShow$: Observable<boolean>;
 
   public columns = 1;
@@ -49,7 +54,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private layouts: HomePageCardLayout[] = [
     new HomePageCardLayout(0, 0, 'Automatic'),
-    null,
     new HomePageCardLayout(1, 1, 'Single Column'),
     new HomePageCardLayout(1, 2, 'Compact Single Column'),
     new HomePageCardLayout(2, 1, 'Two Column'),
@@ -97,11 +101,32 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
     const connected$ = this.endpointsService.connectedEndpoints$;
+    const showMode$ = this.showMode.asObservable();
+
+    // Default value from backend
+    const sessionData$ = this.store.select(s => s.auth).pipe(
+      filter(auth => !!(auth && auth.sessionData)),
+      filter(auth => !!(auth.sessionData.diagnostics)),
+      map((auth: AuthState) => auth.sessionData.config.homeViewShowAllEndpoints)
+    );
+    // Stored value in local storage
+    const showPersistedSetting$ = this.store.select(selectDashboardState).pipe(
+      map(dashboardState => dashboardState.homeShowAllEndpoints),
+      first()
+    );
+
+    // Show Value - current setting then user setting then default from backend
+    const combinedShowMode$ = combineLatest([showMode$, showPersistedSetting$, sessionData$]).pipe(
+      map(([a, b, c]) => (a !== null) ? a : (b !== null) ? b : c
+    ));
 
     // Only show endpoints that have Home Card metadata
-    this.endpoints$ = combineLatest([connected$, userFavoriteManager.getAllFavorites()]).pipe(
-      map(([endpoints, [favGroups, favs]]) => {
-        const ordered = this.orderEndpoints(endpoints, favGroups);
+    this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
+      map(([showMode, endpoints, [favGroups, favs]]) => {
+        this.showAllEndpoints = showMode;
+        // Persist the state
+        this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
+        const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
         return ordered.filter(ep => {
           const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
           const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
@@ -207,6 +232,10 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.checkLayout.next(true);
   }
 
+  public toggleShowAllEndpoints() {
+    this.showMode.next(!this.showAllEndpoints);
+  }
+
   // The layout was changed
   public onChangeLayout(layout: HomePageCardLayout) {
     this.layoutID = layout.id;
@@ -232,7 +261,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // 1. Endpoint has been added as a favourite
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
-  private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups): EndpointModel[] {
+  private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
     const processed = {};
     const result = [];
     const epMap = {};
@@ -258,12 +287,14 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     });
 
-    endpoints.forEach(ep => {
-      if (!processed[ep.guid]) {
-        processed[ep.guid] = true;
-        result.push(ep);
-      }
-    });
+    if (showMode) {
+      endpoints.forEach(ep => {
+        if (!processed[ep.guid]) {
+          processed[ep.guid] = true;
+          result.push(ep);
+        }
+      });
+    }
 
     return result;
   }

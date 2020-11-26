@@ -20,6 +20,8 @@ export const HYDRATE_DASHBOARD_STATE = '[Dashboard] Hydrate dashboard state';
 
 export const SET_PLUGIN_DASHBOARD_VALUE = '[Dashboard] Set Plugin Dashboard Value';
 
+export const SET_DASHBOARD_STATE_VALUE = '[Dashboard] Set Dashboard State Value';
+
 export class OpenSideNav implements Action {
   constructor() { }
   type = OPEN_SIDE_NAV;
@@ -71,4 +73,9 @@ export class HydrateDashboardStateAction implements Action {
 export class SetThemeAction implements Action {
   constructor(public theme: StratosTheme) { }
   type = SET_STRATOS_THEME;
+}
+
+export class SetDashboardStateValueAction implements Action {
+  constructor(public prop: string, public value: any) { }
+  type = SET_DASHBOARD_STATE_VALUE;
 }

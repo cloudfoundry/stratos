@@ -6,7 +6,9 @@ import {
   HYDRATE_DASHBOARD_STATE,
   HydrateDashboardStateAction,
   OPEN_SIDE_NAV,
+  SET_DASHBOARD_STATE_VALUE,
   SET_STRATOS_THEME,
+  SetDashboardStateValueAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
   SetThemeAction,
@@ -31,6 +33,7 @@ export interface DashboardState {
   headerEventMinimized: boolean;
   gravatarEnabled: boolean;
   homeLayout: number;
+  homeShowAllEndpoints: boolean;
 }
 
 export const defaultDashboardState: DashboardState = {
@@ -44,6 +47,7 @@ export const defaultDashboardState: DashboardState = {
   headerEventMinimized: false,
   gravatarEnabled: false,
   homeLayout: 0,
+  homeShowAllEndpoints: null, // Use the default we get from the backend
 };
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
@@ -85,13 +89,19 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
         ...state,
         gravatarEnabled: gravatarAction.enableGravatar
       };
-      case HOME_CARD_LAYOUT:
-        const layoutAction = action as SetHomeCardLayoutAction;
-        return {
-          ...state,
-          homeLayout: layoutAction.id
-        };
-      case HYDRATE_DASHBOARD_STATE:
+    case HOME_CARD_LAYOUT:
+      const layoutAction = action as SetHomeCardLayoutAction;
+      return {
+        ...state,
+        homeLayout: layoutAction.id
+      };
+    case SET_DASHBOARD_STATE_VALUE:
+      const setValueAction = action as SetDashboardStateValueAction;
+      return {
+        ...state,
+        [setValueAction.prop]: setValueAction.value
+      };
+    case HYDRATE_DASHBOARD_STATE:
       const hydrateDashboardStateAction = action as HydrateDashboardStateAction;
       return {
         ...state,
