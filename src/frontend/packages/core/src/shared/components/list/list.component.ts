@@ -3,12 +3,14 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
   Optional,
+  Output,
   SimpleChanges,
   TemplateRef,
   ViewChild,
@@ -162,6 +164,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       })).subscribe();
   }
 
+  @Output() initialised = new EventEmitter<boolean>();
+  private componentInitialised = false;
+
   private initialPageEvent: PageEvent;
   private paginatorSettings: {
     pageSizeOptions: number[],
@@ -212,8 +217,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
 
-
-
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
@@ -225,6 +228,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   initialised$: Observable<boolean>;
 
   pendingActions: Map<Observable<ActionState>, Subscription> = new Map<Observable<ActionState>, Subscription>();
+
+  subs: Subscription[] = [];
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -406,48 +411,60 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
 
-    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
-      this.filterString = paginationFilter.string;
+    const filterStoreToWidget = this.paginationController.filter$.pipe(
+      distinctUntilChanged(),
+      tap((paginationFilter: ListFilter) => {
+        this.filterString = paginationFilter.string;
 
-      const filterKey = paginationFilter.filterKey;
-      if (filterKey) {
-        this.filterSelected = this.filterColumns.find(filterConfig => {
-          return filterConfig.key === filterKey;
-        });
-      } else if (this.filterColumns) {
-        this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
-        if (this.filterSelected) {
-          this.updateListFilter(this.filterSelected);
+        const filterKey = paginationFilter.filterKey;
+        if (filterKey) {
+          this.filterSelected = this.filterColumns.find(filterConfig => {
+            return filterConfig.key === filterKey;
+          });
+        } else if (this.filterColumns) {
+          this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
+          if (this.filterSelected) {
+            this.updateListFilter(this.filterSelected);
+          }
         }
-      }
 
-      // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
-      // downs (change org to one with one space results in that space being selected)
-      Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
-        filterManager.applyValue(paginationFilter.items);
-      });
-    }));
-
-    // Multi filters (e.g. cf/org/space)
-    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
-    // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
-    this.multiFilterWidgetObservables = new Array<Subscription>();
-    filterStoreToWidget.pipe(
-      first(),
-      tap(() => {
+        // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
+        // downs (change org to one with one space results in that space being selected)
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
-          // The first filter will be hidden if there's only one filter option.
-          // To ensure subsequent filters behave correctly automatically select it
+          // TODO: RC tidy up logic
+
+          if (index !== 0 || filterManager.hasValue(paginationFilter.items)) {
+            filterManager.applyValue(paginationFilter.items);
+            return;
+          }
+
           if (index === 0 && this.multiFilterManagers.length > 1) {
             filterManager.filterItems$.pipe(
               first()
             ).subscribe(list => {
               if (list && list.length === 1) {
                 filterManager.selectItem(list[0].value);
+              } else {
+                filterManager.applyValue(paginationFilter.items);
               }
             });
+            return;
           }
 
+          filterManager.applyValue(paginationFilter.items);
+
+        });
+      }),
+    );
+
+    // Multi filters (e.g. cf/org/space)
+    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
+    // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
+    this.multiFilterWidgetObservables = new Array<Subscription>();
+    this.paginationController.filter$.pipe(
+      first(),
+      tap(() => {
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // Pipe changes in the widgets to the store
           const sub = filterManager.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
@@ -492,10 +509,21 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     this.uberSub = observableCombineLatest(
       paginationStoreToWidget,
-      filterStoreToWidget,
       sortStoreToWidget,
       haveMultiActions
     ).subscribe();
+
+    const initialisedSub = observableCombineLatest([
+      filterStoreToWidget // Should not be unsubbed until destroy
+    ]).subscribe(() => {
+      // When this fires the first time we're initialised
+      if (!this.componentInitialised) {
+        this.componentInitialised = true;
+        this.initialised.next(true);
+      }
+    });
+
+    this.subs.push(initialisedSub);
 
     this.pageState$ = observableCombineLatest(
       this.paginationController.pagination$,
@@ -569,6 +597,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       distinctUntilChanged(),
       startWith(true),
     );
+
+
   }
 
   ngAfterViewInit() {
@@ -581,7 +611,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginationWidgetToStore,
       this.filterWidgetToStore,
       this.uberSub,
-      this.multiFilterChangesSub
+      this.multiFilterChangesSub,
+      ...this.subs,
     );
     if (this.dataSource) {
       this.dataSource.destroy();
@@ -600,26 +631,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
-  resetFilteringAndSort() {
+  public resetFilteringAndSort() {
     // TODO: RC multi entity type lists
     /* tslint:disable-next-line:no-string-literal  */
     const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
-    // Ensure that the changes are pushed back to the multi filter controls. Ideally the field to store relationship would be two way..
-    // but it's not for the moment
-    this.multiFilterManagers.forEach(manager => {
-      // TODO: RC huh
-      // manager.hasOneItem$.pipe(first()).subscribe(hasOneItem => {
-      //   // TODO: RC Test
-      //   // const selectItem = hasOneItem || ''
-      //   if (hasOneItem) {
-      //     return;
-      //   }
-      //   manager.selectItem('')
-      // })
-    });
-    if (!this.config.isLocal) {
-      // TODO: RC Fixes space routes, breaks app wall!!
+
+    if (!this.dataSource.isLocal) {
       this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
     }
   }

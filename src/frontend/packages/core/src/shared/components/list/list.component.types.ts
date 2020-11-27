@@ -256,13 +256,16 @@ export class MultiFilterManager<T> {
 
   public applyValue(multiFilters: {}) {
     const value = multiFilters[this.multiFilterConfig.key];
-    if (value) {
-      this.value = value;
-      this.selectItem(value);
-    }
+    this.value = value;
+    this.selectItem(value);
+  }
+
+  public hasValue(multiFilters: {}): boolean {
+    return !!multiFilters[this.multiFilterConfig.key];
   }
 
   public selectItem(itemValue: string) {
+    // console.log(this.multiFilterConfig.key, itemValue); /// TODO: RC REMove
     this.multiFilterConfig.select.next(itemValue);
     this.value = itemValue;
   }

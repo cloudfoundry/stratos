@@ -55,6 +55,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       map(cfs => {
         const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
         this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
+        this.cfOrgSpaceService.setInitialValuesFromAction(this.appsDataSource.action, 'cf', 'org', 'space');
         return true;
       })
     );

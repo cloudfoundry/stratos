@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -28,10 +28,9 @@ import { PaginationMonitorFactory } from '../../../../store/src/monitors/paginat
 import { getPaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
 import { getCurrentPageRequestInfo } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { connectedEndpointsOfTypesSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { selectPaginationState } from '../../../../store/src/selectors/pagination.selectors';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
-import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -78,28 +77,28 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 
-export const initCfOrgSpaceService = (
-  store: Store<CFAppState>,
-  cfOrgSpaceService: CfOrgSpaceDataService,
-  entityKey: string,
-  paginationKey: string): Observable<any> => {
-  return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    filter((pag) => !!pag),
-    first(),
-    tap(pag => {
-      const { cf, org, space } = pag.clientPagination.filter.items;
-      if (cf) {
-        cfOrgSpaceService.cf.select.next(cf);
-      }
-      if (org) {
-        cfOrgSpaceService.org.select.next(org);
-      }
-      if (space) {
-        cfOrgSpaceService.space.select.next(space);
-      }
-    })
-  );
-};
+// export const initCfOrgSpaceService = (
+//   store: Store<CFAppState>,
+//   cfOrgSpaceService: CfOrgSpaceDataService,
+//   entityKey: string,
+//   paginationKey: string): Observable<any> => {
+//   return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+//     filter((pag) => !!pag),
+//     first(),
+//     tap(pag => {
+//       const { cf, org, space } = pag.clientPagination.filter.items;
+//       if (cf) {
+//         cfOrgSpaceService.cf.select.next(cf);
+//       }
+//       if (org) {
+//         cfOrgSpaceService.org.select.next(org);
+//       }
+//       if (space) {
+//         cfOrgSpaceService.space.select.next(space);
+//       }
+//     })
+//   );
+// };
 
 export const createCfOrSpaceMultipleFilterFn = (
   store: Store<CFAppState>,
@@ -154,6 +153,7 @@ export const createCfOrSpaceMultipleFilterFn = (
   };
 };
 
+interface InitialValues { cf: string; org: string; space: string; }
 
 /**
  * This service relies on OnDestroy, so must be `provided` by a component
@@ -168,7 +168,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
-  public paginationAction = this.createPaginationAction();
+  public paginationAction = this.createOrgPaginationAction();
 
   /**
    * This will contain all org and space data
@@ -182,6 +182,15 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
   private subs: Subscription[] = [];
 
+  /*
+   * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
+   */
+  public initialValues$: Observable<any>;
+  /**
+   * Map values from `initialValues$` to supply initial values for drop downs
+   */
+  public initialValuesMap: (param: any) => InitialValues;
+
   constructor(
     private store: Store<CFAppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
@@ -189,15 +198,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.createCf();
     this.createOrg();
     this.createSpace();
-
-    // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
-    this.org.list$.pipe(
-      first(),
-    ).subscribe({
-      complete: () => {
-        this.setupAutoSelectors();
-      }
-    });
 
     this.isLoading$ = combineLatest(
       this.cf.loading$,
@@ -301,7 +301,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     };
   }
 
-  private createPaginationAction() {
+  private createOrgPaginationAction() {
     return cfEntityCatalog.org.actions.getMultiple(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
       includeRelations: [
         createEntityRelationKey(organizationEntityType, spaceEntityType),
@@ -318,12 +318,57 @@ export class CfOrgSpaceDataService implements OnDestroy {
     );
   }
 
-  private setupAutoSelectors() {
+  public setInitialValuesFromAction(
+    paginatedAction: PaginatedAction,
+    cfKey: string,
+    orgKey: string,
+    spaceKey: string,
+  ) {
+    this.initialValuesMap = (p: PaginationEntityState) => ({
+      cf: p.clientPagination?.filter?.items[cfKey],
+      org: p.clientPagination?.filter?.items[orgKey],
+      space: p.clientPagination?.filter?.items[spaceKey]
+    });
+    this.initialValues$ = this.paginationMonitorFactory.create(
+      paginatedAction.paginationKey,
+      cfEntityFactory(paginatedAction.entityType),
+      paginatedAction.flattenPagination
+    ).pagination$.pipe(
+      filter(p => !!p?.clientPagination?.filter),
+    );
+  }
+
+  private getInitialValues(): Observable<InitialValues> {
+    const initialValues$ = this.initialValues$ || of({ cf: undefined, org: undefined, space: undefined });
+    const defaultMap = (a: any) => a;
+    const initialValuesMap = this.initialValuesMap || defaultMap;
+    return initialValues$.pipe(
+      first(),
+      map(initialValuesMap) // Map needs to happen at the point the auto selectors are enabled
+    );
+  }
+
+  public enableAutoSelectors() {
+    // console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC
+    combineLatest(
+      // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
+      this.org.list$,
+      // Get initial values only after we've given a prod... so first values emitted are the one's we want
+      this.getInitialValues(),
+    ).pipe(first()).subscribe(([, initialValues]) => {
+      this.setupAutoSelectors(initialValues.cf, initialValues.org);
+    });
+  }
+
+  private setupAutoSelectors(initialCf: string, initialOrg: string) {
+    // console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC
     const orgResetSub = this.cf.select.asObservable().pipe(
-      startWith(undefined),
+      startWith(initialCf),
       distinctUntilChanged(),
+      filter(cf => cf !== initialCf),
       withLatestFrom(this.org.list$),
       tap(([selectedCF, orgs]) => {
+        initialCf = 'junk';
         if (
           !!orgs.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
@@ -340,10 +385,12 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
     // Clear or automatically select space given org
     const spaceResetSub = this.org.select.asObservable().pipe(
-      startWith(undefined),
+      startWith(initialOrg),
       distinctUntilChanged(),
+      filter(org => org !== initialOrg),
       withLatestFrom(this.space.list$),
       tap(([selectedOrg, spaces]) => {
+        initialOrg = 'junk';
         if (
           !!spaces.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||

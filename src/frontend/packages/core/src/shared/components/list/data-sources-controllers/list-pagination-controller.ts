@@ -115,7 +115,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         }, this.dataSource.isLocal));
       }
     });
-  }
+  };
   filterByString = filterString => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
       if (this.dataSource.isLocal) {
@@ -132,17 +132,27 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         this.dataSource.setFilterParam(filterString, paginationEntityState);
       }
     });
-  }
+  };
 
   handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
+    // console.log('handleMultiFilter: Before', changes); // TODO: RC remove
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
       if (!paginationEntityState) {
         return;
       }
 
-      // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
+      // Changes may include multiple updates for the same key, so only use the very latest
+      const uniqueChanges = [];
+      for (let i = changes.length - 1; i >= 0; i--) {
+        const change = changes[i];
+        if (!uniqueChanges.find(e => e.key === change.key)) {
+          uniqueChanges.push(change);
+        }
+      }
+      // console.log('handleMultiFilter: Clean 1', uniqueChanges); // TODO: RC remove
+      // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
-      const cleanChanges = changes.reduce((newCleanChanges, change) => {
+      const cleanChanges = uniqueChanges.reduce((newCleanChanges, change) => {
         const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
         const newFilterParamValue = valueOrCommonFalsy(change.value);
         if (storeFilterParamValue !== newFilterParamValue) {
@@ -150,6 +160,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         }
         return newCleanChanges;
       }, {});
+      // console.log('handleMultiFilter: Clean 2', cleanChanges); // TODO: RC remove
 
       if (Object.keys(cleanChanges).length > 0) {
         const currentFilter = paginationEntityState.clientPagination.filter;
@@ -172,14 +183,14 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
 
     });
-  }
+  };
 
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
     if (!this.dataSource.isLocal) {
       return;
     }
     this.multiFilterStream.next({ key: filterConfig.key, value: filterValue });
-  }
+  };
 
   private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {
     return {

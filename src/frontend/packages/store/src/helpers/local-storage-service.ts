@@ -19,11 +19,12 @@ export enum LocalStorageSyncTypes {
 
 export class LocalStorageService {
 
-  // TODO: RC applying cf filter works, but not org/space
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
   // TODO: RC todos!
-  // TODO: RC only store pagination settings for those that power lists
+  // TODO: RC load junk settings
+  // TODO: RC encode/decode username in storage key
+  // TODO: RC test deploy app
 
   /**
    * Normally used on app init, move local storage data into the console's store
@@ -158,7 +159,8 @@ export class LocalStorageService {
             }
             res2[paginationKeysOfEntityType] = {
               params: paginationSection.params,
-              clientPagination: paginationSection.clientPagination
+              clientPagination: paginationSection.clientPagination,
+              isListPagination: paginationSection.isListPagination
             };
             return res2;
           }, {});
