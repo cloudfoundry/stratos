@@ -97,6 +97,7 @@ src/jetstream/db/dbconf.yml
 src/jetstream/plugins/monocular/chart-repo/chartrepo
 src/jetstream/plugins/analysis/container/analyzers
 src/jetstream/.helm-cache
+src/jetstream/coverage.txt
 
 # Automatically generated OpenAPI docs
 src/jetstream/docs/
