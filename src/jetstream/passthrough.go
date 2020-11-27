@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -221,7 +221,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 }
 
 func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*interfaces.CNSIRequest, error) {
-	log.Debug("proxy")
+	log.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)
@@ -509,4 +509,48 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if done != nil {
 		done <- cnsiRequest
 	}
+}
+
+func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
+	log.Debug("ProxySingleRequest")
+
+	cnsi := c.Param("uuid")
+
+	uri := url.URL{}
+	uri.Path = c.Param("*")
+	uri.RawQuery = c.Request().URL.RawQuery
+
+	header := getEchoHeaders(c)
+	header.Del("Cookie")
+	header.Del(APIKeyHeader)
+
+	portalUserGUID, err := getPortalUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	req, body, err := getRequestParts(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	done := make(chan *interfaces.CNSIRequest)
+	cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req.Method, &uri, body, header)
+	if buildErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
+	}
+	cnsiRequest.LongRunning = false
+
+	go p.doRequest(&cnsiRequest, done)
+	res := <-done
+
+	c.Response().WriteHeader(res.StatusCode)
+
+	// we don't care if this fails
+	_, writeErr := c.Response().Write(res.Response)
+	if writeErr != nil {
+		log.Errorf("Failed to write passthrough response %v", err)
+	}
+
+	return nil
 }

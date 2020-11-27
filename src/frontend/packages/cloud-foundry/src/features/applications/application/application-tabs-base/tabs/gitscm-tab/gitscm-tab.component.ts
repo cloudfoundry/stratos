@@ -2,19 +2,16 @@ import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
+import { GitBranch, GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, tap } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { EntityService } from '../../../../../../../../store/src/entity-service';
 import { CFAppState } from '../../../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { GitMeta } from '../../../../../../entity-action-builders/git-action-builder';
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
-import { GitSCMService, GitSCMType } from '../../../../../../shared/data-services/scm/scm.service';
-import { GitBranch, GitCommit, GitRepo } from '../../../../../../store/types/git.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 
@@ -81,16 +78,16 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         const scm = this.scmService.getSCM(scmType as GitSCMType);
 
         const gitRepInfoMeta: GitMeta = { projectName: stProject.deploySource.project, scm };
-        this.gitSCMRepoEntityService = cfEntityCatalog.gitRepo.store.getRepoInfo.getEntityService(gitRepInfoMeta)
+        this.gitSCMRepoEntityService = gitEntityCatalog.repo.store.getRepoInfo.getEntityService(gitRepInfoMeta);
 
         const gitMeta: GitMeta = { projectName: stProject.deploySource.project, scm, commitSha };
         const repoEntityID = `${scmType}-${projectName}`;
         const commitEntityID = `${repoEntityID}-${commitSha}`; // FIXME: Should come from action #4245
-        this.gitCommitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, gitMeta)
+        this.gitCommitEntityService = gitEntityCatalog.commit.store.getEntityService(commitEntityID, null, gitMeta);
 
-        this.gitBranchEntityService = cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
+        this.gitBranchEntityService = gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
           scm,
-          projectName: projectName,
+          projectName,
           branchName: stProject.deploySource.branch
         });
 

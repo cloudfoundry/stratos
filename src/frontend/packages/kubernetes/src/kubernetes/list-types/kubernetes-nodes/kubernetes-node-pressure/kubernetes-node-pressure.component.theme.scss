@@ -1,0 +1,13 @@
+
+
+// Not currently used but should be - NJ
+@import '~@angular/material/theming';
+@mixin app-kubernetes-node-pressure($theme, $app-theme) {
+  $status: map-get($app-theme, status);
+  .pressure {
+    // color: map-get($status, danger);
+    &__icon {
+      color: map-get($status, danger);
+    }
+  }
+}

@@ -4,8 +4,13 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cfappssh", []string{"cloudfoundry"}, Init)
+}
 
 // CFAppSSH - Plugin to allow SSH into an application instance
 type CFAppSSH struct {

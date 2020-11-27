@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -89,5 +89,5 @@ func NewJetstreamUserError(userFacingError string) JetstreamError {
 // NewJetstreamUserErrorf creates a new JetStream error indicating that the error is a user error
 func NewJetstreamUserErrorf(userFacingError string, args ...interface{}) JetstreamError {
 	message := fmt.Sprintf(userFacingError, args...)
-	return NewJetstreamError(message)
+	return NewJetstreamUserError(message)
 }

@@ -325,6 +325,7 @@ export class FormComponent extends Component {
     keyString.split(/[ ,:\/]/).forEach((key) => {
       ctrl.sendKeys(key);
       if (key.length === 4) {
+        browser.sleep(500);
         ctrl.sendKeys(Key.ARROW_RIGHT);
       }
     });

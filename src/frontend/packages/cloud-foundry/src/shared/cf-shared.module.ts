@@ -31,8 +31,6 @@ import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-inf
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
-import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import {
@@ -54,7 +52,6 @@ import {
   CreateApplicationStep1Component,
 } from './components/create-application/create-application-step1/create-application-step1.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
-import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import {
   TableCellCfCellComponent,
 } from './components/list/list-types/app-instance/table-cell-cf-cell/table-cell-cf-cell.component';
@@ -181,9 +178,6 @@ import {
   CfSpacePermissionCellComponent,
 } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import {
-  TableCellCommitAuthorComponent,
-} from './components/list/list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
-import {
   TableCellAServicePlanExtrasComponent,
 } from './components/list/list-types/service-plans/table-cell-service-plan-extras/table-cell-service-plan-extras.component';
 import {
@@ -250,7 +244,6 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellServiceActiveComponent,
   TableCellServiceReferencesComponent,
   TableCellServiceInstanceTagsComponent,
-  TableCellCommitAuthorComponent,
   TableCellServiceBrokerComponent
 ];
 
@@ -300,8 +293,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CardCfUserInfoComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
-    CardCfRecentAppsComponent,
-    CompactAppCardComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
@@ -319,7 +310,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     TableCellFeatureFlagDescriptionComponent,
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
-    GithubCommitAuthorComponent,
     EnvVarViewComponent,
     CfUserPermissionDirective
   ],
@@ -349,8 +339,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CardCfUserInfoComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
-    CardCfRecentAppsComponent,
-    CompactAppCardComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
@@ -362,7 +350,6 @@ const cfListCards: Type<CardCell<any>>[] = [
     CloudFoundryEventsListComponent,
     AppNameUniqueDirective,
     ApplicationInstanceChartComponent,
-    GithubCommitAuthorComponent,
     EnvVarViewComponent,
     CfUserPermissionDirective
   ],

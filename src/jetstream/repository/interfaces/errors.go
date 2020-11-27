@@ -1,11 +1,12 @@
 package interfaces
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type ErrHTTPShadow struct {
@@ -20,6 +21,11 @@ type ErrHTTPRequest struct {
 	Response   string
 }
 
+type ErrorResponseBody struct {
+	Status string `json:"status"`
+	Error  string `json:"error"`
+}
+
 func (e ErrHTTPShadow) Error() string {
 	return fmt.Sprintf("HTTP Error: %v\nLog Message: %s", e.HTTPError, e.LogMessage)
 }
@@ -32,7 +38,9 @@ func NewHTTPShadowError(status int, userFacingError string, fmtString string, ar
 	//Only set the HTTPError field of the ErrHTTPShadow struct if we have been passed an error message intended for logging
 	httpErrorMsg := ""
 	if len(userFacingError) > 0 {
-		httpErrorMsg = fmt.Sprintf(`{"error":%q}`, userFacingError)
+		errBody := ErrorResponseBody{Status: "error", Error: userFacingError}
+		bytes, _ := json.Marshal(errBody)
+		httpErrorMsg = string(bytes)
 	}
 	shadowError := ErrHTTPShadow{
 		UserFacingError: userFacingError,

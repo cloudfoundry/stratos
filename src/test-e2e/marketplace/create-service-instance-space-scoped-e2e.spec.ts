@@ -23,8 +23,7 @@ describe('Create Service Instance of Space Scoped Service', () => {
   });
 
   beforeEach(() => {
-    createServiceInstance.navigateTo();
-    createServiceInstance.waitForPage();
+    createServiceInstance.softNavigateTo();
     createMarketplaceServiceInstance = createServiceInstance.selectMarketplace();
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, createMarketplaceServiceInstance);
     createMarketplaceServiceInstance.waitForPage();

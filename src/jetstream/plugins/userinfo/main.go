@@ -9,8 +9,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("userinfo", nil, Init)
+}
 
 // UserInfo is a plugin to fetch user info from the UAA
 type UserInfo struct {
@@ -59,10 +64,11 @@ func (userInfo *UserInfo) Init() error {
 }
 
 func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-
 	log.Debugf("getUserInfoProvider: %v", userInfo.portalProxy.GetConfig().AuthEndpointType)
 	if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
+	} else if interfaces.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == interfaces.AuthNone {
+		return InitNoAuthUserInfo(userInfo.portalProxy)
 	}
 
 	return InitUaaUserInfo(userInfo.portalProxy, c)

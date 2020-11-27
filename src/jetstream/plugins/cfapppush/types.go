@@ -40,11 +40,13 @@ type DeploySource struct {
 // Structure used to provide metadata about the GitHub source
 type GitSCMSourceInfo struct {
 	DeploySource
-	Project    string `json:"project"`
-	Branch     string `json:"branch"`
-	URL        string `json:"url"`
-	CommitHash string `json:"commit"`
-	SCM        string `json:"scm"`
+	Project      string `json:"project"`
+	Branch       string `json:"branch"`
+	URL          string `json:"url"`
+	CommitHash   string `json:"commit"`
+	SCM          string `json:"scm"`
+	EndpointGUID string `json:"endpoint_guid"` // credentials of which to use, e.g. of a private GitHub instance
+	Username     string `json:"username"`      // GitLab username has to be supplied by the frontend
 }
 
 // Structure used to provide metadata about the Git Url source

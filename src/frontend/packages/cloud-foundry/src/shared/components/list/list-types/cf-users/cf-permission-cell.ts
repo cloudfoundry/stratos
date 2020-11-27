@@ -28,11 +28,12 @@ export interface ICellPermissionList<T> extends IUserRole<T> {
 }
 
 @Directive()
-export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<CfUser>> {
+export abstract class CfPermissionCellDirective<T> extends TableCellCustom<APIResource<CfUser>> {
   userEntity: BehaviorSubject<CfUser> = new BehaviorSubject(null);
 
   @Input('row')
   set row(row: APIResource<CfUser>) {
+    super.row = row;
     this.rowSubject.next(row);
     this.guid = row.metadata.guid;
     this.userEntity.next(row.entity);
@@ -40,6 +41,7 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
 
   @Input()
   set config(config: any) {
+    super.config = config;
     this.configSubject.next(config);
   }
 

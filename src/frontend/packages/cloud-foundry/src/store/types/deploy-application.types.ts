@@ -1,6 +1,7 @@
+import { GitBranch } from '@stratosui/git';
+
 import { ITileGraphic } from '../../../../core/src/shared/components/tile/tile-selector.types';
 import { NewAppCFDetails } from './create-application.types';
-import { GitBranch } from './git.types';
 
 export interface SourceType {
   name: string;

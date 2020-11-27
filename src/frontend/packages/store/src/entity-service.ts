@@ -35,10 +35,10 @@ const dispatcherFactory = <T>(
     const updatedAction = {
       ...action,
       updatingKey
-    }
+    };
 
     // Do we have a fetch handler defined by the endpoint/entity?
-    const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler()
+    const entityFetchHandler: EntityFetchHandler<T> = catalogEntity.getEntityFetchHandler();
     const fetchHandler = entityFetchHandler ?
       entityFetchHandler(store, updatedAction) :
       (entity: T) => store.dispatch(updatedAction);
@@ -46,8 +46,8 @@ const dispatcherFactory = <T>(
     // Fetch handler requires the entity, this may be missing or stale to update if required
     return fetchEntity ? (entity: T) => {
       // Entity may be null or stale
-      store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(entity => fetchHandler(entity))
-      fetchHandler(entity)
+      store.select(selectEntity<T>(catalogEntity.entityKey, action.guid)).pipe(first()).subscribe(storeEntity => fetchHandler(storeEntity));
+      fetchHandler(entity);
     } : fetchHandler;
   };
 
@@ -135,7 +135,7 @@ export class EntityService<T = any> {
       first(),
       switchMap(() => cleanEntityInfo$)
     );
-  }
+  };
 
   private getCleanEntityInfoObs(entityMonitor: EntityMonitor<T>) {
     return combineLatest(

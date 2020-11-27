@@ -1,30 +1,30 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
+import {
+  GitCommit,
+  gitEntityCatalog,
+  GithubCommitsDataSource,
+  GithubCommitsListConfigServiceBase,
+  GitSCM,
+  GitSCMService,
+  GitSCMType,
+} from '@stratosui/git';
+import moment from 'moment';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
+import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import {
   CheckProjectExists,
   SetAppSourceDetails,
   SetDeployBranch,
   SetDeployCommit,
   StoreCFSettings,
-} from '../../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { cfEntityCatalog } from '../../../../../../../cloud-foundry/src/cf-entity-catalog';
-import { gitCommitEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
-import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
-import { selectCfEntity } from '../../../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
-import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { GitSCM } from '../../../../data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-
+} from '../../../../../actions/deploy-applications.actions';
+import { CFAppState } from '../../../../../cf-app-state';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
@@ -128,7 +128,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       const scmType = stratosProject.deploySource.scm || stratosProject.deploySource.type;
       this.scm = this.scmService.getSCM(scmType as GitSCMType);
 
-      cfEntityCatalog.gitBranch.store.getEntityService(undefined, undefined, {
+      gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
         scm: this.scm,
         projectName: this.projectName,
         branchName: stratosProject.deploySource.branch
@@ -152,15 +152,13 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private setDeployedCommitDetails() {
     const scmType = this.scm.getType();
-    this.store.select(
-      selectCfEntity<GitCommit>(gitCommitEntityType, scmType + '-' + this.projectName + '-' + this.deployedCommitSha))
-      .pipe(
-        filter(deployedCommit => !!deployedCommit),
-        first(),
-      ).subscribe(deployedCommit => {
-        this.deployedCommit = deployedCommit;
-        this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
-      });
+    gitEntityCatalog.commit.store.getEntityMonitor(scmType + '-' + this.projectName + '-' + this.deployedCommitSha).entity$.pipe(
+      filter(deployedCommit => !!deployedCommit),
+      first(),
+    ).subscribe(deployedCommit => {
+      this.deployedCommit = deployedCommit;
+      this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
+    });
   }
 
   public getSingleActions = () => [this.listActionRedeploy, this.listActionCompare];

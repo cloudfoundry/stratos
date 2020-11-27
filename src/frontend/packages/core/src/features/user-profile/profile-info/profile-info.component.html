@@ -54,8 +54,8 @@
         </mat-card-header>
         <div class="user-profile__options">
 
-          <div class="user-profile__option" *ngIf="gravatarEnabled$ | async as enableGravatar">
-            <div class="user-profile__option-inner">
+          <div class="user-profile__option" *ngIf="canEdit$ | async">
+            <div class="user-profile__option-inner" *ngIf="gravatarEnabled$ | async as enableGravatar">
               <mat-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
                 <div class="user-profile__option-header">Use Gravatar for user icon</div>
               </mat-slide-toggle>

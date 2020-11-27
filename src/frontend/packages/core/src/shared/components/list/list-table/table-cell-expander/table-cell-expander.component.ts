@@ -23,29 +23,33 @@ export interface TableCellExpanderConfig {
     ]),
   ]
 })
-export class TableCellExpanderComponent<T = any> extends TableCellCustom<T> implements OnInit {
+export class TableCellExpanderComponent<T = any> extends TableCellCustom<T, CellConfigFunction<T>> implements OnInit {
 
   expanded = false;
   constructor(public expandedService: TableRowExpandedService) {
     super();
   }
 
-  private pConfig: CellConfigFunction<T>;
   @Input() set config(config: CellConfigFunction<T>) {
-    this.pConfig = config;
+    super.config = config;
     this.updateRowId();
   }
+  get config(): CellConfigFunction<T> {
+    return super.config;
+  }
 
-  private pRow: T;
   @Input() set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     this.updateRowId();
-
   }
+  get row(): T {
+    return super.row;
+  }
+
   public rowId = TableRowExpandedService.allExpanderState;
   private updateRowId() {
-    if (this.pConfig) {
-      const config: TableCellExpanderConfig = this.pConfig(this.pRow);
+    if (this.config) {
+      const config: TableCellExpanderConfig = this.config(this.row);
       this.rowId = config.rowId;
       this.expanded = this.expandedService.expanded[this.rowId];
     }

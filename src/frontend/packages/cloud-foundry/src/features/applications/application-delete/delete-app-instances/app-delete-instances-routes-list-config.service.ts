@@ -28,7 +28,7 @@ import { ApplicationService } from '../../application.service';
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
   hideRefresh: boolean;
   allowSelection: boolean;
-  obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
+  obsCache: { [serviceGuid: string]: Observable<RowState>, } = {};
 
   constructor(
     store: Store<CFAppState>,
@@ -63,7 +63,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
           {
             includeRelations: [],
           }
-        )
+        );
         this.obsCache[serviceBinding.entity.service_instance_guid] = fetchTotalResults(
           action,
           store,

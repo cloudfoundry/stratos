@@ -13,7 +13,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
@@ -28,6 +28,14 @@ type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p                      *portalProxy
 	skipSSLValidation      bool
+}
+
+func (a *uaaAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
+	log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
+	log.Infof("... Console Client          : %s", config.ConsoleClient)
+	log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login           : %t", config.UseSSO)
 }
 
 //Login provides UAA-auth specific Stratos login
@@ -113,6 +121,8 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	return uaaEntry, nil
 
 }
+
+func (a *uaaAuth) BeforeVerifySession(c echo.Context) {}
 
 //VerifySession verifies the session the specified UAA user and refreshes the token if necessary
 func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
@@ -357,7 +367,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, fmt.Errorf(msg, err)
 	}
 
-	req.SetBasicAuth(client, clientSecret)
+	req.SetBasicAuth(url.QueryEscape(client), url.QueryEscape(clientSecret))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	var h = p.GetHttpClientForRequest(req, skipSSLValidation)
@@ -432,11 +442,11 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 //SSO Login will be refactored at a later date
 
 // ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
-// We use a single callback so this can be whitelisted in the client
+// We use a single callback so this can be allow-listed in the client
 func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 	state := c.QueryParam("state")
 
-	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	stateErr := validateSSORedirectState(state, p.Config.SSOAllowList)
 	if stateErr != nil {
 		return stateErr
 	}
@@ -462,7 +472,6 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 		}
 		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
-
 
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
@@ -517,7 +526,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	state := c.QueryParam("state")
-	stateErr := validateSSORedirectState(state, p.Config.SSOWhiteList)
+	stateErr := validateSSORedirectState(state, p.Config.SSOAllowList)
 	if stateErr != nil {
 		return stateErr
 	}
@@ -527,7 +536,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	return nil
 }
 
-func validateSSORedirectState(state string, whiteListStr string) error {
+func validateSSORedirectState(state string, allowListStr string) error {
 	if len(state) == 0 {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
@@ -535,7 +544,7 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	if !safeSSORedirectState(state,whiteListStr) {
+	if !safeSSORedirectState(state, allowListStr) {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: Disallowed redirect state",
@@ -546,17 +555,17 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 	return nil
 }
 
-func safeSSORedirectState(state string, whiteListStr string) bool {
-	if len(whiteListStr) == 0 {
+func safeSSORedirectState(state string, allowListStr string) bool {
+	if len(allowListStr) == 0 {
 		return true
 	}
 
-	whiteList := strings.Split(whiteListStr, ",")
-	if len(whiteList) == 0 {
+	allowList := strings.Split(allowListStr, ",")
+	if len(allowList) == 0 {
 		return true
 	}
 
-	for _, n := range whiteList {
+	for _, n := range allowList {
 		if stringutils.CompareURL(state, n) {
 			return true
 		}

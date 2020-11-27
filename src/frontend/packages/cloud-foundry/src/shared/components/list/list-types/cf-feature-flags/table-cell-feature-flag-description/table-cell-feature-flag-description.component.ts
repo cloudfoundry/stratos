@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { TableCellCustom } from 'frontend/packages/core/src/shared/components/list/list.types';
 
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { IFeatureFlag } from '../../../../../../cf-api.types';
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 
@@ -15,6 +15,7 @@ export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IF
 
   @Input()
   set row(row: IFeatureFlag) {
+    super.row = row;
     this.description = row ? FeatureFlagDescriptions[row.name] : null;
   }
 

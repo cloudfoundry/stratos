@@ -12,6 +12,16 @@ const PROXY_CONFIG = {
     "ws": true,
     "secure": false,
     "changeOrigin": true,
+  },
+  "/api": {
+    "target": {
+      "host": "127.0.0.1",
+      "protocol": "https:",
+      "port": 5443
+    },
+    "ws": true,
+    "secure": false,
+    "changeOrigin": true,
   }
 }
 

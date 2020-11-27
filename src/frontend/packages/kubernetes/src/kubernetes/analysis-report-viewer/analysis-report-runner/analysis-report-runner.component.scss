@@ -1,0 +1,13 @@
+.report-runner {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  &__divider {
+    margin: 4px 0;
+  }
+
+  &__run {
+    padding-right: 0;
+  }
+}

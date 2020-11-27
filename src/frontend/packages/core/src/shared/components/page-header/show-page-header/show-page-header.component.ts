@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { TabNavService } from '../../../../../tab-nav.service';
+import { TabNavService } from '../../../../tab-nav.service';
 
 @Component({
   selector: 'app-show-page-header',

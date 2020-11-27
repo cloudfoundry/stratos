@@ -32,7 +32,7 @@ describe('Marketplace Summary', () => {
       });
     });
 
-    beforeEach(() => {
+    beforeAll(() => {
       marketplaceSummaryPage.navigateTo();
       marketplaceSummaryPage.waitForPage();
     });

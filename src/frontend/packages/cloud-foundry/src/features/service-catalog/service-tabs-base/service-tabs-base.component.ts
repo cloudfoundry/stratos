@@ -68,18 +68,18 @@ export class ServiceTabsBaseComponent {
         ...queryParams,
         [CSI_CANCEL_URL]: `/marketplace/${this.servicesService.cfGuid}/${this.servicesService.serviceGuid}/instances`
       }))
-    )
+    );
     this.addServiceInstanceLink = [
       '/marketplace',
       this.servicesService.cfGuid,
       this.servicesService.serviceGuid,
       'create'
-    ]
+    ];
     this.serviceLabel$ = this.servicesService.service$.pipe(
       map(getServiceName),
       publishReplay(1),
       refCount()
-    )
+    );
   }
 
 }

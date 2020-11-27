@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy } from '@angular/core';
-import { Subscription, Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
@@ -15,13 +15,13 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   public cellDefinition: ICellDefinition<T>;
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (row) {
       this.setValue(row, this.schemaKey);
+      this.setSyncLink();
     }
   }
 
@@ -32,6 +32,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.pSchemaKey = schemaKey;
     if (this.row) {
       this.setValue(this.row, schemaKey);
+      this.setSyncLink();
     }
   }
 
@@ -63,7 +64,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
   }
 
   private setSyncLink() {
-    if (!this.cellDefinition.getLink) {
+    if (!this.cellDefinition || !this.cellDefinition.getLink) {
       return;
     }
     const linkValue = this.cellDefinition.getLink(this.row);

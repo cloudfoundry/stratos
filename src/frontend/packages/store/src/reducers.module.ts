@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { ActionReducerMap, StoreModule } from '@ngrx/store';
 
 import { LocalStorageService } from './helpers/local-storage-service';
-import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
@@ -36,7 +35,6 @@ export const appReducers: ActionReducerMap<{}> = {
   // This is added as part of the entity catalog module.
   // requestData,
   dashboard: dashboardReducer,
-  actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
   internalEvents: internalEventReducer,

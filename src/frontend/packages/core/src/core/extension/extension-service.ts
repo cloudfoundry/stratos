@@ -66,9 +66,9 @@ export interface StratosExtensionRoutes {
 // Stores the extension metadata as defined by the decorators
 const extensionMetadata = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[] },
-  tabs: {} as { [key: string]: IPageSideNavTab[] },
-  actions: {} as { [key: string]: StratosActionMetadata[] },
+  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
+  tabs: {} as { [key: string]: IPageSideNavTab[], },
+  actions: {} as { [key: string]: StratosActionMetadata[], },
 };
 
 /**
@@ -118,6 +118,10 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
   extensionMetadata.actions[action].push(props);
 }
 
+// Empty module used to support the registration of Extension Components
+@NgModule()
+export class ExtEmptyModule { }
+
 // Injectable Extension Service
 @Injectable({
   providedIn: 'root',
@@ -130,7 +134,7 @@ export class ExtensionService {
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components
-  public static declare(components: any[]): ModuleWithProviders {
+  public static declare(components: any[]): ModuleWithProviders<ExtEmptyModule> {
     return {
       ngModule: ExtEmptyModule
     };
@@ -201,7 +205,3 @@ export function getTabsFromExtensions(tabType: StratosTabType): IPageSideNavTab[
 export function getActionsFromExtensions(actionType: StratosActionType): StratosActionMetadata[] {
   return extensionMetadata.actions[actionType] || [];
 }
-
-// Empty module used to support the registration of Extension Components
-@NgModule()
-export class ExtEmptyModule { }

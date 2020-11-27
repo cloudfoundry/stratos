@@ -5,9 +5,11 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
+	"github.com/labstack/echo/v4"
 )
 
 type portalProxy struct {
@@ -24,6 +26,8 @@ type portalProxy struct {
 	AuthProviders          map[string]interfaces.AuthProvider
 	env                    *env.VarSet
 	StratosAuthService     interfaces.StratosAuth
+	APIKeysRepository      apikeys.Repository
+	PluginRegisterRoutes   map[string]func(echo.Context) error
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

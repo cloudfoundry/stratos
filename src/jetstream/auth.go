@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
@@ -36,6 +36,11 @@ func (p *portalProxy) InitStratosAuthService(t interfaces.AuthEndpointType) erro
 			databaseConnectionPool: p.DatabaseConnectionPool,
 			p:                      p,
 		}
+	case interfaces.AuthNone:
+		auth = &noAuth{
+			databaseConnectionPool: p.DatabaseConnectionPool,
+			p:                      p,
+		}
 	default:
 		err := fmt.Errorf("Invalid auth endpoint type: %v", t)
 		return err
@@ -59,13 +64,16 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 		cnsiGUID := c.QueryParam("guid")
 		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint, state, cnsiGUID)
 	} else {
-		username := c.FormValue("username")
-		password := c.FormValue("password")
+		params := new(interfaces.LoginToCNSIParams)
+		bindErr := interfaces.BindOnce(params, c)
+		if bindErr != nil {
+			return nil, nil, bindErr
+		}
 
-		if len(username) == 0 || len(password) == 0 {
+		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return uaaRes, u, errors.New("Needs username and password")
 		}
-		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
+		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, params.Username, params.Password, client, clientSecret, endpoint)
 	}
 	if err != nil {
 		return uaaRes, u, err

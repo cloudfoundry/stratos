@@ -1,0 +1,14 @@
+@mixin app-text-area($theme, $app-theme) {
+
+  $is-dark: map-get($theme, is-dark);
+  $app-background: map-get($app-theme, app-background-color);
+
+  $textarea-color: darken($app-background, 5%);
+  @if $is-dark == true {
+    $textarea-color: lighten($app-background, 5%);
+  }
+
+  textarea {
+    background-color: $textarea-color;
+  }
+}

@@ -3,6 +3,7 @@ import {
   StratosCatalogEndpointEntity,
 } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { APIResource } from '../../store/src/types/api.types';
+import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import {
   IService,
   IServiceBinding,
@@ -29,7 +30,7 @@ import {
   ISpaceQuotaDefinition,
   IStack,
 } from './cf-api.types';
-import { IAppFavMetadata, IBasicCFMetaData, IOrgFavMetadata, ISpaceFavMetadata } from './cf-metadata-types';
+import { ISpaceFavMetadata } from './cf-metadata-types';
 import { AppEnvVarActionBuilders } from './entity-action-builders/application-env-var.action-builders';
 import { AppStatsActionBuilders } from './entity-action-builders/application-stats.action-builders';
 import { AppSummaryActionBuilders } from './entity-action-builders/application-summary.action-builders';
@@ -39,12 +40,6 @@ import { CfEventActionBuilders } from './entity-action-builders/cf-event.action-
 import { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
-import {
-  GitBranchActionBuilders,
-  GitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
-  GitRepoActionBuilders,
-} from './entity-action-builders/git-action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
 import { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
@@ -62,7 +57,6 @@ import { UserProvidedServiceActionBuilder } from './entity-action-builders/user-
 import { UserActionBuilders } from './entity-action-builders/user.action-builders';
 import { AppStat } from './store/types/app-metadata.types';
 import { CfUser } from './store/types/cf-user.types';
-import { GitBranch, GitCommit, GitRepo } from './store/types/git.types';
 
 /**
  * A strongly typed collection of Cloud Foundry Catalog Entities.
@@ -72,151 +66,132 @@ export class CfEntityCatalog {
   public cfEndpoint: StratosCatalogEndpointEntity;
 
   public quotaDefinition: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IOrgQuotaDefinition>,
     QuotaDefinitionActionBuilder
   >;
 
   public appEnvVar: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource,
     AppEnvVarActionBuilders
   >;
 
   public appSummary: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     IAppSummary,
     AppSummaryActionBuilders
   >;
 
   public spaceQuota: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<ISpaceQuotaDefinition>,
     SpaceQuotaDefinitionActionBuilders
   >;
 
   public privateDomain: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IPrivateDomain>
   >;
 
   public cfInfo: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<ICfV2Info>,
     CfInfoDefinitionActionBuilders
   >;
 
   public appStats: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     AppStat,
     AppStatsActionBuilders
   >;
 
   public buildPack: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IBuildpack>,
     BuildpackActionBuilders
   >;
 
   public serviceBroker: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceBroker>,
     ServiceBrokerActionBuilders
   >;
 
   public servicePlanVisibility: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServicePlanVisibility>,
     ServicePlanVisibilityActionBuilders
   >;
 
   public securityGroup: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<ISecurityGroup>,
     SecurityGroupBuilders
   >;
 
   public serviceBinding: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceBinding>,
     ServiceBindingActionBuilders
   >;
 
   public service: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IService>,
     ServiceActionBuilders
   >;
 
   public servicePlan: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServicePlan>,
     ServicePlanActionBuilders
   >;
 
   public serviceInstance: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IServiceInstance>,
     ServiceInstanceActionBuilders
   >;
 
   public user: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<CfUser>,
     UserActionBuilders
   >;
 
   public domain: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IDomain>,
     DomainActionBuilders
   >;
 
-  public gitCommit: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitCommit,
-    GitCommitActionBuildersConfig,
-    GitCommitActionBuilders
-  >;
-
-  public gitRepo: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitRepo,
-    GitRepoActionBuilders
-  >;
-
-  public gitBranch: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
-    GitBranch,
-    GitBranchActionBuilders
-  >;
-
   public event: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<CfEvent>,
     CfEventActionBuilders
   >;
 
   public route: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IRoute>,
     RoutesActionBuilders
   >;
 
   public stack: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IStack>,
     StackActionBuilders
   >;
 
   public featureFlag: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     IFeatureFlag,
     FeatureFlagActionBuilders
   >;
 
   public application: StratosBaseCatalogEntity<
-    IAppFavMetadata,
+    IFavoriteMetadata,
     APIResource<IApp>,
     ApplicationActionBuilders
   >;
@@ -228,17 +203,17 @@ export class CfEntityCatalog {
   >;
 
   public org: StratosBaseCatalogEntity<
-    IOrgFavMetadata,
+    IFavoriteMetadata,
     APIResource<IOrganization>,
     OrganizationActionBuilders
   >;
 
   public metric: StratosBaseCatalogEntity<
-    IBasicCFMetaData
+    IFavoriteMetadata
   >;
 
   public userProvidedService: StratosBaseCatalogEntity<
-    IBasicCFMetaData,
+    IFavoriteMetadata,
     APIResource<IUserProvidedServiceInstance>,
     UserProvidedServiceActionBuilder
   >;

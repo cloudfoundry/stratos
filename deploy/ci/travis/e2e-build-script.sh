@@ -61,10 +61,7 @@ else
   set -e
 
   # Get go
-  curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-  chmod +x ~/bin/gimme
-  eval "$(gimme 1.12.4)"
-  go version
+  source "${DIRNAME}/install-go.sh"
 
   npm run build
   npm run build-backend

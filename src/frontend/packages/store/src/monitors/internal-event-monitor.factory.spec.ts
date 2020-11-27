@@ -1,7 +1,7 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { InternalEventMonitorFactory } from './internal-event-monitor.factory';
-import { SharedModule } from '../../../core/src/shared/shared.module';
+import { inject, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
+
+import { InternalEventMonitorFactory } from './internal-event-monitor.factory';
 
 
 describe('InternalEventMonitorFactory', () => {
@@ -9,7 +9,6 @@ describe('InternalEventMonitorFactory', () => {
     TestBed.configureTestingModule({
       providers: [InternalEventMonitorFactory],
       imports: [
-        SharedModule,
         StoreModule.forRoot({})
       ]
     });

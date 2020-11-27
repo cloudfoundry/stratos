@@ -1,4 +1,3 @@
-import { IOrgFavMetadata } from '../../../cloud-foundry/src/cf-metadata-types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEntity,
@@ -114,5 +113,5 @@ function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
     labelPlural: 'Autoscaler Metrics',
     endpoint: endpointDefinition,
   };
-  return new StratosCatalogEntity<IOrgFavMetadata, APIResource<any>>(definition);
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
 }

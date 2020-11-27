@@ -28,15 +28,28 @@
       <form [formGroup]="passwordForm" class="stepper-form">
         <mat-form-field>
           <mat-label>Password</mat-label>
-          <input matInput formControlName="password" name="password" required [type]="!show ? 'password' : 'text'">
-          <button mat-icon-button matSuffix (click)="show = !show" [attr.aria-label]="'Hide password'"
-            [attr.aria-pressed]="!show">
-            <mat-icon>{{!show ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
+          <input matInput formControlName="password" name="password" required
+            [type]="!showPassword[1] ? 'password' : 'text'">
+          <span matSuffix>
+            <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
+          </span>
           <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
             Password is required</mat-error>
           <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
             Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Confirm Password</mat-label>
+          <input matInput formControlName="password2" name="password2" required
+            [type]="!showPassword[2] ? 'password' : 'text'" [pattern]="passwordForm.controls.password2.value">
+          <span matSuffix>
+            <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+          </span>
+          <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.required">
+            Password is required</mat-error>
+          <mat-error *ngIf="passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.pattern">
+            Passwords must match
           </mat-error>
         </mat-form-field>
       </form>

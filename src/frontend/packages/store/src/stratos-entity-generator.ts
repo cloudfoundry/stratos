@@ -1,28 +1,23 @@
-import { BaseEndpointAuth } from '../../core/src/core/endpoint-auth';
-import {
-  MetricsEndpointDetailsComponent,
-} from '../../core/src/features/metrics/metrics-endpoint-details/metrics-endpoint-details.component';
+import { ApiKey } from './apiKey.types';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
-} from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+} from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
-  endpointEntityType,
+  apiKeyEntityType,
   STRATOS_ENDPOINT_TYPE,
-  stratosEntityFactory,
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
-} from '../../store/src/helpers/stratos-entity-factory';
+} from './helpers/stratos-entity-factory';
+import { endpointEntityType, EndpointModel, stratosEntityFactory } from './public-api';
+import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
+import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
-  addOrUpdateUserFavoriteMetadataReducer,
-  deleteUserFavoriteMetadataReducer,
-} from '../../store/src/reducers/favorite.reducer';
-import { systemEndpointsReducer } from '../../store/src/reducers/system-endpoints.reducer';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
-import {
+  ApiKeyActionBuilder,
+  apiKeyActionBuilder,
   EndpointActionBuilder,
   endpointActionBuilder,
   SystemInfoActionBuilder,
@@ -46,14 +41,15 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     authTypes: [],
     type: STRATOS_ENDPOINT_TYPE,
     schema: null
-  }
+  };
   return [
     generateEndpoint(stratosType),
     generateSystemInfo(stratosType),
     generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
-    generateMetricsEndpoint()
-  ]
+    generateMetricsEndpoint(),
+    generateAPIKeys(stratosType)
+  ];
 }
 
 /**
@@ -65,7 +61,7 @@ function generateEndpoint(stratosType) {
     schema: stratosEntityFactory(endpointEntityType),
     type: endpointEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.endpoint = new StratosCatalogEntity<
     undefined,
     EndpointModel,
@@ -78,7 +74,7 @@ function generateEndpoint(stratosType) {
       ],
       actionBuilders: endpointActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.endpoint;
 }
 
@@ -87,7 +83,7 @@ function generateSystemInfo(stratosType) {
     schema: stratosEntityFactory(systemInfoEntityType),
     type: systemInfoEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.systemInfo = new StratosCatalogEntity<
     undefined,
     SystemInfo,
@@ -97,7 +93,7 @@ function generateSystemInfo(stratosType) {
     {
       actionBuilders: systemInfoActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.systemInfo;
 }
 
@@ -106,7 +102,7 @@ function generateUserFavorite(stratosType) {
     schema: stratosEntityFactory(userFavouritesEntityType),
     type: userFavouritesEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.userFavorite = new StratosCatalogEntity<
     undefined,
     UserFavorite,
@@ -120,7 +116,7 @@ function generateUserFavorite(stratosType) {
       ],
       actionBuilders: userFavoriteActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.userFavorite;
 }
 
@@ -129,7 +125,7 @@ function generateUserProfile(stratosType) {
     schema: stratosEntityFactory(userProfileEntityType),
     type: userProfileEntityType,
     endpoint: stratosType,
-  }
+  };
   stratosEntityCatalog.userProfile = new StratosCatalogEntity<
     undefined,
     UserProfileInfo,
@@ -139,7 +135,7 @@ function generateUserProfile(stratosType) {
     {
       actionBuilders: userProfileActionBuilder
     }
-  )
+  );
   return stratosEntityCatalog.userProfile;
 }
 
@@ -151,11 +147,29 @@ function generateMetricsEndpoint() {
     labelPlural: 'Metrics',
     tokenSharing: true,
     logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    authTypes: [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None],
-    renderPriority: 1,
-    listDetailsComponent: MetricsEndpointDetailsComponent,
+    authTypes: [],
+    renderPriority: 1
   },
-    metadata => `/endpoints/metrics/${metadata.guid}`
-  )
+    entity => `/endpoints/metrics/${entity.endpointId}`
+  );
   return stratosEntityCatalog.metricsEndpoint;
+}
+
+function generateAPIKeys(stratosType) {
+  const definition: IStratosEntityDefinition = {
+    schema: stratosEntityFactory(apiKeyEntityType),
+    type: apiKeyEntityType,
+    endpoint: stratosType,
+  };
+  stratosEntityCatalog.apiKey = new StratosCatalogEntity<
+    undefined,
+    ApiKey,
+    ApiKeyActionBuilder
+  >(
+    definition,
+    {
+      actionBuilders: apiKeyActionBuilder
+    }
+  );
+  return stratosEntityCatalog.apiKey;
 }

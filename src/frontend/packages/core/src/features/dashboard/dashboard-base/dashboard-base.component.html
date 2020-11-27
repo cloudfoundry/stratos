@@ -16,16 +16,24 @@
           </div>
           <div class="dashboard__main">
             <div *ngIf="subNavData$ | async as data">
-              <div class="page-header-sub-nav" *ngIf="data[0] || data[1]">
+              <div class="page-header-sub-nav" *ngIf="data[0] || data[1] || data[3]">
                 <div class="page-header-sub-nav__container">
-                  <div *ngIf="data[0] as activeTabLabel" class="page-header-sub-nav__title">
-                    {{ activeTabLabel }}
+                  <div *ngIf="data[0] && !data[3]" class="page-header-sub-nav__title">
+                    {{ data[0] }}
+                  </div>
+                  <div *ngIf="data[3] as breadcrumbs" class="page-header-sub-nav__breadcrumbs">
+                    <ng-container *ngFor="let breadcrumbDef of breadcrumbs; last as isLast">
+                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
+                        [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-nolink" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <mat-icon *ngIf="!isLast" class="page-header-sub-nav__breadcrumb-separator">chevron_right</mat-icon>
+                    </ng-container>
                   </div>
                   <ng-container *ngIf="data[1] as portal" [cdkPortalOutlet]="portal"></ng-container>
                 </div>
               </div>
             </div>
-            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}">
+            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}" cdkScrollable>
               <router-outlet></router-outlet>
             </div>
           </div>
@@ -34,9 +42,10 @@
     </mat-drawer-content>
   </mat-drawer-container>
   <mat-drawer class="dashboard__side-help-outer" #sideHelp
-    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async)}" [autoFocus]="false" mode="over"
+    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async) >= 0}" [autoFocus]="false" mode="over"
     position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
-    <div class="dashboard__side-help">
+    <div class="dashboard__side-help"
+      [ngClass]="{'dashboard__side-narrow': (sidePanelService.previewMode$ | async) === 2}">
       <template #previewPanelContainer></template>
     </div>
   </mat-drawer>

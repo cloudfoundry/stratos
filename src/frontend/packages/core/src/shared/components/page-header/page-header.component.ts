@@ -2,25 +2,26 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import * as moment from 'moment';
-import { Observable } from 'rxjs';
+import moment from 'moment';
+import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
-import { EntityCatalogHelpers } from '../../../../../store/src/entity-catalog/entity-catalog.helper';
-import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
-import { TabNavService } from '../../../../tab-nav.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
+import { TabNavService } from '../../../tab-nav.service';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
+import { EndpointsService } from './../../../core/endpoints.service';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
@@ -29,6 +30,7 @@ import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from '
   styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
+  public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
@@ -85,26 +87,19 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
-      this.pFavorite = favorite;
-      const mapperFunction = this.favoritesConfigMapper.getMapperFunction(favorite);
-      const prettyType = this.favoritesConfigMapper.getPrettyTypeName(favorite);
-      const prettyEndpointType = this.favoritesConfigMapper.getPrettyTypeName({
-        endpointType: favorite.endpointType,
-        entityType: EntityCatalogHelpers.endpointType
-      });
-      if (mapperFunction) {
-        const { name, routerLink } = mapperFunction(favorite.metadata);
+      if (favorite.canFavorite()) {
+        this.pFavorite = favorite;
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
           date: moment().valueOf(),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,
-          name,
-          routerLink,
-          prettyType,
+          name: favorite.metadata.name,
+          routerLink: favorite.getLink(),
+          prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
-          prettyEndpointType: prettyEndpointType === prettyType ? null : prettyEndpointType
+          metadata: { name: favorite.metadata.name },
         }));
       }
     }
@@ -113,6 +108,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public username$: Observable<string>;
   public user$: Observable<UserProfileInfo>;
   public allowGravatar$: Observable<boolean>;
+  public canLogout$: Observable<boolean>;
 
   public actionsKey: string;
 
@@ -154,8 +150,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private tabNavService: TabNavService,
     private router: Router,
     eventService: GlobalEventService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
     private userProfileService: UserProfileService,
+    private cups: CurrentUserPermissionsService,
+    private endpointsService: EndpointsService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -185,6 +183,19 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.gravatarEnabled)
     );
+
+    // Must be enabled and the user must have permission
+    this.canAPIKeys$ = combineLatest([
+      this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true)),
+      this.cups.can(StratosCurrentUserPermissions.API_KEYS),
+    ]).pipe(
+      map(([disabled, permission]) => !disabled && permission)
+    );
+
+    this.canLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT).pipe(
+      map(noLogout => !noLogout)
+    );
+
   }
 
   ngOnDestroy() {

@@ -27,6 +27,7 @@ import { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointType } from '../extension-types';
+import { httpErrorResponseToSafeString } from '../jetstream';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { NormalizedResponse } from '../types/api.types';
@@ -89,11 +90,13 @@ export class EndpointsEffect {
         });
       });
 
+      const isLogin = associatedAction.type === GET_ENDPOINTS ? (associatedAction as GetAllEndpoints).login : false;
+
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
         new WrapperRequestActionSuccess(mappedData, associatedAction, 'fetch'),
-        new GetAllEndpointsSuccess(mappedData, associatedAction['login']),
+        new GetAllEndpointsSuccess(mappedData, isLogin),
       ];
     }));
 
@@ -104,7 +107,7 @@ export class EndpointsEffect {
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +
           (window.location.port ? ':' + window.location.port : '');
-        const ssoUrl = '/pp/v1/auth/login/cnsi?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
+        const ssoUrl = '/api/v1/tokens?guid=' + action.guid + '&state=' + encodeURIComponent(loc);
         window.location.assign(ssoUrl);
         return [];
       }
@@ -141,48 +144,43 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/auth/login/cnsi',
+        '/api/v1/tokens',
         params,
         null,
         action.endpointsType,
         body,
-        response => response && response.error && response.error.error ? response.error.error : 'Could not connect, please try again'
+        response => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
       );
     }));
 
   @Effect() disconnect$ = this.actions$.pipe(
     ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
     mergeMap(action => {
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_guid: action.guid
-        }
-      });
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/auth/logout/cnsi',
-        params,
+        '/api/v1/tokens/' + action.guid,
         null,
-        action.endpointsType
+        null,
+        action.endpointsType,
+        null,
+        null,
+        'DELETE'
       );
     }));
 
   @Effect() unregister$ = this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
-      const params: HttpParams = new HttpParams({
-        fromObject: {
-          cnsi_guid: action.guid
-        }
-      });
-
       return this.doEndpointAction(
         action,
-        '/pp/v1/unregister',
-        params,
+        '/api/v1/endpoints/' + action.guid,
+        null,
         'delete',
-        action.endpointsType
+        action.endpointsType,
+        null,
+        null,
+        'DELETE'
       );
     }));
 
@@ -211,8 +209,12 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/register/' + action.endpointsType,
-        new HttpParams({}),
+        '/api/v1/endpoints',
+        new HttpParams({
+          fromObject: {
+            endpoint_type: action.endpointsType
+          }
+        }),
         'create',
         action.endpointsType,
         body,
@@ -240,7 +242,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         action,
-        '/pp/v1/endpoint/' + action.id,
+        '/api/v1/endpoints/' + action.id,
         new HttpParams({}),
         'update',
         action.endpointsType,
@@ -280,12 +282,14 @@ export class EndpointsEffect {
     endpointType: EndpointType,
     body?: string,
     errorMessageHandler?: (e: any) => string,
+    method: string = 'POST',
   ) {
 
     const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, body || {}, {
-      params
+    return this.http.request(method, url, {
+      params,
+      body: body || {}
     }).pipe(
       mergeMap((endpoint: EndpointModel) => {
         const actions = [];

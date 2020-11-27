@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -15,10 +15,7 @@ export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<ISe
   breadcrumbs: {};
   spaceUrl: string[];
   spaceName: Observable<string>;
-  @Input() row;
-  constructor() {
-    super();
-  }
+
   ngOnInit(): void {
     this.spaceUrl = [
       '/cloud-foundry',

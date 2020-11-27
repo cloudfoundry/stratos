@@ -45,11 +45,12 @@
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
             <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
-              <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneItem$ | async)" [floatLabel]="'never'">
+              <mat-form-field *ngIf="!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)"
+                [floatLabel]="'never'">
                 <mat-select id="{{multiFilterManager.filterKey}}" matInput [(value)]="multiFilterManager.value"
                   [disabled]="!(multiFilterManager.filterIsReady$ | async)"
                   (selectionChange)="multiFilterManager.selectItem($event.value)">
-                  <mat-option>{{ multiFilterManager.allLabel }}</mat-option>
+                  <mat-option *ngIf="!multiFilterManager.hideAllOption">{{ multiFilterManager.allLabel }}</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterManager.filterItems$ | async"
                     [value]="selectItem.value">
                     {{selectItem.label}}

@@ -1,20 +1,24 @@
 import { ModuleWithProviders } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule } from '@ngrx/store';
-
-import { AppState } from '../../src/app-state';
-import { entityCatalog } from '../../src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../src/entity-catalog/entity-catalog.types';
-import { endpointEntityType, stratosEntityFactory } from '../../src/helpers/stratos-entity-factory';
-import { appReducers } from '../../src/reducers.module';
-import { getDefaultRequestState, rootUpdatingKey } from '../../src/reducers/api-request-reducer/types';
-import { getDefaultPaginationEntityState } from '../../src/reducers/pagination-reducer/pagination-reducer-reset-pagination';
-import { NormalizedResponse } from '../../src/types/api.types';
-import { SessionData, SessionDataEndpoint } from '../../src/types/auth.types';
-import { getDefaultRolesRequestState } from '../../src/types/current-user-roles.types';
-import { EndpointModel } from '../../src/types/endpoint.types';
-import { BaseEntityValues } from '../../src/types/entity.types';
-import { WrapperRequestActionSuccess } from '../../src/types/request.types';
+import { Store, StoreModule, StoreRootModule } from '@ngrx/store';
+import {
+  appReducers,
+  AppState,
+  BaseEntityValues,
+  endpointEntityType,
+  EndpointModel,
+  entityCatalog,
+  EntityCatalogEntityConfig,
+  getDefaultPaginationEntityState,
+  getDefaultRequestState,
+  getDefaultRolesRequestState,
+  NormalizedResponse,
+  rootUpdatingKey,
+  SessionData,
+  SessionDataEndpoint,
+  stratosEntityFactory,
+  WrapperRequestActionSuccess,
+} from '@stratosui/store';
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
@@ -163,8 +167,8 @@ function getDefaultInitialTestStratosStoreState() {
       themeKey: null,
       headerEventMinimized: true,
       gravatarEnabled: false,
+      homeLayout: 0,
     },
-    actionHistory: [],
     lists: {},
     routing: {
       previousState: {
@@ -331,7 +335,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
 
 export function createBasicStoreModule(
   initialState: Partial<AppState<BaseEntityValues>> = getDefaultInitialTestStoreState()
-): ModuleWithProviders {
+): ModuleWithProviders<StoreRootModule> {
   return StoreModule.forRoot(
     appReducers,
     {
@@ -340,7 +344,7 @@ export function createBasicStoreModule(
   );
 }
 
-export function createEmptyStoreModule(): ModuleWithProviders {
+export function createEmptyStoreModule(): ModuleWithProviders<StoreRootModule> {
   return StoreModule.forRoot(
     appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
   );
@@ -387,7 +391,9 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig,
   }, getDefaultInitialTestStoreState());
 }
 
-export function createEntityStore(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>): ModuleWithProviders {
+export function createEntityStore(
+  entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>
+): ModuleWithProviders<StoreRootModule> {
   const initialState = createEntityStoreState(entityMap);
   return createBasicStoreModule(initialState);
 }

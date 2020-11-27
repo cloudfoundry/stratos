@@ -12,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -25,6 +25,11 @@ type localAuth struct {
 	localUserScope         string
 	consoleAdminScope      string
 	p                      *portalProxy
+}
+
+func (a *localAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("... Local User              : %s", config.LocalUser)
+	log.Infof("... Local User Scope        : %s", config.LocalUserScope)
 }
 
 //Login provides Local-auth specific Stratos login
@@ -99,9 +104,10 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	var scopes []string
-	scopes = make([]string, 2)
+	scopes = make([]string, 3)
 	scopes[0] = user.Scope
 	scopes[1] = "password.write"
+	scopes[2] = "scim.write"
 
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   userGUID,
@@ -112,6 +118,8 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 
 	return connectdUser, nil
 }
+
+func (a *localAuth) BeforeVerifySession(c echo.Context) {}
 
 //VerifySession verifies the session the specified local user, currently just verifies user exists
 func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {

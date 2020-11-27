@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -27,6 +27,7 @@ const (
 	versionRequestRegex    = "^/pp/v1/version$"
 	pingRequestRegex       = "^/pp/v1/ping$"
 	backendRequestRegex    = "^/pp/v1/"
+	apiRequestRegex        = "^/api/v1/"
 	systemGroupName        = "env"
 )
 
@@ -256,7 +257,9 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 
 	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
-		if val == interfaces.Local {
+		if val == interfaces.AuthNone {
+			return consoleConfig, nil
+		} else if val == interfaces.Local {
 			//Auth endpoint type is set to "local", so load the local user config
 			err := initialiseLocalUsersConfiguration(consoleConfig, p)
 			if err != nil {
@@ -384,7 +387,8 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
-			if !isBackendRequest {
+			isAPIRequest, _ := regexp.MatchString(apiRequestRegex, requestURLPath)
+			if !(isBackendRequest || isAPIRequest) {
 				return h(c)
 			}
 
@@ -415,7 +419,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 
 	// If setup is complete, then store the config
 	if consoleConfig.IsSetupComplete() {
-		showStratosConfig(consoleConfig)
+		showStratosConfig(portalProxy, consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType

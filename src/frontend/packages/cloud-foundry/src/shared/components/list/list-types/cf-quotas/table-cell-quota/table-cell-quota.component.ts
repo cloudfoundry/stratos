@@ -12,7 +12,7 @@ import { IQuotaDefinition } from '../../../../../../cf-api.types';
 export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaDefinition>> implements OnInit {
   quotaUrl: string[];
 
-  constructor()  {
+  constructor() {
     super();
   }
 

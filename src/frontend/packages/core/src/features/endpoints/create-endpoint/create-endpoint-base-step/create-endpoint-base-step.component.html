@@ -12,7 +12,8 @@
         the 'Connecting' process. To do this return to the Endpoints page.
       </p>
     -->
-      <app-tile-selector [options]="tileSelectorConfig$ | async" (selection)="selectedTile = $event">
+      <app-tile-selector [options]="tileSelectorConfig$ | async" [dynamicSmallerTiles]="6"
+        (selection)="selectedTile = $event">
       </app-tile-selector>
     </div>
   </app-step>

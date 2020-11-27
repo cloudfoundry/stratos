@@ -1,0 +1,7 @@
+<div class="default-home-card" *ngIf="url">
+  <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="url">
+    <div class="default-home-card__address">
+      <div class="default-home-card__address__value">{{ url }}</div>
+    </div>
+  </app-metadata-item>
+</div>

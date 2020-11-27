@@ -29,13 +29,18 @@ export class NoContentMessageComponent implements AfterViewInit {
   constructor(private renderer: Renderer2) { }
 
   ngAfterViewInit() {
-    // Align the prompt with the toolbar item
-    if (this.toolBarLinkElement) {
-      const elem = document.getElementById(this.toolbarAlign);
-      if (elem) {
-        const right = document.body.clientWidth - elem.getBoundingClientRect().right;
-        this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
+    // Align the prompt with the toolbar item ...
+    // Note - Only execute after a delay. The final place of the target element may change given visibility of other menu items
+    // (polling disabled, notification bell). We should come back to this and replace the timeout with a better way of determining readyness
+    setTimeout(() => {
+      if (this.toolBarLinkElement) {
+        const elem = document.getElementById(this.toolbarAlign);
+        if (elem) {
+          const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
+          this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
+          this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
+        }
       }
-    }
+    }, 500);
   }
 }

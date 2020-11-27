@@ -72,11 +72,11 @@ export class ServicesService {
       filter(s => s && s.length === 1),
       map(s => s[0]),
       first()
-    )
+    );
 
   getServiceName = () => this.service$.pipe(
     map(getServiceName)
-  )
+  );
 
   getServiceProviderName = () => observableCombineLatest(this.serviceExtraInfo$, this.service$).pipe(
     map(([extraInfo]) => extraInfo && extraInfo.providerDisplayName ? extraInfo.providerDisplayName : '')
@@ -88,19 +88,19 @@ export class ServicesService {
 
   getDocumentationUrl = () => this.serviceExtraInfo$.pipe(
     map(p => p ? p.documentationUrl : null)
-  )
+  );
 
   getSupportUrl = () => this.serviceExtraInfo$.pipe(
     map(p => p ? p.supportUrl : null)
-  )
+  );
 
   hasSupportUrl = () => this.getSupportUrl().pipe(
     map(p => !!p)
-  )
+  );
 
   hasDocumentationUrl = () => this.getDocumentationUrl().pipe(
     map(p => !!p)
-  )
+  );
 
   getServiceTags = () => this.service$.pipe(
     first(),
@@ -110,7 +110,7 @@ export class ServicesService {
         hideClearButton$: observableOf(true)
       }))
     )
-  )
+  );
 
   /**
    * Init observables specific to a service

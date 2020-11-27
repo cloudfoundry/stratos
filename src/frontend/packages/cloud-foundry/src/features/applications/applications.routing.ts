@@ -39,6 +39,12 @@ const applicationsRoutes: Routes = [
   {
     path: 'new',
     component: NewApplicationBaseStepComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'new/:endpointId',
+    component: NewApplicationBaseStepComponent,
+    pathMatch: 'full'
   },
   {
     path: 'create',
@@ -58,6 +64,11 @@ const applicationsRoutes: Routes = [
         data: {
           extensionsActionsKey: StratosActionType.Applications
         }
+      },
+      {
+        path: ':endpointId',
+        component: ApplicationWallComponent,
+        pathMatch: 'full'
       },
       {
         path: ':endpointId/:id',

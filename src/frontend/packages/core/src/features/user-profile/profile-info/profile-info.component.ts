@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { SetPollingEnabledAction, SetSessionTimeoutAction } from '../../../../../store/src/actions/dashboard-actions';
@@ -10,6 +10,8 @@ import { selectSessionData } from '../../../../../store/src/reducers/auth.reduce
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { ThemeService } from '../../../../../store/src/theme.service';
 import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
@@ -81,11 +83,15 @@ export class ProfileInfoComponent {
     private store: Store<AppState>,
     public userService: UserService,
     public themeService: ThemeService,
-    private confirmationService: ConfirmationDialogService
+    private confirmationService: ConfirmationDialogService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.isError$ = userProfileService.isError$;
     this.userProfile$ = userProfileService.userProfile$;
-    this.canEdit$ = this.isError$.pipe(map(e => !e));
+
+    const canEdit = this.isError$.pipe(map(e => !e));
+    const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
+    this.canEdit$ = combineLatest([canEdit, hasEditPermissions]).pipe(map(([a, b]) => a && b));
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
@@ -96,11 +102,11 @@ export class ProfileInfoComponent {
     this.localStorageSize$ = this.sessionData$.pipe(
       map(sessionData => LocalStorageService.localStorageSize(sessionData)),
       filter(bytes => bytes != -1),
-    )
+    );
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clear(sessionData, this.confirmationService))
+    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clear(sessionData, this.confirmationService));
   }
 
 }

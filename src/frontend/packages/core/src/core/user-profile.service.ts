@@ -56,7 +56,7 @@ export class UserProfileService {
       switchMap(es => es.entityMonitor.entityRequest$),
       filter(requestInfo => !!requestInfo && !requestInfo.fetching),
       map(requestInfo => requestInfo.error)
-    )
+    );
   }
 
   fetchUserProfile() {

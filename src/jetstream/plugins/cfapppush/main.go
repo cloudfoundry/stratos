@@ -4,8 +4,13 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("cfapppush", []string{"cloudfoundry"}, Init)
+}
 
 // CFAppPush is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type CFAppPush struct {

@@ -29,6 +29,12 @@
       justify-content: flex-end;
     }
   }
+
+  &__anchor {
+    display: flex;
+    justify-content: center;
+  }
+
   &__staging-error {
     align-items: center;
     display: flex;

@@ -26,6 +26,7 @@
     font-size: 40px;
     height: 40px;
     margin-right: 12px;
+    text-align: center;
     width: 40px;
   }
   &__label {
@@ -39,5 +40,44 @@
   }
   &__limit {
     font-size: 18px;
+  }
+  &__alerts {
+    cursor: pointer;
+    display: flex;
+    flex: 0;
+    flex-direction: column;
+  }
+  &__alert-badge {
+    align-items: center;
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    font-size: 14px;
+    margin-bottom: 2px;
+    padding: 2px 4px;
+
+    &> mat-icon {
+      font-size: 16px;
+      height: 16px;
+      margin-right: 2px;
+      width: 16x;
+    }
+  }
+}
+
+.number-metric-card__plain.mat-card {
+  border-radius: 0;
+  box-shadow: none;
+  padding: 6px 12px;
+
+  .number-metric-card__usage-count {
+    font-size: 20px;
+  }
+
+  .number-metric-card__icon {
+    flex: 0 0 32px;
+    font-size: 32px;
+    height: 32px;
+    width: 32px;    
   }
 }

@@ -1,13 +1,13 @@
 import { NgZone } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
 
 import {
   InternalEventSeverity,
   InternalEventsState,
-  InternalEventSubjectState,
   InternalEventState,
+  InternalEventSubjectState,
 } from '../types/internal-events.types';
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {

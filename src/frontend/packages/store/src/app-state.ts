@@ -1,4 +1,3 @@
-import { ActionHistoryState } from './reducers/action-history-reducer';
 import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
@@ -27,7 +26,6 @@ export type BaseRequestDataState = Record<string, IRequestEntityTypeState<any>>;
 export abstract class AppState<
   T extends Record<string, any> = any
   > {
-  actionHistory: ActionHistoryState;
   auth: AuthState;
   uaaSetup: UAASetupState;
   endpoints: EndpointState;

@@ -4,13 +4,14 @@ export const userFavouritesEntityType = 'userFavorites';
 export const endpointEntityType = 'endpoint';
 export const userProfileEntityType = 'userProfile';
 export const systemInfoEntityType = 'systemInfo';
+export const apiKeyEntityType = 'apiKey';
 
 export const metricEntityType = 'metrics';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
 
 const entityCache: {
-  [key: string]: EntitySchema
+  [key: string]: EntitySchema;
 } = {};
 
 class StratosEntitySchema extends EntitySchema {
@@ -30,6 +31,9 @@ entityCache[endpointEntityType] = EndpointSchema;
 
 const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
 entityCache[userProfileEntityType] = UserProfileInfoSchema;
+
+const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'guid');
+entityCache[apiKeyEntityType] = ApiKeySchema;
 
 export function stratosEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

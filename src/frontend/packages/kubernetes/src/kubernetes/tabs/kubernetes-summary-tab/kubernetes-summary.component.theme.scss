@@ -1,0 +1,17 @@
+
+@mixin kube-summary-theme($theme, $app-theme) {
+  $status-colors: map-get($app-theme, status);
+  $status-warning: map-get($status-colors, warning);
+  $status-danger: map-get($status-colors, danger);
+
+  .caasp-updates {
+    &__security {
+      border: 1px solid $status-danger;
+      color: $status-danger;
+    }
+    &__disruptive {
+      border: 1px solid $status-warning;
+      color: $status-warning;
+    }
+  }
+}

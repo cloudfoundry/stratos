@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TabNavService } from '../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { LongRunningCfOperationsService } from '../../../shared/data-services/long-running-cf-op.service';
 import { QuotaDefinitionFormComponent } from '../quota-definition-form/quota-definition-form.component';

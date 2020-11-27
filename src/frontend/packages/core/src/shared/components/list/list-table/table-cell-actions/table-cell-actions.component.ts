@@ -19,11 +19,10 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   @Input()
   rowState: Observable<RowState>;
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (row) {
       this.initialise(row);
     }
@@ -34,8 +33,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   actions: IListAction<T>[];
   obs: {
-    visible: { [action: string]: Observable<boolean> },
-    enabled: { [action: string]: Observable<boolean> }
+    visible: { [action: string]: Observable<boolean>; },
+    enabled: { [action: string]: Observable<boolean>; };
   };
 
   private subjects: BehaviorSubject<T>[] = [];

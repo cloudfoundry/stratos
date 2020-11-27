@@ -4,26 +4,31 @@ import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/s
 import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
 
 /**
- * Servicve for showing snackbars
+ * Service for showing snackbars
  */
 @Injectable({
   providedIn: 'root',
 })
 export class SnackBarService {
 
-  constructor(public snackBar: MatSnackBar) {}
+  constructor(public snackBar: MatSnackBar) { }
 
   private snackBars: MatSnackBarRef<SimpleSnackBar>[] = [];
 
   public show(message: string, closeMessage?: string, duration: number = 5000) {
     this.snackBars.push(this.snackBar.open(message, closeMessage, {
-      duration: closeMessage ? null :duration
+      duration: closeMessage ? null : duration
     }));
   }
 
-  public showReturn(message: string, returnUrl: string, returnLabel: string) {
+  public showReturn(message: string, returnUrl: string | string[], returnLabel: string, duration?: number) {
     this.snackBars.push(this.snackBar.openFromComponent(SnackBarReturnComponent, {
-      data: { message, returnUrl, returnLabel }
+      duration,
+      data: {
+        message,
+        returnUrl,
+        returnLabel,
+      }
     }));
   }
 
