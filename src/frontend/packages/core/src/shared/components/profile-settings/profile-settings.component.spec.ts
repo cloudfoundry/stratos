@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { ProfileSettingsComponent } from './profile-settings.component';
 
 describe('ProfileSettingsComponent', () => {
@@ -8,6 +9,7 @@ describe('ProfileSettingsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: BaseTestModules,
       declarations: [ ProfileSettingsComponent ]
     })
     .compileComponents();

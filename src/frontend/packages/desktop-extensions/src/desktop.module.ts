@@ -1,17 +1,21 @@
 import { NgModule } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ElectronService } from 'ngx-electron';
 
 import { GetSystemInfo } from '../../store/src/actions/system.actions';
 import { DesktopLoginComponent } from './desktop-login/desktop-login.component';
+import { ElectronService } from './electron/electron.service';
 
 @NgModule({
   declarations: [
-    DesktopLoginComponent
+    DesktopLoginComponent,
+    ElectronService,
   ],
   entryComponents: [
     DesktopLoginComponent
+  ],
+  providers: [
+    ElectronService,
   ]
 })
 export class DesktopModule {
@@ -20,7 +24,7 @@ export class DesktopModule {
 
   constructor(
     router: Router,
-    private _electronService: ElectronService,
+    private pElectronService: ElectronService,
     private store: Store) {
     // Only update the routes once
     if (!DesktopModule.init) {
@@ -36,10 +40,10 @@ export class DesktopModule {
 
   // Listen for events from the Electron host
   private initElectron() {
-    if (!this._electronService.isElectronApp) {
-      return
+    if (!this.pElectronService.isElectronApp) {
+      return;
     }
-    this._electronService.ipcRenderer.addListener('endpointsChanged', (sender, args) => {
+    this.pElectronService.ipcRenderer.addListener('endpointsChanged', (sender, args) => {
       console.log('Got an event - endpoints changed');
       console.log(sender);
       console.log(args);

@@ -2,7 +2,6 @@ import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } 
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { ElectronService } from 'ngx-electron';
 import { map, pairwise } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
@@ -67,7 +66,6 @@ export class EndpointListHelper {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private snackBarService: SnackBarService,
-    private electron: ElectronService
   ) { }
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
