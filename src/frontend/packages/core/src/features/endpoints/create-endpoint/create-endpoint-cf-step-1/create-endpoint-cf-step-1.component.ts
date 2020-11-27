@@ -17,7 +17,6 @@ import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
@@ -51,6 +50,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
+  show = false;
+
+  showAdvancedOptions = false;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -107,7 +109,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
         };
       })
     );
-  }
+  };
 
 
   ngAfterContentInit() {
@@ -128,5 +130,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     // Only allow SSL if the endpoint type is Cloud Foundry
     this.endpointTypeSupportsSSO = endpoint.definition.type === 'cf';
+  }
+
+  toggleAdvancedOptions() {
+    this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 }

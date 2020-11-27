@@ -10,7 +10,7 @@ image_resource:
   type: docker-image
   source:
    # Generated using scripts/Dockerfile.stratos-ci
-   repository: splatform/stratos-ci-concourse
+   repository: ghcr.io/cf-stratos/stratos-ci-concourse
 
 run:
   path: sh
@@ -21,12 +21,14 @@ run:
       helm init --client-only
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
+      source "${STRATOS}/deploy/ci/tasks/dev-releases/vars-helper.sh"
+
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       HELM_REPO=${ROOT_DIR}/helm-repo/${HELM_REPO_PATH}
-      GIT_TAG=$(cat image-tag/v2-alpha-tag)
-      VERSION=$(cat image-tag/v2-version)
-      RELEASE_VERSION=$(cat image-tag/v2-tag)
-      COMMIT=$(cat image-tag/v2-commit)
+
+      GIT_TAG=${LATEST_TAG}
+      RELEASE_VERSION=${RELEASE_TAG}
+      COMMIT=${COMMIT_HASH}
 
       # Required for setupAndPushChange commit message
       IMAGE_TAG=${GIT_TAG}
@@ -38,9 +40,9 @@ run:
       updateHelmDependency
 
       # Run customization script if there is one
-      if [ -f "${STRATOS}/custom-src/deploy/kubernetes/customize-helm.sh" ]; then
+      if [ -f "${STRATOS}/deploy/kubernetes/custom/customize-helm.sh" ]; then
         echo "Applying Helm Chart customizations"
-        ${STRATOS}/custom-src/deploy/kubernetes/customize-helm.sh "${STRATOS}/deploy/kubernetes/console"
+        ${STRATOS}/deploy/kubernetes/custom/customize-helm.sh "${STRATOS}/deploy/kubernetes/console"
       fi
 
       # Generate imagelist

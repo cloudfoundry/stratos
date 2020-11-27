@@ -22,10 +22,16 @@ export interface SessionEndpoints {
 export interface SessionEndpoint {
   [guid: string]: SessionDataEndpoint;
 }
+export enum APIKeysEnabled {
+  DISABLED = 'disabled',
+  ADMIN_ONLY = 'admin_only',
+  ALL_USERS = 'all_users'
+}
 export interface SessionDataConfig {
   enableTechPreview?: boolean;
   listMaxSize?: number;
   listAllowLoadMaxed?: boolean;
+  APIKeysEnabled?: APIKeysEnabled;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;
@@ -44,10 +50,17 @@ export interface SessionData {
   ['plugin-config']?: PluginConfig;
   plugins: {
     demo: boolean,
-    [pluginName: string]: boolean
+    [pluginName: string]: boolean,
   };
   config: SessionDataConfig;
 }
+
+export interface SessionDataEnvelope {
+  status: string;
+  error?: string;
+  data?: SessionData;
+}
+
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;

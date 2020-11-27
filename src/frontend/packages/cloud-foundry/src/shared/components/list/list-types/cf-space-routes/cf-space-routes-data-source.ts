@@ -32,10 +32,10 @@ export class CfSpaceRoutesDataSource extends CfRoutesDataSourceBase implements I
     const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
     const action = cfEntityCatalog.route.actions.getAllInSpace(
       spaceGuid, cfGuid, paginationKey, [
-        createEntityRelationKey(routeEntityType, applicationEntityType),
-        createEntityRelationKey(routeEntityType, domainEntityType),
-      ], true, false
-    )
+      createEntityRelationKey(routeEntityType, applicationEntityType),
+      createEntityRelationKey(routeEntityType, domainEntityType),
+    ], true, false
+    );
     action.initialParams['order-direction-field'] = 'creation';
     super(store, listConfig, cfGuid, action, false);
   }

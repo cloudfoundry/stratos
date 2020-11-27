@@ -48,7 +48,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     ).pipe(
       switchMap(([org, space]) =>
         cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
-      ))
+      ));
 
   }
 

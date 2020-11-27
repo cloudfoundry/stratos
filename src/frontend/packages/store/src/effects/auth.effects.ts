@@ -29,7 +29,7 @@ import { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { getDashboardStateSessionId } from '../helpers/store-helpers';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
-import { SessionData } from '../types/auth.types';
+import { SessionData, SessionDataEnvelope } from '../types/auth.types';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -73,19 +73,27 @@ export class AuthEffect {
         'x-cap-request-date': (Math.floor(Date.now() / 1000)).toString()
       };
 
-      return this.http.get<SessionData>('/pp/v1/auth/session/verify', {
+      return this.http.get<SessionDataEnvelope>('/api/v1/auth/verify', {
         headers,
         observe: 'response',
         withCredentials: true,
       }).pipe(
         mergeMap(response => {
-          const sessionData = response.body;
-          sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          this.rehydrateDashboardState(this.store, sessionData);
-          return [
-            stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
-            new VerifiedSession(sessionData, action.updateEndpoints)
-          ];
+          const envelope = response.body;
+          if (envelope.status === 'error') {
+            const ssoOptions = response.headers.get(SSO_HEADER) as string;
+            // Check for cookie domain mismatch with the requesting URL
+            const isDomainMismatch = this.isDomainMismatch(response.headers);
+            return action.login ? [new InvalidSession(false, false, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
+          } else {
+            const sessionData = envelope.data;
+            sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
+            this.rehydrateDashboardState(this.store, sessionData);
+            return [
+              stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
+              new VerifiedSession(sessionData, action.updateEndpoints)
+            ];
+          }
         }),
         catchError((err, caught) => {
           let setupMode = false;

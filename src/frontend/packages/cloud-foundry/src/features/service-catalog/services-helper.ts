@@ -22,7 +22,7 @@ import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
-import { fetchTotalResults } from '../cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../cf/cf.helpers';
 import { ServicePlanAccessibility } from './services.service';
 
 export const getSvcAvailability = (
@@ -80,7 +80,7 @@ export const fetchServiceInstancesCount = (
     cfGuid,
     createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
     { includeRelations: [], populateMissing: false }
-  )
+  );
   if (orgGuid) {
     action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
   }
@@ -121,7 +121,7 @@ export const getServicePlans = (
     }));
 };
 
-export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra }): string =>
+export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra, }): string =>
   plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
 
 export const getServicePlanAccessibility = (
@@ -205,5 +205,5 @@ export const getCfServiceInstance = (
       includeRelations,
       populateMissing: !!includeRelations
     }
-  )
+  );
 };

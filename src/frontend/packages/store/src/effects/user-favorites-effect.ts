@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, first, mergeMap, switchMap } from 'rxjs/operators';
+import { catchError, first, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { EntityDeleteCompleteAction } from '../actions/entity.delete.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import {
   GetUserFavoritesAction,
@@ -17,16 +18,16 @@ import {
   UpdateUserFavoriteMetadataAction,
   UpdateUserFavoriteMetadataSuccessAction,
 } from '../actions/user-favourites.actions';
-import { DispatchOnlyAppState } from '../app-state';
+import { InternalAppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { proxyAPIVersion } from '../jetstream';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite, userFavoritesPaginationKey } from '../types/user-favorites.types';
 import { UserFavoriteManager } from '../user-favorite-manager';
+import { STRATOS_ENDPOINT_TYPE, userFavouritesEntityType } from './../helpers/stratos-entity-factory';
 
 const favoriteUrlPath = `/pp/${proxyAPIVersion}/favorites`;
-
 
 @Injectable()
 export class UserFavoritesEffect {
@@ -34,7 +35,7 @@ export class UserFavoritesEffect {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<DispatchOnlyAppState>,
+    private store: Store<InternalAppState>,
     private userFavoriteManager: UserFavoriteManager
   ) {
   }
@@ -43,8 +44,8 @@ export class UserFavoritesEffect {
     ofType<SaveUserFavoriteAction>(SaveUserFavoriteAction.ACTION_TYPE),
     mergeMap(action => {
       const actionType = 'update';
-      this.store.dispatch(new StartRequestAction(action, actionType))
-      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite).pipe(
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      return this.http.post<UserFavorite<IFavoriteMetadata>>(favoriteUrlPath, action.favorite.getPayload()).pipe(
         switchMap(newFavorite => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action, actionType));
           this.store.dispatch(new SaveUserFavoriteSuccessAction(newFavorite));
@@ -63,7 +64,7 @@ export class UserFavoritesEffect {
     switchMap((action: GetUserFavoritesAction) => {
       const favEntityKey = entityCatalog.getEntityKey(action);
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.get<UserFavorite<IFavoriteMetadata>[]>(favoriteUrlPath).pipe(
         switchMap(favorites => {
           const mappedData = favorites.reduce<NormalizedResponse<UserFavorite<IFavoriteMetadata>>>((data, favorite) => {
@@ -79,8 +80,8 @@ export class UserFavoritesEffect {
           return [];
         }),
         catchError(() => {
-          this.store.dispatch(new GetUserFavoritesFailedAction())
-          this.store.dispatch(new WrapperRequestActionFailed('Failed to fetch user favorites', action, actionType))
+          this.store.dispatch(new GetUserFavoritesFailedAction());
+          this.store.dispatch(new WrapperRequestActionFailed('Failed to fetch user favorites', action, actionType));
           return [];
         })
       );
@@ -107,7 +108,7 @@ export class UserFavoritesEffect {
     ofType<RemoveUserFavoriteAction>(RemoveUserFavoriteAction.ACTION_TYPE),
     mergeMap((action: RemoveUserFavoriteAction) => {
       const actionType = 'update';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.delete<UserFavorite<IFavoriteMetadata>>(`${favoriteUrlPath}/${action.guid}`).pipe(
         switchMap(() => {
           this.store.dispatch(new WrapperRequestActionSuccess(null, action));
@@ -127,7 +128,7 @@ export class UserFavoritesEffect {
     ofType<UpdateUserFavoriteMetadataAction>(UpdateUserFavoriteMetadataAction.ACTION_TYPE),
     mergeMap((action: UpdateUserFavoriteMetadataAction) => {
       const actionType = 'update';
-      this.store.dispatch(new StartRequestAction(action, actionType))
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return this.http.post<UserFavorite<IFavoriteMetadata>>(
         `${favoriteUrlPath}/${action.favorite.guid}/metadata`,
         action.favorite.metadata
@@ -144,4 +145,20 @@ export class UserFavoritesEffect {
       );
     })
   );
+
+  @Effect()
+  entityDeleteRequest$ = this.actions$.pipe(
+    ofType<EntityDeleteCompleteAction>(EntityDeleteCompleteAction.ACTION_TYPE),
+    withLatestFrom(this.store),
+    mergeMap(([action, appState]) => {
+      // If there is a favorite, delete it
+      const fav = action.asFavorite();
+      const entityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, userFavouritesEntityType);
+      if (appState.requestData && appState.requestData[entityKey] && appState.requestData[entityKey][fav.guid]) {
+        this.store.dispatch(new RemoveUserFavoriteAction(fav));
+      }
+      return [];
+    })
+  );
+
 }

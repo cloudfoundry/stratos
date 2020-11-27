@@ -40,7 +40,6 @@ jobs:
         GITHUB_REPO: ((helm-repo-github-repository))
         GITHUB_TOKEN: ((github-access-token))
         GIT_PRIVATE_KEY: ((github-private-key))
-        GITHUB_TOKEN: ((github-access-token))
         DOCKER_ORG: ((docker-organization))
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))

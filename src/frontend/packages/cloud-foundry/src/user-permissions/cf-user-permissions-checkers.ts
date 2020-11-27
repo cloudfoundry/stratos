@@ -39,7 +39,7 @@ export const cfCurrentUserPermissionsService = [
     deps: [Store]
   },
   CurrentUserPermissionsService,
-]
+];
 
 export enum CfCurrentUserPermissions {
   APPLICATION_VIEW = 'view.application',
@@ -164,7 +164,10 @@ export const cfPermissionConfigs: IPermissionConfigs = {
   [CfCurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
   [CfCurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CfCurrentUserPermissions.ORGANIZATION_DELETE),
   [CfCurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
-  [CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+  [CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES]: new PermissionConfig(
+    CfPermissionTypes.ORGANIZATION,
+    CfPermissionStrings.ORG_MANAGER
+  ),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
   [CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT]: new PermissionConfig(CfPermissionTypes.SPACE, CfPermissionStrings.SPACE_DEVELOPER),
@@ -191,7 +194,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     allSpacesWithinOrg = false
-  ) {
+  ): Observable<boolean> {
+    // In some situations the observable returned here is not subscribed to (for example due to applyAdminCheck).
+    // This is bad (we should skip this function entirely) and should be fixed. This would require a thorough appraisal and overhaul.
     if (type === CfPermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
         return of(false);
@@ -214,11 +219,11 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       }),
       distinctUntilChanged(),
     );
-  };
+  }
 
   /**
-  * @param permissionConfig Single permission to be checked
-  */
+   * @param permissionConfig Single permission to be checked
+   */
   public getSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
     const check$ = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
     if (permissionConfig.type === CfPermissionTypes.ORGANIZATION || permissionConfig.type === CfPermissionTypes.SPACE) {
@@ -327,8 +332,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   /**
- * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
- */
+   * Includes read only admins, global auditors and users that don't have the cloud_controller.write scope
+   */
   private getReadOnlyCheck(endpointGuid: string) {
     return this.getCfEndpointState(endpointGuid).pipe(
       map(
@@ -357,6 +362,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
           return of(true);
         }
         if (isReadOnly) {
+          // This is bad, we should not assume that the check type wants a negative result if the user only has 'read only' rights.
           return of(false);
         }
         return check$;
@@ -365,8 +371,8 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   /**
- * If no endpoint is passed, check them all
- */
+   * If no endpoint is passed, check them all
+   */
   private getReadOnlyChecks(endpointGuid?: string) {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
@@ -431,9 +437,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     const groupedChecks = this.groupConfigs(permissionConfigs);
     return Object.keys(groupedChecks).map((permission: PermissionTypes) => {
       const configGroup = groupedChecks[permission];
-      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid)
+      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
       if (checkCombiner) {
-        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid))
+        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
       }
       return checkCombiner;
     });
@@ -487,6 +493,6 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
 
   public getFallbackCheck(endpointGuid: string, endpointType: string) {
     return endpointType === CF_ENDPOINT_TYPE ? this.getCfAdminCheck(endpointGuid) : null;
-  };
+  }
 
 }

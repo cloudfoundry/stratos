@@ -2,14 +2,15 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
 import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
-import { TabNavService } from '../../../../tab-nav.service';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
+import { TabNavService } from '../../../tab-nav.service';
 
 
 
@@ -54,7 +55,7 @@ export class PageSideNavComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable();
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map(item => item ? item.label : null));
   }
 
 }

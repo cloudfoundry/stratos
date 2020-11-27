@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { IMetrics } from '../../../../store/src/types/base-metric.types';
@@ -21,6 +21,16 @@ export class MetricsRangeSelectorService {
     {
       value: '1:hour',
       label: 'The past hour',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '1:day',
+      label: 'The past day',
+      queryType: MetricQueryType.QUERY
+    },
+    {
+      value: '3:day',
+      label: 'The past 3 days',
       queryType: MetricQueryType.QUERY
     },
     {

@@ -10,9 +10,13 @@ type SessionDataStore interface {
 	SetValues(session, group string, values map[string]string, autoExpire bool) error
 	DeleteValues(session, group string) error
 
+	IsValidSession(id int) (bool, error)
+
 	// Cleanup runs a background goroutine every interval that deletes expired sessions from the database
 	Cleanup(interval time.Duration) (chan<- struct{}, <-chan struct{})
 	
 	// StopCleanup stops the background cleanup from running
 	StopCleanup(quit chan<- struct{}, done <-chan struct{})
+
+
 }

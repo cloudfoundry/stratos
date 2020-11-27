@@ -21,6 +21,7 @@ export class TableCellServiceInstanceTagsComponent
   tags: AppChip<Tag>[] = [];
   @Input('row')
   set row(row) {
+    super.row = row;
     if (row) {
       this.tags.length = 0;
       if (row.entity && row.entity.service_instance && row.entity.service_instance.entity.tags) {
@@ -42,9 +43,4 @@ export class TableCellServiceInstanceTagsComponent
       }
     }
   }
-
-  constructor() {
-    super();
-  }
-
 }

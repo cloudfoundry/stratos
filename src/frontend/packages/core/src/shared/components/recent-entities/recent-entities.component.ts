@@ -1,15 +1,15 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { entityCatalog } from 'frontend/packages/store/src/entity-catalog/entity-catalog';
-import {
-  MAX_RECENT_COUNT,
-} from 'frontend/packages/store/src/reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/src/app-state';
+import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
+import {
+  MAX_RECENT_COUNT,
+} from '../../../../../store/src/reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
 import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { recentlyVisitedSelector } from '../../../../../store/src/selectors/recently-visitied.selectors';
 import { IRecentlyVisitedEntity } from '../../../../../store/src/types/recently-visited.types';
@@ -21,16 +21,18 @@ class RenderableRecent {
   public iconFont: string;
   constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
-    this.icon = catalogEntity.definition.icon;;
+    this.icon = catalogEntity.definition.icon;
     this.iconFont = catalogEntity.definition.iconFont;
-
+    if (!entity.endpointId) {
+      console.error(`Entity ${entity.guid} does not contain a value for endpointId - recent metadata is malformed`);
+    }
     if (entity.entityType === endpointEntityType) {
       this.subText$ = observableOf(entity.prettyType);
     } else {
       this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
         map(endpoints => {
-          if (Object.keys(endpoints).length > 1) {
-            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}  (${entity.prettyEndpointType})`;
+          if (entity.endpointId && Object.keys(endpoints).length > 1) {
+            return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
           }
           return entity.prettyType;
         })

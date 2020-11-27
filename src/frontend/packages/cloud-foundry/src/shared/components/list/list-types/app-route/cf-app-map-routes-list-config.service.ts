@@ -37,7 +37,7 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
       spaceGuid,
       appService.cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid)
-    )
+    );
     // If parentEntitySchema is set the entity validation process will look for the space routes in the parent space entity
     // In this case, we do have them however they're missing the route-->app relationship.. which means we fetch them at a rate of one per
     // route. For spaces with hundreds of routes this isn't acceptable, so remove the link to the parent and fetch the list afresh.

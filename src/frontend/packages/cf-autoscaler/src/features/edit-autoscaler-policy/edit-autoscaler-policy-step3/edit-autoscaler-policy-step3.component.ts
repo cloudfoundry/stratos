@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
@@ -12,12 +12,8 @@ import {
   recurringSchedulesOverlapping,
   timeIsSameOrAfter,
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import {
-  AppAutoscalerInvalidPolicyError,
-  AppAutoscalerPolicy,
-  AppAutoscalerPolicyLocal,
-} from '../../../store/app-autoscaler.types';
-import { EditAutoscalerPolicy } from '../edit-autoscaler-policy-base-step';
+import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
+import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
   validateRecurringSpecificMax,
@@ -32,7 +28,7 @@ import {
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy implements OnInit {
+export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
@@ -75,7 +71,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
     const { ...newSchedule } = AutoscalerConstants.PolicyDefaultRecurringSchedule;
     this.currentPolicy.schedules.recurring_schedule.push(newSchedule);
     this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
-  }
+  };
 
   removeRecurringSchedule(index: number) {
     if (this.editIndex === index) {
@@ -164,7 +160,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   validateRecurringScheduleGlobal(controlName?: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editRecurringScheduleForm) {
         if (controlName === 'repeat_type') {
           this.editRepeatType = control.value;
@@ -181,7 +177,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   validateRecurringScheduleInitialMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editRecurringScheduleForm &&
         numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count').value,
           this.editRecurringScheduleForm.get('instance_max_count').value + 1, false);
@@ -190,7 +186,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   validateRecurringScheduleDate(mutualName: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       if (this.editEffectiveType === 'always') {
         return null;
       }
@@ -210,7 +206,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   validateRecurringScheduleTime(mutualName: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const invalid = this.editRecurringScheduleForm &&
         timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time').value, this.editRecurringScheduleForm.get('end_time').value);
       const lastValid = this.editMutualValidation.time;
@@ -221,7 +217,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicy imp
   }
 
   validateRecurringScheduleWeekMonth(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
+    return (control: AbstractControl): { [key: string]: any, } => {
       const newSchedule: any = {
         start_time: this.editRecurringScheduleForm.get('start_time').value,
         end_time: this.editRecurringScheduleForm.get('end_time').value

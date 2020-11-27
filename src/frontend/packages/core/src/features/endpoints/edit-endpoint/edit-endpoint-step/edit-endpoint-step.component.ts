@@ -42,6 +42,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   existingEndpointNames$: Observable<string[]>;
   formChangeSub: Subscription;
   setClientInfo = false;
+  show = false;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -152,10 +153,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
               redirect: !o.error
             };
           })
-        )
+        );
       })
-    )
-  }
+    );
+  };
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.formChangeSub);

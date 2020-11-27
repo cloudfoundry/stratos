@@ -23,7 +23,7 @@ import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
-import { ActiveRouteCfOrgSpace } from '../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../features/cf/cf-page.types';
 import {
   fetchTotalResults,
   filterEntitiesByGuid,
@@ -35,7 +35,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions,
-} from '../../features/cloud-foundry/cf.helpers';
+} from '../../features/cf/cf.helpers';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 import {
   CfUser,
@@ -51,7 +51,7 @@ import {
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  users: { [guid: string]: Observable<APIResource<CfUser>> } = {};
+  users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
 
   constructor(
     private store: Store<CFAppState>,
@@ -93,7 +93,7 @@ export class CfUserService {
         return !!users ? users.filter(p => p.entity.cfGuid === endpointGuid) : null;
       }),
       filter(users => filterEmpty ? !!users : true)
-    )
+    );
 
   getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
     // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
@@ -117,7 +117,7 @@ export class CfUserService {
       publishReplay(1),
       refCount()
     );
-  }
+  };
 
   private parseOrgRole(
     user: CfUser,
@@ -260,7 +260,7 @@ export class CfUserService {
       }),
       first()
     );
-  }
+  };
 
   getUserRoleInSpace = (
     userGuid: string,
@@ -276,7 +276,7 @@ export class CfUserService {
         );
       })
     );
-  }
+  };
 
   fetchTotalUsers(cfGuid: string, orgGuid?: string, spaceGuid?: string): Observable<number> {
     return this.isConnectedUserAdmin(cfGuid).pipe(
@@ -447,7 +447,7 @@ export class CfUserService {
 
   private createCfGetAllUsersAction = (cfGuid: string): PaginatedAction => {
     return cfEntityCatalog.user.actions.getMultiple(cfGuid, null);
-  }
+  };
 
   private createOrgGetUsersAction = (isAdmin: boolean, cfGuid: string, orgGuid: string): PaginatedAction => {
     return cfEntityCatalog.user.actions.getAllInOrganization(
@@ -456,21 +456,21 @@ export class CfUserService {
       createEntityRelationPaginationKey(organizationEntityType, orgGuid),
       isAdmin
     );
-  }
+  };
 
-  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string, ): PaginatedAction => {
+  private createSpaceGetUsersAction = (isAdmin: boolean, cfGuid: string, spaceGuid: string): PaginatedAction => {
     return cfEntityCatalog.user.actions.getAllInSpace(
       spaceGuid,
       cfGuid,
       createEntityRelationPaginationKey(spaceEntityType, spaceGuid),
       isAdmin
     );
-  }
+  };
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
     this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
       filter(state => !!state),
       map(state => state.isAdmin),
       first()
-    )
+    );
 }

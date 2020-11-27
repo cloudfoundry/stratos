@@ -12,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -104,9 +104,10 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	var scopes []string
-	scopes = make([]string, 2)
+	scopes = make([]string, 3)
 	scopes[0] = user.Scope
 	scopes[1] = "password.write"
+	scopes[2] = "scim.write"
 
 	connectdUser := &interfaces.ConnectedUser{
 		GUID:   userGUID,

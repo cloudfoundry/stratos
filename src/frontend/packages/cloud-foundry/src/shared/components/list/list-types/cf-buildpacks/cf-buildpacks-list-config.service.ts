@@ -5,7 +5,7 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IBuildpack } from '../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfBuildpackCardComponent } from './cf-buildpack-card/cf-buildpack-card.component';
 import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';

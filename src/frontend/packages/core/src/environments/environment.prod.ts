@@ -6,8 +6,6 @@ export const environment = {
   proxyAPIVersion,
   cfAPIVersion,
   logLevel: LogLevel.WARN,
-  logToConsole: true,
-  logEnableConsoleActions: false,
   showObsDebug: false,
   disablePolling: true,
   desktopMode: false,

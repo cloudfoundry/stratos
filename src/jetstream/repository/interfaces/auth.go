@@ -1,7 +1,10 @@
 package interfaces
 
-import (
-	"github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
+
+const (
+	// DefaultAdminUserName is the default admin user name
+	DefaultAdminUserName = "admin"
 )
 
 //StratosAuth provides common access to Stratos login/logout functionality

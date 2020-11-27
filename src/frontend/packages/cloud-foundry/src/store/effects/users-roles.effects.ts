@@ -2,9 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import {
-  ManageUsersSetUsernamesHelper,
-} from 'frontend/packages/cloud-foundry/src/features/cloud-foundry/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -21,6 +18,9 @@ import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions
 import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import {
+  ManageUsersSetUsernamesHelper,
+} from '../../features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { CfUserService } from '../../shared/data-services/cf-user.service';
 import { fetchCfUserRole } from '../../user-permissions/cf-user-roles-fetch';
 import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';

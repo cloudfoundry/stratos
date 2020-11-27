@@ -1,20 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
-import { APIResource, EntityInfo } from 'frontend/packages/store/src/types/api.types';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
+import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { ICfV2Info } from '../../../../cf-api.types';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
-} from '../../../../features/cloud-foundry/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
-import {
-  UserInviteConfigureService,
-  UserInviteService,
-} from '../../../../features/cloud-foundry/user-invites/user-invite.service';
+} from '../../../../features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
+import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 
 @Component({
   selector: 'app-card-cf-info',

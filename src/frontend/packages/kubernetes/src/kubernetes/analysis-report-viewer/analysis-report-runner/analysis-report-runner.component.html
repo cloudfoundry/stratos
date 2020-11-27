@@ -1,0 +1,15 @@
+<ng-container *ngIf="canShow$ | async">
+  <div *ngIf="analyzers$ | async as analyzers" class="report-runner">
+    <mat-menu #appMenu="matMenu">
+      <button (click)="runAnalysis(analyzer.id)" mat-menu-item
+        *ngFor="let analyzer of analyzers">{{ analyzer.name }}</button>
+      <mat-divider class="report-runner__divider"></mat-divider>
+      <button (click)="showAnalyzersInfo()" mat-menu-item>Analyzer Info</button>
+    </mat-menu>
+
+    <button mat-button [matMenuTriggerFor]="appMenu" *ngIf="analyzers.length > 0" class="report-runner__run">
+      <span>Analyze</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+  </div>
+</ng-container>

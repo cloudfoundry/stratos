@@ -5,7 +5,6 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
 
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-table-cell-edit-variable',
   templateUrl: './table-cell-edit-variable.component.html',
@@ -31,6 +30,6 @@ export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVa
       },
       disableClose: false
     });
-  }
+  };
 
 }

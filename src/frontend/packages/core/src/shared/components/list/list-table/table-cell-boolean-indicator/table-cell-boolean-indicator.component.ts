@@ -14,23 +14,21 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
   templateUrl: './table-cell-boolean-indicator.component.html',
   styleUrls: ['./table-cell-boolean-indicator.component.scss']
 })
-export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T> {
+export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
-  private pRow: T;
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (this.config) {
       this.enabled = this.config.isEnabled(row);
     }
   }
 
-  private pConfig: TableCellBooleanIndicatorComponentConfig<T>;
   @Input('config')
-  get config() { return this.pConfig; }
+  get config() { return super.config; }
   set config(config: TableCellBooleanIndicatorComponentConfig<T>) {
-    this.pConfig = config;
+    super.config = config;
     if (!config) {
       return;
     }

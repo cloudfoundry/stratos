@@ -1,0 +1,115 @@
+{{- if .Values.console.techPreview }}
+---
+{{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
+apiVersion: apps/v1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Deployment
+metadata:
+  name: stratos-analyzers
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-analyzers"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "stratos"
+      app.kubernetes.io/component: "stratos-analyzers"
+  template:
+    metadata:
+{{- if .Values.console.podAnnotations }}
+      annotations:
+{{ toYaml .Values.console.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        app.kubernetes.io/name: "stratos"
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+        app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+        app.kubernetes.io/component: "stratos-analyzers"
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        app: "{{ .Release.Name }}"
+        {{- if .Values.console.podExtraLabels}}
+        {{ toYaml .Values.console.podExtraLabels | nindent 8 }}
+        {{- end}}        
+    spec:
+      containers:
+      - name: analyzers
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/stratos-analyzers:{{.Values.consoleVersion}}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        ports:
+        - name: api
+          containerPort: 8090
+        env:
+        - name: STRATOS_IMAGE_REF
+          value: "{{.Values.consoleVersion}}:{{ .Release.Revision }}"
+        - name: ANALYSIS_SCRIPTS_DIR
+          value: "/scripts"
+        - name: ANALYSIS_REPORTS_DIR
+          value: "/reports"
+        volumeMounts:
+        - name: data
+          mountPath: /reports
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
+      imagePullSecrets:
+      - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      {{- if not .Values.console.reportsVolumeDisabled }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: "{{ .Release.Name }}-reports"
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-analyzers"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-analyzers-service"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: ClusterIP
+  ports:
+  - name: analyzers
+    port: 8090
+    targetPort: 8090
+  selector:
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/component: "stratos-analyzers"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: "{{ .Release.Name }}-reports"
+  labels:
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    app.kubernetes.io/component: "stratos-reports-volume"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+  annotations:
+  {{- if .Values.storageClass }}
+    volume.beta.kubernetes.io/storage-class: {{ .Values.storageClass | quote }}
+  {{- else }}
+    volume.alpha.kubernetes.io/storage-class: default
+  {{- end }}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: {{ default "1Gi" .Values.console.reportsVolumeSize | quote }}
+{{- end }}

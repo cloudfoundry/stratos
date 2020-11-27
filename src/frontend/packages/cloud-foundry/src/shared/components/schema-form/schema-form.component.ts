@@ -1,9 +1,9 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { JsonPointer } from '@cfstratos/ajsf-core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { JsonPointer } from '@cfstratos/ajsf-core';
 
 import { safeStringToObj } from '../../../../../core/src/core/utils.service';
 import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';
@@ -125,7 +125,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
       return obj;
     }, {});
     return Object.keys(filterSchema).length > 0 ? filterSchema : null;
-  }
+  };
 
   onFormChange(formData) {
     this.formData = formData;
@@ -149,6 +149,6 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
       }, '');
       return `${a} ${arrMessage} ${c.message} <br>`;
     }, '');
-  }
+  };
 
 }

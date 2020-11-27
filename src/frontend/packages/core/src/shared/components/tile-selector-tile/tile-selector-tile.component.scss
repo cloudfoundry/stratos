@@ -1,74 +1,90 @@
-.tile-selector {
-  $tile-height: 200px;
-  border-radius: 3px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  height: $tile-height;
-  opacity: .5;
-  transition: transform .2s ease;
-  user-select: none;
-  width: 100%;
 
-  &__taller {
-    height: 260px;
-  }
-  &:hover {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  &__more {
-    align-items: center;
+@mixin create($tile-height: 200px, $icon-size: 80px) {
+  $img-size: $tile-height / 2;
+
+  .tile-selector {
+    border-radius: 3px;
     cursor: pointer;
     display: flex;
-    font-size: 16px;
+    flex-direction: column;
     height: $tile-height;
-    justify-content: center;
-  }
-
-  &:active {
-    transform: scale(.98);
-  }
-
-  &__active {
-    opacity: 1;
-  }
-
-  &__header {
-    align-items: center;
-    display: flex;
-    flex: 2;
-    justify-content: center;
+    opacity: .5;
+    transition: transform .2s ease;
+    user-select: none;
     width: 100%;
 
-    img {
-      height: 100px;
+    &:hover {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+    &__more {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      font-size: 16px;
+      height: $tile-height;
+      justify-content: center;
+    }
+
+    &:active {
+      transform: scale(.98);
+    }
+
+    &__active {
+      opacity: 1;
+    }
+
+    &__header {
+      align-items: center;
+      display: flex;
+      flex: 2;
+      justify-content: center;
+      width: 100%;
+
+      img {
+        height: $img-size;
+      }
+    }
+
+    &__description {
+      flex: 0;
+      padding: 10px;
+      text-align: center;
+    }
+
+    &__content {
+      display: flex;
+      flex: 0;
+      flex-direction: column;
+      justify-content: center;
+      opacity: .8;
+      padding: 0 1em;
+      position: relative;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+    &__icon {
+      font-size: $icon-size;
+      height: $icon-size;
+      opacity: .6;
+      width: $icon-size;
     }
   }
+}
 
-  &__description {
-    flex: 0;
-    padding: 10px;
-    text-align: center;
+.tile-selector-parent {
+  @include create;
+
+  &.smaller {
+    @include create(160px, 60px);
   }
 
-  &__content {
-    display: flex;
-    flex: 0;
-    flex-direction: column;
-    justify-content: center;
-    opacity: .8;
-    padding: 0 1em;
-    position: relative;
-    text-align: center;
-    word-wrap: break-word;
-  }
-
-  $icon-size: 80px;
-  &__icon {
-    font-size: $icon-size;
-    height: $icon-size;
-    opacity: .6;
-    width: $icon-size;
+  &.compact {
+    @include create(160px, 60px);
+    h3 {
+      font-size: 14px;
+      margin: 10px;
+    }
   }
 }

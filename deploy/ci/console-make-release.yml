@@ -3,7 +3,7 @@ resource_types:
 - name: stratos-git-resource
   type: docker-image
   source:
-    repository: splatform/stratos-git-tag-resource
+    repository: ghcr.io/cf-stratos/stratos-git-tag-resource
 resources:
 # Stratos Git Repository
 - name: stratos
@@ -80,3 +80,4 @@ jobs:
         HELM_RELEASE_REPO_FOLDER: ((release-helm-stable-folder))
         HELM_RELEASE_REGISTRY_HOST: ((release-repository))
         HELM_RELEASE_REGISTRY_ORG: ((release-repository-organization))
+        TAG_SUFFIX: ((tag-suffix))

@@ -1,0 +1,11 @@
+.node-link {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  mat-icon {
+    padding-left: 10px;
+  }
+  &__help {
+    cursor: help;
+  }
+}

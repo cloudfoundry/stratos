@@ -7,12 +7,14 @@ import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 import { RouterNav } from '../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
 import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
+import { EntityCatalogHelpers } from '../../../store/src/entity-catalog/entity-catalog.helper';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { EndpointHealthChecks } from '../../endpoints-health-checks';
+import { IEndpointFavMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
 
@@ -24,6 +26,7 @@ export class EndpointsService implements CanActivate {
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
   disablePersistenceFeatures$: Observable<boolean>;
+  connectedEndpoints$: Observable<EndpointModel[]>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
     if (!endpoint) {
@@ -32,7 +35,14 @@ export class EndpointsService implements CanActivate {
     const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
     const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
     if (catalogEntity) {
-      return catalogEntity.builders.entityBuilder.getLink(metadata);
+      const fav = new UserFavorite<IEndpointFavMetadata>(
+        endpoint.guid,
+        endpoint.cnsi_type,
+        EntityCatalogHelpers.endpointType,
+        null,
+        metadata
+      );
+      return fav.getLink();
     }
     return '';
   }
@@ -44,18 +54,17 @@ export class EndpointsService implements CanActivate {
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
-    this.haveConnected$ = this.endpoints$.pipe(map(endpoints =>
-      !!Object.values(endpoints).find(endpoint => {
+    this.connectedEndpoints$ = this.endpoints$.pipe(map(endpoints =>
+      Object.values(endpoints).filter(endpoint => {
         const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
         if (!epType || !epType.definition) {
           return false;
         }
         const epEntity = epType.definition;
-        return epEntity.unConnectable ||
-          endpoint.connectionStatus === 'connected' ||
-          endpoint.connectionStatus === 'checking';
-      }))
-    );
+        return epEntity.unConnectable || endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking';
+      })
+    ));
+    this.haveConnected$ = this.connectedEndpoints$.pipe(map(endpoints => endpoints.length > 0));
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
       map((auth) => auth.sessionData &&

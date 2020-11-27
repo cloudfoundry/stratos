@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 )
 
 const (
@@ -31,11 +33,21 @@ const (
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"
 	jetStreamSessionContextUpdatedKey = "jetstream-session-updated"
+
+	// Header to communicate whether SSO Login is enabled and if so, any configured options
+	stratosSSOHeader = "x-stratos-sso-login"
 )
 
 // SessionValueNotFound - Error returned when a requested key was not found in the session
 type SessionValueNotFound struct {
 	msg string
+}
+
+// SessionInfoEnvelope -- contains response status, data and/or errors
+type SessionInfoEnvelope struct {
+	Status string           `json:"status"`
+	Error  string           `json:"error"`
+	Data   *interfaces.Info `json:"data"`
 }
 
 func (e *SessionValueNotFound) Error() string {
@@ -238,52 +250,73 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	p.StratosAuthService.BeforeVerifySession(c)
 
-	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
-	if err != nil {
-		msg := "Could not find session date"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
+	p.StratosAuthService.BeforeVerifySession(c)
 
-	sessionUser, err := p.GetSessionStringValue(c, "user_id")
-	if err != nil {
-		msg := "Could not find user_id in Session"
-		log.Error(msg)
-		return echo.NewHTTPError(http.StatusForbidden, msg)
-	}
+	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
+		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
+		if err != nil {
+			return nil, errors.New("Could not find session date")
+		}
 
-	err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
+		sessionUser, err := p.GetSessionStringValue(c, "user_id")
+		if err != nil {
+			return nil, errors.New("Could not find user_id in Session")
+		}
 
-	// Could not verify session
-	if err != nil {
-		log.Error(err)
-		err = echo.NewHTTPError(http.StatusForbidden, "Could not verify user")
-
-	} else {
+		err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
+		if err != nil {
+			return nil, errors.New("Could not verify user")
+		}
 
 		// Still need to extend the expires_on of the Session (set session will save session, in save we update `expires_on`)
 		if err = p.setSessionValues(c, nil); err != nil {
-			return err
+			return nil, err
 		}
 
-		err = p.handleSessionExpiryHeader(c)
-		if err != nil {
-			return err
+		if err = p.handleSessionExpiryHeader(c); err != nil {
+			return nil, err
 		}
 
 		info, err := p.getInfo(c)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return nil, err
 		}
 
 		// Add XSRF Token
 		p.ensureXSRFToken(c)
 
-		err = c.JSON(http.StatusOK, info)
-		if err != nil {
-			return err
-		}
+		return info, err
 	}
 
-	return err
+	info, sessionVerifyErr := collectErrors(p, c)
+	if sessionVerifyErr != nil {
+		p.clearSessionCookie(c, true)
+
+		// Add header so front-end knows SSO login is enabled
+		if p.Config.SSOLogin {
+			// A non-empty SSO Header means SSO is enabled
+			// Use the string "enabled" or send the options string if we have one
+			options := "enabled"
+			if len(p.Config.SSOOptions) > 0 {
+				options = p.Config.SSOOptions
+			}
+			c.Response().Header().Set(stratosSSOHeader, options)
+		}
+
+		return c.JSON(
+			http.StatusOK,
+			SessionInfoEnvelope{
+				Status: "error",
+				Error:  sessionVerifyErr.Error(),
+			},
+		)
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		SessionInfoEnvelope{
+			Status: "ok",
+			Data:   info,
+		},
+	)
 }

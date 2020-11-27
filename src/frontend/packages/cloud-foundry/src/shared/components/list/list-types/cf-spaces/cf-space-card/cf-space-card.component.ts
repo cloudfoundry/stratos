@@ -14,7 +14,6 @@ import { ConfirmationDialogConfig } from '../../../../../../../../core/src/share
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -23,19 +22,18 @@ import { MenuItem } from '../../../../../../../../store/src/types/menu-item.type
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
-import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { getSpaceRolesString } from '../../../../../../features/cf/cf.helpers';
+import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
   createSpaceQuotaDefinition,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
-import { SpaceQuotaHelper } from '../../../../../../features/cloud-foundry/services/cloud-foundry-space-quota';
+} from '../../../../../../features/cf/services/cloud-foundry-organization.service';
+import { SpaceQuotaHelper } from '../../../../../../features/cf/services/cloud-foundry-space-quota';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 
@@ -70,7 +68,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private emf: EntityMonitorFactory,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private userFavoriteManager: UserFavoriteManager
   ) {
     super();
   }
@@ -79,7 +77,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, cfEntityFactory(spaceEntityType));
     this.orgGuid = this.cfOrgService.orgGuid;
-    this.favorite = getFavoriteFromEntity(this.row, spaceEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
+    this.favorite = getFavoriteFromEntity(this.row, spaceEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE);
     this.cardMenu = [
       {
         label: 'Edit',

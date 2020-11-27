@@ -1,0 +1,79 @@
+:host {
+  border: 1px solid #ccc;
+  display: flex;
+  padding: 0 12px;
+
+  &:not(:first-child) {
+    border-top: 0;
+  }
+}
+
+.compact-app-card {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-size: 14px;
+  height: 40px;
+  width: 100%;
+  &__name {
+    flex: 1;
+    padding-left: 12px;
+  }
+  &__subtle {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+}
+
+$ph-bg:                   #fff !default;
+$ph-color:                #ced4da !default;
+$ph-border-radius:        2px !default;
+
+$ph-gutter:               30px !default;
+$ph-spacer:               15px !default;
+
+$ph-avatar-border-radius: 50% !default;
+
+$ph-animation-duration: .8s !default;
+
+.ph-item {
+  height: 14px;
+  background-color: #d8d8d8;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    animation: phAnimation $ph-animation-duration linear infinite;
+    background: linear-gradient(to right, rgba($ph-bg, 0) 46%, rgba($ph-bg, .35) 50%, rgba($ph-bg, 0) 54%) 50% 50%;
+    content: '';
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 50%;
+    z-index: 1;
+    width: 500%;
+    margin-left: -250%;
+    position: absolute;    
+  }
+
+  &.ph-large {
+    width: 120px;
+  }
+  &.ph-small {
+    width: 80px;
+  }
+  &.ph-icon {
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+  }
+}
+
+@keyframes phAnimation {
+  0% {
+    transform: translate3d(-30%, 0, 0);
+  }
+  100% {
+    transform: translate3d(30%, 0, 0);
+  }
+}

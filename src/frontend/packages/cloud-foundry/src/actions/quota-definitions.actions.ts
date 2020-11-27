@@ -7,7 +7,7 @@ import { cfEntityFactory } from '../cf-entity-factory';
 import { organizationEntityType, quotaDefinitionEntityType, spaceQuotaEntityType } from '../cf-entity-types';
 import { CFEntityConfig } from '../cf-types';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../entity-relations/entity-relations.types';
-import { QuotaFormValues } from '../features/cloud-foundry/quota-definition-form/quota-definition-form.component';
+import { QuotaFormValues } from '../features/cf/quota-definition-form/quota-definition-form.component';
 import { CFStartAction } from './cf-action.types';
 
 export const GET_QUOTA_DEFINITION = '[QuotaDefinition] Get one';

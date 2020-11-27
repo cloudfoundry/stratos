@@ -12,6 +12,8 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
@@ -36,7 +38,9 @@
       "@stratosui/cloud-foundry": ["frontend/packages/cloud-foundry/src/public_api.ts"],
       "@stratosui/cf-autoscaler": ["frontend/packages/cf-autoscaler/src/public_api.ts"],
       "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
+      "@stratosui/kubernetes": ["frontend/packages/kubernetes/src/public-api.ts"],
       "@stratosui/desktop-extensions": ["frontend/packages/desktop-extensions/src/public-api.ts"],
+      "@stratosui/git": ["frontend/packages/git/src/public_api.ts"],
     }
   }
 }

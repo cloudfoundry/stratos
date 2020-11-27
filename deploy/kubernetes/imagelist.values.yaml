@@ -6,3 +6,7 @@
 kube:
   registry:
     hostname:
+
+# Enable tech preview to include analyzer image
+console:
+  techPreview: true

@@ -1,0 +1,15 @@
+.keys-page {
+  &__new {
+    mat-card {
+      margin-bottom: 24px;
+      mat-card-header {
+        align-items: center;
+        display: flex;
+        margin-bottom: 15px;
+        mat-icon {
+          margin-right: 5px;
+        }
+      }
+    }
+  }
+}

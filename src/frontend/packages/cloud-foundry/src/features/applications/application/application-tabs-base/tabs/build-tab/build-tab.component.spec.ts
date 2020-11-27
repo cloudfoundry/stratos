@@ -5,10 +5,10 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
-import { GITHUB_API_URL } from '../../../../../../../../core/src/core/github.helpers';
 import { APP_GUID, CF_GUID } from '../../../../../../../../core/src/shared/entity.tokens';
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
-import { TabNavService } from '../../../../../../../../core/tab-nav.service';
+import { TabNavService } from '../../../../../../../../core/src/tab-nav.service';
+import { GITHUB_API_URL } from '../../../../../../../../git/src/shared/github.helpers';
 import { AppStoreModule } from '../../../../../../../../store/src/store.module';
 import { ApplicationServiceMock } from '../../../../../../../test-framework/application-service-helper';
 import { generateCfStoreModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';

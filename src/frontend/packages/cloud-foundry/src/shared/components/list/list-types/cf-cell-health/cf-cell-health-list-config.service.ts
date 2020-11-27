@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -17,12 +18,14 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { FetchCFCellMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
 import { CFAppState } from '../../../../../cf-app-state';
-import { CfCellHelper } from '../../../../../features/cloud-foundry/cf-cell.helpers';
+import { CfCellHelper } from '../../../../../features/cf/cf-cell.helpers';
 import {
   CloudFoundryCellService,
-} from '../../../../../features/cloud-foundry/tabs/cloud-foundry-cells/cloud-foundry-cell/cloud-foundry-cell.service';
+} from '../../../../../features/cf/tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell.service';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './cf-cell-health-source';
+
+// tslint:enable:max-line-length
 
 @Injectable()
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
@@ -93,6 +96,6 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
         field: 'state'
       }
     },
-  ]
+  ];
   getDataSource = () => this.dataSource;
 }

@@ -1,0 +1,12 @@
+<app-page-sub-nav>
+  <app-analysis-report-runner [kubeId]="helmReleaseHelper.endpointGuid" [namespace]="helmReleaseHelper.namespace"
+    [app]="helmReleaseHelper.releaseTitle">
+  </app-analysis-report-runner>
+  <app-analysis-report-selector prompt="Report" [allowNone]="false" (selected)="analysisChanged($event)"
+    [autoSelect]="true" [endpoint]="helmReleaseHelper.endpointGuid" (reportCount)="onReportCount($event)" [path]="path">
+  </app-analysis-report-selector>
+</app-page-sub-nav>
+
+<app-analysis-report-viewer [report]="report$ | async"></app-analysis-report-viewer>
+<app-no-content-message *ngIf="noReportsAvailable" icon="assignment" [hidden]="false" firstLine="No reports available">
+</app-no-content-message>

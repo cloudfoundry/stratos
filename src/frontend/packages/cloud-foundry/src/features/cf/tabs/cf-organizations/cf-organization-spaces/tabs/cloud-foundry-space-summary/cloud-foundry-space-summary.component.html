@@ -1,0 +1,84 @@
+<app-page-sub-nav>
+  <button mat-icon-button name="rename"
+    *appCfUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"
+    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space"
+    matTooltip="Edit Space">
+    <mat-icon>edit</mat-icon>
+  </button>
+  <button mat-icon-button name="delete"
+    *appCfUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
+    (click)="deleteSpaceWarn()" matTooltip="Delete Space">
+    <mat-icon>delete</mat-icon>
+  </button>
+  <button mat-icon-button name="cli"
+    routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/cli"
+    matTooltip="CLI Info">
+    <mat-icon>keyboard</mat-icon>
+  </button>
+</app-page-sub-nav>
+
+<div>
+  <app-tile-grid fit="true">
+    <app-tile-group>
+      <app-tile>
+        <app-card-cf-space-details>
+        </app-card-cf-space-details>
+      </app-tile>
+    </app-tile-group>
+    <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps"
+            icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
+          <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
+            value="{{ (cfSpaceService.appInstances$ | async) }}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
+            iconFont="stratos-icons" icon="route" label="Routes"
+            value="{{ (cfSpaceService.routes$ | async)?.length }}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users"
+            icon="person" label="Users" labelSingular="User" value="{{(cfSpaceService.usersCount$ | async)}}">
+          </app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric
+            link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
+            iconFont="stratos-icons" icon="service" label="Service Instances"
+            value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="(cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0">
+          <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+            value="{{ (cfSpaceService.userProvidedServiceInstancesCount$ | async)}}"></app-card-number-metric>
+        </app-tile>
+        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
+          <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
+            value="{{ (cfSpaceService.totalMem$ | async) }}"
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+
+      <app-tile-group>
+        <app-tile>
+          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfSpaceService.apps$"
+            [endpoint]="cfEndpointService.cfGuid"
+          [loading$]="cfSpaceService.loadingApps$" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>
+        </app-tile>
+      </app-tile-group>
+    </app-loading-page>
+  </app-tile-grid>
+</div>

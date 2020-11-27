@@ -1,8 +1,7 @@
-import { DataSource } from '@angular/cdk/table';
 import { Component, Input, OnInit } from '@angular/core';
 import { schema } from 'normalizr';
 import { never as observableNever, Observable, of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -26,7 +25,9 @@ import { ITableColumn } from '../list/list-table/table.types';
 export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input()
-  private data$: Observable<Array<T>> = observableNever();
+  public data$: Observable<Array<T>> = observableNever();
+
+  public replayData$: Observable<Array<T>>;
 
   @Input()
   public entityKey: string;
@@ -58,7 +59,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   @Input()
   public columns: ITableColumn<T>[] = [];
 
-  public dataSource: DataSource<T>;
+  public dataSource: ITableListDataSource<T>;
 
   public allColumns: ITableColumn<T>[] = [];
 
@@ -78,16 +79,25 @@ export class AppActionMonitorComponent<T> implements OnInit {
     const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
-      cellConfig: this.getCellConfig || defaultGetCellConfig,
+      cellConfig: {
+        getConfig: this.getCellConfig || defaultGetCellConfig
+      },
       cellFlex: '0 0 24px'
     };
 
+    // Some data$ obs only ever emit once. If we subscribed directly to this then that emit would be consumed and will not be available
+    // in the data source connect subscription. So wrap it in a replay to ensure the last emitted value is available
+    this.replayData$ = this.data$.pipe(
+      publishReplay(1),
+      refCount()
+    );
+
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
-      connect: () => this.data$,
+      connect: () => this.replayData$,
       disconnect: () => { },
       trackBy: (index, item) => {
-        const fn = monitorColumn.cellConfig(item).getId;
+        const fn = monitorColumn.cellConfig.getConfig(item).getId;
         if (fn) {
           return fn(item);
         } else if (this.getId) {
@@ -98,7 +108,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       isTableLoading$: observableOf(false),
       getRowState: (row) => {
         // Get the row state of the ENTITY
-        const cellConfig = monitorColumn.cellConfig(row);
+        const cellConfig = monitorColumn.cellConfig.getConfig(row);
         const monitorState = new ActionMonitorComponentState(
           this.entityMonitorFactory,
           cellConfig.getId(row),
@@ -117,7 +127,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
           })
         );
       }
-    } as ITableListDataSource<T>;
+    };
   }
 
 

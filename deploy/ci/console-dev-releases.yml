@@ -1,3 +1,4 @@
+# This pipeline creates an Alpha, Beta or RC release
 ---
 resource_types:
 - name: docker-image
@@ -13,8 +14,8 @@ resources:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-    # Match any Version 3 release (alpha, beta, rc) other than the actual release
-    tag_filter: "3*-*"
+    # Match any Version 4 release (alpha, beta, rc) other than the actual release
+    tag_filter: "4*-*"
 - name: helm-repo
   type: git
   source:
@@ -46,7 +47,19 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-console
-
+- name: kube-terminal-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-kube-terminal
+- name: analyzers-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-analyzers
+    
 # Artifacts
 - name: image-tag
   type: s3
@@ -101,6 +114,7 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))
 - name: build-images
   plan:
   - get: stratos
@@ -121,21 +135,7 @@ jobs:
           build_args_file: image-tag/build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: mariadb-image
-        params:
-          dockerfile: stratos/deploy/db/Dockerfile.mariadb
-          build: stratos/deploy/db
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
-    - do:
-      - put: config-init-image
-        params:
-          dockerfile: stratos/deploy/Dockerfile.init
-          build: stratos/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
+    - do: 
       - put: ui-image
         params:
           dockerfile: stratos/deploy/Dockerfile.ui
@@ -145,6 +145,36 @@ jobs:
           build_args_file: image-tag/ui-build-args
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
+    - do:
+      - put: mariadb-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: config-init-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.init
+          build: stratos/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: analyzers-image
+        params:
+          dockerfile: stratos/src/jetstream/plugins/analysis/container/Dockerfile
+          build: stratos/src/jetstream/plugins/analysis/container/
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+      - put: kube-terminal-image
+        params:
+          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
+          build: stratos/deploy/containers/kube-terminal
+          tag: image-tag/v2-alpha-tag
+          patch_base_reg: ((patch-base-reg))
+          patch_base_tag: ((patch-base-tag))
+
 - name: create-chart
   plan:
   - get: stratos
@@ -170,6 +200,7 @@ jobs:
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+        TAG_SUFFIX: ((tag-suffix))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
@@ -197,3 +228,4 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))

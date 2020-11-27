@@ -2,11 +2,9 @@ import { browser } from 'protractor';
 
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
-import { extendE2ETestTime } from '../helpers/extend-test-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
-import { CreateServiceInstance } from './create-service-instance.po';
 import { ServicesHelperE2E } from './services-helper-e2e';
 import { ServicesWallPage } from './services-wall.po';
 
@@ -18,7 +16,6 @@ describe('Service Instances Wall', () => {
   // Ideally we should test with both one and more than one cf's connected, however for the moment we're just testing without
   const hasCfFilter = false; // e2e.secrets.getCloudFoundryEndpoints().length > 1;, registerMultipleCloudFoundries()
 
-  const createServiceInstance = new CreateServiceInstance();
   let e2eSetup;
   let servicesHelperE2E: ServicesHelperE2E;
   let serviceInstanceName: string;
@@ -31,24 +28,11 @@ describe('Service Instances Wall', () => {
       .getInfo();
   });
 
-  beforeEach(() => {
-    servicesWallPage.sideNav.goto(SideNavMenuItem.Services);
-    servicesWallPage.waitForPage();
+  beforeAll(() => {
     servicesHelperE2E = new ServicesHelperE2E(e2eSetup, new CreateMarketplaceServiceInstance(), servicesHelperE2E);
-  });
 
-  describe('', () => {
-    const timeout = 60000;
-    extendE2ETestTime(timeout);
-
-    it('- should create service instance all tests depend on', () => {
-      // FIXME: To save time the service should be created via api call
-      createServiceInstance.navigateTo();
-      createServiceInstance.waitForPage();
-      createServiceInstance.selectMarketplace();
-      serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
-      servicesHelperE2E.createService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
-    });
+    serviceInstanceName = servicesHelperE2E.createServiceInstanceName();
+    return servicesHelperE2E.createServiceViaAPI(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
   });
 
   it('- should reach service instances wall page', () => {
@@ -61,7 +45,12 @@ describe('Service Instances Wall', () => {
     expect(servicesWallPage.header.getTitleText()).toEqual('Services');
   });
 
+  it('- should have a refresh button', () => {
+    expect(servicesWallPage.serviceInstancesList.header.getRefreshListButton().isPresent()).toBeTruthy();
+  });
+
   it('- should have visible services', () => {
+    servicesWallPage.serviceInstancesList.header.refresh();
     servicesWallPage.getServiceInstances().then(services => {
       expect(services.length).toBeGreaterThan(0);
     });
@@ -97,6 +86,7 @@ describe('Service Instances Wall', () => {
   });
 
   it('- should be able to search', () => {
+    servicesWallPage.serviceInstancesList.header.refresh();
     servicesWallPage.serviceInstancesList.header.setSearchText(serviceInstanceName).then(
       () => {
         expect(servicesWallPage.serviceInstancesList.header.getSearchText()).toEqual(serviceInstanceName);
@@ -105,10 +95,6 @@ describe('Service Instances Wall', () => {
         });
       }
     );
-  });
-
-  it('- should have a refresh button', () => {
-    expect(servicesWallPage.serviceInstancesList.header.getRefreshListButton().isPresent()).toBeTruthy();
   });
 
   it('- should be able to refresh list', () => {

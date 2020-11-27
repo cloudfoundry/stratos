@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -17,7 +17,6 @@ import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import {
-  getServiceBrokerName,
   getServiceName,
   getServicePlanName,
   getServiceSummaryUrl,
@@ -26,6 +25,10 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+import {
+  TableCellServiceBrokerComponentConfig,
+  TableCellServiceBrokerComponentMode,
+} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -36,7 +39,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
-
+    super.row = row;
     if (row) {
       this.serviceInstanceEntity = row;
       const schema = cfEntityFactory(serviceInstancesEntityType);
@@ -97,20 +100,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         );
       }
 
-      if (!this.serviceBrokerName$) {
-        // Note, here we just need the service's service broker. This should be available by
-        // `this.serviceInstanceEntity.entity.service_plan.entity.service.entity.service_broker_guid` however can be empty (see #4397).
-        // So fetch the service separately, as per the table way (this shouldn't start a http request if it's already in the store) 
-        this.serviceBrokerName$ = this.service$.pipe(
-          switchMap(service => getServiceBrokerName(service.entity.service_broker_guid, service.entity.cfGuid))
-        )
-      }
-
       if (!this.serviceName$) {
         // See note for this.serviceBrokerName$
         this.serviceName$ = this.service$.pipe(
           map(getServiceName)
-        )
+        );
       }
 
       this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
@@ -142,12 +136,19 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   entityConfig: ComponentEntityMonitorConfig;
 
   cfOrgSpace: CfOrgSpaceLabelService;
-  serviceBrokerName$: Observable<string>;
   serviceName$: Observable<string>;
   servicePlanName: string;
   serviceUrl: string;
 
-  private service$: Observable<APIResource<IService>>;
+  service$: Observable<APIResource<IService>>;
+
+  brokerNameConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.NAME
+  };
+  brokerScopeConfig: TableCellServiceBrokerComponentConfig = {
+    mode: TableCellServiceBrokerComponentMode.SCOPE,
+    altScope: true
+  };
 
   private detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
@@ -156,13 +157,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       this.serviceInstanceEntity.entity.cfGuid,
       false
     );
-  }
+  };
 
   private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid
-  )
+  );
 
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
@@ -170,7 +171,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     {
       [CSI_CANCEL_URL]: '/services'
     }
-  )
+  );
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 

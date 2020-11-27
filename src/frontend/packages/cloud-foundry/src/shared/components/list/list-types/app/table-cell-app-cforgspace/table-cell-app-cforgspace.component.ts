@@ -15,6 +15,7 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
 
   @Input('row')
   set row(row: APIResource<IApp>) {
+    super.row = row;
     if (row) {
       this.init(row.entity.cfGuid, (row.entity.space as APIResource<ISpace>).entity.organization_guid, row.entity.space_guid);
     }

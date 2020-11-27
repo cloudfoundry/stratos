@@ -35,9 +35,6 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { FavoritesEntityListComponent } from './components/favorites-entity-list/favorites-entity-list.component';
-import { FavoritesGlobalListComponent } from './components/favorites-global-list/favorites-global-list.component';
-import { FavoritesMetaCardComponent } from './components/favorites-meta-card/favorites-meta-card.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
@@ -48,6 +45,9 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
+import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
+import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
@@ -55,8 +55,10 @@ import {
   TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
+import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
 import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
+import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
@@ -66,8 +68,6 @@ import {
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
-import { ListHostDirective } from './components/list/simple-list/list-host.directive';
-import { SimpleListComponent } from './components/list/simple-list/simple-list.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -118,6 +118,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { LongRunningOperationsService } from './services/long-running-op.service';
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
+import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
 
 
@@ -195,9 +196,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
-    FavoritesGlobalListComponent,
-    FavoritesMetaCardComponent,
-    FavoritesEntityListComponent,
     MultilineTitleComponent,
     TileSelectorComponent,
     MarkdownPreviewComponent,
@@ -214,8 +212,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     JsonViewerComponent,
-    SimpleListComponent,
     ListHostDirective,
+    ListViewComponent,
+    EntityListViewComponent,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
@@ -290,8 +289,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
-    FavoritesMetaCardComponent,
-    FavoritesGlobalListComponent,
     MultilineTitleComponent,
     PageSubNavComponent,
     BreadcrumbsComponent,
@@ -305,8 +302,10 @@ import { UserPermissionDirective } from './user-permission.directive';
     MarkdownContentObserverDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
+    ListHostDirective,
+    ListViewComponent,
+    EntityListViewComponent,
     JsonViewerComponent,
-    SimpleListComponent,
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
@@ -315,16 +314,19 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
+    ...listTableCells,
     ProfileSettingsComponent
   ],
   providers: [
     ListConfig,
     EndpointListHelper,
     EndpointsListConfigService,
+    ApiKeyListConfigService,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
+    SessionService
   ]
 })
 export class SharedModule { }

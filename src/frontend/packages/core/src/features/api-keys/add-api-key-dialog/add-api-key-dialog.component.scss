@@ -1,0 +1,28 @@
+.key-dialog {
+  &__loading {
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    &-wrapper {
+      position: relative;
+      margin: 0 -24px;
+      transform: translateY(-24px);
+    }
+  }
+
+  &__title {
+    display: flex;
+    h2 {
+      flex: 1;
+    }
+  }
+
+  &__actions {
+    justify-content: flex-end;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}

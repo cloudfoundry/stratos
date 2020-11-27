@@ -52,11 +52,15 @@ export class CreateServiceInstanceHelper {
     );
 
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilityEntityType, this.cfGuid);
-    this.servicePlanVisibilities$ = cfEntityCatalog.servicePlanVisibility.store.getPaginationService(this.cfGuid, paginationKey, {}).entities$
-  }
+    this.servicePlanVisibilities$ = cfEntityCatalog.servicePlanVisibility.store.getPaginationService(
+      this.cfGuid,
+      paginationKey,
+      {}
+    ).entities$;
+  };
 
   getServicePlanVisibilities = (): Observable<APIResource<IServicePlanVisibility>[]> =>
-    this.servicePlanVisibilities$.pipe(filter(p => !!p))
+    this.servicePlanVisibilities$.pipe(filter(p => !!p));
 
 
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
@@ -69,7 +73,7 @@ export class CreateServiceInstanceHelper {
         filter(p => !!p),
         map(getServiceName)
       );
-  }
+  };
 
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
     let action;
@@ -77,7 +81,7 @@ export class CreateServiceInstanceHelper {
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, `${spaceGuid}-${servicePlanGuid}`);
       const q = [new QParam('service_plan_guid', servicePlanGuid, QParamJoiners.colon).toString()];
-      action = cfEntityCatalog.serviceInstance.actions.getAllInSpace(spaceGuid, cfGuid, paginationKey, q)
+      action = cfEntityCatalog.serviceInstance.actions.getAllInSpace(spaceGuid, cfGuid, paginationKey, q);
     } else if (servicePlanGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesEntityType, servicePlanGuid);
       action = cfEntityCatalog.serviceInstance.actions.getAllInServicePlan(servicePlanGuid, cfGuid, paginationKey);
@@ -98,5 +102,5 @@ export class CreateServiceInstanceHelper {
         publishReplay(1),
         refCount()
       );
-  }
+  };
 }

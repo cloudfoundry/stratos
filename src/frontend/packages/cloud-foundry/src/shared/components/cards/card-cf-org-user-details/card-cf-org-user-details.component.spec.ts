@@ -16,9 +16,7 @@ import {
   generateTestCfEndpointServiceProvider,
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
+import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { CardCfOrgUserDetailsComponent } from './card-cf-org-user-details.component';

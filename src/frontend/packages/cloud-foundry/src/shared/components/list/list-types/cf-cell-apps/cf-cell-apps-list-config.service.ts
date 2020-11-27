@@ -7,7 +7,7 @@ import { ListViewTypes } from '../../../../../../../core/src/shared/components/l
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../../cf-api.types';
-import { ActiveRouteCfCell } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 

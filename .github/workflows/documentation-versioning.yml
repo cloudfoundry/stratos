@@ -1,0 +1,42 @@
+name: documentation-versions
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-docs-internal-versions:
+    if: github.repository == 'cloudfoundry/stratos'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Update internal-versions.json
+        run: |
+          cd website
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npm run add-version
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3.3.0
+        with:
+          commit-message: Update Docs Versions
+          delete-branch: true
+          title: Update website docs version following release
+          body: |
+            - Auto-generated
+          labels: |
+            ready for review
+          draft: false
+          base: ${GITHUB_REF##*/}
+      - name: Check output
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"

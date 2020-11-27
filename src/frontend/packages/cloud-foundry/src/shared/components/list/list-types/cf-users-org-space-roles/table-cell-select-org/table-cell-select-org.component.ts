@@ -8,8 +8,8 @@ import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-sta
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
-import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
-import { CfRolesService } from '../../../../../../features/cloud-foundry/users/manage-users/cf-roles.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
+import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
 import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
 
 @Component({
@@ -31,7 +31,9 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfRolesService: CfRolesService,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {

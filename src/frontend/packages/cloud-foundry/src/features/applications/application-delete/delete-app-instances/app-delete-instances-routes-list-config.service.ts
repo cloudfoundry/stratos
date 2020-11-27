@@ -21,14 +21,14 @@ import {
   AppServiceBindingListConfigService,
 } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ServiceActionHelperService } from '../../../../shared/data-services/service-action-helper.service';
-import { fetchTotalResults } from '../../../cloud-foundry/cf.helpers';
+import { fetchTotalResults } from '../../../cf/cf.helpers';
 import { ApplicationService } from '../../application.service';
 
 @Injectable()
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
   hideRefresh: boolean;
   allowSelection: boolean;
-  obsCache: { [serviceGuid: string]: Observable<RowState> } = {};
+  obsCache: { [serviceGuid: string]: Observable<RowState>, } = {};
 
   constructor(
     store: Store<CFAppState>,
@@ -63,7 +63,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
           {
             includeRelations: [],
           }
-        )
+        );
         this.obsCache[serviceBinding.entity.service_instance_guid] = fetchTotalResults(
           action,
           store,

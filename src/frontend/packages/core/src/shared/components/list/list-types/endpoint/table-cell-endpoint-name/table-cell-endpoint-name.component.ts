@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
@@ -24,6 +23,7 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
 
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {
+    super.row = row;
     /* tslint:disable-next-line:no-string-literal */
     const id = row['endpointId'] || row['guid'];
     this.endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(id).entity$.pipe(

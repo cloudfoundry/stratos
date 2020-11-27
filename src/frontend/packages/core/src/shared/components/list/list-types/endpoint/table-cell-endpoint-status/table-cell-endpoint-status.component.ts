@@ -9,17 +9,23 @@ import { TableCellCustom } from '../../../list.types';
   templateUrl: './table-cell-endpoint-status.component.html',
   styleUrls: ['./table-cell-endpoint-status.component.scss']
 })
-export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel> implements OnInit {
+export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {
 
   public connectable = true;
 
-  @Input() row: EndpointModel;
-  @Input() config: { showLabel: boolean } = {
-    showLabel: true
-  };
+  @Input()
+  get row(): EndpointModel {
+    return super.row;
+  }
+  set row(row: EndpointModel) {
+    super.row = row;
+  }
 
   constructor() {
     super();
+    this.config = {
+      showLabel: true,
+    };
   }
 
   ngOnInit() {

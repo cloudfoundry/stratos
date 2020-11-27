@@ -1,4 +1,3 @@
-import { LogLevel } from '../../../store/src/actions/log.actions';
 import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
 
 // The file contents for the current environment will overwrite these during build.
@@ -10,9 +9,6 @@ export const environment = {
   production: false,
   proxyAPIVersion,
   cfAPIVersion,
-  logLevel: LogLevel.DEBUG,
-  logToConsole: true,
-  logEnableConsoleActions: false,
   showObsDebug: false,
   disablePolling: false,
   desktopMode: false,

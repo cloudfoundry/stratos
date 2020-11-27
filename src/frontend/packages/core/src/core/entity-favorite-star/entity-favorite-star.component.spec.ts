@@ -2,7 +2,6 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
@@ -16,7 +15,6 @@ describe('EntityFavoriteStarComponent', () => {
   let fixture: ComponentFixture<EntityFavoriteStarComponent>;
   let element: HTMLElement;
   let userFavoriteManager: UserFavoriteManager;
-  let favoritesConfigMapper: FavoritesConfigMapper;
   let favorite: UserFavorite;
   let overlayContainerElement: HTMLElement;
 
@@ -35,7 +33,9 @@ describe('EntityFavoriteStarComponent', () => {
       declarations: [
         DialogConfirmComponent
       ],
-      imports: [...BaseTestModulesNoShared,],
+      imports: [
+        ...BaseTestModulesNoShared
+      ],
     })
       .compileComponents();
   }));
@@ -43,7 +43,6 @@ describe('EntityFavoriteStarComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(EntityFavoriteStarComponent);
     userFavoriteManager = TestBed.get(UserFavoriteManager);
-    favoritesConfigMapper = TestBed.get(FavoritesConfigMapper);
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;
@@ -70,7 +69,6 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should set isFavorite based on favorite', () => {
     spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(true));
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
     component.favorite = favorite;
     fixture.detectChanges();
 
@@ -79,7 +77,6 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should set isFavorite based on favorite [2]', () => {
     spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(false));
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
     component.favorite = favorite;
     fixture.detectChanges();
 
@@ -88,7 +85,6 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should toggle favorite if clicked', () => {
     const isFavorite$ = new BehaviorSubject<boolean>(false);
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
     spyOn(userFavoriteManager, 'toggleFavorite').and.callFake(() => isFavorite$.next(!isFavorite$.getValue()));
     spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(isFavorite$);
     component.favorite = favorite;
@@ -103,7 +99,6 @@ describe('EntityFavoriteStarComponent', () => {
   });
 
   xit('should toggle even through confirmation dialog if confirm removal', () => {
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
     spyOn(userFavoriteManager, 'toggleFavorite');
     spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(true));
     component.confirmRemoval = true;

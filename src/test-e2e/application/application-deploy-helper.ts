@@ -34,7 +34,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       appGuid
         : ''
     },
-    dockerUrl: 'nginxdemos/hello'
+    dockerUrl: 'ghcr.io/cf-stratos/test-docker-app'
   };
   const testAppUrl = 'https://github.com/' + res.testApp;
   const sourceText = type.toString(); // appUrl ? 'Git URL' : 'GitHub';

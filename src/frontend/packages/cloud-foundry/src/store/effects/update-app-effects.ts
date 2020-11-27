@@ -28,7 +28,10 @@ export class UpdateAppEffects {
             actions.push(cfEntityCatalog.appEnvVar.actions.getMultiple(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
           case AppMetadataTypes.STATS:
-            const statsAction = cfEntityCatalog.appStats.actions.getMultiple(action.apiAction.guid, action.apiAction.endpointGuid as string)
+            const statsAction = cfEntityCatalog.appStats.actions.getMultiple(
+              action.apiAction.guid,
+              action.apiAction.endpointGuid as string
+            );
             // Application has changed and the associated app stats need to also be updated.
             // Apps that are started can just make the stats call to update cached stats, however this call will fail for stopped apps.
             // For those cases create a fake stats request response that should result in the same thing

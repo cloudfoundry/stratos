@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { NormalModuleReplacementPlugin } from 'webpack';
+import { NormalModuleReplacementPlugin, WatchIgnorePlugin } from 'webpack';
 
 import { StratosConfig } from '../lib/stratos.config';
 
 const importModuleRegex = /src\/frontend\/packages\/core\/src\/custom-import.module.ts/;
+
+const isWindows = process.platform === 'win32';
 
 /**
  * Generates the file _custom-import.module.ts containing the code to import
@@ -54,8 +56,22 @@ export class ExtensionsHandler {
     this.writeModule(overrideFile, 'CustomImportModule', moduleImports);
     this.writeModule(overrideFile, 'CustomRoutingImportModule', routingModuleImports);
 
+    let regex;
+    // On windows, use an absolute path with backslashes escaped
+    if (isWindows) {
+      let p = path.resolve(path.join(dir, 'custom-import.module.ts'));
+      p = p.replace(/\\/g, '\\\\');
+      regex = new RegExp(p);
+    } else {
+      regex = importModuleRegex;
+    }
+
+    // Ignore changed in the overrides file - otherwise with ng serve we will build twice
+    // The user needs to restart `ng serve` anyway if new extensions are added
+    webpackConfig.plugins.push(new WatchIgnorePlugin([overrideFile]));
+
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(
-      importModuleRegex,
+      regex,
       overrideFile
     ));
   }

@@ -1,12 +1,8 @@
 import { Component } from '@angular/core';
 
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import {
-  CloudFoundryOrganizationService,
-} from '../../../../../../cloud-foundry/src/features/cloud-foundry/services/cloud-foundry-organization.service';
 import { CfUserService } from '../../../../../../cloud-foundry/src/shared/data-services/cf-user.service';
+import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-card-cf-org-user-details',

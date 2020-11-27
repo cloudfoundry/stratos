@@ -3,6 +3,7 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
@@ -45,11 +46,7 @@ import {
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { GitSCM } from '../../../../shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
-import { GitBranch, GitCommit, GitRepo } from '../../../../store/types/git.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 
@@ -157,7 +154,7 @@ export class DeployApplicationStep2Component
       }));
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
-  }
+  };
 
   ngOnInit() {
     this.sourceType$ = combineLatest(
@@ -219,7 +216,7 @@ export class DeployApplicationStep2Component
     }
 
     this.store.dispatch(new SetAppSourceDetails(sourceType));
-  }
+  };
 
   ngAfterContentInit() {
     this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
@@ -247,10 +244,10 @@ export class DeployApplicationStep2Component
       .pipe(
         // Wait for a new project name change
         filter(state => state && !state.checking && !state.error && state.exists),
-        distinctUntilChanged((x, y) => x.name === y.name),
+        distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
         // Convert project name into branches pagination observable
         switchMap(state =>
-          cfEntityCatalog.gitBranch.store.getPaginationService(null, null, {
+          gitEntityCatalog.branch.store.getPaginationService(null, null, {
             scm: this.scm,
             projectName: state.name
           }).entities$
@@ -285,10 +282,10 @@ export class DeployApplicationStep2Component
             // FIXME: This method to create entity id's should be standardised.... #4245
             const repoEntityID = `${this.scm.getType()}-${projectInfo.full_name}`;
             const commitEntityID = `${repoEntityID}-${commitSha}`;
-            const commitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, {
+            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitEntityID, null, {
               projectName: projectInfo.full_name,
               scm: this.scm, commitSha
-            })
+            });
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
