@@ -35,8 +35,8 @@ describe('GithubCommitAuthorComponent', () => {
       },
       guid: '',
       scmType: 'github',
-      projectName: 'test'
-
+      projectName: 'test',
+      endpointGuid: null,
     };
     fixture.detectChanges();
     element = fixture.nativeElement;
