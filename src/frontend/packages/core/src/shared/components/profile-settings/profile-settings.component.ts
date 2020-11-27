@@ -29,7 +29,9 @@ export class ProfileSettingsComponent {
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-  }
+  };
+
+  hasMultipleThemes: boolean;
 
   public types = ProfileSettingsTypes;
 
@@ -74,7 +76,6 @@ export class ProfileSettingsComponent {
   public setGravatarEnabled(gravatarEnabled: boolean) {
     this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
   }
-  hasMultipleThemes: boolean;
 
   constructor(
     private store: Store<DashboardOnlyAppState>,

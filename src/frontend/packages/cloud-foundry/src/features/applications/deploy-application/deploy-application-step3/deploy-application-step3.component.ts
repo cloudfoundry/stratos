@@ -128,7 +128,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       if (status.error) {
         this.snackBarService.show(status.errorMsg, 'Dismiss');
       } else {
-        this.snackBarService.showReturn('Application deployment complete', '', 'View')
+        this.snackBarService.showReturn('Application deployment complete', '', 'View');
         // const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
         // ref.onAction().subscribe(() => { this.goToAppSummary(); });
       }

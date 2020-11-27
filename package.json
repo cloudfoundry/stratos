@@ -144,7 +144,6 @@
     "karma-jasmine-html-reporter": "^1.5.3",
     "karma-spec-reporter": "0.0.32",
     "kind-of": "^6.0.3",
-    "lodash": "^4.17.19",
     "mem": "6.1.0",
     "mktemp": "^1.0.0",
     "ng-packagr": "^10.1.2",
