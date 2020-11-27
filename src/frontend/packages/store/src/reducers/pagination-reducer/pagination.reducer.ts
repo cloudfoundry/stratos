@@ -26,8 +26,10 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
+  SET_PAGINATION_IS_LIST,
   SET_PARAMS,
   SET_RESULT_COUNT,
+  SetPaginationIsList,
   UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
@@ -35,7 +37,7 @@ import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { mergeState } from '../../helpers/reducer.helper';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 import { UpdatePaginationMaxedState } from './../../actions/pagination.actions';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
@@ -165,7 +167,29 @@ function paginate(action, state: PaginationState = {}, updatePagination) {
     return paginationResetToStart(state, action as ResetPaginationSortFilter);
   }
 
+  if (action.type === SET_PAGINATION_IS_LIST) {
+    return setPaginationIsList(state, action as SetPaginationIsList);
+  }
+
   return enterPaginationReducer(state, action, updatePagination);
+}
+
+function setPaginationIsList(state: PaginationState, action: SetPaginationIsList): PaginationState {
+  const entityKey = entityCatalog.getEntityKey(action.pagAction);
+  const existingPag = state[entityKey] ? state[entityKey][action.pagAction.paginationKey] : null;
+  const pag = existingPag || getDefaultPaginationEntityState();
+
+  const entityState: PaginationEntityTypeState = {
+    ...state[entityKey],
+    [action.pagAction.paginationKey]: {
+      ...pag,
+      isListPagination: action.pagAction.isList
+    }
+  };
+  return {
+    ...state,
+    [entityKey]: entityState
+  };
 }
 
 // TODO: RC tidy the hell out of this

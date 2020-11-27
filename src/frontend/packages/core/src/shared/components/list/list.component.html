@@ -148,7 +148,7 @@
           </div>
           <div
             *ngIf="!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button matTooltip="Reset Filters & Sorting" matTooltipShowDelay="1000" mat-icon-button
+            <button matTooltip="Reset Filters & Sort" matTooltipShowDelay="1000" mat-icon-button
               [disabled]="(dataSource.isLoadingPage$ | async)" (click)="resetFilteringAndSort();">
               <mat-icon>remove_circle_outline</mat-icon>
             </button>
@@ -156,12 +156,12 @@
           <!-- Select table or cards view button -->
           <div id="list-card-toggle"
             *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button mat-icon-button matTooltip="Change view" matTooltipShowDelay="1000"
+            <button mat-icon-button matTooltip="Card view" matTooltipShowDelay="1000"
               [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
               *ngIf="(view$ | async)==='table'">
               <mat-icon>grid_on</mat-icon>
             </button>
-            <button mat-icon-button matTooltip="Change view" matTooltipShowDelay="1000"
+            <button mat-icon-button matTooltip="Table view" matTooltipShowDelay="1000"
               [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
               *ngIf="(view$ | async)==='cards'">
               <mat-icon>list</mat-icon>

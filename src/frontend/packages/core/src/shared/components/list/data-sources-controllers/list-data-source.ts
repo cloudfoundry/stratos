@@ -272,6 +272,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       }
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
     }
+    (this.action as PaginatedAction).isList = true;
+    this.masterAction.isList = true;
   }
 
   private getEntitySelectConfig(multiActionConfig: MultiActionConfig) {

@@ -19,7 +19,6 @@ export enum LocalStorageSyncTypes {
 
 export class LocalStorageService {
 
-  // TODO: RC applying filters that aren't in lists
   // TODO: RC applying cf filter works, but not org/space
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
@@ -47,19 +46,19 @@ export class LocalStorageService {
           dataForStore => store.dispatch(new HydrateDashboardStateAction(dataForStore)),
           storage,
           sessionId
-        )
+        );
         LocalStorageService.handleHydrate(
           LocalStorageSyncTypes.PAGINATION,
           dataForStore => store.dispatch(new HydratePaginationStateAction(dataForStore)),
           storage,
           sessionId
-        )
+        );
         LocalStorageService.handleHydrate(
           LocalStorageSyncTypes.LISTS,
           dataForStore => store.dispatch(new HydrateListsStateAction(dataForStore)),
           storage,
           sessionId
-        )
+        );
       }
     }
   }
@@ -87,7 +86,7 @@ export class LocalStorageService {
   }
 
   private static makeKey(userId: string, storeKey: string) {
-    return userId + '-' + storeKey
+    return userId + '-' + storeKey;
   }
 
   /**
@@ -131,6 +130,7 @@ export class LocalStorageService {
   }
 
   private static getDashboardStateSessionId(username?: string) {
+    // TODO: RC name should be encoded
     const prefix = 'stratos-';
     if (username) {
       return prefix + username;
@@ -150,14 +150,16 @@ export class LocalStorageService {
     switch (type) {
       case LocalStorageSyncTypes.PAGINATION:
         const pagination: PaginationState = storePart as unknown as PaginationState;
-        // TODO: RC Ignore if not from a list!!!!
         const abs = Object.keys(pagination).reduce((res, entityTypes) => {
           const perEntity = Object.keys(pagination[entityTypes]).reduce((res2, paginationKeysOfEntityType) => {
-            const paginationSection = pagination[entityTypes][paginationKeysOfEntityType]
+            const paginationSection = pagination[entityTypes][paginationKeysOfEntityType];
+            if (!paginationSection.isListPagination) {
+              return res2;
+            }
             res2[paginationKeysOfEntityType] = {
               params: paginationSection.params,
               clientPagination: paginationSection.clientPagination
-            }
+            };
             return res2;
           }, {});
           if (Object.keys(perEntity).length > 0) {
@@ -171,7 +173,7 @@ export class LocalStorageService {
   }
 
   public static localStorageSize(sessionData: SessionData): number {
-    const storage = LocalStorageService.getStorage()
+    const storage = LocalStorageService.getStorage();
     const sessionId = LocalStorageService.getDashboardStateSessionId(sessionData.user.name);
     if (storage && sessionId) {
       return Object.values(LocalStorageSyncTypes).reduce((total, type) => {
@@ -193,14 +195,14 @@ export class LocalStorageService {
       confirm: 'Clear',
       critical: true,
       title: 'Are you sure?'
-    }
+    };
 
     const successAction = res => {
       if (!res) {
         return;
       }
 
-      const storage = LocalStorageService.getStorage()
+      const storage = LocalStorageService.getStorage();
       const sessionId = LocalStorageService.getDashboardStateSessionId(sessionData.user.name);
       if (storage && sessionId) {
         Object.values(LocalStorageSyncTypes).forEach(type => {
@@ -213,7 +215,7 @@ export class LocalStorageService {
       } else {
         console.warn('Unable to clear local storage, either storage or session id is missing');
       }
-    }
+    };
 
     confirmationService.openWithCancel(config, successAction, () => { });
   }

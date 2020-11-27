@@ -55,7 +55,7 @@ export class PaginationEntityState {
   ids = {};
   params: PaginationParam;
   pageRequests: {
-    [pageNumber: string]: ListActionState
+    [pageNumber: string]: ListActionState,
   };
   clientPagination?: PaginationClientPagination;
   /**
@@ -63,7 +63,7 @@ export class PaginationEntityState {
    */
   seed?: string;
   maxedState: PaginationMaxedState;
-  forList = false;
+  isListPagination = false;
 }
 
 export function isPaginatedAction(obj: any): PaginatedAction {

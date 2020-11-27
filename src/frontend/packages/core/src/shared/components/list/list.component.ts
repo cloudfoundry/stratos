@@ -167,7 +167,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     pageSizeOptions: number[],
     pageSize: number,
     pageIndex: number,
-    length: number
+    length: number;
   } = {
       pageSizeOptions: null,
       pageSize: null,
@@ -602,20 +602,22 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   resetFilteringAndSort() {
     // TODO: RC multi entity type lists
-    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action
+    /* tslint:disable-next-line:no-string-literal  */
+    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
     // Ensure that the changes are pushed back to the multi filter controls. Ideally the field to store relationship would be two way..
     // but it's not for the moment
     this.multiFilterManagers.forEach(manager => {
-      manager.hasOneItem$.pipe(first()).subscribe(hasOneItem => {
-        // TODO: RC Test
-        // const selectItem = hasOneItem || ''
-        if (hasOneItem) {
-          return;
-        }
-        manager.selectItem('')
-      })
-    })
+      // TODO: RC huh
+      // manager.hasOneItem$.pipe(first()).subscribe(hasOneItem => {
+      //   // TODO: RC Test
+      //   // const selectItem = hasOneItem || ''
+      //   if (hasOneItem) {
+      //     return;
+      //   }
+      //   manager.selectItem('')
+      // })
+    });
     if (!this.config.isLocal) {
       // TODO: RC Fixes space routes, breaks app wall!!
       this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
@@ -736,7 +738,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getRowStateFromRowsState = (row: T): Observable<RowState> =>
-    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
+    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()));
 
   public showAllAfterMax() {
     this.dataSource.showAllAfterMax();

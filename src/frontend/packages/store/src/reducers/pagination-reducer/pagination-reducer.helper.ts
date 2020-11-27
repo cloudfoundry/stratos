@@ -12,7 +12,7 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { SetInitialParams } from '../../actions/pagination.actions';
+import { SetInitialParams, SetPaginationIsList } from '../../actions/pagination.actions';
 import { AppState, GeneralEntityAppState } from '../../app-state';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationMonitor } from '../../monitors/pagination-monitor';
@@ -67,7 +67,6 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-// TODO: This needs to be a service not just a function! - #3802
 export const getPaginationObservables = <T = any, Y extends AppState = AppState>(
   { store, action, paginationMonitor }: {
     store: Store<Y>,
@@ -79,6 +78,9 @@ export const getPaginationObservables = <T = any, Y extends AppState = AppState>
   const baseAction = Array.isArray(action) ? action[0] : action;
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
+
+  store.dispatch(new SetPaginationIsList(baseAction));
+
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
   if (baseAction.initialParams) {
@@ -152,7 +154,7 @@ function paginationParamsString(params: PaginationParam): string {
 }
 
 
-function sortStringify(obj: { [key: string]: string | string[] | number }): string {
+function sortStringify(obj: { [key: string]: string | string[] | number; }): string {
   const keys = Object.keys(obj).sort();
   return keys.reduce((res, key) => {
     return res += `${key}-${obj[key]},`;

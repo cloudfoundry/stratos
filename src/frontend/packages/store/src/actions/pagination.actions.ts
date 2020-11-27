@@ -25,6 +25,7 @@ export const REMOVE_ID_FROM_PAGINATION = '[Pagination] Remove id from pagination
 export const UPDATE_MAXED_STATE = '[Pagination] Update maxed state';
 export const IGNORE_MAXED_STATE = '[Pagination] Ignore maxed state';
 export const HYDRATE_PAGINATION_STATE = '[Pagination] Hydrate pagination state';
+export const SET_PAGINATION_IS_LIST = '[Pagination] Set Is List';
 
 export function getPaginationKey(type: string, id: string, endpointGuid?: string) {
   const key = `${type}-${id}`;
@@ -191,6 +192,7 @@ export class SetInitialParams extends BasePaginationAction implements Action, Se
     public params: PaginationParam,
     public keepPages = false,
     public overwrite = false,
+    public isList = false,
   ) {
     super(pEntityConfig);
   }
@@ -247,4 +249,9 @@ export class IgnorePaginationMaxedState implements Action, EntityCatalogEntityCo
 export class HydratePaginationStateAction implements Action {
   constructor(public paginationState: PaginationState) { }
   type = HYDRATE_PAGINATION_STATE;
+}
+
+export class SetPaginationIsList implements Action {
+  constructor(public pagAction: PaginatedAction) { }
+  type = SET_PAGINATION_IS_LIST;
 }
