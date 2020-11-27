@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -67,14 +66,13 @@ export class KubernetesNamespaceComponent {
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
     filter(app => !!app),
-    map(namespace => getFavoriteFromEntity<IFavoriteMetadata>(
+    map(namespace => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(
       {
         kubeGuid: this.kubeEndpointService.baseKube.guid,
         ...namespace,
         prettyText: 'Kubernetes Namespace',
       },
       kubernetesNamespacesEntityType,
-      this.userFavoriteManager,
       KUBERNETES_ENDPOINT_TYPE
     ))
   );
