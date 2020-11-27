@@ -1,12 +1,12 @@
-import { Component, EventEmitter, InjectionToken, Input, Output } from '@angular/core';
+import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AppState } from '../../../../../store/src/app-state';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
-import { TabNavItem } from '../../../tab-nav.types';
 import { environment } from '../../../environments/environment';
+import { TabNavItem } from '../../../tab-nav.types';
 
 export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
