@@ -105,7 +105,7 @@ export class LogStreamTabComponent implements OnInit {
         msgColour = 'red';
         bold = true;
       }
-      const messageString = this.colorizer.colorize(atob(messageObj.message), msgColour, bold) + '\n';
+      const messageString = this.colorizer.colorize(decodeURIComponent(escape(atob(messageObj.message))), msgColour, bold) + '\n';
       return timeStamp + ': ' + messageSource + ' ' + messageString;
     } catch (error) {
       console.error('Failed to filter jsonMessage from WebSocket: ' + JSON.stringify(error));
