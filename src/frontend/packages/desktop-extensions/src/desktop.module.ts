@@ -9,7 +9,6 @@ import { ElectronService } from './electron/electron.service';
 @NgModule({
   declarations: [
     DesktopLoginComponent,
-    ElectronService,
   ],
   entryComponents: [
     DesktopLoginComponent
