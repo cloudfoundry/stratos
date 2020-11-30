@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
-import { first, map, startWith } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { ListView } from '../../../../../store/src/actions/list.actions';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -255,9 +255,7 @@ export class MultiFilterManager<T> {
   }
 
   public applyValue(multiFilters: {}) {
-    const value = multiFilters[this.multiFilterConfig.key];
-    this.value = value;
-    this.selectItem(value);
+    this.selectItem(multiFilters[this.multiFilterConfig.key]);
   }
 
   public hasValue(multiFilters: {}): boolean {
@@ -266,8 +264,17 @@ export class MultiFilterManager<T> {
 
   public selectItem(itemValue: string) {
     // console.log(this.multiFilterConfig.key, itemValue); /// TODO: RC REMove
-    this.multiFilterConfig.select.next(itemValue);
-    this.value = itemValue;
+    this.multiFilterConfig.loading$.pipe(
+      filter(ready => !ready),
+      switchMap(() => this.filterItems$),
+      first(),
+    ).subscribe(items => {
+      // Ensure we actually have the item. Could be from storage and invalid
+      if (items.find(i => i.value === itemValue)) {
+        this.multiFilterConfig.select.next(itemValue);
+        this.value = itemValue;
+      }
+    });
   }
 }
 

@@ -22,9 +22,7 @@ export class LocalStorageService {
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
   // TODO: RC todos!
-  // TODO: RC load junk settings
   // TODO: RC encode/decode username in storage key
-  // TODO: RC test deploy app
 
   /**
    * Normally used on app init, move local storage data into the console's store

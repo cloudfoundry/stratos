@@ -49,10 +49,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       space: this.cfOrgSpaceService.space.select.getValue()
     }));
     return of({ success: true });
-  }
+  };
 
   ngOnInit() {
     if (this.route.root.snapshot.queryParams.endpointGuid) {
+      // TODO: RC
       this.cfOrgSpaceService.cf.select.next(this.route.root.snapshot.queryParams.endpointGuid);
     }
     this.spaces$ = this.getSpacesFromPermissions();
