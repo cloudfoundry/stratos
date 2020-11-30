@@ -8,20 +8,6 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
-var storeFactory interfaces.StoreFactory
-
-// GetStoreFactory gets the store factory
-func GetStoreFactory() interfaces.StoreFactory {
-	return storeFactory
-}
-
-// SetStoreFactory sets the store factory
-func SetStoreFactory(factory interfaces.StoreFactory) interfaces.StoreFactory {
-	old := storeFactory
-	storeFactory = factory
-	return old
-}
-
 // DefaultStoreFactory is default factory for getting store interfaces
 type DefaultStoreFactory struct {
 	databaseConnectionPool *sql.DB

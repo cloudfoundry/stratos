@@ -211,11 +211,6 @@ func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, e
 	}
 	pp := setupPortalProxy(db)
 
-	pp.DatabaseConnectionPool = db
-
-	store := factory.NewDefaultStoreFactory(db)
-	pp.SetStoreFactory(store)
-
 	return res, e, ctx, pp, db, mock
 }
 

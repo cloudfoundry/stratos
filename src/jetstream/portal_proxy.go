@@ -28,6 +28,7 @@ type portalProxy struct {
 	StratosAuthService     interfaces.StratosAuth
 	APIKeysRepository      apikeys.Repository
 	PluginRegisterRoutes   map[string]func(echo.Context) error
+	StoreFactory           interfaces.StoreFactory
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

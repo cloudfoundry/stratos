@@ -1240,10 +1240,12 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 
 // GetStoreFactory gets the store factory
 func (portalProxy *portalProxy) GetStoreFactory() interfaces.StoreFactory {
-	return factory.GetStoreFactory()
+	return portalProxy.StoreFactory
 }
 
 // SetStoreFactory sets the store factory
 func (portalProxy *portalProxy) SetStoreFactory(f interfaces.StoreFactory) interfaces.StoreFactory {
-	return factory.SetStoreFactory(f)
+	old := portalProxy.StoreFactory
+	portalProxy.StoreFactory = f
+	return old
 }
