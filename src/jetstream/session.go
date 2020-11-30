@@ -250,8 +250,6 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	p.StratosAuthService.BeforeVerifySession(c)
 
-	p.StratosAuthService.BeforeVerifySession(c)
-
 	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
 		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 		if err != nil {
