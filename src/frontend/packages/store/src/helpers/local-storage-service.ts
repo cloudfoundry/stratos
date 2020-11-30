@@ -19,13 +19,10 @@ export enum LocalStorageSyncTypes {
 
 export class LocalStorageService {
 
+  /**
+   * Convenience for dev
+   */
   private static Encrypt = true;
-
-  // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
-  // TODO: RC backward compatible (load 'user-dashboard' into 'user')
-  // TODO: RC todos!
-  // TODO: RC (pag reducer - hydratePagination) how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
-  // TODO: RC Multi List - service type drop down excluded from sticky and reset
 
   /**
    * Normally used on app init, move local storage data into the console's store
@@ -142,7 +139,6 @@ export class LocalStorageService {
   }
 
   private static getDashboardStateSessionId(username?: string) {
-    // TODO: RC name should be encoded
     const prefix = 'stratos-';
     if (username) {
       return prefix + username;

@@ -264,14 +264,12 @@ export class MultiFilterManager<T> {
   }
 
   public selectItem(itemValue: string) {
-    console.log('1: ' + this.multiFilterConfig.key, itemValue); /// TODO: RC REMove
     this.multiFilterConfig.loading$.pipe(
       filter(ready => !ready),
       switchMap(() => this.filterItems$),
       first(),
     ).subscribe(items => {
       // Ensure we actually have the item. Could be from storage and invalid
-      console.log('2: ' + this.multiFilterConfig.key, itemValue);
       if (itemValue === undefined || items.find(i => i.value === itemValue)) {
         this.value = itemValue;
         this.multiFilterConfig.select.next(itemValue);

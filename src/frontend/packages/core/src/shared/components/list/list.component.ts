@@ -637,7 +637,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   public resetFilteringAndSort() {
-    // TODO: RC multi entity type lists
     /* tslint:disable-next-line:no-string-literal  */
     const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));

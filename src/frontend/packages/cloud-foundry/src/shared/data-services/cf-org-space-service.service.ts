@@ -351,7 +351,6 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   public enableAutoSelectors() {
-    console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC console.log
     combineLatest(
       // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
       this.org.list$,
