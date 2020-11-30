@@ -24,7 +24,6 @@ export class LocalStorageService {
   // TODO: RC todos!
   // TODO: RC maxed list paginationResetToStart maxedState commented out
   // TODO: RC (pag reducer - hydratePagination) how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
-  // TODO: RC fix reset!
 
   /**
    * Normally used on app init, move local storage data into the console's store

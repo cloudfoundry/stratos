@@ -135,7 +135,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   };
 
   handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
-    // console.log('handleMultiFilter: Before', changes); // TODO: RC remove
+    console.log('handleMultiFilter: Before', changes); // TODO: RC remove
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
       if (!paginationEntityState) {
         return;
@@ -149,7 +149,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           uniqueChanges.push(change);
         }
       }
-      // console.log('handleMultiFilter: Clean 1', uniqueChanges); // TODO: RC remove
+      console.log('handleMultiFilter: Clean 1', uniqueChanges); // TODO: RC remove
       // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
       const cleanChanges = uniqueChanges.reduce((newCleanChanges, change) => {
@@ -160,7 +160,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         }
         return newCleanChanges;
       }, {});
-      // console.log('handleMultiFilter: Clean 2', cleanChanges); // TODO: RC remove
+      console.log('handleMultiFilter: Clean 2', cleanChanges); // TODO: RC remove
 
       if (Object.keys(cleanChanges).length > 0) {
         const currentFilter = paginationEntityState.clientPagination.filter;

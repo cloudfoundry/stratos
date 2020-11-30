@@ -256,6 +256,7 @@ export class MultiFilterManager<T> {
 
   public applyValue(multiFilters: {}) {
     this.selectItem(multiFilters[this.multiFilterConfig.key]);
+
   }
 
   public hasValue(multiFilters: {}): boolean {
@@ -263,16 +264,17 @@ export class MultiFilterManager<T> {
   }
 
   public selectItem(itemValue: string) {
-    // console.log(this.multiFilterConfig.key, itemValue); /// TODO: RC REMove
+    console.log('1: ' + this.multiFilterConfig.key, itemValue); /// TODO: RC REMove
     this.multiFilterConfig.loading$.pipe(
       filter(ready => !ready),
       switchMap(() => this.filterItems$),
       first(),
     ).subscribe(items => {
       // Ensure we actually have the item. Could be from storage and invalid
-      if (items.find(i => i.value === itemValue)) {
-        this.multiFilterConfig.select.next(itemValue);
+      console.log('2: ' + this.multiFilterConfig.key, itemValue);
+      if (itemValue === undefined || items.find(i => i.value === itemValue)) {
         this.value = itemValue;
+        this.multiFilterConfig.select.next(itemValue);
       }
     });
   }

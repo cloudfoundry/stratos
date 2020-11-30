@@ -62,6 +62,8 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
+  // A lot of problems are caused by these being BehaviourSubject's (specifically auto select process in CfOrgSpaceDataService and sticky values)
+  // Ideally this would change to Subject... but some usages .value
   select: BehaviorSubject<string>;
 }
 
@@ -249,7 +251,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       loading$: list$.pipe(
         map(cfs => !cfs)
       ),
-      select: new BehaviorSubject(undefined)
+      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
     };
   }
 
@@ -270,7 +272,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.org = {
       list$: orgList$,
       loading$: this.allOrgsLoading$,
-      select: new BehaviorSubject(undefined)
+      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
     };
   }
 
@@ -297,7 +299,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.space = {
       list$: spaceList$,
       loading$: this.org.loading$,
-      select: new BehaviorSubject(undefined)
+      select: new BehaviorSubject(null) // Should be different to undefined (sticky values & reset list)
     };
   }
 
@@ -349,7 +351,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   public enableAutoSelectors() {
-    // console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC
+    console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC
     combineLatest(
       // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
       this.org.list$,
@@ -361,7 +363,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors(initialCf: string, initialOrg: string) {
-    // console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC
+    console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(initialCf),
       distinctUntilChanged(),
