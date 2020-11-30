@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { DashboardState } from '../reducers/dashboard-reducer';
+import { DashboardState, defaultDashboardState } from '../types/dashboard.types';
 import { StratosTheme } from '../types/theme.types';
 
 export const OPEN_SIDE_NAV = '[Dashboard] Open side nav';
@@ -76,6 +76,10 @@ export class SetThemeAction implements Action {
 }
 
 export class SetDashboardStateValueAction implements Action {
-  constructor(public prop: string, public value: any) { }
+  constructor(public prop: string, public value: any) {
+    if (!defaultDashboardState.hasOwnProperty(prop)) {
+      console.warn(`SetDashboardStateValueAction: Unknown property ${prop}`);
+    }
+  }
   type = SET_DASHBOARD_STATE_VALUE;
 }

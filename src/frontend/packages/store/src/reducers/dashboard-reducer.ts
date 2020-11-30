@@ -15,6 +15,7 @@ import {
   TIMEOUT_SESSION,
   TOGGLE_SIDE_NAV,
 } from '../actions/dashboard-actions';
+import { DashboardState, defaultDashboardState } from '../types/dashboard.types';
 import {
   GRAVATAR_ENABLED,
   HOME_CARD_LAYOUT,
@@ -22,33 +23,6 @@ import {
   SetHomeCardLayoutAction,
 } from './../actions/dashboard-actions';
 
-export interface DashboardState {
-  timeoutSession: boolean;
-  pollingEnabled: boolean;
-  sidenavOpen: boolean;
-  isMobile: boolean;
-  isMobileNavOpen: boolean;
-  sideNavPinned: boolean;
-  themeKey: string;
-  headerEventMinimized: boolean;
-  gravatarEnabled: boolean;
-  homeLayout: number;
-  homeShowAllEndpoints: boolean;
-}
-
-export const defaultDashboardState: DashboardState = {
-  timeoutSession: true,
-  pollingEnabled: true,
-  sidenavOpen: true,
-  isMobile: false,
-  isMobileNavOpen: false,
-  sideNavPinned: true,
-  themeKey: null,
-  headerEventMinimized: false,
-  gravatarEnabled: false,
-  homeLayout: 0,
-  homeShowAllEndpoints: null, // Use the default we get from the backend
-};
 
 export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
   switch (action.type) {
@@ -97,6 +71,9 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       };
     case SET_DASHBOARD_STATE_VALUE:
       const setValueAction = action as SetDashboardStateValueAction;
+      if (state[setValueAction.prop] === setValueAction.value) {
+        return state;
+      }
       return {
         ...state,
         [setValueAction.prop]: setValueAction.value

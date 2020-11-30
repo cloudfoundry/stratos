@@ -27,6 +27,18 @@ import { IUserFavoritesGroups } from './../../../../../store/src/types/favorite-
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
 
+const noConnectedMsg = {
+  firstLine: 'There are no connected endpoints',
+  secondLine: { text: 'Use the Endpoints view to connect'},
+  icon: 'settings_ethernet'
+};
+
+const noFavoritesMsg = {
+  firstLine: 'There are no favorites',
+  secondLine: { text: 'Use the Endpoints view to favorite Endpoints'},
+  icon: 'star_outline'
+};
+
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
@@ -60,6 +72,8 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     new HomePageCardLayout(2, 2, 'Compact Two Column'),
     new HomePageCardLayout(3, 2, 'Three Column'),
   ];
+
+  noneAvailableMsg = noFavoritesMsg;
 
   @ViewChild('endpointsPanel') endpointsPanel;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
@@ -105,9 +119,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Default value from backend
     const sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      filter(auth => !!(auth.sessionData.diagnostics)),
-      map((auth: AuthState) => auth.sessionData.config.homeViewShowAllEndpoints)
+      filter(auth => !!auth?.sessionData?.config),
+      map((auth: AuthState) => auth.sessionData.config.homeViewShowFavoritesOnly),
+      map(onlyFavorites => !onlyFavorites)
     );
     // Stored value in local storage
     const showPersistedSetting$ = this.store.select(selectDashboardState).pipe(
@@ -123,9 +137,12 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     // Only show endpoints that have Home Card metadata
     this.endpoints$ = combineLatest([combinedShowMode$, connected$, userFavoriteManager.getAllFavorites()]).pipe(
       map(([showMode, endpoints, [favGroups, favs]]) => {
-        this.showAllEndpoints = showMode;
-        // Persist the state
-        this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
+        if (this.showAllEndpoints !== showMode) {
+          this.showAllEndpoints = showMode;
+          // Persist the state
+          this.store.dispatch(new SetDashboardStateValueAction('homeShowAllEndpoints', this.showAllEndpoints));
+          this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg;
+        }
         const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
         return ordered.filter(ep => {
           const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);

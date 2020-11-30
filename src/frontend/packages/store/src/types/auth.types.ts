@@ -32,8 +32,8 @@ export interface SessionDataConfig {
   listMaxSize?: number;
   listAllowLoadMaxed?: boolean;
   APIKeysEnabled?: APIKeysEnabled;
-  // Default value for Home View Show All Endpoints setting
-  homeViewShowAllEndpoints?: boolean;
+  // Default value for Home View - show only favorited endpoints?
+  homeViewShowFavoritesOnly?: boolean;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;
