@@ -351,7 +351,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   public enableAutoSelectors() {
-    console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC
+    console.log('enableAutoSelectors:', !!this.initialValues$); // TODO: RC console.log
     combineLatest(
       // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
       this.org.list$,
@@ -363,7 +363,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors(initialCf: string, initialOrg: string) {
-    console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC
+    console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC console.log
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(initialCf),
       distinctUntilChanged(),

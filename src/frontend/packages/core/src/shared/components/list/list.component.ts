@@ -120,7 +120,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
-  initialEntitySelection$: Observable<number>;
+
+  entitySelectValue = new BehaviorSubject(undefined);
+  entitySelectValue$: Observable<number> = this.entitySelectValue.asObservable();
+
   pPaginator: MatPaginator;
   private filterString: string;
 
@@ -300,10 +303,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
-    this.initialEntitySelection$ = this.dataSource.pagination$.pipe(
+
+    this.dataSource.pagination$.pipe(
       first(),
-      map(pag => pag.forcedLocalPage)
-    );
+    ).subscribe(pag => {
+      this.entitySelectValue.next(pag.forcedLocalPage);
+    });
+
+
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
@@ -431,13 +438,13 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
         // downs (change org to one with one space results in that space being selected)
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
-          // TODO: RC tidy up logic
-
+          // If this is NOT the first... and we have the value to apply
           if (index !== 0 || filterManager.hasValue(paginationFilter.items)) {
             filterManager.applyValue(paginationFilter.items);
             return;
           }
 
+          // If we're the first drop down filter and there are other drop downs... select the first one
           if (index === 0 && this.multiFilterManagers.length > 1) {
             filterManager.filterItems$.pipe(
               first()
@@ -597,8 +604,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       distinctUntilChanged(),
       startWith(true),
     );
-
-
   }
 
   ngAfterViewInit() {
@@ -640,6 +645,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     if (!this.dataSource.isLocal) {
       this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
     }
+
+    // Reset the multi-entity filter
+    this.entitySelectValue.next(undefined);
+    this.setEntityPage(undefined);
   }
 
   updateListView(listView: ListView) {
@@ -706,6 +715,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
+  // Used by multi-entity lists
   public setEntityPage(page: number) {
     this.pPaginator.firstPage();
     this.store.dispatch(new SetPage(

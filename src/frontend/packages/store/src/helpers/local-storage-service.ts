@@ -19,11 +19,13 @@ export enum LocalStorageSyncTypes {
 
 export class LocalStorageService {
 
+  private static Encrypt = true;
+
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
   // TODO: RC todos!
-  // TODO: RC maxed list paginationResetToStart maxedState commented out
   // TODO: RC (pag reducer - hydratePagination) how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
+  // TODO: RC Multi List - service type drop down excluded from sticky and reset
 
   /**
    * Normally used on app init, move local storage data into the console's store
@@ -172,7 +174,8 @@ export class LocalStorageService {
             res2[paginationKeysOfEntityType] = {
               params: paginationSection.params,
               clientPagination: paginationSection.clientPagination,
-              isListPagination: paginationSection.isListPagination
+              isListPagination: paginationSection.isListPagination, // We do not persist any that are false
+              forcedLocalPage: paginationSection.forcedLocalPage // Value of the multi-entity filter
             };
             return res2;
           }, {});
@@ -236,12 +239,18 @@ export class LocalStorageService {
     confirmationService.openWithCancel(config, successAction, () => { });
   }
 
-  private static encrypt(obj: {}): string {
-    const strObj = JSON.stringify(obj);
-    return btoa(strObj);
+  private static encrypt(obj: {}) {
+    if (LocalStorageService.Encrypt) {
+      const strObj = JSON.stringify(obj);
+      return btoa(strObj);
+    }
+    return obj;
   }
 
   private static decrypt(strObj: string): string {
-    return atob(strObj);
+    if (LocalStorageService.Encrypt) {
+      return atob(strObj);
+    }
+    return strObj;
   }
 }
