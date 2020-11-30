@@ -10,8 +10,7 @@ export function paginationResetToStart(state: PaginationState, action: ResetPagi
   if (!state[entityKey] || !state[entityKey][pKey]) {
     return state;
   }
-  const pSection: PaginationEntityState = state[entityKey][pKey]
-  // TODO: RC it would be nice to try to also reset page & page size... but we've lost the latter
+  const pSection: PaginationEntityState = state[entityKey][pKey];
   const res: PaginationEntityState = {
     ...pSection,
     clientPagination: {
@@ -21,11 +20,10 @@ export function paginationResetToStart(state: PaginationState, action: ResetPagi
         string: ''
       },
     },
-    // maxedState:// TODO: RC test
     params: {
       ...pAction.initialParams
     },
-  }
+  };
   return {
     ...state,
     [entityKey]: {

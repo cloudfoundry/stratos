@@ -22,7 +22,9 @@ export class LocalStorageService {
   // TODO: RC cleaning sessions storage (entities that don't exist, etc, can be done by storeagesync??)
   // TODO: RC backward compatible (load 'user-dashboard' into 'user')
   // TODO: RC todos!
-  // TODO: RC encode/decode username in storage key
+  // TODO: RC maxed list paginationResetToStart maxedState commented out
+  // TODO: RC (pag reducer - hydratePagination) how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
+  // TODO: RC fix reset!
 
   /**
    * Normally used on app init, move local storage data into the console's store
@@ -50,7 +52,8 @@ export class LocalStorageService {
           LocalStorageSyncTypes.PAGINATION,
           dataForStore => store.dispatch(new HydratePaginationStateAction(dataForStore)),
           storage,
-          sessionId
+          sessionId,
+          true
         );
         LocalStorageService.handleHydrate(
           LocalStorageSyncTypes.LISTS,
@@ -74,11 +77,14 @@ export class LocalStorageService {
     type: LocalStorageSyncTypes,
     dispatch: (dataForStore: any) => void,
     storage: Storage,
-    sessionId: string
+    sessionId: string,
+    encrypted = false,
   ) {
     const key = LocalStorageService.makeKey(sessionId, type);
     try {
-      dispatch(JSON.parse(storage.getItem(key)));
+      const fromStorage = storage.getItem(key);
+      const strValue = encrypted ? LocalStorageService.decrypt(fromStorage) : fromStorage;
+      dispatch(JSON.parse(strValue));
     } catch (e) {
       console.warn(`Failed to parse user settings with key '${key}' from session storage, consider clearing manually`, e);
     }
@@ -117,10 +123,16 @@ export class LocalStorageService {
               pagination,
               LocalStorageSyncTypes.PAGINATION
             ),
-          }
+            // encrypt: (state: string) => {
+            //   console.log('a');
+            //   return state;
+            // },
+            // decrypt: (state: string) => {
+            //   console.log('b');
+            //   return state;
+            // },
+          },
         },
-        // encrypt: // TODO: RC only store guids, so shouldn't need
-        // decrypt: // TODO: RC
       ],
       // Don't push local storage state into store on start up... we need the logged in user's id before we can do that
       rehydrate: false,
@@ -145,13 +157,16 @@ export class LocalStorageService {
    *  Allow for selective persistence of data. For pagination we only store params and clientPagination
    */
   private static parseForStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): Object {
-    // TODO: RC Tidy
     switch (type) {
       case LocalStorageSyncTypes.PAGINATION:
         const pagination: PaginationState = storePart as unknown as PaginationState;
+        // Convert each pagination section that we care about into an object with only the properties we care about
+        // For each entity type....
         const abs = Object.keys(pagination).reduce((res, entityTypes) => {
+          // For each pagination section of the entity type...
           const perEntity = Object.keys(pagination[entityTypes]).reduce((res2, paginationKeysOfEntityType) => {
             const paginationSection = pagination[entityTypes][paginationKeysOfEntityType];
+            // Only store pagination section for lists
             if (!paginationSection.isListPagination) {
               return res2;
             }
@@ -162,14 +177,16 @@ export class LocalStorageService {
             };
             return res2;
           }, {});
+
+          // If this entity type has pagination section that we've cared about store it, else ignore
           if (Object.keys(perEntity).length > 0) {
             res[entityTypes] = perEntity;
           }
           return res;
         }, {});
-        return abs;
+        return LocalStorageService.encrypt(abs);
     }
-    return storePart;
+    return LocalStorageService.encrypt(storePart);
   }
 
   public static localStorageSize(sessionData: SessionData): number {
@@ -218,5 +235,14 @@ export class LocalStorageService {
     };
 
     confirmationService.openWithCancel(config, successAction, () => { });
+  }
+
+  private static encrypt(obj: {}): string {
+    const strObj = JSON.stringify(obj);
+    return btoa(strObj);
+  }
+
+  private static decrypt(strObj: string): string {
+    return atob(strObj);
   }
 }

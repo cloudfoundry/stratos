@@ -147,11 +147,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.isLocal
     );
 
-    // TODO: RC HERE!! Mark action as local, store via reducer, use when deciding to persist settings to store
-    // Or find a way that's not as horrible (persist to store only has access to pagination section)
-    // if (this.action['length']) {
-    //   this.action.forEach()
-    // }
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,

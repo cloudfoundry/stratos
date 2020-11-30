@@ -192,24 +192,21 @@ function setPaginationIsList(state: PaginationState, action: SetPaginationIsList
   };
 }
 
-// TODO: RC tidy the hell out of this
 /**
- * Push data (in the action) from local storage back into the pagination state
+ * Push data from local storage back into the pagination state
  */
 function hydratePagination(state: PaginationState, action: HydratePaginationStateAction): PaginationState {
-  const hydrate = (action.paginationState || {}); // TODO: RC don't wrap when parseing
-  const entityKeys = Object.keys(hydrate || {});
+  const hydrate = action.paginationState || {};
+  const entityKeys = Object.keys(hydrate);
   if (entityKeys.length === 0) {
     return state;
   }
 
-  // TODO: RC how to remove entries (pagination and list) that no longer exist (endpoint not connected, deleted app (bindings), etc)?
-
+  // Loop through all entity types.... and pagination sections in those types.... merging in state from storage
   const newState = entityKeys.reduce((res, entityKey) => {
     const existingEntityState = state[entityKey] || {};
-    const hydrateEntityState = action.paginationState[entityKey]; // TODO: RC don't wrap when parseing
+    const hydrateEntityState = action.paginationState[entityKey];
 
-    // TODO: RC change Object.keys to Object.entries
     res[entityKey] = Object.keys(hydrateEntityState).reduce((res2, paginationKey) => {
       const existingPageState = existingEntityState[paginationKey] || getDefaultPaginationEntityState();
       const hydratePagSection = hydrateEntityState[paginationKey];

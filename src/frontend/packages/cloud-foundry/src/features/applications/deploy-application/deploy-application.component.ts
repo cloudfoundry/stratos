@@ -82,7 +82,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // Has the endpoint ID been specified in the URL?
     const endpoint = this.activatedRoute.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
     if (endpoint) {
-      this.cfOrgSpaceService.cf.select.next(endpoint); // TODO: RC
+      this.cfOrgSpaceService.cf.select.next(endpoint);
     }
 
     if (this.appGuid) {
@@ -90,7 +90,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !!p),
         tap(p => {
-          this.cfOrgSpaceService.cf.select.next(p.cloudFoundry); // TODO: RC
+          this.cfOrgSpaceService.cf.select.next(p.cloudFoundry);
           this.cfOrgSpaceService.org.select.next(p.org);
           this.cfOrgSpaceService.space.select.next(p.space);
         })
