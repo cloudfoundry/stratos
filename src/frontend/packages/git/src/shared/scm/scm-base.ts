@@ -40,6 +40,7 @@ export abstract class BaseSCM {
           url: `${commonPrefix}/${endpoint.guid}`,
           requestArgs: {
             ... new HttpOptions(),
+            'x-cap-no-token': !endpoint.user
           }
         };
       }),
