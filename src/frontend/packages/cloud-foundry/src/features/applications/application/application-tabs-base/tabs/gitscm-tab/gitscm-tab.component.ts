@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType } from '@stratosui/git';
+import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -13,11 +13,13 @@ import {
   refCount,
   startWith,
   switchMap,
-  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  NoContentMessageLine,
+} from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import { CFAppState } from '../../../../../../cf-app-state';
 import {
   GithubCommitsListConfigServiceAppTab,
@@ -55,6 +57,15 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   private gitSCMRepoErrorSub: Subscription;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
+  public noContentFirstLine = 'Failed to fetch git details';
+  public noContentSecondLine: NoContentMessageLine = {
+    text: 'This could be a communication issue,'
+  };
+  public noContentOtherLines: NoContentMessageLine[] = [{
+    text: 'or the repository has been removed or is private.'
+  }];
+  public icon$: Observable<SCMIcon>;
+
   ngOnDestroy(): void {
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
@@ -65,7 +76,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    public applicationService: ApplicationService,
+    public appService: ApplicationService,
     private snackBar: MatSnackBar,
     private scmService: GitSCMService
   ) { }
@@ -79,12 +90,20 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = this.applicationService.applicationStratProject$.pipe(
+    const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = this.appService.applicationStratProject$.pipe(
       first(),
       map(stProject => [stProject, this.createBaseGitMeta(stProject)])
     );
 
-    this.hasRepo$ = this.applicationService.applicationStratProject$.pipe(
+    this.icon$ = this.appService.applicationStratProject$.pipe(
+      first(),
+      map((stProject: EnvVarStratosProject) => {
+        const meta: GitMeta = this.createBaseGitMeta(stProject);
+        return meta.scm.getIcon();
+      })
+    );
+
+    this.hasRepo$ = this.appService.applicationStratProject$.pipe(
       first(),
       switchMap((stProject: EnvVarStratosProject) => {
         const gitRepInfoMeta: GitMeta = this.createBaseGitMeta(stProject);
@@ -102,15 +121,15 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       startWith(true)
     );
 
-    const blockedInfo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
+    const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
       filter(hasRepo => hasRepo),
       switchMap(() => coreInfo$)
     );
 
-    this.gitSCMRepo$ = blockedInfo$.pipe(
+    this.gitSCMRepo$ = blockedOnRepo$.pipe(
       map(([, baseGitMeta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(baseGitMeta)),
       switchMap(repoService => repoService.waitForEntity$),
-      map(p => p.entity && p.entity) // Huh
+      map(p => p.entity)
     );
 
     this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
@@ -119,7 +138,6 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       switchMap(([, baseGitMeta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(baseGitMeta).entityMonitor.entityRequest$),
       map(request => request.message),
       distinctUntilChanged(),
-      tap((a) => console.log('5: ', a)),
       withLatestFrom(coreInfo$)
     ).subscribe(([errorMessage, [, baseGitMeta]]) => {
       if (this.snackBarRef) {
@@ -128,7 +146,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       this.snackBarRef = this.snackBar.open(`Unable to fetch ${baseGitMeta.scm.getLabel()} project: ${errorMessage}`, 'Dismiss');
     });
 
-    this.commit$ = blockedInfo$.pipe(
+    this.commit$ = blockedOnRepo$.pipe(
       map(([stProject, baseGitMeta]) => gitEntityCatalog.commit.store.getEntityService(null, null, {
         ...baseGitMeta,
         commitSha: stProject.deploySource.commit.trim()
@@ -136,13 +154,13 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       switchMap(commitService => commitService.waitForEntity$),
       map(p => p.entity)
     );
-    this.isHead$ = blockedInfo$.pipe(
+    this.isHead$ = blockedOnRepo$.pipe(
       map(([stProject, baseGitMeta]) => gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
         ...baseGitMeta,
         branchName: stProject.deploySource.branch
       })),
       switchMap(branchService => branchService.waitForEntity$),
-      withLatestFrom(blockedInfo$),
+      withLatestFrom(blockedOnRepo$),
       map(([p, [stProject]]) => p.entity.commit.sha === stProject.deploySource.commit.trim()),
     );
   }
