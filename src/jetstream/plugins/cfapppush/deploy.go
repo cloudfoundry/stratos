@@ -400,10 +400,6 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
 		if !isTokenFound {
-
-			// err := fmt.Errorf("No token found for endpoint %s", info.EndpointGUID)
-			// log.Errorf("%+v", err)
-			// return StratosProject{}, tempDir, err
 			loggerURL = parsedURL.String()
 		} else {
 			var (

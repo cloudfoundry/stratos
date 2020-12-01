@@ -175,8 +175,15 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 
 	cnsiRequest.URL = new(url.URL)
 	*cnsiRequest.URL = *cnsiRec.APIEndpoint
-	// The APIEndpoint might have a path already - so join the request URI to it
-	cnsiRequest.URL.Path = path.Join(cnsiRequest.URL.Path, uri.Path)
+	// The APIEndpoint might have a path already - so join the request URI to it...
+	// but ensure we don't escape parameters again
+	extraPath := uri.Path
+	if len(uri.RawPath) > 0 {
+		extraPath = uri.RawPath
+	}
+	cnsiRequest.URL.RawPath = path.Join(cnsiRequest.URL.Path, extraPath)
+	cnsiRequest.URL.Path, _ = url.PathUnescape(cnsiRequest.URL.RawPath)
+
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
 	return cnsiRequest, nil
@@ -546,7 +553,7 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	cnsi := c.Param("uuid")
 
 	uri := url.URL{}
-	// Ensure we don't escape parameters aghin
+	// Ensure we don't escape parameters again
 	uri.RawPath = c.Param("*")
 	uri.Path, _ = url.PathUnescape(uri.RawPath)
 
