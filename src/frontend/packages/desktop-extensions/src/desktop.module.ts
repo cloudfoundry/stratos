@@ -43,9 +43,6 @@ export class DesktopModule {
       return;
     }
     this.pElectronService.ipcRenderer.addListener('endpointsChanged', (sender, args) => {
-      console.log('Got an event - endpoints changed');
-      console.log(sender);
-      console.log(args);
       this.store.dispatch(new GetSystemInfo());
     });
   }

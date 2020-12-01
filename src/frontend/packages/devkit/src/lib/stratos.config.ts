@@ -119,7 +119,7 @@ export class StratosConfig implements Logger {
     const defaultExcludedPackages = ['@example/theme', '@example/extensions', '@stratosui/desktop-extensions'];
     if (this.stratosConfig && this.stratosConfig.packages && this.stratosConfig.packages.desktop) {
       defaultExcludedPackages.pop();
-      this.log('Building with desktop pacakge');
+      this.log('Building with desktop package');
     }
 
     const exclude = [];
