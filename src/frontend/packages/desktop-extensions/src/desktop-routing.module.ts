@@ -9,20 +9,21 @@ const customRoutes: Routes = [
       stratosNavigationPage: true
     },
   },
-  {
-    path: 'installer',
-    loadChildren: () => import('./installer/installer.module').then(m => m.InstallerModule),
-    data: {
-      reuseRoute: true,
-      stratosNavigation: {
-        text: 'Install',
-        matIcon: 'deploy',
-        matIconFont: 'stratos-icons',
-        position: 98,
-      }
-    }
-  },
-]
+  // Example of other functionality we can add
+  // {
+  //   path: 'installer',
+  //   loadChildren: () => import('./installer/installer.module').then(m => m.InstallerModule),
+  //   data: {
+  //     reuseRoute: true,
+  //     stratosNavigation: {
+  //       text: 'Install',
+  //       matIcon: 'deploy',
+  //       matIconFont: 'stratos-icons',
+  //       position: 98,
+  //     }
+  //   }
+  // },
+];
 
 @NgModule({
   imports: [
