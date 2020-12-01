@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { first } from 'rxjs/operators';
 
 import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
 
@@ -13,16 +14,17 @@ export class SnackBarService {
 
   constructor(public snackBar: MatSnackBar) { }
 
-  private snackBars: MatSnackBarRef<SimpleSnackBar>[] = [];
+  // There can onlly be one snackbar on screen at once
+  private lastSnackBar: MatSnackBarRef<SimpleSnackBar>;
 
   public show(message: string, closeMessage?: string, duration: number = 5000) {
-    this.snackBars.push(this.snackBar.open(message, closeMessage, {
+    this.trackSnackBar(this.snackBar.open(message, closeMessage, {
       duration: closeMessage ? null : duration
     }));
   }
 
   public showReturn(message: string, returnUrl: string | string[], returnLabel: string, duration?: number) {
-    this.snackBars.push(this.snackBar.openFromComponent(SnackBarReturnComponent, {
+    this.trackSnackBar(this.snackBar.openFromComponent(SnackBarReturnComponent, {
       duration,
       data: {
         message,
@@ -33,6 +35,13 @@ export class SnackBarService {
   }
 
   public hide() {
-    this.snackBars.forEach(snackBar => snackBar.dismiss());
+    if (this.lastSnackBar) {
+      this.lastSnackBar.dismiss();
+    }
+  }
+
+  private trackSnackBar(snackBar: MatSnackBarRef<SimpleSnackBar>) {
+    this.lastSnackBar = snackBar;
+    snackBar.afterDismissed().pipe(first()).subscribe(() => this.lastSnackBar = null);
   }
 }
