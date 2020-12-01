@@ -34,6 +34,11 @@ popd > /dev/null
 
 pushd ${STRATOS} > /dev/null
 
+if [ ! -d "./node_modules" ]; then
+  echo "Installing node modules in top-level folder ..."
+  npm install
+fi
+
 if [ ! -d "./dist" ]; then
   BUILD_FRONTEND=true
   echo "Frontend has not been built - will build"
