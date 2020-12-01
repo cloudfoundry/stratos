@@ -85,6 +85,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
         `${api.url}/repos/${projectName}/commits?sha=${ref}`, {
         ...api.requestArgs,
         params: {
+          ...api.requestArgs.params,
           [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
         }
       }))

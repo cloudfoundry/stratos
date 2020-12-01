@@ -66,6 +66,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
       {
         ...this.options,
         params: {
+          ...this.options.params,
           ...args[0]
         },
       }

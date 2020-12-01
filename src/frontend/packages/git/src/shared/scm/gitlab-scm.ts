@@ -70,7 +70,9 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     return this.getAPI().pipe(
       switchMap(api => httpClient.get(
         `${api.url}/projects/${prjNameEncoded}/repository/branches`, {
+        ...api.requestArgs,
         params: {
+          ...api.requestArgs.params,
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
         }
       })),
