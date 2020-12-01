@@ -3,6 +3,7 @@ import { Validators } from '@angular/forms';
 import { entityFetchedWithoutError } from '@stratosui/store';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
+import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -147,23 +148,6 @@ const kubeAuthTypeMap: { [type: string]: EndpointAuthTypeConfig, } = {
   }
 };
 
-function k8sShortcuts(id: string) {
-  return [
-    {
-      title: 'View Nodes',
-      link: ['/kubernetes', id, 'nodes'],
-      icon: 'node',
-      iconFont: 'stratos-icons'
-    },
-    {
-      title: 'View Namespaces',
-      link: ['/kubernetes', id, 'namespaces'],
-      icon: 'namespace',
-      iconFont: 'stratos-icons'
-    }
-  ];
-}
-
 export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: KUBERNETES_ENDPOINT_TYPE,
@@ -180,6 +164,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
     ],
     favoriteFromEntity: getFavoriteFromKubeEntity,
     renderPriority: 4,
+    urlValidationRegexString: urlValidationExpression,
     subTypes: [
       {
         type: 'config',
@@ -225,16 +210,15 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/core/assets/custom/k3s.svg',
         renderPriority: 6
       }],
-      homeCard: {
-        component: (compiler: Compiler, injector: Injector) => import('./home/kubernetes-home-card.module').then((m) => {
-          return compiler.compileModuleAndAllComponentsAsync(m.KubernetesHomeCardModule).then(cm => {
-            const mod = cm.ngModuleFactory.create(injector);
-            return mod.instance.createHomeCard(mod.componentFactoryResolver);
-          });
-        }),
-        fullView: false
-        // shortcuts: k8sShortcuts
-      }
+    homeCard: {
+      component: (compiler: Compiler, injector: Injector) => import('./home/kubernetes-home-card.module').then((m) => {
+        return compiler.compileModuleAndAllComponentsAsync(m.KubernetesHomeCardModule).then(cm => {
+          const mod = cm.ngModuleFactory.create(injector);
+          return mod.instance.createHomeCard(mod.componentFactoryResolver);
+        });
+      }),
+      fullView: false
+    }
   };
   return [
     generateEndpointEntity(endpointDefinition),
@@ -320,21 +304,21 @@ function generateNamespacesEntity(endpointDefinition: StratosEndpointExtensionDe
   };
   kubeEntityCatalog.namespace = new StratosCatalogEntity<IKubeResourceFavMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
     definition, {
-      actionBuilders: kubeNamespaceActionBuilders,
-      entityBuilder: {
-        getIsValid: (fav) => kubeEntityCatalog.namespace.api.get(fav.metadata.name, fav.endpointId).pipe(entityFetchedWithoutError()),
-        getMetadata: (namespace: any) => {
-          return {
-            endpointId: namespace.kubeGuid,
-            guid: namespace.metadata.uid,
-            kubeGuid: namespace.kubeGuid,
-            name: namespace.metadata.name,
-          };
-        },
-        getLink: favorite => `/kubernetes/${favorite.endpointId}/namespaces/${favorite.metadata.name}`,
-        getGuid: namespace => namespace.metadata.uid,
-      }
-    });
+    actionBuilders: kubeNamespaceActionBuilders,
+    entityBuilder: {
+      getIsValid: (fav) => kubeEntityCatalog.namespace.api.get(fav.metadata.name, fav.endpointId).pipe(entityFetchedWithoutError()),
+      getMetadata: (namespace: any) => {
+        return {
+          endpointId: namespace.kubeGuid,
+          guid: namespace.metadata.uid,
+          kubeGuid: namespace.kubeGuid,
+          name: namespace.metadata.name,
+        };
+      },
+      getLink: favorite => `/kubernetes/${favorite.endpointId}/namespaces/${favorite.metadata.name}`,
+      getGuid: namespace => namespace.metadata.uid,
+    }
+  });
   return kubeEntityCatalog.namespace;
 }
 

@@ -32,7 +32,6 @@ export class GitEffects {
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
-    // private scmService: GitSCMService,
     private httpClient: HttpClient
   ) { }
 

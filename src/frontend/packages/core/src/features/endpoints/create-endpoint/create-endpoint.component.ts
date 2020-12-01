@@ -3,7 +3,6 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  Injector,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -31,7 +30,6 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     private resolver: ComponentFactoryResolver,
-    private injector: Injector
   ) {
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
