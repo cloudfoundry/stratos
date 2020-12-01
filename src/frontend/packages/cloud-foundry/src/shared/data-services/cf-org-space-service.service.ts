@@ -62,8 +62,8 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  // A lot of problems are caused by these being BehaviourSubject's (specifically auto select process in CfOrgSpaceDataService and sticky values)
-  // Ideally this would change to Subject... but some usages .value
+  // A lot of problems are caused by these being BehaviourSubject's (specifically auto select process in CfOrgSpaceDataService and sticky
+  // values). Ideally this would change to Subject... but some usages <behaviour subject>.value
   select: BehaviorSubject<string>;
 }
 

@@ -101,7 +101,7 @@ export class ProfileInfoComponent {
 
     this.localStorageSize$ = this.sessionData$.pipe(
       map(sessionData => LocalStorageService.localStorageSize(sessionData)),
-      filter(bytes => bytes != -1),
+      filter(bytes => bytes !== -1),
     );
   }
 

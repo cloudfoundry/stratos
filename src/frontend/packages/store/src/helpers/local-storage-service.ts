@@ -153,7 +153,7 @@ export class LocalStorageService {
   /**
    *  Allow for selective persistence of data. For pagination we only store params and clientPagination
    */
-  private static parseForStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): Object {
+  private static parseForStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): object {
     switch (type) {
       case LocalStorageSyncTypes.PAGINATION:
         const pagination: PaginationState = storePart as unknown as PaginationState;
