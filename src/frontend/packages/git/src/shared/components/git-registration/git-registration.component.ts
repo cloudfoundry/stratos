@@ -34,6 +34,7 @@ interface GithubType {
   description: string[];
   name?: string;
   exists?: boolean;
+  urlSuffix?: string;
 }
 
 enum GitTypeKeys {
@@ -99,7 +100,6 @@ export class GitRegistrationComponent implements OnDestroy {
             description: [
               `Register your own GitHub Enterprise server.`,
               'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
-              `The Endpoint Address will be similar to github.com's - \`${publicGithubUrl}\``
             ],
           }
         }
@@ -123,8 +123,8 @@ export class GitRegistrationComponent implements OnDestroy {
             description: [
               `Register your own Gitlab Enterprise server.`,
               'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
-              `The Endpoint Address will be similar to gitlab.com's - \`${publicGitlabUrl}\``
             ],
+            urlSuffix: 'api/v4'
           }
         }
       }
@@ -187,7 +187,7 @@ export class GitRegistrationComponent implements OnDestroy {
     const typ = this.registerForm.value.selectedType;
     const defn = this.gitTypes[this.epSubType].types[typ];
     const name = defn.name || this.registerForm.controls.nameField.value;
-    const url = defn.url || this.registerForm.controls.urlField.value;
+    const url: string = this.updateUrlWithSuffix(defn.url || this.registerForm.controls.urlField.value, defn);
     // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSllField.value :
@@ -219,4 +219,13 @@ export class GitRegistrationComponent implements OnDestroy {
         })
       );
   };
+
+  private updateUrlWithSuffix(url: string, defn: GithubType): string {
+    const urlTrimmed = url.trim();
+    if (!defn.urlSuffix) {
+      return urlTrimmed;
+    }
+    const ready = urlTrimmed[urlTrimmed.length - 1] === '/' ? urlTrimmed.substring(0, urlTrimmed.length - 1) : urlTrimmed;
+    return ready + '/' + defn.urlSuffix;
+  }
 }

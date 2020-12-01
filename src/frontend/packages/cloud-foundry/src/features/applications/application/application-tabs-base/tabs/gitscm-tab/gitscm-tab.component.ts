@@ -43,7 +43,7 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
       },
       deps: [Store, DatePipe, GitSCMService, ApplicationService]
     }
-  ]
+  ],
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
 

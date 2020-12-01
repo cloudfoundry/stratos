@@ -62,7 +62,7 @@
                   </app-metadata-item>
                   <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
                   </app-metadata-item>
-                  <app-metadata-item label="Description">{{ gitSCMRepo.description }}</app-metadata-item>
+                  <app-metadata-item label="Description">{{ gitSCMRepo.description || '-' }}</app-metadata-item>
                   <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
                   <app-metadata-item *ngIf="gitSCMRepo.pushed_at" label="Last Pushed:">
                     {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
