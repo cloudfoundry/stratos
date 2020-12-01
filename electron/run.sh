@@ -40,4 +40,7 @@ cp -R ${STRATOS}/dist ${DIR}
 cp -R ${STRATOS}/dev-ssl ${DIR}
 popd > /dev/null
 
+cat ../package.json | jq -r .version > version
+
+echo "Building ...."
 npm run electron -- ${ARGS}

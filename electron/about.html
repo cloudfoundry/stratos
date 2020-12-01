@@ -54,18 +54,23 @@
       <h1>STRATOS</h1>
     </div>
     <div>
-      <h2>Version: 4.0.0</h2>
+      <h2>Version: <span id="version"></span></h2>
       <p>Lovingly designed & created in Bristol</p>
     </div>
   </div>
   <button id="cancel-btn">Close</button>
 </div>
 <script>
- const remote = require('electron').remote;
- document.getElementById("cancel-btn").addEventListener("click", function (e) {
-       var window = remote.getCurrentWindow();
-       window.close();
-  });   
+  const electron = require('electron');
+  const remote = electron.remote;
+  document.getElementById("cancel-btn").addEventListener("click", function (e) {
+    var window = remote.getCurrentWindow();
+    window.close();
+  });
 
+  // Set version number
+  const version = remote.getCurrentWindow().stratosVersion || 'dev';
+  const elm = document.getElementById('version');
+  elm.innerText = version;
 </script> 
 </html>

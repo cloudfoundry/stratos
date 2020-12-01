@@ -1,12 +1,16 @@
-const electron = require('electron');
+// const electron = require('electron');
 const path = require('path');
 const fs = require('fs');
+const homeDir = require('os').homedir();
 
-class Store {
+class ElectronStore {
   constructor(opts) {
     // Renderer process has to get `app` module via `remote`, whereas the main process can get it directly
     // app.getPath('userData') will return a string of the user's app data directory path.
-    this.path = (electron.app || electron.remote.app).getPath('userData');
+    // Causes `EISDIR: illegal operation on a directory, open '/Users/<user>/Library/Application Support/Stratos/settings.json'`
+    // this.path = (electron.app || electron.remote.app).getPath('userData');
+    this.path = path.join(homeDir, '.config', 'stratos');
+
     // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
     this.filePath = path.join(this.path, opts.configName + '.json');
 
@@ -41,4 +45,4 @@ function parseDataFile(filePath, defaults) {
 }
 
 // expose the class
-module.exports = Store;
+module.exports = ElectronStore;

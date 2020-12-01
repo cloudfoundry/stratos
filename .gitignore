@@ -91,7 +91,7 @@ build/dev_config.json
 e2e-reports/
 .stratos-git-metadata.json
 src/jetstream/jetstream
-src/jetstream/console-database.db
+console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 src/jetstream/plugins/monocular/chart-repo/chartrepo
@@ -147,3 +147,4 @@ website/versions-repo
 /electron/out
 /electron/dev-ssl
 /electron/jetstream
+/electron/version

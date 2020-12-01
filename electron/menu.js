@@ -5,10 +5,14 @@ const {
   autoUpdater
 } = require('electron')
 
+const fs = require('fs');
+
 const isMac = process.platform === 'darwin'
 
 let appMainWindow;
 let appHomeUrl;
+
+const version = fs.readFileSync('./version').toString();
 
 function getMenu(mainWindow, homeUrl) {
   appMainWindow = mainWindow;
@@ -27,7 +31,9 @@ function about() {
       nodeIntegration: true
     }
   });
+  child.stratosVersion = version;
   child.loadFile('about.html');
+  //child.webContents.openDevTools({mode:'undocked'});
 }
 
 const template = [

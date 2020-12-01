@@ -13,7 +13,7 @@ const path = require("path");
 const https = require('https');
 const chokidar = require('chokidar');
 
-const Store = require('./store.js');
+const ElectronStore = require('./electron-store.js');
 
 const findFreePort = require("./freeport");
 const {
@@ -51,7 +51,7 @@ let mainWindow;
 let jetstream;
 
 const lastLocation = 'lastLocation';
-const store = new Store({
+const store = new ElectronStore({
   configName: 'settings',
   defaults: {
     [lastLocation]: ''
@@ -140,12 +140,11 @@ function doCreateWindow(url) {
     url = '127.0.0.1:4200'
   }
   url = `https://${url}`
-  url = addPath(url);
 
   const menu = Menu.buildFromTemplate(mainMenu(mainWindow, url));
   Menu.setApplicationMenu(menu)
 
-  mainWindow.loadURL(url);
+  mainWindow.loadURL(addPath(url));
 
   ipcMain.on(ELECTRON_NOTIFICATION, (event, args) => {
     new Notification({
@@ -214,7 +213,8 @@ function getEnvironment(url) {
     'SQLITE_KEEP_DB': 'true',
     'SQLITE_DB_DIR': getConfigFolder(),
     //'LOG_LEVEL': 'DEBUG',
-    'SESSION_STORE_EXPIRY': 50000000
+    'SESSION_STORE_EXPIRY': 5000,
+    'AUTH_ENDPOINT_TYPE': 'none'
   };
 }
 
