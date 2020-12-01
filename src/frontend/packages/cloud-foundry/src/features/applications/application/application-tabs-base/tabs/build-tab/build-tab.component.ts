@@ -190,7 +190,9 @@ export class BuildTabComponent implements OnInit {
         return observableCombineLatest(res);
       }),
       map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, EntityInfo<GitCommit>]) => {
-        deploySource.commitURL = commit?.entity?.html_url;
+        if (deploySource) {
+          deploySource.commitURL = commit?.entity?.html_url;
+        }
         return deploySource;
       }),
       startWith({ type: 'loading' })

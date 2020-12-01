@@ -24,14 +24,14 @@ describe('Autoscaler -', () => {
 
   const validateFormDate = (fromForm: promise.Promise<any>, toEqual: moment.Moment, label: string) => {
     fromForm.then(fieldInput => {
-      const momentFieldInput = moment(fieldInput)
+      const momentFieldInput = moment(fieldInput);
       expect(momentFieldInput.year).toBe(toEqual.year, `Failed for '${label}'`);
       expect(momentFieldInput.month).toBe(toEqual.month, `Failed for '${label}'`);
       expect(momentFieldInput.day).toBe(toEqual.day, `Failed for '${label}'`);
       expect(momentFieldInput.hour).toBe(toEqual.hour, `Failed for '${label}'`);
       expect(momentFieldInput.minute).toBe(toEqual.minute, `Failed for '${label}'`);
-    })
-  }
+    });
+  };
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.user)
@@ -58,7 +58,7 @@ describe('Autoscaler -', () => {
   const memoryUtilBreach = '160';
 
   const throughputOperator = '>=';
-  const throughputThreshold = '100'
+  const throughputThreshold = '100';
   const throughputAdjustment = '10';
   const throughputAdjustmentType = '% instances';
 
@@ -114,7 +114,7 @@ describe('Autoscaler -', () => {
     });
 
     it('Check edit steps', () => {
-      createPolicy.header.waitForTitleText('Create AutoScaler Policy: ' + testAppName)
+      createPolicy.header.waitForTitleText('Create AutoScaler Policy: ' + testAppName);
       // Check the steps
       e2e.debugLog(`${loggingPrefix} Checking Steps`);
       createPolicy.stepper.getStepNames().then(steps => {
@@ -386,7 +386,7 @@ describe('Autoscaler -', () => {
     it('Should pass ScalingRules Step', () => {
       createPolicy.stepper.clickAddButton();
       createPolicy.stepper.getStepperForm().getControlsMap().then(map => {
-        expect(map['metric_type'].value).toBe('memoryused')
+        expect(map['metric_type'].value).toBe('memoryused');
       });
       createPolicy.stepper.getStepperForm().fill({ threshold: memoryUsedThreshold });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);
@@ -538,7 +538,7 @@ describe('Autoscaler -', () => {
           // These console.logs help by
           // .. Showing the actual time we're checking, which can be compared with schedule start/end times
           // .. Showing when successful runs complete, over time this should show on average events take to show
-          const time = moment().toString()
+          const time = moment().toString();
           console.log(`${time}: Table Data: `, tableData);
 
           if (isRefreshing) {
