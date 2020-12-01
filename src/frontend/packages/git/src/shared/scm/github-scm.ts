@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
-import { getGitHubAPIURL } from '../github.helpers';
 import { GitSuggestedRepo } from './../../store/git.public-types';
 import {
   GITHUB_PER_PAGE_PARAM,
@@ -19,7 +18,7 @@ import { GitSCMType } from './scm.service';
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
   constructor(gitHubURL: string, endpointGuid: string) {
-    super(gitHubURL || getGitHubAPIURL());
+    super(gitHubURL);
     this.endpointGuid = endpointGuid;
   }
 

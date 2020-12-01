@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -87,6 +87,8 @@ export class BuildTabComponent implements OnInit {
 
   deploySource$: Observable<CustomEnvVarStratosProjectSource>;
 
+  public gitRepo$: Observable<GitRepo>;
+
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
       combineLatest(
@@ -122,6 +124,16 @@ export class BuildTabComponent implements OnInit {
         this.applicationService.cfGuid,
         space.metadata.guid)
       )
+    );
+
+    this.gitRepo$ = this.applicationService.applicationStratProject$.pipe(
+      map(project => {
+        const scmType = project.deploySource.scm || project.deploySource.type;
+        const scm = this.scmService.getSCM(scmType as GitSCMType, project.deploySource.endpointGuid);
+        return gitEntityCatalog.repo.store.getRepoInfo.getEntityService({ projectName: project.deploySource.project, scm });
+      }),
+      switchMap(repoService => repoService.waitForEntity$),
+      map(p => p.entity)
     );
 
     const deploySource$ = observableCombineLatest(

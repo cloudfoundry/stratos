@@ -40,9 +40,6 @@ export abstract class BaseSCM {
           url: `${commonPrefix}/${endpoint.guid}`,
           requestArgs: {
             ... new HttpOptions(),
-            header: {
-              'x-cap-passthrough': 'true',
-            }
           }
         };
       }),

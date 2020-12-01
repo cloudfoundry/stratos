@@ -43,6 +43,13 @@
       margin-right: 8px;
     }
   }
+
+  &__gitscm {
+    display: flex;
+    div {
+      flex: 1;
+    }
+  }
 }
 
 .app-metadata {
