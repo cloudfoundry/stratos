@@ -386,7 +386,7 @@ describe('Autoscaler -', () => {
     it('Should pass ScalingRules Step', () => {
       createPolicy.stepper.clickAddButton();
       createPolicy.stepper.getStepperForm().getControlsMap().then(map => {
-        expect(map['metric_type'].value).toBe('memoryused');
+        expect(map.metric_type.value).toBe('memoryused');
       });
       createPolicy.stepper.getStepperForm().fill({ threshold: memoryUsedThreshold });
       expect(createPolicy.stepper.getMatErrorsCount()).toBe(0);

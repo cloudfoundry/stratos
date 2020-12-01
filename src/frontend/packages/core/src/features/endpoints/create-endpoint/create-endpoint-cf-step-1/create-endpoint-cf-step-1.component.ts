@@ -72,7 +72,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       ssoAllowedField: [false, []],
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
-      clientSecretField: [false, []],
+      clientSecretField: ['', []],
     });
 
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(

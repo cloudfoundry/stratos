@@ -150,9 +150,8 @@ describe('Application Deploy -', () => {
       expect(appSummary.cardBuildInfo.stack.getValue()).toBe(testAppStack || defaultStack);
 
       appSummary.cardDeployInfo.waitForTitle('Deployment Info');
-      appSummary.cardDeployInfo.github.waitUntilShown('Waiting for GitHub deployment information');
-      expect(appSummary.cardDeployInfo.github.isDisplayed()).toBeTruthy();
-      appSummary.cardDeployInfo.github.getValue().then(commitHash => {
+      appSummary.cardDeployInfo.gitCommit.waitUntilShown();
+      appSummary.cardDeployInfo.gitCommit.getValue().then(commitHash => {
         expect(commitHash).toBeDefined();
         expect(commitHash.length).toBe(8);
       });
@@ -402,8 +401,8 @@ describe('Application Deploy -', () => {
       // Reload page at app summary, just in case of caching
       appSummary.navigateTo();
       appSummary.waitForPage();
-      appSummary.cardDeployInfo.github.waitUntilShown();
-      appSummary.cardDeployInfo.github.getValue().then(commitHash => {
+      appSummary.cardDeployInfo.gitCommit.waitUntilShown();
+      appSummary.cardDeployInfo.gitCommit.getValue().then(commitHash => {
         expect(commitHash).toBeDefined();
         expect(commitHash.length).toBe(8);
       });
