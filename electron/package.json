@@ -9,7 +9,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron": "../node_modules/.bin/electron .",
+    "electron": "./node_modules/.bin/electron .",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "epublish": "electron-forge publish"

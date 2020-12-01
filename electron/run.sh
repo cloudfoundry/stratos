@@ -24,7 +24,26 @@ if [ "$1" == "dev" ]; then
   ARGS="dev"
 fi
 
+pushd ${DIR} > /dev/null
+# Checks for fresh run on checkout
+if [ ! -d "./node_modules" ]; then
+  echo "Installing node modules ..."
+  npm install
+fi
+popd > /dev/null
+
 pushd ${STRATOS} > /dev/null
+
+if [ ! -d "./dist" ]; then
+  BUILD_FRONTEND=true
+  echo "Frontend has not been built - will build"
+fi
+
+if [ ! -f "./src/jetstream/jetstream" ]; then
+  BUILD_BACKEND=true
+  echo "Backend has not been built - will build"
+fi
+
 if [ "$BUILD_FRONTEND" == "true" ]; then
   # Ensure the desktop-extendsions are included
   STRATOS_YAML=./electron/stratos.yaml ng build --configuration=desktop
