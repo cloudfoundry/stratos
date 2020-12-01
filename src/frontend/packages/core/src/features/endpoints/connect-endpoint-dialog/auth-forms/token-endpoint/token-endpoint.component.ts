@@ -9,6 +9,8 @@ import { IAuthForm } from '../../../../../../../store/src/extension-types';
   styleUrls: ['./token-endpoint.component.scss']
 })
 export class TokenEndpointComponent implements IAuthForm {
+  public showToken = false;
+
   @Input() formGroup: FormGroup;
 
   @Input() config: any = {};

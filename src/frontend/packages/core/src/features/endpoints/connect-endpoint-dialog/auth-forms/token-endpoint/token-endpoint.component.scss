@@ -1,4 +1,6 @@
 .token {
+  min-width: 350px;
+
   &__form {
     display: flex;
     flex-direction: column;
