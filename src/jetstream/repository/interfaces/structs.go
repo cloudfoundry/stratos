@@ -339,8 +339,6 @@ type CNSIRequest struct {
 	Body         []byte       `json:"-"`
 	Header       http.Header  `json:"-"`
 	URL          *url.URL     `json:"-"`
-	UnescapePath bool         `json:"-"`
-	AllowNoToken bool         `json:"-"`
 	StatusCode   int          `json:"statusCode"`
 	Status       string       `json:"status"`
 	PassThrough  bool         `json:"-"`

@@ -698,6 +698,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
+	// No authentication
+	pp.AddAuthProvider(interfaces.AuthConnectTypeNone, interfaces.AuthProvider{
+		Handler:  pp.doNoAuthFlowRequest,
+		UserInfo: pp.getCNSIUserForNoAuth,
+	})
+
 	// Generic Bearer Auth (HTTP Authorization header with 'bearer' prefix)
 	pp.AddAuthProvider(interfaces.AuthTypeBearer, interfaces.AuthProvider{
 		Handler: pp.doBearerFlowRequest,

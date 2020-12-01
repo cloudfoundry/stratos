@@ -22,7 +22,10 @@ import (
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
 
-const longRunningTimeoutHeader = "x-cap-long-running"
+const (
+	longRunningTimeoutHeader = "x-cap-long-running"
+	noTokenHeader            = "x-cap-no-token"
+)
 
 // Timeout for long-running requests, after which we will return indicating request it still active
 // to prevent hitting the 2 minute browser timeout
@@ -463,15 +466,9 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		body = bytes.NewReader(cnsiRequest.Body)
 	}
 
-	// cnsiRequest.URL.String() uses encoded version of path.. which re-encodes content when it shouldn't
-	// (for example gitlab intentionally encoded path of `projects/richard-cox%2Fcf-quick-app` becomes
-	// `projects/richard-cox%252Fcf-quick-app` which results in 404). Provide a way to override this functionality with UnescapePath
-	url := cnsiRequest.URL.String()
-	if cnsiRequest.UnescapePath {
-		url = strings.ReplaceAll(url, cnsiRequest.URL.EscapedPath(), cnsiRequest.URL.Path)
-	}
+	proxyURL := cnsiRequest.URL.String()
 
-	req, err = http.NewRequest(cnsiRequest.Method, url, body)
+	req, err = http.NewRequest(cnsiRequest.Method, proxyURL, body)
 	if err != nil {
 		cnsiRequest.Error = err
 		if done != nil {
@@ -481,24 +478,19 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	}
 
 	var tokenRec interfaces.TokenRecord
-	var noToken bool
 	if cnsiRequest.Token != nil {
 		tokenRec = *cnsiRequest.Token
 	} else {
 		// get a cnsi token record and a cnsi record
 		tokenRec, _, err = p.getCNSIRequestRecords(cnsiRequest)
 		if err != nil {
-			if cnsiRequest.AllowNoToken {
-				noToken = true
-			} else {
-				cnsiRequest.Error = err
-				if done != nil {
-					cnsiRequest.StatusCode = 400
-					cnsiRequest.Status = "Unable to retrieve CNSI token record"
-					done <- cnsiRequest
-				}
-				return
+			cnsiRequest.Error = err
+			if done != nil {
+				cnsiRequest.StatusCode = 400
+				cnsiRequest.Status = "Unable to retrieve CNSI token record"
+				done <- cnsiRequest
 			}
+			return
 		}
 	}
 
@@ -510,29 +502,12 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		req.Header.Set(longRunningTimeoutHeader, "true")
 	}
 
-	if noToken {
-		var client http.Client
-		var cnsi interfaces.CNSIRecord
-		cnsi, err = p.GetCNSIRecord(cnsiRequest.GUID)
-		if err != nil {
-			cnsiRequest.Error = err
-			if done != nil {
-				cnsiRequest.StatusCode = 400
-				cnsiRequest.Status = "Unable to retrieve CNSI record"
-				done <- cnsiRequest
-			}
-			return
-		}
-		client = p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation)
-		res, err = client.Do(req)
+	// Find the auth provider for the auth type - default ot oauthflow
+	authHandler := p.GetAuthProvider(tokenRec.AuthType)
+	if authHandler.Handler != nil {
+		res, err = authHandler.Handler(cnsiRequest, req)
 	} else {
-		// Find the auth provider for the auth type - default ot oauthflow
-		authHandler := p.GetAuthProvider(tokenRec.AuthType)
-		if authHandler.Handler != nil {
-			res, err = authHandler.Handler(cnsiRequest, req)
-		} else {
-			res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
-		}
+		res, err = p.DoOAuthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {
@@ -571,7 +546,10 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	cnsi := c.Param("uuid")
 
 	uri := url.URL{}
-	uri.Path = c.Param("*")
+	// Ensure we don't escape parameters aghin
+	uri.RawPath = c.Param("*")
+	uri.Path, _ = url.PathUnescape(uri.RawPath)
+
 	uri.RawQuery = c.Request().URL.RawQuery
 
 	header := getEchoHeaders(c)
@@ -593,9 +571,17 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	if buildErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 	}
-	cnsiRequest.LongRunning = false // FIXME: Should come from header. Would this have knock on effects (only handled in other cases)?
-	cnsiRequest.UnescapePath = true // TODO: RC should this come from a header?
-	cnsiRequest.AllowNoToken = true // TODO: RC should this come from a header?
+
+	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)
+	noToken := "true" == c.Request().Header.Get(noTokenHeader)
+
+	cnsiRequest.LongRunning = longRunning
+	if noToken {
+		// Fake a token record with no authentication
+		cnsiRequest.Token = &interfaces.TokenRecord{
+			AuthType: interfaces.AuthConnectTypeNone,
+		}
+	}
 
 	go p.doRequest(&cnsiRequest, done)
 	res := <-done
