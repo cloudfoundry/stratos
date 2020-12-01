@@ -54,7 +54,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
-	github.com/mattn/go-sqlite3 v1.13.0
+	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/miekg/dns v1.1.4 // indirect
 	github.com/moby/moby v1.13.1 // indirect
