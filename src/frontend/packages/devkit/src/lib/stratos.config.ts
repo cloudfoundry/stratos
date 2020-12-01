@@ -108,7 +108,7 @@ export class StratosConfig implements Logger {
   }
 
   private excludeExamples() {
-    const examplePackages = ['@example/theme', '@example/extensions']
+    const examplePackages = ['@example/theme', '@example/extensions', '@stratosui/desktop-extensions'];
     const exclude = [];
     // Are examples explicitly in the include section?
     if (this.stratosConfig &&
@@ -116,7 +116,7 @@ export class StratosConfig implements Logger {
       this.stratosConfig.packages.include &&
       this.stratosConfig.packages.include.length > 0 // Will check if this is an array
     ) {
-      examplePackages.forEach(ep => this.addIfMissing(this.stratosConfig.packages.include, ep, exclude))
+      examplePackages.forEach(ep => this.addIfMissing(this.stratosConfig.packages.include, ep, exclude));
     } else {
       exclude.push(...examplePackages);
     }
@@ -128,10 +128,10 @@ export class StratosConfig implements Logger {
 
     // If examples are not in include section, add them to the exclude
     if (!this.stratosConfig) {
-      this.stratosConfig = {}
+      this.stratosConfig = {};
     }
     if (!this.stratosConfig.packages) {
-      this.stratosConfig.packages = {}
+      this.stratosConfig.packages = {};
     }
     if (!this.stratosConfig.packages.exclude) {
       this.stratosConfig.packages.exclude = [];
@@ -141,7 +141,7 @@ export class StratosConfig implements Logger {
 
   private addIfMissing<T = string>(array: T[], entry: T, dest: T[] = array) {
     if (array.indexOf(entry) < 0) {
-      dest.push(entry)
+      dest.push(entry);
     }
   }
 
@@ -153,7 +153,7 @@ export class StratosConfig implements Logger {
     }
 
     const exclude = buildRemove.split(',');
-    console.log(`Detected STRATOS_BUILD_REMOVE: ${buildRemove}`)
+    console.log(`Detected STRATOS_BUILD_REMOVE: ${buildRemove}`);
 
     // Add the package to the list of excludes
     exclude.forEach(e => this.addIfMissing(this.stratosConfig.packages.exclude, e.trim()));
