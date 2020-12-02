@@ -175,7 +175,22 @@ export class UserFavoriteManager {
     );
   }
 
-  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  // Get a favorite for the given entity
+  public getFavorite<Y extends IEntityMetadata = IEntityMetadata>(
+    entity: any,
+    entityType: string,
+    endpointType: string
+  ) {
+    // We need to get the endpoint ID for the entity
+    const endpointCatalogEntity = entityCatalog.getEndpoint(endpointType);
+    if (entity && endpointCatalogEntity && endpointCatalogEntity.definition.getEndpointIdFromEntity) {
+      const id = endpointCatalogEntity.definition.getEndpointIdFromEntity(entity);
+      return this.getFavoriteFromEntity<Y>(entityType, endpointType, id, entity);
+    }
+    return null;
+  }
+
+  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     entityType: string,
     endpointType: string,
     endpointId: string,

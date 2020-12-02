@@ -81,3 +81,6 @@ INVITE_USER_CLIENT_SECRET=
 
 # Enabled Artifact Hub
 # ARTIFACT_HUB_DISABLED=false
+
+# Allow backup/restore feature?
+#FEATURE_ALLOW_BACKUP=false

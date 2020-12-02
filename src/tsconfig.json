@@ -40,7 +40,7 @@
       "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
       "@stratosui/kubernetes": ["frontend/packages/kubernetes/src/public-api.ts"],
       "@stratosui/desktop-extensions": ["frontend/packages/desktop-extensions/src/public-api.ts"],
-      "@stratosui/git": ["frontend/packages/git/src/public_api.ts"],
+      "@stratosui/git": ["frontend/packages/git/src/public_api.ts"]
     }
   }
 }

@@ -26,12 +26,12 @@
   </div>
 </div>
 <ng-template #noEndpoints>
-  <div *ngIf="haveRegistered$ | async; else noneRegistered">
+  <div class="home-page" *ngIf="haveRegistered$ | async; else noneRegistered">
     <app-no-content-message [icon]="'settings_ethernet'" firstLine="There are no connected endpoints" 
     [secondLine]="{text: 'Use the Endpoints view to connect'}"></app-no-content-message>
   </div>
 </ng-template>
 
 <ng-template #noneRegistered>
-  <app-endpoints-missing [showToolbarHint]="false"></app-endpoints-missing>
+  <app-endpoints-missing class="home-page" [showToolbarHint]="false"></app-endpoints-missing>
 </ng-template>
