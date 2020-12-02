@@ -35,6 +35,10 @@ export class LocalStorageService {
    * Make a key used by local storage that relates to a section of the user's settings in the console's store
    */
   private static makeKey(userId: string, storeKey: LocalStorageSyncTypes) {
+    if (storeKey === LocalStorageSyncTypes.DASHBOARD) {
+      // Legacy support for when we only stored dashboard
+      return userId;
+    }
     return userId + '-' + storeKey;
   }
 
