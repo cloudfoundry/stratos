@@ -57,12 +57,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   private gitSCMRepoErrorSub: Subscription;
   private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
-  public noContentFirstLine = 'Failed to fetch git details';
+  public noContentFirstLine = 'Unable to fetch details';
   public noContentSecondLine: NoContentMessageLine = {
-    text: 'This could be a communication issue,'
+    text: 'This repository may be private or has been removed.'
   };
   public noContentOtherLines: NoContentMessageLine[] = [{
-    text: 'or the repository has been removed or is private.'
+    text: 'Alternatively this may be due to a communication issue.'
   }];
   public icon$: Observable<SCMIcon>;
 

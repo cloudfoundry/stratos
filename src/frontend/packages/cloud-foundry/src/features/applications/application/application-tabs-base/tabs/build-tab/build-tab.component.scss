@@ -48,6 +48,9 @@
     display: flex;
     div {
       flex: 1;
+      app-metadata-item:first-of-type {
+        margin-top: 0;
+      }
     }
   }
 }
