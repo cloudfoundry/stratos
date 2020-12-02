@@ -26,7 +26,6 @@ import { endpointEntitiesSelector } from '../../../../../../store/src/selectors/
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { IFavoriteMetadata } from '../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { UpdateExistingApplication } from '../../../../actions/application.actions';
 import { IApp, IOrganization, ISpace } from '../../../../cf-api.types';
@@ -48,7 +47,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public favorite$ = this.applicationService.app$.pipe(
     filter(app => !!app),
-    map(app => getFavoriteFromEntity<IFavoriteMetadata>(app.entity, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE))
+    map(app => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(app.entity, applicationEntityType, CF_ENDPOINT_TYPE))
   );
 
   isBusyUpdating$: Observable<{ updating: boolean; }>;

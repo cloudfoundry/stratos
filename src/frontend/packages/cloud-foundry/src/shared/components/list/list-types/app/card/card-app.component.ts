@@ -9,7 +9,6 @@ import { CardCell } from '../../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -50,7 +49,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
       this.row.entity.space_guid
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, applicationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE);
+    this.favorite = this.userFavoriteManager.getFavorite(this.row, applicationEntityType, CF_ENDPOINT_TYPE);
 
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(

@@ -10,13 +10,12 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
-  IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
-import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
+import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
@@ -162,7 +161,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
       BaseEndpointAuth.UsernamePassword,
       kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN],
     ],
-    favoriteFromEntity: getFavoriteFromKubeEntity,
+    getEndpointIdFromEntity: (entity) => entity.kubeGuid,
     renderPriority: 4,
     urlValidationRegexString: urlValidationExpression,
     subTypes: [
@@ -367,17 +366,4 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
     endpoint: endpointDefinition,
   };
   return new StratosCatalogEntity(definition);
-}
-
-function getFavoriteFromKubeEntity<T extends IEntityMetadata = IEntityMetadata>(
-  entity,
-  entityType: string,
-  userFavoriteManager: UserFavoriteManager
-): UserFavorite<T> {
-  return userFavoriteManager.getFavoriteFromEntity<T>(
-    entityType,
-    KUBERNETES_ENDPOINT_TYPE,
-    entity.kubeGuid,
-    entity
-  );
 }

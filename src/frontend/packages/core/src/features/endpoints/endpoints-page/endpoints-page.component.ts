@@ -11,11 +11,12 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, Subscription } from 'rxjs';
-import { delay, first, map, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { delay, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
+import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -24,6 +25,7 @@ import {
   StratosActionMetadata,
   StratosActionType,
 } from '../../../core/extension/extension-service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
@@ -46,6 +48,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public canRegisterEndpoint = StratosCurrentUserPermissions.ENDPOINT_REGISTER;
   private healthCheckTimeout: number;
 
+  public canBackupRestore$: Observable<boolean>;
+
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
 
@@ -63,6 +67,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private resolver: ComponentFactoryResolver,
     private snackBarService: SnackBarService,
     cs: CustomizationService,
+    currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.customizations = cs.get();
 
@@ -81,6 +86,13 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       }),
       first()
     ).subscribe();
+
+    // Is the backup/restore plugin available on the backend?
+    this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
+      first(),
+      map(sessionData => sessionData?.plugins.backup),
+      switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint) : of(false))
+    );
   }
 
   subs: Subscription[] = [];

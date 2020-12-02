@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { NormalModuleReplacementPlugin } from 'webpack';
+import { NormalModuleReplacementPlugin, WatchIgnorePlugin } from 'webpack';
 
 import { StratosConfig } from '../lib/stratos.config';
 
@@ -62,6 +62,10 @@ export class ExtensionsHandler {
     } else {
       regex = importModuleRegex;
     }
+
+    // Ignore changed in the overrides file - otherwise with ng serve we will build twice
+    // The user needs to restart `ng serve` anyway if new extensions are added
+    webpackConfig.plugins.push(new WatchIgnorePlugin([overrideFile]));
 
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(
       regex,
