@@ -25,35 +25,42 @@ export class LocalStorageService {
   private static Encrypt = true;
 
   /**
-   * Normally used on app init, move local storage data into the console's store
+   * Object used to access/update local storage
    */
-  public static storageToStore(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
-    return LocalStorageService.rehydrateDashboardState(store, sessionData);
+  private static getStorage(): Storage {
+    return localStorage || window.localStorage;
   }
 
   /**
-   * For the current user dispatch actions that will populate the store with the contents of local storage
+   * Make a key used by local storage that relates to a section of the user's settings in the console's store
    */
-  private static rehydrateDashboardState(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
+  private static makeKey(userId: string, storeKey: LocalStorageSyncTypes) {
+    return userId + '-' + storeKey;
+  }
+
+  /**
+   * Normally used on app init, move local storage data into the console's store
+   */
+  public static localStorageToStore(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
     const storage = LocalStorageService.getStorage();
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {
-      const sessionId = LocalStorageService.getDashboardStateSessionId(sessionData.user.name);
+      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
       if (sessionId) {
-        LocalStorageService.handleHydrate(
+        LocalStorageService.localStorageToStoreSection(
           LocalStorageSyncTypes.DASHBOARD,
           dataForStore => store.dispatch(new HydrateDashboardStateAction(dataForStore)),
           storage,
           sessionId
         );
-        LocalStorageService.handleHydrate(
+        LocalStorageService.localStorageToStoreSection(
           LocalStorageSyncTypes.PAGINATION,
           dataForStore => store.dispatch(new HydratePaginationStateAction(dataForStore)),
           storage,
           sessionId,
           true
         );
-        LocalStorageService.handleHydrate(
+        LocalStorageService.localStorageToStoreSection(
           LocalStorageSyncTypes.LISTS,
           dataForStore => store.dispatch(new HydrateListsStateAction(dataForStore)),
           storage,
@@ -63,15 +70,11 @@ export class LocalStorageService {
     }
   }
 
-  private static getStorage(): Storage {
-    return localStorage || window.localStorage;
-  }
-
   /**
    * For a given storage type fetch it's data for the given user from local storage and dispatch an action that will
    * be handled by the reducers for that storage type (dashboard, pagination, etc)
    */
-  private static handleHydrate(
+  private static localStorageToStoreSection(
     type: LocalStorageSyncTypes,
     dispatch: (dataForStore: any) => void,
     storage: Storage,
@@ -88,14 +91,10 @@ export class LocalStorageService {
     }
   }
 
-  private static makeKey(userId: string, storeKey: string) {
-    return userId + '-' + storeKey;
-  }
-
   /**
    * This will ensure changes in the store are selectively pushed to local storage
    */
-  public static localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
+  public static storeToLocalStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
     // This is done to ensure we don't accidentally apply state from session storage from another user.
     let globalUserId = null;
     return localStorageSync({
@@ -105,7 +104,7 @@ export class LocalStorageService {
         if (globalUserId) {
           return true;
         }
-        const userId = LocalStorageService.getDashboardStateSessionId();
+        const userId = LocalStorageService.getLocalStorageSessionId();
         if (userId) {
           globalUserId = userId;
           return true;
@@ -117,18 +116,10 @@ export class LocalStorageService {
         LocalStorageSyncTypes.LISTS,
         {
           [LocalStorageSyncTypes.PAGINATION]: {
-            serialize: (pagination: PaginationState) => LocalStorageService.parseForStorage<PaginationState>(
+            serialize: (pagination: PaginationState) => LocalStorageService.parseStorePartForLocalStorage<PaginationState>(
               pagination,
               LocalStorageSyncTypes.PAGINATION
             ),
-            // encrypt: (state: string) => {
-            //   console.log('a');
-            //   return state;
-            // },
-            // decrypt: (state: string) => {
-            //   console.log('b');
-            //   return state;
-            // },
           },
         },
       ],
@@ -138,7 +129,10 @@ export class LocalStorageService {
     })(reducer);
   }
 
-  private static getDashboardStateSessionId(username?: string) {
+  /**
+   * Get a unique identifier for the user
+   */
+  private static getLocalStorageSessionId(username?: string) {
     const prefix = 'stratos-';
     if (username) {
       return prefix + username;
@@ -153,7 +147,7 @@ export class LocalStorageService {
   /**
    *  Allow for selective persistence of data. For pagination we only store params and clientPagination
    */
-  private static parseForStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): object {
+  private static parseStorePartForLocalStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): object {
     switch (type) {
       case LocalStorageSyncTypes.PAGINATION:
         const pagination: PaginationState = storePart as unknown as PaginationState;
@@ -189,7 +183,7 @@ export class LocalStorageService {
 
   public static localStorageSize(sessionData: SessionData): number {
     const storage = LocalStorageService.getStorage();
-    const sessionId = LocalStorageService.getDashboardStateSessionId(sessionData.user.name);
+    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
     if (storage && sessionId) {
       return Object.values(LocalStorageSyncTypes).reduce((total, type) => {
         const key = LocalStorageService.makeKey(sessionId, type);
@@ -204,9 +198,9 @@ export class LocalStorageService {
   /**
    * Clear local storage and the store
    */
-  public static clear(sessionData: SessionData, confirmationService: ConfirmationDialogService, reloadTo = '/user-profile') {
+  public static clearLocalStorage(sessionData: SessionData, confirmationService: ConfirmationDialogService, reloadTo = '/user-profile') {
     const config: ConfirmationDialogConfig = {
-      message: 'This will clear your settings in local storage for this address and reload this window',
+      message: 'This will clear your stored settings and reload the application',
       confirm: 'Clear',
       critical: true,
       title: 'Are you sure?'
@@ -218,7 +212,7 @@ export class LocalStorageService {
       }
 
       const storage = LocalStorageService.getStorage();
-      const sessionId = LocalStorageService.getDashboardStateSessionId(sessionData.user.name);
+      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
       if (storage && sessionId) {
         Object.values(LocalStorageSyncTypes).forEach(type => {
           const key = LocalStorageService.makeKey(sessionId, type);

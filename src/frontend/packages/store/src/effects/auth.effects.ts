@@ -87,7 +87,7 @@ export class AuthEffect {
           } else {
             const sessionData = envelope.data;
             sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
-            LocalStorageService.storageToStore(this.store, sessionData);
+            LocalStorageService.localStorageToStore(this.store, sessionData);
             return [
               stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
               new VerifiedSession(sessionData, action.updateEndpoints)

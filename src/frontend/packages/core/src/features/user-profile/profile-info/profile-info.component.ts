@@ -106,7 +106,7 @@ export class ProfileInfoComponent {
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clear(sessionData, this.confirmationService));
+    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clearLocalStorage(sessionData, this.confirmationService));
   }
 
 }

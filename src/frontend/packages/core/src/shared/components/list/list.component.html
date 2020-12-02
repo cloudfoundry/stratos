@@ -149,7 +149,7 @@
             *ngIf="!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
             <button matTooltip="Reset Filters & Sort" matTooltipShowDelay="1000" mat-icon-button
               [disabled]="(dataSource.isLoadingPage$ | async)" (click)="resetFilteringAndSort();">
-              <mat-icon>remove_circle_outline</mat-icon>
+              <mat-icon>highlight_off</mat-icon>
             </button>
           </div>
           <!-- Select table or cards view button -->

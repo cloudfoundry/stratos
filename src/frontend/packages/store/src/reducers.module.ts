@@ -49,7 +49,7 @@ export const appReducers: ActionReducerMap<{}> = {
       appReducers,
       {
         metaReducers: [
-          LocalStorageService.localStorageSyncReducer
+          LocalStorageService.storeToLocalStorageSyncReducer
         ],
         runtimeChecks: {
           strictStateImmutability: true,

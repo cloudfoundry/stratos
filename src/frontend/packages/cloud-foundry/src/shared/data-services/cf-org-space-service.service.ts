@@ -78,30 +78,6 @@ export const enum CfOrgSpaceSelectMode {
   ANY = 2
 }
 
-
-// export const initCfOrgSpaceService = (
-//   store: Store<CFAppState>,
-//   cfOrgSpaceService: CfOrgSpaceDataService,
-//   entityKey: string,
-//   paginationKey: string): Observable<any> => {
-//   return store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-//     filter((pag) => !!pag),
-//     first(),
-//     tap(pag => {
-//       const { cf, org, space } = pag.clientPagination.filter.items;
-//       if (cf) {
-//         cfOrgSpaceService.cf.select.next(cf);
-//       }
-//       if (org) {
-//         cfOrgSpaceService.org.select.next(org);
-//       }
-//       if (space) {
-//         cfOrgSpaceService.space.select.next(space);
-//       }
-//     })
-//   );
-// };
-
 export const createCfOrSpaceMultipleFilterFn = (
   store: Store<CFAppState>,
   action: PaginatedAction,
@@ -362,14 +338,15 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private setupAutoSelectors(initialCf: string, initialOrg: string) {
-    console.log(`initialCf: ${initialCf}. initialOrg: ${initialOrg}`); // TODD: RC console.log
+    // Clear or automatically select org + space given cf
+    let cfTapped = false;
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(initialCf),
       distinctUntilChanged(),
-      filter(cf => cf !== initialCf),
+      filter(cf => cfTapped || cf !== initialCf),
       withLatestFrom(this.org.list$),
       tap(([selectedCF, orgs]) => {
-        initialCf = 'junk';
+        cfTapped = true;
         if (
           !!orgs.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
@@ -385,13 +362,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.subs.push(orgResetSub);
 
     // Clear or automatically select space given org
+    let orgTapped = false;
     const spaceResetSub = this.org.select.asObservable().pipe(
       startWith(initialOrg),
       distinctUntilChanged(),
-      filter(org => org !== initialOrg),
+      filter(org => orgTapped || org !== initialOrg),
       withLatestFrom(this.space.list$),
       tap(([selectedOrg, spaces]) => {
-        initialOrg = 'junk';
+        orgTapped = true;
         if (
           !!spaces.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
