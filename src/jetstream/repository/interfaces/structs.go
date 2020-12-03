@@ -79,15 +79,19 @@ const (
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeBearer is authentication with an API token
+	// AuthTypeBearer is http header auth with bearer prefix
 	AuthTypeBearer = "Bearer"
+	// AuthTypeToken is http header auth with token prefix
+	AuthTypeToken = "Token"
 )
 
 const (
 	// AuthConnectTypeCreds means authenticate with username/password credentials
 	AuthConnectTypeCreds = "creds"
-	// AuthConnectTypeBearer is authentication with an API token
+	// AuthConnectTypeBearer is authentication with an API token  and a auth header prefix of 'bearer'
 	AuthConnectTypeBearer = "bearer"
+	// AuthConnectTypeToken is authentication with a token and a auth header prefix of 'token'
+	AuthConnectTypeToken = "token"
 	// AuthConnectTypeNone means no authentication
 	AuthConnectTypeNone = "none"
 )
@@ -330,21 +334,20 @@ func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
 
 // CNSIRequest
 type CNSIRequest struct {
-	GUID     string `json:"-"`
-	UserGUID string `json:"-"`
-
-	Method      string      `json:"-"`
-	Body        []byte      `json:"-"`
-	Header      http.Header `json:"-"`
-	URL         *url.URL    `json:"-"`
-	StatusCode  int         `json:"statusCode"`
-	Status      string      `json:"status"`
-	PassThrough bool        `json:"-"`
-	LongRunning bool        `json:"-"`
-
-	Response     []byte `json:"-"`
-	Error        error  `json:"-"`
-	ResponseGUID string `json:"-"`
+	GUID         string       `json:"-"`
+	UserGUID     string       `json:"-"`
+	Method       string       `json:"-"`
+	Body         []byte       `json:"-"`
+	Header       http.Header  `json:"-"`
+	URL          *url.URL     `json:"-"`
+	StatusCode   int          `json:"statusCode"`
+	Status       string       `json:"status"`
+	PassThrough  bool         `json:"-"`
+	LongRunning  bool         `json:"-"`
+	Response     []byte       `json:"-"`
+	Error        error        `json:"-"`
+	ResponseGUID string       `json:"-"`
+	Token        *TokenRecord `json:"-"` // Optional Token record to use instead of looking up
 }
 
 type PortalConfig struct {

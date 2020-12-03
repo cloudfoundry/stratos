@@ -1,3 +1,11 @@
+import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
+import { urlValidationExpression } from '../../../core/src/core/utils.service';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+} from '../../../store/src/actions/endpoint.actions';
+import { IRequestEntityTypeState } from '../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
@@ -8,19 +16,44 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
-import { GitMeta } from '../shared/scm/scm';
+import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
+import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
 import {
   GitBranchActionBuilders,
   gitBranchActionBuilders,
   GitCommitActionBuilders,
   gitCommitActionBuilders,
-  GitCommitActionBuildersConfig,
   GitRepoActionBuilders,
   gitRepoActionBuilders,
-} from './git-action-builder';
-import { GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
-import { GitBranch, GitCommit, GitRepo } from './git.public-types';
+} from './git-action-builders';
+import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
+import { GitBranch, GitCommit, GitEntity, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
+
+
+function endpointDisconnectRemoveEntitiesReducer() {
+  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
+    switch (action.type) {
+      case DISCONNECT_ENDPOINTS_SUCCESS:
+      case UNREGISTER_ENDPOINTS_SUCCESS:
+        return deleteEndpointEntities(state, action.guid);
+    }
+    return state;
+  };
+}
+
+function deleteEndpointEntities(
+  state: IRequestEntityTypeState<GitEntity>,
+  endpointGuid: string
+) {
+  return Object.keys(state).reduce((newEntities, guid) => {
+    const entity = state[guid];
+    if (entity.endpointGuid !== endpointGuid) {
+      newEntities[guid] = entity;
+    }
+    return newEntities;
+  }, {});
+}
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -33,7 +66,6 @@ class GitEntityCatalog {
   public commit: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     GitCommit,
-    GitCommitActionBuildersConfig,
     GitCommitActionBuilders
   >;
 
@@ -58,8 +90,42 @@ class GitEntityCatalog {
       iconFont: 'stratos-icons',
       logoUrl: '/core/assets/Git-logo.png',
       authTypes: [],
-      renderPriority: 20,
+      registrationComponent: GitRegistrationComponent,
       registeredLimit: () => 0,
+      urlValidationRegexString: urlValidationExpression,
+      listDetailsComponent: GitEndpointDetailsComponent,
+      subTypes: [
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.GITHUB,
+          label: 'Github',
+          labelShort: 'Github',
+          authTypes: [{
+            ...BaseEndpointAuth.Token,
+            help: '/core/assets/connect/github.md',
+            config: {
+              title: 'Personal Access Token'
+            }
+          }],
+          logoUrl: '/core/assets/endpoint-icons/github-logo.png',
+          renderPriority: 50,
+          registeredLimit: () => Number.MAX_SAFE_INTEGER,
+        },
+        {
+          type: GIT_ENDPOINT_SUB_TYPES.GITLAB,
+          label: 'Gitlab',
+          labelShort: 'Gitlab',
+          authTypes: [{
+            ...BaseEndpointAuth.Bearer,
+            help: '/core/assets/connect/gitlab.md',
+            config: {
+              title: 'Personal Access Token'
+            }
+          }],
+          logoUrl: '/core/assets/endpoint-icons/gitlab-icon-rgb.svg',
+          renderPriority: 51,
+          registeredLimit: () => Number.MAX_SAFE_INTEGER,
+        },
+      ]
     };
 
     this.gitEndpoint = new StratosCatalogEndpointEntity(
@@ -79,18 +145,20 @@ class GitEntityCatalog {
       labelPlural: 'Git Commits',
       endpoint: endpointDefinition,
       nonJetstreamRequest: true,
-      successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
-        const metadata = (action.metadata as GitMeta[])[0];
-        return {
-          ...metadata.scm.convertCommit(metadata.projectName, data),
-          guid: action.guid
-        };
-      },
+      // FIXME: This is code from when the git commit get function used generic actions/pipeline. Need to revisit this at some point
+      // successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+      //   const metadata = (action.metadata as GitMeta[])[0];
+      //   return {
+      //     ...metadata.scm.convertCommit(endpointGuid, metadata.projectName, data),
+      //     guid: action.guid // This works for single requests... but not for multiple
+      //   };
+      // },
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuildersConfig, GitCommitActionBuilders>(
+    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuilders>(
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitCommitActionBuilders,
         entityBuilder: {
@@ -120,6 +188,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitRepoActionBuilders,
       }
@@ -138,6 +207,7 @@ class GitEntityCatalog {
       definition,
       {
         dataReducers: [
+          endpointDisconnectRemoveEntitiesReducer()
         ],
         actionBuilders: gitBranchActionBuilders,
       }
