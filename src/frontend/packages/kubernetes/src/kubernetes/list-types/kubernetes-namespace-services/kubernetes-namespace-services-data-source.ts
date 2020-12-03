@@ -18,7 +18,7 @@ export class KubernetesNamespaceServicesDataSource extends BaseKubernetesService
   ) {
     super(
       store,
-      kubeEntityCatalog.service.actions.getInNamespace(namespace, kubeGuid.guid),
+      kubeEntityCatalog.service.actions.getInNamespace(kubeGuid.guid, namespace),
       listConfig
     );
   }

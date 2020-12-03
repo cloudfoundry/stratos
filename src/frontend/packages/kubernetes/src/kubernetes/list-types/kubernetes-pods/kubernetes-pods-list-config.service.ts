@@ -140,6 +140,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
   getMultiFiltersConfigs = () => [];
 }
 
+// TODO: RC this isn't used now?
 @Injectable()
 export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
   private podsDataSource: KubernetesPodsDataSource;
