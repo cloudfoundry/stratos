@@ -12,9 +12,9 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { SourceType } from '../../../store/types/deploy-application.types';
 import {
   ApplicationDeploySourceTypes,
+  AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
   AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
 } from '../../applications/deploy-application/deploy-application-steps.types';
 import {
@@ -78,8 +78,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   private appStatsLoaded = new BehaviorSubject<boolean>(false);
   private appStatsToLoad: APIResource<IApp>[] = [];
 
-  private sourceTypes: SourceType[];
-  public tileSelectorConfig: ITileConfig<IAppTileData>[];
+  public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
   showDeployAppTiles = false;
 
@@ -92,16 +91,19 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     this.pLayout = new HomePageCardLayout(1, 1);
 
     // Get source types for if we are showing tiles to deploy an application
-    this.sourceTypes = appDeploySourceTypes.getTypes();
-    this.tileSelectorConfig = [
-      ...this.sourceTypes.map(type =>
+    this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
+      map(types => types.map(type =>
         new ITileConfig<IAppTileData>(
           type.name,
           type.graphic,
-          { type: 'deploy', subType: type.id },
+          {
+            type: 'deploy',
+            subType: type.id,
+            endpointGuid: type.endpointGuid
+          },
         )
-      )
-    ];
+      ))
+    );
   }
 
   // Deploy an app from the Home Card for the given endpoint
@@ -114,6 +116,9 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
       };
       if (tile.data.subType) {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
+      }
+      if (tile.data.endpointGuid) {
+        query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
       }
       this.store.dispatch(new RouterNav({ path: `applications/${type}`, query }));
     }

@@ -9,7 +9,6 @@ import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-s
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import * as favoriteHelpers from '../../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { SharedModule } from '../../../../../shared.module';
@@ -141,14 +140,6 @@ describe('MetaCardComponent', () => {
 
   it('should show star if favoritable', () => {
     component.favorite = favorite;
-    fixture.detectChanges();
-
-    expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();
-  });
-
-  it('should set favorite from entityConfig if not set', () => {
-    spyOn(favoriteHelpers, 'getFavoriteFromEntity').and.returnValue(favorite);
-    component.entityConfig = entityConfig;
     fixture.detectChanges();
 
     expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();

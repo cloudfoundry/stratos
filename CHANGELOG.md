@@ -188,7 +188,7 @@ This release contains a number of fixes and improvements:
 
 **Improvements:**
 
-- Apply SSO whitelist to additional places [\#4318](https://github.com/cloudfoundry/stratos/issues/4318)
+- Apply SSO allow-list to additional places [\#4318](https://github.com/cloudfoundry/stratos/issues/4318)
 
 **Fixes:**
 

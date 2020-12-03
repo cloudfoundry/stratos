@@ -34,13 +34,14 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
         return (appSource.type.id === 'github' || appSource.type.id === 'gitlab') ? {
           scm: appSource.type.id as GitSCMType,
           projectName: appSource.gitDetails.projectName,
-          sha: appSource.gitDetails.branch.name
+          sha: appSource.gitDetails.branch.name,
+          endpointGuid: appSource.gitDetails.endpointGuid
         } : null;
       }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       first()
     ).subscribe(fetchDetails => {
-      const scm = scmService.getSCM(fetchDetails.scm);
+      const scm = scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid);
       this.dataSource = new GithubCommitsDataSource(this.store, this, scm, fetchDetails.projectName, fetchDetails.sha);
       this.initialised.next(true);
 

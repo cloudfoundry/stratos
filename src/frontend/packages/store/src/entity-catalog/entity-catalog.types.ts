@@ -134,7 +134,6 @@ export class EndpointHealthCheck {
 export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
-  readonly urlValidation?: boolean;
   readonly unConnectable?: boolean;
   /**
    * How many endpoints of this type can be registered, 0 - many
@@ -161,6 +160,8 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
+  // Used for favorites - given an entity, get the endpoint ID of the endpoint it belongs to
+  readonly getEndpointIdFromEntity?: (entity: any) => string;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;

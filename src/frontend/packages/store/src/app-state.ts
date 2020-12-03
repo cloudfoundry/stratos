@@ -1,8 +1,8 @@
 import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { AuthState } from './reducers/auth.reducer';
-import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
 import { ICurrentUserRolesState } from './types/current-user-roles.types';
+import { DashboardState } from './types/dashboard.types';
 import { EndpointState } from './types/endpoint.types';
 import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import { IUserFavoritesGroupsState } from './types/favorite-groups.types';

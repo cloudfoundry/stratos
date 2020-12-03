@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { GitSharedModule } from '../../../../git/src/shared/git-shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import {
@@ -45,6 +46,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     SharedModule,
     ApplicationsRoutingModule,
     CloudFoundrySharedModule,
+    GitSharedModule
   ],
   declarations: [
     ApplicationWallComponent,

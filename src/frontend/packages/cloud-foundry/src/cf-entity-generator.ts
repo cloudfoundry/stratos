@@ -91,7 +91,6 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { CfErrorResponse, getCfError } from './cf-error-helpers';
-import { getFavoriteFromCfEntity } from './cf-favorites-helpers';
 import { ISpaceFavMetadata } from './cf-metadata-types';
 import { CF_ENDPOINT_TYPE } from './cf-types';
 import {
@@ -165,7 +164,7 @@ import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/ro
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
-import { CFResponse } from './store/types/cf-api.types';
+import { CfAPIResource, CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
 import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
@@ -275,7 +274,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
     healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
-    favoriteFromEntity: getFavoriteFromCfEntity,
+    getEndpointIdFromEntity: (entity: CfAPIResource) => entity.entity.cfGuid,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
     },
@@ -1209,4 +1208,3 @@ function generateAutoscalerInfoEntity(endpointDefinition: StratosEndpointExtensi
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AutoscalerInfo>>(definition);
 }
-
