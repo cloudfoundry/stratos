@@ -7,7 +7,7 @@ import { first, map } from 'rxjs/operators';
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/public-api';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 
 @Component({
@@ -37,7 +37,7 @@ export class KubernetesHomeCardComponent implements OnInit {
   public nodeCount$: Observable<number>;
   public namespaceCount$: Observable<number>;
 
-  constructor(private store: Store<AppState>)  { }
+  constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     const guid = this.endpoint.guid;

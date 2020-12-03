@@ -13,7 +13,9 @@ import {
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { entityCatalog } from '../../../../../store/src/public-api';
+import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesListConfigService } from '../../kubernetes-list-service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
@@ -69,7 +71,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
       this.entityCatalogKey = routeParts[routeParts.length - 1];
     }
 
-    const catalogEntity = kubeEntityCatalog[this.entityCatalogKey];
+    const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, this.entityCatalogKey));
     if (!catalogEntity) {
       console.error(`Can not find catalog entity for Kubernetes entity ${this.entityCatalogKey}`);
       return;
@@ -146,14 +148,14 @@ export class KubernetesResourceListComponent implements OnDestroy {
         cellFlex: '3',
         cellConfig: (resource): TableCellSidePanelConfig<KubernetesResourceViewerConfig> => {
           return ({
-          text: resource.metadata.name,
-          sidePanelComponent: KubernetesResourceViewerComponent,
-          sidePanelConfig: {
-            title: resource.metadata.name,
-            resourceKind: definition.label,
-            resource$: of(resource)
-          }
-        });
+            text: resource.metadata.name,
+            sidePanelComponent: KubernetesResourceViewerComponent,
+            sidePanelConfig: {
+              title: resource.metadata.name,
+              resourceKind: definition.label,
+              resource$: of(resource)
+            }
+          });
         }
       },
       // Namespace
@@ -201,13 +203,13 @@ export class KubernetesResourceListComponent implements OnDestroy {
       cellFlex: cell.flex || '1'
     };
 
-    if (typeof(cell.field) === 'string') {
+    if (typeof (cell.field) === 'string') {
       tableCell.cellDefinition.valuePath = cell.field as string;
     } else {
       tableCell.cellDefinition.getValue = cell.field as SimpleColumnValueGetter<KubeAPIResource>;
     }
 
-    if (cell.sort && typeof(cell.field) === 'string') {
+    if (cell.sort && typeof (cell.field) === 'string') {
       tableCell.sort = {
         type: 'sort',
         orderKey: tableCell.columnId,

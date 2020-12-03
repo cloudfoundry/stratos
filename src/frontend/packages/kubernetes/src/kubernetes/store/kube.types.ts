@@ -1,7 +1,11 @@
 import { Observable } from 'rxjs';
 
+import {
+  OrchestratedActionBuilderConfig,
+  OrchestratedActionBuilders,
+} from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
 
 // Map of endpoint ID to current namespace for that endpoint
@@ -38,7 +42,11 @@ export interface IKubeResourceEntityDefinition extends IStratosEntityDefinition 
   apiNamespaced: boolean;
 }
 
-export interface KubeResourceEntityDefinition {
+export interface KubeResourceEntityDefinition<
+  A extends IEntityMetadata = IEntityMetadata,
+  B = any,
+  C extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
+  > {
   apiVersion: string;
   apiName: string;
   apiNamespaced?: boolean;
@@ -48,9 +56,7 @@ export interface KubeResourceEntityDefinition {
   icon: string;
   iconFont?: string;
   type: string;
-  kubeCatalogEntity: string;
-  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity;
-  route?: string;
+  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
   listColumns?: SimpleKubeListColumn[];
   // Should this entity be hidden in the auto-generated navigation?
   hidden?: boolean;

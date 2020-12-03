@@ -86,7 +86,10 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly schema: T;
   readonly label?: string;
   readonly labelShort?: string;
+  readonly labelTab?: string;
   readonly labelPlural?: string;
+  readonly icon?: string;
+  readonly iconFont?: string;
   readonly renderPriority?: number;
   /**
    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>

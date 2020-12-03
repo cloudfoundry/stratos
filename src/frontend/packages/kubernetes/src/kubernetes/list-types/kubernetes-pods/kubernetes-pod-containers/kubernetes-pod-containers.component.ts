@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
 
 export interface ContainerForTable {

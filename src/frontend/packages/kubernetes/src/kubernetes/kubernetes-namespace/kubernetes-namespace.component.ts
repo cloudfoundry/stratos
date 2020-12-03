@@ -5,7 +5,6 @@ import { filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -13,7 +12,6 @@ import { KubernetesNamespaceService } from '../services/kubernetes-namespace.ser
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
 import { IFavoriteMetadata } from './../../../../store/src/types/user-favorites.types';
-import { KubeResourceEntityDefinition } from '../store/kube.types';
 import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 
 @Component({
@@ -81,28 +79,27 @@ export class KubernetesNamespaceComponent {
   );
 
   private getTabsFromEntityConfig(namespaced: boolean = true) {
-    const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
-    const tabsFromRouterConfig = [];
+    return [];
+    // const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
+    // const tabsFromRouterConfig = [];
 
-    // Get the tabs from the router configuration
-    entityNames.forEach(key => {
-      // See if we can find an entity for the key
-      const catalogEntity = kubeEntityCatalog[key];
-      if (catalogEntity) {
-        const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-        if (defn.apiNamespaced === namespaced) {
-          tabsFromRouterConfig.push({
-            link: defn.route || `resource/${key}`,
-            label: defn.labelTab || defn.labelPlural,
-            icon: defn.icon,
-            iconFont: defn.iconFont,
-          });
-        }
-      }
-    });
+    // // Get the tabs from the router configuration
+    // kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
+    //   if (catalogEntity) {
+    //     const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+    //     if (defn.apiNamespaced === namespaced) {
+    //       tabsFromRouterConfig.push({
+    //         link: defn.route || `resource/${key}`,
+    //         label: defn.labelTab || defn.labelPlural,
+    //         icon: defn.icon,
+    //         iconFont: defn.iconFont,
+    //       });
+    //     }
+    //   }
+    // });
 
-    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
-    return tabsFromRouterConfig;
+    // tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    // return tabsFromRouterConfig;
   }
 
 }
