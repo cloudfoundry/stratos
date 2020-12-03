@@ -51,7 +51,7 @@ import {
   paginationResetPagination,
   resetEndpointEntities,
 } from './pagination-reducer-reset-pagination';
-import { paginationResetToStart } from './pagination-reducer-reset-sort-filter';
+import { paginationResetSortAndFilter } from './pagination-reducer-reset-sort-filter';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
@@ -164,7 +164,7 @@ function paginate(action, state: PaginationState = {}, updatePagination) {
   }
 
   if (action.type === RESET_PAGINATION_SORT_FILTER) {
-    return paginationResetToStart(state, action as ResetPaginationSortFilter);
+    return paginationResetSortAndFilter(state, action as ResetPaginationSortFilter);
   }
 
   if (action.type === SET_PAGINATION_IS_LIST) {
@@ -178,6 +178,10 @@ function setPaginationIsList(state: PaginationState, action: SetPaginationIsList
   const entityKey = entityCatalog.getEntityKey(action.pagAction);
   const existingPag = state[entityKey] ? state[entityKey][action.pagAction.paginationKey] : null;
   const pag = existingPag || getDefaultPaginationEntityState();
+
+  if (pag.isListPagination === action.pagAction.isList) {
+    return state;
+  }
 
   const entityState: PaginationEntityTypeState = {
     ...state[entityKey],

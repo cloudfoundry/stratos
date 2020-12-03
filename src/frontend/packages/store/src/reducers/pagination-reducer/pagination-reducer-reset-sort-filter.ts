@@ -2,7 +2,7 @@ import { ResetPaginationSortFilter } from '../../actions/pagination.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 
-export function paginationResetToStart(state: PaginationState, action: ResetPaginationSortFilter): PaginationState {
+export function paginationResetSortAndFilter(state: PaginationState, action: ResetPaginationSortFilter): PaginationState {
   const { pAction } = action;
   const entityKey = entityCatalog.getEntityKey(pAction);
   const pKey = action.pAction.paginationKey;

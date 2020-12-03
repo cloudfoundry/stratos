@@ -22,7 +22,6 @@ export interface IRequestEntityTypeState<T> {
 export type BaseRequestState = Record<string, IRequestEntityTypeState<RequestInfoState>>;
 export type BaseRequestDataState = Record<string, IRequestEntityTypeState<any>>;
 
-
 export abstract class AppState<
   T extends Record<string, any> = any
   > {

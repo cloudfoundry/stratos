@@ -154,7 +154,7 @@ function paginationParamsString(params: PaginationParam): string {
 }
 
 
-function sortStringify(obj: { [key: string]: string | string[] | number; }): string {
+function sortStringify(obj: { [key: string]: string | string[] | number, }): string {
   const keys = Object.keys(obj).sort();
   return keys.reduce((res, key) => {
     return res += `${key}-${obj[key]},`;

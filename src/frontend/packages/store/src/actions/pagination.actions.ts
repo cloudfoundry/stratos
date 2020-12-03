@@ -192,7 +192,6 @@ export class SetInitialParams extends BasePaginationAction implements Action, Se
     public params: PaginationParam,
     public keepPages = false,
     public overwrite = false,
-    public isList = false,
   ) {
     super(pEntityConfig);
   }

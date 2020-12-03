@@ -3,14 +3,12 @@
     [otherLines]="state.otherLines">
     <span *ngIf="state.canIgnoreMaxedState">
       <button color="primary" (click)="showAll()" mat-raised-button>
-        <!-- <ng-container *ngIf="!!count">
-          Count comes from the paginator's no. of results value. On first load with sticky settings, this will already
-          be reduced via the filters... so is NOT the total no. of results
-          Fetch All ({{count}})
-        </ng-container>
-        <ng-container *ngIf="!count && !!maxCount">
-          Fetch All (over {{maxCount}})
-        </ng-container> -->
+        <!--
+          This used to be !!count -> Fetch All ({{count}}), and then !!count for others.
+          Cannot rely on count now. It comes from the paginator's no. of results value.
+          On first load with sticky settings, this will already be reduced via the filters... 
+          so is NOT the total no. of results
+         -->
         <ng-container *ngIf="!!maxCount">
           Fetch All (over {{maxCount}})
         </ng-container>
