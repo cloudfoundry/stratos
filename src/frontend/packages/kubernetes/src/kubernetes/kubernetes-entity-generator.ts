@@ -16,7 +16,6 @@ import {
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -406,9 +405,6 @@ function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefini
   return new StratosCatalogEntity(definition);
 }
 
-}
-
-
 // =============================================================================================================
 // Kubernetes Resources using generic resource pattern
 // =============================================================================================================
@@ -614,3 +610,4 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
   });
 
   return entities.entities;
+}
