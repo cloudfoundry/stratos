@@ -88,6 +88,10 @@ export class LocalStorageService {
     const key = LocalStorageService.makeKey(sessionId, type);
     try {
       const fromStorage = storage.getItem(key);
+      if (!fromStorage) {
+        // Could be first load using the new local storage process... or content has been cleared
+        return;
+      }
       const strValue = encrypted ? LocalStorageService.decrypt(fromStorage) : fromStorage;
       dispatch(JSON.parse(strValue));
     } catch (e) {
