@@ -47,3 +47,12 @@ form.stepper-form {
     height: auto;
   }
 }
+
+.hide {
+  height: 0;
+  overflow: hidden;
+}
+
+.show {
+  height: auto;
+}

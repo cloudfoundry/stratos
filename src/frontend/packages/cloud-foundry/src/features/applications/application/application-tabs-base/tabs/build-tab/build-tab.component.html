@@ -164,12 +164,41 @@
                   {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                 </div>
               </app-metadata-item>
-              <app-metadata-item *ngSwitchCase="'gitscm'" [iconFont]="deploySource.icon.fontName"
-                [icon]="deploySource.icon.iconName" [label]="deploySource.label">
-                <a href="{{ deploySource.commitURL }}" rel="noopener noreferrer" target="_blank">
-                  {{ deploySource.commit | slice:0:8 }}
-                </a>
-              </app-metadata-item>
+              <div *ngSwitchCase="'gitscm'" class="summary__gitscm">
+                <div>
+                  <app-metadata-item [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName"
+                    label="SCM">
+                    {{deploySource.label}}
+                  </app-metadata-item>
+                  <app-metadata-item iconFont="stratos-icons" icon="repositories" label="Repository">
+                    <a *ngIf="!!(gitRepo$ | async); else displayRepo" href="{{ (gitRepo$ | async)?.html_url }}"
+                      rel="noopener noreferrer" target="_blank">
+                      <ng-container *ngTemplateOutlet="displayRepo">
+                      </ng-container>
+                    </a>
+                    <ng-template #displayRepo>{{ deploySource.project }}</ng-template>
+                  </app-metadata-item>
+                </div>
+                <div>
+                  <app-metadata-item icon="call_split" label="Branch">
+                    <a *ngIf="!!(gitRepo$ | async) as repo; else displayBranch"
+                      href="{{ (gitRepo$ | async)?.html_url }}/tree/{{ deploySource.branch }}" rel="noopener noreferrer"
+                      target="_blank">
+                      <ng-container *ngTemplateOutlet="displayBranch">
+                      </ng-container>
+                    </a>
+                    <ng-template #displayBranch>{{ deploySource.branch}}</ng-template>
+                  </app-metadata-item>
+                  <app-metadata-item icon="show_chart" label="Commit">
+                    <a *ngIf="!!deploySource.commitURL; else displayCommit" href="{{ deploySource.commitURL }}"
+                      rel="noopener noreferrer" target="_blank">
+                      <ng-container *ngTemplateOutlet="displayCommit">
+                      </ng-container>
+                    </a>
+                    <ng-template #displayCommit>{{ deploySource.commit | slice:0:8 }}</ng-template>
+                  </app-metadata-item>
+                </div>
+              </div>
               <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
                 Deployed from local folder
               </app-metadata-item>

@@ -1,0 +1,18 @@
+.token {
+  min-width: 350px;
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+
+    textarea {
+      font-family: 'Source Code Pro';
+      font-size: 14px;
+      line-break: anywhere;
+    }
+  }
+  &__title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+}

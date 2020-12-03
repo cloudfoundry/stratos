@@ -41,6 +41,16 @@ export class GithubProjectExistsDirective implements Validator {
     return this.lastValue.length && this.lastValue.indexOf(name) === 0;
   }
 
+  private getTypeAndEndpoint(): [GitSCMType, string] {
+    const res = this.appGithubProjectExists.split(',');
+    if (res.length === 2) {
+      return [res[0] as GitSCMType, res[1]];
+    }
+    console.warn('appGithubProjectExists value should be `<scm type>,<endpoint guid>');
+    return null;
+  }
+
+
   validate(c: AbstractControl): Observable<GithubProjectExistsResponse> {
     if (c.value) {
       if (!this.isValidProjectName(c.value) || this.haveAlreadyChecked(c.value)) {
@@ -54,7 +64,7 @@ export class GithubProjectExistsDirective implements Validator {
         debounceTime(250),
         tap(createAppState => {
           if (createAppState.projectExists && createAppState.projectExists.name !== c.value) {
-            this.store.dispatch(new CheckProjectExists(this.scmService.getSCM(this.appGithubProjectExists as GitSCMType), c.value));
+            this.store.dispatch(new CheckProjectExists(this.scmService.getSCM(...this.getTypeAndEndpoint()), c.value));
           }
         }),
         filter(createAppState =>

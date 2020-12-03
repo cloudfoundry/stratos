@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { CfAutoscalerModule } from '../../../../cf-autoscaler/src/cf-autoscaler.module';
 import { CoreModule } from '../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { GitSharedModule } from '../../../../git/src/shared/git-shared.module';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
 import {
@@ -47,7 +48,8 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ApplicationsRoutingModule,
     CloudFoundrySharedModule,
     // FIXME: Remove hard link between cf and autoscaler packages #4416
-    CfAutoscalerModule
+    CfAutoscalerModule,
+    GitSharedModule
   ],
   declarations: [
     ApplicationWallComponent,
