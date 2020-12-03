@@ -1,12 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClientModule, HttpClient, HttpBackend } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../../../git/src/shared/github.helpers';
 import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SetAppSourceDetails } from '../../../../../actions/deploy-applications.actions';
 import { CommitListWrapperComponent } from './commit-list-wrapper.component';

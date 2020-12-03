@@ -25,11 +25,13 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
     checked: boolean;
   }>(null);
   initialValue$ = this.initialValue.asObservable();
+  initialized = false;
 
   @Input()
   set row(row: KubeConfigFileCluster) {
-    if (!this.pRow) {
-      this.pRow = row;
+    super.row = row;
+    if (!this.initialized) {
+      this.initialized = true;
       if (row.cluster['insecure-skip-tls-verify']) {
         // User has manually specified default skip option
         this.initialValue.next({
@@ -49,7 +51,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
     }
   }
   get row(): KubeConfigFileCluster {
-    return this.pRow;
+    return super.row;
   }
 
   constructor(

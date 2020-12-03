@@ -3,10 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { IAppFavMetadata } from '../../../../cloud-foundry/src/cf-metadata-types';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
-import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -14,6 +12,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
+import { IFavoriteMetadata } from './../../../../store/src/types/user-favorites.types';
 import { KubeResourceEntityDefinition } from '../store/kube.types';
 import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 
@@ -49,7 +48,7 @@ export class KubernetesNamespaceComponent {
     public kubeEndpointService: KubernetesEndpointService,
     public kubeNamespaceService: KubernetesNamespaceService,
     public analysisService: KubernetesAnalysisService,
-    private favoritesConfigMapper: FavoritesConfigMapper,
+    private userFavoriteManager: UserFavoriteManager,
   ) {
     this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
@@ -70,14 +69,13 @@ export class KubernetesNamespaceComponent {
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
     filter(app => !!app),
-    map(namespace => getFavoriteFromEntity<IAppFavMetadata>(
+    map(namespace => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(
       {
         kubeGuid: this.kubeEndpointService.baseKube.guid,
         ...namespace,
         prettyText: 'Kubernetes Namespace',
       },
       kubernetesNamespacesEntityType,
-      this.favoritesConfigMapper,
       KUBERNETES_ENDPOINT_TYPE
     ))
   );

@@ -16,7 +16,7 @@ export class BaseCreateApplicationStepper {
         this.tiles.select('Application Shell');
         return new CreateApplicationShellStepper();
       case APPLICATION_CREATION_TYPES.DEPLOY:
-        this.tiles.select('Public GitHub');
+        this.tiles.select('GitHub');
         return new DeployApplication();
       case APPLICATION_CREATION_TYPES.DEPLOY_URL:
         this.tiles.select('Public Git URL');

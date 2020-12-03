@@ -16,10 +16,9 @@ export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<I
 
   tags: AppChip<ServiceTag>[] = [];
 
-  private service;
   @Input()
   set row(pService: APIResource<IService>) {
-    this.service = pService;
+    super.row = pService;
     if (!pService) {
       return;
     }
@@ -29,10 +28,7 @@ export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<I
     }));
   }
   get row(): APIResource<IService> {
-    return this.service;
+    return super.row;
   }
 
-  constructor() {
-    super();
-  }
 }

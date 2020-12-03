@@ -99,6 +99,7 @@ $bottom-index: $top-index - 1;
     height: 20vh;
   }
   &__divider {
+    cursor: default;
     opacity: .3;
     padding: 0 10px 0 5px;
   }

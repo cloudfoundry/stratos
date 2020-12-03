@@ -1,16 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GitCommit, GitSCMService } from '@stratosui/git';
 import { Observable } from 'rxjs';
 import { filter, map, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import { GitCommit } from '../../../../../../../cloud-foundry/src/store/types/git.types';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   GithubCommitsListConfigServiceDeploy,
 } from '../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-deploy.service';
-import { GitSCMService } from '../../../../../shared/data-services/scm/scm.service';
 
 @Component({
   selector: 'app-commit-list-wrapper',

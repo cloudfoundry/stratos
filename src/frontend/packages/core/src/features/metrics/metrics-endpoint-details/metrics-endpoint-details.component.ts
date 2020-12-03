@@ -84,6 +84,7 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
 
   @Input()
   set row(data: EndpointModel) {
+    super.row = data;
     this.guid$.next(data.guid);
   }
 }

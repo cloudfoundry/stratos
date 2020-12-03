@@ -29,7 +29,7 @@ export class TableCellServiceBrokerComponent extends
 
   @Input()
   set row(row: APIResource<IService>) {
-    this.pRow = row;
+    super.row = row;
     if (row && !this.spaceLink$) {
       this.broker$ = cfEntityCatalog.serviceBroker.store.getEntityService(
         this.row.entity.service_broker_guid,
@@ -62,7 +62,7 @@ export class TableCellServiceBrokerComponent extends
     }
   }
   get row(): APIResource<IService> {
-    return this.pRow;
+    return super.row;
   }
 
   public spaceLink$: Observable<{

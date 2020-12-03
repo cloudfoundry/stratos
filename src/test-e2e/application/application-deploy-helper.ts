@@ -21,9 +21,9 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
   deployedCommit: promise.Promise<string>,
   appDetails: {
     cfGuid: string,
-    appGuid: string
+    appGuid: string,
   },
-  dockerUrl: string
+  dockerUrl: string,
 } {
   const res = {
     testApp: e2e.secrets.getDefaultCFEndpoint().testDeployApp || 'nwmac/cf-quick-app',
@@ -34,7 +34,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
       appGuid
         : ''
     },
-    dockerUrl: 'nginxdemos/hello'
+    dockerUrl: 'ghcr.io/cf-stratos/test-docker-app'
   };
   const testAppUrl = 'https://github.com/' + res.testApp;
   const sourceText = type.toString(); // appUrl ? 'Git URL' : 'GitHub';
@@ -80,7 +80,7 @@ export function createApplicationDeployTests(type = CREATE_APP_DEPLOY_TEST_TYPE.
     it('Check deploy steps', () => {
       switch (type) {
         case CREATE_APP_DEPLOY_TEST_TYPE.GIT_CLONE:
-          expect(deployApp.header.getTitleText()).toBe(`Deploy from Public ${sourceText}`);
+          expect(deployApp.header.getTitleText()).toBe(`Deploy from ${sourceText}`);
           break;
         case CREATE_APP_DEPLOY_TEST_TYPE.GIT_URL:
           expect(deployApp.header.getTitleText()).toBe(`Deploy from Public ${sourceText}`);

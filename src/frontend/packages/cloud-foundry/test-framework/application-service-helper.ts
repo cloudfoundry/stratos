@@ -66,7 +66,7 @@ export class ApplicationServiceMock {
   } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
-    observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '' }, deployOverrides: null });
+    observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '', endpointGuid: ''  }, deployOverrides: null});
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);

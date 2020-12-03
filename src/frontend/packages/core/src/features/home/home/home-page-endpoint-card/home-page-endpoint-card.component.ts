@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Compiler,
   Component,
+  ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
   Injector,
@@ -19,19 +20,28 @@ import {
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { FavoritesConfigMapper } from '../../../../../../store/src/favorite-config-mapper';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
+import {
+  DefaultEndpointHomeComponent,
+} from './../default-endpoint-home-component/default-endpoint-home-component.component';
 
 const MAX_FAVS_NORMAL = 15;
 const MAX_FAVS_COMPACT = 5;
 const CUTOFF_SHOW_SHORTCUTS_ON_LEFT = 10;
 const MAX_SHORTCUTS = 5;
 const MAX_LINKS = 5;
+
+// Loading/error status of the card
+enum Status {
+  OK = 0,
+  Loading = 1,
+  Error = 2,
+}
 
 @Component({
   selector: 'app-home-page-endpoint-card',
@@ -73,10 +83,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   public link: string;
 
-  load$: Observable<boolean>;
-  loadSubj = new BehaviorSubject<boolean>(false);
-  isLoading = false;
-  isError = false;
+  // Status = 0 OK, 1 Loading, 2 Error
+  status$: Observable<Status>;
+  status = new BehaviorSubject<Status>(Status.OK);
 
   private ref: ComponentRef<HomePageEndpointCard>;
   private sub: Subscription;
@@ -90,14 +99,18 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Should the Home Card use the whole width, or do we show the links panel as well?
   fullView = false;
 
+  // Does the endpoint haev entities that can be favourited
+  // If not, then don't show favorites, as there can never be any
+  hasFavEntities = false;
+
   constructor(
-    private favoritesConfigMapper: FavoritesConfigMapper,
     private userFavoriteManager: UserFavoriteManager,
     private sidePanelService: SidePanelService,
     private compiler: Compiler,
     private injector: Injector,
+    private componentFactoryResolver: ComponentFactoryResolver,
   ) {
-    this.load$ = this.loadSubj.asObservable();
+    this.status$ = this.status.asObservable();
   }
 
   ngAfterViewInit() {
@@ -106,36 +119,28 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
-      console.warn(`No endpoint home card for ${this.endpoint.guid}`);
+      this.createCard(undefined);
     }
   }
 
   ngOnInit() {
+    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type);
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid).pipe(
-      map(f => f.map(item => this.userFavoriteManager.mapToHydrated(item)))
-    );
-
+    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid);
     this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
-      this.favorite = this.favoritesConfigMapper.getFavoriteEndpointFromEntity(this.endpoint);
+      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
       this.fullView = this.definition?.homeCard?.fullView;
-
-      const mapper = this.favoritesConfigMapper.getMapperFunction(this.favorite);
-      if (mapper && this.favorite.metadata) {
-        const p = mapper(this.favorite.metadata);
-        if (p) {
-          this.link = p.routerLink;
-        }
-      }
+      this.link = this.favorite.getLink();
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
       filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
-        const allShortcuts = this.definition?.homeCard?.shortcuts(this.endpoint.guid) || [];
+        const shortcutsFn = this.definition?.homeCard?.shortcuts;
+        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid) || [] : [];
         let shortcuts = allShortcuts;
         const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
         const totalShortcuts = allShortcuts.length;
@@ -166,6 +171,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
             this.showShortcutsOnSide = false;
           }
         }
+
+        // If nothing can be favorited and there are no shotrcuts then hide the right-hand side panel
+        if (!this.hasFavEntities && shortcuts.length === 0) {
+          setTimeout(() => this.fullView = true, 0);
+        }
         return {
           favs,
           shortcuts
@@ -193,7 +203,14 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   async createCard(endpointEntity: any) {
     this.customCard.clear();
-    const component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+
+    let component;
+    if (!endpointEntity) {
+      component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
+    } else {
+      component = await endpointEntity.definition.homeCard.component(this.compiler, this.injector);
+    }
+
     this.ref = this.customCard.createComponent(component);
     this.ref.instance.endpoint = this.endpoint;
     this.ref.instance.layout = this.pLayout;
@@ -209,17 +226,17 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Ask the card to load itself
   loadCardIfReady() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
-      this.isLoading = true;
+      this.status.next(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
       // Timeout after 15 seconds
       this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next();
-        this.isLoading = false;
+        setTimeout(() => this.status.next(Status.OK), 0);
       }, () => {
         this.loaded.next();
-        this.isLoading = false;
-        this.isError = true;
+        this.status.next(Status.Error);
+        this.sub.unsubscribe();
       });
     }
   }

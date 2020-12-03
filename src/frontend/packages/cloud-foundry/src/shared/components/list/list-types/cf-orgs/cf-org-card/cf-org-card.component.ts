@@ -13,7 +13,6 @@ import { ConfirmationDialogConfig } from '../../../../../../../../core/src/share
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -21,7 +20,7 @@ import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.t
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { getStartedAppInstanceCount } from '../../../../../../cf.helpers';
@@ -64,7 +63,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private confirmDialog: ConfirmationDialogService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private emf: EntityMonitorFactory,
-    private favoritesConfigMapper: FavoritesConfigMapper
+    private userFavoriteManager: UserFavoriteManager
   ) {
     super();
 
@@ -96,7 +95,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       refCount()
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, organizationEntityType, this.favoritesConfigMapper, CF_ENDPOINT_TYPE);
+    this.favorite = this.userFavoriteManager.getFavorite(this.row, organizationEntityType, CF_ENDPOINT_TYPE);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

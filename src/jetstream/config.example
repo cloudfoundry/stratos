@@ -25,8 +25,8 @@ LOG_TO_JSON=false
 LOG_API_REQUESTS=true
 
 SSO_LOGIN=false
-# Whitelist for the SSO redirect url. Paths can contain wildcard `*`
-SSO_WHITELIST=
+# Allow-list for the SSO redirect url. Paths can contain wildcard `*`
+SSO_ALLOWLIST=
 
 # Enable feature in tech preview
 ENABLE_TECH_PREVIEW=false
@@ -34,6 +34,9 @@ ENABLE_TECH_PREVIEW=false
 #UI_LIST_MAX_SIZE=600
 # If the max list size is hit allow the user to load all results anyway. Defaults to false
 #UI_LIST_ALLOW_LOAD_MAXED=false
+
+# By default, only show favorites endpoints on the home view
+# HOME_VIEW_SHOW_FAVORITES_ONLY=false
 
 # User Invites
 SMTP_FROM_ADDRESS=Stratos<invite@stratos.com>
@@ -80,3 +83,6 @@ INVITE_USER_CLIENT_SECRET=
 
 # Enabled Artifact Hub
 # ARTIFACT_HUB_DISABLED=false
+
+# Allow backup/restore feature?
+#FEATURE_ALLOW_BACKUP=false

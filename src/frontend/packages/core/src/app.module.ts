@@ -5,6 +5,7 @@ import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router
 import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
@@ -13,7 +14,6 @@ import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
 import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { FavoritesConfigMapper } from '../../store/src/favorite-config-mapper';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpers/stratos-entity-factory';
 import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
 import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
@@ -30,7 +30,6 @@ import { CoreModule } from './core/core.module';
 import { CustomizationService } from './core/customizations.types';
 import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
 import { ExtensionService } from './core/extension/extension-service';
-import { getGitHubAPIURL, GITHUB_API_URL } from './core/github.helpers';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
 import { environment } from './environments/environment';
@@ -133,7 +132,6 @@ export class AppModule {
     private store: Store<GeneralEntityAppState>,
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
-    private favoritesConfigMapper: FavoritesConfigMapper,
     ech: EntityCatalogHelper
   ) {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
@@ -152,7 +150,7 @@ export class AppModule {
     });
     eventService.addEventConfig<{
       count: number,
-      endpoint: EndpointModel
+      endpoint: EndpointModel;
     }>({
       eventTriggered: (state: GeneralEntityAppState) => {
         const eventState = internalEventStateSelector(state);
@@ -234,12 +232,11 @@ export class AppModule {
     ).subscribe(
       ([entities, recents]) => {
         Object.values(recents).forEach(recentEntity => {
-          const mapper = this.favoritesConfigMapper.getMapperFunction(recentEntity);
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
-            const entityToMetadata = this.favoritesConfigMapper.getEntityMetadata(recentEntity, entity);
-            const name = mapper(entityToMetadata).name;
+            const entityToMetadata = this.userFavoriteManager.getEntityMetadata(recentEntity, entity);
+            const name = entityToMetadata.name;
             if (name && name !== recentEntity.name) {
               // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
@@ -263,12 +260,11 @@ export class AppModule {
       }) : entityCatalog.getEntityKey(favorite);
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
-        const newMetadata = this.favoritesConfigMapper.getEntityMetadata(favorite, entity);
+        const newMetadata = this.userFavoriteManager.getEntityMetadata(favorite, entity);
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-          stratosEntityCatalog.userFavorite.api.updateFavorite({
-            ...favorite,
-            metadata: newMetadata
-          });
+          const fav = this.userFavoriteManager.getUserFavoriteFromObject(favorite);
+          fav.metadata = newMetadata;
+          stratosEntityCatalog.userFavorite.api.updateFavorite(fav);
         }
       }
     }

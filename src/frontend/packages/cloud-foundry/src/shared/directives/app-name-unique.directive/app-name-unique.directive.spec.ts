@@ -9,9 +9,9 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { ExtensionService } from '../../../../../core/src/core/extension/extension-service';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../core/src/core/github.helpers';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
 import { CoreTestingModule } from '../../../../../core/test-framework/core-test.modules';
+import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
 import { AppStoreModule } from '../../../../../store/src/store.module';
 import { CFAppState } from '../../../cf-app-state';
 import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';

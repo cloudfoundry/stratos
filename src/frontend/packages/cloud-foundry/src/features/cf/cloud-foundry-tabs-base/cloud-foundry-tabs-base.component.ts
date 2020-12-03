@@ -13,8 +13,8 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
-import { FavoritesConfigMapper } from '../../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
@@ -45,12 +45,12 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     public cfEndpointService: CloudFoundryEndpointService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     endpointsService: EndpointsService,
-    favoritesConfigMapper: FavoritesConfigMapper
+    userFavoriteManager: UserFavoriteManager
   ) {
     this.favorite$ = endpointsService.endpoints$.pipe(
       first(),
       map(endpoints => endpoints[this.cfEndpointService.cfGuid]),
-      map(endpoint => favoritesConfigMapper.getFavoriteEndpointFromEntity(endpoint))
+      map(endpoint => userFavoriteManager.getFavoriteEndpointFromEntity(endpoint))
     );
 
     const firehoseHidden$ = this.currentUserPermissionsService

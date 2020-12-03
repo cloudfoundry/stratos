@@ -62,6 +62,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
 
   @Input('row')
   set row(row: APIResource<AppScalingTrigger>) {
+    super.row = row;
     if (row) {
       if (row.entity.query && row.entity.query.params) {
         this.paramsMetricsStart = row.entity.query.params.start * 1000;

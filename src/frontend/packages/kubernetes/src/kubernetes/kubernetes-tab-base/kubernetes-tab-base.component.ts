@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { FavoritesConfigMapper } from '../../../../store/src/favorite-config-mapper';
 import { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
@@ -43,7 +43,7 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
-    public favoritesConfigMapper: FavoritesConfigMapper,
+    public userFavoriteManager: UserFavoriteManager,
     public analysisService: KubernetesAnalysisService,
     private route: ActivatedRoute,
   ) {
@@ -120,7 +120,7 @@ export class KubernetesTabBaseComponent implements OnInit {
     );
     this.favorite$ = this.kubeEndpointService.endpoint$.pipe(
       first(),
-      map(endpoint => this.favoritesConfigMapper.getFavoriteEndpointFromEntity(endpoint.entity))
+      map(endpoint => this.userFavoriteManager.getFavoriteEndpointFromEntity(endpoint.entity))
     );
     this.endpointIds$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => [endpoint.entity.guid])

@@ -22,7 +22,10 @@ import (
 // API Host Prefix to replace if the custom header is supplied
 const apiPrefix = "api."
 
-const longRunningTimeoutHeader = "x-cap-long-running"
+const (
+	longRunningTimeoutHeader = "x-cap-long-running"
+	noTokenHeader            = "x-cap-no-token"
+)
 
 // Timeout for long-running requests, after which we will return indicating request it still active
 // to prevent hitting the 2 minute browser timeout
@@ -172,8 +175,15 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 
 	cnsiRequest.URL = new(url.URL)
 	*cnsiRequest.URL = *cnsiRec.APIEndpoint
-	// The APIEndpoint might have a path already - so join the request URI to it
-	cnsiRequest.URL.Path = path.Join(cnsiRequest.URL.Path, uri.Path)
+	// The APIEndpoint might have a path already - so join the request URI to it...
+	// but ensure we don't escape parameters again
+	extraPath := uri.Path
+	if len(uri.RawPath) > 0 {
+		extraPath = uri.RawPath
+	}
+	cnsiRequest.URL.RawPath = path.Join(cnsiRequest.URL.Path, extraPath)
+	cnsiRequest.URL.Path, _ = url.PathUnescape(cnsiRequest.URL.RawPath)
+
 	cnsiRequest.URL.RawQuery = uri.RawQuery
 
 	return cnsiRequest, nil
@@ -398,6 +408,24 @@ func (p *portalProxy) DoProxySingleRequest(cnsiGUID, userGUID, method, requestUr
 	return responses[req.ResultGUID], err
 }
 
+// Convenience helper for a single request using a token
+func (p *portalProxy) DoProxySingleRequestWithToken(cnsiGUID string, token *interfaces.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*interfaces.CNSIRequest, error) {
+	proxyURL, err := url.Parse(requestURL)
+	if err != nil {
+		return nil, err
+	}
+
+	done := make(chan *interfaces.CNSIRequest)
+	cnsiRequest, buildErr := p.buildCNSIRequest(cnsiGUID, "", method, proxyURL, body, headers)
+	if buildErr != nil {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
+	}
+	cnsiRequest.Token = token
+	go p.doRequest(&cnsiRequest, done)
+	res := <-done
+	return res, nil
+}
+
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
 	shouldPassthrough := "true" == c.Request().Header.Get("x-cap-passthrough")
 
@@ -444,7 +472,10 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	if len(cnsiRequest.Body) > 0 {
 		body = bytes.NewReader(cnsiRequest.Body)
 	}
-	req, err = http.NewRequest(cnsiRequest.Method, cnsiRequest.URL.String(), body)
+
+	proxyURL := cnsiRequest.URL.String()
+
+	req, err = http.NewRequest(cnsiRequest.Method, proxyURL, body)
 	if err != nil {
 		cnsiRequest.Error = err
 		if done != nil {
@@ -453,16 +484,21 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 		return
 	}
 
-	// get a cnsi token record and a cnsi record
-	tokenRec, _, err := p.getCNSIRequestRecords(cnsiRequest)
-	if err != nil {
-		cnsiRequest.Error = err
-		if done != nil {
-			cnsiRequest.StatusCode = 400
-			cnsiRequest.Status = "Unable to retrieve CNSI token record"
-			done <- cnsiRequest
+	var tokenRec interfaces.TokenRecord
+	if cnsiRequest.Token != nil {
+		tokenRec = *cnsiRequest.Token
+	} else {
+		// get a cnsi token record and a cnsi record
+		tokenRec, _, err = p.getCNSIRequestRecords(cnsiRequest)
+		if err != nil {
+			cnsiRequest.Error = err
+			if done != nil {
+				cnsiRequest.StatusCode = 400
+				cnsiRequest.Status = "Unable to retrieve CNSI token record"
+				done <- cnsiRequest
+			}
+			return
 		}
-		return
 	}
 
 	// Copy original headers through, except custom portal-proxy Headers
@@ -517,7 +553,10 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	cnsi := c.Param("uuid")
 
 	uri := url.URL{}
-	uri.Path = c.Param("*")
+	// Ensure we don't escape parameters again
+	uri.RawPath = c.Param("*")
+	uri.Path, _ = url.PathUnescape(uri.RawPath)
+
 	uri.RawQuery = c.Request().URL.RawQuery
 
 	header := getEchoHeaders(c)
@@ -539,11 +578,22 @@ func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
 	if buildErr != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
 	}
-	cnsiRequest.LongRunning = false
+
+	longRunning := "true" == c.Request().Header.Get(longRunningTimeoutHeader)
+	noToken := "true" == c.Request().Header.Get(noTokenHeader)
+
+	cnsiRequest.LongRunning = longRunning
+	if noToken {
+		// Fake a token record with no authentication
+		cnsiRequest.Token = &interfaces.TokenRecord{
+			AuthType: interfaces.AuthConnectTypeNone,
+		}
+	}
 
 	go p.doRequest(&cnsiRequest, done)
 	res := <-done
 
+	// FIXME: cnsiRequest.Status info is lost for failures, only get a status code
 	c.Response().WriteHeader(res.StatusCode)
 
 	// we don't care if this fails

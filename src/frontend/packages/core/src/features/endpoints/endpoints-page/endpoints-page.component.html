@@ -5,7 +5,7 @@
       [routerLink]="'/endpoints/new/'" matTooltip="Register Endpoint">
       <mat-icon>add</mat-icon>
     </button>
-    <button id="stratos-restore-backup" *appUserPermission="canRegisterEndpoint" mat-icon-button
+    <button id="stratos-restore-backup" *ngIf="canBackupRestore$ | async" mat-icon-button
       [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
       <mat-icon>settings_backup_restore</mat-icon>
     </button>

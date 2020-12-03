@@ -65,7 +65,9 @@ export STRATOS_E2E_BASE_URL="https://127.0.0.1:5443"
 E2E_TARGET="e2e -- --no-webdriver-update --dev-server-target= --base-url=https://127.0.0.1:5443 --suite=${SUITE}"
 
 # Set Stratos debug if running a PR with the appropriate label
+set +e
 source "${DIRPATH}/deploy/ci/travis/check-e2e-pr.sh"
+set -e
 
 # Capture video if configured
 if [ "$CAPTURE_VIDEO" == "video" ]; then

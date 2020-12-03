@@ -17,18 +17,18 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
   @Input('row')
-  get row() { return this.pRow; }
+  get row() { return super.row; }
   set row(row: T) {
-    this.pRow = row;
+    super.row = row;
     if (this.config) {
       this.enabled = this.config.isEnabled(row);
     }
   }
 
   @Input('config')
-  get config() { return this.pConfig; }
+  get config() { return super.config; }
   set config(config: TableCellBooleanIndicatorComponentConfig<T>) {
-    this.pConfig = config;
+    super.config = config;
     if (!config) {
       return;
     }

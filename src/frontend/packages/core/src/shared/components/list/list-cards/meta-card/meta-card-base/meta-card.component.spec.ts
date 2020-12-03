@@ -5,12 +5,10 @@ import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { Observable, of } from 'rxjs';
 
-import { FavoritesConfigMapper } from '../../../../../../../../store/src/favorite-config-mapper';
 import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-schema';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import * as favoriteHelpers from '../../../../../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { SharedModule } from '../../../../../shared.module';
@@ -70,7 +68,6 @@ describe('MetaCardComponent', () => {
   let fixture: ComponentFixture<WrapperComponent>;
   let element: HTMLElement;
   let entityMonitorFactory: EntityMonitorFactoryMock;
-  let favoritesConfigMapper: FavoritesConfigMapper;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -94,7 +91,6 @@ describe('MetaCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);
     entityMonitorFactory = TestBed.get(EntityMonitorFactory);
-    favoritesConfigMapper = TestBed.get(FavoritesConfigMapper);
     component = fixture.componentInstance.metaCard;
     fixture.detectChanges();
     element = fixture.debugElement.nativeElement;
@@ -143,17 +139,7 @@ describe('MetaCardComponent', () => {
   });
 
   it('should show star if favoritable', () => {
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
     component.favorite = favorite;
-    fixture.detectChanges();
-
-    expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();
-  });
-
-  it('should set favorite from entityConfig if not set', () => {
-    spyOn(favoritesConfigMapper, 'getPrettyTypeName').and.returnValue('prettyName');
-    spyOn(favoriteHelpers, 'getFavoriteFromEntity').and.returnValue(favorite);
-    component.entityConfig = entityConfig;
     fixture.detectChanges();
 
     expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();
