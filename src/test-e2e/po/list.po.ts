@@ -161,7 +161,7 @@ export class ListCardComponent extends Component {
 
   static cardsCss = 'app-card:not(.row-filler)';
 
-  constructor(locator: ElementFinder, private header: ListHeaderComponent) {
+  constructor(locator: ElementFinder, private list: ListComponent) {
     super(locator);
   }
 
@@ -181,6 +181,13 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
+    this.list.header.getCardListViewToggleButton().click();
+    this.list.isTableView().then(isTableView => {
+      if (isTableView) {
+        return this.list.header.getCardListViewToggleButton().click();
+      }
+    });
+
     const card = this.locator.all(by.css(`${ListCardComponent.cardsCss} ${metaType}`)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
@@ -198,8 +205,8 @@ export class ListCardComponent extends Component {
 
   findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM, filter = false): promise.Promise<MetaCard> {
     if (filter) {
-      this.header.waitUntilShown();
-      this.header.setSearchText(title);
+      this.list.header.waitUntilShown();
+      this.list.header.setSearchText(title);
       return this.waitForCardByTitle(title, metaType);
     }
 
@@ -485,7 +492,7 @@ export class ListComponent extends Component {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.header = new ListHeaderComponent(locator);
-    this.cards = new ListCardComponent(locator, this.header);
+    this.cards = new ListCardComponent(locator, this);
     this.pagination = new ListPaginationComponent(locator);
     this.empty = new ListEmptyComponent(locator);
   }
