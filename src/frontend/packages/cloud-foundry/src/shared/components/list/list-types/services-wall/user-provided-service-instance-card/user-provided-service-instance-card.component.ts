@@ -38,6 +38,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
 
   @Input('row')
   set row(row: APIResource<IUserProvidedServiceInstance>) {
+    super.row = row;
     if (row) {
       this.setup(row);
     }
@@ -107,14 +108,14 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
       false,
       true
     );
-  }
+  };
 
   private delete = () => this.serviceActionHelperService.deleteServiceInstance(
     this.serviceInstanceEntity.metadata.guid,
     this.serviceInstanceEntity.entity.name,
     this.serviceInstanceEntity.entity.cfGuid,
     true
-  )
+  );
 
   private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
     this.serviceInstanceEntity.metadata.guid,
@@ -123,7 +124,7 @@ export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResour
       [CSI_CANCEL_URL]: '/services'
     },
     true
-  )
+  );
 
   getSpaceBreadcrumbs = () => ({ breadcrumbs: 'services-wall' });
 

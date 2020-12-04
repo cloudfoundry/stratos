@@ -135,8 +135,8 @@ export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {
     paginationKey?: string
   ) => GetKubernetesServices;
   getInNamespace: (
+    kubeGuid: string,
     namespace: string,
-    kubeGuid: string
   ) => GetKubernetesServicesInNamespace;
   getInWorkload: (
     releaseTitle: string,
@@ -146,7 +146,7 @@ export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {
 
 export const kubeServiceActionBuilders: KubeServiceActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesServices(kubeGuid),
-  getInNamespace: (namespace: string, kubeGuid: string) => new GetKubernetesServicesInNamespace(kubeGuid, namespace),
+  getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesServicesInNamespace(kubeGuid, namespace),
   getInWorkload: (releaseTitle: string, kubeGuid: string) => new GetHelmReleaseServices(kubeGuid, releaseTitle),
 };
 

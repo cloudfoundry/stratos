@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
 import { filter, first, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -9,9 +10,7 @@ import { DeployApplicationSource } from '../../../../../../../cloud-foundry/src/
 import {
   TableCellRadioComponent,
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
-import { GitSCMService, GitSCMType } from '../../../../data-services/scm/scm.service';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+
 
 @Injectable()
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
@@ -35,13 +34,14 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
         return (appSource.type.id === 'github' || appSource.type.id === 'gitlab') ? {
           scm: appSource.type.id as GitSCMType,
           projectName: appSource.gitDetails.projectName,
-          sha: appSource.gitDetails.branch.name
+          sha: appSource.gitDetails.branch.name,
+          endpointGuid: appSource.gitDetails.endpointGuid
         } : null;
       }),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       first()
     ).subscribe(fetchDetails => {
-      const scm = scmService.getSCM(fetchDetails.scm);
+      const scm = scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid);
       this.dataSource = new GithubCommitsDataSource(this.store, this, scm, fetchDetails.projectName, fetchDetails.sha);
       this.initialised.next(true);
 

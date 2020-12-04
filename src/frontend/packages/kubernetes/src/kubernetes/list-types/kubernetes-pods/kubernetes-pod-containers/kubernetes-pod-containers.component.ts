@@ -4,14 +4,8 @@ import moment from 'moment';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import {
-  BooleanIndicatorType,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import {
-  TableCellBooleanIndicatorComponentConfig,
-} from '../../../../../../core/src/shared/components/list/list-table/table-cell-boolean-indicator/table-cell-boolean-indicator.component';
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { Container, ContainerState, ContainerStatus, InitContainer, KubernetesPod } from '../../../store/kube.types';
 
 export interface ContainerForTable {
@@ -45,15 +39,9 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
     }
   };
 
-  public readyBoolConfig: TableCellBooleanIndicatorComponentConfig<ContainerForTable> = {
-    isEnabled: (row: ContainerForTable) => row.containerStatus.ready,
-    type: BooleanIndicatorType.yesNo,
-    subtle: false,
-    showText: false
-  };
-
   @Input()
   set row(row: KubernetesPod) {
+    super.row = row;
     if (!row || !!this.containers$) {
       return;
     }
@@ -62,6 +50,9 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
       filter(pod => !!pod),
       map(pod => this.map(pod)),
     );
+  }
+  get row(): KubernetesPod {
+    return super.row;
   }
 
   constructor(

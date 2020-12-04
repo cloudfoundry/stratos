@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { catchError, filter, first, map } from 'rxjs/operators';
 
+import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../store/src/app-state';
 import {
@@ -46,13 +47,13 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
     iconFont: 'stratos-icons',
     label: 'Helm',
     labelPlural: 'Helms',
+    urlValidationRegexString: urlValidationExpression,
     subTypes: [
       {
         type: HELM_REPO_ENDPOINT_TYPE,
         label: 'Helm Repository',
         labelPlural: 'Helm Repositories',
         logoUrl: '/core/assets/custom/helm.svg',
-        urlValidation: undefined,
         unConnectable: true,
         techPreview: false,
         authTypes: [],
@@ -107,7 +108,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   helmEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    metadata => `/monocular/charts`,
+    (fav) => `/monocular/charts/${fav.metadata.name}`,
   );
   return helmEntityCatalog.endpoint;
 }

@@ -20,7 +20,7 @@ import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.t
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, IOrganization } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -96,7 +96,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       refCount()
     );
 
-    this.favorite = getFavoriteFromEntity(this.row, organizationEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE);
+    this.favorite = this.userFavoriteManager.getFavorite(this.row, organizationEntityType, CF_ENDPOINT_TYPE);
 
     const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))

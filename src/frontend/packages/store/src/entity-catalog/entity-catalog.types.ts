@@ -86,7 +86,10 @@ export interface IStratosBaseEntityDefinition<T = EntitySchema | EntityCatalogSc
   readonly schema: T;
   readonly label?: string;
   readonly labelShort?: string;
+  readonly labelTab?: string;
   readonly labelPlural?: string;
+  readonly icon?: string;
+  readonly iconFont?: string;
   readonly renderPriority?: number;
   /**
    * Show custom content in the endpoints list. Should be Type<EndpointListDetailsComponent>
@@ -134,7 +137,6 @@ export class EndpointHealthCheck {
 export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
-  readonly urlValidation?: boolean;
   readonly unConnectable?: boolean;
   /**
    * How many endpoints of this type can be registered, 0 - many
@@ -161,6 +163,8 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly globalPrePaginationRequest?: PrePaginationApiRequest;
   readonly globalErrorMessageHandler?: ApiErrorMessageHandler;
   readonly healthCheck?: EndpointHealthCheck;
+  // Used for favorites - given an entity, get the endpoint ID of the endpoint it belongs to
+  readonly getEndpointIdFromEntity?: (entity: any) => string;
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
@@ -232,13 +236,13 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
   getGuid(entity: Y): string;
-  getLink?(entityMetadata: T): string;
+  getLink?(favorite: UserFavorite<T>): string;
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,
   };
   // Is the underlying entity for the favorite valid?
-  getIsValid?(entityMetadata): Observable<boolean>;
+  getIsValid?(favorite: UserFavorite<T>): Observable<boolean>;
   /**
    * Actions that don't effect an individual entity i.e. create new
    * @returns global actions

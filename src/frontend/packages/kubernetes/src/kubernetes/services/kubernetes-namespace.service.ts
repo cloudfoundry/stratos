@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../store/kube.types';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 

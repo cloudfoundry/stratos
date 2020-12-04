@@ -3,6 +3,7 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
 import {
   combineLatest,
   combineLatest as observableCombineLatest,
@@ -45,12 +46,10 @@ import {
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { GitSCM } from '../../../../shared/data-services/scm/scm';
-import { GitSCMService, GitSCMType } from '../../../../shared/data-services/scm/scm.service';
+import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
-import { GitBranch, GitCommit, GitRepo } from '../../../../store/types/git.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
+import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
 
 
 
@@ -65,7 +64,6 @@ export class DeployApplicationStep2Component
   @Input() isRedeploy = false;
 
   commitInfo: GitCommit;
-  sourceTypes: SourceType[];
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
@@ -84,13 +82,13 @@ export class DeployApplicationStep2Component
   // @Input('fsSourceData') fsSourceData;
 
   // ---- GIT ----------
-  repositoryBranches$: Observable<any>;
+  repositoryBranches$: Observable<GitBranch[]>;
 
   projectInfo$: Observable<GitRepo>;
   commitSubscription: Subscription;
 
   sourceType: SourceType;
-  repositoryBranch: GitBranch = { name: null, commit: null };
+  repositoryBranch: GitBranch = null;
   repository: string;
 
   scm: GitSCM;
@@ -98,7 +96,7 @@ export class DeployApplicationStep2Component
   cachedSuggestions = {};
 
   // We don't have any repositories to suggest initially - need user to start typing
-  suggestedRepos$: Observable<string[]>;
+  suggestedRepos$: Observable<GitSuggestedRepo[]>;
 
   // Git URL
   gitUrl: string;
@@ -130,24 +128,34 @@ export class DeployApplicationStep2Component
     private httpClient: HttpClient,
     private appDeploySourceTypes: ApplicationDeploySourceTypes
   ) {
-    this.sourceTypes = appDeploySourceTypes.getTypes();
   }
 
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
-      this.store.dispatch(new SaveAppDetails({
+      gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
         projectName: this.repository,
-        branch: this.repositoryBranch,
-        url: this.scm.getCloneURL(this.repository),
-        commit: this.isRedeploy ? this.commitInfo.sha : undefined
-      }, null));
+        scm: this.scm,
+      }).waitForEntity$.pipe(first()).subscribe(repo => {
+        this.store.dispatch(new SaveAppDetails({
+          projectName: this.repository,
+          branch: this.repositoryBranch,
+          url: repo.entity.clone_url,
+          commit: this.isRedeploy ? this.commitInfo.sha : undefined,
+          endpointGuid: this.sourceType.endpointGuid,
+        }, null));
+      });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.store.dispatch(new SaveAppDetails({
         projectName: this.gitUrl,
         branch: {
-          name: this.gitUrlBranchName
-        }
+          name: this.gitUrlBranchName,
+          guid: null,
+          projectName: null,
+          scmType: null,
+          endpointGuid: null,
+        },
+        endpointGuid: null
       }, null));
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
       this.store.dispatch(new SaveAppDetails(null, {
@@ -161,11 +169,11 @@ export class DeployApplicationStep2Component
 
   ngOnInit() {
     this.sourceType$ = combineLatest(
-      of(this.appDeploySourceTypes.getAutoSelectedType(this.route)),
+      this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.store.select(selectSourceType),
-      of(this.sourceTypes[this.INITIAL_SOURCE_TYPE])
+      this.appDeploySourceTypes.types$.pipe(first(), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
-      map(([sourceFromStore, sourceFromParam, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
+      map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
     );
 
@@ -250,12 +258,12 @@ export class DeployApplicationStep2Component
         distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
         // Convert project name into branches pagination observable
         switchMap(state =>
-          cfEntityCatalog.gitBranch.store.getPaginationService(null, null, {
+          gitEntityCatalog.branch.store.getPaginationService(null, null, {
             scm: this.scm,
             projectName: state.name
           }).entities$
         ),
-        // Find the specific branch we're interested inS
+        // Find the specific branch we're interested in
         withLatestFrom(deployBranchName$),
         filter(([, branchName]) => !!branchName),
         tap(([branches, branchName]) => {
@@ -263,7 +271,7 @@ export class DeployApplicationStep2Component
             branch => branch.name === branchName
           );
         }),
-        map(([p, q]) => p),
+        map(([branches, branchName]) => branches),
         publishReplay(1),
         refCount()
       );
@@ -272,20 +280,17 @@ export class DeployApplicationStep2Component
       this.repositoryBranches$,
       deployBranchName$,
       this.projectInfo$,
-      deployCommit$
+      deployCommit$,
     ).pipe(
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
-        if (branch && !!projectInfo && branch.projectId === projectInfo.full_name) {
+        if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {
           this.store.dispatch(new SetBranch(branch));
-
 
           if (this.isRedeploy) {
             const commitSha = commit || branch.commit.sha;
-            // FIXME: This method to create entity id's should be standardised.... #4245
-            const repoEntityID = `${this.scm.getType()}-${projectInfo.full_name}`;
-            const commitEntityID = `${repoEntityID}-${commitSha}`;
-            const commitEntityService = cfEntityCatalog.gitCommit.store.getEntityService(commitEntityID, null, {
+            const commitGuid = getCommitGuid(this.scm.getType(), projectInfo.full_name, commitSha);
+            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitGuid, null, {
               projectName: projectInfo.full_name,
               scm: this.scm, commitSha
             });
@@ -307,10 +312,11 @@ export class DeployApplicationStep2Component
 
     const setSourceTypeModel$ = this.store.select(selectSourceType).pipe(
       filter(p => !!p),
-      tap(p => {
-        this.sourceType = this.sourceTypes.find(s => s.id === p.id);
+      withLatestFrom(this.appDeploySourceTypes.types$),
+      tap(([p, sourceTypes]) => {
+        this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
 
-        const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType);
+        const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
         if (!!newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
@@ -320,7 +326,7 @@ export class DeployApplicationStep2Component
             this.repositoryBranch = null;
             this.store.dispatch(new SetBranch(null));
             this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null }, null));
+            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpointGuid: this.sourceType.endpointGuid }, null));
           }
           this.scm = newScm;
         }
@@ -347,9 +353,9 @@ export class DeployApplicationStep2Component
     );
   }
 
-  updateSuggestedRepositories(name: string): Observable<string[]> {
+  updateSuggestedRepositories(name: string): Observable<GitSuggestedRepo[]> {
     if (!name || name.length < 3) {
-      return observableOf([] as string[]);
+      return observableOf([] as GitSuggestedRepo[]);
     }
 
     const cacheName = this.scm.getType() + ':' + name;
@@ -361,7 +367,7 @@ export class DeployApplicationStep2Component
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
-      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions)
+      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions),
     );
   }
 

@@ -99,6 +99,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
           routerLink: favorite.getLink(),
           prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
+          metadata: { name: favorite.metadata.name },
         }));
       }
     }

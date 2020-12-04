@@ -1,0 +1,5 @@
+<div *ngIf="commit.author" class="github-commit-author__core-author">
+  <a *ngIf="commit.author.html_url" href="{{commit.author.html_url}}" target="_blank">{{commit.commit.author.name}}</a>
+  <span *ngIf="!commit.author.html_url">{{commit.commit.author.name}}</span>
+  <img *ngIf="showAvatar && commit.author.avatar_url" src="{{commit.author.avatar_url}}">
+</div>

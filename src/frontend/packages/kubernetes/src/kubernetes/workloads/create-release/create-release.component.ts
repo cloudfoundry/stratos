@@ -13,8 +13,8 @@ import { ChartsService } from '../../../helm/monocular/shared/services/charts.se
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
 import { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.types';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 

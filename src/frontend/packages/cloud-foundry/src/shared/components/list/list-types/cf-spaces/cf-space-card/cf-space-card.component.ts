@@ -21,7 +21,7 @@ import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.t
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -77,7 +77,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
     this.entityConfig = new ComponentEntityMonitorConfig(this.spaceGuid, cfEntityFactory(spaceEntityType));
     this.orgGuid = this.cfOrgService.orgGuid;
-    this.favorite = getFavoriteFromEntity(this.row, spaceEntityType, this.userFavoriteManager, CF_ENDPOINT_TYPE);
+    this.favorite = this.userFavoriteManager.getFavorite(this.row, spaceEntityType, CF_ENDPOINT_TYPE);
     this.cardMenu = [
       {
         label: 'Edit',

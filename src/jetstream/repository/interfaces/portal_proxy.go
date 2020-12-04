@@ -56,6 +56,7 @@ type PortalProxy interface {
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
 	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*CNSIRequest, error)
+	DoProxySingleRequestWithToken(cnsiGUID string, token *TokenRecord, method, requestURL string, headers http.Header, body []byte) (*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 
 	// Database Connection

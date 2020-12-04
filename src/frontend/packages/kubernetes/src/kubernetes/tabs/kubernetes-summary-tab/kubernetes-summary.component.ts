@@ -15,7 +15,7 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { AppState, entityCatalog } from '../../../../../store/src/public-api';
 import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction, PaginationEntityState } from '../../../../../store/src/types/pagination.types';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 interface IValueLabels {

@@ -23,6 +23,7 @@ import { MenuItem } from '../../../../../../../../store/src/types/menu-item.type
 import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
+import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
 import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
@@ -67,30 +68,29 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   @Input('row')
   set row(row: EndpointModel) {
+    super.row = row;
     if (!row) {
       return;
     }
-    this.pRow = row;
 
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
     if (this.endpointCatalogEntity) {
-      const metadata = this.endpointCatalogEntity.builders.entityBuilder.getMetadata(row);
       this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
-        this.endpointCatalogEntity.builders.entityBuilder.getLink(metadata) : null;
+        EndpointsService.getLinkForEndpoint(row) : null;
       this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
 
   }
   get row(): EndpointModel {
-    return this.pRow;
+    return super.row;
   }
 
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
-    this.pDataSource = ds;
+    super.dataSource = ds;
 
     // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
     if (ds && !ds.dsEndpointType && !this.cardMenu) {
@@ -98,7 +98,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
         const separator = endpointAction.label === '-';
         return {
           label: endpointAction.label,
-          action: () => endpointAction.action(this.pRow),
+          action: () => endpointAction.action(this.row),
           can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : null,
           separator
         };
@@ -142,7 +142,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   updateInnerComponent() {
-    if (!this.endpointDetails || !this.pRow) {
+    if (!this.endpointDetails || !this.row) {
       return;
     }
     const e = this.endpointCatalogEntity.definition;
@@ -158,10 +158,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
 
     if (this.component) {
-      this.component.row = this.pRow;
+      this.component.row = this.row;
       this.component.isTable = false;
     }
-    this.component.row = this.pRow;
+    this.component.row = this.row;
     this.componentRef.changeDetectorRef.detectChanges();
 
 

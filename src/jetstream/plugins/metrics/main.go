@@ -182,29 +182,8 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 
 	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
 	res, err := h.Do(req)
-
-	if err == nil && res.StatusCode == http.StatusNotFound {
-		log.Debug("Checking if this is a prometheus endpoint")
-		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
-		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
-		req, err = http.NewRequest("GET", statusEndpoint, nil)
-		if err != nil {
-			msg := "Failed to create request for the Metrics Endpoint: %v"
-			log.Errorf(msg, err)
-			return nil, false, fmt.Errorf(msg, err)
-		}
-		m.addAuth(req, auth)
-
-		response, err := h.Do(req)
-		defer response.Body.Close()
-		if err != nil || response.StatusCode != http.StatusOK {
-			log.Errorf("Error performing http request - response: %v, error: %v", response, err)
-			return nil, false, interfaces.LogHTTPError(res, err)
-		}
-
-		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
-		return tr, false, nil
-	} else if err != nil || res.StatusCode != http.StatusOK {
+	// Error performing the request?
+	if err != nil {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		errMessage := ""
 		if res.StatusCode == http.StatusUnauthorized {
@@ -217,6 +196,39 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	}
 
 	defer res.Body.Close()
+
+	// If we got anything other than a 200, then we did not find the Stratos Metrics metadata file
+	if res.StatusCode != http.StatusOK {
+		log.Debug("Did not find Stratos Metrics metadata file")
+		log.Debug("Checking if this is a prometheus endpoint")
+		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
+		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
+		req, err = http.NewRequest("GET", statusEndpoint, nil)
+		if err != nil {
+			msg := "Failed to create request for the Metrics Endpoint: %v"
+			log.Errorf(msg, err)
+			return nil, false, fmt.Errorf(msg, err)
+		}
+		m.addAuth(req, auth)
+
+		// Get for /api/v1/status/config
+		response, err := h.Do(req)
+		if err != nil {
+			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
+			return nil, false, interfaces.LogHTTPError(res, err)
+		}
+
+		defer response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
+			return nil, false, interfaces.LogHTTPError(res, err)
+		}
+
+		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
+		return tr, false, nil
+	}
+
+	// We read the Stratos Metadata file ok
 	body, _ := ioutil.ReadAll(res.Body)
 	// Put the body in the token metadata
 	tr.Metadata = string(body)
@@ -226,7 +238,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 
 func (m *MetricsSpecification) addAuth(req *http.Request, auth *MetricsAuth) {
 	if auth.Type == interfaces.AuthConnectTypeCreds {
-		req.SetBasicAuth(auth.Username, auth.Password)
+		req.SetBasicAuth(url.QueryEscape(auth.Username), url.QueryEscape(auth.Password))
 	}
 }
 

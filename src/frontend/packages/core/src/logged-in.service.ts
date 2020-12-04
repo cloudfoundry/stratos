@@ -9,7 +9,7 @@ import { VerifySession } from '../../store/src/actions/auth.actions';
 import { AppState } from '../../store/src/app-state';
 import { AuthState } from '../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
-import { DashboardState } from './../../store/src/reducers/dashboard-reducer';
+import { DashboardState } from '../../store/src/types/dashboard.types';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';

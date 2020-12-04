@@ -1,0 +1,35 @@
+.select-step {
+  width: 100%;
+
+  &__radio-group {
+    display: flex;
+    flex-direction: column;
+  }
+  &__radio-button {
+    margin: 5px 0;
+  }
+  &__description {
+    margin-left: 28px;
+    padding-bottom: 10px;
+    p {
+      margin: 0 0 10px 0;
+      opacity: 0.7;
+    }
+  }
+  &__endpoint-form {
+    margin-left: 28px;
+    max-width: 450px;
+
+    mat-checkbox {
+      display: flex;
+      margin-top: 20px;
+    }
+  }
+  &__off {
+    opacity: 0.6;
+  }
+}
+
+.select-step .stepper-form {
+  max-width: unset;
+}

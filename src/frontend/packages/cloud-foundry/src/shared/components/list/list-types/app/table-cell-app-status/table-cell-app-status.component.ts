@@ -18,6 +18,7 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   applicationState: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
+    super.config = value;
     value = value || {
       hideIcon: false,
       initialStateOnly: false

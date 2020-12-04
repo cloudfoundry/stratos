@@ -6,7 +6,7 @@ import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
@@ -72,10 +72,9 @@ export class MetaCardComponent implements OnDestroy {
       if (!this.favorite) {
         this.entityMonitorSub = entityMonitor.entity$.pipe(
           first(),
-          tap(entity => this.favorite = getFavoriteFromEntity(
+          tap(entity => this.favorite = this.userFavoriteManager.getFavorite(
             entity,
             entityConfig.schema.entityType,
-            this.userFavoriteManager,
             entityConfig.schema.endpointType
           ))
         ).subscribe();

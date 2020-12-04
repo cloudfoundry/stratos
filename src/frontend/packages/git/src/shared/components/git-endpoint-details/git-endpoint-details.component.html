@@ -1,0 +1,9 @@
+<div class="git-details" *ngIf="name else noUser">
+  <div class="git-details__line">
+    <span class="git-details__icon" *ngIf="avatar">
+      <img src="{{ avatar }}" alt="@{{ name }}">
+    </span>
+    {{ name }}
+  </div>
+</div>
+<ng-template #noUser>-</ng-template>

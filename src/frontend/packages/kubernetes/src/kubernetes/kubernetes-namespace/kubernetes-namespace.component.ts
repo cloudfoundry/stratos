@@ -3,18 +3,16 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { IAppFavMetadata } from '../../../../cloud-foundry/src/cf-metadata-types';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KubeResourceEntityDefinition } from '../store/kube.types';
+import { IFavoriteMetadata } from './../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from './../kubernetes-entity-factory';
 
 @Component({
@@ -70,41 +68,39 @@ export class KubernetesNamespaceComponent {
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
     filter(app => !!app),
-    map(namespace => getFavoriteFromEntity<IAppFavMetadata>(
+    map(namespace => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(
       {
         kubeGuid: this.kubeEndpointService.baseKube.guid,
         ...namespace,
         prettyText: 'Kubernetes Namespace',
       },
       kubernetesNamespacesEntityType,
-      this.userFavoriteManager,
       KUBERNETES_ENDPOINT_TYPE
     ))
   );
 
   private getTabsFromEntityConfig(namespaced: boolean = true) {
-    const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
-    const tabsFromRouterConfig = [];
+    return [];
+    // const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
+    // const tabsFromRouterConfig = [];
 
-    // Get the tabs from the router configuration
-    entityNames.forEach(key => {
-      // See if we can find an entity for the key
-      const catalogEntity = kubeEntityCatalog[key];
-      if (catalogEntity) {
-        const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-        if (defn.apiNamespaced === namespaced) {
-          tabsFromRouterConfig.push({
-            link: defn.route || `resource/${key}`,
-            label: defn.labelTab || defn.labelPlural,
-            icon: defn.icon,
-            iconFont: defn.iconFont,
-          });
-        }
-      }
-    });
+    // // Get the tabs from the router configuration
+    // kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
+    //   if (catalogEntity) {
+    //     const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+    //     if (defn.apiNamespaced === namespaced) {
+    //       tabsFromRouterConfig.push({
+    //         link: defn.route || `resource/${key}`,
+    //         label: defn.labelTab || defn.labelPlural,
+    //         icon: defn.icon,
+    //         iconFont: defn.iconFont,
+    //       });
+    //     }
+    //   }
+    // });
 
-    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
-    return tabsFromRouterConfig;
+    // tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    // return tabsFromRouterConfig;
   }
 
 }

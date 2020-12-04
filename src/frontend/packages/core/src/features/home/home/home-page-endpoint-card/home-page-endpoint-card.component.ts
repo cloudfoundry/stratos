@@ -119,7 +119,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
-      console.warn(`No endpoint home card for ${this.endpoint.guid}`);
+      this.createCard(undefined);
       this.createCard(undefined);
     }
   }
@@ -140,7 +140,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
-        const allShortcuts = this.definition?.homeCard?.shortcuts(this.endpoint.guid) || [];
+        const shortcutsFn = this.definition?.homeCard?.shortcuts;
+        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid) || [] : [];
         let shortcuts = allShortcuts;
         const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
         const totalShortcuts = allShortcuts.length;

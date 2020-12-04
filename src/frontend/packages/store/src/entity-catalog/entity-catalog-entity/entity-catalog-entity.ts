@@ -1,7 +1,6 @@
 import { ActionReducer } from '@ngrx/store';
 
 import { IRequestEntityTypeState } from '../../app-state';
-import { getFullEndpointApiUrl } from '../../endpoint-utils';
 import {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
@@ -17,7 +16,7 @@ import { EntitySchema } from '../../helpers/entity-schema';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
 import { EndpointModel } from '../../types/endpoint.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
-import { IEndpointFavMetadata } from '../../types/user-favorites.types';
+import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import {
   ActionBuilderAction,
   ActionOrchestrator,
@@ -319,11 +318,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   static readonly baseEndpointRender: IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel> = {
     getMetadata: endpoint => ({
       name: endpoint.name,
-      guid: endpoint.guid,
-      address: getFullEndpointApiUrl(endpoint),
-      user: endpoint.user ? endpoint.user.name : undefined,
       subType: endpoint.sub_type,
-      admin: endpoint.user ? endpoint.user.admin ? 'Yes' : 'No' : undefined
     }),
     getLink: () => null,
     getGuid: metadata => metadata.guid,
@@ -332,7 +327,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
-    getLink?: (metadata: IEndpointFavMetadata) => string
+    getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string
   ) {
     const fullEntity: IStratosEndpointDefinition = {
       ...entity,

@@ -10,7 +10,7 @@ import { KubernetesEndpointService } from '../services/kubernetes-endpoint.servi
 import { KubernetesAnalysisService } from '../services/kubernetes.analysis.service';
 import { KubernetesService } from '../services/kubernetes.service';
 import { KubeResourceEntityDefinition } from '../store/kube.types';
-import { kubeEntityCatalog } from './../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from './../kubernetes-entity-generator';
 
 @Component({
   selector: 'app-kubernetes-tab-base',
@@ -52,7 +52,6 @@ export class KubernetesTabBaseComponent implements OnInit {
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Cluster' },
       { link: 'nodes', label: 'Nodes', icon: 'node', iconFont: 'stratos-icons' },
-      { link: 'resource/namespace', label: 'Namespaces', icon: 'namespace', iconFont: 'stratos-icons' },
       ...this.getTabsFromEntityConfig(false),
       { link: '-', label: 'Resources' },
       ...this.getTabsFromEntityConfig(true)
@@ -61,18 +60,15 @@ export class KubernetesTabBaseComponent implements OnInit {
 
 
   private getTabsFromEntityConfig(namespaced: boolean = true) {
-    const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
     const tabsFromRouterConfig = [];
 
     // Get the tabs from the router configuration
-    entityNames.forEach(key => {
-      // See if we can find an entity for the key
-      const catalogEntity = kubeEntityCatalog[key];
+    kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
       if (catalogEntity) {
-        const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-        if (defn.apiNamespaced === namespaced && !defn.hidden) {
+        const defn = catalogEntity.definition as unknown as KubeResourceEntityDefinition;
+        if (defn.apiNamespaced === namespaced) {
           tabsFromRouterConfig.push({
-            link: defn.route || `resource/${key}`,
+            link: `resource/${catalogEntity.type}`,
             label: defn.labelTab || defn.labelPlural,
             icon: defn.icon,
             iconFont: defn.iconFont,
@@ -85,33 +81,34 @@ export class KubernetesTabBaseComponent implements OnInit {
     return tabsFromRouterConfig;
   }
 
-  private getTabsFromRouterConfig(namespaced: boolean = true) {
-    const childRoutes = this.route.snapshot.routeConfig.children;
-    const tabsFromRouterConfig = [];
+  // TODO: RC Q This is unused
+  // private getTabsFromRouterConfig(namespaced: boolean = true) {
+  //   const childRoutes = this.route.snapshot.routeConfig.children;
+  //   const tabsFromRouterConfig = [];
 
-    // Get the tabs from the router configuration
-    childRoutes.forEach( r => {
-      if (r.path.length > 0) {
-        // See if we can find an entity for the key
-        const key = r.data ? (r.data.entityCatalogKey ? r.data.entityCatalogKey : r.path) : r.path;
-        const catalogEntity = kubeEntityCatalog[key];
-        if (catalogEntity) {
-          const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-          if (defn.apiNamespaced === namespaced) {
-            tabsFromRouterConfig.push({
-              link: defn.route ? defn.route : `resource/${r.path}`,
-              label: defn.labelTab || defn.labelPlural,
-              icon: defn.icon,
-              iconFont: defn.iconFont,
-            });
-          }
-        }
-      }
-    });
+  //   // Get the tabs from the router configuration
+  //   childRoutes.forEach(r => {
+  //     if (r.path.length > 0) {
+  //       // See if we can find an entity for the key
+  //       const key = r.data ? (r.data.entityCatalogKey ? r.data.entityCatalogKey : r.path) : r.path;
+  //       const catalogEntity = kubeEntityCatalog[key];
+  //       if (catalogEntity) {
+  //         const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+  //         if (defn.apiNamespaced === namespaced) {
+  //           tabsFromRouterConfig.push({
+  //             link: defn.route ? defn.route : `resource/${r.path}`,
+  //             label: defn.labelTab || defn.labelPlural,
+  //             icon: defn.icon,
+  //             iconFont: defn.iconFont,
+  //           });
+  //         }
+  //       }
+  //     }
+  //   });
 
-    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
-    return tabsFromRouterConfig;
-  }
+  //   tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+  //   return tabsFromRouterConfig;
+  // }
 
   ngOnInit() {
     this.isFetching$ = this.kubeEndpointService.endpoint$.pipe(

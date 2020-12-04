@@ -16,7 +16,7 @@ import { ConfirmationDialogService } from '../../../../../../../../core/src/shar
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { getFavoriteFromEntity } from '../../../../../../../../store/src/user-favorite-helpers';
+import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
@@ -115,7 +115,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     userFavoriteManager: UserFavoriteManager
   ) {
     this.favorite$ = cfSpaceService.space$.pipe(
-      map(space => getFavoriteFromEntity<ISpaceFavMetadata>(space.entity, spaceEntityType, userFavoriteManager, CF_ENDPOINT_TYPE))
+      map(space => userFavoriteManager.getFavorite<ISpaceFavMetadata>(space.entity, spaceEntityType, CF_ENDPOINT_TYPE))
     );
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)

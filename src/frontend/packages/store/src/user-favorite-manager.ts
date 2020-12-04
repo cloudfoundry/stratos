@@ -112,7 +112,7 @@ export class UserFavoriteManager {
     });
   }
 
-  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: UserFavorite<T>): UserFavorite<T> => {
+  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> => {
     return new UserFavorite<T>(f.endpointId, f.endpointType, f.entityType, f.entityId, f.metadata);
   }
 
@@ -161,8 +161,8 @@ export class UserFavoriteManager {
     const entityDefinition = catalogEntity.definition as IStratosEntityDefinition;
     const endpointType = isEndpoint ? catalogEntity.getTypeAndSubtype().type : entityDefinition.endpoint.type;
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
-    const metadata = catalogEntity.builders.entityBuilder?.getMetadata(entity);
-    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder?.getGuid(entity);
+    const metadata = catalogEntity.builders.entityBuilder.getMetadata(entity);
+    const guid = isEndpoint ? null : catalogEntity.builders.entityBuilder.getGuid(entity);
     if (!endpointId) {
       console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
     }
@@ -175,7 +175,22 @@ export class UserFavoriteManager {
     );
   }
 
-  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  // Get a favorite for the given entity
+  public getFavorite<Y extends IEntityMetadata = IEntityMetadata>(
+    entity: any,
+    entityType: string,
+    endpointType: string
+  ) {
+    // We need to get the endpoint ID for the entity
+    const endpointCatalogEntity = entityCatalog.getEndpoint(endpointType);
+    if (entity && endpointCatalogEntity && endpointCatalogEntity.definition.getEndpointIdFromEntity) {
+      const id = endpointCatalogEntity.definition.getEndpointIdFromEntity(entity);
+      return this.getFavoriteFromEntity<Y>(entityType, endpointType, id, entity);
+    }
+    return null;
+  }
+
+  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     entityType: string,
     endpointType: string,
     endpointId: string,
@@ -212,12 +227,4 @@ export class UserFavoriteManager {
     return total > 0;
   }
 
-  public canFavoriteEntityType(entityDefn: StratosBaseCatalogEntity) {
-    const defn = entityDefn.builders?.entityBuilder;
-    if (defn) {
-      const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
-      return canFavorite;
-    }
-    return false;
-  }
 }

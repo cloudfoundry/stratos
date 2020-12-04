@@ -7,7 +7,7 @@ import {
 } from '../../actions/user-favourites.actions';
 import { getDefaultFavoriteGroupsState, IUserFavoritesGroupsState } from '../../types/favorite-groups.types';
 import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
-import { deriveEndpointFavoriteFromFavorite } from '../../user-favorite-helpers';
+import { getEndpointIDFromFavorite } from '../../user-favorite-helpers';
 import { userFavoriteGroupsReducer } from './user-favorites-groups.reducer';
 
 const endpointFavorite = () => new UserFavorite<IEndpointFavMetadata>(
@@ -70,14 +70,14 @@ describe('userFavoritesReducer', () => {
 
   it(' [empty state] should add new entity and mark endpoint group as ethereal', () => {
     const fav = favorite();
-    const endpointFav = deriveEndpointFavoriteFromFavorite(fav);
+    const endpointFavGuid = getEndpointIDFromFavorite(fav);
     const action = new SaveUserFavoriteSuccessAction(fav);
     const newState = userFavoriteGroupsReducer(undefined, action);
     const defaultState = getDefaultFavoriteGroupsState();
     expect(newState).toEqual({
       ...defaultState,
       groups: {
-        [endpointFav.guid]: {
+        [endpointFavGuid]: {
           endpoint: {},
           ethereal: true,
           entitiesIds: [
@@ -141,7 +141,7 @@ describe('userFavoritesReducer', () => {
     const action = new GetUserFavoritesSuccessAction(favs);
     const newState = userFavoriteGroupsReducer(undefined, action);
 
-    const endpoint3Fav = deriveEndpointFavoriteFromFavorite(fav3);
+    const endpoint3FavGuid = getEndpointIDFromFavorite(fav3);
     const defaultState = getDefaultFavoriteGroupsState();
     expect(newState).toEqual({
       ...defaultState,
@@ -161,7 +161,7 @@ describe('userFavoritesReducer', () => {
             fav21.guid
           ]
         },
-        [endpoint3Fav.guid]: {
+        [endpoint3FavGuid]: {
           endpoint: {},
           ethereal: true,
           entitiesIds: [

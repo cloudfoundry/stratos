@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { Observable, of as observableOf, of, Subscription } from 'rxjs';
+import { filter, first, map, tap } from 'rxjs/operators';
 
 import {
   DeleteDeployAppSection,
@@ -41,7 +41,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
-  selectedSourceType: SourceType;
+  selectedSourceType$: Observable<SourceType>;
   entityKey: string;
   constructor(
     private store: Store<CFAppState>,
@@ -53,7 +53,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
-    this.selectedSourceType = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
+    this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
 
     this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => {
@@ -72,7 +72,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       space: this.cfOrgSpaceService.space.select.getValue()
     }));
     return observableOf({ success: true });
-  }
+  };
 
   ngOnDestroy(): void {
     this.initCfOrgSpaceService.forEach(p => p.unsubscribe());
@@ -123,12 +123,14 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  getTitle = () => {
+  getTitle = (): Observable<string> => {
     if (this.appGuid) {
-      return 'Redeploy';
-    } else {
-      return `Deploy ${this.selectedSourceType ? 'from ' + this.selectedSourceType.name : ''}`;
+      return of('Redeploy');
     }
-  }
+    return this.selectedSourceType$.pipe(
+      first(),
+      map(selectedSourceType => `Deploy ${selectedSourceType ? 'from ' + selectedSourceType.name : ''}`)
+    );
+  };
 }
 

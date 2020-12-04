@@ -75,6 +75,7 @@ const kubernetes: Routes = [{
     }
   ]
 },
+// TODO: RC these can be removed?
 {
   path: ':endpointId/namespaces/:namespaceName',
   component: KubernetesNamespaceComponent,

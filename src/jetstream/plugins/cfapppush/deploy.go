@@ -391,50 +391,50 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 	loggerURL := info.URL
 
 	if len(info.EndpointGUID) != 0 {
-		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
-		if isTokenFound != true {
-			err := fmt.Errorf("No token found for endpoint %s", info.EndpointGUID)
-			log.Errorf("%+v", err)
-			return StratosProject{}, tempDir, err
-		}
-
-		authTokenDecodedBytes, err := base64.StdEncoding.DecodeString(tokenRecord.AuthToken)
-		if err != nil {
-			return StratosProject{}, tempDir, errors.New("Failed to decode auth token")
-		}
-
 		parsedURL, err := url.Parse(info.URL)
 		if err != nil {
 			return StratosProject{}, tempDir, errors.New("Failed to parse SCM URL")
 		}
 
-		var (
-			username string
-			password string
-		)
-
-		switch info.SCM {
-		case SCM_TYPE_GITHUB:
-			// GitHub API uses basic HTTP auth, username and password are stored in the DB
-			pieces := strings.SplitN(string(authTokenDecodedBytes), ":", 2)
-			username, password = pieces[0], pieces[1]
-		case SCM_TYPE_GITLAB:
-			// GitLab API uses bearer token auth, the username is supplied by the frontend
-			username = info.Username
-			password = string(authTokenDecodedBytes)
-		default:
-			return StratosProject{}, tempDir, fmt.Errorf("Unknown SCM type '%s'", info.SCM)
-		}
-
-		if len(username) == 0 {
-			return StratosProject{}, tempDir, errors.New("Username is empty")
-		}
-
 		// mask the credentials for the logs
-		parsedURL.User = url.UserPassword("REDACTED", "REDACTED")
-		loggerURL = parsedURL.String()
 
-		parsedURL.User = url.UserPassword(username, password)
+		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
+		if !isTokenFound {
+			loggerURL = parsedURL.String()
+		} else {
+			var (
+				username string
+				password string
+			)
+
+			authTokenDecodedBytes, err := base64.StdEncoding.DecodeString(tokenRecord.AuthToken)
+			if err != nil {
+				return StratosProject{}, tempDir, errors.New("Failed to decode auth token")
+			}
+
+			switch info.SCM {
+			case SCM_TYPE_GITHUB:
+				// GitHub API uses token auth: username and password are stored in the token information
+				username = tokenRecord.RefreshToken
+				password = string(authTokenDecodedBytes)
+			case SCM_TYPE_GITLAB:
+				// GitLab API uses token auth: username and password are stored in the token information
+				username = tokenRecord.RefreshToken
+				password = string(authTokenDecodedBytes)
+			default:
+				return StratosProject{}, tempDir, fmt.Errorf("Unknown SCM type '%s'", info.SCM)
+			}
+
+			if len(username) == 0 {
+				return StratosProject{}, tempDir, errors.New("Username is empty")
+			}
+
+			parsedURL.User = url.UserPassword("REDACTED", "REDACTED")
+			loggerURL = parsedURL.String()
+
+			parsedURL.User = url.UserPassword(username, password)
+		}
+
 		info.URL = parsedURL.String()
 	}
 
