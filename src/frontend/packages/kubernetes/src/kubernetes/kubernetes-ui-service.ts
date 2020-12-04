@@ -15,7 +15,7 @@ class ConfigHolder<T = any> {
     this.configs[name] = config;
   }
 
-  get<Y= any>(name: string): Y {
+  get<Y = any>(name: string): Y {
     return name ? this.configs[name] : undefined;
   }
 }

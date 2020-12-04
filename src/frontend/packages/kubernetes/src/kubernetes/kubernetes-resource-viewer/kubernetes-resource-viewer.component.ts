@@ -17,10 +17,12 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
+import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { KubeResourceActionBuilders } from '../store/action-builders/kube-resource.action-builder';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
 import { SidePanelService } from './../../../../core/src/shared/services/side-panel.service';
@@ -105,7 +107,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   createCustomComponent() {
     this.removeCustomComponent();
-    if (this.component &&  this.customComponentContainer) {
+    if (this.component && this.customComponentContainer) {
       const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
       this.componentRef = this.customComponentContainer.createComponent(factory);
       this.componentRef.instance.setProps(this.data);
@@ -243,7 +245,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   // Warn about deletion and then delete the resource if confirmed
   public deleteWarn() {
-    const defn = this.data.definition;
+    const defn = this.data.definition as KubeResourceEntityDefinition;
     this.sidePanelService.hide();
     const confirmation = new ConfirmationDialogConfig(
       `Delete ${defn.label}`,
@@ -254,7 +256,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     this.confirmDialog.openWithCancel(confirmation,
       () => {
         // TODO: Subscribe only until done
-        kubeEntityCatalog[defn.kubeCatalogEntity].api.deleteResource(
+        const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
+          StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
+        catalogEntity.api.deleteResource(
           this.data.resource.metadata.name,
           this.data.endpointId,
           this.data.resource.metadata.namespace

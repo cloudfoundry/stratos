@@ -180,27 +180,22 @@ class KubeResourceEntityHelper {
       defn.apiNamespaced = true;
     }
 
+    const schema = kubernetesEntityFactory(defn.type);
     const d: IStratosEntityDefinition = {
       ...defn,
       endpoint: endpointDefinition,
-      schema: kubernetesEntityFactory(defn.type),
+      schema,
       iconFont: defn.iconFont || 'stratos-icons',
       labelPlural: defn.labelPlural || `${defn.label}s`
     };
 
-    let kubeCatalogEntity;
-    if (defn.getKubeCatalogEntity) {
-      kubeCatalogEntity = defn.getKubeCatalogEntity(d);
-    } else {
-      kubeCatalogEntity = new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
-        actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
-      });
-    }
+    const entity = defn.getKubeCatalogEntity ? defn.getKubeCatalogEntity(d) : new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
+      actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
+    });
 
-    if (defn.canFavorite) {
-      console.log(kubeCatalogEntity);
-      kubeCatalogEntity.builders.entityBuilder = {
-        getIsValid: (fav) => kubeCatalogEntity.api.get(fav.name, fav.kubeGuid).pipe(entityFetchedWithoutError()),
+    if (defn.canFavorite && defn.getIsValid) {
+      entity.builders.entityBuilder = {
+        getIsValid: defn.getIsValid,
         getMetadata: (resource: any) => {
           return {
             endpointId: resource.kubeGuid,
@@ -209,13 +204,14 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        // TODO - not always API name ?
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
-        getGuid: resource => resource.metadata.uid,
+        // TODO - not always API name
+        // getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`, // TODO: RC
+        getGuid: resource => schema.getId(resource),
       };
     }
 
-    return kubeCatalogEntity;
+    return entity;
   }
 }
 
@@ -351,6 +347,7 @@ export class KubeEntityCatalog {
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
+      getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.metadata.name, favorite.endpointId).pipe(entityFetchedWithoutError()),
       listColumns: [
         {
           header: 'Status',
