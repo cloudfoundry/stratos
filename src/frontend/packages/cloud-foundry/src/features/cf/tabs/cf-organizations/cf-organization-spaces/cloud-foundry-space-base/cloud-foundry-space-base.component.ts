@@ -17,7 +17,6 @@ import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/compo
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { spaceEntityType } from '../../../../../../cf-entity-types';

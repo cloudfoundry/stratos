@@ -37,10 +37,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log('app-analysis-report-selector');
-    console.log(this.path);
     this.analyzers$ = this.analysisService.getByPath(this.endpoint, this.path, true).pipe(
-      tap(a => console.log(a)),
       map(reports => {
         const res = [];
         if (this.allowNone) {

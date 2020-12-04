@@ -15,7 +15,6 @@ import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/componen
 import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
-import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';

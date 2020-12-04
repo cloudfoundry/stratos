@@ -5,7 +5,6 @@ import { filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
-import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
