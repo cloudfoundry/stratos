@@ -18,8 +18,8 @@ import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
@@ -236,7 +236,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
       const canFav = this.userFavoriteManager.canFavoriteEntityType(entityDefn);
       if (canFav) {
-        this.favorite = this.userFavoriteManager.getFavoriteFromEntity(defn.type, KUBERNETES_ENDPOINT_TYPE, this.getEndpointId(item), item);
+        this.favorite = this.userFavoriteManager.getFavorite(item, defn.type, KUBERNETES_ENDPOINT_TYPE);
       }
     }
   }

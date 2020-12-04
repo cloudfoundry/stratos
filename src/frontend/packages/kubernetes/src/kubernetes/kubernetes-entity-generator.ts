@@ -20,7 +20,6 @@ import {
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../store/src/user-favorite-manager';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -189,16 +188,19 @@ class KubeResourceEntityHelper {
       labelPlural: defn.labelPlural || `${defn.label}s`
     };
 
+    let kubeCatalogEntity;
     if (defn.getKubeCatalogEntity) {
-      return defn.getKubeCatalogEntity(d);
+      kubeCatalogEntity = defn.getKubeCatalogEntity(d);
     } else {
-      return new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
+      kubeCatalogEntity = new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
         actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
       });
     }
+
     if (defn.canFavorite) {
-      kubeEntityCatalog[defn.kubeCatalogEntity].builders.entityBuilder = {
-        getIsValid: (fav) => kubeEntityCatalog[defn.kubeCatalogEntity].api.get(fav.name, fav.kubeGuid).pipe(entityFetchedWithoutError()),
+      console.log(kubeCatalogEntity);
+      kubeCatalogEntity.builders.entityBuilder = {
+        getIsValid: (fav) => kubeCatalogEntity.api.get(fav.name, fav.kubeGuid).pipe(entityFetchedWithoutError()),
         getMetadata: (resource: any) => {
           return {
             endpointId: resource.kubeGuid,
@@ -207,11 +209,13 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        // TODO - not always API name
+        // TODO - not always API name ?
         getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
         getGuid: resource => resource.metadata.uid,
       };
     }
+
+    return kubeCatalogEntity;
   }
 }
 
@@ -321,8 +325,6 @@ export class KubeEntityCatalog {
       endpointDef,
       favorite => `/kubernetes/${favorite.endpointId}`
     );
-        getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.name, favorite.kubeGuid).pipe(entityFetchedWithoutError()),
-
     this.statefulSet = this.generateStatefulSetsEntity(endpointDef);
     this.pod = KubeResourceEntityHelper.generate<KubernetesPod, KubePodActionBuilders>(endpointDef, {
       type: kubernetesPodsEntityType,
@@ -345,7 +347,7 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'namespaces',
       apiNamespaced: false,
-    canFavorite: true,
+      canFavorite: true,
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),

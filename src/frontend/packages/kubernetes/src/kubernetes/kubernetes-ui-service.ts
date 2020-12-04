@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Type } from '@angular/core';
 import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
-import { PreviewableComponent } from './../../../core/src/shared/previewable-component';
+import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
 
 interface KubernetesListConfig {
   [name: string]: ISimpleListConfig<any>;
 }
 
-class ConfigHolder<T> {
+class ConfigHolder<T = any> {
 
   private configs: T = {} as T;
 
@@ -23,7 +23,7 @@ class ConfigHolder<T> {
 
 // Holder for UI configurations - e.g. list configurations
 // This allows us to reference them by name and lazy-load the configs yet reference them
-// in an entity defintion that may not have been laz-loaded
+// in an entity defintion that may not have been lazy-loaded
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +34,6 @@ export class KubernetesUIConfigService {
   public listConfig = new ConfigHolder<ISimpleListConfig<any>>();
 
   // Side Panel Preview Resource components
-  public previewComponent = new ConfigHolder<PreviewableComponent>();
+  public previewComponent = new ConfigHolder<Type<PreviewableComponent>>();
 
 }
