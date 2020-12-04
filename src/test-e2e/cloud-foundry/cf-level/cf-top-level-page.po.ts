@@ -183,6 +183,7 @@ export class CfTopLevelPage extends CFPage {
 
   clickOnCard(orgName: string) {
     const list = new ListComponent();
+    list.header.clearFilters();
     list.cards.findCardByTitle(orgName).then((card) => {
       expect(card).toBeDefined();
       card.click();

@@ -16,11 +16,7 @@ import {
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import {
-  CfOrgSpaceDataService,
-  createCfOrgSpaceFilterConfig,
-  initCfOrgSpaceService,
-} from '../../../../data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfRoutesDataSource } from './cf-routes-data-source';
 import { ListCfRoute } from './cf-routes-data-source-base';
 import { CfRoutesListConfigBase } from './cf-routes-list-config-base';
@@ -76,10 +72,6 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
       createCfOrgSpaceFilterConfig('org', 'Organization', cfOrgSpaceService.org),
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
-    initCfOrgSpaceService(store, cfOrgSpaceService,
-      this.dataSource.masterAction.entityType,
-      this.dataSource.masterAction.paginationKey).subscribe();
-    cfOrgSpaceService.cf.select.next(cfService.cfGuid);
 
     this.getInitialised = () => combineLatest(
       cfOrgSpaceService.cf.list$,
@@ -89,5 +81,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
       map(loading => !loading),
       startWith(true)
     );
+
+    cfOrgSpaceService.cf.select.next(cfService.cfGuid);
   }
 }
