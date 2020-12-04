@@ -47,11 +47,7 @@ export class SnackBarService {
   }
 
   private trackSnackBar(snackBar: MatSnackBarRef<SimpleSnackBar>) {
-    snackBar.afterOpened().pipe(first()).subscribe(() => {
-      this.snackBars.push(snackBar);
-    });
-    snackBar.afterDismissed().pipe(first()).subscribe(() => {
-      this.snackBars.shift();
-    });
+    this.snackBars.push(snackBar);
+    snackBar.afterDismissed().pipe(first()).subscribe(() => this.snackBars.shift());
   }
 }
