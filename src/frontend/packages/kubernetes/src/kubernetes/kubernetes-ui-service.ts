@@ -3,6 +3,7 @@ import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/
 
 import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
 
+// TODO: RC remove?
 interface KubernetesListConfig {
   [name: string]: ISimpleListConfig<any>;
 }
