@@ -15,7 +15,7 @@ export interface CardMetadata {
 }
 
 export interface TableData {
-  [columnHeader: string]: string
+  [columnHeader: string]: string;
 }
 
 // Page Object for the List Table View
@@ -378,6 +378,14 @@ export class ListHeaderComponent extends Component {
 
   getIconButton(iconText: string): ElementFinder {
     return this.getLeftHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
+  }
+
+  clearFilters(): promise.Promise<any> {
+    return this.getClearButton().click();
+  }
+
+  getClearButton() {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'highlight_off'));
   }
 
 }
