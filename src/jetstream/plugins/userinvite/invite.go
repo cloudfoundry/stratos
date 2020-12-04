@@ -248,7 +248,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 	req.Header.Set("Authorization", "bearer "+token.AuthToken)
 	req.Header.Set("Accept", "application/json")
 
-	httpClient := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation)
+	httpClient := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)

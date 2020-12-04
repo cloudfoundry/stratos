@@ -38,7 +38,7 @@ func (m *Monocular) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, u
 }
 
 // Info checks the endpoint type and fetches any metadata
-func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Helm Repository Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -51,7 +51,7 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces
 	}
 
 	// Just check that we can fetch index.yaml
-	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	res, err := httpClient.Get(apiEndpoint + "/index.yaml")
 	if err != nil {
 		// This should ultimately catch 503 cert errors

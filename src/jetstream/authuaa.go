@@ -370,7 +370,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	req.SetBasicAuth(url.QueryEscape(client), url.QueryEscape(clientSecret))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
-	var h = p.GetHttpClientForRequest(req, skipSSLValidation)
+	var h = p.GetHttpClientForRequest(req, skipSSLValidation, "")
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)

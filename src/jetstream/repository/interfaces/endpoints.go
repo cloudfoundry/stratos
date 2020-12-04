@@ -5,7 +5,7 @@ import (
 )
 
 type EndpointPlugin interface {
-	Info(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
+	Info(apiEndpoint string, skipSSLValidation bool, caCert string) (CNSIRecord, interface{}, error)
 	GetType() string
 	Register(echoContext echo.Context) error
 	Connect(echoContext echo.Context, cnsiRecord CNSIRecord, userId string) (*TokenRecord, bool, error)

@@ -245,7 +245,7 @@ func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error)
 // download a file from the given url and save to the file path
 func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	// Get the data
-	httpClient := m.portalProxy.GetHttpClient(false)
+	httpClient := m.portalProxy.GetHttpClient(false, "")
 	resp, err := httpClient.Get(url)
 	if err != nil {
 		return "", err

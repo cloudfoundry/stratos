@@ -107,7 +107,7 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 	return tr, false, nil
 }
 
-func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 	var dummy interface{}
 	var newCNSI interfaces.CNSIRecord
 

@@ -13,8 +13,12 @@
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
   </mat-form-field>
-  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint
-  </mat-checkbox>
+  <mat-checkbox [disabled]="showCACertField" mmatInput name="skipSll" #skipSllField="ngModel" ngModel>Skip SSL validation for the endpoint</mat-checkbox>
+  <mat-checkbox matInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</mat-checkbox>
+  <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
+    <span class="create-endpoint__cacert-title">Specify CA Certificate:</span>
+    <textarea rows="10" class="create-endpoint__cacert" matInput #caCertField="ngModel" ngModel name="caCert"></textarea>
+  </div>
   <div *ngIf="showAdvancedFields" class="create-endpoint__section">
     <mat-checkbox matInput (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
     <div [ngClass]="{'create-endpoint__shown': showAdvancedOptions}" class="create-endpoint__advanced">

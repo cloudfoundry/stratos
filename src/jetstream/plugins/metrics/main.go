@@ -180,7 +180,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	}
 	m.addAuth(req, auth)
 
-	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
+	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
 	res, err := h.Do(req)
 	// Error performing the request?
 	if err != nil {
@@ -314,7 +314,7 @@ func (m *MetricsSpecification) Init() error {
 	return nil
 }
 
-func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Metrics Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -326,7 +326,7 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 		return newCNSI, nil, err
 	}
 
-	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	resp, err := httpClient.Get(apiEndpoint)
 	if err != nil {
 		return newCNSI, nil, err

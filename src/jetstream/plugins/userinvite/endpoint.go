@@ -25,7 +25,7 @@ func (invite *UserInvite) Connect(echoContext echo.Context, cnsiRecord interface
 }
 
 // Info is not implemented
-func (invite *UserInvite) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (invite *UserInvite) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 	return interfaces.CNSIRecord{}, nil, errors.New("Not implemented")
 }
 

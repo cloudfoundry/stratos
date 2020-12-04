@@ -193,7 +193,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	}
 }
 
-func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 
 	log.Debug("Kubernetes Info")
 	var v2InfoResponse interfaces.V2Info
@@ -207,7 +207,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	}
 
 	log.Debug("Request Kube API Versions")
-	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	res, err := httpClient.Get(apiEndpoint + "/api")
 	if err != nil {
 		// This should ultimately catch 503 cert errors
@@ -279,7 +279,7 @@ func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
 	url := ec.QueryParam("url")
 
 	log.Debug("Request Kube API Versions")
-	var httpClient = c.portalProxy.GetHttpClient(false)
+	var httpClient = c.portalProxy.GetHttpClient(false, "")
 	_, err := httpClient.Get(url + "/api")
 	var response struct {
 		Status   int

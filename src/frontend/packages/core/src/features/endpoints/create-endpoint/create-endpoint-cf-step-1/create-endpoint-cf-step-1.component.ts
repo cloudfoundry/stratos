@@ -43,6 +43,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   @ViewChild('clientIDField') clientIDField: NgModel;
   @ViewChild('clientSecretField') clientSecretField: NgModel;
 
+  // CA Cert
+  @ViewChild('caCertField') caCertField: NgModel;
+
   urlValidation: string;
 
   showAdvancedFields = false;
@@ -52,7 +55,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpoint: StratosCatalogEndpointEntity;
   show = false;
 
+  showCACertField = false;
   showAdvancedOptions = false;
+  lastSkipSSLValue = false;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -76,6 +81,16 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   onNext: StepOnNextFunction = () => {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
+
+    let sslAllow = this.ssoAllowedField ? !!this.ssoAllowedField.value : false;
+
+    // SSL Setttings
+    if (this.showCACertField) {
+      sslAllow = false;
+    }
+
+    console.log(this.caCertField);
+
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
@@ -84,7 +99,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       !!this.skipSllField.value,
       this.clientIDField ? this.clientIDField.value : '',
       this.clientSecretField ? this.clientSecretField.value : '',
-      this.ssoAllowedField ? !!this.ssoAllowedField.value : false,
+      sslAllow,
+      this.caCertField.value,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -134,5 +150,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
+  }
+
+  toggleCACertField() {
+    this.showCACertField = !this.showCACertField;
+    if (this.showCACertField) {
+      this.lastSkipSSLValue = this.skipSllField.value;
+      this.skipSllField.reset(false);
+    } else {
+      this.skipSllField.reset(this.lastSkipSSLValue);
+    }
   }
 }

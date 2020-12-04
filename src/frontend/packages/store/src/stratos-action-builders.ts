@@ -60,6 +60,7 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
     clientID?: string,
     clientSecret?: string,
     ssoAllowed?: boolean,
+    caCert?: string,
   ) => RegisterEndpoint;
   update: (
     guid: string,
@@ -73,6 +74,7 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
       clientID: string,
       clientSecret: string,
       allowSSO: boolean,
+      caCert?: string,
     }
   ) => UpdateEndpoint;
 }
@@ -104,6 +106,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     clientID?: string,
     clientSecret?: string,
     ssoAllowed?: boolean,
+    caCert?: string,
   ) => new RegisterEndpoint(
     endpointType,
     endpointSubType,
@@ -113,6 +116,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     clientID,
     clientSecret,
     ssoAllowed,
+    caCert,
   ),
   update: (
     guid: string,
@@ -126,6 +130,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
       clientID: string,
       clientSecret: string,
       allowSSO: boolean,
+      caCert?: string,
     }
   ) => new UpdateEndpoint(
     args.endpointType,
@@ -135,7 +140,8 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     args.setClientInfo,
     args.clientID,
     args.clientSecret,
-    args.allowSSO
+    args.allowSSO,
+    args.caCert,
   ),
 };
 

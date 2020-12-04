@@ -21,7 +21,7 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 		return err
 	}
 
-	_, endpointInfo, err := cfEndpointSpec.Info(apiEndpoint, skipSSLValidation)
+	_, endpointInfo, err := cfEndpointSpec.Info(apiEndpoint, skipSSLValidation, c.config.CACert)
 	if err != nil {
 		return err
 	}

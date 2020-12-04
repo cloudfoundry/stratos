@@ -30,7 +30,7 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	}
 
 	// Read the index.html file from the repository
-	httpClient := m.portalProxy.GetHttpClient(false)
+	httpClient := m.portalProxy.GetHttpClient(false, "")
 	resp, err := httpClient.Get(downloadURL)
 	if err != nil {
 		return fmt.Errorf("Could not download Helm Repository Index: %s", err)

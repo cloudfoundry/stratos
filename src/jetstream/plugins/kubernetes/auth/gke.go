@@ -171,7 +171,7 @@ func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSe
 	tokenInfo := interfaces.UAAResponse{}
 
 	// Go and get a new access token
-	httpClient := c.portalProxy.GetHttpClient(skipSSLValidation)
+	httpClient := c.portalProxy.GetHttpClient(skipSSLValidation, "")
 	body := fmt.Sprintf("client_secret=%s&refresh_token=%s&client_id=%s&grant_type=refresh_token", url.QueryEscape(clientSecret), url.QueryEscape(refreshToken), url.QueryEscape(clientID))
 	resp, err := httpClient.Post(googleOAuthEndpoint, "application/x-www-form-urlencoded", strings.NewReader(body))
 	if err != nil {

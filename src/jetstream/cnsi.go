@@ -69,7 +69,9 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, subType, fetchInfo)
+	caCert := params.CACert
+
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, ssoAllowed, subType, caCert, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -78,7 +80,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, caCert string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -109,7 +111,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		)
 	}
 
-	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation)
+	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation, caCert)
 	if err != nil {
 		if ok, detail := isSSLRelatedError(err); ok {
 			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -136,6 +138,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.ClientSecret = clientSecret
 	newCNSI.SSOAllowed = ssoAllowed
 	newCNSI.SubType = subType
+	newCNSI.CACert = caCert
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -629,7 +632,7 @@ func (p *portalProxy) updateEndpoint(ec echo.Context) error {
 					if err != nil {
 						return fmt.Errorf("Can not get endpoint type for %s: '%v'", endpoint.CNSIType, err)
 					}
-					_, _, err = plugin.Info(endpoint.APIEndpoint.String(), endpoint.SkipSSLValidation)
+					_, _, err = plugin.Info(endpoint.APIEndpoint.String(), endpoint.SkipSSLValidation, endpoint.CACert)
 					if err != nil {
 						if ok, detail := isSSLRelatedError(err); ok {
 							return interfaces.NewHTTPShadowError(
