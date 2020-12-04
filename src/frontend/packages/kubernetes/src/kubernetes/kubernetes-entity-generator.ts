@@ -226,8 +226,6 @@ export class KubeEntityCatalog {
   public role: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public job: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
 
-  private workloadEntities: StratosBaseCatalogEntity[];
-
   constructor() {
     const endpointDef: StratosEndpointExtensionDefinition = {
       type: KUBERNETES_ENDPOINT_TYPE,
@@ -328,7 +326,6 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'namespaces',
       apiNamespaced: false,
-      hidden: true,
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
@@ -487,32 +484,12 @@ export class KubeEntityCatalog {
       apiName: 'jobs',
     });
 
-    this.workloadEntities = generateWorkloadsEntities(endpointDef);
   }
 
   public allKubeEntities(): StratosBaseCatalogEntity[] {
     return [
-      this.endpoint,
-      this.statefulSet,
-      this.pod,
-      this.deployment,
-      this.node,
-      this.namespace,
-      this.service,
-      this.dashboard,
-      this.analysisReport,
-      this.configMap,
-      this.metrics,
-      this.secrets,
-      this.pvc,
-      this.storage,
-      this.pv,
-      this.replicaSet,
-      this.clusterRole,
-      this.serviceAccount,
-      this.role,
-      this.job,
-      ...this.workloadEntities
+      ...Object.getOwnPropertyNames(this).map(s => this[s]),
+      ...generateWorkloadsEntities(this.endpoint.definition)
     ];
   }
 

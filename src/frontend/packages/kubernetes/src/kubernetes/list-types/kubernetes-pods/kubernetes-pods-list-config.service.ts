@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
 import {
@@ -7,13 +5,7 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListConfig,
-  ISimpleListConfig,
-  ListViewTypes,
-} from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -23,7 +15,6 @@ import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers/kubernetes-pod-containers.component';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
-import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
 export abstract class BaseKubernetesPodsListConfigService implements ISimpleListConfig<KubernetesPod> {
 
@@ -138,23 +129,6 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getMultiFiltersConfigs = () => [];
-}
-
-// TODO: RC this isn't used now?
-@Injectable()
-export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
-  private podsDataSource: KubernetesPodsDataSource;
-
-  getDataSource = () => this.podsDataSource;
-
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-  ) {
-    super([]);
-    this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
-  }
-
 }
 
 export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {

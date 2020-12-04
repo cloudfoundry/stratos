@@ -6,7 +6,7 @@ export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
   get: (
     resourceName: string,
     kubeGuid: string,
-    extraArgs: { namespace: string; }
+    extraArgs: { namespace: string, }
   ) => GetKubernetesResource;
   getMultiple: (
     kubeGuid: string,

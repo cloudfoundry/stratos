@@ -83,7 +83,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     this.createProvider(catalogEntity);
 
     // Watch for namespace changes
-    // TODO: RC k8sCurrentNamespace should go into dashboard state... so it's sticky
     this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
       map(data => data[this.kubeId.guid]),
       filter(data => !!data)
@@ -105,7 +104,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     this.isNamespacedView = !!catalogEntity.definition.apiNamespaced;
     let action;
     if (this.selectedNamespace && this.isNamespacedView) {
-      // TODO: RC There should be a nicer way of accessing these
       action = catalogEntity.actions.getInNamespace(this.kubeId.guid, this.selectedNamespace);
     } else {
       action = catalogEntity.actions.getMultiple(this.kubeId.guid);

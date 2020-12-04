@@ -78,7 +78,7 @@ const kubernetes: Routes = [{
 // TODO: RC these can be removed?
 {
   path: ':endpointId/namespaces/:namespaceName',
-  component: KubernetesNamespaceComponent,
+  component: KubernetesNamespaceComponent, // TODO: RC This component, and others in here, should be removed if route goes
   children: [
     {
       path: '',
