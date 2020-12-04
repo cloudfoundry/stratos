@@ -16,12 +16,12 @@ import { ListViewTypes } from '../../../../../core/src/shared/components/list/li
 import { entityCatalog } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
+import { KubernetesListConfigService } from '../../kubernetes-list-service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
 } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
-import { KubernetesUIConfigService } from '../../kubernetes-ui-service';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import {
@@ -83,7 +83,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     this.createProvider(catalogEntity);
 
     // Watch for namespace changes
-    // TODO: RC k8sCurrentNamespace should go into dashboard state... so it's sticky
     this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
       map(data => data[this.kubeId.guid]),
       filter(data => !!data)
@@ -105,7 +104,6 @@ export class KubernetesResourceListComponent implements OnDestroy {
     this.isNamespacedView = !!catalogEntity.definition.apiNamespaced;
     let action;
     if (this.selectedNamespace && this.isNamespacedView) {
-      // TODO: RC There should be a nicer way of accessing these
       action = catalogEntity.actions.getInNamespace(this.kubeId.guid, this.selectedNamespace);
     } else {
       action = catalogEntity.actions.getMultiple(this.kubeId.guid);
@@ -157,8 +155,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
               title: resource.metadata.name,
               resourceKind: definition.label,
               resource$: of(resource)
-            component,
-            definition,
+              component,
+              definition,
             }
           });
         }

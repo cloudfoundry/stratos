@@ -27,6 +27,7 @@ import {
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import { kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
+import { KubernetesListConfigService } from './kubernetes-list-service';
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';

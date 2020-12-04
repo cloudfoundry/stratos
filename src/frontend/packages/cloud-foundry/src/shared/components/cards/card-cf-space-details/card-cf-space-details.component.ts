@@ -33,7 +33,7 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
   goToOrgQuota() {
     this.quotaLinkSub = this.cfSpaceService.quotaLink$.subscribe(quotaLink => {
       this.store.dispatch(new RouterNav({ path: quotaLink }));
-      this.snackBarService.showReturn('You were switched to an organization', this.router.url, 'Return to space');
+      this.snackBarService.showWithLink('You were switched to an organization', this.router.url, 'Return to space');
     });
   }
 

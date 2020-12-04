@@ -15,7 +15,7 @@ import { generateStratosEntities } from '../../../../store/src/stratos-entity-ge
 import { createBasicStoreModule } from '../../../../store/testing/public-api';
 import { generateHelmEntities } from '../../helm/helm-entity-generator';
 import { HelmTestingModule } from '../../helm/helm-testing.module';
-import { generateKubernetesEntities } from '../kubernetes-entity-generator';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 
 @NgModule({
   imports: [{
@@ -27,7 +27,7 @@ import { generateKubernetesEntities } from '../kubernetes-entity-generator';
           testEntityCatalog.clear();
           return [
             ...generateStratosEntities(),
-            ...generateKubernetesEntities(),
+            ...kubeEntityCatalog.allKubeEntities(),
             ...generateHelmEntities(),
           ];
         }

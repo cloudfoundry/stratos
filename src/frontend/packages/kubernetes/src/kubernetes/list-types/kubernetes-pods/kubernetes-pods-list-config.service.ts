@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 
 import {
@@ -12,8 +10,6 @@ import {
   ISimpleListConfig,
   ListViewTypes,
 } from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -25,7 +21,6 @@ import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType } from './../../kubernetes-entity-factory';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers/kubernetes-pod-containers.component';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
-import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
 export abstract class BaseKubernetesPodsListConfigService implements ISimpleListConfig<KubernetesPod> {
 
@@ -143,21 +138,10 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
   getMultiFiltersConfigs = () => [];
 }
 
-// TODO: RC this isn't used now?
-@Injectable()
-export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
-  private podsDataSource: KubernetesPodsDataSource;
-
-  getDataSource = () => this.podsDataSource;
-
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-  ) {
+export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
+  constructor() {
     super([]);
-    this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
   }
-
 }
 
 export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
