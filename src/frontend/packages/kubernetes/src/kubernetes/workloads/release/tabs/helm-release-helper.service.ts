@@ -5,7 +5,7 @@ import { filter, map } from 'rxjs/operators';
 import { helmEntityCatalog } from '../../../../helm/helm-entity-catalog';
 import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
 import { ChartMetadata } from '../../../../helm/store/helm.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
 import {

@@ -7,7 +7,7 @@ import { catchError, map, share, switchMap } from 'rxjs/operators';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
 import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
 import { KubernetesPod, KubeService } from '../../../store/kube.types';
 import { KubePaginationAction } from '../../../store/kubernetes.actions';

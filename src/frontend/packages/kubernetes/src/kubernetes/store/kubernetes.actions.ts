@@ -1,4 +1,5 @@
 import { SortDirection } from '@angular/material/sort';
+import { Action } from '@ngrx/store';
 import { getActions } from 'frontend/packages/store/src/actions/action.helper';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 
@@ -17,7 +18,7 @@ import {
   kubernetesServicesEntityType,
   kubernetesStatefulSetsEntityType,
 } from '../kubernetes-entity-factory';
-import { getGuidFromKubeDashboard, getGuidFromKubeNamespace, getGuidFromKubeNode, getGuidFromKubePod } from './kube.getIds';
+import { getGuidFromKubeNamespace, getGuidFromKubeNode, getGuidFromKubePod } from './kube.getIds';
 
 export const GET_RELEASE_POD_INFO = '[KUBERNETES Endpoint] Get Release Pods Info';
 export const GET_RELEASE_POD_INFO_SUCCESS = '[KUBERNETES Endpoint] Get Release Pods Info Success';
@@ -81,11 +82,18 @@ export const GET_KUBE_DASHBOARD = '[KUBERNETES Endpoint] Get K8S Dashboard Info'
 export const GET_KUBE_DASHBOARD_SUCCESS = '[KUBERNETES Endpoint] Get Dashboard Success';
 export const GET_KUBE_DASHBOARD_FAILURE = '[KUBERNETES Endpoint] Get Dashboard Failure';
 
+export const SET_CURRENT_NAMESPACE = '[Kubernetes] Set Current Namespace';
+
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,
   'order-direction-field': 'name'
 };
 
+// Set the current namespace fo the given endpoint
+export class SetCurrentNamespaceAction implements Action {
+  constructor(public endpoint, public namespace: string) { }
+  type = SET_CURRENT_NAMESPACE;
+}
 
 export interface KubeAction extends EntityRequestAction {
   kubeGuid: string;
@@ -325,7 +333,7 @@ export class GeKubernetesDeployments implements KubePaginationAction {
 
 export class GetKubernetesDashboard implements KubeSingleEntityAction {
   constructor(public kubeGuid: string) {
-    this.guid = getGuidFromKubeDashboard(kubeGuid);
+    this.guid = kubeGuid;
   }
   type = GET_KUBE_DASHBOARD;
   entityType = kubernetesDashboardEntityType;

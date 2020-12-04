@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/src/public-api';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesPod } from '../../store/kube.types';
 

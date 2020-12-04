@@ -10,7 +10,7 @@ import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-moni
 import { AppState } from '../../../../store/src/public-api';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';

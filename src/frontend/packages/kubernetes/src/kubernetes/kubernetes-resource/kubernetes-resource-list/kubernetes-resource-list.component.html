@@ -1,0 +1,15 @@
+<app-page-sub-nav>
+  <div class="sub-nav-menu-button">
+    <mat-menu #appMenu="matMenu" class="menu">
+      <button (click)="select('*')" mat-menu-item>All namespaces</button>
+      <button *ngFor="let ns of namespaces$ | async" (click)="select(ns)" mat-menu-item>{{ ns }}</button>
+    </mat-menu>
+    <button mat-button [matMenuTriggerFor]="appMenu" class="sub-nav-menu-button__btn" [ngClass]="{'sub-nav-menu-button__not-allowed': !isNamespacedView}">
+      <mat-icon *ngIf="selectedNamespace" fontSet="stratos-icons" class="sub-nav-menu-button__icon">namespace</mat-icon>
+      <span class="sub-nav-menu-button__label">{{ selectedNamespace || 'All namespaces'}}</span>
+      <mat-icon class="sub-nav-menu-button__arrow">arrow_drop_down</mat-icon>
+    </button>
+  </div>
+</app-page-sub-nav>
+
+<app-list-view [config]="provider"></app-list-view>

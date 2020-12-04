@@ -14,10 +14,7 @@ export class HelmReleasePodsListConfig extends BaseKubernetesPodsListConfigServi
     store: Store<AppState>,
     helmReleaseHelper: HelmReleaseHelperService
   ) {
-    super(
-      helmReleaseHelper.endpointGuid,
-      [BaseKubernetesPodsListConfigService.namespaceColumnId]
-    );
+    super([BaseKubernetesPodsListConfigService.namespaceColumnId]);
     this.podsDataSource = new HelmReleasePodsDataSource(store, this, helmReleaseHelper.endpointGuid, helmReleaseHelper.releaseTitle);
   }
 

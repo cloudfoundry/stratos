@@ -3,7 +3,7 @@ import { ListDataSource } from 'frontend/packages/core/src/shared/components/lis
 import { IListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 import { AppState } from 'frontend/packages/store/src/app-state';
 
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesPod } from '../../store/kube.types';
 
 

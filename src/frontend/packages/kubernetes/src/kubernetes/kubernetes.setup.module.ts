@@ -40,16 +40,16 @@ import {
 import {
   KubeConfigTableUserSelectComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
-import { kubeEntityCatalog } from './kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
-import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { kubeEntityCatalog } from './kubernetes-entity-generator';
+import { KubernetesListConfigService } from './kubernetes-list-service';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 
 @NgModule({
   imports: [
-    EntityCatalogModule.forFeature(generateKubernetesEntities),
+    EntityCatalogModule.forFeature(() => kubeEntityCatalog.allKubeEntities()),
     CoreModule,
     CommonModule,
     SharedModule,
@@ -74,6 +74,7 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
   providers: [
     BaseKubeGuid,
     KubernetesEndpointService,
+    KubernetesListConfigService,
   ],
   entryComponents: [
     KubernetesCertsAuthFormComponent,

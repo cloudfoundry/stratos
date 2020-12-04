@@ -15,7 +15,7 @@ import {
 import { generateStratosEntities } from '../../../store/src/stratos-entity-generator';
 import { createBasicStoreModule } from '../../../store/testing/public-api';
 import { HelmReleaseActivatedRouteMock, HelmReleaseGuidMock } from '../helm/helm-testing.module';
-import { generateKubernetesEntities } from './kubernetes-entity-generator';
+import { kubeEntityCatalog } from './kubernetes-entity-generator';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { HelmReleaseHelperService } from './workloads/release/tabs/helm-release-helper.service';
 
@@ -29,7 +29,7 @@ import { HelmReleaseHelperService } from './workloads/release/tabs/helm-release-
           testEntityCatalog.clear();
           return [
             ...generateStratosEntities(),
-            ...generateKubernetesEntities(),
+            ...kubeEntityCatalog.allKubeEntities(),
           ];
         }
       }

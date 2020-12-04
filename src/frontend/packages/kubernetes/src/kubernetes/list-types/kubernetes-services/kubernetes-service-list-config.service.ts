@@ -1,12 +1,11 @@
 import { of } from 'rxjs';
 
-import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import {
   TableCellSidePanelComponent,
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -17,7 +16,7 @@ import { createKubeAgeColumn } from '../kube-list.helper';
 import { KubernetesServicePortsComponent } from '../kubernetes-service-ports/kubernetes-service-ports.component';
 import { KubeServiceCardComponent } from './kubernetes-service-card/kubernetes-service-card.component';
 
-export abstract class BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
+export abstract class BaseKubernetesServicesListConfig implements ISimpleListConfig<KubeService> {
   columns: Array<ITableColumn<KubeService>> = [
     {
       columnId: 'name', headerCell: () => 'Name',
@@ -71,11 +70,15 @@ export abstract class BaseKubernetesServicesListConfig implements IListConfig<Ku
     filter: 'Filter by Name',
     noEntries: 'There are no services'
   };
-  getDataSource: () => ListDataSource<KubeService>;
-
   getGlobalActions = () => null;
   getMultiActions = () => [];
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getMultiFiltersConfigs = () => [];
+}
+
+export class KubernetesServicesListConfig extends BaseKubernetesServicesListConfig {
+  constructor() {
+    super();
+  }
 }

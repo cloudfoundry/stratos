@@ -14,7 +14,7 @@ import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-h
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../store/src/types/metric.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';

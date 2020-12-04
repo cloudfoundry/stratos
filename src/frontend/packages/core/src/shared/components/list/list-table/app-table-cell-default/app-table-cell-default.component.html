@@ -24,6 +24,6 @@
 </span>
 
 <ng-template let-value="value" #valueTemplate>
-  <span *ngIf="value">{{ value }}</span>
-  <span class="default-cell__no-value" *ngIf="!value">-</span>
+  <span *ngIf="value !== 'undefined' && value !== 'null'">{{ value }}</span>
+  <span class="default-cell__no-value" *ngIf="value === 'undefined' || value === 'null'">-</span>
 </ng-template>

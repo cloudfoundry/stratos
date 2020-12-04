@@ -126,6 +126,9 @@ export interface IListConfig<T> {
   customTimeInitialValue?: string;
 }
 
+// Simple list config does not need getDataSource
+export type ISimpleListConfig<T> = Omit<IListConfig<T>, 'getDataSource'>;
+
 export interface IListMultiFilterConfig {
   key: string;
   label: string;
