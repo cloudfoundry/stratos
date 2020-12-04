@@ -181,7 +181,6 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
-    this.list.header.getCardListViewToggleButton().click();
     this.list.isTableView().then(isTableView => {
       if (isTableView) {
         return this.list.header.getCardListViewToggleButton().click();
