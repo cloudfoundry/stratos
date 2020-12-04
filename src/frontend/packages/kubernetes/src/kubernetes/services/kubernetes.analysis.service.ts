@@ -128,7 +128,7 @@ export class KubernetesAnalysisService {
       } else {
         msg = `${type} analysis started for the Kubernetes cluster`;
       }
-      this.snackbarService.showReturn(msg, ['kubernetes', endpointID, 'analysis'], 'View', 5000);
+      this.snackbarService.showWithLink(msg, ['kubernetes', endpointID, 'analysis'], 'View', 5000);
       this.refresh();
     });
     return obs$;
