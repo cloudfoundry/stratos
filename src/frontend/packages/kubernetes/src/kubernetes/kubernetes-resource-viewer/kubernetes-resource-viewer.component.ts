@@ -20,7 +20,6 @@ import { PreviewableComponent } from '../../../../core/src/shared/previewable-co
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubeResourceActionBuilders } from '../store/action-builders/kube-resource.action-builder';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';

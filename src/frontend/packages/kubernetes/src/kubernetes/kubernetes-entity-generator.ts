@@ -258,7 +258,7 @@ export class KubeEntityCatalog {
         BaseEndpointAuth.UsernamePassword,
         kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN],
       ],
-      getEndpointIdFromEntity: (entity) => entity.kubeGuid,
+      getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
       urlValidationRegexString: urlValidationExpression,
       subTypes: [
