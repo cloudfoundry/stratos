@@ -19,6 +19,7 @@ import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { entityDeleted } from '../../../../store/src/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -258,17 +259,16 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     );
     this.confirmDialog.openWithCancel(confirmation,
       () => {
-        // TODO: Subscribe only until done
         const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
           StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
         catalogEntity.api.deleteResource(
           this.data.resource.metadata.name,
           this.data.endpointId,
           this.data.resource.metadata.namespace
-        ).subscribe(a => {
-          console.log('delete progress');
-          console.log(a);
-        });
+        ).pipe(
+          entityDeleted(),
+          first()
+        ).subscribe();
       },
       () => {
         this.sidePanelService.open();

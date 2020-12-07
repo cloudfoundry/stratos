@@ -407,7 +407,7 @@ export class KubernetesEffects {
             return res;
           }, base);
 
-        // // TODO: We only really support a single endpoint
+        // Can we de-paginate like this? (Note: We only really support a single endpoint)
         // Object.entries(allRes).forEach(([kubeId, res]) => {
         //   console.log(res);
         //   if (res.metadata.continue) {
@@ -506,9 +506,6 @@ export class KubernetesEffects {
     return request
       .pipe(
         mergeMap((response: T) => {
-
-          // TODO: What should happen here?
-
           const res = {
             entities: { [entityKey]: {} },
             result: []

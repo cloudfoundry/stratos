@@ -204,8 +204,6 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        // TODO - not always API name
-        // getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
         getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`, // TODO: RC
         getGuid: resource => schema.getId(resource),
       };
