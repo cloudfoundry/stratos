@@ -27,20 +27,12 @@ import {
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
 import { kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
-import { KubernetesListConfigService } from './kubernetes-list-service';
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
 import {
-  KubernetesNamespacePodsComponent,
-} from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
-import {
   KubernetesNamespacePreviewComponent,
 } from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
-import {
-  KubernetesNamespaceServicesComponent,
-} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
-import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import {
   KubernetesNodeMetricStatsCardComponent,
 } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
@@ -173,9 +165,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodeSimpleMetricComponent,
     ConditionCellComponent,
     KubernetesNamespaceLinkComponent,
-    KubernetesNamespaceComponent,
-    KubernetesNamespacePodsComponent,
-    KubernetesNamespaceServicesComponent,
     KubeNamespacePodCountComponent,
     NodePodCountComponent,
     KubernetesServicePortsComponent,
