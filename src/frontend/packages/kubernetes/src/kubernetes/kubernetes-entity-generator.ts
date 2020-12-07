@@ -204,7 +204,7 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`, // TODO: RC
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`,
         getGuid: resource => schema.getId(resource),
       };
     }
@@ -385,8 +385,6 @@ export class KubeEntityCatalog {
       ]
     });
     this.metrics = this.generateMetricEntity(endpointDef);
-
-
     this.secrets = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'secrets',
       icon: 'config_maps',
@@ -553,7 +551,6 @@ export class KubeEntityCatalog {
       apiVersion: '/apis/batch/v1',
       apiName: 'jobs',
     });
-
   }
 
   public allKubeEntities(): StratosBaseCatalogEntity[] {
@@ -624,8 +621,6 @@ export class KubeEntityCatalog {
       endpoint: endpointDefinition,
     });
   }
-
-
 }
 
 /**
