@@ -115,7 +115,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   ngAfterViewInit() {
     this.createCustomComponent();
-    this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef);
+    setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
   setProps(props: KubernetesResourceViewerConfig) {
