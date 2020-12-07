@@ -49,10 +49,17 @@ const routes: Routes = [
           { path: 'notes', component: HelmReleaseNotesTabComponent },
           { path: 'values', component: HelmReleaseValuesTabComponent },
           { path: 'history', component: HelmReleaseHistoryTabComponent },
-          { path: 'pods', component: HelmReleasePodsTabComponent },
-          { path: 'services', component: HelmReleaseServicesTabComponent },
+          { path: 'pods', component: HelmReleasePodsTabComponent }, // TODO: RC
+          { path: 'services', component: HelmReleaseServicesTabComponent }, // TODO: RC
           { path: 'graph', component: HelmReleaseResourceGraphComponent },
           { path: 'analysis', component: HelmReleaseAnalysisTabComponent },
+          {
+            path: 'resource/:resource',
+            loadChildren: () => import('../kubernetes-resource/generic-resource.module').then(m => m.KubernetesGenericResourceModule),
+            data: {
+              isWorkload: true
+            }
+          },
         ]
       },
     ]

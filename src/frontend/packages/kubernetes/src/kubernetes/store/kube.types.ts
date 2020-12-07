@@ -50,6 +50,7 @@ export interface KubeResourceEntityDefinition<
   apiVersion: string;
   apiName: string;
   apiNamespaced?: boolean;
+  apiWorkspaced?: boolean;
   label: string;
   labelPlural?: string;
   labelTab?: string;

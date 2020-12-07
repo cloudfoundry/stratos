@@ -9,7 +9,7 @@ import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../.
 import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { KubernetesPod, KubeService } from '../../../store/kube.types';
+import { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
 import { KubePaginationAction } from '../../../store/kubernetes.actions';
 import { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
@@ -95,19 +95,36 @@ export class HelmReleaseSocketService implements OnDestroy {
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
-          const svcs: KubeService[] = [];
+          const resources: { [type: string]: BasicKubeAPIResource[]; } = {};
+
           // Store ALL resources for the release
-          manifest.forEach(resource => {
-            if (resource.kind === 'Service' && prefix) {
-              svcs.push(resource);
-            }
-          });
-          if (svcs.length > 0) {
-            const releaseServicesAction = kubeEntityCatalog.service.actions.getInWorkload(
-              this.helmReleaseHelper.releaseTitle,
-              this.helmReleaseHelper.endpointGuid,
-            );
-            this.populateList(releaseServicesAction, svcs);
+          if (prefix) {
+            manifest.forEach(resource => {
+              if (this.isValidPushResource(resource.kind)) {
+                this.pushResource(resources, resource.kind, resource);
+              }
+            });
+
+            Object.entries(resources).forEach(([type, resourcesOfType]) => {
+              let action: KubePaginationAction;
+              switch (type) {
+                case 'Service':
+                  action = kubeEntityCatalog.service.actions.getInWorkload(
+                    this.helmReleaseHelper.releaseTitle,
+                    this.helmReleaseHelper.endpointGuid,
+                  );
+                  break;
+                default:
+                  const entityType = this.kubeToEntityType(type);
+                  action = kubeEntityCatalog[entityType].actions.getInWorkload(
+                    this.helmReleaseHelper.endpointGuid,
+                    this.helmReleaseHelper.namespace,
+                    this.helmReleaseHelper.releaseTitle
+                  );
+                  break;
+              }
+              this.populateList(action, resourcesOfType);
+            });
           }
 
           // const resources = { ...manifest };
@@ -127,6 +144,46 @@ export class HelmReleaseSocketService implements OnDestroy {
         }
       }
     });
+  }
+
+  private isValidPushResource(type: string): boolean {
+    return type === 'Service' ||
+      type === 'Job' ||
+      type === 'PersistentVolumeClaim' ||
+      type === 'ReplicaSet' ||
+      type === 'Role' ||
+      type === 'Secret' ||
+      type === 'ServiceAccount';
+  }
+
+  private kubeToEntityType(type: string): string {
+    console.log(type);
+    switch (type) {
+      case 'Service':
+        return 'service';
+      case 'Job':
+        return 'job';
+      case 'PersistentVolumeClaim':
+        return 'pvc';
+      case 'ReplicaSet':
+        return 'replicaSet';
+      case 'Role':
+        return 'role';
+      case 'Secret':
+        return 'secrets';
+      case 'ServiceAccount':
+        return 'serviceAccount';
+    }
+  }
+
+  private pushResource(
+    resources: { [type: string]: BasicKubeAPIResource[]; },
+    type: string,
+    resource: BasicKubeAPIResource) {
+    if (!resources[type]) {
+      resources[type] = [];
+    }
+    resources[type].push(resource);
   }
 
   public stop() {

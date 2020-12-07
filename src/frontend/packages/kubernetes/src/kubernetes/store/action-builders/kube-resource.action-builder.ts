@@ -1,5 +1,10 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { GetKubernetesResource, GetKubernetesResources, GetKubernetesResourcesInNamespace } from '../kube-resource.actions';
+import {
+  GetKubernetesResource,
+  GetKubernetesResources,
+  GetKubernetesResourcesInNamespace,
+  GetKubernetesResourcesInWorkload,
+} from '../kube-resource.actions';
 
 
 export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
@@ -16,6 +21,11 @@ export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
     kubeGuid: string,
     namespace: string
   ) => GetKubernetesResourcesInNamespace;
+  getInWorkload: (
+    kubeGuid: string,
+    namespace: string,
+    releaseTitle: string
+  ) => GetKubernetesResourcesInWorkload;
 }
 
 export function createKubeResourceActionBuilder(entityType: string): KubeResourceActionBuilders {
@@ -23,5 +33,7 @@ export function createKubeResourceActionBuilder(entityType: string): KubeResourc
     get: (resName: string, kubeGuid: string, { namespace }) => new GetKubernetesResource(entityType, resName, namespace, kubeGuid),
     getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesResources(entityType, kubeGuid),
     getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesResourcesInNamespace(entityType, kubeGuid, namespace),
+    getInWorkload: (kubeGuid: string, namespace: string, releaseTitle: string) =>
+      new GetKubernetesResourcesInWorkload(entityType, kubeGuid, namespace, releaseTitle),
   };
 }

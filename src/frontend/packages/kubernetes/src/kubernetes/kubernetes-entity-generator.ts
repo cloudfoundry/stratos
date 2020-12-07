@@ -375,6 +375,7 @@ export class KubeEntityCatalog {
       label: 'Secret',
       apiVersion: '/api/v1',
       apiName: 'secrets',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Data Keys',
@@ -389,6 +390,7 @@ export class KubeEntityCatalog {
       labelTab: 'PVCs',
       apiVersion: '/api/v1',
       apiName: 'persistentvolumeclaims',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Storage Class',
@@ -446,6 +448,7 @@ export class KubeEntityCatalog {
       label: 'Replica Set',
       apiVersion: '/apis/apps/v1',
       apiName: 'replicasets',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Replicas',
@@ -468,6 +471,7 @@ export class KubeEntityCatalog {
       label: 'Service Account',
       apiVersion: '/api/v1',
       apiName: 'serviceaccounts',
+      apiWorkspaced: true,
     });
     this.role = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'role',
@@ -475,6 +479,7 @@ export class KubeEntityCatalog {
       label: 'Role',
       apiVersion: '/apis/rbac.authorization.k8s.io/v1',
       apiName: 'roles',
+      apiWorkspaced: true,
     });
     this.job = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'job',
@@ -482,6 +487,7 @@ export class KubeEntityCatalog {
       label: 'Job',
       apiVersion: '/apis/batch/v1',
       apiName: 'jobs',
+      apiWorkspaced: true,
     });
 
   }
