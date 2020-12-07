@@ -60,3 +60,12 @@ form.stepper-form {
     max-width: 580px;
   }
 }
+
+.hide {
+  height: 0;
+  overflow: hidden;
+}
+
+.show {
+  height: auto;
+}

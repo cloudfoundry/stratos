@@ -82,15 +82,19 @@ const (
 	AuthTypeOIDC = "OIDC"
 	// AuthTypeHttpBasic means HTTP Basic auth
 	AuthTypeHttpBasic = "HttpBasic"
-	// AuthTypeBearer is authentication with an API token
+	// AuthTypeBearer is http header auth with bearer prefix
 	AuthTypeBearer = "Bearer"
+	// AuthTypeToken is http header auth with token prefix
+	AuthTypeToken = "Token"
 )
 
 const (
 	// AuthConnectTypeCreds means authenticate with username/password credentials
 	AuthConnectTypeCreds = "creds"
-	// AuthConnectTypeBearer is authentication with an API token
+	// AuthConnectTypeBearer is authentication with an API token  and a auth header prefix of 'bearer'
 	AuthConnectTypeBearer = "bearer"
+	// AuthConnectTypeToken is authentication with a token and a auth header prefix of 'token'
+	AuthConnectTypeToken = "token"
 	// AuthConnectTypeNone means no authentication
 	AuthConnectTypeNone = "none"
 )
@@ -226,10 +230,11 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview        bool   `json:"enableTechPreview"`
-		ListMaxSize        int64  `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed bool   `json:"listAllowLoadMaxed,omitempty"`
-		APIKeysEnabled     string `json:"APIKeysEnabled"`
+		TechPreview               bool   `json:"enableTechPreview"`
+		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled            string `json:"APIKeysEnabled"`
+		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
 	} `json:"config"`
 }
 
@@ -333,21 +338,20 @@ func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
 
 // CNSIRequest
 type CNSIRequest struct {
-	GUID     string `json:"-"`
-	UserGUID string `json:"-"`
-
-	Method      string      `json:"-"`
-	Body        []byte      `json:"-"`
-	Header      http.Header `json:"-"`
-	URL         *url.URL    `json:"-"`
-	StatusCode  int         `json:"statusCode"`
-	Status      string      `json:"status"`
-	PassThrough bool        `json:"-"`
-	LongRunning bool        `json:"-"`
-
-	Response     []byte `json:"-"`
-	Error        error  `json:"-"`
-	ResponseGUID string `json:"-"`
+	GUID         string       `json:"-"`
+	UserGUID     string       `json:"-"`
+	Method       string       `json:"-"`
+	Body         []byte       `json:"-"`
+	Header       http.Header  `json:"-"`
+	URL          *url.URL     `json:"-"`
+	StatusCode   int          `json:"statusCode"`
+	Status       string       `json:"status"`
+	PassThrough  bool         `json:"-"`
+	LongRunning  bool         `json:"-"`
+	Response     []byte       `json:"-"`
+	Error        error        `json:"-"`
+	ResponseGUID string       `json:"-"`
+	Token        *TokenRecord `json:"-"` // Optional Token record to use instead of looking up
 }
 
 type PortalConfig struct {
@@ -391,6 +395,7 @@ type PortalConfig struct {
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
+	HomeViewShowFavoritesOnly          bool                      `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

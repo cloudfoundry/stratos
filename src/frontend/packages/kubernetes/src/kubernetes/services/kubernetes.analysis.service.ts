@@ -8,7 +8,7 @@ import { SnackBarService } from '../../../../core/src/shared/services/snackbar.s
 import { ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../store/src/app-state';
 import { ListActionState, RequestInfoState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { GetAnalysisReports } from '../store/analysis.actions';
 import { AnalysisReport } from '../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../workloads/store/workloads-entity-factory';
@@ -128,7 +128,7 @@ export class KubernetesAnalysisService {
       } else {
         msg = `${type} analysis started for the Kubernetes cluster`;
       }
-      this.snackbarService.showReturn(msg, ['kubernetes', endpointID, 'analysis'], 'View', 5000);
+      this.snackbarService.showWithLink(msg, ['kubernetes', endpointID, 'analysis'], 'View', 5000);
       this.refresh();
     });
     return obs$;

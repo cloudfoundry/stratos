@@ -11,7 +11,7 @@ import { EndpointModel } from '../../../../store/src/public-api';
 import { PaginationObservables } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../store/src/types/endpoint.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {
   KubernetesDeployment,

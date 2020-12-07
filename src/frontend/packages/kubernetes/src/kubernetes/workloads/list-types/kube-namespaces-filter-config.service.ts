@@ -18,8 +18,8 @@ import {
 } from 'rxjs/operators';
 
 import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
 
 export interface KubernetesNamespacesFilterItem<T = any> {

@@ -134,7 +134,6 @@ export class EndpointHealthCheck {
 export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySchema> extends IStratosBaseEntityDefinition<T> {
   readonly logoUrl: string;
   readonly tokenSharing?: boolean;
-  readonly urlValidation?: boolean;
   readonly unConnectable?: boolean;
   /**
    * How many endpoints of this type can be registered, 0 - many

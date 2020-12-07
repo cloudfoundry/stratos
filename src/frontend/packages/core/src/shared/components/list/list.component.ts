@@ -3,12 +3,14 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
   Optional,
+  Output,
   SimpleChanges,
   TemplateRef,
   ViewChild,
@@ -49,12 +51,18 @@ import {
   ListView,
   SetListViewAction,
 } from '../../../../../store/src/actions/list.actions';
-import { SetClientFilterKey, SetPage } from '../../../../../store/src/actions/pagination.actions';
+import {
+  ResetPagination,
+  ResetPaginationSortFilter,
+  SetClientFilterKey,
+  SetPage,
+} from '../../../../../store/src/actions/pagination.actions';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
+import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,
@@ -112,7 +120,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
-  initialEntitySelection$: Observable<number>;
+
+  entitySelectValue = new BehaviorSubject(undefined);
+  entitySelectValue$: Observable<number> = this.entitySelectValue.asObservable();
+
   pPaginator: MatPaginator;
   private filterString: string;
 
@@ -156,12 +167,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       })).subscribe();
   }
 
+  @Output() initialised = new EventEmitter<boolean>();
+  private componentInitialised = false;
+
   private initialPageEvent: PageEvent;
   private paginatorSettings: {
     pageSizeOptions: number[],
     pageSize: number,
     pageIndex: number,
-    length: number
+    length: number;
   } = {
       pageSizeOptions: null,
       pageSize: null,
@@ -206,8 +220,6 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   showProgressBar$: Observable<boolean>;
   isRefreshing$: Observable<boolean>;
 
-
-
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
@@ -219,6 +231,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   initialised$: Observable<boolean>;
 
   pendingActions: Map<Observable<ActionState>, Subscription> = new Map<Observable<ActionState>, Subscription>();
+
+  subs: Subscription[] = [];
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -289,10 +303,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     this.entitySelectConfig = this.dataSource.entitySelectConfig;
-    this.initialEntitySelection$ = this.dataSource.pagination$.pipe(
+
+    this.dataSource.pagination$.pipe(
       first(),
-      map(pag => pag.forcedLocalPage)
-    );
+    ).subscribe(pag => {
+      this.entitySelectValue.next(pag.forcedLocalPage);
+    });
+
+
     if (this.dataSource.rowsState) {
       this.dataSource.getRowState = this.getRowStateFromRowsState;
     } else if (!this.dataSource.getRowState) {
@@ -400,48 +418,60 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
 
-    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((paginationFilter: ListFilter) => {
-      this.filterString = paginationFilter.string;
+    const filterStoreToWidget = this.paginationController.filter$.pipe(
+      distinctUntilChanged(),
+      tap((paginationFilter: ListFilter) => {
+        this.filterString = paginationFilter.string;
 
-      const filterKey = paginationFilter.filterKey;
-      if (filterKey) {
-        this.filterSelected = this.filterColumns.find(filterConfig => {
-          return filterConfig.key === filterKey;
-        });
-      } else if (this.filterColumns) {
-        this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
-        if (this.filterSelected) {
-          this.updateListFilter(this.filterSelected);
+        const filterKey = paginationFilter.filterKey;
+        if (filterKey) {
+          this.filterSelected = this.filterColumns.find(filterConfig => {
+            return filterConfig.key === filterKey;
+          });
+        } else if (this.filterColumns) {
+          this.filterSelected = this.filterColumns.find(filterConfig => filterConfig.default);
+          if (this.filterSelected) {
+            this.updateListFilter(this.filterSelected);
+          }
         }
-      }
 
-      // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
-      // downs (change org to one with one space results in that space being selected)
-      Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
-        filterManager.applyValue(paginationFilter.items);
-      });
-    }));
-
-    // Multi filters (e.g. cf/org/space)
-    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
-    // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
-    this.multiFilterWidgetObservables = new Array<Subscription>();
-    filterStoreToWidget.pipe(
-      first(),
-      tap(() => {
+        // Pipe store values to filter managers. This ensures any changes such as automatically selected orgs/spaces are shown in the drop
+        // downs (change org to one with one space results in that space being selected)
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
-          // The first filter will be hidden if there's only one filter option.
-          // To ensure subsequent filters behave correctly automatically select it
+          // If this is NOT the first... and we have the value to apply
+          if (index !== 0 || filterManager.hasValue(paginationFilter.items)) {
+            filterManager.applyValue(paginationFilter.items);
+            return;
+          }
+
+          // If we're the first drop down filter and there are other drop downs... select the first one
           if (index === 0 && this.multiFilterManagers.length > 1) {
             filterManager.filterItems$.pipe(
               first()
             ).subscribe(list => {
               if (list && list.length === 1) {
                 filterManager.selectItem(list[0].value);
+              } else {
+                filterManager.applyValue(paginationFilter.items);
               }
             });
+            return;
           }
 
+          filterManager.applyValue(paginationFilter.items);
+
+        });
+      }),
+    );
+
+    // Multi filters (e.g. cf/org/space)
+    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
+    // - If the first multi filter has one value it's not shown, ensure it's automatically selected to ensure other filters are correct
+    this.multiFilterWidgetObservables = new Array<Subscription>();
+    this.paginationController.filter$.pipe(
+      first(),
+      tap(() => {
+        Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // Pipe changes in the widgets to the store
           const sub = filterManager.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
@@ -486,10 +516,21 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
     this.uberSub = observableCombineLatest(
       paginationStoreToWidget,
-      filterStoreToWidget,
       sortStoreToWidget,
       haveMultiActions
     ).subscribe();
+
+    const initialisedSub = observableCombineLatest([
+      filterStoreToWidget // Should not be unsubbed until destroy
+    ]).subscribe(() => {
+      // When this fires the first time we're initialised
+      if (!this.componentInitialised) {
+        this.componentInitialised = true;
+        this.initialised.next(true);
+      }
+    });
+
+    this.subs.push(initialisedSub);
 
     this.pageState$ = observableCombineLatest(
       this.paginationController.pagination$,
@@ -575,7 +616,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginationWidgetToStore,
       this.filterWidgetToStore,
       this.uberSub,
-      this.multiFilterChangesSub
+      this.multiFilterChangesSub,
+      ...this.subs,
     );
     if (this.dataSource) {
       this.dataSource.destroy();
@@ -592,6 +634,20 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       default:
         return this.config.defaultView || 'table';
     }
+  }
+
+  public resetFilteringAndSort() {
+    /* tslint:disable-next-line:no-string-literal  */
+    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
+    this.store.dispatch(new ResetPaginationSortFilter(pAction));
+
+    if (!this.dataSource.isLocal) {
+      this.store.dispatch(new ResetPagination(pAction, pAction.paginationKey));
+    }
+
+    // Reset the multi-entity filter
+    this.entitySelectValue.next(undefined);
+    this.setEntityPage(undefined);
   }
 
   updateListView(listView: ListView) {
@@ -658,6 +714,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
   }
 
+  // Used by multi-entity lists
   public setEntityPage(page: number) {
     this.pPaginator.firstPage();
     this.store.dispatch(new SetPage(
@@ -708,7 +765,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getRowStateFromRowsState = (row: T): Observable<RowState> =>
-    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()))
+    this.dataSource.rowsState.pipe(map(state => state[this.dataSource.getRowUniqueId(row)] || getDefaultRowState()));
 
   public showAllAfterMax() {
     this.dataSource.showAllAfterMax();

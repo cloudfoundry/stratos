@@ -48,7 +48,7 @@ describe('Delete Service Instance', () => {
     ])
       .then(() => {
         servicesWall.navigateTo();
-
+        servicesWall.serviceInstancesList.header.clearFilters();
         servicesWall.serviceInstancesList.header.refresh();
         servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName1);
         return servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName2);

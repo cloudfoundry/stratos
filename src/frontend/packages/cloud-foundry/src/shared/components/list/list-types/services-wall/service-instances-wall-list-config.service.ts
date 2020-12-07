@@ -91,6 +91,7 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
       breadcrumbs: 'service-wall'
     };
 
+    this.cfOrgSpaceService.setInitialValuesFromAction(this.dataSource.masterAction, 'cf', 'org', 'space');
     this.getInitialised = () => combineLatest(
       cfOrgSpaceService.cf.list$,
       cfOrgSpaceService.org.list$,

@@ -3,13 +3,20 @@
   <div class="page-header-right">
     <div *ngIf="layouts$ | async as layouts">
       <mat-menu #appMenu="matMenu" xPosition="before">
-        <div  *ngFor="let layout of layouts">
+        <div *ngFor="let layout of layouts">
           <button *ngIf="layout" (click)="onChangeLayout(layout)" mat-menu-item class="layout-menu">
-            <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">{{ layout.title }}</div>
-            <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done</mat-icon>
+            <div [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__label">
+              {{ layout.title }}</div>
+            <mat-icon [ngClass]="{'layout-menu__tick' : layout.id === layoutID}" class="layout-menu__icon">done
+            </mat-icon>
           </button>
           <div *ngIf="!layout" class="layout-menu__sep"></div>
         </div>
+        <div class="layout-menu__sep"></div>
+        <button (click)="toggleShowAllEndpoints()" mat-menu-item class="layout-menu">
+          <div class="layout-menu__label">Show all endpoints</div>
+          <mat-icon [ngClass]="{'layout-menu__tick' : showAllEndpoints}" class="layout-menu__icon">done</mat-icon>
+        </button>
       </mat-menu>
       <button mat-button [matMenuTriggerFor]="appMenu">
         <mat-icon>view_week</mat-icon>
@@ -19,16 +26,18 @@
   </div>
 </app-page-header>
 <div class="home-page" *ngIf="haveThingsToShow$ | async ; else noEndpoints">
-  <div class="home-page__list" [ngClass]="{'home-page__list-2': columns === 2, 'home-page__list-3': columns === 3}" #endpointsPanel>
+  <div class="home-page__list" [ngClass]="{'home-page__list-2': columns === 2, 'home-page__list-3': columns === 3}"
+    #endpointsPanel>
     <div *ngFor="let ep of endpoints$ | async" class="home-page__card" #endpointCard>
-      <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep"></app-home-page-endpoint-card>
+      <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
+      </app-home-page-endpoint-card>
     </div>
   </div>
 </div>
 <ng-template #noEndpoints>
   <div class="home-page" *ngIf="haveRegistered$ | async; else noneRegistered">
-    <app-no-content-message [icon]="'settings_ethernet'" firstLine="There are no connected endpoints" 
-    [secondLine]="{text: 'Use the Endpoints view to connect'}"></app-no-content-message>
+    <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
+      [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>
   </div>
 </ng-template>
 

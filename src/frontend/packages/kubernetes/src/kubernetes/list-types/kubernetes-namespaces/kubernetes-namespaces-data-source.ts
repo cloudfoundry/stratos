@@ -4,8 +4,8 @@ import { ListDataSource } from '../../../../../core/src/shared/components/list/d
 import { IListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { getPaginationKey } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/public-api';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
+import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesNamespace } from '../../store/kube.types';
 

@@ -2,16 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
 import { first, tap } from 'rxjs/operators';
 
-import { CFFeatureFlagTypes, IFeatureFlag } from '../../../../cloud-foundry/src/cf-api.types';
-import { cfEntityFactory } from '../../../../cloud-foundry/src/cf-entity-factory';
-import { generateCFEntities } from '../../../../cloud-foundry/src/cf-entity-generator';
-import { featureFlagEntityType } from '../../../../cloud-foundry/src/cf-entity-types';
-import {
-  CfCurrentUserPermissions,
-  cfCurrentUserPermissionsService,
-  CfPermissionTypes,
-  CfScopeStrings,
-} from '../../../../cloud-foundry/src/user-permissions/cf-user-permissions-checkers';
 import { PermissionConfig } from '../../../../core/src/core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../core/src/core/permissions/current-user-permissions.service';
 import { StratosScopeStrings } from '../../../../core/src/core/permissions/stratos-user-permissions.checker';
@@ -25,6 +15,16 @@ import { APIResource } from '../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseEntityValues } from '../../../../store/src/types/entity.types';
 import { PaginationState } from '../../../../store/src/types/pagination.types';
+import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
+import { cfEntityFactory } from '../../cf-entity-factory';
+import { generateCFEntities } from '../../cf-entity-generator';
+import { featureFlagEntityType } from '../../cf-entity-types';
+import {
+  CfCurrentUserPermissions,
+  cfCurrentUserPermissionsService,
+  CfPermissionTypes,
+  CfScopeStrings,
+} from '../../user-permissions/cf-user-permissions-checkers';
 
 const ffSchema = cfEntityFactory(featureFlagEntityType);
 
@@ -520,7 +520,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             },
             totalResults: 2
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: true
         }
       },
       cfFeatureFlag: {
@@ -548,7 +549,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             },
             totalResults: 13
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: false
         },
         'endpoint-c80420ca-204b-4879-bf69-b6b7a202ad87': {
           pageCount: 1,
@@ -574,7 +576,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             },
             totalResults: 13
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: false
         }
       },
     };

@@ -1,0 +1,12 @@
+<div [formGroup]="formGroup" class="token">
+  <div formGroupName="authValues" class="token__form">
+    <mat-form-field>
+      <input matInput placeholder="{{config.title || 'Token'}}" type="password" formControlName="token"
+        [type]="!showToken ? 'password' : 'text'">
+      <button mat-icon-button matSuffix (click)="showToken = !showToken" [attr.aria-label]="'Hide Token'"
+        [attr.aria-pressed]="!showToken" type='button'>
+        <mat-icon>{{!showToken ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+</div>

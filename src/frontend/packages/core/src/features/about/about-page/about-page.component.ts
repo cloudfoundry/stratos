@@ -39,7 +39,7 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private resolver: ComponentFactoryResolver,
-    cs: CustomizationService
+    cs: CustomizationService,
   ) {
     this.customizations = cs.get();
   }

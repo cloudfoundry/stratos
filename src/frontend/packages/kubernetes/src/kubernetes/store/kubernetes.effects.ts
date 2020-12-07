@@ -19,7 +19,15 @@ import {
 } from '../kubernetes-entity-factory';
 import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
 import {
+  GET_KUBE_RESOURCES,
+  GET_KUBE_RESOURCES_IN_NAMESPACE,
+  GetKubernetesResources,
+  GetKubernetesResourcesInNamespace,
+} from './kube-resource.actions';
+import {
   BasicKubeAPIResource,
+  IKubeResourceEntityDefinition,
+  KubeAPIResource,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -68,6 +76,9 @@ export interface KubeDashboardContainer {
 export interface KubeDashboardStatus {
   guid: string;
   kubeGuid: string;
+  metadata?: {
+    kubeId: string;
+  };
   installed: boolean;
   stratosInstalled: boolean;
   running: boolean;
@@ -111,6 +122,9 @@ export class KubernetesEffects {
           } as NormalizedResponse;
           const status = response as KubeDashboardStatus;
           status.kubeGuid = action.kubeGuid;
+          status.metadata = {
+            kubeId: action.kubeGuid
+          };
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
           return [
@@ -253,6 +267,50 @@ export class KubernetesEffects {
       `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
     ))
   );
+
+  // =======================================================================================
+  // Generic resource effects
+  // =======================================================================================
+
+  @Effect()
+  fetchKubeResources$ = this.actions$.pipe(
+    ofType<GetKubernetesResources>(GET_KUBE_RESOURCES),
+    flatMap((action: GetKubernetesResources) => {
+      const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
+      if (catalog && catalog.definition) {
+        const defn = catalog.definition as IKubeResourceEntityDefinition;
+        if (defn.apiVersion && defn.apiName) {
+          return this.processListAction<KubeAPIResource>(
+            action,
+            `/pp/${this.proxyAPIVersion}/proxy/${defn.apiVersion}/${defn.apiName}`
+          );
+        }
+      }
+
+      throw new Error('Kubernetes Resource request - but no API information is available');
+    })
+  );
+
+  @Effect()
+  fetchKubeResourcesInNamespace$ = this.actions$.pipe(
+    ofType<GetKubernetesResources>(GET_KUBE_RESOURCES_IN_NAMESPACE),
+    flatMap((action: GetKubernetesResourcesInNamespace) => {
+      const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
+      if (catalog && catalog.definition) {
+        const defn = catalog.definition as IKubeResourceEntityDefinition;
+        if (defn.apiVersion && defn.apiName) {
+          return this.processListAction<KubeAPIResource>(
+            action,
+            `/pp/${this.proxyAPIVersion}/proxy/${defn.apiVersion}/namespaces/${action.namespaceName}/${defn.apiName}`
+          );
+        }
+      }
+
+      throw new Error('Kubernetes Resource request - but no API information is available');
+    })
+  );
+
+  // =======================================================================================
 
   private processNodeAction(action: GetKubernetesNodes) {
     return this.processListAction<KubernetesNode>(

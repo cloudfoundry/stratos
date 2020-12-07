@@ -38,7 +38,7 @@ export class DeployAppEffects {
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => observableOf(err.status === 404 ?
           new ProjectDoesntExist(action.projectName) :
-          new ProjectFetchFail(action.projectName, this.gitSCMService.parseErrorAsString(err, action.scm.getType()))
+          new ProjectFetchFail(action.projectName, action.scm.parseErrorAsString(err))
         ))
       );
     })

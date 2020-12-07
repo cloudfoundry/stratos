@@ -168,6 +168,7 @@ function getDefaultInitialTestStratosStoreState() {
       headerEventMinimized: true,
       gravatarEnabled: false,
       homeLayout: 0,
+      homeShowAllEndpoints: true,
     },
     lists: {},
     routing: {
@@ -234,12 +235,13 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
               items: {}
             },
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: true
         }
       },
       metrics: {},
       stratosUserProfile: {},
-      stratosUserFavorites: {}
+      stratosUserFavorites: {},
     },
     request: {
       stratosUserProfile: {},
