@@ -1,18 +1,18 @@
 <app-tile-grid fit="true">
   <app-tile-group class="k8s-home-card__plain-tiles">
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/nodes"
-        icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/nodes" icon="apps" label="Nodes"
+        labelSingular="Node" value="{{ nodeCount$ | async }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/namespaces"
-        icon="language" label="Namespaces" labelSingular="Node" value="{{ namespaceCount$ | async }}">
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/namespaces" icon="language"
+        label="Namespaces" labelSingular="Node" value="{{ namespaceCount$ | async }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/pods"
-        icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/resource/pod" icon="apps" label="Pods"
+        labelSingular="Pod" value="{{ podCount$ | async }}">
       </app-card-number-metric>
     </app-tile>
   </app-tile-group>
