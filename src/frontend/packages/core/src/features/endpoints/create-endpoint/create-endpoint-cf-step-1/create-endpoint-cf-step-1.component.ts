@@ -49,9 +49,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   validate: Observable<boolean>;
 
-  // CA Cert
-  @ViewChild('caCertField') caCertField: NgModel;
-
   urlValidation: string;
 
   showAdvancedFields = false;
@@ -169,10 +166,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   toggleCACertField() {
     this.showCACertField = !this.showCACertField;
     if (this.showCACertField) {
-      this.lastSkipSSLValue = this.skipSllField.value;
-      this.skipSllField.reset(false);
+      this.lastSkipSSLValue = this.registerForm.value.skipSllField;
+      this.registerForm.controls.skipSllField.setValue(false);
     } else {
-      this.skipSllField.reset(this.lastSkipSSLValue);
+      this.registerForm.controls.skipSllField.setValue(this.lastSkipSSLValue);
     }
   }
 }

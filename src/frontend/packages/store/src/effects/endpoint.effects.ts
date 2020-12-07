@@ -187,8 +187,6 @@ export class EndpointsEffect {
   @Effect() register$ = this.actions$.pipe(
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
-      console.log(action);
-
       const paramsObj = {
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
