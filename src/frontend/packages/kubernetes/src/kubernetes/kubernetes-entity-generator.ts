@@ -179,24 +179,22 @@ class KubeResourceEntityHelper {
       defn.apiNamespaced = true;
     }
 
+    const schema = kubernetesEntityFactory(defn.type);
     const d: IStratosEntityDefinition = {
       ...defn,
       endpoint: endpointDefinition,
-      schema: kubernetesEntityFactory(defn.type),
+      schema,
       iconFont: defn.iconFont || 'stratos-icons',
       labelPlural: defn.labelPlural || `${defn.label}s`
     };
 
-    if (defn.getKubeCatalogEntity) {
-      return defn.getKubeCatalogEntity(d);
-    } else {
-      return new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
-        actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
-      });
-    }
-    if (defn.canFavorite) {
-      kubeEntityCatalog[defn.kubeCatalogEntity].builders.entityBuilder = {
-        getIsValid: (fav) => kubeEntityCatalog[defn.kubeCatalogEntity].api.get(fav.name, fav.kubeGuid).pipe(entityFetchedWithoutError()),
+    const entity = defn.getKubeCatalogEntity ? defn.getKubeCatalogEntity(d) : new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
+      actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
+    });
+
+    if (defn.canFavorite && defn.getIsValid) {
+      entity.builders.entityBuilder = {
+        getIsValid: defn.getIsValid,
         getMetadata: (resource: any) => {
           return {
             endpointId: resource.kubeGuid,
@@ -206,10 +204,13 @@ class KubeResourceEntityHelper {
           };
         },
         // TODO - not always API name
-        getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
-        getGuid: resource => resource.metadata.uid,
+        // getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`, // TODO: RC
+        getGuid: resource => schema.getId(resource),
       };
     }
+
+    return entity;
   }
 }
 
@@ -241,8 +242,6 @@ export class KubeEntityCatalog {
   public serviceAccount: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public role: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public job: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
-
-  private workloadEntities: StratosBaseCatalogEntity[];
 
   constructor() {
     const endpointDef: StratosEndpointExtensionDefinition = {
@@ -321,7 +320,6 @@ export class KubeEntityCatalog {
       endpointDef,
       favorite => `/kubernetes/${favorite.endpointId}`
     );
-
     this.statefulSet = this.generateStatefulSetsEntity(endpointDef);
     this.pod = KubeResourceEntityHelper.generate<KubernetesPod, KubePodActionBuilders>(endpointDef, {
       type: kubernetesPodsEntityType,
@@ -344,11 +342,11 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'namespaces',
       apiNamespaced: false,
-      hidden: true,
       canFavorite: true,
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
+      getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.metadata.name, favorite.endpointId).pipe(entityFetchedWithoutError()),
       listColumns: [
         {
           header: 'Status',
@@ -504,10 +502,6 @@ export class KubeEntityCatalog {
       apiName: 'jobs',
     });
 
-    this.workloadEntities = generateWorkloadsEntities(endpointDef);
-        }
-      ]
-    });
     this.pv = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'persistentVolume',
       icon: 'persistent_volume',
@@ -566,23 +560,6 @@ export class KubeEntityCatalog {
     return [
       ...Object.getOwnPropertyNames(this).map(s => this[s]),
       ...generateWorkloadsEntities(this.endpoint.definition)
-    ];
-  }
-
-  private generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-    return new StratosCatalogEntity<IFavoriteMetadata, KubernetesStatefulSet, KubeStatefulSetsActionBuilders>(
-      {
-        type: kubernetesStatefulSetsEntityType,
-        schema: kubernetesEntityFactory(kubernetesStatefulSetsEntityType),
-      this.pvc,
-      this.storage,
-      this.pv,
-      this.replicaSet,
-      this.clusterRole,
-      this.serviceAccount,
-      this.role,
-      this.job,
-      ...this.workloadEntities
     ];
   }
 

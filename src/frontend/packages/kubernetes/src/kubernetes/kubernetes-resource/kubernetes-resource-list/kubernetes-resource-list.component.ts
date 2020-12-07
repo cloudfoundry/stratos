@@ -154,7 +154,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
             sidePanelConfig: {
               title: resource.metadata.name,
               resourceKind: definition.label,
-              resource$: of(resource)
+              resource$: of(resource),
               component,
               definition,
             }

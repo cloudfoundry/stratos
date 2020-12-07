@@ -5,11 +5,7 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import {
-  IListConfig,
-  ISimpleListConfig,
-  ListViewTypes,
-} from '../../../../../core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -136,12 +132,6 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
   getSingleActions = () => [];
   getColumns = () => this.columns;
   getMultiFiltersConfigs = () => [];
-}
-
-export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
-  constructor() {
-    super([]);
-  }
 }
 
 export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {

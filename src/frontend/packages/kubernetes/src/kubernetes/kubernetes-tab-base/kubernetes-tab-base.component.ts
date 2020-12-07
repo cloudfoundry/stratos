@@ -66,7 +66,7 @@ export class KubernetesTabBaseComponent implements OnInit {
     kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
       if (catalogEntity) {
         const defn = catalogEntity.definition as unknown as KubeResourceEntityDefinition;
-        if (defn.apiNamespaced === namespaced) {
+        if (defn.apiNamespaced === namespaced && !defn.hidden) {
           tabsFromRouterConfig.push({
             link: `resource/${catalogEntity.type}`,
             label: defn.labelTab || defn.labelPlural,
@@ -80,35 +80,6 @@ export class KubernetesTabBaseComponent implements OnInit {
     tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
     return tabsFromRouterConfig;
   }
-
-  // TODO: RC Q This is unused
-  // private getTabsFromRouterConfig(namespaced: boolean = true) {
-  //   const childRoutes = this.route.snapshot.routeConfig.children;
-  //   const tabsFromRouterConfig = [];
-
-  //   // Get the tabs from the router configuration
-  //   childRoutes.forEach(r => {
-  //     if (r.path.length > 0) {
-  //       // See if we can find an entity for the key
-  //       const key = r.data ? (r.data.entityCatalogKey ? r.data.entityCatalogKey : r.path) : r.path;
-  //       const catalogEntity = kubeEntityCatalog[key];
-  //       if (catalogEntity) {
-  //         const defn = catalogEntity.definition as KubeResourceEntityDefinition;
-  //         if (defn.apiNamespaced === namespaced) {
-  //           tabsFromRouterConfig.push({
-  //             link: defn.route ? defn.route : `resource/${r.path}`,
-  //             label: defn.labelTab || defn.labelPlural,
-  //             icon: defn.icon,
-  //             iconFont: defn.iconFont,
-  //           });
-  //         }
-  //       }
-  //     }
-  //   });
-
-  //   tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
-  //   return tabsFromRouterConfig;
-  // }
 
   ngOnInit() {
     this.isFetching$ = this.kubeEndpointService.endpoint$.pipe(
