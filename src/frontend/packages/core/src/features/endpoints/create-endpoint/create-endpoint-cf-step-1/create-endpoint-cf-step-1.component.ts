@@ -78,6 +78,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
+      caCertField: ['', []]
     });
 
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
@@ -99,9 +100,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   onNext: StepOnNextFunction = () => {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
 
-    let sslAllow = this.registerForm.value.ssoAllowedField;
-    
     // SSL Setttings
+    let sslAllow = this.registerForm.value.skipSllField;
     if (this.showCACertField) {
       sslAllow = false;
     }
@@ -111,12 +111,11 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       subType,
       this.registerForm.value.nameField,
       this.registerForm.value.urlField,
-      this.registerForm.value.skipSllField,
+      sslAllow,
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
-      sslAllow,
-      //TODO: Covnert to reactive form value
-      this.caCertField.value,
+      this.registerForm.value.ssoAllowedField,
+      this.registerForm.value.caCertField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
