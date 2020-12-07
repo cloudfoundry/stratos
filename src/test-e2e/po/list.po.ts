@@ -15,7 +15,7 @@ export interface CardMetadata {
 }
 
 export interface TableData {
-  [columnHeader: string]: string
+  [columnHeader: string]: string;
 }
 
 // Page Object for the List Table View
@@ -161,7 +161,7 @@ export class ListCardComponent extends Component {
 
   static cardsCss = 'app-card:not(.row-filler)';
 
-  constructor(locator: ElementFinder, private header: ListHeaderComponent) {
+  constructor(locator: ElementFinder, private list: ListComponent) {
     super(locator);
   }
 
@@ -181,6 +181,12 @@ export class ListCardComponent extends Component {
   }
 
   private findCardElementByTitle(title: string, metaType = MetaCardTitleType.CUSTOM): ElementFinder {
+    this.list.isTableView().then(isTableView => {
+      if (isTableView) {
+        return this.list.header.getCardListViewToggleButton().click();
+      }
+    });
+
     const card = this.locator.all(by.css(`${ListCardComponent.cardsCss} ${metaType}`)).filter(elem =>
       elem.getText().then(text => text === title)
     ).first();
@@ -198,8 +204,8 @@ export class ListCardComponent extends Component {
 
   findCardByTitle(title: string, metaType = MetaCardTitleType.CUSTOM, filter = false): promise.Promise<MetaCard> {
     if (filter) {
-      this.header.waitUntilShown();
-      this.header.setSearchText(title);
+      this.list.header.waitUntilShown();
+      this.list.header.setSearchText(title);
       return this.waitForCardByTitle(title, metaType);
     }
 
@@ -380,6 +386,14 @@ export class ListHeaderComponent extends Component {
     return this.getLeftHeaderSection().element(by.cssContainingText('button mat-icon', iconText));
   }
 
+  clearFilters(): promise.Promise<any> {
+    return this.getClearButton().click();
+  }
+
+  getClearButton() {
+    return this.locator.element(by.cssContainingText('.list-component__header__right button mat-icon', 'highlight_off'));
+  }
+
 }
 
 export class ListPaginationComponent extends Component {
@@ -477,7 +491,7 @@ export class ListComponent extends Component {
     super(locator);
     this.table = new ListTableComponent(locator);
     this.header = new ListHeaderComponent(locator);
-    this.cards = new ListCardComponent(locator, this.header);
+    this.cards = new ListCardComponent(locator, this);
     this.pagination = new ListPaginationComponent(locator);
     this.empty = new ListEmptyComponent(locator);
   }

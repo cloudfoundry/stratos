@@ -2,15 +2,13 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { applicationEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
-import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
@@ -22,13 +20,13 @@ import { goToAppWall } from '../../cf/cf.helpers';
   animations: [
     trigger(
       'cardEnter', [
-        transition('* => *', [
-          query(':enter', [
-            style({ opacity: 0, transform: 'translateY(10px)' }),
-            animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-          ], { optional: true })
-        ])
-      ]
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(10px)' }),
+          animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+        ], { optional: true })
+      ])
+    ]
     )
   ],
   providers: [{
@@ -40,7 +38,6 @@ import { goToAppWall } from '../../cf/cf.helpers';
 })
 export class ApplicationWallComponent implements OnDestroy {
   public cfIds$: Observable<string[]>;
-  private initCfOrgSpaceService: Subscription;
 
   public canCreateApplication: string;
 
@@ -49,7 +46,7 @@ export class ApplicationWallComponent implements OnDestroy {
   constructor(
     public cloudFoundryService: CloudFoundryService,
     private store: Store<CFAppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
+    public cfOrgSpaceService: CfOrgSpaceDataService,
     activatedRoute: ActivatedRoute,
   ) {
     // If we have an endpoint ID, select it and redirect
@@ -67,16 +64,8 @@ export class ApplicationWallComponent implements OnDestroy {
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
     );
-
-    this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
-      this.cfOrgSpaceService,
-      applicationEntityType,
-      CfAppsDataSource.paginationKey).subscribe();
   }
 
   ngOnDestroy(): void {
-    if (this.initCfOrgSpaceService) {
-      this.initCfOrgSpaceService.unsubscribe();
-    }
   }
 }
