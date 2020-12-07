@@ -16,12 +16,12 @@ import { ListViewTypes } from '../../../../../core/src/shared/components/list/li
 import { entityCatalog } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesListConfigService } from '../../kubernetes-list-service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
 } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+import { KubernetesUIConfigService } from '../../kubernetes-ui-service';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import {
