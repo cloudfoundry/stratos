@@ -6,6 +6,7 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
+  OnInit,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
@@ -57,7 +58,7 @@ interface KubernetesResourceViewerResource {
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss']
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, OnInit, AfterViewInit {
 
   constructor(
     private endpointsService: EndpointsService,
@@ -88,8 +89,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   data: any;
 
-  @ViewChild('header') templatePortalContent: TemplateRef<unknown>;
+  @ViewChild('header', {static: false}) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
+
+  ngOnInit() {
+    this.createCustomComponent();
+  }
 
   ngOnDestroy() {
     this.removeCustomComponent();
@@ -114,7 +119,6 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   ngAfterViewInit() {
-    this.createCustomComponent();
     setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
@@ -176,7 +180,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         };
         this.createCustomComponent();
 
-        this.setFavorite(props.definition, item);
+        setTimeout(() => this.setFavorite(props.definition, item), 0);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
         if (item.metadata) {
