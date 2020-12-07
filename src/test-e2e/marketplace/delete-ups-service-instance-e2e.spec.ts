@@ -49,6 +49,7 @@ describe('Delete Service Instance (User Provided Service)', () => {
     names.push(serviceInstanceName);
     servicesHelperE2E.createUserProvidedService(e2e.secrets.getDefaultCFEndpoint().services.publicService.name, serviceInstanceName);
     servicesWall.waitForPage();
+    servicesWall.serviceInstancesList.header.clearFilters();
     servicesWall.serviceInstancesList.cards.waitForCardByTitle(serviceInstanceName);
   }, timeout);
 

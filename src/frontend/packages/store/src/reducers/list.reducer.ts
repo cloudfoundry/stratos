@@ -1,9 +1,9 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
-import { mergeState } from '../helpers/reducer.helper';
+import { HydrateListsStateAction, ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
 import { ListsOnlyAppState } from '../app-state';
+import { mergeState } from '../helpers/reducer.helper';
 
 export class ListsState {
   [key: string]: ListState;
@@ -34,6 +34,11 @@ export function listReducer(state = defaultListsState, action): ListsState {
         'view',
         listView ? listView.toString() : ''
       );
+    case ListStateActionTypes.HYDRATE:
+      const hydrate = action as HydrateListsStateAction;
+      return {
+        ...hydrate.listsState
+      };
     default:
       return state;
   }

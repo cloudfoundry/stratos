@@ -235,12 +235,13 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
               items: {}
             },
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: true
         }
       },
       metrics: {},
       stratosUserProfile: {},
-      stratosUserFavorites: {}
+      stratosUserFavorites: {},
     },
     request: {
       stratosUserProfile: {},

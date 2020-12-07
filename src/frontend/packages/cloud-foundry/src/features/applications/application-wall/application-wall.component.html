@@ -23,5 +23,6 @@
 </ng-template>
 
 <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
+  (initialised)="cfOrgSpaceService.enableAutoSelectors()"
   *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
 </app-list>

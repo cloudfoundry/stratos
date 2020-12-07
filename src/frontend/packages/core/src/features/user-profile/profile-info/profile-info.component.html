@@ -50,7 +50,7 @@
       </mat-card>
       <mat-card>
         <mat-card-header>
-          <mat-card-title>Settings</mat-card-title>
+          <mat-card-title>Local Settings</mat-card-title>
         </mat-card-header>
         <div class="user-profile__options">
 
@@ -101,8 +101,8 @@
             </div>
           </div>
 
-          <div class="user-profile__sectiom" *ngIf="hasMultipleThemes">
-            <mat-card-title class="user-profile__section">Theme</mat-card-title>
+          <div class="user-profile__section" *ngIf="hasMultipleThemes">
+            <div class="user-profile__option">Theme</div>
             <div class="user-profile__option">
               <div class="user-profile__option-inner">
                 <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
@@ -111,6 +111,21 @@
                     {{ theme.label }}
                   </mat-button-toggle>
                 </mat-button-toggle-group>
+              </div>
+            </div>
+          </div>
+          <div class="user-profile__section user-profile__local-storage"
+            *ngIf="localStorageSize$ | async as localStorageSize">
+            <div class="user-profile__option">Clear Settings</div>
+            <div class="user-profile__option">
+              <div class="user-profile__option-inner">
+                <div class="user-profile__local-storage--div">Your browser's local storage is used to persist local
+                  settings
+                  This covers the options in this section and some changes to lists such as filters and sorting.
+                </div>
+                <div class="user-profile__local-storage--div">Size of local storage:
+                  ~{{ localStorageSize | bytesToHumanSize }} <button color="warn" mat-button mat-raised-button
+                    (click)="clearLocalStorage()">Clear</button></div>
               </div>
             </div>
           </div>
