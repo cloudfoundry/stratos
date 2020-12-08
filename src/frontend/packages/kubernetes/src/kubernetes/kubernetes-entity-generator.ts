@@ -2,7 +2,6 @@ import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
@@ -258,7 +257,6 @@ export class KubeEntityCatalog {
       ],
       getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
-      urlValidationRegexString: urlValidationExpression,
       subTypes: [
         {
           type: 'config',
