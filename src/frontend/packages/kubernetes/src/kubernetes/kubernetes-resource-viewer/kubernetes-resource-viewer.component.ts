@@ -6,6 +6,7 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
+  OnInit,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
@@ -18,9 +19,9 @@ import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { entityDeleted } from '../../../../store/src/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubeResourceActionBuilders } from '../store/action-builders/kube-resource.action-builder';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
@@ -58,7 +59,7 @@ interface KubernetesResourceViewerResource {
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss']
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, OnInit, AfterViewInit {
 
   constructor(
     private endpointsService: EndpointsService,
@@ -89,8 +90,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   data: any;
 
-  @ViewChild('header') templatePortalContent: TemplateRef<unknown>;
+  @ViewChild('header', {static: false}) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
+
+  ngOnInit() {
+    this.createCustomComponent();
+  }
 
   ngOnDestroy() {
     this.removeCustomComponent();
@@ -115,8 +120,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   ngAfterViewInit() {
-    this.createCustomComponent();
-    this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef);
+    setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
   setProps(props: KubernetesResourceViewerConfig) {
@@ -177,7 +181,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         };
         this.createCustomComponent();
 
-        this.setFavorite(props.definition, item);
+        setTimeout(() => this.setFavorite(props.definition, item), 0);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
         if (item.metadata) {
@@ -255,17 +259,16 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     );
     this.confirmDialog.openWithCancel(confirmation,
       () => {
-        // TODO: Subscribe only until done
         const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
           StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
         catalogEntity.api.deleteResource(
           this.data.resource.metadata.name,
           this.data.endpointId,
           this.data.resource.metadata.namespace
-        ).subscribe(a => {
-          console.log('delete progress');
-          console.log(a);
-        });
+        ).pipe(
+          entityDeleted(),
+          first()
+        ).subscribe();
       },
       () => {
         this.sidePanelService.open();

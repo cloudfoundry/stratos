@@ -1,6 +1,5 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { entityFetchedWithoutError } from '@stratosui/store';
 import moment from 'moment';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
@@ -20,6 +19,7 @@ import {
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
+import { entityFetchedWithoutError } from '../../../store/src/operators';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
@@ -207,9 +207,7 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        // TODO - not always API name
-        // getLink: metadata => `/kubernetes/${metadata.kubeGuid}/${defn.apiName}/${metadata.name}`,
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`, // TODO: RC
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`,
         getGuid: resource => schema.getId(resource),
       };
     }
@@ -261,7 +259,7 @@ export class KubeEntityCatalog {
         BaseEndpointAuth.UsernamePassword,
         kubeAuthTypeMap[KubeEndpointAuthTypes.TOKEN],
       ],
-      getEndpointIdFromEntity: (entity) => entity.kubeGuid,
+      getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
       urlValidationRegexString: urlValidationExpression,
       subTypes: [
@@ -350,7 +348,8 @@ export class KubeEntityCatalog {
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
-      getIsValid: (favorite) => kubeEntityCatalog.namespace.api.get(favorite.metadata.name, favorite.endpointId).pipe(entityFetchedWithoutError()),
+      getIsValid: (favorite) =>
+        kubeEntityCatalog.namespace.api.get(favorite.metadata.name, favorite.endpointId).pipe(entityFetchedWithoutError()),
       listColumns: [
         {
           header: 'Status',
@@ -389,7 +388,6 @@ export class KubeEntityCatalog {
       ]
     });
     this.metrics = this.generateMetricEntity(endpointDef);
-
     this.secrets = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'secrets',
       icon: 'config_maps',
@@ -532,6 +530,57 @@ export class KubeEntityCatalog {
       }]
     });
 
+    this.pv = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'persistentVolume',
+      icon: 'persistent_volume',
+      label: 'Persistent Volume',
+      apiVersion: '/api/v1',
+      apiName: 'persistentvolumes',
+      apiNamespaced: false,
+    });
+    this.replicaSet = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'replicaSet',
+      icon: 'replica_set',
+      label: 'Replica Set',
+      apiVersion: '/apis/apps/v1',
+      apiName: 'replicasets',
+      listColumns: [
+        {
+          header: 'Replicas',
+          field: 'spec.replicas',
+          sort: true
+        },
+      ]
+    });
+    this.clusterRole = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'clusterRole',
+      icon: 'cluster_role',
+      label: 'Cluster Role',
+      apiVersion: '/apis/rbac.authorization.k8s.io/v1',
+      apiName: 'clusterroles',
+      apiNamespaced: false,
+    });
+    this.serviceAccount = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'serviceAccount',
+      icon: 'replica_set',
+      label: 'Service Account',
+      apiVersion: '/api/v1',
+      apiName: 'serviceaccounts',
+    });
+    this.role = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'role',
+      icon: 'role_binding',
+      label: 'Role',
+      apiVersion: '/apis/rbac.authorization.k8s.io/v1',
+      apiName: 'roles',
+    });
+    this.job = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+      type: 'job',
+      icon: 'job',
+      label: 'Job',
+      apiVersion: '/apis/batch/v1',
+      apiName: 'jobs',
+    });
   }
 
   public allKubeEntities(): StratosBaseCatalogEntity[] {
@@ -602,8 +651,6 @@ export class KubeEntityCatalog {
       endpoint: endpointDefinition,
     });
   }
-
-
   private jobToCompletion(spec: any, status: any): string {
     if (!!spec.completions) {
       return status.succeeded + '/' + spec.completions;

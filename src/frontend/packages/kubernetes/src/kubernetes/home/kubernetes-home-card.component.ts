@@ -50,7 +50,7 @@ export class KubernetesHomeCardComponent implements OnInit {
       },
       {
         title: 'View Namespaces',
-        link: ['/kubernetes', guid, 'namespaces'],
+        link: ['/kubernetes', guid, 'resource', 'namespace'],
         icon: 'namespace',
         iconFont: 'stratos-icons'
       }

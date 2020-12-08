@@ -64,8 +64,7 @@
         <div class="list-component__header__right">
           <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
             <mat-form-field [floatLabel]="'never'">
-              <mat-select matInput [value]="initialEntitySelection$ | async"
-                (selectionChange)="setEntityPage($event.value)">
+              <mat-select matInput [value]="entitySelectValue$ | async" (selectionChange)="setEntityPage($event.value)">
                 <mat-option>{{ entitySelectConfig.selectEmptyText }}</mat-option>
                 <mat-option *ngFor="let item of entitySelectConfig.entitySelectItems" [value]="item.page">
                   {{item.label}}
@@ -106,12 +105,14 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <button mat-icon-button (click)="updateListSort(headerSort.value, 'desc')"
-              [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='asc'">
+            <button mat-icon-button matTooltip="Sort Order" matTooltipShowDelay="1000"
+              (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)"
+              *ngIf="headerSort.direction==='asc'">
               <mat-icon>sort</mat-icon>
             </button>
-            <button mat-icon-button (click)="updateListSort(headerSort.value, 'asc')"
-              [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='desc'">
+            <button mat-icon-button matTooltip="Sort Order" matTooltipShowDelay="1000"
+              (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)"
+              *ngIf="headerSort.direction==='desc'">
               <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
             </button>
           </div>
@@ -144,14 +145,23 @@
               <mat-icon>add</mat-icon>
             </button>
           </div>
+          <div
+            *ngIf="!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
+            <button matTooltip="Reset Filters & Sort" matTooltipShowDelay="1000" mat-icon-button
+              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="resetFilteringAndSort();">
+              <mat-icon>highlight_off</mat-icon>
+            </button>
+          </div>
           <!-- Select table or cards view button -->
           <div id="list-card-toggle"
             *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
+            <button mat-icon-button matTooltip="Card view" matTooltipShowDelay="1000"
+              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
               *ngIf="(view$ | async)==='table'">
               <mat-icon>grid_on</mat-icon>
             </button>
-            <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
+            <button mat-icon-button matTooltip="Table view" matTooltipShowDelay="1000"
+              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
               *ngIf="(view$ | async)==='cards'">
               <mat-icon>list</mat-icon>
             </button>

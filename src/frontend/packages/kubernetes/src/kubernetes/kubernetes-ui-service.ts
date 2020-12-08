@@ -3,11 +3,6 @@ import { ISimpleListConfig } from 'frontend/packages/core/src/shared/components/
 
 import { PreviewableComponent } from '../../../core/src/shared/previewable-component';
 
-// TODO: RC remove?
-interface KubernetesListConfig {
-  [name: string]: ISimpleListConfig<any>;
-}
-
 class ConfigHolder<T = any> {
 
   private configs: T = {} as T;
@@ -20,7 +15,6 @@ class ConfigHolder<T = any> {
     return name ? this.configs[name] : undefined;
   }
 }
-
 
 // Holder for UI configurations - e.g. list configurations
 // This allows us to reference them by name and lazy-load the configs yet reference them

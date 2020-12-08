@@ -10,11 +10,15 @@ import {
   CLEAR_PAGINATION_OF_TYPE,
   ClearPaginationOfType,
   CREATE_PAGINATION,
+  HYDRATE_PAGINATION_STATE,
+  HydratePaginationStateAction,
   IGNORE_MAXED_STATE,
   IgnorePaginationMaxedState,
   REMOVE_PARAMS,
   RESET_PAGINATION,
   RESET_PAGINATION_OF_TYPE,
+  RESET_PAGINATION_SORT_FILTER,
+  ResetPaginationSortFilter,
   SET_CLIENT_FILTER,
   SET_CLIENT_FILTER_KEY,
   SET_CLIENT_PAGE,
@@ -22,8 +26,10 @@ import {
   SET_INITIAL_PARAMS,
   SET_PAGE,
   SET_PAGE_BUSY,
+  SET_PAGINATION_IS_LIST,
   SET_PARAMS,
   SET_RESULT_COUNT,
+  SetPaginationIsList,
   UPDATE_MAXED_STATE,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
@@ -31,7 +37,7 @@ import { InitCatalogEntitiesAction } from '../../entity-catalog.actions';
 import { entityCatalog } from '../../entity-catalog/entity-catalog';
 import { getDefaultStateFromEntityCatalog } from '../../entity-catalog/entity-catalog.store-setup';
 import { mergeState } from '../../helpers/reducer.helper';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationEntityTypeState, PaginationState } from '../../types/pagination.types';
 import { UpdatePaginationMaxedState } from './../../actions/pagination.actions';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
@@ -45,6 +51,7 @@ import {
   paginationResetPagination,
   resetEndpointEntities,
 } from './pagination-reducer-reset-pagination';
+import { paginationResetSortAndFilter } from './pagination-reducer-reset-sort-filter';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
@@ -105,7 +112,7 @@ function paginationReducer(updatePagination) {
   };
 }
 
-function paginate(action, state = {}, updatePagination) {
+function paginate(action, state: PaginationState = {}, updatePagination) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
   }
@@ -152,7 +159,75 @@ function paginate(action, state = {}, updatePagination) {
     return paginationIgnoreMaxed(state, action as IgnorePaginationMaxedState);
   }
 
+  if (action.type === HYDRATE_PAGINATION_STATE) {
+    return hydratePagination(state, action as HydratePaginationStateAction);
+  }
+
+  if (action.type === RESET_PAGINATION_SORT_FILTER) {
+    return paginationResetSortAndFilter(state, action as ResetPaginationSortFilter);
+  }
+
+  if (action.type === SET_PAGINATION_IS_LIST) {
+    return setPaginationIsList(state, action as SetPaginationIsList);
+  }
+
   return enterPaginationReducer(state, action, updatePagination);
+}
+
+function setPaginationIsList(state: PaginationState, action: SetPaginationIsList): PaginationState {
+  const entityKey = entityCatalog.getEntityKey(action.pagAction);
+  const existingPag = state[entityKey] ? state[entityKey][action.pagAction.paginationKey] : null;
+  const pag = existingPag || getDefaultPaginationEntityState();
+
+  if (pag.isListPagination === action.pagAction.isList) {
+    return state;
+  }
+
+  const entityState: PaginationEntityTypeState = {
+    ...state[entityKey],
+    [action.pagAction.paginationKey]: {
+      ...pag,
+      isListPagination: action.pagAction.isList
+    }
+  };
+  return {
+    ...state,
+    [entityKey]: entityState
+  };
+}
+
+/**
+ * Push data from local storage back into the pagination state
+ */
+function hydratePagination(state: PaginationState, action: HydratePaginationStateAction): PaginationState {
+  const hydrate = action.paginationState || {};
+  const entityKeys = Object.keys(hydrate);
+  if (entityKeys.length === 0) {
+    return state;
+  }
+
+  // Loop through all entity types.... and pagination sections in those types.... merging in state from storage
+  const newState = entityKeys.reduce((res, entityKey) => {
+    const existingEntityState = state[entityKey] || {};
+    const hydrateEntityState = action.paginationState[entityKey];
+
+    res[entityKey] = Object.keys(hydrateEntityState).reduce((res2, paginationKey) => {
+      const existingPageState = existingEntityState[paginationKey] || getDefaultPaginationEntityState();
+      const hydratePagSection = hydrateEntityState[paginationKey];
+      res2[paginationKey] = {
+        ...existingPageState,
+        ...hydratePagSection
+      };
+      return res2;
+    }, {
+      ...existingEntityState
+    });
+
+    return res;
+  }, {
+    ...state
+  });
+  return newState;
 }
 
 function isEndpointAction(action) {

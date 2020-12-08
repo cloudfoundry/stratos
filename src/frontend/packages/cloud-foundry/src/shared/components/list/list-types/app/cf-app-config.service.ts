@@ -48,13 +48,14 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
 
     // Apply the initial cf guid to the data source. Normally this is done via applying the selection to the filter... however this is too
     // late for maxedResult world
-    this.initialised$ = this.cfOrgSpaceService.cf.loading$.pipe(
+    this.initialised$ = this.cfOrgSpaceService.isLoading$.pipe(
       filter(isLoading => !isLoading),
       switchMap(() => this.cfOrgSpaceService.cf.list$),
       first(),
       map(cfs => {
         const cfGuid = cfs.length === 1 ? cfs[0].guid : null;
         this.appsDataSource = new CfAppsDataSource(this.store, this, undefined, undefined, undefined, cfGuid);
+        this.cfOrgSpaceService.setInitialValuesFromAction(this.appsDataSource.action, 'cf', 'org', 'space');
         return true;
       })
     );

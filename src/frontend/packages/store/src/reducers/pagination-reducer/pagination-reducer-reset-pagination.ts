@@ -25,7 +25,8 @@ const defaultPaginationEntityState: PaginationEntityState = {
   },
   maxedState: {
     isMaxedMode: false
-  }
+  },
+  isListPagination: false
 };
 
 export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {

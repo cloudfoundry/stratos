@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
-import { ActionReducer, ActionReducerMap, StoreModule } from '@ngrx/store';
-import { localStorageSync } from 'ngrx-store-localstorage';
+import { ActionReducerMap, StoreModule } from '@ngrx/store';
 
-import { getDashboardStateSessionId } from './helpers/store-helpers';
+import { LocalStorageService } from './helpers/local-storage-service';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
@@ -16,6 +15,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 
+
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
 
 // import { storeLogger } from 'ngrx-store-logger';
@@ -26,7 +26,7 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 //   return storeLogger()(reducer);
 // }
 
-export const appReducers = {
+export const appReducers: ActionReducerMap<{}> = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   endpoints: endpointsReducer,
@@ -41,40 +41,16 @@ export const appReducers = {
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
   recentlyVisited: recentlyVisitedReducer,
-} as ActionReducerMap<{}>;
-
-export function localStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  // This is done to ensure we don't accidentally apply state from session storage from another user.
-  let globalUserId = null;
-  return localStorageSync({
-    storageKeySerializer: (id) => {
-      return globalUserId || id;
-    },
-    syncCondition: () => {
-      if (globalUserId) {
-        return true;
-      }
-      const userId = getDashboardStateSessionId();
-      if (userId) {
-        globalUserId = userId;
-        return true;
-      }
-      return false;
-    },
-    keys: ['dashboard'],
-    rehydrate: false,
-
-  })(reducer);
-}
-
-const metaReducers = [localStorageSyncReducer];
+};
 
 @NgModule({
   imports: [
     StoreModule.forRoot(
       appReducers,
       {
-        metaReducers,
+        metaReducers: [
+          LocalStorageService.storeToLocalStorageSyncReducer
+        ],
         runtimeChecks: {
           strictStateImmutability: true,
           strictActionImmutability: false
