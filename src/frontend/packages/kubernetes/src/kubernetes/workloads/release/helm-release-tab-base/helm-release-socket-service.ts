@@ -92,20 +92,23 @@ export class HelmReleaseSocketService implements OnDestroy {
           // Store ALL resources for the release
           if (prefix) {
             manifest.forEach(resource => {
-              if (this.isValidPushResource(resource.kind)) {
-                this.pushResource(resources, resource.kind, resource);
+              const entityType = this.getEntityTypeForResource(resource.kind);
+              if (entityType) {
+                if (!resources[entityType]) {
+                  resources[entityType] = [];
+                }
+                resources[entityType].push(resource);
               }
             });
 
-            Object.entries(resources).forEach(([type, resourcesOfType]) => {
+            Object.entries(resources).forEach(([entityType, resourcesOfType]) => {
               let action: KubePaginationAction;
-              if (type === 'Pod') {
+              if (entityType === 'pod') {
                 resourcesOfType = resourcesOfType || [];
                 resourcesOfType = resourcesOfType.map((pod: KubernetesPod) =>
                   KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
                 );
               }
-              const entityType = this.kubeToEntityType(type);
               action = kubeEntityCatalog[entityType].actions.getInWorkload(
                 this.helmReleaseHelper.endpointGuid,
                 this.helmReleaseHelper.namespace,
@@ -134,18 +137,10 @@ export class HelmReleaseSocketService implements OnDestroy {
     });
   }
 
-  private isValidPushResource(type: string): boolean {
-    return type === 'Service' ||
-      type === 'Pod' ||
-      type === 'Job' ||
-      type === 'PersistentVolumeClaim' ||
-      type === 'ReplicaSet' ||
-      type === 'Role' ||
-      type === 'Secret' ||
-      type === 'ServiceAccount';
-  }
-
-  private kubeToEntityType(type: string): string {
+  /**
+   * Convert type in kube api kind string to kube entity catalog property name
+   */
+  private getEntityTypeForResource(type: string): string {
     switch (type) {
       case 'Service':
         return 'service';
@@ -164,16 +159,6 @@ export class HelmReleaseSocketService implements OnDestroy {
       case 'ServiceAccount':
         return 'serviceAccount';
     }
-  }
-
-  private pushResource(
-    resources: { [type: string]: BasicKubeAPIResource[]; },
-    type: string,
-    resource: BasicKubeAPIResource) {
-    if (!resources[type]) {
-      resources[type] = [];
-    }
-    resources[type].push(resource);
   }
 
   public stop() {
