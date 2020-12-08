@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { first } from 'rxjs/operators';
+import { finalize, first, switchMap, tap } from 'rxjs/operators';
 
 import { Chart } from '../shared/models/chart';
 import { ChartVersion } from '../shared/models/chart-version';
@@ -39,24 +39,30 @@ export class ChartDetailsComponent implements OnInit {
       const chartName = params.chartName;
 
       if (!!chartName) {
-        this.chartsService.getChart(repo, chartName).pipe(first()).subscribe(chart => {
-          clearTimeout(this.loadingDelay);
-          this.loading = false;
-          this.initing = false;
-          this.chart = chart;
-          this.chartSubTitle = chart.attributes.repo.name;
-          if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
-            this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
-          }
-          const version = params.version || this.chart.relationships.latestChartVersion.data.version;
-          this.chartsService.getVersion(repo, chartName, version).pipe(first())
-            .subscribe(chartVersion => {
-              this.currentVersion = chartVersion;
-              this.titleVersion = this.currentVersion.attributes.app_version || '';
-              this.updateMetaTags();
-              this.iconUrl = this.chartsService.getChartIconURL(this.chart, chartVersion);
-            });
-        });
+        this.chartsService.getChart(repo, chartName).pipe(
+          first(),
+          switchMap(chart => {
+            clearTimeout(this.loadingDelay);
+            this.chart = chart;
+            this.chartSubTitle = chart.attributes.repo.name;
+            if (getMonocularEndpoint(this.route, chart) !== stratosMonocularEndpointGuid) {
+              this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
+            }
+            const version = params.version || this.chart.relationships.latestChartVersion.data.version;
+            return this.chartsService.getVersion(repo, chartName, version).pipe(first());
+          }),
+          tap(chartVersion => {
+            this.currentVersion = chartVersion;
+            this.titleVersion = this.currentVersion.attributes.app_version || '';
+            this.updateMetaTags();
+            this.iconUrl = this.chartsService.getChartIconURL(this.chart, chartVersion);
+          }),
+          finalize(() => {
+            clearTimeout(this.loadingDelay);
+            this.loading = false;
+            this.initing = false;
+          })
+        ).subscribe();
       }
     });
   }
