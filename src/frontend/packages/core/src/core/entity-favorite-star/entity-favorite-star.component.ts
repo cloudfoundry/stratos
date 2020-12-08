@@ -27,6 +27,8 @@ export class EntityFavoriteStarComponent {
   @Input()
   public confirmRemoval = false;
 
+  @Input() small = false;
+
   public isFavorite$: Observable<boolean>;
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);

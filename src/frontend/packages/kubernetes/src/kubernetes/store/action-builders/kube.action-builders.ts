@@ -1,5 +1,9 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { kubernetesPodsEntityType, kubernetesServicesEntityType } from '../../kubernetes-entity-factory';
+import {
+  kubernetesNamespacesEntityType,
+  kubernetesPodsEntityType,
+  kubernetesServicesEntityType,
+} from '../../kubernetes-entity-factory';
 import {
   DeleteAnalysisReport,
   GetAnalysisReportById,
@@ -7,7 +11,7 @@ import {
   GetAnalysisReportsByPath,
   RunAnalysisReport,
 } from '../analysis.actions';
-import { GetKubernetesResourcesInWorkload } from '../kube-resource.actions';
+import { DeleteKubernetesResource, GetKubernetesResourcesInWorkload } from '../kube-resource.actions';
 import {
   CreateKubernetesNamespace,
   GeKubernetesDeployments,
@@ -118,12 +122,19 @@ export interface KubeNamespaceActionBuilders extends OrchestratedActionBuilders 
     kubeGuid: string,
     paginationKey?: string,
   ) => GetKubernetesNamespaces;
+  deleteResource: (
+    kubeGuid: string,
+    resourceName: string,
+    namespace?: string
+  ) => DeleteKubernetesResource;
 }
 
 export const kubeNamespaceActionBuilders: KubeNamespaceActionBuilders = {
   get: (namespace: string, kubeGuid: string) => new GetKubernetesNamespace(namespace, kubeGuid),
   create: (namespace: string, kubeGuid: string) => new CreateKubernetesNamespace(namespace, kubeGuid),
-  getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid)
+  getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid),
+  deleteResource: (resName: string, kubeGuid: string, namespace: string) =>
+    new DeleteKubernetesResource(kubernetesNamespacesEntityType, kubeGuid, resName, namespace)
 };
 
 export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {

@@ -1,9 +1,10 @@
 import { SortDirection } from '@angular/material/sort';
 
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
+import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginationParam } from '../../../../store/src/types/pagination.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../kubernetes-entity-factory';
-import { getGuidFromKubePod } from './kube.getIds';
+import { getGuidForNamespacedResource, getGuidForResource, getGuidFromKubePod } from './kube.getIds';
 import { KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
 
 
@@ -22,6 +23,10 @@ export const GET_KUBE_RESOURCES_IN_NAMESPACE_FAILURE = '[KUBERNETES Endpoint] Ge
 export const GET_KUBE_RESOURCES_IN_WORKLOAD = '[KUBERNETES Endpoint] Get Resources in workload';
 export const GET_KUBE_RESOURCES_IN_WORKLOAD_SUCCESS = '[KUBERNETES Endpoint] Get Resources in workload Success';
 export const GET_KUBE_RESOURCES_IN_WORKLOAD_FAILURE = '[KUBERNETES Endpoint] Get Resources in workload Failure';
+
+export const DELETE_KUBE_RESOURCE = '[KUBERNETES Endpoint] Delete Resource';
+export const DELETE_KUBE_RESOURCE_SUCCESS = '[KUBERNETES Endpoint] Delete Resource Success';
+export const DELETE_KUBE_RESOURCE_FAILURE = '[KUBERNETES Endpoint] Delete Resource Failure';
 
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,
@@ -93,4 +98,34 @@ export class GetKubernetesResourcesInWorkload extends GetKubernetesResources {
     GET_KUBE_RESOURCES_IN_WORKLOAD_SUCCESS,
     GET_KUBE_RESOURCES_IN_WORKLOAD_FAILURE
   ];
+}
+
+export class DeleteKubernetesResource implements KubeSingleEntityAction {
+
+  public entity;
+
+  constructor(
+    public entityType: string,
+    public kubeGuid: string,
+    public name: string,
+    public namespace?: string
+  ) {
+    this.entity = [kubernetesEntityFactory(this.entityType)];
+    // TODO: RC
+    if (this.namespace) {
+      this.guid = getGuidForNamespacedResource(this.kubeGuid, this.namespace, this.name);
+    } else {
+      this.guid = getGuidForResource(this.kubeGuid, this.name);
+    }
+  }
+
+  type = DELETE_KUBE_RESOURCE;
+  endpointType = KUBERNETES_ENDPOINT_TYPE;
+  actions = [
+    DELETE_KUBE_RESOURCE,
+    DELETE_KUBE_RESOURCE_SUCCESS,
+    DELETE_KUBE_RESOURCE_FAILURE
+  ];
+  requestType: ApiRequestTypes = 'delete';
+  guid: string;
 }

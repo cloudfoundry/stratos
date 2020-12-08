@@ -1,4 +1,4 @@
-<app-page-sub-nav>
+<app-page-sub-nav [breadcrumbs]="breadcrumbs">
 
   <app-analysis-report-runner [kubeId]="endpointID" [namespace]="kubeNamespaceService.namespaceName">
   </app-analysis-report-runner>

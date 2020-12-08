@@ -9,13 +9,6 @@ import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernet
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
-import {
-  KubernetesNamespacePodsComponent,
-} from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
-import {
-  KubernetesNamespaceServicesComponent,
-} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
-import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
 import { KubernetesNodeMetricsComponent } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metrics.component';
 import { KubernetesNodePodsComponent } from './kubernetes-node/kubernetes-node-pods/kubernetes-node-pods.component';
 import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.component';
@@ -75,34 +68,6 @@ const kubernetes: Routes = [{
     }
   ]
 },
-// TODO: RC these can be removed?
-{
-  path: ':endpointId/namespaces/:namespaceName',
-  component: KubernetesNamespaceComponent, // TODO: RC This component, and others in here, should be removed if route goes
-  children: [
-    {
-      path: '',
-      redirectTo: 'pods',
-      pathMatch: 'full'
-    },
-    {
-      path: 'pods',
-      component: KubernetesNamespacePodsComponent
-    },
-    {
-      path: 'services',
-      component: KubernetesNamespaceServicesComponent
-    },
-    {
-      path: 'analysis',
-      component: KubernetesNamespaceAnalysisReportComponent
-    },
-    {
-      path: 'resource/:resource',
-      loadChildren: () => import('./kubernetes-resource/generic-resource.module').then(m => m.KubernetesGenericResourceModule),
-    },
-  ]
-},
 {
   path: ':endpointId',
   component: KubernetesTabBaseComponent,
@@ -135,6 +100,11 @@ const kubernetes: Routes = [{
     {
       path: 'analysis/info',
       component: KubernetesAnalysisInfoComponent
+    },
+    {
+      path: 'resource/namespace/:namespaceName/analysis',
+      pathMatch: 'full',
+      component: KubernetesNamespaceAnalysisReportComponent
     },
     {
       path: 'resource/:resource',

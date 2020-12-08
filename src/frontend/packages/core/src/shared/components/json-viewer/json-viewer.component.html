@@ -1,4 +1,4 @@
-<section class="ngx-json-viewer">
+<section class="ngx-json-viewer" [ngClass]="{'small-text': small}">
   <section
     *ngFor="let segment of segments"
     [ngClass]="['segment', 'segment-type-' + segment.type]">

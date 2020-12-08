@@ -6,6 +6,7 @@ import {
 } from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IEntityMetadata, IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
 
 // Map of endpoint ID to current namespace for that endpoint
@@ -58,11 +59,14 @@ export interface KubeResourceEntityDefinition<
   iconFont?: string;
   type: string;
   getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
+  getIsValid?: (fav: UserFavorite<A>) => Observable<boolean>;
   listColumns?: SimpleKubeListColumn[];
   // Should this entity be hidden in the auto-generated navigation?
   hidden?: boolean;
   // Name fo a list config that can be obtained from the list config service
   listConfig?: string;
+  // Allow this entity to be favorited?
+  canFavorite?: boolean;
 }
 
 export interface KubeService extends BasicKubeAPIResource {

@@ -1,6 +1,10 @@
 <div class="sidepanel-preview" [ngClass]="{'sidepanel-preview__preview': (sidePanelService.previewMode$ | async)}">
   <div class="sidepanel-preview__header">
     <h1>{{ title }}</h1>
+    <app-entity-favorite-star [small]="true" class="sidepanel-preview__favorite" *ngIf="favorite" [favorite]="favorite"></app-entity-favorite-star>
+    <div  class="sidepanel-preview__custom">
+      <ng-container *ngIf="header" [cdkPortalOutlet]="header"></ng-container>
+    </div>
     <button class="sidepanel__close" mat-icon-button (click)="sidePanelService.hide()">
       <mat-icon>close</mat-icon>
     </button>

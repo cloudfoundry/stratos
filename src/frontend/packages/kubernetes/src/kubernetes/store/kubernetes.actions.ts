@@ -100,6 +100,7 @@ export interface KubeAction extends EntityRequestAction {
 }
 export interface KubePaginationAction extends PaginatedAction, KubeAction {
   flattenPagination: boolean;
+  continuationToken?: string;
 }
 export interface KubeSingleEntityAction extends KubeAction {
   guid: string;
