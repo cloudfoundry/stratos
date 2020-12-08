@@ -510,6 +510,7 @@ export class KubernetesEffects {
             entities: { [entityKey]: {} },
             result: []
           } as NormalizedResponse;
+          response.metadata.kubeId = action.kubeGuid;
           res.entities[entityKey][action.guid] = response;
           res.result.push(action.guid);
           const actions: Action[] = [
