@@ -78,14 +78,6 @@ export class HelmReleaseSocketService implements OnDestroy {
       if (messageObj) {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
-        } else if (messageObj.kind === 'Pods') {
-          const pods: KubernetesPod[] = messageObj.data || [];
-          const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
-          const releasePodsAction = kubeEntityCatalog.pod.actions.getInWorkload(
-            this.helmReleaseHelper.endpointGuid,
-            this.helmReleaseHelper.releaseTitle
-          );
-          this.populateList(releasePodsAction, podsWithInfo);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
@@ -107,22 +99,18 @@ export class HelmReleaseSocketService implements OnDestroy {
 
             Object.entries(resources).forEach(([type, resourcesOfType]) => {
               let action: KubePaginationAction;
-              switch (type) {
-                case 'Service':
-                  action = kubeEntityCatalog.service.actions.getInWorkload(
-                    this.helmReleaseHelper.releaseTitle,
-                    this.helmReleaseHelper.endpointGuid,
-                  );
-                  break;
-                default:
-                  const entityType = this.kubeToEntityType(type);
-                  action = kubeEntityCatalog[entityType].actions.getInWorkload(
-                    this.helmReleaseHelper.endpointGuid,
-                    this.helmReleaseHelper.namespace,
-                    this.helmReleaseHelper.releaseTitle
-                  );
-                  break;
+              if (type === 'Pod') {
+                resourcesOfType = resourcesOfType || [];
+                resourcesOfType = resourcesOfType.map((pod: KubernetesPod) =>
+                  KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
+                );
               }
+              const entityType = this.kubeToEntityType(type);
+              action = kubeEntityCatalog[entityType].actions.getInWorkload(
+                this.helmReleaseHelper.endpointGuid,
+                this.helmReleaseHelper.namespace,
+                this.helmReleaseHelper.releaseTitle
+              );
               this.populateList(action, resourcesOfType);
             });
           }
@@ -148,6 +136,7 @@ export class HelmReleaseSocketService implements OnDestroy {
 
   private isValidPushResource(type: string): boolean {
     return type === 'Service' ||
+      type === 'Pod' ||
       type === 'Job' ||
       type === 'PersistentVolumeClaim' ||
       type === 'ReplicaSet' ||
@@ -157,10 +146,11 @@ export class HelmReleaseSocketService implements OnDestroy {
   }
 
   private kubeToEntityType(type: string): string {
-    console.log(type);
     switch (type) {
       case 'Service':
         return 'service';
+      case 'Pod':
+        return 'pod';
       case 'Job':
         return 'job';
       case 'PersistentVolumeClaim':

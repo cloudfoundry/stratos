@@ -312,6 +312,7 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'pods',
       apiNamespaced: true,
+      apiWorkspaced: true,
       listConfig: 'k8s-pods',
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(
         definition, { actionBuilders: kubePodActionBuilders }
@@ -344,6 +345,7 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'service',
       apiNamespaced: true,
+      apiWorkspaced: true,
       listConfig: 'k8s-services',
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>(
         definition, {

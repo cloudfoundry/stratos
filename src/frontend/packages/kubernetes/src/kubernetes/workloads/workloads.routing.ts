@@ -9,11 +9,9 @@ import {
 } from './release/tabs/helm-release-analysis-tab/helm-release-analysis-tab.component';
 import { HelmReleaseHistoryTabComponent } from './release/tabs/helm-release-history-tab/helm-release-history-tab.component';
 import { HelmReleaseNotesTabComponent } from './release/tabs/helm-release-notes-tab/helm-release-notes-tab.component';
-import { HelmReleasePodsTabComponent } from './release/tabs/helm-release-pods/helm-release-pods-tab.component';
 import {
   HelmReleaseResourceGraphComponent,
 } from './release/tabs/helm-release-resource-graph/helm-release-resource-graph.component';
-import { HelmReleaseServicesTabComponent } from './release/tabs/helm-release-services/helm-release-services-tab.component';
 import { HelmReleaseSummaryTabComponent } from './release/tabs/helm-release-summary-tab/helm-release-summary-tab.component';
 import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-values-tab/helm-release-values-tab.component';
 import { HelmReleasesTabComponent } from './releases-tab/releases-tab.component';
@@ -49,8 +47,6 @@ const routes: Routes = [
           { path: 'notes', component: HelmReleaseNotesTabComponent },
           { path: 'values', component: HelmReleaseValuesTabComponent },
           { path: 'history', component: HelmReleaseHistoryTabComponent },
-          { path: 'pods', component: HelmReleasePodsTabComponent }, // TODO: RC
-          { path: 'services', component: HelmReleaseServicesTabComponent }, // TODO: RC
           { path: 'graph', component: HelmReleaseResourceGraphComponent },
           { path: 'analysis', component: HelmReleaseAnalysisTabComponent },
           {
