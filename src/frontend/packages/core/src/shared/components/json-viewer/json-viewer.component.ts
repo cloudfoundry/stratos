@@ -26,6 +26,8 @@ export class JsonViewerComponent implements OnChanges {
    */
   @Input() cleanOnChange = true;
 
+  @Input() small = false;
+
   segments: Segment[] = [];
 
   expand() {

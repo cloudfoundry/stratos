@@ -37,6 +37,11 @@
       top: 7px;
     }
   }
+  &__custom {
+    align-self: center;
+    flex: 1;
+    margin: 0 50px 0 10px;
+  }
 
   &__content {
     flex: 1;
@@ -49,5 +54,12 @@
     position: absolute;
     right: 5px;
     top: 7px;
+  }
+
+  &__favorite {
+    align-items: center;
+    display: flex;
+    margin-left: 10px;
+    opacity: 0.6;
   }
 }

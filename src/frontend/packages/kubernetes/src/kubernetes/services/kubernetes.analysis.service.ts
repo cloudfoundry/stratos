@@ -34,6 +34,14 @@ export class KubernetesAnalysisService {
 
   private action: GetAnalysisReports;
 
+  public static isAnalysisEnabled(store: Store<AppState>): Observable<boolean> {
+    // Is the backend plugin available?
+    const enabled$ = store.select('auth').pipe(
+      map(auth => auth.sessionData.plugins && auth.sessionData.plugins.analysis)
+    );
+    return enabled$.pipe(startWith(false));
+  }
+
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
     public activatedRoute: ActivatedRoute,
@@ -43,14 +51,8 @@ export class KubernetesAnalysisService {
     this.kubeGuid = kubeEndpointService.kubeGuid || getHelmReleaseDetailsFromGuid(activatedRoute.snapshot.params.guid).endpointId;
 
     // Is the backend plugin available?
-    this.enabled$ = this.store.select('auth').pipe(
-      map(auth => auth.sessionData.plugins && auth.sessionData.plugins.analysis)
-    );
-
-    this.hideAnalysis$ = this.enabled$.pipe(
-      map(enabled => !enabled),
-      startWith(true),
-    );
+    this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.store);
+    this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
 
     const allEngines = {
       popeye:

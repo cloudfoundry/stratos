@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
+import { KubernetesService } from '../../services/kubernetes.service';
 import { AnalysisReport } from '../../store/kube.types';
 
 @Component({
@@ -11,7 +12,10 @@ import { AnalysisReport } from '../../store/kube.types';
   templateUrl: './kubernetes-namespace-analysis-report.component.html',
   styleUrls: ['./kubernetes-namespace-analysis-report.component.scss'],
   providers: [
-    KubernetesAnalysisService
+    KubernetesService,
+    KubernetesEndpointService,
+    KubernetesNamespaceService,
+    KubernetesAnalysisService,
   ]
 })
 export class KubernetesNamespaceAnalysisReportComponent {
@@ -26,6 +30,8 @@ export class KubernetesNamespaceAnalysisReportComponent {
 
   noReportsAvailable = false;
 
+  breadcrumbs = [];
+
   constructor(
     public analyzerService: KubernetesAnalysisService,
     public endpointService: KubernetesEndpointService,
@@ -34,6 +40,12 @@ export class KubernetesNamespaceAnalysisReportComponent {
     this.endpointID = this.endpointService.kubeGuid;
     this.path = `${this.kubeNamespaceService.namespaceName}`;
     this.report$.next(null);
+
+    this.breadcrumbs = [
+      { value: 'Analysis' },
+      { value: this.path },
+    ];
+
   }
 
   public analysisChanged(report) {
