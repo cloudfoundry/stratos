@@ -18,6 +18,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
+import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { entityDeleted } from '../../../../store/src/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
@@ -69,6 +70,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     private viewContainerRef: ViewContainerRef,
     private confirmDialog: ConfirmationDialogService,
     private sidePanelService: SidePanelService,
+    private snackBarService: SnackBarService,
   ) { }
 
   public title: string;
@@ -268,7 +270,11 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         ).pipe(
           entityDeleted(),
           first()
-        ).subscribe();
+        ).subscribe((result) => {
+          const msg = result.error ? `Could not delete reosource: ${result.error}` : `Deleted resource '${this.data.resource.metadata.name}'`;
+          this.snackBarService.show(msg);
+        }
+        );
       },
       () => {
         this.sidePanelService.open();
