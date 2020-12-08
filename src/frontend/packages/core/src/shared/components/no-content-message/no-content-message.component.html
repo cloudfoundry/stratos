@@ -3,7 +3,7 @@
     <div class="app-no-content-container__link-text">{{toolbarLink.text}}</div>
     <mat-icon #toolbarRef class="app-no-content-container__link-icon">reply</mat-icon>
   </div>
-  <mat-icon [fontSet]="iconFont">{{icon}}</mat-icon>
+  <mat-icon class="icon" [fontSet]="iconFont">{{icon}}</mat-icon>
   <div *ngIf="firstLine" class="first-line">{{firstLine}}</div>
   <div class="second-line">
     <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}
