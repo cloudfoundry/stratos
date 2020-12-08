@@ -4,5 +4,10 @@
 
   .app-no-content-container {
     color: $subdued;
+    &__link,
+    .icon,
+    .first-line {
+      color:  mat-color($primary);
+    }
   }
 }

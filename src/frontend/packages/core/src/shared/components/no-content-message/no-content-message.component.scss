@@ -26,7 +26,7 @@
   }
   &__link {
     display: flex;
-    opacity: 0%;
+    opacity: 0;
     position: absolute;
     right: 113px;
     top: 54px;
@@ -41,7 +41,7 @@
       margin-top: 26px;
     }
     &--show {
-      opacity: 100%;
+      opacity: 1;
       transition: opacity .6s;
     }
   }
