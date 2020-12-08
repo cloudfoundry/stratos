@@ -3,9 +3,18 @@ Tech Preview is enabled, extra features will be shown.
 {{- end}}
 
 To access Stratos:
-{{- $ingress := .Values.console.ingress | default dict }}
+{{- $ingress := .Values.console.service.ingress | default dict }}
 {{- if $ingress.enabled }}
-From outside the cluster, the server URL is: http://{{ .Values.console.ingress.host }}
+{{- if .Values.console.service.ingress.host }}
+From outside the cluster, the server URL is: https://{{ .Values.console.service.ingress.host }}
+{{- else }}
+NOTE: It may take a few minutes for the Ingress IP to become available.
+You can watch the status of by running 'kubectl get ingress --namespace {{ .Release.Namespace }} -w {{ .Release.Name }}-ingress'
+
+Get the URL by running these commands in the same shell:
+  export INGRESS_ADDR=$(kubectl get ingress --namespace {{ .Release.Namespace }} --field-selector 'metadata.name={{ .Release.Name }}-ingress' -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+  echo https://$INGRESS_ADDR
+{{- end }}
 {{- else }}
 Get the URL by running these commands in the same shell:
 {{- if contains "NodePort" .Values.console.service.type }}

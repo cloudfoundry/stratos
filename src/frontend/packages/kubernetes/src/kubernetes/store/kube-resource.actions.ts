@@ -1,10 +1,12 @@
 import { SortDirection } from '@angular/material/sort';
 
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginationParam } from '../../../../store/src/types/pagination.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../kubernetes-entity-factory';
-import { getGuidForNamespacedResource, getGuidForResource, getGuidFromKubePod } from './kube.getIds';
+import { getGuidFromKubePod } from './kube.getIds';
+import { BasicKubeAPIResource } from './kube.types';
 import { KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
 
 
@@ -21,8 +23,8 @@ export const GET_KUBE_RESOURCES_IN_NAMESPACE_SUCCESS = '[KUBERNETES Endpoint] Ge
 export const GET_KUBE_RESOURCES_IN_NAMESPACE_FAILURE = '[KUBERNETES Endpoint] Get Resources in namespace Failure';
 
 export const DELETE_KUBE_RESOURCE = '[KUBERNETES Endpoint] Delete Resource';
-export const DELETE_KUBE_RESOURCE_SUCCESS  = '[KUBERNETES Endpoint] Delete Resource Success';
-export const DELETE_KUBE_RESOURCE_FAILURE  = '[KUBERNETES Endpoint] Delete Resource Failure';
+export const DELETE_KUBE_RESOURCE_SUCCESS = '[KUBERNETES Endpoint] Delete Resource Success';
+export const DELETE_KUBE_RESOURCE_FAILURE = '[KUBERNETES Endpoint] Delete Resource Failure';
 
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,
@@ -85,20 +87,18 @@ export class GetKubernetesResourcesInNamespace extends GetKubernetesResources {
 
 export class DeleteKubernetesResource implements KubeSingleEntityAction {
 
-  public entity;
+  public entity: EntitySchema[];
 
   constructor(
     public entityType: string,
+    private resource: BasicKubeAPIResource,
     public kubeGuid: string,
     public name: string,
     public namespace?: string
   ) {
-    this.entity = [kubernetesEntityFactory(this.entityType)];
-    if (this.namespace) {
-      this.guid = getGuidForNamespacedResource(this.kubeGuid, this.namespace, this.name);
-    } else {
-      this.guid = getGuidForResource(this.kubeGuid, this.name);
-    }
+    const schema = kubernetesEntityFactory(this.entityType);
+    this.entity = [schema];
+    this.guid = schema.getId(resource);
   }
 
   type = DELETE_KUBE_RESOURCE;

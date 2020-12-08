@@ -2,7 +2,6 @@ import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
@@ -204,7 +203,7 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`,
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/resource/${defn.type}`,
         getGuid: resource => schema.getId(resource),
       };
     }
@@ -258,7 +257,6 @@ export class KubeEntityCatalog {
       ],
       getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
-      urlValidationRegexString: urlValidationExpression,
       subTypes: [
         {
           type: 'config',
@@ -448,58 +446,6 @@ export class KubeEntityCatalog {
         }
       ]
     });
-    this.pv = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'persistentVolume',
-      icon: 'persistent_volume',
-      label: 'Persistent Volume',
-      apiVersion: '/api/v1',
-      apiName: 'persistentvolumes',
-      apiNamespaced: false,
-    });
-    this.replicaSet = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'replicaSet',
-      icon: 'replica_set',
-      label: 'Replica Set',
-      apiVersion: '/apis/apps/v1',
-      apiName: 'replicasets',
-      listColumns: [
-        {
-          header: 'Replicas',
-          field: 'spec.replicas',
-          sort: true
-        },
-      ]
-    });
-    this.clusterRole = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'clusterRole',
-      icon: 'cluster_role',
-      label: 'Cluster Role',
-      apiVersion: '/apis/rbac.authorization.k8s.io/v1',
-      apiName: 'clusterroles',
-      apiNamespaced: false,
-    });
-    this.serviceAccount = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'serviceAccount',
-      icon: 'replica_set',
-      label: 'Service Account',
-      apiVersion: '/api/v1',
-      apiName: 'serviceaccounts',
-    });
-    this.role = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'role',
-      icon: 'role_binding',
-      label: 'Role',
-      apiVersion: '/apis/rbac.authorization.k8s.io/v1',
-      apiName: 'roles',
-    });
-    this.job = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
-      type: 'job',
-      icon: 'job',
-      label: 'Job',
-      apiVersion: '/apis/batch/v1',
-      apiName: 'jobs',
-    });
-
     this.pv = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'persistentVolume',
       icon: 'persistent_volume',

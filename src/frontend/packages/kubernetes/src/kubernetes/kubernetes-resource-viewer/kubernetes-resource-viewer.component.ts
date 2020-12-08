@@ -6,7 +6,6 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
-  OnInit,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
@@ -60,7 +59,7 @@ interface KubernetesResourceViewerResource {
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss']
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, OnInit, AfterViewInit {
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
 
   constructor(
     private endpointsService: EndpointsService,
@@ -90,14 +89,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   component: any;
 
-  data: any;
+  data: any; // TODO: Typing
 
-  @ViewChild('header', {static: false}) templatePortalContent: TemplateRef<unknown>;
+  @ViewChild('header', { static: false }) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
-
-  ngOnInit() {
-    this.createCustomComponent();
-  }
 
   ngOnDestroy() {
     this.removeCustomComponent();
@@ -122,12 +117,15 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   ngAfterViewInit() {
+    this.createCustomComponent();
     setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
   setProps(props: KubernetesResourceViewerConfig) {
     this.title = props.title;
     this.analysis = props.analysis;
+    this.component = props.component;
+
     this.resource$ = props.resource$.pipe(
       filter(item => !!item),
       map((item: (KubeAPIResource | KubeStatus)) => {
@@ -215,6 +213,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         ];
       })
     );
+    this.createCustomComponent();
   }
 
   private getVersionFromSelfLink(url: string): string {
@@ -251,7 +250,8 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   // Warn about deletion and then delete the resource if confirmed
   public deleteWarn() {
-    const defn = this.data.definition as KubeResourceEntityDefinition;
+    // Namespace vs Pod definition in different places
+    const defn = (this.data.definition?.definition || this.data.definition) as KubeResourceEntityDefinition;
     this.sidePanelService.hide();
     const confirmation = new ConfirmationDialogConfig(
       `Delete ${defn.label}`,
@@ -264,8 +264,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
           StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
         catalogEntity.api.deleteResource(
-          this.data.resource.metadata.name,
+          this.data.resource,
           this.data.endpointId,
+          this.data.resource.metadata.name,
           this.data.resource.metadata.namespace
         ).pipe(
           entityDeleted(),
