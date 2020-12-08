@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
@@ -515,7 +515,8 @@ export class KubernetesEffects {
           const actions: Action[] = [
             new WrapperRequestActionSuccess(res, action)
           ];
-          actions.push(new ClearPaginationOfType(action));
+          // actions.push(new ClearPaginationOfType(action));
+          actions.push(new ClearPaginationOfEntity(action, action.guid));
           return actions;
         }),
         catchError(error => {
