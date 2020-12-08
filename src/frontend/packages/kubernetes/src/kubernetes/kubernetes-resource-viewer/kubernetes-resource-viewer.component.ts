@@ -6,7 +6,6 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   OnDestroy,
-  OnInit,
   TemplateRef,
   ViewChild,
   ViewContainerRef,
@@ -59,7 +58,7 @@ interface KubernetesResourceViewerResource {
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss']
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, OnInit, AfterViewInit {
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
 
   constructor(
     private endpointsService: EndpointsService,
@@ -93,10 +92,6 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   @ViewChild('header', { static: false }) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
 
-  ngOnInit() {
-    this.createCustomComponent();
-  }
-
   ngOnDestroy() {
     this.removeCustomComponent();
   }
@@ -120,12 +115,15 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   ngAfterViewInit() {
+    this.createCustomComponent();
     setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
   setProps(props: KubernetesResourceViewerConfig) {
     this.title = props.title;
     this.analysis = props.analysis;
+    this.component = props.component;
+
     this.resource$ = props.resource$.pipe(
       filter(item => !!item),
       map((item: (KubeAPIResource | KubeStatus)) => {
@@ -213,6 +211,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         ];
       })
     );
+    this.createCustomComponent();
   }
 
   private getVersionFromSelfLink(url: string): string {
