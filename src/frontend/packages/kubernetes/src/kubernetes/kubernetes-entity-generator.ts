@@ -560,7 +560,7 @@ export class KubeEntityCatalog {
       apiName: 'clusterroles',
       apiNamespaced: false,
     });
-    this.serviceAccount = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+    this.serviceAccount = KubeResourceEntityHelper.generate<KubeServiceAccount, KubeResourceActionBuilders>(endpointDef, {
       type: 'serviceAccount',
       icon: 'replica_set',
       label: 'Service Account',
