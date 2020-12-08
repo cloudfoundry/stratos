@@ -376,7 +376,7 @@ export class KubernetesEffects {
             return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
           }, new HttpParams());
         }
-        return this.http.get(limit, requestArgs as any);
+        return this.http.get(limit, requestArgs);
       }),
       mergeMap(allRes => {
         const base = {
