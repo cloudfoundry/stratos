@@ -87,12 +87,15 @@ export class ListActionOrConfigHelpers {
     dsOverrides?: Partial<IListDataSourceConfig<A, T>>
   ): IListDataSourceConfig<A, T> {
     const { action, catalogEntity } = ListActionOrConfigHelpers.createListAction(actionOrConfig);
+    const schema = catalogEntity.getSchema(action.schemaKey);
     return {
       store,
       action,
       paginationKey: action.paginationKey,
       schema: catalogEntity.getSchema(action.schemaKey),
-      getRowUniqueId: entity => catalogEntity.getGuidFromEntity(entity),
+      getRowUniqueId: entity => {
+        return catalogEntity.getGuidFromEntity(entity) || schema.getId(entity);
+      },
       listConfig,
       isLocal: true, // assume true unless overwritten
       ...dsOverrides
