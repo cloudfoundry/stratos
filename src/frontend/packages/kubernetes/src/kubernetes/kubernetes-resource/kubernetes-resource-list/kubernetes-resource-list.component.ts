@@ -140,8 +140,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
         noEntries: 'There are no resources'
       },
       getColumns: () => this.getColumns(catalogEntity.definition),
-      hideRefresh: this.isWorkloadView
     };
+    listConfig.hideRefresh = this.isWorkloadView;
 
     provider.updateListConfig(listConfig);
     this.provider = provider;
