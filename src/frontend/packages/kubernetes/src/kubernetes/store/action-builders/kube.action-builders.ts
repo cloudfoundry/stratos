@@ -1,5 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
-import { kubernetesNamespacesEntityType } from '../../kubernetes-entity-factory';
+import { kubernetesNamespacesEntityType, kubernetesPodsEntityType } from '../../kubernetes-entity-factory';
 import { GetHelmReleasePods, GetHelmReleaseServices } from '../../workloads/store/workloads.actions';
 import {
   DeleteAnalysisReport,
@@ -60,6 +60,11 @@ export interface KubePodActionBuilders extends OrchestratedActionBuilders {
     kubeGuid: string,
     releaseTitle: string
   ) => GetHelmReleasePods;
+  deleteResource: (
+    kubeGuid: string,
+    resourceName: string,
+    namespace?: string
+  ) => DeleteKubernetesResource;
 }
 
 export const kubePodActionBuilders: KubePodActionBuilders = {
@@ -67,7 +72,12 @@ export const kubePodActionBuilders: KubePodActionBuilders = {
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesPods(kubeGuid),
   getOnNode: (kubeGuid: string, nodeName: string) => new GetKubernetesPodsOnNode(kubeGuid, nodeName),
   getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesPodsInNamespace(kubeGuid, namespace),
-  getInWorkload: (kubeGuid: string, releaseTitle: string) => new GetHelmReleasePods(kubeGuid, releaseTitle)
+  getInWorkload: (kubeGuid: string, releaseTitle: string) => new GetHelmReleasePods(kubeGuid, releaseTitle),
+  deleteResource: (
+    kubeGuid: string,
+    resourceName: string,
+    namespace?: string
+  ) => new DeleteKubernetesResource(kubernetesPodsEntityType, kubeGuid, resourceName, namespace)
 };
 
 export interface KubeDeploymentActionBuilders extends OrchestratedActionBuilders {
@@ -126,7 +136,7 @@ export const kubeNamespaceActionBuilders: KubeNamespaceActionBuilders = {
   create: (namespace: string, kubeGuid: string) => new CreateKubernetesNamespace(namespace, kubeGuid),
   getMultiple: (kubeGuid: string, paginationKey?: string) => new GetKubernetesNamespaces(kubeGuid),
   deleteResource: (resName: string, kubeGuid: string, namespace: string) =>
-  new DeleteKubernetesResource(kubernetesNamespacesEntityType, kubeGuid, resName, namespace)
+    new DeleteKubernetesResource(kubernetesNamespacesEntityType, kubeGuid, resName, namespace)
 };
 
 export interface KubeServiceActionBuilders extends OrchestratedActionBuilders {

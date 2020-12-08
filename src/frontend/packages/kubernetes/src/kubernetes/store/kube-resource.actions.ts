@@ -21,8 +21,8 @@ export const GET_KUBE_RESOURCES_IN_NAMESPACE_SUCCESS = '[KUBERNETES Endpoint] Ge
 export const GET_KUBE_RESOURCES_IN_NAMESPACE_FAILURE = '[KUBERNETES Endpoint] Get Resources in namespace Failure';
 
 export const DELETE_KUBE_RESOURCE = '[KUBERNETES Endpoint] Delete Resource';
-export const DELETE_KUBE_RESOURCE_SUCCESS  = '[KUBERNETES Endpoint] Delete Resource Success';
-export const DELETE_KUBE_RESOURCE_FAILURE  = '[KUBERNETES Endpoint] Delete Resource Failure';
+export const DELETE_KUBE_RESOURCE_SUCCESS = '[KUBERNETES Endpoint] Delete Resource Success';
+export const DELETE_KUBE_RESOURCE_FAILURE = '[KUBERNETES Endpoint] Delete Resource Failure';
 
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,

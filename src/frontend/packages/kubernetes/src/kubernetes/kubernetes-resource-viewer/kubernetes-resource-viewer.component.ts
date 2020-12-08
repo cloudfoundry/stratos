@@ -92,7 +92,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   data: any;
 
-  @ViewChild('header', {static: false}) templatePortalContent: TemplateRef<unknown>;
+  @ViewChild('header', { static: false }) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
 
   ngOnInit() {
@@ -251,7 +251,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   // Warn about deletion and then delete the resource if confirmed
   public deleteWarn() {
-    const defn = this.data.definition as KubeResourceEntityDefinition;
+    const defn = this.data.definition.definition as KubeResourceEntityDefinition;
     this.sidePanelService.hide();
     const confirmation = new ConfirmationDialogConfig(
       `Delete ${defn.label}`,
@@ -264,8 +264,8 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
           StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
         catalogEntity.api.deleteResource(
-          this.data.resource.metadata.name,
           this.data.endpointId,
+          this.data.resource.metadata.name,
           this.data.resource.metadata.namespace
         ).pipe(
           entityDeleted(),
