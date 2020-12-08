@@ -597,6 +597,7 @@ export class KubeEntityCatalog {
       endpoint: endpointDefinition,
     });
   }
+
   private jobToCompletion(spec: any, status: any): string {
     if (!!spec.completions) {
       return status.succeeded + '/' + spec.completions;
