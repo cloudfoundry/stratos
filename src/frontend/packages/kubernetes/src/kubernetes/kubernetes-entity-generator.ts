@@ -206,7 +206,7 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`,
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/resource/${defn.type}`,
         getGuid: resource => schema.getId(resource),
       };
     }
