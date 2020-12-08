@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -24,7 +24,7 @@ const REPO_FILTER_NAME = 'repository';
   }]
 
 })
-export class CatalogTabComponent {
+export class CatalogTabComponent implements OnDestroy {
 
   public repos$: Observable<{
     artifactHubRepos: string[],
@@ -38,6 +38,9 @@ export class CatalogTabComponent {
 
   public collapsed = true;
   public hide = true;
+
+  private initStateSet = false;
+  private sub: Subscription;
 
   constructor(private store: Store<AppState>, private activatedRoute: ActivatedRoute) {
     // Determine the starting state of the filter by repo section
@@ -89,15 +92,20 @@ export class CatalogTabComponent {
       startWith(null)
     );
 
-    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
-      first()
-    ).subscribe(pagination => {
-      const { repo } = this.activatedRoute.snapshot.params;
-      if (repo &&  repo.length > 0) {
-        this.filterCharts(repo);
-      } else {
-        this.filteredRepo = pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME];
+    const { repo: repoFromRoute } = this.activatedRoute.snapshot.params;
+    const repoFromStore$ = helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(
+      map(pagination => pagination.clientPagination?.filter?.items?.[REPO_FILTER_NAME])
+    );
+
+    // Set the initial state... and watch for changes (aka reset filters button)
+    this.sub = repoFromStore$.subscribe(repoFromStore => {
+      // Only apply repo from url on first load (and if we have one)
+      if (!this.initStateSet && repoFromRoute && repoFromRoute.length > 0) {
+        this.filterCharts(repoFromRoute);
+      } else if (this.filteredRepo !== repoFromStore) {
+        this.filteredRepo = repoFromStore;
       }
+      this.initStateSet = true;
     });
   }
 
@@ -122,5 +130,11 @@ export class CatalogTabComponent {
    */
   public searchRepos(repoName: string) {
     this.searchReposSub.next(repoName);
+  }
+
+  ngOnDestroy(): void {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
   }
 }

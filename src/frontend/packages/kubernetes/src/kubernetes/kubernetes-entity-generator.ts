@@ -2,7 +2,6 @@ import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
-import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
   OrchestratedActionBuilderConfig,
   OrchestratedActionBuilders,
@@ -204,7 +203,7 @@ class KubeResourceEntityHelper {
             name: resource.metadata.name,
           };
         },
-        getLink: metadata => `/kubernetes/${metadata.endpointId}/${defn.type}/${metadata.metadata.name}`,
+        getLink: metadata => `/kubernetes/${metadata.endpointId}/resource/${defn.type}`,
         getGuid: resource => schema.getId(resource),
       };
     }
@@ -258,7 +257,6 @@ export class KubeEntityCatalog {
       ],
       getEndpointIdFromEntity: (entity) => entity.kubeGuid || entity.metadata?.kubeId,
       renderPriority: 4,
-      urlValidationRegexString: urlValidationExpression,
       subTypes: [
         {
           type: 'config',

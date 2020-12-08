@@ -1,10 +1,12 @@
 import { SortDirection } from '@angular/material/sort';
 
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
+import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginationParam } from '../../../../store/src/types/pagination.types';
 import { KUBERNETES_ENDPOINT_TYPE, kubernetesEntityFactory } from '../kubernetes-entity-factory';
-import { getGuidForNamespacedResource, getGuidForResource, getGuidFromKubePod } from './kube.getIds';
+import { getGuidFromKubePod } from './kube.getIds';
+import { BasicKubeAPIResource } from './kube.types';
 import { KubePaginationAction, KubeSingleEntityAction } from './kubernetes.actions';
 
 
@@ -102,21 +104,18 @@ export class GetKubernetesResourcesInWorkload extends GetKubernetesResources {
 
 export class DeleteKubernetesResource implements KubeSingleEntityAction {
 
-  public entity;
+  public entity: EntitySchema[];
 
   constructor(
     public entityType: string,
+    private resource: BasicKubeAPIResource,
     public kubeGuid: string,
     public name: string,
     public namespace?: string
   ) {
-    this.entity = [kubernetesEntityFactory(this.entityType)];
-    // TODO: RC
-    if (this.namespace) {
-      this.guid = getGuidForNamespacedResource(this.kubeGuid, this.namespace, this.name);
-    } else {
-      this.guid = getGuidForResource(this.kubeGuid, this.name);
-    }
+    const schema = kubernetesEntityFactory(this.entityType);
+    this.entity = [schema];
+    this.guid = schema.getId(resource);
   }
 
   type = DELETE_KUBE_RESOURCE;

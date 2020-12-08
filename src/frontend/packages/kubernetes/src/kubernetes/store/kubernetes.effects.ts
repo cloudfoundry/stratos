@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
@@ -376,7 +376,7 @@ export class KubernetesEffects {
             return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
           }, new HttpParams());
         }
-        return this.http.get(limit, requestArgs as any);
+        return this.http.get(limit, requestArgs);
       }),
       mergeMap(allRes => {
         const base = {
@@ -510,12 +510,14 @@ export class KubernetesEffects {
             entities: { [entityKey]: {} },
             result: []
           } as NormalizedResponse;
+          response.metadata.kubeId = action.kubeGuid;
           res.entities[entityKey][action.guid] = response;
           res.result.push(action.guid);
           const actions: Action[] = [
             new WrapperRequestActionSuccess(res, action)
           ];
-          actions.push(new ClearPaginationOfType(action));
+          // actions.push(new ClearPaginationOfType(action));
+          actions.push(new ClearPaginationOfEntity(action, action.guid));
           return actions;
         }),
         catchError(error => {
