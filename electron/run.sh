@@ -39,7 +39,7 @@ if [ ! -d "./node_modules" ]; then
   npm install
 fi
 
-if [ ! -d "./dist" ]; then
+if [ "$1" != "be" && ! -d "./dist" ]; then
   BUILD_FRONTEND=true
   echo "Frontend has not been built - will build"
 fi
@@ -54,6 +54,8 @@ if [ "$BUILD_FRONTEND" == "true" ]; then
   STRATOS_YAML=./electron/stratos.yaml ng build --configuration=desktop
 fi
 if [ "$BUILD_BACKEND" == "true" ]; then
+  # Ensure we include the desktop backend plugin
+  STRATOS_YAML=./electron/stratos.yaml npm run prepare-backend
   npm run build-backend
 fi
 cp ./src/jetstream/jetstream ./electron

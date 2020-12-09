@@ -2,6 +2,7 @@
   "name": "@stratosui/desktop-extensions",
   "version": "0.0.0",
   "stratos": {
+    "backend": ["desktop"],
     "assets": {
       "assets/core": "core/assets"
     },
