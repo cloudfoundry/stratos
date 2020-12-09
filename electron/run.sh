@@ -34,12 +34,14 @@ popd > /dev/null
 
 pushd ${STRATOS} > /dev/null
 
+cat ./package.json | jq -r .version > ${DIR}/version
+
 if [ ! -d "./node_modules" ]; then
   echo "Installing node modules in top-level folder ..."
   npm install
 fi
 
-if [ "$1" != "be" && ! -d "./dist" ]; then
+if [ "$1" != "be" ] && [ ! -d "./dist" ]; then
   BUILD_FRONTEND=true
   echo "Frontend has not been built - will build"
 fi
@@ -63,7 +65,6 @@ cp -R ${STRATOS}/dist ${DIR}
 cp -R ${STRATOS}/dev-ssl ${DIR}
 popd > /dev/null
 
-cat ../package.json | jq -r .version > version
 
 echo "Building ...."
 npm run electron -- ${ARGS}

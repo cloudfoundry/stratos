@@ -3,11 +3,17 @@ package desktop
 import (
 	"errors"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/desktop/kubernetes"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo/v4"
 
 	log "github.com/sirupsen/logrus"
 )
+
+// Module init will register plugin
+func init() {
+	interfaces.AddPlugin("desktop", nil, Init)
+}
 
 // Desktop - Desktop hosting plugin
 type Desktop struct {
@@ -67,6 +73,9 @@ func (br *Desktop) Init() error {
 		portalProxy: br.portalProxy,
 		store:       tStore,
 	}
+
+	// Now add the Kubernetes Desktop support in
+	kubernetes.Init(br.portalProxy)
 
 	return nil
 }
