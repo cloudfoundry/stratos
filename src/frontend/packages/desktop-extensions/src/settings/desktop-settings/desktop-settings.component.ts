@@ -8,9 +8,10 @@ import { ProfileSettingsTypes } from '@stratosui/core';
 })
 export class DesktopSettingsComponent {
 
-  public settings: { [settingName: string]: boolean } = {
+  public settings: { [settingName: string]: boolean, } = {
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-  }
+    [ProfileSettingsTypes.STORAGE]: true,
+  };
 
 }

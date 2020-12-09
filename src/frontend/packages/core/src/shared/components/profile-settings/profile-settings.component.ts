@@ -1,21 +1,29 @@
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
 
 import {
   SetGravatarEnabledAction,
   SetPollingEnabledAction,
   SetSessionTimeoutAction,
 } from '../../../../../store/src/actions/dashboard-actions';
-import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
+import { AppState } from '../../../../../store/src/app-state';
+import { LocalStorageService } from '../../../../../store/src/helpers/local-storage-service';
+import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { ThemeService } from '../../../../../store/src/theme.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { UserProfileService } from '../../../core/user-profile.service';
+import { ConfirmationDialogService } from '../confirmation-dialog.service';
 
 export enum ProfileSettingsTypes {
   GRAVATAR,
   SESSION_TIMEOUT,
   POLLING,
-  THEME
+  THEME,
+  STORAGE
 }
 @Component({
   selector: 'app-profile-settings',
@@ -24,31 +32,42 @@ export enum ProfileSettingsTypes {
 })
 export class ProfileSettingsComponent {
 
-  @Input() show: { [settingName: string]: boolean } = {
+  @Input() show: { [settingName: string]: boolean; } = {
     [ProfileSettingsTypes.GRAVATAR]: true,
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
+    [ProfileSettingsTypes.STORAGE]: true,
   };
 
   hasMultipleThemes: boolean;
 
+  private dashboardState$ = this.store.select(selectDashboardState);
+  private sessionData$ = this.store.select(selectSessionData());
+
+  public canEdit$: Observable<boolean>;
+
   public types = ProfileSettingsTypes;
 
-  public timeoutSession$ = this.store.select(selectDashboardState).pipe(
+  public timeoutSession$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
   );
 
-  public pollingEnabled$ = this.store.select(selectDashboardState).pipe(
+  public pollingEnabled$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false')
   );
 
-  public gravatarEnabled$ = this.store.select(selectDashboardState).pipe(
+  public gravatarEnabled$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
   );
 
-  public allowGravatar$ = this.store.select(selectDashboardState).pipe(
+  public allowGravatar$ = this.dashboardState$.pipe(
     map(dashboardState => dashboardState.gravatarEnabled)
+  );
+
+  public localStorageSize$ = this.sessionData$.pipe(
+    map(sessionData => LocalStorageService.localStorageSize(sessionData)),
+    filter(bytes => bytes !== -1),
   );
 
   public updateSessionKeepAlive(timeoutSession: string) {
@@ -78,11 +97,21 @@ export class ProfileSettingsComponent {
   }
 
   constructor(
-    private store: Store<DashboardOnlyAppState>,
-    public themeService: ThemeService
+    userProfileService: UserProfileService,
+    private store: Store<AppState>,
+    public themeService: ThemeService,
+    private confirmationService: ConfirmationDialogService,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.hasMultipleThemes = themeService.getThemes().length > 1;
 
+    const canEdit = userProfileService.isError$.pipe(map(e => !e));
+    const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
+    this.canEdit$ = combineLatest([canEdit, hasEditPermissions]).pipe(map(([a, b]) => a && b));
+  }
+
+  clearLocalStorage() {
+    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clearLocalStorage(sessionData, this.confirmationService));
   }
 
 }

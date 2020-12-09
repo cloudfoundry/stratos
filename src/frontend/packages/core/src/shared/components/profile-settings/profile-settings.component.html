@@ -1,6 +1,6 @@
 <div class="user-profile__options">
-  <div class="user-profile__option" *ngIf="show[types.GRAVATAR] && gravatarEnabled$ | async as enableGravatar">
-    <div class="user-profile__option-inner">
+  <div class="user-profile__option" *ngIf="canEdit$ | async">
+    <div class="user-profile__option-inner" *ngIf="show[types.GRAVATAR] && gravatarEnabled$ | async as enableGravatar">
       <mat-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
         <div class="user-profile__option-header">Use Gravatar for user icon</div>
       </mat-slide-toggle>
@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <div class="user-profile__sectiom" *ngIf="show[types.THEME] && hasMultipleThemes">
+  <div class="user-profile__option" *ngIf="show[types.THEME] && hasMultipleThemes">
     <mat-card-title class="user-profile__section">Theme</mat-card-title>
     <div class="user-profile__option">
       <div class="user-profile__option-inner">
@@ -55,6 +55,22 @@
             {{ theme.label }}
           </mat-button-toggle>
         </mat-button-toggle-group>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-profile__section user-profile__local-storage"
+    *ngIf="show[types.STORAGE] && localStorageSize$ | async as localStorageSize">
+    <mat-card-title class="user-profile__section">Clear Settings</mat-card-title>
+    <div class="user-profile__option">
+      <div class="user-profile__option-inner">
+        <div class="user-profile__local-storage--div">Your browser's local storage is used to persist local
+          settings
+          This covers the options in this section and some changes to lists such as filters and sorting.
+        </div>
+        <div class="user-profile__local-storage--div">Size of local storage:
+          ~{{ localStorageSize | bytesToHumanSize }} <button color="warn" mat-button mat-raised-button
+            (click)="clearLocalStorage()">Clear</button></div>
       </div>
     </div>
   </div>
