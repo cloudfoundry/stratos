@@ -577,3 +577,8 @@ export interface SimpleKubeListColumn<T = any> {
   flex?: string;
   sort?: boolean;
 }
+
+export interface KubeServiceAccount {
+  metadata: Metadata;
+  secrets: { [name: string]: string; }[];
+}
