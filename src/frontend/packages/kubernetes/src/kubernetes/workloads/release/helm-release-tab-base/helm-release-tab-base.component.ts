@@ -6,7 +6,9 @@ import { map } from 'rxjs/operators';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
+import { KubeResourceEntityDefinition } from '../../../store/kube.types';
 import { HelmReleaseGuid } from '../../workload.types';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 import { HelmReleaseSocketService } from './helm-release-socket-service';
@@ -62,8 +64,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Resources' },
       { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map(tp => !tp)) },
-      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
-      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' }
+      ...this.getTabsFromEntityConfig()
     ];
 
     this.socketService.start();
@@ -72,5 +73,27 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   ngOnDestroy() {
     this.socketService.stop();
     this.snackbarService.hide();
+  }
+
+  private getTabsFromEntityConfig(): IPageSideNavTab[] {
+    const tabsFromRouterConfig = [];
+
+    // Get the tabs from the router configuration
+    kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
+      if (catalogEntity) {
+        const defn = catalogEntity.definition as unknown as KubeResourceEntityDefinition;
+        if (defn.apiWorkspaced && !defn.hidden) {
+          tabsFromRouterConfig.push({
+            link: `resource/${catalogEntity.type}`,
+            label: defn.labelTab || defn.labelPlural,
+            icon: defn.icon,
+            iconFont: defn.iconFont,
+          });
+        }
+      }
+    });
+
+    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    return tabsFromRouterConfig;
   }
 }

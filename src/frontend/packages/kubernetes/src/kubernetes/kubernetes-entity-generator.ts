@@ -328,6 +328,7 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'pods',
       apiNamespaced: true,
+      apiWorkspaced: true,
       listConfig: 'k8s-pods',
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(
         definition, { actionBuilders: kubePodActionBuilders }
@@ -363,6 +364,7 @@ export class KubeEntityCatalog {
       apiVersion: '/api/v1',
       apiName: 'service',
       apiNamespaced: true,
+      apiWorkspaced: true,
       listConfig: 'k8s-services',
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>(
         definition, {
@@ -392,6 +394,7 @@ export class KubeEntityCatalog {
       label: 'Secret',
       apiVersion: '/api/v1',
       apiName: 'secrets',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Type',
@@ -411,6 +414,7 @@ export class KubeEntityCatalog {
       labelTab: 'PVCs',
       apiVersion: '/api/v1',
       apiName: 'persistentvolumeclaims',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Storage Class',
@@ -468,6 +472,7 @@ export class KubeEntityCatalog {
       label: 'Replica Set',
       apiVersion: '/apis/apps/v1',
       apiName: 'replicasets',
+      apiWorkspaced: true,
       listColumns: [
         {
           header: 'Desired',
@@ -500,6 +505,7 @@ export class KubeEntityCatalog {
       label: 'Service Account',
       apiVersion: '/api/v1',
       apiName: 'serviceaccounts',
+      apiWorkspaced: true,
       listColumns: [{
         header: 'Secrets',
         field: (row: KubeServiceAccount) => row.secrets?.length.toString()
@@ -511,6 +517,7 @@ export class KubeEntityCatalog {
       label: 'Role',
       apiVersion: '/apis/rbac.authorization.k8s.io/v1',
       apiName: 'roles',
+      apiWorkspaced: true,
     });
     this.job = KubeResourceEntityHelper.generate<BasicKubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'job',
@@ -518,6 +525,7 @@ export class KubeEntityCatalog {
       label: 'Job',
       apiVersion: '/apis/batch/v1',
       apiName: 'jobs',
+      apiWorkspaced: true,
       listColumns: [{
         header: 'Completions',
         field: (row: BasicKubeAPIResource) => this.jobToCompletion(row.spec, row.status)

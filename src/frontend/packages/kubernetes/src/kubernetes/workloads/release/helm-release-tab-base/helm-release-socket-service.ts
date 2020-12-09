@@ -9,7 +9,7 @@ import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../.
 import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { KubernetesPod, KubeService } from '../../../store/kube.types';
+import { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
 import { KubePaginationAction } from '../../../store/kubernetes.actions';
 import { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
@@ -78,14 +78,6 @@ export class HelmReleaseSocketService implements OnDestroy {
       if (messageObj) {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
-        } else if (messageObj.kind === 'Pods') {
-          const pods: KubernetesPod[] = messageObj.data || [];
-          const podsWithInfo: KubernetesPod[] = pods.map(pod => KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod));
-          const releasePodsAction = kubeEntityCatalog.pod.actions.getInWorkload(
-            this.helmReleaseHelper.endpointGuid,
-            this.helmReleaseHelper.releaseTitle
-          );
-          this.populateList(releasePodsAction, podsWithInfo);
         } else if (messageObj.kind === 'Graph') {
           const graph: HelmReleaseGraph = messageObj.data;
           graph.endpointId = this.helmReleaseHelper.endpointGuid;
@@ -95,19 +87,35 @@ export class HelmReleaseSocketService implements OnDestroy {
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
-          const svcs: KubeService[] = [];
+          const resources: { [type: string]: BasicKubeAPIResource[]; } = {};
+
           // Store ALL resources for the release
-          manifest.forEach(resource => {
-            if (resource.kind === 'Service' && prefix) {
-              svcs.push(resource);
-            }
-          });
-          if (svcs.length > 0) {
-            const releaseServicesAction = kubeEntityCatalog.service.actions.getInWorkload(
-              this.helmReleaseHelper.releaseTitle,
-              this.helmReleaseHelper.endpointGuid,
-            );
-            this.populateList(releaseServicesAction, svcs);
+          if (prefix) {
+            manifest.forEach(resource => {
+              const entityType = this.getEntityTypeForResource(resource.kind);
+              if (entityType) {
+                if (!resources[entityType]) {
+                  resources[entityType] = [];
+                }
+                resources[entityType].push(resource);
+              }
+            });
+
+            Object.entries(resources).forEach(([entityType, resourcesOfType]) => {
+              let action: KubePaginationAction;
+              if (entityType === 'pod') {
+                resourcesOfType = resourcesOfType || [];
+                resourcesOfType = resourcesOfType.map((pod: KubernetesPod) =>
+                  KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
+                );
+              }
+              action = kubeEntityCatalog[entityType].actions.getInWorkload(
+                this.helmReleaseHelper.endpointGuid,
+                this.helmReleaseHelper.namespace,
+                this.helmReleaseHelper.releaseTitle
+              );
+              this.populateList(action, resourcesOfType);
+            });
           }
 
           // const resources = { ...manifest };
@@ -127,6 +135,33 @@ export class HelmReleaseSocketService implements OnDestroy {
         }
       }
     });
+  }
+
+  /**
+   * Convert type in kube api kind string to kube entity catalog property name
+   */
+  private getEntityTypeForResource(type: string): string {
+    // TODO: Ideally this should come from some kubeEntityCatalog.allKubeEntities `def.apiName === resource.kind && def.apiWorkspaced`
+    // lookup, however we don't currently have anything in the entity that matches the catalog property name
+    // (apiName casing doesn't match). We should improve the whole kubeEntityCatalog[entityType] process
+    switch (type) {
+      case 'Service':
+        return 'service';
+      case 'Pod':
+        return 'pod';
+      case 'Job':
+        return 'job';
+      case 'PersistentVolumeClaim':
+        return 'pvc';
+      case 'ReplicaSet':
+        return 'replicaSet';
+      case 'Role':
+        return 'role';
+      case 'Secret':
+        return 'secrets';
+      case 'ServiceAccount':
+        return 'serviceAccount';
+    }
   }
 
   public stop() {

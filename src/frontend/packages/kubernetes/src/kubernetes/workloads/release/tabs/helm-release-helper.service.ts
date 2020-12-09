@@ -155,6 +155,7 @@ export class HelmReleaseHelperService {
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
     return kubeEntityCatalog.pod.store.getInWorkload.getPaginationMonitor(
       this.endpointGuid,
+      this.namespace,
       this.releaseTitle
     ).currentPage$.pipe(
       filter(pods => !!pods),

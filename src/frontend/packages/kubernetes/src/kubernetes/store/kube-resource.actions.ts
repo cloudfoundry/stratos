@@ -22,6 +22,10 @@ export const GET_KUBE_RESOURCES_IN_NAMESPACE = '[KUBERNETES Endpoint] Get Resour
 export const GET_KUBE_RESOURCES_IN_NAMESPACE_SUCCESS = '[KUBERNETES Endpoint] Get Resources in namespace Success';
 export const GET_KUBE_RESOURCES_IN_NAMESPACE_FAILURE = '[KUBERNETES Endpoint] Get Resources in namespace Failure';
 
+export const GET_KUBE_RESOURCES_IN_WORKLOAD = '[KUBERNETES Endpoint] Get Resources in workload';
+export const GET_KUBE_RESOURCES_IN_WORKLOAD_SUCCESS = '[KUBERNETES Endpoint] Get Resources in workload Success';
+export const GET_KUBE_RESOURCES_IN_WORKLOAD_FAILURE = '[KUBERNETES Endpoint] Get Resources in workload Failure';
+
 export const DELETE_KUBE_RESOURCE = '[KUBERNETES Endpoint] Delete Resource';
 export const DELETE_KUBE_RESOURCE_SUCCESS = '[KUBERNETES Endpoint] Delete Resource Success';
 export const DELETE_KUBE_RESOURCE_FAILURE = '[KUBERNETES Endpoint] Delete Resource Failure';
@@ -82,6 +86,19 @@ export class GetKubernetesResourcesInNamespace extends GetKubernetesResources {
     GET_KUBE_RESOURCES_IN_NAMESPACE,
     GET_KUBE_RESOURCES_IN_NAMESPACE_SUCCESS,
     GET_KUBE_RESOURCES_IN_NAMESPACE_FAILURE
+  ];
+}
+
+export class GetKubernetesResourcesInWorkload extends GetKubernetesResources {
+  constructor(entityType: string, kubeGuid: string, namespace: string, releaseTitle: string) {
+    super(entityType, kubeGuid);
+    this.paginationKey = getPaginationKey(entityType, namespace + ':' + releaseTitle, kubeGuid);
+  }
+  type = GET_KUBE_RESOURCES_IN_WORKLOAD;
+  actions = [
+    GET_KUBE_RESOURCES_IN_WORKLOAD,
+    GET_KUBE_RESOURCES_IN_WORKLOAD_SUCCESS,
+    GET_KUBE_RESOURCES_IN_WORKLOAD_FAILURE
   ];
 }
 
