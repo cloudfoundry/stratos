@@ -43,7 +43,9 @@ export class ProfileSettingsComponent {
   hasMultipleThemes: boolean;
 
   private dashboardState$ = this.store.select(selectDashboardState);
-  private sessionData$ = this.store.select(selectSessionData());
+  private sessionData$ = this.store.select(selectSessionData()).pipe(
+    filter(sessionData => !!sessionData)
+  );
 
   public canEdit$: Observable<boolean>;
 
