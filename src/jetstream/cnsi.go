@@ -617,6 +617,13 @@ func (p *portalProxy) updateEndpoint(ec echo.Context) error {
 		updates = true
 	}
 
+	// CA Cert
+	caCert := params.CACert
+	if strings.Compare(endpoint.CACert, caCert) != 0 {
+		endpoint.CACert = caCert
+		updates = true
+	}
+
 	// Skip SSL validation
 	skipSSL := params.SkipSSL
 	if len(skipSSL) > 0 {

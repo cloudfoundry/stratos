@@ -189,7 +189,7 @@ func getJSONValue(data map[string]interface{}, valuePath string) string {
 }
 
 // Info gets the info for the endpoint
-func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (interfaces.CNSIRecord, interface{}, error) {
 	var dummy interface{}
 	var newCNSI interfaces.CNSIRecord
 
@@ -202,6 +202,7 @@ func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bo
 
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
+	newCNSI.CACert = caCert
 
 	return newCNSI, dummy, nil
 }

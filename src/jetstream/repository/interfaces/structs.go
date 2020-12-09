@@ -54,7 +54,7 @@ type CNSIRecord struct {
 	SSOAllowed             bool     `json:"sso_allowed"`
 	SubType                string   `json:"sub_type"`
 	Metadata               string   `json:"metadata"`
-	CACert                 string   `json:"-"`
+	CACert                 string   `json:"ca_cert"`
 }
 
 // ConnectedEndpoint
@@ -435,6 +435,7 @@ type UpdateEndpointParams struct {
 	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
 	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
 	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
+	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
 // BindOnce -- allows to call echo.Context.Bind() multiple times on the same request
