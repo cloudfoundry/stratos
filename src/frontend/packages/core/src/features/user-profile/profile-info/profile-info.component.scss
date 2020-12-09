@@ -22,4 +22,14 @@ $user-profile-avatar-size: 48px;
   &__content {
     margin: 2% 24px;
   }
+
+  &__local-storage {
+    &--div {
+      padding-bottom: 10px;
+    }
+
+    button {
+      margin-left: 15px;
+    }
+  }
 }

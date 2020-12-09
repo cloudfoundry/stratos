@@ -1,4 +1,13 @@
-import { Component, ViewChild, ViewContainerRef, ComponentRef, OnInit, OnDestroy, ComponentFactory, ComponentFactoryResolver } from '@angular/core';
+import {
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver,
+  ComponentRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
@@ -18,7 +27,10 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
   @ViewChild('customComponent', { read: ViewContainerRef, static: true }) customComponentContainer;
   componentRef: ComponentRef<any>;
 
-  constructor(activatedRoute: ActivatedRoute, private resolver: ComponentFactoryResolver) {
+  constructor(
+    activatedRoute: ActivatedRoute,
+    private resolver: ComponentFactoryResolver,
+  ) {
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const endpoint = entityCatalog.getEndpoint(epType, epSubType);

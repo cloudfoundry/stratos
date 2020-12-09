@@ -24,6 +24,8 @@ import { CreateEndpointComponent } from './create-endpoint.component';
   ],
   exports: [
     CreateEndpointComponent,
+    CreateEndpointCfStep1Component,
+    CreateEndpointConnectComponent,
     ConnectEndpointComponent
   ]
 })

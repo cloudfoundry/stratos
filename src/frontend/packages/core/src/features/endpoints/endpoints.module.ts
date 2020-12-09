@@ -12,6 +12,7 @@ import { RestoreEndpointsComponent } from './backup-restore/restore-endpoints/re
 import { CredentialsAuthFormComponent } from './connect-endpoint-dialog/auth-forms/credentials-auth-form.component';
 import { NoneAuthFormComponent } from './connect-endpoint-dialog/auth-forms/none-auth-form.component';
 import { SSOAuthFormComponent } from './connect-endpoint-dialog/auth-forms/sso-auth-form.component';
+import { TokenEndpointComponent } from './connect-endpoint-dialog/auth-forms/token-endpoint/token-endpoint.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { EditEndpointStepComponent } from './edit-endpoint/edit-endpoint-step/edit-endpoint-step.component';
@@ -39,6 +40,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     RestoreEndpointsComponent,
     BackupCheckboxCellComponent,
     BackupConnectionCellComponent,
+    TokenEndpointComponent,
   ],
   entryComponents: [
     ConnectEndpointDialogComponent,
@@ -46,7 +48,8 @@ import { EndpointsRoutingModule } from './endpoints.routing';
     SSOAuthFormComponent,
     NoneAuthFormComponent,
     BackupCheckboxCellComponent,
-    BackupConnectionCellComponent
+    BackupConnectionCellComponent,
+    TokenEndpointComponent
   ]
 })
 export class EndpointsModule { }

@@ -26,16 +26,13 @@ import {
   KubedashConfigurationComponent,
 } from './kubernetes-dashboard/kubedash-configuration/kubedash-configuration.component';
 import { KubernetesDashboardTabComponent } from './kubernetes-dashboard/kubernetes-dashboard.component';
+import { kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
 import {
   KubernetesNamespaceAnalysisReportComponent,
 } from './kubernetes-namespace/kubernetes-namespace-analysis-report/kubernetes-namespace-analysis-report.component';
 import {
-  KubernetesNamespacePodsComponent,
-} from './kubernetes-namespace/kubernetes-namespace-pods/kubernetes-namespace-pods.component';
-import {
-  KubernetesNamespaceServicesComponent,
-} from './kubernetes-namespace/kubernetes-namespace-services/kubernetes-namespace-services.component';
-import { KubernetesNamespaceComponent } from './kubernetes-namespace/kubernetes-namespace.component';
+  KubernetesNamespacePreviewComponent,
+} from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
 import {
   KubernetesNodeMetricStatsCardComponent,
 } from './kubernetes-node/kubernetes-node-metrics/kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
@@ -51,6 +48,7 @@ import { KubernetesNodeComponent } from './kubernetes-node/kubernetes-node.compo
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesResourceViewerComponent } from './kubernetes-resource-viewer/kubernetes-resource-viewer.component';
 import { KubernetesTabBaseComponent } from './kubernetes-tab-base/kubernetes-tab-base.component';
+import { KubernetesUIConfigService } from './kubernetes-ui-service';
 import { KubernetesRoutingModule } from './kubernetes.routing';
 import { KubernetesComponent } from './kubernetes/kubernetes.component';
 import { AnalysisStatusCellComponent } from './list-types/analysis-status-cell/analysis-status-cell.component';
@@ -101,10 +99,12 @@ import {
   KubernetesPodStatusComponent,
 } from './list-types/kubernetes-pods/kubernetes-pod-status/kubernetes-pod-status.component';
 import { KubernetesPodTagsComponent } from './list-types/kubernetes-pods/kubernetes-pod-tags/kubernetes-pod-tags.component';
+import { KubernetesPodsListConfig } from './list-types/kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesServicePortsComponent } from './list-types/kubernetes-service-ports/kubernetes-service-ports.component';
 import {
   KubeServiceCardComponent,
 } from './list-types/kubernetes-services/kubernetes-service-card/kubernetes-service-card.component';
+import { KubernetesServicesListConfig } from './list-types/kubernetes-services/kubernetes-service-list-config.service';
 import { PodMetricsComponent } from './pod-metrics/pod-metrics.component';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
@@ -121,7 +121,6 @@ import {
 import { KubernetesAnalysisTabComponent } from './tabs/kubernetes-analysis-tab/kubernetes-analysis-tab.component';
 import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-tab/kubernetes-namespaces-tab.component';
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
-import { KubernetesPodsTabComponent } from './tabs/kubernetes-pods-tab/kubernetes-pods-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
 /* tslint:disable:max-line-length */
@@ -140,7 +139,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodesTabComponent,
     KubernetesTabBaseComponent,
     KubernetesNodeCapacityComponent,
-    KubernetesPodsTabComponent,
     KubernetesPodTagsComponent,
     KubernetesNamespacesTabComponent,
     KubernetesDashboardTabComponent,
@@ -167,9 +165,6 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubernetesNodeSimpleMetricComponent,
     ConditionCellComponent,
     KubernetesNamespaceLinkComponent,
-    KubernetesNamespaceComponent,
-    KubernetesNamespacePodsComponent,
-    KubernetesNamespaceServicesComponent,
     KubeNamespacePodCountComponent,
     NodePodCountComponent,
     KubernetesServicePortsComponent,
@@ -192,6 +187,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     KubeScoreReportViewerComponent,
     AnalysisStatusCellComponent,
     KubernetesNamespaceAnalysisReportComponent,
+    KubernetesNamespacePreviewComponent,
   ],
   providers: [
     KubernetesService,
@@ -232,7 +228,16 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
     ResourceAlertPreviewComponent,
     ResourceAlertViewComponent,
     AnalysisStatusCellComponent,
+    KubernetesNamespacePreviewComponent,
   ]
 })
-export class KubernetesModule { }
+export class KubernetesModule {
+
+  constructor(uiConfigService: KubernetesUIConfigService) {
+    uiConfigService.listConfig.set('k8s-pods', new KubernetesPodsListConfig());
+    uiConfigService.listConfig.set('k8s-services', new KubernetesServicesListConfig());
+
+    uiConfigService.previewComponent.set(kubernetesNamespacesEntityType, KubernetesNamespacePreviewComponent);
+  }
+}
 

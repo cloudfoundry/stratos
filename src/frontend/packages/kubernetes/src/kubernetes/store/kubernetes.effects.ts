@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
+import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { of } from 'rxjs';
@@ -19,7 +19,17 @@ import {
 } from '../kubernetes-entity-factory';
 import { KubernetesPodExpandedStatusHelper } from '../services/kubernetes-expanded-state';
 import {
+  DELETE_KUBE_RESOURCE,
+  DeleteKubernetesResource,
+  GET_KUBE_RESOURCES,
+  GET_KUBE_RESOURCES_IN_NAMESPACE,
+  GetKubernetesResources,
+  GetKubernetesResourcesInNamespace,
+} from './kube-resource.actions';
+import {
   BasicKubeAPIResource,
+  IKubeResourceEntityDefinition,
+  KubeAPIResource,
   KubernetesDeployment,
   KubernetesNamespace,
   KubernetesNode,
@@ -68,6 +78,9 @@ export interface KubeDashboardContainer {
 export interface KubeDashboardStatus {
   guid: string;
   kubeGuid: string;
+  metadata?: {
+    kubeId: string;
+  };
   installed: boolean;
   stratosInstalled: boolean;
   running: boolean;
@@ -111,6 +124,9 @@ export class KubernetesEffects {
           } as NormalizedResponse;
           const status = response as KubeDashboardStatus;
           status.kubeGuid = action.kubeGuid;
+          status.metadata = {
+            kubeId: action.kubeGuid
+          };
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
           return [
@@ -254,6 +270,72 @@ export class KubernetesEffects {
     ))
   );
 
+  // =======================================================================================
+  // Generic resource effects
+  // =======================================================================================
+
+  @Effect()
+  fetchKubeResources$ = this.actions$.pipe(
+    ofType<GetKubernetesResources>(GET_KUBE_RESOURCES),
+    flatMap((action: GetKubernetesResources) => {
+      const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
+      if (catalog && catalog.definition) {
+        const defn = catalog.definition as IKubeResourceEntityDefinition;
+        if (defn.apiVersion && defn.apiName) {
+          return this.processListAction<KubeAPIResource>(
+            action,
+            `/pp/${this.proxyAPIVersion}/proxy/${defn.apiVersion}/${defn.apiName}`
+          );
+        }
+      }
+
+      throw new Error('Kubernetes Resource request - but no API information is available');
+    })
+  );
+
+  @Effect()
+  fetchKubeResourcesInNamespace$ = this.actions$.pipe(
+    ofType<GetKubernetesResources>(GET_KUBE_RESOURCES_IN_NAMESPACE),
+    flatMap((action: GetKubernetesResourcesInNamespace) => {
+      const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
+      if (catalog && catalog.definition) {
+        const defn = catalog.definition as IKubeResourceEntityDefinition;
+        if (defn.apiVersion && defn.apiName) {
+          return this.processListAction<KubeAPIResource>(
+            action,
+            `/pp/${this.proxyAPIVersion}/proxy/${defn.apiVersion}/namespaces/${action.namespaceName}/${defn.apiName}`
+          );
+        }
+      }
+
+      throw new Error('Kubernetes Resource request - but no API information is available');
+    })
+  );
+
+  // =======================================================================================
+
+  @Effect()
+  deleteKubeResource$ = this.actions$.pipe(
+    ofType<DeleteKubernetesResource>(DELETE_KUBE_RESOURCE),
+    flatMap(action => {
+      const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
+      if (catalog && catalog.definition) {
+        const defn = catalog.definition as IKubeResourceEntityDefinition;
+        if (defn.apiVersion && defn.apiName) {
+          let apiURL;
+          if (action.namespace) {
+            apiURL = `/pp/${this.proxyAPIVersion}/proxy${defn.apiVersion}/namespaces/${action.namespace}/${defn.apiName}/${action.name}`;
+          } else {
+            apiURL = `/pp/${this.proxyAPIVersion}/proxy${defn.apiVersion}/${defn.apiName}/${action.name}`;
+          }
+          return this.processSingleItemDeleteAction<KubeAPIResource>(action, apiURL);
+        }
+      }
+    })
+  );
+
+  // =======================================================================================
+
   private processNodeAction(action: GetKubernetesNodes) {
     return this.processListAction<KubernetesNode>(
       action,
@@ -265,6 +347,11 @@ export class KubernetesEffects {
     action: KubePaginationAction,
     url: string) {
     this.store.dispatch(new StartRequestAction(action));
+
+    let limit = `${url}?limit=500`;
+    if (action.continuationToken) {
+      limit = `${limit}&continue=${action.continuationToken}`;
+    }
 
     const getKubeIds = action.kubeGuid ?
       of([action.kubeGuid]) :
@@ -289,7 +376,7 @@ export class KubernetesEffects {
             return httpParams.set(initialKey, paginationAction.initialParams[initialKey].toString());
           }, new HttpParams());
         }
-        return this.http.get(url, requestArgs);
+        return this.http.get(limit, requestArgs);
       }),
       mergeMap(allRes => {
         const base = {
@@ -319,6 +406,21 @@ export class KubernetesEffects {
             res.result.push(id);
             return res;
           }, base);
+
+        // Can we de-paginate like this? (Note: We only really support a single endpoint)
+        // Object.entries(allRes).forEach(([kubeId, res]) => {
+        //   console.log(res);
+        //   if (res.metadata.continue) {
+        //     console.log('continue for ' + kubeId);
+        //     action.continuationToken = res.metadata.continue;
+
+        //     const nextPageAction = {...action};
+        //     nextPageAction.continuationToken = res.metadata.continue;
+        //     nextPageAction.pageNumber = action.pageNumber ? action.pageNumber + 1 : 2;
+        //     this.store.dispatch(nextPageAction);
+        //   }
+        // });
+
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
@@ -378,6 +480,50 @@ export class KubernetesEffects {
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, requestType, {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: status,
+              message,
+              error
+            })
+          ];
+        })
+      );
+  }
+
+  private processSingleItemDeleteAction<T extends BasicKubeAPIResource>(action: KubeAction, url: string) {
+    this.store.dispatch(new StartRequestAction(action, 'delete'));
+    const headers = new HttpHeaders({
+      'x-cap-cnsi-list': action.kubeGuid,
+      'x-cap-passthrough': 'true'
+    },
+    );
+    const requestArgs = {
+      headers
+    };
+    const request = this.http.delete(url, requestArgs);
+    const entityKey = entityCatalog.getEntityKey(action);
+    return request
+      .pipe(
+        mergeMap((response: T) => {
+          const res = {
+            entities: { [entityKey]: {} },
+            result: []
+          } as NormalizedResponse;
+          response.metadata.kubeId = action.kubeGuid;
+          res.entities[entityKey][action.guid] = response;
+          res.result.push(action.guid);
+          const actions: Action[] = [
+            new WrapperRequestActionSuccess(res, action)
+          ];
+          // actions.push(new ClearPaginationOfType(action));
+          actions.push(new ClearPaginationOfEntity(action, action.guid));
+          return actions;
+        }),
+        catchError(error => {
+          const { status, message } = this.createKubeError(error);
+          return [
+            new WrapperRequestActionFailed(message, action, 'delete', {
               endpointIds: [action.kubeGuid],
               url: error.url || url,
               eventCode: status,

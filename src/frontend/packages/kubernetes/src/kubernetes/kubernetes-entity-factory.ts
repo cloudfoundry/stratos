@@ -4,25 +4,26 @@ import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/a
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import {
-  getGuidFromKubeDashboardObj,
   getGuidFromKubeDeploymentObj,
   getGuidFromKubeNamespaceObj,
   getGuidFromKubeNodeObj,
   getGuidFromKubePodObj,
   getGuidFromKubeServiceObj,
   getGuidFromKubeStatefulSetObj,
+  getGuidFromResource,
 } from './store/kube.getIds';
 import { KubernetesApp } from './store/kube.types';
 
-export const kubernetesEntityType = 'kubernetesInfo';
-export const kubernetesNodesEntityType = 'kubernetesNode';
-export const kubernetesPodsEntityType = 'kubernetesPod';
-export const kubernetesNamespacesEntityType = 'kubernetesNamespace';
-export const kubernetesServicesEntityType = 'kubernetesService';
-export const kubernetesStatefulSetsEntityType = 'kubernetesStatefulSet';
-export const kubernetesDeploymentsEntityType = 'kubernetesDeployment';
-export const kubernetesDashboardEntityType = 'kubernetesDashboard';
+export const kubernetesEntityType = 'info';
+export const kubernetesNodesEntityType = 'node';
+export const kubernetesPodsEntityType = 'pod';
+export const kubernetesNamespacesEntityType = 'namespace';
+export const kubernetesServicesEntityType = 'service';
+export const kubernetesStatefulSetsEntityType = 'statefulSet';
+export const kubernetesDeploymentsEntityType = 'deployment';
+export const kubernetesDashboardEntityType = 'dashboard';
 export const analysisReportEntityType = 'analysisReport';
+export const kubernetesConfigMapEntityType = 'configMap';
 
 export const getKubeAppId = (object: KubernetesApp) => object.name;
 
@@ -102,7 +103,7 @@ entityCache[kubernetesServicesEntityType] = new KubernetesEntitySchema(
 entityCache[kubernetesDashboardEntityType] = new KubernetesEntitySchema(
   kubernetesDashboardEntityType,
   {},
-  { idAttribute: getGuidFromKubeDashboardObj }
+  { idAttribute: getGuidFromResource }
 );
 
 // Analysis Reports - should not be bound to an endpoint

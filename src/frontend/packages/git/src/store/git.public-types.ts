@@ -14,7 +14,13 @@ export const FETCH_BRANCHES_START = '[GitHub] Fetch branches start';
 export const FETCH_BRANCHES_SUCCESS = '[GitHub] Fetch branches succeeded';
 export const FETCH_BRANCHES_FAILED = '[GitHub] Fetch branches failed';
 
-export interface GitRepo {
+export interface GitEntity {
+  guid: string;
+  endpointGuid: string;
+  scmType: string;
+}
+
+export interface GitRepo extends GitEntity {
   pushed_at?: string;
   last_activity_at?: string;
   created_at: string;
@@ -23,6 +29,15 @@ export interface GitRepo {
   full_name: string;
   default_branch: string;
   description: string;
+  projectName: string;
+  private: boolean;
+  clone_url: string;
+  html_url: string;
+}
+
+export interface GitSuggestedRepo {
+  name: string;
+  private: boolean;
 }
 
 export interface GitUser {
@@ -32,14 +47,13 @@ export interface GitUser {
   login: string;
 }
 
-export interface GitBranch {
+export interface GitBranch extends GitEntity {
   name: string;
   commit?: GitCommit;
-  projectId?: string;
-  entityId?: string;
+  projectName: string;
 }
 
-export interface GitCommit {
+export interface GitCommit extends GitEntity {
   sha: string;
   author?: GitUser;
   committer?: GitUser;
@@ -52,6 +66,5 @@ export interface GitCommit {
     };
     message: string;
   };
-  guid?: string;
+  projectName: string;
 }
-

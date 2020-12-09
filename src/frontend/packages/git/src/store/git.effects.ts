@@ -6,11 +6,8 @@ import { catchError, mergeMap } from 'rxjs/operators';
 
 import { AppState } from '../../../store/src/app-state';
 import { entityCatalog, NormalizedResponse, WrapperRequestActionSuccess } from '../../../store/src/public-api';
-import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction, StartRequestAction, WrapperRequestActionFailed } from '../../../store/src/types/request.types';
 import { GitCommit } from '../public_api';
-import { GitSCMService } from '../shared/scm/scm.service';
-import { GIT_ENDPOINT_TYPE } from './git-entity-factory';
 import {
   FetchBranchesForProject,
   FetchBranchForProject,
@@ -25,10 +22,7 @@ import {
   FETCH_COMMITS,
   FETCH_GITHUB_REPO,
 } from './git.public-types';
-import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
-// const { proxyAPIVersion } = environment;
-// const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
 // FIXME: This should be removed in favour of entity action builder config.
 // See github commit action builder for an example,
@@ -38,7 +32,6 @@ export class GitEffects {
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
-    private scmService: GitSCMService,
     private httpClient: HttpClient
   ) { }
 
@@ -47,28 +40,26 @@ export class GitEffects {
     ofType<FetchGitHubRepoInfo>(FETCH_GITHUB_REPO),
     mergeMap(action => {
       const actionType = 'fetch';
-      const apiAction = {
-        entityType: gitRepoEntityType,
-        endpointType: GIT_ENDPOINT_TYPE,
-        type: action.type,
-        guid: action.guid
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      const entityConfig = entityCatalog.getEntity(apiAction);
+      this.store.dispatch(new StartRequestAction(action, actionType));
+      const entityConfig = entityCatalog.getEntity(action);
       return action.meta.scm.getRepository(this.httpClient, action.meta.projectName).pipe(
         mergeMap(repoDetails => {
           const mappedData: NormalizedResponse = {
             entities: { [entityConfig.entityKey]: {} },
             result: []
           };
-          mappedData.entities[entityConfig.entityKey][action.guid] = repoDetails;
-          mappedData.result.push(action.guid);
+          repoDetails.scmType = action.meta.scm.getType();
+          repoDetails.projectName = action.meta.projectName;
+          repoDetails.guid = action.guid;
+          repoDetails.endpointGuid = action.meta.scm.endpointGuid;
+          mappedData.entities[entityConfig.entityKey][repoDetails.guid] = repoDetails;
+          mappedData.result.push(repoDetails.guid);
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.meta.scm.getType()), apiAction, actionType)
+          new WrapperRequestActionFailed(action.meta.scm.parseErrorAsString(err), action, actionType)
         ]
         ));
     }));
@@ -78,39 +69,29 @@ export class GitEffects {
     ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT),
     mergeMap(action => {
       const actionType = 'fetch';
-      const apiAction: PaginatedAction = {
-        entityType: gitBranchesEntityType,
-        endpointType: GIT_ENDPOINT_TYPE,
-        type: action.type,
-        paginationKey: action.paginationKey
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return action.scm.getBranches(this.httpClient, action.projectName).pipe(
         mergeMap(branches => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
             entities: { [entityKey]: {} },
             result: []
           };
 
-          const scmType = action.scm.getType();
           branches.forEach(b => {
-            const id = `${scmType}-${action.projectName}-${b.name}`;
-            b.projectId = action.projectName;
-            b.entityId = id;
-            // mappedData.entities[entityKey][id] = {
-            //   entity: b,
-            //   metadata: {}
-            // };
-            mappedData.entities[entityKey][id] = b;
-            mappedData.result.push(id);
+            b.scmType = action.scm.getType();
+            b.projectName = action.projectName;
+            b.guid = action.entity[0].getId(b);
+            b.endpointGuid = action.scm.endpointGuid;
+            mappedData.entities[entityKey][b.guid] = b;
+            mappedData.result.push(b.guid);
           });
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), apiAction, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -119,30 +100,26 @@ export class GitEffects {
     ofType<FetchBranchForProject>(FETCH_BRANCH_FOR_PROJECT),
     mergeMap(action => {
       const actionType = 'fetch';
-      const apiAction = {
-        entityType: gitBranchesEntityType,
-        endpointType: GIT_ENDPOINT_TYPE,
-        type: action.type,
-        guid: action.guid
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return action.scm.getBranch(this.httpClient, action.projectName, action.branchName).pipe(
         mergeMap(branch => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
             entities: { [entityKey]: {} },
             result: []
           };
-          branch.projectId = action.projectName;
-          branch.entityId = action.guid;
-          mappedData.entities[entityKey][action.guid] = branch;
-          mappedData.result.push(action.guid);
+          branch.scmType = action.scm.getType();
+          branch.projectName = action.projectName;
+          branch.guid = action.guid;
+          branch.endpointGuid = action.scm.endpointGuid;
+          mappedData.entities[entityKey][branch.guid] = branch;
+          mappedData.result.push(branch.guid);
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), apiAction, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -151,26 +128,25 @@ export class GitEffects {
     ofType<FetchCommit>(FETCH_COMMIT),
     mergeMap(action => {
       const actionType = 'fetch';
-      const apiAction: EntityRequestAction = {
-        entityType: gitCommitEntityType,
-        endpointType: GIT_ENDPOINT_TYPE,
-        type: action.type,
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return action.scm.getCommit(this.httpClient, action.projectName, action.commitSha).pipe(
         mergeMap(commit => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
             entities: { [entityKey]: {} },
             result: []
           };
-          this.addCommit(entityKey, mappedData, action.scm.getType(), action.projectName, commit);
+          this.addCommit(
+            entityKey,
+            mappedData,
+            this.updateCommit(action.scm.getType(), action.projectName, commit, action.scm.endpointGuid, action)
+          );
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), apiAction, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
@@ -179,40 +155,46 @@ export class GitEffects {
     ofType<FetchCommits>(FETCH_COMMITS),
     mergeMap(action => {
       const actionType = 'fetch';
-      const apiAction: PaginatedAction = {
-        entityType: gitCommitEntityType,
-        endpointType: GIT_ENDPOINT_TYPE,
-        type: action.type,
-        paginationKey: action.paginationKey
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return action.scm.getCommits(this.httpClient, action.projectName, action.sha).pipe(
         mergeMap((commits: GitCommit[]) => {
-          const entityKey = entityCatalog.getEntity(apiAction).entityKey;
+          const entityKey = entityCatalog.getEntity(action).entityKey;
           const mappedData: NormalizedResponse = {
             entities: { [entityKey]: {} },
             result: []
           };
           commits.forEach(commit => {
-            this.addCommit(entityKey, mappedData, action.scm.getType(), action.projectName, commit);
+            this.addCommit(entityKey, mappedData, this.updateCommit(action.scm.getType(),
+              action.projectName,
+              commit,
+              action.scm.endpointGuid,
+              action
+            ));
           });
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+            new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
         catchError(err => [
-          new WrapperRequestActionFailed(this.scmService.parseErrorAsString(err, action.scm.getType()), apiAction, actionType)
+          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
     }));
 
-  addCommit(entityKey: string, mappedData: NormalizedResponse, scmType: string, projectName: string, commit: GitCommit) {
-    const id = scmType + '-' + projectName + '-' + commit.sha; // FIXME: get from action, see #4245
-    mappedData.entities[entityKey][id] = commit;
-    // mappedData.entities[entityKey][id] = {
-    //   entity: commit,
-    //   metadata: {}
-    // };
-    mappedData.result.push(id);
+  updateCommit(scmType: string, projectName: string, commit: GitCommit, endpointGuid: string, action: EntityRequestAction): GitCommit {
+    const newCommit = {
+      ...commit,
+      scmType,
+      projectName,
+      endpointGuid,
+    };
+    newCommit.guid = action.entity[0].getId(newCommit);
+
+    return newCommit;
+  }
+
+  addCommit(entityKey: string, mappedData: NormalizedResponse, commit: GitCommit) {
+    mappedData.entities[entityKey][commit.guid] = commit;
+    mappedData.result.push(commit.guid);
   }
 
 }

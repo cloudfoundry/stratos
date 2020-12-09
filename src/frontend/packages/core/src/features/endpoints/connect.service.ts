@@ -35,6 +35,8 @@ export class ConnectEndpointService {
 
   public connectingError$: Observable<string>;
   private hasConnected = new Subject<boolean>();
+
+  // This Observable is used to observe when conenction has completed
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
   public isBusy$: Observable<boolean>;
 
@@ -132,7 +134,6 @@ export class ConnectEndpointService {
   public submit(): Observable<{ success: boolean, errorMessage: string }> {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared, bodyContent } = this.pData;
-
     return stratosEntityCatalog.endpoint.api.connect<ActionState>(
       this.config.guid,
       this.config.type,
@@ -147,7 +148,7 @@ export class ConnectEndpointService {
       map(updateSection => ({
         success: !updateSection.error,
         errorMessage: updateSection.message
-      })),
+      }))
     );
   }
 

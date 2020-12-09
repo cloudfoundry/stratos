@@ -53,7 +53,7 @@ metadata:
     {{- if hasKey .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/proxy-body-size" | not -}}
       {{ $_ := set .Values.console.service.ingress.annotations "nginx.ingress.kubernetes.io/proxy-body-size" "200m" }}
     {{- end }}
-    {{ $_ := set .Values.console.service.ingress.annotations "nginx.org/websocket-services" (print .Release.Name "-ui-ext") }}
+    {{- $_ := set .Values.console.service.ingress.annotations "nginx.org/websocket-services" (print .Release.Name "-ui-ext") }}
 {{ toYaml .Values.console.service.ingress.annotations | indent 4 }}
   labels:
     app.kubernetes.io/name: "stratos"
@@ -65,12 +65,17 @@ metadata:
     {{ $key }}: {{ $value }}
 {{- end }}    
 spec:
+{{- $host := (include "ingress.host" .) }}
   tls:
   - secretName: {{ default (print .Release.Name "-ingress-tls") .Values.console.service.ingress.secretName | quote }}
+    {{- if $host }}
     hosts:
-    - {{ template "ingress.host" . }}
+    - {{ $host }}
+    {{- end }}
   rules:
-    - host: {{ template "ingress.host" . }}
+    - {{ if $host -}}
+      host: {{ $host }}
+      {{ end -}}
       http:
         paths:
           - path: "/"

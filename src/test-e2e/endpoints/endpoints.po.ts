@@ -3,14 +3,14 @@ import { ElementFinder } from 'protractor/built';
 
 import { E2EEndpointConfig } from '../e2e.types';
 import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
-import { ListCardComponent, ListComponent, ListHeaderComponent, ListTableComponent } from '../po/list.po';
+import { ListCardComponent, ListComponent, ListTableComponent } from '../po/list.po';
 import { MetaCard, MetaCardItem } from '../po/meta-card.po';
 import { Page } from '../po/page.po';
 import { SnackBarPo } from '../po/snackbar.po';
 
 export class EndpointCards extends ListCardComponent {
-  constructor(locator: ElementFinder, header: ListHeaderComponent) {
-    super(locator, header);
+  constructor(locator: ElementFinder, list: ListComponent) {
+    super(locator, list);
   }
 
   findCardByTitle(title: string, subtitle = 'Cloud Foundry'): promise.Promise<MetaCard> {
@@ -108,7 +108,7 @@ export class EndpointsPage extends Page {
 
   // Endpoints table (as opposed to generic list.table)
   public table = new EndpointsTable(this.list.getComponent());
-  public cards = new EndpointCards(this.list.locator, this.list.header);
+  public cards = new EndpointCards(this.list.locator, this.list);
 
   constructor() {
     super('/endpoints');

@@ -28,8 +28,8 @@ describe('Metrics', () => {
     expect(register.stepper.canNext()).toBeFalsy();
 
     register.form.getControlsMap().then(fields => {
-      expect(fields.client_id).toBeUndefined();
-      expect(fields.client_secret).toBeUndefined();
+      expect(fields.client_id.value).toBe('');
+      expect(fields.client_secret.value).toBe('');
     });
 
     register.form.fill({
@@ -39,8 +39,8 @@ describe('Metrics', () => {
     });
 
     register.form.getControlsMap().then(fields => {
-      expect(fields.client_id).not.toBeDefined();
-      expect(fields.client_secret).not.toBeDefined();
+      expect(fields.client_id.value).toBe('');
+      expect(fields.client_secret.value).toBe('');
     });
 
     expect(register.stepper.canNext()).toBeTruthy();

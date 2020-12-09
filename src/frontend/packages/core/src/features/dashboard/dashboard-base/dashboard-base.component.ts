@@ -11,9 +11,9 @@ import { CloseSideNav, DisableMobileNav, EnableMobileNav } from '../../../../../
 import { GetCurrentUsersRelations } from '../../../../../store/src/actions/permissions.actions';
 import { DashboardOnlyAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { DashboardState } from '../../../../../store/src/reducers/dashboard-reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { DashboardState } from '../../../../../store/src/types/dashboard.types';
 import { CustomizationService } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';

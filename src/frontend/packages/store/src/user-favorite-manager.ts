@@ -227,4 +227,12 @@ export class UserFavoriteManager {
     return total > 0;
   }
 
+  public canFavoriteEntityType(entityDefn: StratosBaseCatalogEntity) {
+    const defn = entityDefn.builders?.entityBuilder;
+    if (defn) {
+      const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+      return canFavorite;
+    }
+    return false;
+  }
 }

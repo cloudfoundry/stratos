@@ -146,6 +146,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.masterAction,
       this.isLocal
     );
+
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,
@@ -266,6 +267,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       }
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
     }
+    /* tslint:disable-next-line:no-string-literal  */
+    if (this.action['length']) {
+      this.action = (this.action as PaginatedAction[]).map(a => ({
+        ...a,
+        isList: true
+      }));
+    } else {
+      (this.action as PaginatedAction).isList = true;
+    }
+    this.masterAction.isList = true;
   }
 
   private getEntitySelectConfig(multiActionConfig: MultiActionConfig) {

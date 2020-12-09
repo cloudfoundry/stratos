@@ -1,4 +1,18 @@
+import { Observable } from 'rxjs';
+
+import {
+  OrchestratedActionBuilderConfig,
+  OrchestratedActionBuilders,
+} from '../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
+import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IEntityMetadata, IStratosEntityDefinition } from '../../../../store/src/entity-catalog/entity-catalog.types';
+import { UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KubernetesPodExpandedStatus } from '../services/kubernetes-expanded-state';
+
+// Map of endpoint ID to current namespace for that endpoint
+export interface KubernetesCurrentNamespace {
+  [endpoint: string]: string;
+}
 
 export interface KubernetesInfo {
   nodes: {};
@@ -21,6 +35,37 @@ export interface KubeAPIResource extends BasicKubeAPIResource {
   metadata: Metadata;
   status: BaseStatus;
   spec: any;
+}
+
+export interface IKubeResourceEntityDefinition extends IStratosEntityDefinition {
+  apiVersion: string;
+  apiName: string;
+  apiNamespaced: boolean;
+}
+
+export interface KubeResourceEntityDefinition<
+  A extends IEntityMetadata = IEntityMetadata,
+  B = any,
+  C extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders
+  > {
+  apiVersion: string;
+  apiName: string;
+  apiNamespaced?: boolean;
+  label: string;
+  labelPlural?: string;
+  labelTab?: string;
+  icon: string;
+  iconFont?: string;
+  type: string;
+  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
+  getIsValid?: (fav: UserFavorite<A>) => Observable<boolean>;
+  listColumns?: SimpleKubeListColumn[];
+  // Should this entity be hidden in the auto-generated navigation?
+  hidden?: boolean;
+  // Name fo a list config that can be obtained from the list config service
+  listConfig?: string;
+  // Allow this entity to be favorited?
+  canFavorite?: boolean;
 }
 
 export interface KubeService extends BasicKubeAPIResource {
@@ -516,4 +561,23 @@ export interface AnalysisReport {
   duration: number;
   report?: any;
   title?: string;
+}
+
+
+export interface KubernetesConfigMap extends BasicKubeAPIResource {
+  test?: string;
+}
+
+export type SimpleColumnValueGetter<T> = (row: T) => string | Observable<string>;
+
+export interface SimpleKubeListColumn<T = any> {
+  field: string | SimpleColumnValueGetter<T>;
+  header: string;
+  flex?: string;
+  sort?: boolean;
+}
+
+export interface KubeServiceAccount {
+  metadata: Metadata;
+  secrets: { [name: string]: string; }[];
 }

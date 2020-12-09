@@ -1,8 +1,3 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import {
-  IListDataSource,
-} from 'frontend/packages/core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { of } from 'rxjs';
 
 import {
@@ -10,9 +5,7 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../../../store/src/public-api';
-import { BaseKubeGuid } from '../../kubernetes-page.types';
+import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -20,18 +13,18 @@ import {
 import { KubernetesPod } from '../../store/kube.types';
 import { defaultHelmKubeListPageSize } from '../kube-helm-list-types';
 import { createKubeAgeColumn } from '../kube-list.helper';
+import { entityCatalog } from './../../../../../store/src/entity-catalog/entity-catalog';
+import { KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType } from './../../kubernetes-entity-factory';
 import { KubernetesPodContainersComponent } from './kubernetes-pod-containers/kubernetes-pod-containers.component';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status/kubernetes-pod-status.component';
-import { KubernetesPodsDataSource } from './kubernetes-pods-data-source';
 
-export abstract class BaseKubernetesPodsListConfigService implements IListConfig<KubernetesPod> {
+export abstract class BaseKubernetesPodsListConfigService implements ISimpleListConfig<KubernetesPod> {
 
   static namespaceColumnId = 'namespace';
   static nodeColumnId = 'node';
   public showNamespaceLink = true;
 
   constructor(
-    private kubeId: string,
     hideColumns: string[] = [
       BaseKubernetesPodsListConfigService.namespaceColumnId,
       BaseKubernetesPodsListConfigService.nodeColumnId
@@ -59,7 +52,8 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
         sidePanelConfig: {
           title: pod.metadata.name,
           resourceKind: 'pod',
-          resource$: of(pod)
+          resource$: of(pod),
+          definition: entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, kubernetesPodsEntityType)
         }
       })
     },
@@ -74,7 +68,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'metadata.namespace',
-        getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
+        getLink: row => this.showNamespaceLink ? `/kubernetes/${row.metadata.kubeId}/namespaces/${row.metadata.namespace}` : null
       },
       sort: {
         type: 'sort',
@@ -88,7 +82,7 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
       columnId: BaseKubernetesPodsListConfigService.nodeColumnId, headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
-        getLink: pod => `/kubernetes/${this.kubeId}/nodes/${pod.spec.nodeName}/summary`
+        getLink: pod => `/kubernetes/${pod.metadata.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
@@ -96,14 +90,6 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
         field: 'spec.nodeName'
       },
       cellFlex: '2',
-    },
-    {
-      columnId: 'ready',
-      headerCell: () => 'Ready',
-      cellDefinition: {
-        getValue: pod => `${pod.expandedStatus.readyContainers}/${pod.expandedStatus.totalContainers}`
-      },
-      cellFlex: '1'
     },
     {
       columnId: 'expandedStatus',
@@ -139,7 +125,6 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
     filter: 'Filter by Name',
     noEntries: 'There are no pods'
   };
-  abstract getDataSource: () => IListDataSource<KubernetesPod>;
   expandComponent = KubernetesPodContainersComponent;
 
   getGlobalActions = () => null;
@@ -149,19 +134,8 @@ export abstract class BaseKubernetesPodsListConfigService implements IListConfig
   getMultiFiltersConfigs = () => [];
 }
 
-@Injectable()
-export class KubernetesPodsListConfigService extends BaseKubernetesPodsListConfigService {
-  private podsDataSource: KubernetesPodsDataSource;
-
-  getDataSource = () => this.podsDataSource;
-
-  constructor(
-    store: Store<AppState>,
-    kubeId: BaseKubeGuid,
-  ) {
-    super(kubeId.guid, []);
-    this.podsDataSource = new KubernetesPodsDataSource(store, kubeId, this);
+export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {
+  constructor() {
+    super([]);
   }
-
 }
-

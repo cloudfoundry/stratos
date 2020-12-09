@@ -129,7 +129,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           (stratProject.deploySource.type === 'github' || stratProject.deploySource.type === 'gitscm')
         ) {
           const gitscm = stratProject.deploySource.scm || stratProject.deploySource.type;
-          const scm = scmService.getSCM(gitscm as GitSCMType);
+          const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
           const iconInfo = scm.getIcon();
           // Add tab or update existing tab
           const tab = this.tabLinks.find(t => t.link === 'gitscm');

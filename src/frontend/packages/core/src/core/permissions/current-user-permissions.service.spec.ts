@@ -124,7 +124,8 @@ describe('CurrentUserPermissionsService', () => {
             },
             totalResults: 2
           },
-          maxedState: {}
+          maxedState: {},
+          isListPagination: true
         }
       },
     };

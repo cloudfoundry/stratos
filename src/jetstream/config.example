@@ -36,6 +36,9 @@ ENABLE_TECH_PREVIEW=false
 # If the max list size is hit allow the user to load all results anyway. Defaults to false
 #UI_LIST_ALLOW_LOAD_MAXED=false
 
+# By default, only show favorites endpoints on the home view
+# HOME_VIEW_SHOW_FAVORITES_ONLY=false
+
 # User Invites
 SMTP_FROM_ADDRESS=Stratos<invite@stratos.com>
 SMTP_HOST=127.0.0.1

@@ -712,12 +712,33 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		UserInfo: pp.GetCNSIUserFromBasicToken,
 	})
 
-	// Generic Token Bearer Auth
+	// No authentication
+	pp.AddAuthProvider(interfaces.AuthConnectTypeNone, interfaces.AuthProvider{
+		Handler:  pp.doNoAuthFlowRequest,
+		UserInfo: pp.getCNSIUserForNoAuth,
+	})
+
+	// Generic Bearer Auth (HTTP Authorization header with 'bearer' prefix)
 	pp.AddAuthProvider(interfaces.AuthTypeBearer, interfaces.AuthProvider{
-		Handler: pp.doTokenBearerFlowRequest,
+		Handler: pp.doBearerFlowRequest,
 		UserInfo: func(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
 			// don't fetch user info for the generic token auth
-			return &interfaces.ConnectedUser{}, false
+			return &interfaces.ConnectedUser{
+				Name: cfTokenRecord.RefreshToken,
+				GUID: cfTokenRecord.RefreshToken,
+			}, true
+		},
+	})
+
+	// Generic Token Auth (HTTP Authorization header with 'token' prefix)
+	pp.AddAuthProvider(interfaces.AuthTypeToken, interfaces.AuthProvider{
+		Handler: pp.doTokenFlowRequest,
+		UserInfo: func(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+			// don't fetch user info for the generic token auth
+			return &interfaces.ConnectedUser{
+				Name: cfTokenRecord.RefreshToken,
+				GUID: cfTokenRecord.RefreshToken,
+			}, true
 		},
 	})
 

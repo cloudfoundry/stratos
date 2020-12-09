@@ -8,7 +8,7 @@ import { first, map } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/public-api';
 import { isFetchingPage } from '../../../../store/src/reducers/pagination-reducer/pagination-reducer.helper';
-import { kubeEntityCatalog } from '../kubernetes-entity-catalog';
+import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { GetAnalysisReports } from '../store/analysis.actions';
 import { AnalysisReport } from '../store/kube.types';
