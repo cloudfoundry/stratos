@@ -1,5 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
+import moment from 'moment';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -71,6 +72,7 @@ import {
 import { getGuidFromKubePodObj } from './store/kube.getIds';
 import {
   AnalysisReport,
+  BasicKubeAPIResource,
   KubeAPIResource,
   KubeResourceEntityDefinition,
   KubernetesConfigMap,
@@ -80,6 +82,7 @@ import {
   KubernetesPod,
   KubernetesStatefulSet,
   KubeService,
+  KubeServiceAccount,
 } from './store/kube.types';
 import { KubeDashboardStatus } from './store/kubernetes.effects';
 import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
@@ -237,9 +240,9 @@ export class KubeEntityCatalog {
   public pv: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public replicaSet: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public clusterRole: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
-  public serviceAccount: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
+  public serviceAccount: StratosCatalogEntity<IFavoriteMetadata, KubeServiceAccount, KubeResourceActionBuilders>;
   public role: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
-  public job: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
+  public job: StratosCatalogEntity<IFavoriteMetadata, BasicKubeAPIResource, KubeResourceActionBuilders>;
 
   constructor() {
     const endpointDef: StratosEndpointExtensionDefinition = {
@@ -391,6 +394,11 @@ export class KubeEntityCatalog {
       apiName: 'secrets',
       listColumns: [
         {
+          header: 'Type',
+          field: 'type',
+          sort: true
+        },
+        {
           header: 'Data Keys',
           field: (row: KubernetesConfigMap) => `${Object.keys(row.data).length}`
         },
@@ -462,8 +470,18 @@ export class KubeEntityCatalog {
       apiName: 'replicasets',
       listColumns: [
         {
-          header: 'Replicas',
+          header: 'Desired',
           field: 'spec.replicas',
+          sort: true
+        },
+        {
+          header: 'Current',
+          field: 'status.replicas',
+          sort: true
+        },
+        {
+          header: 'Ready',
+          field: 'status.readyReplicas',
           sort: true
         },
       ]
@@ -476,12 +494,16 @@ export class KubeEntityCatalog {
       apiName: 'clusterroles',
       apiNamespaced: false,
     });
-    this.serviceAccount = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+    this.serviceAccount = KubeResourceEntityHelper.generate<KubeServiceAccount, KubeResourceActionBuilders>(endpointDef, {
       type: 'serviceAccount',
       icon: 'replica_set',
       label: 'Service Account',
       apiVersion: '/api/v1',
       apiName: 'serviceaccounts',
+      listColumns: [{
+        header: 'Secrets',
+        field: (row: KubeServiceAccount) => row.secrets?.length.toString()
+      }]
     });
     this.role = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'role',
@@ -490,12 +512,20 @@ export class KubeEntityCatalog {
       apiVersion: '/apis/rbac.authorization.k8s.io/v1',
       apiName: 'roles',
     });
-    this.job = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
+    this.job = KubeResourceEntityHelper.generate<BasicKubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'job',
       icon: 'job',
       label: 'Job',
       apiVersion: '/apis/batch/v1',
       apiName: 'jobs',
+      listColumns: [{
+        header: 'Completions',
+        field: (row: BasicKubeAPIResource) => this.jobToCompletion(row.spec, row.status)
+      },
+      {
+        header: 'Duration',
+        field: (row: BasicKubeAPIResource) => this.jobToDuration(row.status)
+      }]
     });
   }
 
@@ -566,6 +596,34 @@ export class KubeEntityCatalog {
       labelPlural: 'Kubernetes Metrics',
       endpoint: endpointDefinition,
     });
+  }
+
+  private jobToCompletion(spec: any, status: any): string {
+    if (!!spec.completions) {
+      return status.succeeded + '/' + spec.completions;
+    }
+
+    if (!spec.parallelism) {
+      return status.succeeded + '/1';
+    }
+
+    if (spec.parallelism > 1) {
+      return status.Succeeded + '/1 of ' + spec.parallelism;
+    }
+
+    return status.succeeded + '/1';
+  }
+
+  private jobToDuration(status: any): string {
+    if (!status.startTime) {
+      return '';
+    }
+
+    if (!!status.CompletionTime) {
+      return moment.duration(moment(status.startTime).diff(moment())).humanize();
+    }
+
+    return moment.duration(moment(status.startTime).diff(moment(status.completionTime))).humanize();
   }
 }
 
