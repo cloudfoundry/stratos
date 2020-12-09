@@ -141,6 +141,9 @@ export class HelmReleaseSocketService implements OnDestroy {
    * Convert type in kube api kind string to kube entity catalog property name
    */
   private getEntityTypeForResource(type: string): string {
+    // TODO: Ideally this should come from some kubeEntityCatalog.allKubeEntities `def.apiName === resource.kind && def.apiWorkspaced`
+    // lookup, however we don't currently have anything in the entity that matches the catalog property name
+    // (apiName casing doesn't match). We should improve the whole kubeEntityCatalog[entityType] process
     switch (type) {
       case 'Service':
         return 'service';
