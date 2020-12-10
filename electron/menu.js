@@ -6,6 +6,7 @@ const {
 } = require('electron')
 
 const fs = require('fs');
+const path = require("path");
 
 const isMac = process.platform === 'darwin'
 
