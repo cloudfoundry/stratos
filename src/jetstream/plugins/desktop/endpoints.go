@@ -88,7 +88,7 @@ func mergeEndpoints(first, second []*interfaces.CNSIRecord) []*interfaces.CNSIRe
 		if _, ok := urls[endpoint.APIEndpoint.String()]; !ok {
 			merged = append(merged, endpoint)
 		} else {
-			log.Infof("Removed endpoint: %s", endpoint.APIEndpoint.String())
+			log.Debugf("Removed endpoint: %s", endpoint.APIEndpoint.String())
 		}
 	}
 
@@ -118,7 +118,7 @@ func mergeConnectedEndpoints(first, second []*interfaces.ConnectedEndpoint) []*i
 		if _, ok := urls[endpoint.APIEndpoint.String()]; !ok {
 			merged = append(merged, endpoint)
 		} else {
-			log.Infof("Removed endpoint: %s", endpoint.APIEndpoint.String())
+			log.Debugf("Removed endpoint: %s", endpoint.APIEndpoint.String())
 		}
 	}
 
