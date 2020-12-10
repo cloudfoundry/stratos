@@ -1,5 +1,32 @@
 # Change Log
 
+## 4.4.0
+
+[Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.3.0...4.4.0)
+
+This release includes a number of improvements and fixes, including updates to visible Kubernetes resource types, deploying applications from private Github/Gitlab repositories and a greatly improved home page.
+
+**Improvements:**
+
+- Show more kube resource types for a cluster [\#4823](https://github.com/cloudfoundry/stratos/issues/4823)
+- Add additional kube resources to Workload page [\#4831](https://github.com/cloudfoundry/stratos/issues/4831)
+- Deploy Applications from Enterprise GitHub and GitLab [\#4828](https://github.com/cloudfoundry/stratos/issues/4828)
+- Improve initial home page to show more meaningful data [\#4774](https://github.com/cloudfoundry/stratos/issues/4774)
+- Persist list settings over browser refresh & add reset button [\#4814](https://github.com/cloudfoundry/stratos/issues/4814)
+- Application logstreams incorrectly render unicode characters in the log. [\#4807](https://github.com/cloudfoundry/stratos/issues/4807)
+- No option to set an SSOWhitelist with helm deployments [\#4785](https://github.com/cloudfoundry/stratos/issues/4785)
+- Endpoint Registration: Advanced Client ID and Secret fields can be confusing [\#4767](https://github.com/cloudfoundry/stratos/issues/4767)
+- Clicking on a helm repo endpoint should automatically set it as a filter in chart list [\#4760](https://github.com/cloudfoundry/stratos/issues/4760)
+- Upgrade to Angular 10 [\#4725](https://github.com/cloudfoundry/stratos/issues/4725)
+- Add ability to favourite Kubernetes Namespaces [\#4651](https://github.com/cloudfoundry/stratos/issues/4651)
+
+**Fixes:**
+
+- Can't connect Stratos to a non-Stratos-Metrics Prometheus [\#4804](https://github.com/cloudfoundry/stratos/issues/4804)
+- UAA Setup UI does not accept client secret with # char [\#4789](https://github.com/cloudfoundry/stratos/issues/4789)
+- Password show/hide icon takes tab focus [\#4768](https://github.com/cloudfoundry/stratos/issues/4768)
+
+
 ## 4.3.0
 
 [Full Changelog](https://github.com/cloudfoundry/stratos/compare/4.2.1...4.3.0)
