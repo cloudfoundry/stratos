@@ -12,7 +12,12 @@ const isMac = process.platform === 'darwin'
 let appMainWindow;
 let appHomeUrl;
 
-const version = fs.readFileSync('./version').toString();
+// Read version file
+const versionFile = path.join(__dirname, `./version`);
+let version = 'dev';
+if (fs.existsSync(versionFile)) {
+  version = fs.readFileSync(versionFile).toString();
+}
 
 function getMenu(mainWindow, homeUrl) {
   appMainWindow = mainWindow;
