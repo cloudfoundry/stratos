@@ -83,6 +83,7 @@ import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
+import { ProfileSettingsComponent } from './components/profile-settings/profile-settings.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
 import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
@@ -219,6 +220,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellSidePanelComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
+    ProfileSettingsComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -310,7 +312,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,
-    ...listTableCells
+    ...listTableCells,
+    ProfileSettingsComponent
   ],
   providers: [
     ListConfig,

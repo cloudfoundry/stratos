@@ -1,0 +1,48 @@
+.stratos.stratos-desktop {
+
+  // Remove some of the padding on the list header
+  .list-component__header {
+   > mat-card.list-component__header-card {
+      min-height: unset;
+    }
+  }
+
+  // User icon goes, so remove extra padding
+  .page-header__right {
+    padding-right: 0;
+  }
+
+  // Less padding for the icons on the right of the page header
+  .page-header .page-header__toolbar {
+    padding-right: 5px;
+  }
+
+  // Smaller icons in the main page header
+  .page-header mat-icon {
+    font-size: 20px;
+    height: 20px;
+    line-height: 20px;
+    width: 20px;
+  }
+
+  .page-header__notifications-button.mat-badge.mat-badge-medium .mat-badge-content.mat-badge-active {
+    font-size: 10px;
+    height: 16px;
+    line-height: 16px;
+    right: -6px;
+    top: -6px;
+    width: 16px;
+  }
+
+  .page-header__left {
+    h1 {
+      font-size: 18px;
+    }
+  }
+
+  // Hide copyright button
+  .side-nav__bottom {
+    display: none;
+  }
+
+}

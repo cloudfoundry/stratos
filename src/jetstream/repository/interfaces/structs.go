@@ -54,6 +54,7 @@ type CNSIRecord struct {
 	SSOAllowed             bool     `json:"sso_allowed"`
 	SubType                string   `json:"sub_type"`
 	Metadata               string   `json:"metadata"`
+	Local                  bool     `json:"local"`
 }
 
 // ConnectedEndpoint
@@ -70,6 +71,7 @@ type ConnectedEndpoint struct {
 	TokenMetadata          string   `json:"-"`
 	SubType                string   `json:"sub_type"`
 	EndpointMetadata       string   `json:"metadata"`
+	Local                  bool     `json:"local"`
 }
 
 const (

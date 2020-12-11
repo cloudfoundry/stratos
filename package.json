@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Stratos Console",
   "main": "index.js",
   "scripts": {
@@ -124,7 +124,7 @@
     "codelyzer": "^6.0.1",
     "copy-webpack-plugin": "^6.2.0",
     "delete": "^1.1.0",
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^9.0.1",
     "globby": "^11.0.0",
     "istanbul": "^0.4.5",
     "istanbul-api": "2.1.6",
@@ -142,7 +142,6 @@
     "karma-jasmine-html-reporter": "^1.5.3",
     "karma-spec-reporter": "0.0.32",
     "kind-of": "^6.0.3",
-    "lodash": "^4.17.19",
     "mem": "6.1.0",
     "mktemp": "^1.0.0",
     "ng-packagr": "^10.1.2",

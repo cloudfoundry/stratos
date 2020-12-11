@@ -1,0 +1,27 @@
+<app-page-header>
+  <h1>Install</h1>
+</app-page-header>
+<div class="choices">
+  <mat-card *ngFor="let type of types">
+    <!-- <mat-card-header>
+      <mat-card-title>{{ type.title }} </mat-card-title>
+    </mat-card-header> -->
+    <mat-card-content>
+      <div class="icon">
+        <div>
+          <img [src]="type.icon">
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="description">
+          {{type.description}}
+        </div>
+        <div class="button">
+          <button (click)="edit()" mat-raised-button color="primary">
+            Install Now!
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

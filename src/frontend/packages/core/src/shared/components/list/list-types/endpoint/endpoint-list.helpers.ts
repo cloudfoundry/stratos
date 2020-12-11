@@ -88,9 +88,12 @@ export class EndpointListHelper {
     return [
       {
         action: (item) => {
+          const message1 = `Are you sure you want to disconnect endpoint '${item.name}'?`;
+          // TODO: This only current applies to CF
+          const message2 = item.local ? `This will also update your local configuration.` : '';
           const confirmation = new ConfirmationDialogConfig(
             'Disconnect Endpoint',
-            `Are you sure you want to disconnect endpoint '${item.name}'?`,
+            `${message1}${message2 ? `<br><br>${message2}` : ''}`,
             'Disconnect',
             false
           );

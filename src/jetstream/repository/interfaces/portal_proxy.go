@@ -79,4 +79,8 @@ type PortalProxy interface {
 
 	// Plugins
 	GetPlugin(name string) interface{}
+
+	// Store
+	GetStoreFactory() StoreFactory
+	SetStoreFactory(factory StoreFactory) StoreFactory
 }

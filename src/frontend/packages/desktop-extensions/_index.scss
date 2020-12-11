@@ -1,0 +1,31 @@
+@import '~@stratosui/theme/helper';
+
+@import './sass/styles';
+
+// Custom Theme
+@import './sass/colors';
+
+@function stratos-theme() {
+  @return (
+    default: create-desktop-theme($desktop-theme),
+    dark: create-desktop-theme($oss-dark-theme),
+  );
+}
+
+@function create-desktop-theme($base-theme) {
+  $theme: stratos-theme-helper($base-theme);
+
+  // Modify some of the colors
+  $app-theme: map-get($theme, app-theme);
+  $app-theme: map-merge($app-theme, (
+    header-background-color: $desktop-header-bar,
+    intro-screen-background-color: $background-color,
+  ));
+
+  $theme: map-merge($theme, (
+    app-theme: $app-theme
+  ));
+
+  @return $theme;
+}
+

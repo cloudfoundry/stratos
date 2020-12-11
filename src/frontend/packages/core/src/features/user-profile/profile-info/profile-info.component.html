@@ -34,7 +34,7 @@
               <ng-template #noEmail>
                 <app-metadata-item icon="email" label="Email">No Email Address</app-metadata-item>
               </ng-template>
-              <app-metadata-item *ngIf="(this.userService.isAdmin$ | async)" icon="security" label="User Type">
+              <app-metadata-item *ngIf="(userService.isAdmin$ | async)" icon="security" label="User Type">
                 Administrator</app-metadata-item>
             </div>
             <div class="app-metadata__two-cols" *ngIf="profile.origin === 'uaa'">
@@ -52,84 +52,7 @@
         <mat-card-header>
           <mat-card-title>Local Settings</mat-card-title>
         </mat-card-header>
-        <div class="user-profile__options">
-
-          <div class="user-profile__option" *ngIf="canEdit$ | async">
-            <div class="user-profile__option-inner" *ngIf="gravatarEnabled$ | async as enableGravatar">
-              <mat-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
-                <div class="user-profile__option-header">Use Gravatar for user icon</div>
-              </mat-slide-toggle>
-              <div class="user-profile__option-subtext">Use image from Gravatar for the user profile icon when email
-                address is available</div>
-            </div>
-          </div>
-
-          <div class="user-profile__option" *ngIf="timeoutSession$ | async as timeoutSession"
-            [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
-            <div class="user-profile__option-inner">
-              <mat-slide-toggle color="warn" [checked]="timeoutSession === 'false'"
-                (change)="updateSessionKeepAlive(timeoutSession)">
-                <div class="user-profile__option-header">Disable session timeout
-                  <mat-icon *ngIf="timeoutSession === 'false'"
-                    matTooltip="Session timeout is disabled, you are now at a greater security risk."
-                    matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
-                    warning
-                  </mat-icon>
-                </div>
-              </mat-slide-toggle>
-              <div class="user-profile__option-subtext">Disable automatic logout if you are inactive
-                for a long period of time. Disabling session timeout is considered a security risk.</div>
-            </div>
-          </div>
-
-          <div class="user-profile__option" *ngIf="pollingEnabled$ | async as pollingEnabled"
-            [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
-            <div class="user-profile__option-inner">
-              <mat-slide-toggle color="warn" [checked]="pollingEnabled === 'false'"
-                (change)="updatePolling(pollingEnabled)">
-                <div class="user-profile__option-header">Disable polling
-                  <mat-icon *ngIf="pollingEnabled === 'false'" #tooltip="matTooltip"
-                    matTooltip="Polling is disabled, some pages may not automatically update."
-                    matTooltipPosition="right" class="user-profile__option-warning-icon" inline="true">
-                    warning
-                  </mat-icon>
-                </div>
-              </mat-slide-toggle>
-              <div class="user-profile__option-subtext">Disable automatically refreshing data throughout the
-                application. Disabling
-                polling may result in some pages showing out-of-date information.</div>
-            </div>
-          </div>
-
-          <div class="user-profile__section" *ngIf="hasMultipleThemes">
-            <div class="user-profile__option">Theme</div>
-            <div class="user-profile__option">
-              <div class="user-profile__option-inner">
-                <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
-                  (change)="themeService.setTheme($event.value)" name="theme" aria-label="Theme">
-                  <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key">
-                    {{ theme.label }}
-                  </mat-button-toggle>
-                </mat-button-toggle-group>
-              </div>
-            </div>
-          </div>
-          <div class="user-profile__section user-profile__local-storage"
-            *ngIf="localStorageSize$ | async as localStorageSize">
-            <div class="user-profile__option">Clear Settings</div>
-            <div class="user-profile__option">
-              <div class="user-profile__option-inner">
-                <div class="user-profile__local-storage--div">Your browser's local storage is used to persist local
-                  settings
-                  This covers the options in this section and some changes to lists such as filters and sorting.
-                </div>
-                <div class="user-profile__local-storage--div">Size of local storage:
-                  ~{{ localStorageSize | bytesToHumanSize }} <button color="warn" mat-button mat-raised-button
-                    (click)="clearLocalStorage()">Clear</button></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <app-profile-settings></app-profile-settings>
       </mat-card>
       <mat-card *ngIf="profile.origin === 'uaa'">
         <mat-card-header>

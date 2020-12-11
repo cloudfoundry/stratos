@@ -78,10 +78,12 @@ require (
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	google.golang.org/genproto v0.0.0-20200620020550-bd6e04640131 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.5.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apiextensions-apiserver v0.0.0 // indirect
+	k8s.io/client-go v9.0.0+incompatible
 	k8s.io/helm v2.16.10+incompatible // indirect
 	k8s.io/kubectl v0.0.0 // indirect
 )

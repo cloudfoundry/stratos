@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -14,6 +13,7 @@ import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/acti
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -49,7 +49,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   constructor(
     private store: Store<CFAppState>,
-    private snackBar: MatSnackBar,
+    private snackBarService: SnackBarService,
     public cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     this.valid$ = observableOf(false);
@@ -64,7 +64,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Observables
     this.errorSub = this.deployer.status$.pipe(
       filter((status) => status.error)
-    ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
+    ).subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'));
 
     const appGuid$ = this.deployer.applicationGuid$.pipe(
       filter((appGuid) => appGuid !== null),
@@ -126,9 +126,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
       first()
     ).subscribe(status => {
       if (status.error) {
-        this.snackBar.open(status.errorMsg, 'Dismiss');
+        this.snackBarService.show(status.errorMsg, 'Dismiss');
       } else {
-        const ref = this.snackBar.open('Application deployment complete', 'View', { duration: 5000 });
+        const ref = this.snackBarService.show('Application deployment complete', 'View', 10000, true);
         ref.onAction().subscribe(() => { this.goToAppSummary(); });
       }
       this.deployer.close();
@@ -151,14 +151,14 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.deployer.deploy();
     }
     this.busy = true;
-  }
+  };
 
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     this.goToAppSummary();
     return observableOf({ success: true });
-  }
+  };
 
   goToAppSummary() {
     // Take user to applications
