@@ -2,6 +2,27 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v1
+    appVersion: 4.4.0
+    created: "2020-12-16T08:49:46.068914817Z"
+    description: A Helm chart for deploying Stratos
+    digest: b1e8c1d577fa5e70abb41cb0315602673f3923e68c1dc68fbeb6e1169038d4ca
+    home: https://stratos.app
+    icon: https://raw.githubusercontent.com/cloudfoundry/stratos/master/deploy/kubernetes/console/icon.png
+    keywords:
+    - Stratos
+    - Cloud Foundry
+    - Kubernetes
+    - Helm
+    maintainers:
+    - email: stratos-maintainers@suse.de
+      name: Stratos Maintainers
+    name: console
+    sources:
+    - https://github.com/cloudfoundry/stratos
+    urls:
+    - https://github.com/cloudfoundry/stratos/releases/download/4.4.0-rc.1/console-helm-chart-4.4.0-rc.1-0413ee5be.tgz
+    version: 4.4.0-rc.1
+  - apiVersion: v1
     appVersion: 4.3.0
     created: "2020-11-11T13:30:11.773560212Z"
     description: A Helm chart for deploying Stratos
@@ -829,4 +850,4 @@ entries:
     urls:
     - https://github.com/cloudfoundry-incubator/stratos/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: "2020-11-11T13:30:11.769019494Z"
+generated: "2020-12-16T08:49:46.067024806Z"
