@@ -9,6 +9,7 @@ RUN npm run build-backend
 
 FROM splatform/stratos-bk-base:leap15_2 as common-build
 COPY --from=builder /home/stratos/src/jetstream/jetstream /srv/
+COPY --from=builder /home/stratos/src/jetstream/plugins.yaml /srv/
 RUN chmod +x /srv/jetstream
 
 # use --target=prod-build to build a backend image for Kubernetes
