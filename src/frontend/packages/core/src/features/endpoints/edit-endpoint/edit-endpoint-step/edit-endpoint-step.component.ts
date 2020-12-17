@@ -82,9 +82,6 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       map(endpoints => Object.values(endpoints).find((e => e.guid === this.endpointID)))
     );
 
-    // TODO: Remove
-    this.endpoint$.subscribe(a => console.log(a));
-
     this.definition$ = this.endpoint$.pipe(
       map(entity => entityCatalog.getEndpoint(entity.cnsi_type, entity.sub_type)),
       map(d => d.definition)
