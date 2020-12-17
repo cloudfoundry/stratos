@@ -155,8 +155,6 @@ Ingress Host:
 {{ $host | quote }}
 {{- else if .Values.env.DOMAIN -}}
 {{ print "console." .Values.env.DOMAIN }}
-{{- else -}}
-{{ required "Host name is required" $host | quote }}
 {{- end -}}
 {{- end -}}
 

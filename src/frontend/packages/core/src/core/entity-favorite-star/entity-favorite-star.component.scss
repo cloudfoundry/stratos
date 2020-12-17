@@ -1,8 +1,19 @@
 $size: 24px;
+$small: 20px;
 .favorite-star {
   align-items: center;
   cursor: pointer;
   display: flex;
   height: $size;
   width: $size;
+  &__small {
+    height: $small;
+    width: $small;
+    mat-icon {
+      font-size: $small;
+      height: $small;
+      line-height: $small;
+      width: $small;
+    }
+  }
 }

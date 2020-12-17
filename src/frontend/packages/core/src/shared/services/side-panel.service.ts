@@ -92,7 +92,8 @@ export class SidePanelService {
     this.showMode(SidePanelMode.Modal, component, props, componentFactoryResolver);
   }
 
-  private open() {
+  // Re-open the panel with its current contents
+  public open() {
     this.openedSubject.next(true);
     this.document.addEventListener('keydown', this.onKeyDown);
   }

@@ -1,4 +1,8 @@
+$icon_size: 20px;
+
 .resource-preview {
+
+  font-size: 14px;
 
   &__labels {
     display: table;
@@ -24,7 +28,19 @@
     app-metadata-item {
       margin-right: 40px;
     }
+  }
 
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+
+    mat-icon {
+      font-size: $icon_size;
+      height: $icon_size;
+      line-height: $icon_size;
+      opacity: 0.7;
+      width: $icon_size;
+    }
   }
 
   &__metrics {

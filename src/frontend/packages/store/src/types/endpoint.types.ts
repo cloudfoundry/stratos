@@ -49,6 +49,7 @@ export interface EndpointModel {
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
+  local?: true;
 }
 
 export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';

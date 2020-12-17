@@ -5,5 +5,8 @@ export const environment = {
   proxyAPIVersion,
   cfAPIVersion,
   showObsDebug: false,
-  disablePolling: false
+  disablePolling: true,
+  desktopMode: false,
+  hideUserMenu: false,
+  fixedSideNav: false,
 };

@@ -1,0 +1,85 @@
+{
+  "name": "Stratos",
+  "version": "4.0.0",
+  "main": "index.js",
+  "scripts": {
+    "ng": "ng",
+    "start": "electron-forge start",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "electron": "./node_modules/.bin/electron .",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "epublish": "electron-forge publish"
+  },
+  "dependencies": {
+    "chokidar": "^3.4.1",
+    "electron-context-menu": "^2.0.1",
+    "electron-log": "^4.2.2",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-window-state": "^5.0.3",
+    "fs-extra": "^9.0.1",
+    "update-electron-app": "^1.5.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.52",
+    "@electron-forge/maker-deb": "^6.0.0-beta.52",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.52",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.52",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.52",
+    "@electron-forge/maker-zip": "^6.0.0-beta.52",
+    "@electron-forge/publisher-github": "^6.0.0-beta.52",
+    "electron": "^11.0.3"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "dir": ".",
+        "icon": "./icon.icns"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "Stratos"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "background": "background.png",
+            "icon": "VolumeIcon.icns"
+          }
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "nwmac",
+              "name": "stratos-desktop"
+            },
+            "prerelease": false
+          }
+        }
+      ]
+    }
+  }
+}

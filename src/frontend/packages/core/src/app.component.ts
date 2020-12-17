@@ -68,6 +68,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     if (isDesktop) {
       this.document.body.classList.add('mat-desktop');
     }
+
+    // Desktop (Electron ?)
+    if (environment.desktopMode) {
+      this.document.body.classList.add('stratos-desktop');
+    }
   }
 
   ngOnDestroy() {

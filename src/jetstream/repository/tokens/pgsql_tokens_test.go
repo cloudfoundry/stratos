@@ -34,7 +34,7 @@ var tokenRecord = interfaces.TokenRecord{
 	TokenExpiry:  mockTokenExpiry,
 }
 
-func initialiseRepo(t *testing.T) (*sql.DB, sqlmock.Sqlmock, Repository) {
+func initialiseRepo(t *testing.T) (*sql.DB, sqlmock.Sqlmock, interfaces.TokenRepository) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)

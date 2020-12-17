@@ -69,6 +69,9 @@ cp src/jetstream/jetstream .
 # Copy the user invite templates
 cp -R src/jetstream/templates ./templates
 
+# Copy plugins.yaml
+cp src/jetstream/plugins.yaml .
+
 # Back-end serves static resources from ui folder not dist
 mv dist ui
 

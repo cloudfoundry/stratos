@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
 import {
   ActionListConfigProvider,
 } from '../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
@@ -16,12 +17,12 @@ import { ListViewTypes } from '../../../../../core/src/shared/components/list/li
 import { entityCatalog } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesListConfigService } from '../../kubernetes-list-service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
 } from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
+import { KubernetesUIConfigService } from '../../kubernetes-ui-service';
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import {
@@ -31,6 +32,7 @@ import {
   SimpleColumnValueGetter,
   SimpleKubeListColumn,
 } from '../../store/kube.types';
+import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
 import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
 
 const namespaceColumnId = 'namespace';
@@ -53,15 +55,19 @@ export class KubernetesResourceListComponent implements OnDestroy {
   public provider: ActionListConfigProvider<KubeAPIResource>;
 
   public isNamespacedView = true;
+  public isWorkloadView = false;
 
   private sub: Subscription;
+  private kubeId: string;
+  private workloadTitle: string;
+  private workloadNamespace: string;
 
   constructor(
     private store: Store<any>,
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     router: Router,
-    private kubeId: BaseKubeGuid,
-    private listConfigService: KubernetesListConfigService
+    kubeId: BaseKubeGuid,
+    private uiConfigService: KubernetesUIConfigService
   ) {
     // Entity Catalog Key can be specified in the route config
     this.entityCatalogKey = route.snapshot.data.entityCatalogKey;
@@ -77,21 +83,32 @@ export class KubernetesResourceListComponent implements OnDestroy {
       return;
     }
 
-    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(kubeId.guid);
-    this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
+    // Workload
+    if (route.snapshot.data?.isWorkload) {
+      this.isWorkloadView = true;
+      const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.route.snapshot.parent.parent.params.guid);
+      this.kubeId = endpointId;
+      this.workloadNamespace = namespace;
+      this.workloadTitle = releaseTitle;
+    } else {
+      // Namespaced
+      this.kubeId = kubeId.guid;
+      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(kubeId.guid);
+      this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
+
+      // Watch for namespace changes
+      this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
+        map(data => data[this.kubeId]),
+        filter(data => !!data)
+      ).subscribe(ns => {
+        this.selectedNamespace = ns === '*' ? undefined : ns;
+        if (this.isNamespacedView) {
+          this.createProvider(catalogEntity);
+        }
+      });
+    }
 
     this.createProvider(catalogEntity);
-
-    // Watch for namespace changes
-    this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
-      map(data => data[this.kubeId.guid]),
-      filter(data => !!data)
-    ).subscribe(ns => {
-      this.selectedNamespace = ns === '*' ? undefined : ns;
-      if (this.isNamespacedView) {
-        this.createProvider(catalogEntity);
-      }
-    });
   }
 
   ngOnDestroy() {
@@ -101,40 +118,41 @@ export class KubernetesResourceListComponent implements OnDestroy {
   }
 
   private createProvider(catalogEntity: any) {
-    this.isNamespacedView = !!catalogEntity.definition.apiNamespaced;
+    this.isNamespacedView = !this.isWorkloadView && !!catalogEntity.definition.apiNamespaced;
     let action;
-    if (this.selectedNamespace && this.isNamespacedView) {
-      action = catalogEntity.actions.getInNamespace(this.kubeId.guid, this.selectedNamespace);
+    if (this.isWorkloadView) {
+      action = catalogEntity.actions.getInWorkload(this.kubeId, this.workloadNamespace, this.workloadTitle);
+    } else if (this.selectedNamespace && this.isNamespacedView) {
+      action = catalogEntity.actions.getInNamespace(this.kubeId, this.selectedNamespace);
     } else {
-      action = catalogEntity.actions.getMultiple(this.kubeId.guid);
+      action = catalogEntity.actions.getMultiple(this.kubeId);
     }
 
     const provider = new ActionListConfigProvider<KubeAPIResource>(this.store, action);
     const listConfigName = catalogEntity.definition ? catalogEntity.definition.listConfig : null;
-    let listConfig: any = this.listConfigService.get(listConfigName);
-    if (!listConfig) {
-      listConfig = {
-        pageSizeOptions: defaultHelmKubeListPageSize,
-        viewType: ListViewTypes.TABLE_ONLY,
-        enableTextFilter: true,
-        text: {
-          title: null,
-          filter: 'Filter by Name',
-          noEntries: 'There are no resources'
-        },
-        getColumns: () => this.getColumns(catalogEntity.definition)
-      };
-    }
+    const listConfig: ListConfigUpdate<any> = this.uiConfigService.listConfig.get(listConfigName) || {
+      pageSizeOptions: defaultHelmKubeListPageSize,
+      viewType: ListViewTypes.TABLE_ONLY,
+      enableTextFilter: true,
+      text: {
+        title: null,
+        filter: 'Filter by Name',
+        noEntries: 'There are no resources'
+      },
+      getColumns: () => this.getColumns(catalogEntity.definition),
+    };
+    listConfig.hideRefresh = this.isWorkloadView;
 
     provider.updateListConfig(listConfig);
     this.provider = provider;
   }
 
   select(item?: string) {
-    this.store.dispatch(new SetCurrentNamespaceAction(this.kubeId.guid, item));
+    this.store.dispatch(new SetCurrentNamespaceAction(this.kubeId, item));
   }
 
   private getColumns(definition: KubeResourceEntityDefinition): ITableColumn<KubeAPIResource>[] {
+    const component = this.uiConfigService.previewComponent.get(definition.type);
     let columns: Array<ITableColumn<KubeAPIResource>> = [
       // Name
       {
@@ -153,7 +171,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
             sidePanelConfig: {
               title: resource.metadata.name,
               resourceKind: definition.label,
-              resource$: of(resource)
+              resource$: of(resource),
+              component,
+              definition,
             }
           });
         }

@@ -71,8 +71,11 @@ type PgsqlTokenRepository struct {
 	db *sql.DB
 }
 
+// SystemSharedUserGuid - User ID for the system shared user for endpoints. Also used by front end
+const SystemSharedUserGuid = "00000000-1111-2222-3333-444444444444"
+
 // NewPgsqlTokenRepository - get a reference to the token data source
-func NewPgsqlTokenRepository(dcp *sql.DB) (Repository, error) {
+func NewPgsqlTokenRepository(dcp *sql.DB) (interfaces.TokenRepository, error) {
 	log.Debug("NewPgsqlTokenRepository")
 	return &PgsqlTokenRepository{db: dcp}, nil
 }

@@ -17,6 +17,7 @@ import (
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/factory"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
@@ -159,6 +160,9 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	pp.SessionStoreOptions.Secure = false
 	pp.SessionStoreOptions.Path = "/"
 
+	store := factory.NewDefaultStoreFactory(db)
+	pp.SetStoreFactory(store)
+
 	return pp
 }
 
@@ -206,8 +210,6 @@ func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, e
 		fmt.Printf("an error '%s' was not expected when opening a stub database connection", dberr)
 	}
 	pp := setupPortalProxy(db)
-
-	pp.DatabaseConnectionPool = db
 
 	return res, e, ctx, pp, db, mock
 }
