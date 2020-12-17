@@ -263,6 +263,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 		err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
 		if err != nil {
+			log.Error(err)
 			return nil, errors.New("Could not verify user")
 		}
 

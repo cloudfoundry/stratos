@@ -178,10 +178,11 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 		tokenExpiry            sql.NullInt64
 		authType               string
 		metadata               sql.NullString
+		enabled                bool
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata, &enabled)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -214,6 +215,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if metadata.Valid {
 		tr.Metadata = metadata.String
 	}
+	tr.Enabled = enabled
 	return *tr, nil
 }
 

@@ -33,7 +33,7 @@ func TestRegisterCFCluster(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {
@@ -238,7 +238,7 @@ func TestGetCFv2InfoWithBadURL(t *testing.T) {
 
 	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
 	invalidEndpoint := "%zzzz"
-	if _, _, err := endpointPlugin.Info(invalidEndpoint, true); err == nil {
+	if _, _, err := endpointPlugin.Info(invalidEndpoint, true, ""); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the URL is bad.")
 	}
 }
@@ -250,7 +250,7 @@ func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	endpointPlugin, _ := cfPlugin.GetEndpointPlugin()
 
 	ep := "http://invalid.net"
-	if _, _, err := endpointPlugin.Info(ep, true); err == nil {
+	if _, _, err := endpointPlugin.Info(ep, true, ""); err == nil {
 		t.Error("getCFv2Info should not return a valid response when the endpoint is invalid.")
 	}
 }
