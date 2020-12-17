@@ -39,6 +39,9 @@ COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/config.prope
 # User Invite templates
 COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/src/jetstream/templates /srv/templates
 
+# Plugins.yaml configuration
+COPY --chown=jetstream:users --from=jetstream-builder /home/stratos/src/jetstream/plugins.yaml /srv/plugins.yaml
+
 # Enable persistence features if canary build flag is set
 RUN if [ "x$CANARY_BUILD" != "x" ] ; then printf "\nFORCE_ENABLE_PERSISTENCE_FEATURES=true\n" >> /srv/config.properties ; fi
 
