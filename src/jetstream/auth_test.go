@@ -776,8 +776,6 @@ func TestVerifySession(t *testing.T) {
 			t.Error(err)
 		}
 
-		log.Error("TESTING")
-
 		header := res.Header()
 		contentType := header.Get("Content-Type")
 
