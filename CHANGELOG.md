@@ -22,6 +22,7 @@ This release includes a number of improvements and fixes, including updates to v
 
 **Fixes:**
 
+- Helm chart: Cannot provide custom mariadb.port [\#4843](https://github.com/cloudfoundry/stratos/issues/4843)
 - Can't connect Stratos to a non-Stratos-Metrics Prometheus [\#4804](https://github.com/cloudfoundry/stratos/issues/4804)
 - UAA Setup UI does not accept client secret with # char [\#4789](https://github.com/cloudfoundry/stratos/issues/4789)
 - Password show/hide icon takes tab focus [\#4768](https://github.com/cloudfoundry/stratos/issues/4768)
