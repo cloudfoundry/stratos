@@ -144,6 +144,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
     listConfig.hideRefresh = this.isWorkloadView;
 
     provider.updateListConfig(listConfig);
+    provider.updateDataSourceConfig({
+      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
+    });
     this.provider = provider;
   }
 
