@@ -300,7 +300,7 @@
           }
         },
         "port": {
-          "type": "null"
+          "type": ["integer", "null"]
         },
         "resources": {
           "type": "object",
