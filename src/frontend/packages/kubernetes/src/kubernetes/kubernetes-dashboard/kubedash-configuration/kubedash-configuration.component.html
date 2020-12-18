@@ -2,7 +2,7 @@
   <h1>Dashboard Configuration</h1>
 </app-page-header>
 
-<p>Stratos can proxy and embed the Kubernetes Dashboard UI when configured. This requires:</p>
+<p><app-product-name></app-product-name> can proxy and embed the Kubernetes Dashboard UI when configured. This requires:</p>
 <ol class="kubedash__list">
   <li>Kubernetes Dashboard Installation - An installation of the Dashboard in the Kubernetes cluster</li>
   <li>Service Account - A Service Account that can be used to access the Dashboard</li>
@@ -48,9 +48,9 @@
           </p>
         </div>
 
-        <h2 class="kubedash__option">Install the Kubernetes Dashboard from Stratos</h2>
+        <h2 class="kubedash__option">Install the Kubernetes Dashboard from <app-product-name></app-product-name></h2>
         <div class="kubedash__option-block">
-          <p>Stratos will download the Dashboard yaml from the Dashboard GitHub repository and install it for you.</p>
+          <p><app-product-name></app-product-name> will download the Dashboard yaml from the Dashboard GitHub repository and install it for you.</p>
           <div class="kubedash__buttons">
             <button (click)="installDashboard()" [disabled]="isBusy$ | async" mat-button color="primary">Install
               Dashboard</button>
@@ -94,7 +94,7 @@
               href="https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard">here</a> to give this account
             permissions.
           </p>
-          <p>You also need to add the following label to the Service Account in order for Stratos to know the account is
+          <p>You also need to add the following label to the Service Account in order for <app-product-name></app-product-name> to know the account is
             configured:</p>
           <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
           <p>You can add this label with the following command:</p>
@@ -102,7 +102,7 @@
             stratos-role=kubernetes-dashboard-user</div>
         </div>
         <div *ngIf="!(isAzure$ | async)">
-          <p>Service Account not found - you can create one manually or Stratos can do this for you.</p>
+          <p>Service Account not found - you can create one manually or <app-product-name></app-product-name> can do this for you.</p>
           <h2 class="kubedash__option">Manually create a Service Account</h2>
           <div class="kubedash__option-block">
             <p>Create a Service Account with the appropriate permissions that will be used by the Dashboard to
@@ -110,14 +110,14 @@
             <p>Ensure that this token is labelled with the label:</p>
             <div class="kubedash__label">stratos-role: kubernetes-dashboard-user</div>
           </div>
-          <h2 class="kubedash__option">Create a Service Account from Stratos</h2>
+          <h2 class="kubedash__option">Create a Service Account from <app-product-name></app-product-name></h2>
           <div class="kubedash__option-block">
             <div *ngIf="!status.service">
-              <p>Stratos can create a service account for accessing the Kubernetes Dashboard - please install the
+              <p><app-product-name></app-product-name> can create a service account for accessing the Kubernetes Dashboard - please install the
                 Dashboard first to enable this capability.</p>
             </div>
             <div *ngIf="status.service">
-              <p>Stratos will create a service account with a cluster role binding to the cluster-admin role. This user
+              <p><app-product-name></app-product-name> will create a service account with a cluster role binding to the cluster-admin role. This user
                 will
                 have full permissions over the cluster.</p>
               <p class="kubedash__warn">
