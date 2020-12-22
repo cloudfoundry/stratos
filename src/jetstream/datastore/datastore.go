@@ -346,7 +346,7 @@ func WaitForMigrations(db *sql.DB) error {
 		}
 
 		// If our timeout boundary has been exceeded, bail out
-		if timeout.Sub(time.Now()) < 0 {
+		if time.Until(timeout) < 0 {
 			// If we timed out and the last request was a db error, show the error
 			if err != nil {
 				log.Error(err)
