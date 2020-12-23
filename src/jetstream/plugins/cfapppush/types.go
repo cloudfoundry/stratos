@@ -117,7 +117,8 @@ type Applications struct {
 }
 
 type CloneDetails struct {
-	Url    string
-	Branch string
-	Commit string
+	Url       string
+	LoggerUrl string
+	Branch    string
+	Commit    string
 }

@@ -389,28 +389,26 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 	}
 
 	loggerURL := info.URL
+	cloneURL := info.URL
 
+	// Apply credentials associated with the endpoint
 	if len(info.EndpointGUID) != 0 {
 		parsedURL, err := url.Parse(info.URL)
 		if err != nil {
 			return StratosProject{}, tempDir, errors.New("Failed to parse SCM URL")
 		}
 
-		// mask the credentials for the logs
-
 		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
-		if !isTokenFound {
-			loggerURL = parsedURL.String()
-		} else {
-			var (
-				username string
-				password string
-			)
-
+		if isTokenFound {
 			authTokenDecodedBytes, err := base64.StdEncoding.DecodeString(tokenRecord.AuthToken)
 			if err != nil {
 				return StratosProject{}, tempDir, errors.New("Failed to decode auth token")
 			}
+
+			var (
+				username string
+				password string
+			)
 
 			switch info.SCM {
 			case SCM_TYPE_GITHUB:
@@ -429,20 +427,22 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 				return StratosProject{}, tempDir, errors.New("Username is empty")
 			}
 
+			// mask the credentials for the logs and env var
 			parsedURL.User = url.UserPassword("REDACTED", "REDACTED")
 			loggerURL = parsedURL.String()
 
+			// apply the correct credentials
 			parsedURL.User = url.UserPassword(username, password)
+			cloneURL = parsedURL.String()
 		}
-
-		info.URL = parsedURL.String()
 	}
 
 	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
 	cloneDetails := CloneDetails{
-		Url:    info.URL,
-		Branch: info.Branch,
-		Commit: info.CommitHash,
+		Url:       cloneURL,
+		LoggerUrl: loggerURL,
+		Branch:    info.Branch,
+		Commit:    info.CommitHash,
 	}
 	info.CommitHash, err = cloneRepository(cloneDetails, clientWebSocket, tempDir)
 	if err != nil {
@@ -594,7 +594,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	if len(cloneDetails.Branch) == 0 {
 		err := errors.New("No branch supplied")
-		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.Url, err)
+		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.LoggerUrl, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 		return "", err
 	}
@@ -603,7 +603,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	err := vcsGit.Create(tempDir, cloneDetails.Url, cloneDetails.Branch)
 	if err != nil {
-		log.Infof("Failed to clone repo %s due to %+v", cloneDetails.Url, err)
+		log.Infof("Failed to clone repo %s due to %+v", cloneDetails.LoggerUrl, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", err
 	}
