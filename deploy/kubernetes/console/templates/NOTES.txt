@@ -28,7 +28,7 @@ Get the URL by running these commands in the same shell:
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ .Release.Name }}-ui-ext -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo http://$SERVICE_IP:{{ .Values.console.service.servicePort }}
 {{- else if contains "ClusterIP"  .Values.console.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app=stratos-0,component=ui" -o jsonpath="{.items[0].metadata.name}")
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ .Release.Name }},component=stratos" -o jsonpath="{.items[0].metadata.name}")
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 443
 {{- end }}
 {{- end }}
