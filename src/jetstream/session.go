@@ -227,7 +227,7 @@ func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
 // Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
 func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
-	if err != nil || len(token) == 0 {
+	if err != nil || token == "" {
 		// Need a new token
 		tokenBytes, err := crypto.GenerateRandomBytes(32)
 		if err == nil {

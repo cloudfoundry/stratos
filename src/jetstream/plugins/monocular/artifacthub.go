@@ -366,7 +366,7 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 		}
 
 		// No icon, so write a 0 byte file so next time we don't try and figure out it doesn't have one all over again
-		if len(hubInfo.IconID) == 0 {
+		if hubInfo.IconID == "" {
 			out, err := os.Create(iconFilePath)
 			if err == nil {
 				out.Close()
@@ -395,7 +395,7 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 	}
 
 	// Read the content type
-	if len(contentType) == 0 {
+	if contentType == "" {
 		if data, err := ioutil.ReadFile(iconTypeFilePath); err == nil {
 			contentType = string(data)
 		}

@@ -53,7 +53,7 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 	}
 
 	favoriteGUID := c.Param("guid")
-	if len(favoriteGUID) == 0 {
+	if favoriteGUID == "" {
 		return errors.New("Invalid favorite GUID")
 	}
 
@@ -75,7 +75,7 @@ func (uf *UserFavorites) setMetadata(c echo.Context) error {
 	}
 
 	favoriteGUID := c.Param("guid")
-	if len(favoriteGUID) == 0 {
+	if favoriteGUID == "" {
 		return errors.New("Invalid favorite GUID")
 	}
 	req := c.Request()
@@ -125,7 +125,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 			"Unable to parse User Favorite from request body")
 	}
 
-	if len(favorite.EndpointID) == 0 || len(favorite.EndpointType) == 0 {
+	if favorite.EndpointID == "" || favorite.EndpointType == "" {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Invalid request - must provide EndpointID and EndpointType",
@@ -166,7 +166,7 @@ func (uf *UserFavorites) RemoveEndpointFavorites(endpointGUID string) error {
 		return err
 	}
 
-	if len(endpointGUID) == 0 {
+	if endpointGUID == "" {
 		return errors.New("Invalid endpoint GUID")
 	}
 

@@ -111,7 +111,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	chartName := c.Param("chartName")
 	version := c.Param("version")
 
-	if len(version) == 0 {
+	if version == "" {
 		log.Debugf("Get icon for %s/%s", repo, chartName)
 	} else {
 		log.Debugf("Get icon for %s/%s-%s", repo, chartName, version)
@@ -126,7 +126,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	// This will download and cache the icon if it is not already cached - it returns the local file path to the icon file
 	// or an empty string if no icon is available or could not be downloaded
 	iconFilePath, _ := m.cacheChartIcon(*chart)
-	if len(iconFilePath) == 0 {
+	if iconFilePath == "" {
 		// No icon or error downloading
 		http.Redirect(c.Response().Writer, c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 		return nil

@@ -176,8 +176,7 @@ func (c *Analysis) deleteReports(ec echo.Context) error {
 		return err
 	}
 
-	var ids []string
-	ids = make([]string, 0)
+	var ids []string = make([]string, 0)
 	if err = json.Unmarshal(body, &ids); err != nil {
 		return err
 	}

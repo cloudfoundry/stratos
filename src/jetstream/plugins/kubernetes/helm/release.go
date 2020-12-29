@@ -399,7 +399,7 @@ func getRestURL(namespace, kind, apiVersion, name string) string {
 	}
 
 	kindPlural := pluralize(strings.ToLower(kind))
-	if len(namespace) == 0 {
+	if namespace == "" {
 		// This is not a namespaced resource
 		restURL = fmt.Sprintf("/%s/%s/%s/%s", base, apiVersion, kindPlural, name)
 	} else {

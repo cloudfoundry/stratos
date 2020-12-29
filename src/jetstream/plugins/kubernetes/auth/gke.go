@@ -81,7 +81,7 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Conte
 	}
 
 	// Type needs to be "authorized_user"
-	if gkeInfo.Type != gkeConfigType || len(gkeInfo.RefreshToken) == 0 {
+	if gkeInfo.Type != gkeConfigType || gkeInfo.RefreshToken == "" {
 		return nil, nil, errors.New("Invalid configuration file")
 	}
 

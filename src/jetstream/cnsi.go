@@ -78,7 +78,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 
 func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
-	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
+	if cnsiName == "" || apiEndpoint == "" {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Needs CNSI Name and API Endpoint",
@@ -167,7 +167,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 	cnsiGUID := c.Param("id")
 	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")
 
-	if len(cnsiGUID) == 0 {
+	if cnsiGUID == "" {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
@@ -585,7 +585,7 @@ func (p *portalProxy) updateEndpoint(ec echo.Context) error {
 	}
 
 	// Check we have an ID
-	if len(params.ID) == 0 {
+	if params.ID == "" {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",

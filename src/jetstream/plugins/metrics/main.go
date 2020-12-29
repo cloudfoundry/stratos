@@ -149,7 +149,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	case interfaces.AuthConnectTypeCreds:
 		auth.Username = params.Username
 		auth.Password = params.Password
-		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
+		if connectType == interfaces.AuthConnectTypeCreds && (auth.Username == "" || auth.Password == "") {
 			return nil, false, errors.New("Need username and password")
 		}
 	case interfaces.AuthConnectTypeNone:
@@ -420,7 +420,7 @@ func compareURL(a, b string) bool {
 
 func getPort(u *url.URL) string {
 	port := u.Port()
-	if len(port) == 0 {
+	if port == "" {
 		switch u.Scheme {
 		case "http":
 			port = "80"

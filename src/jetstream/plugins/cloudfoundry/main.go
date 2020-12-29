@@ -74,7 +74,7 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfac
 	}
 
 	connectType := params.ConnectType
-	if len(connectType) == 0 {
+	if connectType == "" {
 		connectType = interfaces.AuthConnectTypeCreds
 	}
 
@@ -115,7 +115,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
 		// Allow the auto-registration name to be configured
 		autoRegName := c.portalProxy.GetConfig().AutoRegisterCFName
-		if len(autoRegName) == 0 {
+		if autoRegName == "" {
 			autoRegName = "Cloud Foundry"
 		}
 

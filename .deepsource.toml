@@ -1,0 +1,31 @@
+version = 1
+
+test_patterns = [
+    "*_test.go",
+    "*/testing/**"
+]
+
+[[analyzers]]
+name = "go"
+enabled = true
+
+  [analyzers.meta]
+  import_paths = ["github.com/cloudfoundry-incubator/stratos/src/jetstream"]
+  import_root = "github.com/cloudfoundry-incubator/stratos"
+
+[[analyzers]]
+name = "docker"
+enabled = true
+
+  [analyzers.meta]
+  dockerfile_paths = ["*/Dockerfile.*"]
+
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+  [analyzers.meta]
+  style_guide = "standard"
+  dialect = "typescript"
+  environment = ["nodejs"]
+  plugins = ["angular"]

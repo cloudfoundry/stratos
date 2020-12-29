@@ -92,7 +92,7 @@ func (userinvite *UserInvite) Init() error {
 func (userinvite *UserInvite) initClientToken(context echo.Context) error {
 	// Do we have a valid cf guid?
 	if userinvite.portalProxy.GetConfig().CloudFoundryInfo == nil ||
-		len(userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID) == 0 {
+		userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID == "" {
 		return nil
 	}
 	cfGuid := userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID
@@ -110,8 +110,8 @@ func (userinvite *UserInvite) initClientToken(context echo.Context) error {
 
 	// Do we have the required config?
 	if userinvite.Config.Client == nil ||
-		len(userinvite.Config.Client.ID) == 0 ||
-		len(userinvite.Config.Client.Secret) == 0 {
+		userinvite.Config.Client.ID == "" ||
+		userinvite.Config.Client.Secret == "" {
 		return nil
 	}
 

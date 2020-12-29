@@ -52,7 +52,7 @@ func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
 	}
 
 	// Check that we have everything we need
-	if len(kt.Image) == 0 || len(kt.Namespace) == 0 {
+	if kt.Image == "" || kt.Namespace == "" {
 		log.Warn("Kube Terminal configuration is not complete")
 		return nil
 	}

@@ -144,7 +144,7 @@ func (p *HelmChartDBStore) GetChart(repo, name, version string) (*ChartStoreReco
 	var row *sql.Row
 	chart := new(ChartStoreRecord)
 
-	if len(version) == 0 {
+	if version == "" {
 		row = p.db.QueryRow(getLatestChart, repo, name)
 	} else {
 		row = p.db.QueryRow(getChartVersion, repo, name, version)
