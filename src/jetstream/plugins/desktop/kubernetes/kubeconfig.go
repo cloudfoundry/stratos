@@ -114,7 +114,7 @@ func readKubeConfigFile() (*clientcmdapi.Config, error) {
 
 	// Use the KUBECONFIG env var if set, otherwise use default
 	kcFile := os.Getenv("KUBECONFIG")
-	if len(kcFile) == 0 {
+	if kcFile == "" {
 		usr, err := user.Current()
 		if err != nil {
 			return nil, err

@@ -103,7 +103,7 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 
 	switch params.ConnectType {
 	case interfaces.AuthConnectTypeCreds:
-		if len(params.Username) == 0 || len(params.Password) == 0 {
+		if params.Username == "" || params.Password == "" {
 			return nil, false, errors.New("Need username and password")
 		}
 
@@ -140,7 +140,7 @@ func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord interface
 
 // We support a basic mechanism for fetching the username of the user if configured
 func (gep GeneratedEndpointPlugin) fetchUsername(config pluginConfig, cnsiRecord *interfaces.CNSIRecord, tr *interfaces.TokenRecord) string {
-	if len(config.UserInfoAPI) == 0 || len(config.UserInfoPath) == 0 {
+	if config.UserInfoAPI == "" || config.UserInfoPath == "" {
 		// Not configured
 		return defaultTokenUsername
 	}
@@ -231,7 +231,7 @@ func MakePluginsFromConfig() {
 
 	plugins := make(map[string]GeneratedEndpointPlugin)
 	for _, plugin := range config {
-		if len(plugin.Name) == 0 {
+		if plugin.Name == "" {
 			log.Errorf("Plugin must have a name")
 			return
 		}

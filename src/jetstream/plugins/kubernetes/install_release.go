@@ -60,7 +60,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	}
 
 	// Client must give us the download URL for the chart
-	if len(params.ChartURL) == 0 {
+	if params.ChartURL == "" {
 		return interfaces.NewJetstreamUserError("Client did not supply Chart download URL")
 	}
 
@@ -199,7 +199,7 @@ func (c *KubernetesSpecification) UpgradeRelease(ec echo.Context) error {
 	}
 
 	// Client must give us the download URL for the chart
-	if len(params.ChartURL) == 0 {
+	if params.ChartURL == "" {
 		return interfaces.NewJetstreamErrorf("Client did not supply Chart download URL")
 	}
 

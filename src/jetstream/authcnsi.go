@@ -35,7 +35,7 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 	}
 
 	state := c.QueryParam("state")
-	if len(state) == 0 {
+	if state == "" {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: State parameter missing",
@@ -54,7 +54,7 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 	// Check if this is first time in the flow, or via the callback
 	code := c.QueryParam("code")
 
-	if len(code) == 0 {
+	if code == "" {
 		// First time around
 		// Use the standard SSO Login Callback endpoint, so this can be allow-listed for Stratos and Endpoint login
 		returnURL := getSSORedirectURI(state, state, endpointGUID)
@@ -106,7 +106,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 		return err
 	}
 
-	if len(params.CNSIGUID) == 0 {
+	if params.CNSIGUID == "" {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
@@ -342,7 +342,7 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 
 	cnsiGUID := c.Param("cnsi_guid")
 
-	if len(cnsiGUID) == 0 {
+	if cnsiGUID == "" {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",

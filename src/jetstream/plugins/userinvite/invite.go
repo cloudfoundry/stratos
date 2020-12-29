@@ -107,7 +107,7 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	}
 
 	// Must provide an Orgs
-	if len(userInviteRequest.Org) == 0 {
+	if userInviteRequest.Org == "" {
 		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no org provided")
 	}
 

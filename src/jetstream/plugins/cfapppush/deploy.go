@@ -390,7 +390,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 	loggerURL := info.URL
 
-	if len(info.EndpointGUID) != 0 {
+	if info.EndpointGUID != "" {
 		parsedURL, err := url.Parse(info.URL)
 		if err != nil {
 			return StratosProject{}, tempDir, errors.New("Failed to parse SCM URL")
@@ -425,7 +425,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 				return StratosProject{}, tempDir, fmt.Errorf("Unknown SCM type '%s'", info.SCM)
 			}
 
-			if len(username) == 0 {
+			if username == "" {
 				return StratosProject{}, tempDir, errors.New("Username is empty")
 			}
 
@@ -592,7 +592,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 
 func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-	if len(cloneDetails.Branch) == 0 {
+	if cloneDetails.Branch == "" {
 		err := errors.New("No branch supplied")
 		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.Url, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)

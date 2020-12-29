@@ -84,7 +84,7 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 		c.SMTP.Port = defaultSMTPPort
 	}
 
-	if len(c.TemplateConfig.Subject) == 0 {
+	if c.TemplateConfig.Subject == "" {
 		c.TemplateConfig.Subject = defaultSubject
 	}
 
@@ -94,11 +94,11 @@ func (userinvite *UserInvite) LoadConfig(env env.VarSet) (*Config, error) {
 // ValidateConfig will validate that enough configuration is available
 func (userinvite *UserInvite) ValidateConfig(c *Config) error {
 
-	if len(c.TemplateConfig.HTMLTemplate) == 0 {
+	if c.TemplateConfig.HTMLTemplate == "" {
 		c.TemplateConfig.HTMLTemplate = defaultHTMLTemplate
 	}
 
-	if len(c.TemplateConfig.PlainTextTemplate) == 0 {
+	if c.TemplateConfig.PlainTextTemplate == "" {
 		c.TemplateConfig.PlainTextTemplate = defaultPlainTextTemplate
 	}
 
@@ -108,11 +108,11 @@ func (userinvite *UserInvite) ValidateConfig(c *Config) error {
 	}
 
 	// Check SMTP Configuration
-	if len(c.SMTP.Host) == 0 {
+	if c.SMTP.Host == "" {
 		return errors.New("SMTP Server Host is not configured")
 	}
 
-	if len(c.SMTP.FromAddress) == 0 {
+	if c.SMTP.FromAddress == "" {
 		return errors.New("SMTP From Address is not configured")
 	}
 

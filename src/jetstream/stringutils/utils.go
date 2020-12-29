@@ -47,7 +47,7 @@ func CompareURL(a, b string) bool {
 
 func getPort(u *url.URL) string {
 	port := u.Port()
-	if len(port) == 0 {
+	if port == "" {
 		switch u.Scheme {
 		case "http":
 			port = "80"

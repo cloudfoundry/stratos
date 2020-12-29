@@ -486,7 +486,7 @@ func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
 	}
 
 	state := c.QueryParam("state")
-	if len(state) == 0 {
+	if state == "" {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: State parameter missing",
@@ -536,7 +536,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 }
 
 func validateSSORedirectState(state string, allowListStr string) error {
-	if len(state) == 0 {
+	if state == "" {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: State parameter missing",
@@ -555,7 +555,7 @@ func validateSSORedirectState(state string, allowListStr string) error {
 }
 
 func safeSSORedirectState(state string, allowListStr string) bool {
-	if len(allowListStr) == 0 {
+	if allowListStr == "" {
 		return true
 	}
 
@@ -608,7 +608,7 @@ func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *interfaces.UAAResp
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	if len(username) == 0 || len(password) == 0 {
+	if username == "" || password == "" {
 		return uaaRes, u, errors.New("Needs username and password")
 	}
 

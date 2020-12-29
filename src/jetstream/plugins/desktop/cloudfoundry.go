@@ -33,7 +33,7 @@ func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
 	}
 
 	// Ignore if the api endpoint is empty
-	if len(cfg.APIEndpoint) == 0 {
+	if cfg.APIEndpoint == "" {
 		return nil, nil
 	}
 
@@ -63,7 +63,7 @@ func ListConnectedCloudFoundry() ([]*interfaces.ConnectedEndpoint, error) {
 	}
 
 	// Ignore if the api endpoint is empty
-	if len(cfg.APIEndpoint) == 0 {
+	if cfg.APIEndpoint == "" {
 		return nil, nil
 	}
 

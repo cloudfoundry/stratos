@@ -97,7 +97,7 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 		}
 	}
 
-	if len(job.ID) == 0 {
+	if job.ID == "" {
 		return errors.New("Invalid Job metadata supplied")
 	}
 

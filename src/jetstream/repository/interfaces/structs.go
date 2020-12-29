@@ -301,13 +301,13 @@ func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
 	if AuthEndpointTypes[consoleConfig.AuthEndpointType] == Local {
 
 		// Need LocalUser and LocalUserPassword
-		if len(consoleConfig.LocalUser) == 0 || len(consoleConfig.LocalUserPassword) == 0 {
+		if consoleConfig.LocalUser == "" || consoleConfig.LocalUserPassword == "" {
 			return false
 		}
 
 		// Also, we will make sure that admin scopes are set up for admin, if not specified
-		if len(consoleConfig.LocalUserScope) == 0 {
-			if len(consoleConfig.ConsoleAdminScope) == 0 {
+		if consoleConfig.LocalUserScope == "" {
+			if consoleConfig.ConsoleAdminScope == "" {
 				// Neither set, so use default for both
 				consoleConfig.LocalUserScope = defaultAdminScope
 				consoleConfig.ConsoleAdminScope = defaultAdminScope
@@ -316,7 +316,7 @@ func (consoleConfig *ConsoleConfig) IsSetupComplete() bool {
 				consoleConfig.LocalUserScope = consoleConfig.ConsoleAdminScope
 			}
 		} else {
-			if len(consoleConfig.ConsoleAdminScope) == 0 {
+			if consoleConfig.ConsoleAdminScope == "" {
 				// Console admin scope not set, so use local user scope
 				consoleConfig.ConsoleAdminScope = consoleConfig.LocalUserScope
 			}

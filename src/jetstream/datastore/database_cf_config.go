@@ -131,7 +131,8 @@ func getDBCredentialsValue(val interface{}) string {
 }
 
 func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[string]VCAPService {
-	var configs map[string]VCAPService = make(map[string]VCAPService)
+	var configs map[string]VCAPService
+	configs = make(map[string]VCAPService)
 
 	for _, services := range vcapServices {
 		for _, service := range services {

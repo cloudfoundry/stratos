@@ -93,7 +93,7 @@ func KubeDashboardProxy(c echo.Context, p interfaces.PortalProxy, config *rest.C
 	// Redirect requests with an empty path to a location that ends with a '/'
 	// This is essentially a hack for http://issue.k8s.io/4958.
 	// Note: Keep this code after tryUpgrade to not break that flow.
-	if len(loc.Path) == 0 {
+	if loc.Path == "" {
 		log.Debug("Redirecting")
 		var queryPart string
 		if len(req.URL.RawQuery) > 0 {
@@ -121,7 +121,7 @@ func KubeDashboardProxy(c echo.Context, p interfaces.PortalProxy, config *rest.C
 		log.Debugf("Got proxy response for: %s (Status: %s)", loc.String(), response.StatusCode)
 		// For the root page, set the session cookie so that the user is automatically logged in from
 		// the login we did manually
-		if len(path) == 0 {
+		if path == "" {
 			// TODO: Check the value for the cookie header - kube dash may well update with the value
 			// that it wants to use
 			cookie := fmt.Sprintf("jweToken=%s; Max-Age=36000", token)

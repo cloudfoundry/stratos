@@ -34,7 +34,7 @@ func KubeDashboardLogin(c echo.Context, p interfaces.PortalProxy) error {
 	}
 
 	// Check that we have a token
-	if len(status.Token) == 0 {
+	if status.Token == "" {
 		return sendErrorPage(c, "Kubernetes Dashboard is not confiured - could not find Service Account Token")
 	}
 

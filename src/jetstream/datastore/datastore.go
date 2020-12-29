@@ -82,7 +82,7 @@ const (
 // NewDatabaseConnectionParametersFromConfig setup database connection parameters based on contents of config struct
 func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfig, error) {
 
-	if len(dc.DatabaseProvider) == 0 {
+	if dc.DatabaseProvider == "" {
 		dc.DatabaseProvider = DefaultDatabaseProvider
 	}
 

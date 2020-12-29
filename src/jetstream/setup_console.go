@@ -249,7 +249,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 		return consoleConfig, fmt.Errorf("Unable to load Console configuration. %v", err)
 	}
 
-	if len(consoleConfig.AuthEndpointType) == 0 {
+	if consoleConfig.AuthEndpointType == "" {
 		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
 		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
 		consoleConfig.AuthEndpointType = string(interfaces.Remote)

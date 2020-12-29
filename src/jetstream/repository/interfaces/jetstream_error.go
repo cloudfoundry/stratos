@@ -32,7 +32,7 @@ func (e JetstreamError) Error() string {
 
 // HTTPError formats the error as an echo HTTPError
 func (e JetstreamError) HTTPError() *echo.HTTPError {
-	if len(e.StatusMesssage) == 0 {
+	if e.StatusMesssage == "" {
 		e.StatusMesssage = "Failed"
 	}
 
@@ -55,10 +55,10 @@ func (e JetstreamError) HTTPErrorInContext(c echo.Context) *echo.HTTPError {
 
 // Finalize will fill in missing fields from the context before the error is sent to the client
 func (e *JetstreamError) finalize(c echo.Context) {
-	if len(e.StatusMesssage) == 0 {
+	if e.StatusMesssage == "" {
 		e.StatusMesssage = http.StatusText(e.Status)
 	}
-	if len(e.Method) == 0 {
+	if e.Method == "" {
 		log.Warn(c.Request().Method)
 		e.Method = c.Request().Method
 	}

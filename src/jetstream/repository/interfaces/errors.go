@@ -54,7 +54,7 @@ func NewHTTPShadowError(status int, userFacingError string, fmtString string, ar
 
 func (e ErrHTTPRequest) Error() string {
 	body := "No request body"
-	if len(e.Response) != 0 {
+	if e.Response != "" {
 		body = e.Response
 	}
 	return fmt.Sprintf("Error: %v\nStatus: %d\nResponse: %s", e.InnerError, e.Status, body)

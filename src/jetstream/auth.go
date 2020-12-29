@@ -70,7 +70,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 			return nil, nil, bindErr
 		}
 
-		if len(params.Username) == 0 || len(params.Password) == 0 {
+		if params.Username == "" || params.Password == "" {
 			return uaaRes, u, errors.New("Needs username and password")
 		}
 		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, params.Username, params.Password, client, clientSecret, endpoint)
