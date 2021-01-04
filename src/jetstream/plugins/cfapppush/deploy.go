@@ -443,7 +443,6 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 			parsedURL.User = url.UserPassword(username, password)
 			cloneURL = parsedURL.String()
 		}
-
 	}
 
 	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
