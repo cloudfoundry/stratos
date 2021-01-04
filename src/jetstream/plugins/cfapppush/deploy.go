@@ -390,6 +390,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 
 	loggerURL := info.URL
 	cloneURL := info.URL
+	skipSLL := false
 
 	// Apply credentials associated with the endpoint
 	if len(info.EndpointGUID) != 0 {
@@ -397,6 +398,13 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 		if err != nil {
 			return StratosProject{}, tempDir, errors.New("Failed to parse SCM URL")
 		}
+
+		cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(info.EndpointGUID)
+		if err != nil {
+			return StratosProject{}, tempDir, errors.New("Failed to find endpoint with guid " + info.EndpointGUID)
+		}
+
+		skipSLL = cnsiRecord.SkipSSLValidation
 
 		tokenRecord, isTokenFound := cfAppPush.portalProxy.GetCNSITokenRecord(info.EndpointGUID, userGUID)
 		if isTokenFound {
@@ -435,6 +443,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 			parsedURL.User = url.UserPassword(username, password)
 			cloneURL = parsedURL.String()
 		}
+
 	}
 
 	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
@@ -443,6 +452,7 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 		LoggerUrl: loggerURL,
 		Branch:    info.Branch,
 		Commit:    info.CommitHash,
+		SkipSSL:   skipSLL,
 	}
 	info.CommitHash, err = cloneRepository(cloneDetails, clientWebSocket, tempDir)
 	if err != nil {
@@ -601,7 +611,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	vcsGit := GetVCS()
 
-	err := vcsGit.Create(tempDir, cloneDetails.Url, cloneDetails.Branch)
+	err := vcsGit.Create(cloneDetails.SkipSSL, tempDir, cloneDetails.Url, cloneDetails.Branch)
 	if err != nil {
 		log.Infof("Failed to clone repo %s due to %+v", cloneDetails.LoggerUrl, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -14,7 +15,7 @@ import (
 var vcsGit = &vcsCmd{
 	name:             "Git",
 	cmd:              "git",
-	createCmd:        []string{"clone -b {branch} {repo} {dir}"},
+	createCmd:        []string{"clone -c http.sslVerify={sslVerify} -b {branch} {repo} {dir} "},
 	resetToCommitCmd: []string{"reset --hard {commit}"},
 	checkoutCmd:      []string{"checkout refs/remotes/origin/{branch}"},
 	headCmd:          []string{"rev-parse HEAD"},
@@ -35,9 +36,9 @@ type vcsCmd struct {
 	resetToCommitCmd []string // reset branch to commit
 }
 
-func (vcs *vcsCmd) Create(dir string, repo string, branch string) error {
+func (vcs *vcsCmd) Create(skipSSL bool, dir string, repo string, branch string) error {
 	for _, cmd := range vcs.createCmd {
-		if err := vcs.run(".", cmd, "dir", dir, "repo", repo, "branch", branch); err != nil {
+		if err := vcs.run(".", cmd, "sslVerify", strconv.FormatBool(!skipSSL), "dir", dir, "repo", repo, "branch", branch); err != nil {
 			return err
 		}
 	}

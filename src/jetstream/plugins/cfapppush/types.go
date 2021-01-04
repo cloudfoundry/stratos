@@ -121,4 +121,5 @@ type CloneDetails struct {
 	LoggerUrl string
 	Branch    string
 	Commit    string
+	SkipSSL   bool
 }
