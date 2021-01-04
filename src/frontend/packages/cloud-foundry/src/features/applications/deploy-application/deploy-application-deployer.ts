@@ -341,7 +341,7 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
         this.onClose(log, 'Deploy Failed - Failed to clone repository!',
-          'Failed to deploy app! Please make sure the repository is public.');
+          'Failed to deploy app! Please make sure the repository is accessible.');
         break;
       case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
         this.onClose(log, 'Deploy Failed - Failed to located branch!',
