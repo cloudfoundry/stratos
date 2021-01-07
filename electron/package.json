@@ -2,6 +2,8 @@
   "name": "Stratos",
   "version": "4.4.0",
   "main": "index.js",
+  "description": "Stratos Electron",
+  "license" : "Apache-2.0",
   "scripts": {
     "ng": "ng",
     "start": "electron-forge start",
