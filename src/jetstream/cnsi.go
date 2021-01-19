@@ -198,18 +198,17 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
 
-	//check user role and filter endpoints, if user has special role
 	userID, err := p.GetSessionValue(c, "user_id")
 	u, err := p.StratosAuthService.GetUser(userID.(string))
 	if err != nil {
 		return nil, err
 	}
-	stratosEndpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
-	if stratosEndpointAdmin == true {
-		return p.ListAdminEndpoints(userID.(string))
+	if u.Admin == true {
+		return p.ListEndpoints()
 	}
 
-	return p.ListEndpoints()
+	//filter endpoints if user isn't admin
+	return p.ListAdminEndpoints(userID.(string))
 }
 
 func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
