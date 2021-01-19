@@ -35,12 +35,12 @@ export enum StratosPermissionStrings {
   STRATOS_ADMIN = 'isAdmin'
 }
 
-
 export enum StratosScopeStrings {
   STRATOS_CHANGE_PASSWORD = 'password.write',
   SCIM_READ = 'scim.read',
   SCIM_WRITE = 'scim.write',
-  STRATOS_NOAUTH = 'stratos.noauth'
+  STRATOS_NOAUTH = 'stratos.noauth',
+  STRATOS_ENDPOINTADMIN = 'stratos.user' //TODO needs to be implemented properly
 }
 
 export enum StratosPermissionTypes {
@@ -54,8 +54,8 @@ export enum StratosPermissionTypes {
 // true (see `getCheckFromConfig`).
 export const stratosPermissionConfigs: IPermissionConfigs = {
   [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(
-    StratosPermissionTypes.STRATOS,
-    StratosPermissionStrings.STRATOS_ADMIN
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.STRATOS_ENDPOINTADMIN
   ),
   [StratosCurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(
     StratosPermissionTypes.STRATOS_SCOPE,
