@@ -55,6 +55,7 @@ type CNSIRecord struct {
 	SubType                string   `json:"sub_type"`
 	Metadata               string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	CreatedBy              string   `json:"created_by"`
 }
 
 // ConnectedEndpoint
@@ -72,6 +73,7 @@ type ConnectedEndpoint struct {
 	SubType                string   `json:"sub_type"`
 	EndpointMetadata       string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	CreatedBy              string   `json:"created_by"`
 }
 
 const (
