@@ -2,7 +2,6 @@ package cnsis
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -126,9 +125,6 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*interfaces.CNSIR
 	}
 
 	// rows.Close()
-
-	marshalJSON, _ := json.Marshal(cnsiList)
-	fmt.Println(string(marshalJSON))
 
 	return cnsiList, nil
 }
