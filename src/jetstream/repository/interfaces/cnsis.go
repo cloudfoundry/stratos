@@ -4,6 +4,7 @@ package interfaces
 type EndpointRepository interface {
 	List(encryptionKey []byte) ([]*CNSIRecord, error)
 	ListByUser(userGUID string) ([]*ConnectedEndpoint, error)
+	ListByCreator(userGUID string, encryptionKey []byte) ([]*CNSIRecord, error)
 	Find(guid string, encryptionKey []byte) (CNSIRecord, error)
 	FindByAPIEndpoint(endpoint string, encryptionKey []byte) (CNSIRecord, error)
 	Delete(guid string) error

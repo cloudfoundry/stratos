@@ -197,6 +197,18 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
+
+	//check user role and filter endpoints, if user has special role
+	userID, err := p.GetSessionValue(c, "user_id")
+	u, err := p.StratosAuthService.GetUser(userID.(string))
+	if err != nil {
+		return nil, err
+	}
+	stratosEndpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
+	if stratosEndpointAdmin == true {
+		return p.ListAdminEndpoints(userID.(string))
+	}
+
 	return p.ListEndpoints()
 }
 
@@ -213,6 +225,54 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 	cnsiList, err = cnsiRepo.List(p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return cnsiList, err
+	}
+
+	return cnsiList, nil
+}
+
+//return a CNSI list with endpoints created by the current endpointadmin and all admins
+func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecord, error) {
+	log.Debug("ListAdminEndpoints")
+
+	var cnsiList []*interfaces.CNSIRecord
+	var adminList []string
+	var err error
+
+	//look up all admin ids in tokens
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
+	if err != nil {
+		return cnsiList, fmt.Errorf("listRegisteredTokens: %s", err)
+	}
+	tokenList, err := tokenRepo.ListAuthToken(p.Config.EncryptionKeyInBytes)
+	if err != nil {
+		return cnsiList, err
+	}
+
+	//search for admins and add them to list
+	for _, token := range tokenList {
+		tokenInfo, err := p.GetUserTokenInfo(token.AuthToken)
+		if err != nil {
+			return cnsiList, err
+		}
+		stratosAdmin := strings.Contains(strings.Join(tokenInfo.Scope, ""), "stratos.admin")
+		if stratosAdmin == true {
+			adminList = append(adminList, tokenInfo.UserGUID)
+		}
+	}
+	adminList = append(adminList, userID)
+
+	//get a cnsi list from every admin found and current endpointadmin
+	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
+	if err != nil {
+		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
+	}
+
+	for _, adminID := range adminList {
+		creatorList, err := cnsiRepo.ListByCreator(adminID, p.Config.EncryptionKeyInBytes)
+		if err != nil {
+			return creatorList, err
+		}
+		cnsiList = append(cnsiList, creatorList...)
 	}
 
 	return cnsiList, nil

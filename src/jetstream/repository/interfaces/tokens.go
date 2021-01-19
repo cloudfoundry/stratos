@@ -10,6 +10,7 @@ type Token struct {
 // TokenRepository is an application of the repository pattern for storing tokens
 type TokenRepository interface {
 	FindAuthToken(userGUID string, encryptionKey []byte) (TokenRecord, error)
+	ListAuthToken(encryptionKey []byte) ([]TokenRecord, error)
 	SaveAuthToken(userGUID string, tokenRecord TokenRecord, encryptionKey []byte) error
 
 	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error)
