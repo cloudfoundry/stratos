@@ -106,8 +106,12 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"Failed to get API Endpoint: %v", err)
 	}
 
+	h := sha1.New()
+	h.Write([]byte(apiEndpointURL.String() + userId))
+	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+
 	// check if we've already got this endpoint in the DB
-	ok := p.cnsiRecordExists(apiEndpoint)
+	ok := p.cnsiRecordExists(guid)
 	if ok {
 		// a record with the same api endpoint was found
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -132,10 +136,6 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"Failed to validate endpoint: %v",
 			err)
 	}
-
-	h := sha1.New()
-	h.Write([]byte(apiEndpointURL.String()))
-	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL
@@ -260,7 +260,7 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 	}
 	adminList = append(adminList, userID)
 
-	//get a cnsi list from every admin found and current endpointadmin
+	//get a cnsi list from every admin found and given userID
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
@@ -430,10 +430,10 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 	return rec, nil
 }
 
-func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
+func (p *portalProxy) cnsiRecordExists(guid string) bool {
 	log.Debug("cnsiRecordExists")
 
-	_, err := p.GetCNSIRecordByEndpoint(endpoint)
+	_, err := p.GetCNSIRecord(guid)
 	return err == nil
 }
 
