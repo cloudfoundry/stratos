@@ -193,6 +193,11 @@ type ConnectedUser struct {
 	Scopes []string `json:"scopes"`
 }
 
+// CreatorInfo - additional information about the user who created an endpoint
+type CreatorInfo struct {
+	Admin bool `json:"admin"`
+}
+
 type JWTUserTokenInfo struct {
 	UserGUID    string   `json:"user_id"`
 	UserName    string   `json:"user_name"`
@@ -243,6 +248,7 @@ type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
 	User              *ConnectedUser    `json:"user"`
+	Creator           *CreatorInfo      `json:"creator"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
 	TokenMetadata     string            `json:"-"`
 	SystemSharedToken bool              `json:"system_shared_token"`

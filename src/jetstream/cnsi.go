@@ -199,15 +199,10 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 	log.Debug("buildCNSIList")
 
 	userID, err := p.GetSessionValue(c, "user_id")
-	u, err := p.StratosAuthService.GetUser(userID.(string))
 	if err != nil {
 		return nil, err
 	}
-	if u.Admin == true {
-		return p.ListEndpoints()
-	}
 
-	//filter endpoints if user isn't admin
 	return p.ListAdminEndpoints(userID.(string))
 }
 

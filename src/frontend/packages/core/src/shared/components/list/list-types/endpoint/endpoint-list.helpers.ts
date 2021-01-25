@@ -108,7 +108,7 @@ export class EndpointListHelper {
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
         createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER),
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
           row$
         ).pipe(
           map(([isAdmin, row]) => {
@@ -155,7 +155,7 @@ export class EndpointListHelper {
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
       },
       {
         action: (item) => {
@@ -164,7 +164,7 @@ export class EndpointListHelper {
         },
         label: 'Edit endpoint',
         description: 'Edit the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
       },
       ...customActions
     ];
