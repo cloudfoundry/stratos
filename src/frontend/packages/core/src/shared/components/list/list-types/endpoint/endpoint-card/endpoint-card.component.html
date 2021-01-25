@@ -44,14 +44,12 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <!-- TODO add this in before pull-request or decide on a better option to implement this feature
   <app-meta-card-item>
     <app-meta-card-key>Created by</app-meta-card-key>
     <app-meta-card-value>
-      <div>{{ row.created_by }}</div>
+      <div>{{ row.creator.admin ? "Admin" : "User" }}</div>
     </app-meta-card-value>
   </app-meta-card-item>
-  -->
   <app-meta-card-item [hidden]="!hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>

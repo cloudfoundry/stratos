@@ -45,7 +45,7 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ENDPOINT, StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
+  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
