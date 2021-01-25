@@ -1,3 +1,4 @@
+import { isNgTemplate } from '@angular/compiler';
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -155,7 +156,23 @@ export class EndpointListHelper {
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
+        createVisible: (row$: Observable<EndpointModel>) => {
+          // TODO lock this behind featureflag
+          return combineLatest([
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
+            row$
+          ]).pipe(
+            map(([isAdmin, isEndpointAdmin, row])=>{
+              if(row.creator.admin){
+                return isAdmin;
+              }else{
+                return isEndpointAdmin || isAdmin;
+              }
+            })
+          );
+          //return this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
+        }
       },
       {
         action: (item) => {
@@ -164,7 +181,23 @@ export class EndpointListHelper {
         },
         label: 'Edit endpoint',
         description: 'Edit the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
+        createVisible: (row$: Observable<EndpointModel>) => {
+          // TODO lock this behind featureflag
+          return combineLatest([
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
+            row$
+          ]).pipe(
+            map(([isAdmin, isEndpointAdmin, row])=>{
+              if(row.creator.admin){
+                return isAdmin;
+              }else{
+                return isEndpointAdmin || isAdmin;
+              }
+            })
+          );
+          //return this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
+        }
       },
       ...customActions
     ];
