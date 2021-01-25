@@ -123,6 +123,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         system_shared_token: false,
         metricsAvailable: false,
         sso_allowed: false,
+        created_by: "",
+        creator: {admin:false}
       }),
       paginationKey: action.paginationKey,
       isLocal: true,

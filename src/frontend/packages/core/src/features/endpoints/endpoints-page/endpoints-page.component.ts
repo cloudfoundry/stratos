@@ -45,7 +45,7 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = StratosCurrentUserPermissions.ENDPOINT_REGISTER;
+  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ENDPOINT, StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
@@ -91,7 +91,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
       first(),
       map(sessionData => sessionData?.plugins.backup),
-      switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint) : of(false))
+      switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint[0]) : of(false))
     );
   }
 

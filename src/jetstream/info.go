@@ -98,6 +98,16 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			endpoint.TokenMetadata = token.Metadata
 			endpoint.SystemSharedToken = token.SystemShared
 		}
+
+		// try to get additional creator information for this cnsi
+		u, err := p.StratosAuthService.GetUser(cnsi.CreatedBy)
+		if err == nil {
+			creator := &interfaces.CreatorInfo{
+				Admin: u.Admin,
+			}
+			endpoint.Creator = creator
+		}
+
 		cnsiType := cnsi.CNSIType
 
 		_, ok = s.Endpoints[cnsiType]

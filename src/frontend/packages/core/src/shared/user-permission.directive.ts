@@ -1,5 +1,6 @@
 import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { PermissionTypes } from '../core/permissions/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
@@ -9,7 +10,7 @@ import { CurrentUserPermissionsService } from '../core/permissions/current-user-
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
   @Input()
-  public appUserPermission: PermissionTypes;
+  public appUserPermission: PermissionTypes[];
 
   @Input()
   public appUserPermissionEndpointGuid: string;
@@ -23,9 +24,22 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   ) { }
 
   public ngOnInit() {
-    this.canSub = this.currentUserPermissionsService.can(
-      this.appUserPermission,
-      this.appUserPermissionEndpointGuid,
+    // execute a permission check for every give permissiontype
+    let $permissionChecks: Observable<boolean>[];
+    $permissionChecks = this.appUserPermission.map((permission: PermissionTypes) => {
+      return this.currentUserPermissionsService.can(permission,this.appUserPermissionEndpointGuid)
+    });
+
+    // permit user if one check results true
+    this.canSub = combineLatest($permissionChecks).pipe(
+      map((arr: boolean[])=>{
+        for(const result of arr){
+          if(result){
+            return result;
+          }
+        }
+        return false;
+      })
     ).subscribe(can => {
       if (can) {
         this.viewContainer.createEmbeddedView(this.templateRef);
