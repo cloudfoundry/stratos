@@ -107,7 +107,11 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	}
 
 	h := sha1.New()
-	h.Write([]byte(apiEndpointURL.String() + userId))
+	if p.GetConfig().EnableUserEndpoints == true {
+		h.Write([]byte(apiEndpointURL.String() + userId))
+	} else {
+		h.Write([]byte(apiEndpointURL.String()))
+	}
 	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	// check if we've already got this endpoint in the DB
@@ -198,12 +202,15 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
 
-	userID, err := p.GetSessionValue(c, "user_id")
-	if err != nil {
-		return nil, err
+	if p.GetConfig().EnableUserEndpoints == true {
+		userID, err := p.GetSessionValue(c, "user_id")
+		if err != nil {
+			return nil, err
+		}
+		return p.ListAdminEndpoints(userID.(string))
+	} else {
+		return p.ListEndpoints()
 	}
-
-	return p.ListAdminEndpoints(userID.(string))
 }
 
 func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
