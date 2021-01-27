@@ -286,6 +286,10 @@ func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			if creator.Admin == true && u.Admin == false {
 				return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be Stratos admin to modify this endpoint.")
 			}
+
+			if creator.Admin == false && u.Admin == false && creator.GUID != userID.(string) {
+				return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "Endpoint-admins are not allowed to modify endpoints created by other endpoint-admins.")
+			}
 		}
 
 		return h(c)
