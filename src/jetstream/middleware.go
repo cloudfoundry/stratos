@@ -271,6 +271,7 @@ func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpoint-admin to access this API")
 		}
 
+		// if id exists, then it's not a CREATE request
 		endpointID := c.Param("id")
 		if len(endpointID) != 0 {
 			cnsiRecord, err := p.GetCNSIRecord(endpointID)

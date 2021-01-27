@@ -402,6 +402,7 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                      `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	EnableUserEndpoints                bool                      `configName:"ENABLE_USER_ENDPOINTS"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

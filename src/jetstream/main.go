@@ -298,6 +298,11 @@ func main() {
 
 	log.Info("Initialization complete.")
 
+	//TODO delete later
+	enableuserendpoints := portalProxy.GetConfig().EnableUserEndpoints
+	fmt.Println("User Endpoints enabled?")
+	fmt.Println(enableuserendpoints)
+
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -1112,7 +1117,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
-	stableAdminAPIGroup.Use(p.endpointMiddleware)
+	if p.GetConfig().EnableUserEndpoints == true {
+		stableAdminAPIGroup.Use(p.endpointMiddleware)
+	} else {
+		stableAdminAPIGroup.Use(p.adminMiddleware)
+	}
 
 	// route endpoint creation requests to respecive plugins
 	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
