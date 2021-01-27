@@ -252,30 +252,43 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+// endpointMiddleware - checks if user is admin or endpointadmin and has the necessary rights to edit the endpoint
+func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		//check if user has endpointadmin or admin role
 		userID, err := p.GetSessionValue(c, "user_id")
-		if err == nil {
-			// check their admin status in UAA
-			u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		// TODO remove hard coded value
+		endpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
+		if endpointAdmin == false && u.Admin == false {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpoint-admin to access this API")
+		}
+
+		endpointID := c.Param("id")
+		if len(endpointID) != 0 {
+			cnsiRecord, err := p.GetCNSIRecord(endpointID)
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
 
-			//TODO needs to be adjusted so that stratos.endpointadmin isnt hardcoded here?
-			//like this a.p.Config.ConsoleConfig.ConsoleAdminScope
-			stratosEndpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
-			if stratosEndpointAdmin == true {
-				return h(c)
+			creator, err := p.StratosAuthService.GetUser(cnsiRecord.CreatedBy)
+			if err != nil {
+				return c.NoContent(http.StatusUnauthorized)
 			}
 
-			//if user has no endpointAdmin role, continue to check for admin role
-			if u.Admin == true {
-				return h(c)
+			if creator.Admin == true && u.Admin == false {
+				return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be Stratos admin to modify this endpoint.")
 			}
 		}
-		return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpoint-admin to access this API")
+
+		return h(c)
 	}
 }
 
