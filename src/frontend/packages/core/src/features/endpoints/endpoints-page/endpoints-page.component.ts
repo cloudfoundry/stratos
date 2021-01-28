@@ -34,6 +34,7 @@ import {
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { SessionService } from '../../../shared/services/session.service';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -45,7 +46,7 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
+  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
@@ -68,6 +69,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private snackBarService: SnackBarService,
     cs: CustomizationService,
     currentUserPermissionsService: CurrentUserPermissionsService,
+    public sessionService: SessionService
   ) {
     this.customizations = cs.get();
 
@@ -93,6 +95,10 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       map(sessionData => sessionData?.plugins.backup),
       switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint[0]) : of(false))
     );
+
+    this.sessionService.userEndpointsEnabled().subscribe(enabled => {
+      if(enabled) this.canRegisterEndpoint.push(StratosCurrentUserPermissions.EDIT_ENDPOINT);
+    });
   }
 
   subs: Subscription[] = [];

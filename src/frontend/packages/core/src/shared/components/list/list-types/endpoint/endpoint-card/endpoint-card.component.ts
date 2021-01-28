@@ -32,6 +32,7 @@ import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
+import { SessionService } from '../../../../../services/session.service';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -54,6 +55,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
   public connectionStatus: string;
+  public enableUserEndpoints$: Observable<boolean>;
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
 
@@ -121,6 +123,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private userFavoriteManager: UserFavoriteManager,
+    private sessionService: SessionService,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
@@ -130,6 +133,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row);
     const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
+    this.enableUserEndpoints$ = this.sessionService.userEndpointsEnabled();
   }
 
   ngOnDestroy(): void {

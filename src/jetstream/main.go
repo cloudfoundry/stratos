@@ -298,11 +298,6 @@ func main() {
 
 	log.Info("Initialization complete.")
 
-	//TODO delete later
-	enableuserendpoints := portalProxy.GetConfig().EnableUserEndpoints
-	fmt.Println("User Endpoints enabled?")
-	fmt.Println(enableuserendpoints)
-
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {

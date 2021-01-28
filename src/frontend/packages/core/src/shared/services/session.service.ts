@@ -17,4 +17,11 @@ export class SessionService {
       map(sessionData => sessionData.config.enableTechPreview || false)
     );
   }
+
+  userEndpointsEnabled(): Observable<boolean> {
+    return this.store.select(selectSessionData()).pipe(
+      first(),
+      map(sessionData => sessionData.config.enableUserEndpoints || false)
+    );
+  }
 }

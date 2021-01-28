@@ -62,6 +62,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
+	s.Configuration.EnableUserEndpoints = p.Config.EnableUserEndpoints
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {
@@ -99,13 +100,17 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			endpoint.SystemSharedToken = token.SystemShared
 		}
 
+		// set the creator preemptively as admin, if no id is found
+		endpoint.Creator = &interfaces.CreatorInfo{
+			Admin: true,
+		}
+
 		// try to get additional creator information for this cnsi
-		u, err := p.StratosAuthService.GetUser(cnsi.CreatedBy)
-		if err == nil {
-			creator := &interfaces.CreatorInfo{
-				Admin: u.Admin,
+		if len(cnsi.CreatedBy) != 0 {
+			u, err := p.StratosAuthService.GetUser(cnsi.CreatedBy)
+			if err == nil {
+				endpoint.Creator.Admin = u.Admin
 			}
-			endpoint.Creator = creator
 		}
 
 		cnsiType := cnsi.CNSIType
