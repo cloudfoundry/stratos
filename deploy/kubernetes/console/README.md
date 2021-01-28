@@ -126,6 +126,8 @@ The following table lists the configurable parameters of the Stratos Helm chart 
 |configInit.nodeSelector|Node selectors to use for the configuration Pod||
 |console.pspEnabled|Enable Pod Security Policies. Set this to true if you cluster is configured with PSPs enabled|false|
 |console.pspName|Name of an existing Pod Security Policy to use instead of the one created by the chart when PSPs are enabled||
+|console.pspAnnotations|Annotations to be added to all pod security policy resources||
+|console.pspExtraLabels|Additional labels to be added to all pod security policy resources||
 
 ## Accessing the Console
 
