@@ -88,6 +88,8 @@ func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidati
 func (p *portalProxy) getHttpClient(skipSSLValidation bool, caCert string, mutating bool) http.Client {
 	// We need to create a client with the specified CA Cert
 	if len(caCert) > 0 {
+		// TODO: Remove
+		log.Warn("Using HTTP client with CA Cert")
 		return *getHttpClientWIthCA(caCert, mutating)
 	}
 	var client http.Client
