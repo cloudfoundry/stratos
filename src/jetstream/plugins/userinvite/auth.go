@@ -59,6 +59,11 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 		return nil, nil, fmt.Errorf(msg, err)
 	}
 
+	// Remove this - for debugging issue
+	log.Warn("--- ENDPOINT INFO ------")
+	log.Warnf("%t", endpoint.SkipSSLValidation)
+	log.Warnf("%s", endpoint.CACert)
+
 	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
