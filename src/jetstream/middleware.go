@@ -280,8 +280,9 @@ func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 
 			// if CreatedBy is not set, then its a legacy admin-endpoint
-			creator := &interfaces.ConnectedUser{}
-			creator.Admin = true
+			creator := &interfaces.ConnectedUser{
+				Admin: true,
+			}
 			if len(cnsiRecord.CreatedBy) != 0 {
 				creatorRecord, err := p.StratosAuthService.GetUser(cnsiRecord.CreatedBy)
 				if err != nil {
