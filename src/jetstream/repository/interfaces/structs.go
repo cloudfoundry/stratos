@@ -240,6 +240,7 @@ type Info struct {
 		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled            string `json:"APIKeysEnabled"`
 		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
+		EnableUserEndpoints       bool   `json:"enableUserEndpoints"`
 	} `json:"config"`
 }
 

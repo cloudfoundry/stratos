@@ -34,6 +34,7 @@ export interface SessionDataConfig {
   APIKeysEnabled?: APIKeysEnabled;
   // Default value for Home View - show only favorited endpoints?
   homeViewShowFavoritesOnly?: boolean;
+  enableUserEndpoints?: boolean;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;

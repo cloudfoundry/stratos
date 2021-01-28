@@ -148,7 +148,10 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.ClientSecret = clientSecret
 	newCNSI.SSOAllowed = ssoAllowed
 	newCNSI.SubType = subType
-	newCNSI.CreatedBy = userId
+
+	if p.GetConfig().EnableUserEndpoints == true {
+		newCNSI.CreatedBy = userId
+	}
 
 	err = p.setCNSIRecord(guid, newCNSI)
 
@@ -255,12 +258,13 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 		if err != nil {
 			return cnsiList, err
 		}
-		stratosAdmin := strings.Contains(strings.Join(tokenInfo.Scope, ""), "stratos.admin")
+		stratosAdmin := strings.Contains(strings.Join(tokenInfo.Scope, ""), p.GetConfig().ConsoleConfig.ConsoleAdminScope)
 		if stratosAdmin == true {
 			adminList = append(adminList, tokenInfo.UserGUID)
 		}
 	}
 	adminList = append(adminList, userID)
+	adminList = append(adminList, "") //legacy endpoints dont have a creator
 
 	//get a cnsi list from every admin found and given userID
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
