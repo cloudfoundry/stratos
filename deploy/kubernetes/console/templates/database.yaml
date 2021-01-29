@@ -1,5 +1,63 @@
 {{- if not .Values.mariadb.external }}
 ---
+# Service account "stratos-db" for the database, if needed
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") (.Values.console.pspEnabled) }}
+apiVersion: "v1"
+kind: "ServiceAccount"
+metadata:
+  name: "stratos-db"
+  labels:
+    app.kubernetes.io/component: "stratos-db"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+{{- end }}
+---
+# Role "stratos-db-role" only used by account "[- stratos-db]"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") (.Values.console.pspEnabled) }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "Role"
+metadata:
+  name: "stratos-db-role"
+  labels:
+    app.kubernetes.io/component: "stratos-db-role"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+rules:
+- apiGroups:
+  - extensions
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+  - {{ default (printf "%s-psp" .Release.Name) .Values.console.pspName }}
+{{- end }}
+---
+# Role binding for service account "stratos-db" and role "stratos-db-role"
+{{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") (.Values.console.pspEnabled) }}
+apiVersion: "rbac.authorization.k8s.io/v1"
+kind: "RoleBinding"
+metadata:
+  name: "stratos-db-role-binding"
+  labels:
+    app.kubernetes.io/component: "stratos-db-role-binding"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "stratos"
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+    helm.sh/chart:  "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+subjects:
+- kind: "ServiceAccount"
+  name: "stratos-db"
+roleRef:
+  apiGroup: "rbac.authorization.k8s.io"
+  kind: "Role"
+  name: "stratos-db-role"
+{{- end }}
+---
 {{- if semverCompare ">=1.16" (printf "%s.%s" .Capabilities.KubeVersion.Major (trimSuffix "+" .Capabilities.KubeVersion.Minor) )}}
 apiVersion: apps/v1
 {{- else }}
@@ -106,6 +164,9 @@ spec:
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
+      {{- end }}
+      {{- if and (eq (printf "%s" .Values.kube.auth) "rbac") (.Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1") (.Values.console.pspEnabled) }}
+      serviceAccountName: "stratos-db"
       {{- end }}
       volumes:
       - name: data

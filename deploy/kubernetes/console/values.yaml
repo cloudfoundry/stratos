@@ -110,6 +110,18 @@ console:
   # Extra labels to apply to Pods
   podExtraLabels: {}
 
+  # Whether PodSecurityPolicy is enabled
+  pspEnabled: false
+
+  # Optional name of a PodSecurityPolicy to use - if not specified, a default will be created
+  pspName:  
+
+  # Custom annotations to apply to Pod Security Policies
+  pspAnnotations: {}  
+
+  # Extra labels to apply to Pod Security Policies
+  pspExtraLabels: {}  
+
   # Node Selector for console Pod
   nodeSelector: {}
 
