@@ -191,7 +191,18 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*interfaces.Conn
 // ListByCreator - Returns a list of CNSIs created by a user
 func (p *PostgresCNSIRepository) ListByCreator(userGUID string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("ListByCreator")
-	rows, err := p.db.Query(listCNSIsByCreator, userGUID)
+	return p.listBy(listCNSIsByCreator, userGUID, encryptionKey)
+}
+
+// ListByAPIEndpoint - Returns a a list of CNSIs with the same APIEndpoint
+func (p *PostgresCNSIRepository) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	log.Debug("listByAPIEndpoint")
+	return p.listBy(findCNSIByAPIEndpoint, endpoint, encryptionKey)
+}
+
+// listBy - Returns a list of CNSI Records found using the given query looking for match
+func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	rows, err := p.db.Query(query, match)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
@@ -247,8 +258,6 @@ func (p *PostgresCNSIRepository) ListByCreator(userGUID string, encryptionKey []
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("Unable to List CNSI records: %v", err)
 	}
-
-	// rows.Close()
 
 	return cnsiList, nil
 }
