@@ -154,7 +154,7 @@ func InstallDashboard(p interfaces.PortalProxy, endpointGUID, userGUID string) e
 
 	log.Debugf("InstallDashboard: %s", kubeDashboardImage)
 
-	http := p.GetHttpClient(false)
+	http := p.GetHttpClient(false, "")
 	resp, err := http.Get(kubeDashboardImage)
 	if err != nil {
 		return fmt.Errorf("Could not download YAML to install the dashboard: %+v", err)

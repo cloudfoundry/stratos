@@ -17,9 +17,15 @@
         margin-bottom: 10px;
       }
       textarea {
+        font-family: "Source Code Pro";
+        font-size: 14px;
+        line-break: anywhere;
         max-height: 75px;
         min-height: 60px;
       }
     }
+  }
+  &__label {
+    font-size: 14px;
   }
 }

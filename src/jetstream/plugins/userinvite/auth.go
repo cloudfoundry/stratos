@@ -59,12 +59,12 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 		return nil, nil, fmt.Errorf(msg, err)
 	}
 
-	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation)
+	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := client.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Warnf("Error performing http request - response: %v, error: %v", res, err)
+		log.Warnf("User Invite: Error performing http request - response: %v, error: %v", res, err)
 
 		// Try and get the error details form the WWW-Authenticate hehader
 		errMsg := "Error checking UAA Client"

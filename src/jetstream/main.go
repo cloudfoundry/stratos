@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/sha1"
-	"crypto/tls"
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
@@ -11,7 +10,6 @@ import (
 	"io"
 	"io/ioutil"
 	"math/rand"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -85,15 +83,6 @@ const (
 )
 
 var appVersion string
-
-var (
-	// Standard clients
-	httpClient        = http.Client{}
-	httpClientSkipSSL = http.Client{}
-	// Clients to use typically for mutating operations - typically allow a longer request timeout
-	httpClientMutating        = http.Client{}
-	httpClientMutatingSkipSSL = http.Client{}
-)
 
 // getEnvironmentLookup return a search path for configuration settings
 func getEnvironmentLookup() *env.VarSet {
@@ -756,43 +745,6 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 	return pp
 }
 
-func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {
-	log.Debug("initializeHTTPClients")
-
-	// Common KeepAlive dialer shared by both transports
-	dial := (&net.Dialer{
-		Timeout:   time.Duration(connectionTimeout) * time.Second,
-		KeepAlive: 30 * time.Second, // should be less than any proxy connection timeout (typically 2-3 minutes)
-	}).Dial
-
-	tr := &http.Transport{
-		Proxy:               http.ProxyFromEnvironment,
-		Dial:                dial,
-		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: false},
-		MaxIdleConnsPerHost: 6, // (default is 2)
-	}
-	httpClient.Transport = tr
-	httpClient.Timeout = time.Duration(timeout) * time.Second
-
-	trSkipSSL := &http.Transport{
-		Proxy:               http.ProxyFromEnvironment,
-		Dial:                dial,
-		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-		MaxIdleConnsPerHost: 6, // (default is 2)
-	}
-
-	httpClientSkipSSL.Transport = trSkipSSL
-	httpClientSkipSSL.Timeout = time.Duration(timeout) * time.Second
-
-	// Clients with longer timeouts (use for mutating operations)
-	httpClientMutating.Transport = tr
-	httpClientMutating.Timeout = time.Duration(timeoutMutating) * time.Second
-	httpClientMutatingSkipSSL.Transport = trSkipSSL
-	httpClientMutatingSkipSSL.Timeout = time.Duration(timeoutMutating) * time.Second
-}
-
 func echoShouldNotLog(ec echo.Context) bool {
 	// Don't log readiness probes
 	if ec.Request().RequestURI == "/pp/v1/ping" {
@@ -894,44 +846,6 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (interfaces.EndpointP
 	}
 
 	return nil, errors.New("Endpoint type plugin not loaded")
-}
-
-func (p *portalProxy) GetHttpClient(skipSSLValidation bool) http.Client {
-	return p.getHttpClient(skipSSLValidation, false)
-}
-
-// GetHttpClientForRequest returns an Http Client for the giving request
-func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client {
-	isMutating := req.Method != "GET" && req.Method != "HEAD"
-	client := p.getHttpClient(skipSSLValidation, isMutating)
-
-	// Is this is a long-running request, then use a different timeout
-	if req.Header.Get(longRunningTimeoutHeader) == "true" {
-		longRunningClient := http.Client{}
-		longRunningClient.Transport = client.Transport
-		longRunningClient.Timeout = time.Duration(p.GetConfig().HTTPClientTimeoutLongRunningInSecs) * time.Second
-		return longRunningClient
-	}
-
-	return client
-}
-
-func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.Client {
-	var client http.Client
-	if !mutating {
-		if skipSSLValidation {
-			client = httpClientSkipSSL
-		} else {
-			client = httpClient
-		}
-	} else {
-		if skipSSLValidation {
-			client = httpClientMutatingSkipSSL
-		} else {
-			client = httpClientMutating
-		}
-	}
-	return client
 }
 
 // routes endpoint registration requests to Register functions of respective plugins

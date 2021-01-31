@@ -21,8 +21,8 @@ const (
 	countTokensSql      = `SELECT COUNT`
 	insertTokenSql      = `INSERT INTO tokens`
 	updateUAATokenSql   = `UPDATE tokens`
-	findTokenSql        = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token FROM tokens .*`
-	findUAATokenSql     = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data FROM tokens WHERE token_type = 'uaa' AND .*`
+	findTokenSql        = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled FROM tokens .*`
+	findUAATokenSql     = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data, enabled FROM tokens WHERE token_type = 'uaa' AND .*`
 	deleteFromTokensSql = `DELETE FROM tokens`
 )
 
@@ -293,8 +293,8 @@ func TestFindUAATokens(t *testing.T) {
 
 		Convey("Success case", func() {
 
-			rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data"}).
-				AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, "oauth", "")
+			rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "auth_type", "meta_data", "enabled"}).
+				AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, "oauth", "", true)
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
@@ -356,8 +356,8 @@ func TestFindCNSITokens(t *testing.T) {
 		})
 
 		Convey("Success case", func() {
-			rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
-				AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, false, "oauth", "", mockUserGuid, nil)
+			rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token", "enabled"}).
+				AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, false, "oauth", "", mockUserGuid, nil, true)
 
 			mock.ExpectQuery(findTokenSql).
 				WillReturnRows(rs)

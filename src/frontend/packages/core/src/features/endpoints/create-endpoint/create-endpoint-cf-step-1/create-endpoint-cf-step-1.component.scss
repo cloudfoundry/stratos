@@ -1,10 +1,13 @@
+
+$checkbox-margin: 30px;
+
 :host {
   height: 100%;
   width: 100%;
 }
 
 mat-checkbox {
-  padding-top: 40px;
+  padding-top: $checkbox-margin;
 }
 
 form.stepper-form {
@@ -20,14 +23,14 @@ form.stepper-form {
 
 .create-endpoint {
   &__section {
-    margin-top: 40px;
+    margin-top: $checkbox-margin;
 
     &-title {
       font-size: 16px;
     }
   }
   &__sso {
-    margin-top: 40px;
+    margin-top: $checkbox-margin;
   }
   &__advanced {
     display: flex;
@@ -45,6 +48,16 @@ form.stepper-form {
   }
   &__shown {
     height: auto;
+  }
+  &__cacert-title {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  &__cacert {
+    font-family: "Source Code Pro";
+    font-size: 14px;
+    line-break: anywhere;
+    max-width: 580px;
   }
 }
 

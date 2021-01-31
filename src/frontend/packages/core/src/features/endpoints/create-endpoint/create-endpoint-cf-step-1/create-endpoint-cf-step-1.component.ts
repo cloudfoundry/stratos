@@ -58,7 +58,9 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   endpoint: StratosCatalogEndpointEntity;
   show = false;
 
+  showCACertField = false;
   showAdvancedOptions = false;
+  lastSkipSSLValue = false;
 
   constructor(
     private fb: FormBuilder,
@@ -73,6 +75,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
+      caCertField: ['', []]
     });
 
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
@@ -93,15 +96,23 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   onNext: StepOnNextFunction = () => {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
+
+    // SSL Setttings
+    let sslAllow = this.registerForm.value.skipSllField;
+    if (this.showCACertField) {
+      sslAllow = false;
+    }
+
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
       this.registerForm.value.nameField,
       this.registerForm.value.urlField,
-      this.registerForm.value.skipSllField,
+      sslAllow,
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
+      this.registerForm.value.caCertField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -150,5 +161,15 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
+  }
+
+  toggleCACertField() {
+    this.showCACertField = !this.showCACertField;
+    if (this.showCACertField) {
+      this.lastSkipSSLValue = this.registerForm.value.skipSllField;
+      this.registerForm.controls.skipSllField.setValue(false);
+    } else {
+      this.registerForm.controls.skipSllField.setValue(this.lastSkipSSLValue);
+    }
   }
 }

@@ -587,6 +587,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID str
 		APIEndpointURL:         cnsiRecord.APIEndpoint.String(),
 		DopplerLoggingEndpoint: cnsiRecord.DopplerLoggingEndpoint,
 		SkipSSLValidation:      cnsiRecord.SkipSSLValidation,
+		CACert:                 cnsiRecord.CACert,
 		AuthToken:              token.AuthToken,
 		OrgGUID:                orgGUID,
 		OrgName:                orgName,

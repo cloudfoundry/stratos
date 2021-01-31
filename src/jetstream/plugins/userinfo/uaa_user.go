@@ -145,7 +145,7 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 		copyHeaderIfSet(echoReq, req, "X-Identity-Zone-Subdomain")
 	}
 
-	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation)
+	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation, "")
 	res, err = client.Do(req)
 	if err != nil {
 		log.Debugf("Request failed: %v", err)

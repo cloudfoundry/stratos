@@ -118,7 +118,7 @@ func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, e
 	log.Debugf("Helm Chart Download URL: %s", downloadURL)
 
 	// NWM: Should we look up Helm Repository endpoint and use the value from that
-	httpClient := c.portalProxy.GetHttpClient(false)
+	httpClient := c.portalProxy.GetHttpClient(false, "")
 	resp, err := httpClient.Get(downloadURL)
 	if err != nil {
 		return nil, fmt.Errorf("Could not download Chart Archive: %s", err)

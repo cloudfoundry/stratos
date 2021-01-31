@@ -187,14 +187,14 @@ export class EndpointsEffect {
   @Effect() register$ = this.actions$.pipe(
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
-
       const paramsObj = {
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
         skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
-        cnsi_client_id: action.clientID,
-        cnsi_client_secret: action.clientSecret,
-        sso_allowed: action.ssoAllowed ? 'true' : 'false'
+        cnsi_client_id: action.clientID || '',
+        cnsi_client_secret: action.clientSecret || '',
+        sso_allowed: action.ssoAllowed ? 'true' : 'false',
+        ca_cert: action.caCert || '',
       };
       // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
       if (action.endpointSubType) {
@@ -229,9 +229,10 @@ export class EndpointsEffect {
         name: action.name,
         skipSSL: action.skipSSL,
         setClientInfo: action.setClientInfo,
-        clientID: action.clientID,
-        clientSecret: action.clientSecret,
+        clientID: action.clientID || '',
+        clientSecret: action.clientSecret || '',
         allowSSO: action.allowSSO,
+        ca_cert: action.caCert || '',
       };
 
       // Encode auth values in the body, not the query string

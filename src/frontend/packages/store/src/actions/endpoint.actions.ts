@@ -215,6 +215,7 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
     public clientID = '',
     public clientSecret = '',
     public ssoAllowed: boolean,
+    public caCert: string = '',
   ) {
     super(
       REGISTER_ENDPOINTS,
@@ -241,6 +242,7 @@ export class UpdateEndpoint extends SingleBaseEndpointAction {
     public clientID: string,
     public clientSecret: string,
     public allowSSO: boolean,
+    public caCert: string = '',
   ) {
     super(
       UPDATE_ENDPOINT,

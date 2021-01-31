@@ -37,7 +37,7 @@ type V2Info struct {
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
-type InfoFunc func(apiEndpoint string, skipSSLValidation bool) (CNSIRecord, interface{}, error)
+type InfoFunc func(apiEndpoint string, skipSSLValidation bool, caCert string) (CNSIRecord, interface{}, error)
 
 //TODO this could be moved back to cnsis subpackage, and extensions could import it?
 type CNSIRecord struct {
@@ -55,6 +55,7 @@ type CNSIRecord struct {
 	SubType                string   `json:"sub_type"`
 	Metadata               string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	CACert                 string   `json:"ca_cert"`
 }
 
 // ConnectedEndpoint
@@ -72,6 +73,8 @@ type ConnectedEndpoint struct {
 	SubType                string   `json:"sub_type"`
 	EndpointMetadata       string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	Enabled                bool     `json:"enabled"`
+	CACert                 string   `json:"-"`
 }
 
 const (
@@ -128,6 +131,7 @@ type TokenRecord struct {
 	LinkedGUID     string // Indicates the GUID of the token that this token is linked to (if any)
 	Certificate    string
 	CertificateKey string
+	Enabled        bool
 }
 
 type CFInfo struct {
@@ -136,7 +140,7 @@ type CFInfo struct {
 	AppGUID      string
 }
 
-// Structure for optional metadata for an OAuth2 Token
+// OAuth2Metadata is te structure for optional metadata for an OAuth2 Token
 type OAuth2Metadata struct {
 	ClientID     string
 	ClientSecret string
@@ -422,6 +426,7 @@ type RegisterEndpointParams struct {
 	CNSIClientID      string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
 	CNSIClientSecret  string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
 	SubType           string `json:"sub_type" form:"sub_type" query:"sub_type"`
+	CACert            string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
 type UpdateEndpointParams struct {
@@ -432,6 +437,7 @@ type UpdateEndpointParams struct {
 	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
 	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
 	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
+	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
 // BindOnce -- allows to call echo.Context.Bind() multiple times on the same request

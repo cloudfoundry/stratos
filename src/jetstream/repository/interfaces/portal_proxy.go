@@ -11,10 +11,10 @@ import (
 )
 
 type PortalProxy interface {
-	GetHttpClient(skipSSLValidation bool) http.Client
-	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool) http.Client
+	GetHttpClient(skipSSLValidation bool, caCert string) http.Client
+	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool, caCert string) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
-	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, fetchInfo InfoFunc) (CNSIRecord, error)
+	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, ssoAllowed bool, subType string, caCert string, fetchInfo InfoFunc) (CNSIRecord, error)
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth

@@ -197,7 +197,7 @@ func (ch *CFHosting) Init() error {
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
-		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
+		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true, "")
 		if err != nil {
 			log.Fatalf("Could not get the info for Cloud Foundry: %+v", err)
 			return nil

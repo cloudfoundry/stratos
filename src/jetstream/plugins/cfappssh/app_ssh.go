@@ -68,7 +68,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return sendSSHError("Can not get Cloud Foundry endpoint plugin")
 	}
 
-	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation)
+	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
 	if err != nil {
 		return sendSSHError("Can not get Cloud Foundry info")
 	}

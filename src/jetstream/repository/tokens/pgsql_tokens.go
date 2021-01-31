@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var findAuthToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data
+var findAuthToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data, enabled
 									FROM tokens
 									WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS' AND user_guid = $1`
 
@@ -27,23 +27,23 @@ var updateAuthToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
 									WHERE cnsi_guid = 'STRATOS' AND user_guid = $4 AND token_type = $5`
 
-var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
 									FROM tokens
 									WHERE user_guid = $1 AND token_guid = $2`
 
-var getTokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+var getTokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
 									FROM tokens
 									WHERE user_guid = $1 AND token_guid = $2 AND disconnected = '0'`
 
-var findCNSIToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+var findCNSIToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi'`
 
-var findCNSITokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+var findCNSITokenConnected = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
 										FROM tokens
 										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi' AND disconnected = '0'`
 
-var findAllCNSIToken = `SELECT user_guid, token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token
+var findAllCNSIToken = `SELECT user_guid, token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
 										FROM tokens
 										WHERE cnsi_guid = $1 AND token_type = 'cnsi'`
 
@@ -181,10 +181,11 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 		tokenExpiry            sql.NullInt64
 		authType               string
 		metadata               sql.NullString
+		enabled                bool
 	)
 
 	// Get the UAA record from the db
-	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
+	err := p.db.QueryRow(findAuthToken, userGUID).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata, &enabled)
 	if err != nil {
 		msg := "Unable to Find UAA token: %v"
 		log.Debugf(msg, err)
@@ -217,6 +218,7 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 	if metadata.Valid {
 		tr.Metadata = metadata.String
 	}
+	tr.Enabled = enabled
 	return *tr, nil
 }
 
@@ -368,8 +370,9 @@ func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptio
 			metadata               sql.NullString
 			tokenUserGUID          sql.NullString
 			linkedTokenGUID        sql.NullString
+			enabled                bool
 		)
-		err = rows.Scan(&userGUID, &tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		err = rows.Scan(&userGUID, &tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID, &enabled)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
@@ -413,9 +416,7 @@ func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptio
 		btr.EndpointGUID = cnsiGUID
 		btr.TokenType = "cnsi"
 		btr.UserGUID = userGUID
-
 		btrs = append(btrs, *btr)
-
 	}
 
 	return btrs, nil
@@ -446,13 +447,14 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		metadata               sql.NullString
 		tokenUserGUID          sql.NullString
 		linkedTokenGUID        sql.NullString
+		enabled                bool
 	)
 
 	var err error
 	if includeDisconnected {
-		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID, &enabled)
 	} else {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID, &enabled)
 	}
 
 	if err != nil {
@@ -469,9 +471,9 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	// Currently we don't recurse - we only support one level of linked token - you can't link to another linked token
 	if linkedTokenGUID.Valid {
 		if includeDisconnected {
-			err = p.db.QueryRow(getToken, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+			err = p.db.QueryRow(getToken, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID, &enabled)
 		} else {
-			err = p.db.QueryRow(getTokenConnected, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID)
+			err = p.db.QueryRow(getTokenConnected, userGUID, linkedTokenGUID.String).Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID, &linkedTokenGUID, &enabled)
 		}
 
 		if err != nil {
@@ -518,6 +520,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	if linkedTokenGUID.Valid {
 		tr.LinkedGUID = linkedTokenGUID.String
 	}
+	tr.Enabled = enabled
 
 	return *tr, nil
 }
