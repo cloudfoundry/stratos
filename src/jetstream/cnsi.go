@@ -147,8 +147,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		// check if we've already got this APIEndpoint from a admin in this DB
 		for _, duplicate := range duplicateEndpoints {
 			// filter out all endpoints created by users
-			creatorRecord, err := p.StratosAuthService.GetUser(duplicate.CreatedBy)
-			if len(duplicate.CreatedBy) != 0 || creatorRecord.Admin == true || err != nil {
+			creatorRecord, err := p.StratosAuthService.GetUser(duplicate.Creator)
+			if len(duplicate.Creator) != 0 || creatorRecord.Admin == true || err != nil {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same admin endpoint multiple times",
@@ -189,7 +189,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SSOAllowed = ssoAllowed
 	newCNSI.SubType = subType
 	if p.GetConfig().EnableUserEndpoints == true {
-		newCNSI.CreatedBy = userId
+		newCNSI.Creator = userId
 	}
 
 	err = p.setCNSIRecord(guid, newCNSI)

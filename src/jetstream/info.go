@@ -106,8 +106,8 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		}
 
 		// try to get additional creator information for this cnsi
-		if len(cnsi.CreatedBy) != 0 {
-			u, err := p.StratosAuthService.GetUser(cnsi.CreatedBy)
+		if len(cnsi.Creator) != 0 {
+			u, err := p.StratosAuthService.GetUser(cnsi.Creator)
 			if err == nil {
 				endpoint.Creator.Admin = u.Admin
 			}

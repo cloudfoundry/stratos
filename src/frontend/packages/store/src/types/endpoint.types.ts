@@ -49,7 +49,6 @@ export interface EndpointModel {
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
   local?: true;
-  created_by: string;
   creator: CreatorInfo;
 }
 
