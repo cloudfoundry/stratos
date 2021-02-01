@@ -7,8 +7,8 @@ import (
 )
 
 func init() {
-	RegisterMigration(20210119150000, "CreatedBy", func(txn *sql.Tx, conf *goose.DBConf) error {
-		alterCNSI := "ALTER TABLE cnsis ADD COLUMN created_by VARCHAR(36) NOT NULL DEFAULT '';"
+	RegisterMigration(20210201110000, "Creator", func(txn *sql.Tx, conf *goose.DBConf) error {
+		alterCNSI := "ALTER TABLE cnsis ADD COLUMN creator VARCHAR(36) NOT NULL DEFAULT '';"
 
 		_, err := txn.Exec(alterCNSI)
 		if err != nil {
