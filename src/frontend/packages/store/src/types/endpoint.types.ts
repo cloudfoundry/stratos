@@ -66,6 +66,7 @@ export interface EndpointUser {
 
 // Metadata for the user who created an endpoint
 export interface CreatorInfo {
+  name: string;
   admin: boolean;
 }
 
