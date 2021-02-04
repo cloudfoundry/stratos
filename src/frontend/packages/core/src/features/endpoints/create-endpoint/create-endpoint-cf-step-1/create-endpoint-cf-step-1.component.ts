@@ -1,6 +1,7 @@
 import { AfterContentInit, Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
@@ -16,6 +17,12 @@ import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { SessionService } from '../../../../shared/services/session.service';
+
+type EndpointObservable = Observable<{
+  names: string[],
+  urls: string[],
+}>;
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -42,10 +49,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     }
   }
 
-  existingEndpoints: Observable<{
-    names: string[],
-    urls: string[],
-  }>;
+  overwritePermission: Observable<StratosCurrentUserPermissions[]>;
+
+  existingEndpoints: EndpointObservable;
+  existingAdminEndpoints: EndpointObservable;
 
   validate: Observable<boolean>;
 
@@ -63,7 +70,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   constructor(
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
-    private snackBarService: SnackBarService
+    private snackBarService: SnackBarService,
+    private sessionService: SessionService
   ) {
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
@@ -73,13 +81,25 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
+      overwriteEndpointsField: [false, []],
     });
 
-    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+    const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
+    this.existingAdminEndpoints = currentPage$.pipe(
+      map(endpoints => ({
+        names: endpoints.filter(ep => ep.creator.admin).map(ep => ep.name),
+        urls: endpoints.filter(ep => ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
+      }))
+    );
+    this.existingEndpoints = currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.map(ep => ep.name),
         urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
       }))
+    );
+
+    this.overwritePermission = this.sessionService.userEndpointsEnabled().pipe(
+      map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
     );
 
     const epType = getIdFromRoute(activatedRoute, 'type');
@@ -102,6 +122,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
+      this.registerForm.value.overwriteEndpointsField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -150,5 +171,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
+  }
+
+  toggleOverwriteEndpoints() {
+    // wait a tick for validators to adjust to new data in the directive
+    setTimeout(()=>{
+      this.registerForm.controls.nameField.updateValueAndValidity();
+      this.registerForm.controls.urlField.updateValueAndValidity();
+    });
   }
 }

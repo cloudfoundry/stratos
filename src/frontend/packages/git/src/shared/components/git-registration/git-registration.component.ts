@@ -1,6 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { StratosCurrentUserPermissions } from 'frontend/packages/core/src/core/permissions/stratos-user-permissions.checker';
+import { SessionService } from 'frontend/packages/core/src/shared/services/session.service';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
@@ -44,6 +46,11 @@ enum GitTypeKeys {
   GITLAB_ENTERPRISE = 'githubenterprize',
 }
 
+type EndpointObservable = Observable<{
+  names: string[],
+  urls: string[],
+}>;
+
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
@@ -65,12 +72,18 @@ export class GitRegistrationComponent implements OnDestroy {
 
   urlValidation: string;
 
+  overwritePermission: Observable<StratosCurrentUserPermissions[]>;
+
+  existingEndpoints: EndpointObservable;
+  existingAdminEndpoints: EndpointObservable;
+
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
+    private sessionService: SessionService,
   ) {
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
@@ -130,6 +143,24 @@ export class GitRegistrationComponent implements OnDestroy {
       }
     };
 
+    const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
+    this.existingAdminEndpoints = currentPage$.pipe(
+      map(endpoints => ({
+        names: endpoints.filter(ep => ep.creator.admin).map(ep => ep.name),
+        urls: endpoints.filter(ep => ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
+      }))
+    );
+    this.existingEndpoints = currentPage$.pipe(
+      map(endpoints => ({
+        names: endpoints.map(ep => ep.name),
+        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+      }))
+    );
+
+    this.overwritePermission = this.sessionService.userEndpointsEnabled().pipe(
+      map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
+    );
+
     // Check the endpoints and turn off any options for endpoints that are already registered
     this.endpointsService.endpoints$.pipe(first()).subscribe(eps => {
       Object.values(this.gitTypes[this.epSubType].types).forEach(type => {
@@ -151,6 +182,7 @@ export class GitRegistrationComponent implements OnDestroy {
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
       skipSllField: [false, []],
+      overwriteEndpointsField: [false, []],
     });
     this.updateType();
 
@@ -192,8 +224,9 @@ export class GitRegistrationComponent implements OnDestroy {
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSllField.value :
       false;
+    const overwriteEndpoints = this.registerForm.controls.overwriteEndpointsField.value;
 
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false)
+    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false, overwriteEndpoints)
       .pipe(
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -227,5 +260,13 @@ export class GitRegistrationComponent implements OnDestroy {
     }
     const ready = urlTrimmed[urlTrimmed.length - 1] === '/' ? urlTrimmed.substring(0, urlTrimmed.length - 1) : urlTrimmed;
     return ready + '/' + defn.urlSuffix;
+  }
+
+  toggleOverwriteEndpoints() {
+    // wait a tick for validators to adjust to new data in the directive
+    setTimeout(()=>{
+      this.registerForm.controls.nameField.updateValueAndValidity();
+      this.registerForm.controls.urlField.updateValueAndValidity();
+    });
   }
 }

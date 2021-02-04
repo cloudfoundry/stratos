@@ -194,7 +194,8 @@ export class EndpointsEffect {
         skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
         cnsi_client_id: action.clientID,
         cnsi_client_secret: action.clientSecret,
-        sso_allowed: action.ssoAllowed ? 'true' : 'false'
+        sso_allowed: action.ssoAllowed ? 'true' : 'false',
+        overwrite_endpoints: action.overwriteEndpoints ? 'true' : 'false'
       };
       // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
       if (action.endpointSubType) {

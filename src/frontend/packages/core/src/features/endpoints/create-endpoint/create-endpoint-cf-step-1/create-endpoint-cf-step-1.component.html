@@ -2,17 +2,22 @@
   <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
   <mat-form-field>
     <input matInput id="name" name="name" formControlName="nameField" placeholder="Name"
-      [appUnique]="(existingEndpoints | async)?.names">
+      [appUnique]="registerForm.value.overwriteEndpointsField ? (existingAdminEndpoints | async)?.names : (existingEndpoints | async)?.names">
     <mat-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</mat-error>
     <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
   </mat-form-field>
   <mat-form-field novalidate>
     <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-      pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
+      pattern="{{urlValidation}}" 
+      [appUnique]="registerForm.value.overwriteEndpointsField ? (existingAdminEndpoints | async)?.urls : (existingEndpoints | async)?.urls">
     <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
     <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
   </mat-form-field>
+  <mat-checkbox matInput *appUserPermission="overwritePermission | async" name="overwriteEndpoints" 
+    formControlName="overwriteEndpointsField" (change)="toggleOverwriteEndpoints()"
+    [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Automatically overwrite user endpoints
+  </mat-checkbox>
   <mat-checkbox matInput name="skipSll" formControlName="skipSllField"
     [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Skip SSL validation for the
     endpoint
