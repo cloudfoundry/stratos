@@ -46,7 +46,7 @@ import { SessionService } from '../../../shared/services/session.service';
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
+  public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
@@ -89,16 +89,22 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       first()
     ).subscribe();
 
+    this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
+      map(enabled => {
+        if(enabled){
+          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
+        }else{
+          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT]
+        }
+      })
+    );
+
     // Is the backup/restore plugin available on the backend?
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
       first(),
       map(sessionData => sessionData?.plugins.backup),
-      switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint[0]) : of(false))
+      switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
-
-    this.sessionService.userEndpointsEnabled().subscribe(enabled => {
-      if(enabled) this.canRegisterEndpoint.push(StratosCurrentUserPermissions.EDIT_ENDPOINT);
-    });
   }
 
   subs: Subscription[] = [];

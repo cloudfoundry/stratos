@@ -62,6 +62,12 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	cnsiClientSecret := params.CNSIClientSecret
 	subType := params.SubType
 
+	overwriteEndpoints, err := strconv.ParseBool(params.OverwriteEndpoints)
+	if err != nil {
+		// default to false
+		overwriteEndpoints = false
+	}
+
 	if cnsiClientId == "" {
 		cnsiClientId = p.GetConfig().CFClient
 		cnsiClientSecret = p.GetConfig().CFClientSecret
@@ -76,7 +82,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	}
 	uaaUserId := sessionValue.(string)
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, uaaUserId, ssoAllowed, subType, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, uaaUserId, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -85,7 +91,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, overwriteEndpoints bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -146,9 +152,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 		// check if we've already got this APIEndpoint from a admin in this DB
 		for _, duplicate := range duplicateEndpoints {
-			// filter out all endpoints created by users
 			creatorRecord, err := p.StratosAuthService.GetUser(duplicate.Creator)
-			if len(duplicate.Creator) != 0 || creatorRecord.Admin == true || err != nil {
+			if len(duplicate.Creator) == 0 || creatorRecord.Admin == true || err != nil {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same admin endpoint multiple times",
@@ -157,7 +162,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			}
 		}
 
-		if currentCreator.Admin == true {
+		if currentCreator.Admin == true && overwriteEndpoints == true {
 			// remove all endpoints with same APIEndpoint
 			for _, duplicate := range duplicateEndpoints {
 				p.doUnregisterCluster(duplicate.GUID)
@@ -255,10 +260,18 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 		if err != nil {
 			return nil, err
 		}
-		return p.ListAdminEndpoints(userID.(string))
-	} else {
-		return p.ListEndpoints()
+
+		u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return nil, err
+		}
+
+		if u.Admin == false {
+			return p.ListAdminEndpoints(userID.(string))
+		}
 	}
+
+	return p.ListEndpoints()
 }
 
 func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
