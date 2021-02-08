@@ -14,6 +14,7 @@ import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store
 import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
 import { IEndpointFavMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
@@ -50,7 +51,8 @@ export class EndpointsService implements CanActivate {
   constructor(
     private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
-    private endpointHealthChecks: EndpointHealthChecks
+    private endpointHealthChecks: EndpointHealthChecks,
+    private sessionService: SessionService
   ) {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
@@ -99,17 +101,19 @@ export class EndpointsService implements CanActivate {
         this.haveRegistered$,
         this.haveConnected$,
         this.userService.isAdmin$,
+        this.userService.isEndpointAdmin$,
+        this.sessionService.userEndpointsEnabled(),
         this.disablePersistenceFeatures$
       ),
-      map(([state, haveRegistered, haveConnected, isAdmin, disablePersistenceFeatures]
-        : [[AuthState, EndpointState], boolean, boolean, boolean, boolean]) => {
+      map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
+        : [[AuthState, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
         const [authState] = state;
         if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
           let redirect: string;
           if (!disablePersistenceFeatures) {
             if (!haveRegistered) {
-              redirect = isAdmin ? '/endpoints' : '/noendpoints';
+              redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
             } else if (!haveConnected) {
               redirect = '/endpoints';
             }
