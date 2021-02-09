@@ -79,6 +79,11 @@ func (invite *UserInvite) configure(c echo.Context) error {
 		)
 	}
 
+	_, err := invite.checkEndpointCreator(cfGUID, c)
+	if err != nil {
+		return err
+	}
+
 	uaaRecord, _, err := invite.RefreshToken(cfGUID, clientID, clientSecret)
 	if err != nil {
 		return err

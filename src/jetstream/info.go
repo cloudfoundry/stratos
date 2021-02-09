@@ -111,6 +111,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			u, err := p.StratosAuthService.GetUser(cnsi.Creator)
 			if err == nil {
 				endpoint.Creator.Admin = u.Admin
+				// dont set username of admins for security reasons
 				if u.Admin == false {
 					endpoint.Creator.Name = u.Name
 				}

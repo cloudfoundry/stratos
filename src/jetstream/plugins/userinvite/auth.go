@@ -119,6 +119,42 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 	return &uaaResponse, tokenRecord, nil
 }
 
+// Check that there is an endpoint with the specified ID and if the creator is an admin
+func (invite *UserInvite) checkEndpointCreator(cfGUID string, c echo.Context) (interfaces.CNSIRecord, error) {
+	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
+	if err != nil {
+		// Could find the endpoint
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Can not find enpoint",
+			"Can not find enpoint: %s", cfGUID,
+		)
+	}
+
+	if len(endpoint.Creator) > 0 {
+		stratosAuthService := invite.portalProxy.GetStratosAuthService()
+
+		creator, err := stratosAuthService.GetUser(endpoint.Creator)
+		if err != nil {
+			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+				http.StatusBadRequest,
+				"Can not find creator account",
+				"Can not find creator account: %s", endpoint.Creator,
+			)
+		}
+
+		if !creator.Admin {
+			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+				http.StatusBadRequest,
+				"Not an admin endpoint",
+				"Not an admin endpoint: %s", cfGUID,
+			)
+		}
+	}
+
+	return endpoint, nil
+}
+
 func (invite *UserInvite) checkEndpoint(cfGUID string) (interfaces.CNSIRecord, error) {
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
