@@ -241,7 +241,7 @@ type Info struct {
 		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled            string `json:"APIKeysEnabled"`
 		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
-		EnableUserEndpoints       bool   `json:"enableUserEndpoints"`
+		UserEndpointsEnabled      string `json:"UserEndpointsEnabled"`
 	} `json:"config"`
 }
 
@@ -402,9 +402,9 @@ type PortalConfig struct {
 	DatabaseProviderName               string
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 	CanMigrateDatabaseSchema           bool
-	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
-	HomeViewShowFavoritesOnly          bool                      `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
-	EnableUserEndpoints                bool                      `configName:"ENABLE_USER_ENDPOINTS"`
+	APIKeysEnabled                     config.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
+	HomeViewShowFavoritesOnly          bool                            `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	UserEndpointsEnabled               config.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

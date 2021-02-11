@@ -1112,7 +1112,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
-	if p.GetConfig().EnableUserEndpoints == true {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		stableAdminAPIGroup.Use(p.endpointMiddleware)
 	} else {
 		stableAdminAPIGroup.Use(p.adminMiddleware)
