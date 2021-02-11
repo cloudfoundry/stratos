@@ -98,7 +98,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       }))
     );
 
-    this.overwritePermission = this.sessionService.userEndpointsEnabled().pipe(
+    this.overwritePermission = this.sessionService.userEndpointsNotDisabled().pipe(
       map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
     );
 

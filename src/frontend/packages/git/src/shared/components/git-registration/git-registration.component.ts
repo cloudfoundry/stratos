@@ -157,7 +157,7 @@ export class GitRegistrationComponent implements OnDestroy {
       }))
     );
 
-    this.overwritePermission = this.sessionService.userEndpointsEnabled().pipe(
+    this.overwritePermission = this.sessionService.userEndpointsNotDisabled().pipe(
       map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
     );
 

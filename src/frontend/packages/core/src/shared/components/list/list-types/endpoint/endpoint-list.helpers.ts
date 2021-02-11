@@ -137,7 +137,7 @@ export class EndpointListHelper {
         description: '',
         createVisible: (row$: Observable<EndpointModel>) => {
           return combineLatest([
-            this.sessionService.userEndpointsEnabled(),
+            this.sessionService.userEndpointsNotDisabled(),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
             row$
           ]).pipe(
@@ -172,7 +172,7 @@ export class EndpointListHelper {
         description: 'Remove the endpoint',
         createVisible: (row$: Observable<EndpointModel>) => {
           return combineLatest([
-            this.sessionService.userEndpointsEnabled(),
+            this.sessionService.userEndpointsNotDisabled(),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
             row$
@@ -196,7 +196,7 @@ export class EndpointListHelper {
         description: 'Edit the endpoint',
         createVisible: (row$: Observable<EndpointModel>) => {
           return combineLatest([
-            this.sessionService.userEndpointsEnabled(),
+            this.sessionService.userEndpointsNotDisabled(),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
             row$
