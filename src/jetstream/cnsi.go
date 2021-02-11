@@ -92,6 +92,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 }
 
 func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, overwriteEndpoints bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+	log.Debug("DoRegisterEndpoint")
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -113,6 +114,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	isAdmin := false
 
+	// anonymous admin?
 	if len(userId) == 0 {
 		isAdmin = true
 	} else {
@@ -148,7 +150,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 				err)
 		}
 
-		// check if we've already got this APIEndpoint from a admin in this DB
+		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
 			creatorRecord, err := p.StratosAuthService.GetUser(duplicate.Creator)
 			if len(duplicate.Creator) == 0 || (err == nil && creatorRecord.Admin == true) {
@@ -158,9 +160,16 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 					"Can not register same admin endpoint multiple times",
 				)
 			}
+			if duplicate.Creator == userId && !overwriteEndpoints {
+				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+					http.StatusBadRequest,
+					"Can not register same endpoint multiple times",
+					"Can not register same endpoint multiple times",
+				)
+			}
 		}
 
-		if isAdmin && overwriteEndpoints {
+		if isAdmin {
 			// remove all endpoints with same APIEndpoint
 			for _, duplicate := range duplicateEndpoints {
 				p.doUnregisterCluster(duplicate.GUID)
@@ -251,6 +260,7 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 }
 
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
+	log.Debug("doUnregisterCluster")
 
 	// Should check for errors?
 	p.unsetCNSIRecord(cnsiGUID)
@@ -511,7 +521,7 @@ func (p *portalProxy) GetCNSIRecord(guid string) (interfaces.CNSIRecord, error) 
 }
 
 func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIRecord, error) {
-	log.Debug("GetCNSIRecordByEndpoint")
+	log.Debug("GetAdminCNSIRecordByEndpoint")
 	var rec *interfaces.CNSIRecord
 
 	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
@@ -542,7 +552,7 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (interfaces.
 }
 
 func (p *portalProxy) adminCNSIRecordExists(apiEndpoint string) bool {
-	log.Debug("cnsiRecordExists")
+	log.Debug("adminCNSIRecordExists")
 
 	_, err := p.GetAdminCNSIRecordByEndpoint(apiEndpoint)
 	return err == nil
