@@ -36,7 +36,7 @@ type PortalProxy interface {
 
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
-	GetCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
+	GetAdminCNSIRecordByEndpoint(endpoint string) (CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
