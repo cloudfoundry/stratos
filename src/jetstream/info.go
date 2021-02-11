@@ -62,7 +62,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
-	s.Configuration.EnableUserEndpoints = p.Config.EnableUserEndpoints
+	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {

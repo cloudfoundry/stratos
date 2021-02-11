@@ -17,6 +17,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -139,7 +140,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		)
 	}
 
-	if p.GetConfig().EnableUserEndpoints {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		// get all endpoints determined by the APIEndpoint
 		duplicateEndpoints, err := p.listCNSIByAPIEndpoint(apiEndpoint)
 		if err != nil {
@@ -179,7 +180,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	h := sha1.New()
 
-	if p.GetConfig().EnableUserEndpoints && !isAdmin {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
 		h.Write([]byte(apiEndpointURL.String() + userId))
 	} else {
 		h.Write([]byte(apiEndpointURL.String()))
@@ -213,7 +214,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	// don't save the creator if it's an admin to not break legacy features like GetCNSIRecordByEndpoint
 	// once they have been updated, it's safe to save admin ids
-	if p.GetConfig().EnableUserEndpoints && !isAdmin {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
 		newCNSI.Creator = userId
 	}
 
@@ -276,7 +277,7 @@ func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
 
-	if p.GetConfig().EnableUserEndpoints == true {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
 			return nil, err
@@ -287,12 +288,15 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 			return nil, err
 		}
 
-		if u.Admin == false {
-			return p.ListAdminEndpoints(userID.(string))
+		if u.Admin {
+			return p.ListEndpoints()
+		} else {
+			if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
+				return p.ListAdminEndpoints(userID.(string))
+			}
 		}
 	}
-
-	return p.ListEndpoints()
+	return p.ListAdminEndpoints("")
 }
 
 func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
@@ -343,7 +347,9 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 		}
 	}
 	adminList = append(adminList, userID)
-	adminList = append(adminList, "") //legacy endpoints dont have a creator
+	if len(userID) != 0 {
+		adminList = append(adminList, "") // admin endpoint without saved id
+	}
 
 	//get a cnsi list from every admin found and given userID
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
