@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { UserEndpointsEnabled } from 'frontend/packages/store/src/types/auth.types';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -21,7 +22,14 @@ export class SessionService {
   userEndpointsEnabled(): Observable<boolean> {
     return this.store.select(selectSessionData()).pipe(
       first(),
-      map(sessionData => sessionData.config.enableUserEndpoints || false)
+      map(sessionData => sessionData.config.UserEndpointsEnabled === UserEndpointsEnabled.ENABLED ? true : false)
+    );
+  }
+
+  userEndpointsNotDisabled(): Observable<boolean> {
+    return this.store.select(selectSessionData()).pipe(
+      first(),
+      map(sessionData => sessionData.config.UserEndpointsEnabled !== UserEndpointsEnabled.DISABLED ? true : false)
     );
   }
 }

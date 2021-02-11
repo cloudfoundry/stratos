@@ -27,6 +27,11 @@ export enum APIKeysEnabled {
   ADMIN_ONLY = 'admin_only',
   ALL_USERS = 'all_users'
 }
+export enum UserEndpointsEnabled {
+  DISABLED = 'disabled',
+  ADMIN_ONLY = 'admin_only',
+  ENABLED = 'enabled'
+}
 export interface SessionDataConfig {
   enableTechPreview?: boolean;
   listMaxSize?: number;
@@ -34,7 +39,7 @@ export interface SessionDataConfig {
   APIKeysEnabled?: APIKeysEnabled;
   // Default value for Home View - show only favorited endpoints?
   homeViewShowFavoritesOnly?: boolean;
-  enableUserEndpoints?: boolean;
+  UserEndpointsEnabled?: UserEndpointsEnabled;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;

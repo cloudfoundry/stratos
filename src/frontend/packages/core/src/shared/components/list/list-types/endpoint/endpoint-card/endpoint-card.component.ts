@@ -133,7 +133,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row);
     const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
-    this.enableUserEndpoints$ = this.sessionService.userEndpointsEnabled();
+    this.enableUserEndpoints$ = this.sessionService.userEndpointsNotDisabled();
   }
 
   ngOnDestroy(): void {
