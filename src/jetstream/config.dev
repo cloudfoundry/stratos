@@ -57,8 +57,9 @@ LOCAL_USER=admin
 LOCAL_USER_PASSWORD=admin
 LOCAL_USER_SCOPE=stratos.admin
 
-# Enable users with a stratos.endpointadmin role to create user endpoints
-ENABLE_USER_ENDPOINTS=false
+# Enable users create user endpoints (disabled, admin_only, enabled). Default is disabled
+# admin_only will enable admins to see created user endpoints, but users won't be able to create user endpoints or see them
+USER_ENDPOINTS_ENABLED=disabled
 
 # Enable/disable API key-based access to Stratos API (disabled, admin_only, all_users). Default is admin_only
 #API_KEYS_ENABLED=admin_only
