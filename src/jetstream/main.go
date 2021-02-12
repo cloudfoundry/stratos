@@ -693,6 +693,12 @@ func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore
 		pc.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
 	}
 
+	// Setting default value for UserEndpointsEnabled
+	if pc.UserEndpointsEnabled == "" {
+		log.Debug(`UserEndpointsEnabled not set, setting to "disabled"`)
+		pc.UserEndpointsEnabled = config.UserEndpointsConfigEnum.Disabled
+	}
+
 	pp := &portalProxy{
 		Config:                 pc,
 		DatabaseConnectionPool: dcp,
