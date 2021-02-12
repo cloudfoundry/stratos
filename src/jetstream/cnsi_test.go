@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	_ "github.com/satori/go.uuid"
@@ -32,8 +33,17 @@ func TestRegisterCFCluster(t *testing.T) {
 	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
+	// Set a dummy userid in session - normally the login to UAA would do this.
+	sessionValues := make(map[string]interface{})
+	sessionValues["user_id"] = mockUserGUID
+	sessionValues["exp"] = time.Now().AddDate(0, 0, 1).Unix()
+
+	if errSession := pp.setSessionValues(ctx, sessionValues); errSession != nil {
+		t.Error(errors.New("unable to mock/stub user in session object"))
+	}
+
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {
