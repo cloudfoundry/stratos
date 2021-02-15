@@ -243,7 +243,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	if msg.Type != CLOSE_ACK {
-		log.Errorf("Expected a close acknowledgement - got: %s", string(msg.Type))
+		log.Errorf("Expected a close acknowledgement - got: %d", msg.Type)
 	} else {
 		log.Debug("Got close acknowledgement from the client")
 	}
