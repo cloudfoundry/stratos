@@ -46,6 +46,14 @@ func (d *EndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey []byte)
 	return d.store.FindByAPIEndpoint(endpoint, encryptionKey)
 }
 
+func (d *EndpointStore) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	return d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+}
+
+func (d *EndpointStore) ListByCreator(userGUID string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	return d.store.ListByCreator(userGUID, encryptionKey)
+}
+
 func (d *EndpointStore) Delete(guid string) error {
 	return d.store.Delete(guid)
 }

@@ -41,6 +41,14 @@ func (d *DesktopEndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey 
 	return d.store.FindByAPIEndpoint(endpoint, encryptionKey)
 }
 
+func (d *DesktopEndpointStore) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	return d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+}
+
+func (d *DesktopEndpointStore) ListByCreator(userGUID string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
+	return d.store.ListByCreator(userGUID, encryptionKey)
+}
+
 func (d *DesktopEndpointStore) Delete(guid string) error {
 	if IsLocalCloudFoundry(guid) {
 		updates := make(map[string]string)
