@@ -385,6 +385,16 @@ func TestLoginToCNSI(t *testing.T) {
 			t.Error(errors.New("unable to mock/stub user in session object"))
 		}
 
+		//Init the auth service
+		err := pp.InitStratosAuthService(interfaces.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		if err != nil {
+			log.Warnf("%v, defaulting to auth type: remote", err)
+			err = pp.InitStratosAuthService(interfaces.Remote)
+			if err != nil {
+				log.Fatalf("Could not initialise auth service: %v", err)
+			}
+		}
+
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))

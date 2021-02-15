@@ -113,12 +113,10 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			"Failed to get API Endpoint: %v", err)
 	}
 
-	isAdmin := false
+	isAdmin := true
 
 	// anonymous admin?
-	if len(userId) == 0 {
-		isAdmin = true
-	} else {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && len(userId) != 0 {
 		currentCreator, err := p.StratosAuthService.GetUser(userId)
 		if err != nil {
 			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(

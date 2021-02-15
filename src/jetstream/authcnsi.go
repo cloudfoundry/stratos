@@ -150,13 +150,13 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
-	user, err := p.StratosAuthService.GetUser(userID)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
-	}
-
 	// admins are note allowed to connect to user created endpoints
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && len(cnsiRecord.Creator) > 0 {
+		user, err := p.StratosAuthService.GetUser(userID)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
+		}
+
 		cnsiUser, err := p.StratosAuthService.GetUser(cnsiRecord.Creator)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - endpoint creator has no account")
@@ -169,6 +169,11 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 
 	// Register as a system endpoint?
 	if systemSharedToken {
+		user, err := p.StratosAuthService.GetUser(userID)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
+		}
+
 		// User needs to be an admin
 		if !user.Admin {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect System Shared endpoint - user is not an administrator")
