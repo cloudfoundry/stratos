@@ -151,8 +151,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
-			creatorRecord, err := p.StratosAuthService.GetUser(duplicate.Creator)
-			if len(duplicate.Creator) == 0 || (err == nil && creatorRecord.Admin == true) {
+			if len(duplicate.Creator) == 0 {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same admin endpoint multiple times",
@@ -177,13 +176,12 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	}
 
 	h := sha1.New()
-
+	// see why its generated this way in Issue #4753 / #3031
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
 		h.Write([]byte(apiEndpointURL.String() + userId))
 	} else {
 		h.Write([]byte(apiEndpointURL.String()))
 	}
-
 	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation)
@@ -210,8 +208,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SSOAllowed = ssoAllowed
 	newCNSI.SubType = subType
 
-	// don't save the creator if it's an admin to not break legacy features like GetCNSIRecordByEndpoint
-	// once they have been updated, it's safe to save admin ids
+	// admins currently can't create user endpoints
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
 		newCNSI.Creator = userId
 	}
@@ -320,33 +317,12 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 	log.Debug("ListAdminEndpoints")
 
 	var cnsiList []*interfaces.CNSIRecord
-	var adminList []string
+	var userList []string
 	var err error
 
-	//look up all admin ids in tokens
-	tokenRepo, err := p.GetStoreFactory().TokenStore()
-	if err != nil {
-		return cnsiList, fmt.Errorf("listRegisteredTokens: %s", err)
-	}
-	tokenList, err := tokenRepo.ListAuthToken(p.Config.EncryptionKeyInBytes)
-	if err != nil {
-		return cnsiList, err
-	}
-
-	//search for admins and add them to list
-	for _, token := range tokenList {
-		tokenInfo, err := p.GetUserTokenInfo(token.AuthToken)
-		if err != nil {
-			return cnsiList, err
-		}
-		stratosAdmin := strings.Contains(strings.Join(tokenInfo.Scope, ""), p.GetConfig().ConsoleConfig.ConsoleAdminScope)
-		if stratosAdmin == true {
-			adminList = append(adminList, tokenInfo.UserGUID)
-		}
-	}
-	adminList = append(adminList, userID)
+	userList = append(userList, userID)
 	if len(userID) != 0 {
-		adminList = append(adminList, "") // admin endpoint without saved id
+		userList = append(userList, "")
 	}
 
 	//get a cnsi list from every admin found and given userID
@@ -355,8 +331,8 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
-	for _, adminID := range adminList {
-		creatorList, err := cnsiRepo.ListByCreator(adminID, p.Config.EncryptionKeyInBytes)
+	for _, id := range userList {
+		creatorList, err := cnsiRepo.ListByCreator(id, p.Config.EncryptionKeyInBytes)
 		if err != nil {
 			return creatorList, err
 		}
@@ -537,11 +513,6 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (interfaces.
 	for _, endpoint := range endpointList {
 		if len(endpoint.Creator) == 0 {
 			rec = endpoint
-		} else {
-			creatorRecord, err := p.StratosAuthService.GetUser(endpoint.Creator)
-			if err == nil && creatorRecord.Admin == true {
-				rec = endpoint
-			}
 		}
 	}
 
