@@ -151,18 +151,13 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 	}
 
 	// admins are note allowed to connect to user created endpoints
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && len(cnsiRecord.Creator) > 0 {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && len(cnsiRecord.Creator) != 0 {
 		user, err := p.StratosAuthService.GetUser(userID)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
 		}
 
-		cnsiUser, err := p.StratosAuthService.GetUser(cnsiRecord.Creator)
-		if err != nil {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - endpoint creator has no account")
-		}
-
-		if !cnsiUser.Admin && user.Admin {
+		if user.Admin {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - admins are not allowed to connect to user created endpoints")
 		}
 	}
