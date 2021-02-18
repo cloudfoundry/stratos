@@ -142,7 +142,7 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, row]) => {
-              if(userEndpointsEnabled && !row.creator.admin && isAdmin){
+              if (userEndpointsEnabled && !row.creator.admin && isAdmin){
                 return false;
               }else{
                 const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
@@ -177,8 +177,8 @@ export class EndpointListHelper {
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
             row$
           ]).pipe(
-            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row])=>{
-              if(!userEndpointsEnabled || row.creator.admin){
+            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
+              if (!userEndpointsEnabled || row.creator.admin){
                 return isAdmin;
               }else{
                 return isEndpointAdmin || isAdmin;
@@ -201,8 +201,8 @@ export class EndpointListHelper {
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
             row$
           ]).pipe(
-            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row])=>{
-              if(!userEndpointsEnabled || row.creator.admin){
+            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
+              if (!userEndpointsEnabled || row.creator.admin){
                 return isAdmin;
               }else{
                 return isEndpointAdmin || isAdmin;

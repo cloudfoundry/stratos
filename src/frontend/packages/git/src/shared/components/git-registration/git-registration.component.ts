@@ -226,7 +226,8 @@ export class GitRegistrationComponent implements OnDestroy {
       false;
     const overwriteEndpoints = this.registerForm.controls.overwriteEndpointsField.value;
 
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false, overwriteEndpoints)
+    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE,
+      this.epSubType, name, url, skipSSL, '', '', false, overwriteEndpoints)
       .pipe(
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -264,7 +265,7 @@ export class GitRegistrationComponent implements OnDestroy {
 
   toggleOverwriteEndpoints() {
     // wait a tick for validators to adjust to new data in the directive
-    setTimeout(()=>{
+    setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();
       this.registerForm.controls.urlField.updateValueAndValidity();
     });

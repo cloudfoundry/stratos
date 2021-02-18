@@ -175,7 +175,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   toggleOverwriteEndpoints() {
     // wait a tick for validators to adjust to new data in the directive
-    setTimeout(()=>{
+    setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();
       this.registerForm.controls.urlField.updateValueAndValidity();
     });

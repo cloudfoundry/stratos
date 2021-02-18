@@ -91,10 +91,10 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
       map(enabled => {
-        if(enabled){
+        if (enabled){
           return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
         }else{
-          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT]
+          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
         }
       })
     );
