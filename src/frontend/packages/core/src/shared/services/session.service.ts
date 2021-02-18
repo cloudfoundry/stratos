@@ -22,14 +22,14 @@ export class SessionService {
   userEndpointsEnabled(): Observable<boolean> {
     return this.store.select(selectSessionData()).pipe(
       first(),
-      map(sessionData => sessionData.config.UserEndpointsEnabled === UserEndpointsEnabled.ENABLED ? true : false)
+      map(sessionData => sessionData && sessionData.config.UserEndpointsEnabled === UserEndpointsEnabled.ENABLED ? true : false)
     );
   }
 
   userEndpointsNotDisabled(): Observable<boolean> {
     return this.store.select(selectSessionData()).pipe(
       first(),
-      map(sessionData => sessionData.config.UserEndpointsEnabled !== UserEndpointsEnabled.DISABLED ? true : false)
+      map(sessionData => sessionData && sessionData.config.UserEndpointsEnabled !== UserEndpointsEnabled.DISABLED ? true : false)
     );
   }
 }

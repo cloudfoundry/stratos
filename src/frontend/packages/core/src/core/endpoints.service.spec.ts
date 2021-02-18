@@ -3,6 +3,7 @@ import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreTestingModule } from '../../test-framework/core-test.modules';
+import { SessionService } from '../shared/services/session.service';
 import { CoreModule } from './core.module';
 import { EndpointsService } from './endpoints.service';
 import { UtilsService } from './utils.service';
@@ -13,7 +14,8 @@ describe('EndpointsService', () => {
       providers: [
         EndpointsService,
         UtilsService,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        SessionService
       ],
       imports: [
         CoreModule,

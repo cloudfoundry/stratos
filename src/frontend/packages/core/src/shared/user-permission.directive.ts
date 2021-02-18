@@ -26,9 +26,11 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   public ngOnInit() {
     // execute a permission check for every give permissiontype
     let $permissionChecks: Observable<boolean>[];
-    $permissionChecks = this.appUserPermission.map((permission: PermissionTypes) => {
-      return this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid);
-    });
+    if (this.appUserPermission) {
+      $permissionChecks = this.appUserPermission.map((permission: PermissionTypes) => {
+        return this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid);
+      });
+    }
 
     // permit user if one check results true
     this.canSub = combineLatest($permissionChecks).pipe(
