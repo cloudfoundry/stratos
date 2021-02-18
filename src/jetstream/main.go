@@ -1119,7 +1119,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
-		stableAdminAPIGroup.Use(p.endpointMiddleware)
+		stableAdminAPIGroup.Use(p.endpointAdminMiddleware)
 	} else {
 		stableAdminAPIGroup.Use(p.adminMiddleware)
 	}
@@ -1127,6 +1127,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// route endpoint creation requests to respecive plugins
 	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 
+	stableAdminAPIGroup.Use(p.endpointUpdateDeleteMiddleware)
 	// Apply edits for the given endpoint
 	stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
 	stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
