@@ -123,7 +123,6 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 func (invite *UserInvite) checkEndpointCreator(cfGUID string, c echo.Context) (interfaces.CNSIRecord, error) {
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
-		// Could find the endpoint
 		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Can not find enpoint",
@@ -131,25 +130,12 @@ func (invite *UserInvite) checkEndpointCreator(cfGUID string, c echo.Context) (i
 		)
 	}
 
-	if len(endpoint.Creator) > 0 {
-		stratosAuthService := invite.portalProxy.GetStratosAuthService()
-
-		creator, err := stratosAuthService.GetUser(endpoint.Creator)
-		if err != nil {
-			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Can not find creator account",
-				"Can not find creator account: %s", endpoint.Creator,
-			)
-		}
-
-		if !creator.Admin {
-			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Not an admin endpoint",
-				"Not an admin endpoint: %s", cfGUID,
-			)
-		}
+	if len(endpoint.Creator) != 0 {
+		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Not an admin endpoint",
+			"Not an admin endpoint: %s", cfGUID,
+		)
 	}
 
 	return endpoint, nil
