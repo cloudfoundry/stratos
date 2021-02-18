@@ -47,8 +47,9 @@ describe('CreateEndpointComponent', () => {
               subtype: null
             }
           }
-        }
+        },
       },
+        CurrentUserPermissionsService,
         TabNavService,
         SidePanelService,
         CurrentUserPermissionsService
