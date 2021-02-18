@@ -50,6 +50,10 @@ describe('CurrentUserPermissionsService', () => {
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
           ]
         },
+        creator: {
+          name: 'admin',
+          admin: true
+        },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
@@ -82,6 +86,10 @@ describe('CurrentUserPermissionsService', () => {
             StratosScopeStrings.STRATOS_CHANGE_PASSWORD,
             StratosScopeStrings.SCIM_READ
           ]
+        },
+        creator: {
+          name: 'admin',
+          admin: true
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
