@@ -27,14 +27,14 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
     // execute a permission check for every give permissiontype
     let $permissionChecks: Observable<boolean>[];
     $permissionChecks = this.appUserPermission.map((permission: PermissionTypes) => {
-      return this.currentUserPermissionsService.can(permission,this.appUserPermissionEndpointGuid)
+      return this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid);
     });
 
     // permit user if one check results true
     this.canSub = combineLatest($permissionChecks).pipe(
-      map((arr: boolean[])=>{
-        for(const result of arr){
-          if(result){
+      map((arr: boolean[]) => {
+        for (const result of arr){
+          if (result){
             return result;
           }
         }
