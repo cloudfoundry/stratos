@@ -1127,7 +1127,11 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// route endpoint creation requests to respecive plugins
 	stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 
-	stableAdminAPIGroup.Use(p.endpointUpdateDeleteMiddleware)
+	// do additional checks if user endpoints are enabled
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+		stableAdminAPIGroup.Use(p.endpointUpdateDeleteMiddleware)
+	}
+
 	// Apply edits for the given endpoint
 	stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
 	stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
