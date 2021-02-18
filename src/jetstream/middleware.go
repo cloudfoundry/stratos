@@ -252,8 +252,8 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// endpointMiddleware - checks if user is admin or endpointadmin and has the necessary rights to edit the endpoint
-func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+// endpointAdminMiddleware - checks if user is admin or endpointadmin
+func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
@@ -265,39 +265,45 @@ func (p *portalProxy) endpointMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
-		// TODO remove hard coded value
 		endpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
+
 		if endpointAdmin == false && u.Admin == false {
 			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpoint-admin to access this API")
 		}
 
-		// if id exists, then it's not a CREATE request
+		return h(c)
+	}
+}
+
+// endpointUpdateDeleteMiddleware - checks if user has necessary permissions to modify endpoint
+func (p *portalProxy) endpointUpdateDeleteMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userID, err := p.GetSessionValue(c, "user_id")
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
 		endpointID := c.Param("id")
-		if len(endpointID) != 0 {
-			cnsiRecord, err := p.GetCNSIRecord(endpointID)
-			if err != nil {
-				return c.NoContent(http.StatusUnauthorized)
-			}
 
-			// if Creator is not set, then its a legacy admin-endpoint
-			creator := &interfaces.ConnectedUser{
-				Admin: true,
-			}
-			if len(cnsiRecord.Creator) != 0 {
-				creatorRecord, err := p.StratosAuthService.GetUser(cnsiRecord.Creator)
-				if err != nil {
-					return c.NoContent(http.StatusUnauthorized)
-				}
-				creator = creatorRecord
-			}
+		cnsiRecord, err := p.GetCNSIRecord(endpointID)
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
 
-			if creator.Admin == true && u.Admin == false {
-				return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be Stratos admin to modify this endpoint.")
-			}
+		// endpoint created by admin when no id is saved
+		adminEndpoint := len(cnsiRecord.Creator) == 0
 
-			if creator.Admin == false && u.Admin == false && len(creator.GUID) != 0 && creator.GUID != userID.(string) {
-				return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "Endpoint-admins are not allowed to modify endpoints created by other endpoint-admins.")
-			}
+		if adminEndpoint && !u.Admin {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be Stratos admin to modify this endpoint.")
+		}
+
+		if !adminEndpoint && !u.Admin && cnsiRecord.Creator != userID.(string) {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "Endpoint-admins are not allowed to modify endpoints created by other endpoint-admins.")
 		}
 
 		return h(c)
