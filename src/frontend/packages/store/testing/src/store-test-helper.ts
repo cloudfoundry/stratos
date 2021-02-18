@@ -46,7 +46,11 @@ export const testSCFEndpoint: EndpointModel = {
   cnsi_type: 'cf',
   system_shared_token: false,
   sso_allowed: false,
-  metricsAvailable: false
+  metricsAvailable: false,
+  creator: {
+    name: 'admin',
+    admin: true
+  }
 };
 
 export const testSessionData: SessionData = {
@@ -296,6 +300,10 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
           sso_allowed: true,
           user: {
             guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
+            name: 'admin',
+            admin: true
+          },
+          creator: {
             name: 'admin',
             admin: true
           },
