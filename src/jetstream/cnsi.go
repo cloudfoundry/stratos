@@ -285,10 +285,10 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 
 		if u.Admin {
 			return p.ListEndpoints()
-		} else {
-			if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
-				return p.ListAdminEndpoints(userID.(string))
-			}
+		}
+
+		if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
+			return p.ListAdminEndpoints(userID.(string))
 		}
 	}
 	return p.ListAdminEndpoints("")
