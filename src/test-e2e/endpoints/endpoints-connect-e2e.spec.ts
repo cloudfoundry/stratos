@@ -12,7 +12,7 @@ import { SnackBarPo } from '../po/snackbar.po';
 import { ConnectDialogComponent } from './connect-dialog.po';
 import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
-fdescribe('Endpoints', () => {
+describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
   const snackBar = new SnackBarPo();
 
