@@ -1,11 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { StratosCurrentUserPermissions } from 'frontend/packages/core/src/core/permissions/stratos-user-permissions.checker';
-import { SessionService } from 'frontend/packages/core/src/shared/services/session.service';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
+import { StratosCurrentUserPermissions } from '../../../../../core/src/core/permissions/stratos-user-permissions.checker';
+import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';

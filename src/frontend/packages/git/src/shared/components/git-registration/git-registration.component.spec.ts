@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SharedModule } from '@stratosui/core';
 import { getGitHubAPIURL, gitEntityCatalog, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 import { CATALOGUE_ENTITIES } from '@stratosui/store';
+import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { GitRegistrationComponent } from './git-registration.component';
@@ -16,6 +17,7 @@ describe('GitRegistrationComponent', () => {
       declarations: [ GitRegistrationComponent ],
       imports: [
         ...BaseTestModulesNoShared,
+        createBasicStoreModule(),
         SharedModule,
       ],
       providers: [
