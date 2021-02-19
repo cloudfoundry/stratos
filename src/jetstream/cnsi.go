@@ -271,27 +271,40 @@ func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 
 func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
-
+	log.Warnf("buildCNSIList: Started")
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
+			log.Warnf("buildCNSIList: 1: %+v", err)
 			return nil, err
 		}
 
 		u, err := p.StratosAuthService.GetUser(userID.(string))
 		if err != nil {
+			log.Warnf("buildCNSIList: 2: %+v", err)
 			return nil, err
 		}
 
 		if u.Admin {
-			return p.ListEndpoints()
+			log.Warnf("buildCNSIList: 3")
+			res, err := p.ListEndpoints()
+			log.Warnf("buildCNSIList: 3 res: %+v", res)
+			return res, err
 		}
 
+		// TODO: RC Something doesn't feel right here....
 		if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
-			return p.ListAdminEndpoints(userID.(string))
+			log.Warnf("buildCNSIList: 4")
+			res, err := p.ListAdminEndpoints(userID.(string))
+			log.Warnf("buildCNSIList: 4: res: %+v", res)
+
+			return res, err
 		}
 	}
-	return p.ListAdminEndpoints("")
+	log.Warnf("buildCNSIList: 5")
+	res, err := p.ListAdminEndpoints("")
+	log.Warnf("buildCNSIList: 5: %+v", res)
+	return res, err
 }
 
 func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
@@ -315,7 +328,7 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 //return a CNSI list with endpoints created by the current endpointadmin and all admins
 func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("ListAdminEndpoints")
-
+	log.Warnf("ListAdminEndpoints: started")
 	var cnsiList []*interfaces.CNSIRecord
 	var userList []string
 	var err error
@@ -324,20 +337,27 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 	if len(userID) != 0 {
 		userList = append(userList, "")
 	}
+	log.Warnf("ListAdminEndpoints: userList: %+v: ", userList)
 
 	//get a cnsi list from every admin found and given userID
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		return cnsiList, fmt.Errorf("listRegisteredCNSIs: %s", err)
+		return nil, fmt.Errorf("listRegisteredCNSIs: %s", err)
 	}
 
 	for _, id := range userList {
 		creatorList, err := cnsiRepo.ListByCreator(id, p.Config.EncryptionKeyInBytes)
+		log.Warnf("ListAdminEndpoints: creatorList: %+v: ", creatorList)
+		log.Warnf("ListAdminEndpoints: creatorList err: %+v: ", err)
 		if err != nil {
-			return creatorList, err
+			return nil, err
 		}
+		log.Warnf("ListAdminEndpoints: cnsiList: b %+v: ", cnsiList)
 		cnsiList = append(cnsiList, creatorList...)
+		log.Warnf("ListAdminEndpoints: cnsiList: a %+v: ", cnsiList)
 	}
+	log.Warnf("ListAdminEndpoints: Completed %+v: ", cnsiList)
+
 	return cnsiList, nil
 }
 
@@ -379,6 +399,7 @@ func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*interfaces.C
 // @Router /endpoints [get]
 func (p *portalProxy) listCNSIs(c echo.Context) error {
 	log.Debug("listCNSIs")
+	log.Warn("listCNSIs: Started")
 	cnsiList, err := p.buildCNSIList(c)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
@@ -387,14 +408,16 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 			"Failed to retrieve list of CNSIs: %v", err,
 		)
 	}
-
+	log.Warnf("listCNSIs: Res Object %+v", cnsiList)
 	jsonString, err := marshalCNSIlist(cnsiList)
 	if err != nil {
 		return err
 	}
+	log.Warnf("listCNSIs: Res String %+s", jsonString)
 
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
+	log.Warn("listCNSIs: Completed")
 	return nil
 }
 
