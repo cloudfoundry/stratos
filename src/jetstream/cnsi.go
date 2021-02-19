@@ -329,7 +329,8 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("ListAdminEndpoints")
 	log.Warnf("ListAdminEndpoints: started")
-	var cnsiList []*interfaces.CNSIRecord
+	// Initialise cnsiList to ensure empty struct (marshals to null) is not returned
+	cnsiList := []*interfaces.CNSIRecord{}
 	var userList []string
 	var err error
 
