@@ -133,11 +133,15 @@ export class ResetsHelpers {
    */
   removeAllEndpoints(req) {
     return reqHelpers.sendRequest(req, { method: 'GET', url: 'api/v1/endpoints' }).then((data) => {
+      console.warn('reset-helpers.ts: removeAllEndpoints: raw response', data);
+
       if (!data || !data.length) {
         return;
       }
       data = data.trim();
+      console.warn('reset-helpers.ts: removeAllEndpoints: trimmed response', data);
       data = JSON.parse(data);
+      console.warn('reset-helpers.ts: removeAllEndpoints: parsed response', data);
       const p = promise.fulfilled({});
       data.forEach((c) => {
         p.then(() => reqHelpers.sendRequest(req, { method: 'DELETE', url: 'api/v1/endpoints/' + c.guid }, null, {}));
