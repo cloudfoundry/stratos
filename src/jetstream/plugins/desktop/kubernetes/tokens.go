@@ -14,10 +14,6 @@ func (d *TokenStore) FindAuthToken(userGUID string, encryptionKey []byte) (inter
 	return d.store.FindAuthToken(userGUID, encryptionKey)
 }
 
-func (d *TokenStore) ListAuthToken(encryptionKey []byte) ([]interfaces.TokenRecord, error) {
-	return d.store.ListAuthToken(encryptionKey)
-}
-
 func (d *TokenStore) SaveAuthToken(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error {
 	return d.store.SaveAuthToken(userGUID, tokenRecord, encryptionKey)
 }

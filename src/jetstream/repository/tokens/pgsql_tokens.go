@@ -16,10 +16,6 @@ var findAuthToken = `SELECT token_guid, auth_token, refresh_token, token_expiry,
 									FROM tokens
 									WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS' AND user_guid = $1`
 
-var listAuthTokens = `SELECT token_guid, auth_token, refresh_token, token_expiry, auth_type, meta_data
-						FROM tokens
-						WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS'`
-
 var countAuthTokens = `SELECT COUNT(*)
 										FROM tokens
 										WHERE token_type = 'uaa' AND cnsi_guid = 'STRATOS' AND user_guid = $1 `
@@ -88,7 +84,6 @@ func NewPgsqlTokenRepository(dcp *sql.DB) (interfaces.TokenRepository, error) {
 func InitRepositoryProvider(databaseProvider string) {
 	// Modify the database statements if needed, for the given database type
 	findAuthToken = datastore.ModifySQLStatement(findAuthToken, databaseProvider)
-	listAuthTokens = datastore.ModifySQLStatement(listAuthTokens, databaseProvider)
 	countAuthTokens = datastore.ModifySQLStatement(countAuthTokens, databaseProvider)
 	insertAuthToken = datastore.ModifySQLStatement(insertAuthToken, databaseProvider)
 	updateAuthToken = datastore.ModifySQLStatement(updateAuthToken, databaseProvider)
@@ -223,76 +218,6 @@ func (p *PgsqlTokenRepository) FindAuthToken(userGUID string, encryptionKey []by
 		tr.Metadata = metadata.String
 	}
 	return *tr, nil
-}
-
-// ListAuthToken - Return a list of Auth Tokens
-func (p *PgsqlTokenRepository) ListAuthToken(encryptionKey []byte) ([]interfaces.TokenRecord, error) {
-	log.Debug("ListAuthTokens")
-
-	var rows *sql.Rows
-	var err error
-	rows, err = p.db.Query(listAuthTokens)
-	if err != nil {
-		msg := "Unable to Find All CNSI tokens: %v"
-		if err == sql.ErrNoRows {
-			log.Debugf(msg, err)
-		} else {
-			log.Errorf(msg, err)
-		}
-		return make([]interfaces.TokenRecord, 0), fmt.Errorf(msg, err)
-	}
-	defer rows.Close()
-
-	tokens := make([]interfaces.TokenRecord, 0)
-	for rows.Next() {
-		// temp vars to retrieve db data
-		var (
-			tokenGUID              sql.NullString
-			ciphertextAuthToken    []byte
-			ciphertextRefreshToken []byte
-			tokenExpiry            sql.NullInt64
-			authType               string
-			metadata               sql.NullString
-		)
-
-		err := rows.Scan(&tokenGUID, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &authType, &metadata)
-		if err != nil {
-			msg := "Unable to Find UAA token: %v"
-			log.Debugf(msg, err)
-			return make([]interfaces.TokenRecord, 0), fmt.Errorf(msg, err)
-		}
-
-		log.Debug("Decrypting Auth Token")
-		plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
-		if err != nil {
-			return make([]interfaces.TokenRecord, 0), err
-		}
-
-		log.Debug("Decrypting Refresh Token")
-		plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
-		if err != nil {
-			return make([]interfaces.TokenRecord, 0), err
-		}
-
-		// Build a new TokenRecord based on the decrypted tokens
-		tr := new(interfaces.TokenRecord)
-		if tokenGUID.Valid {
-			tr.TokenGUID = tokenGUID.String
-		}
-		tr.AuthToken = plaintextAuthToken
-		tr.RefreshToken = plaintextRefreshToken
-		if tokenExpiry.Valid {
-			tr.TokenExpiry = tokenExpiry.Int64
-		}
-		tr.AuthType = authType
-		if metadata.Valid {
-			tr.Metadata = metadata.String
-		}
-
-		tokens = append(tokens, *tr)
-	}
-
-	return tokens, nil
 }
 
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
