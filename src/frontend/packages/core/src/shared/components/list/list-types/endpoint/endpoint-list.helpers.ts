@@ -111,7 +111,7 @@ export class EndpointListHelper {
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
         createVisible: (row$: Observable<EndpointModel>) => combineLatest([
-            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
             row$
           ]).pipe(
           map(([isAdmin, row]) => {
