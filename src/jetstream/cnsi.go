@@ -74,16 +74,15 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	sessionValue, err := p.GetSessionValue(c, "user_id")
+	uaaUserID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to get session user",
 			"Failed to get session user: %v", err)
 	}
-	uaaUserId := sessionValue.(string)
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, uaaUserId, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, uaaUserID, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
 	if err != nil {
 		return err
 	}
