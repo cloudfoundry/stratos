@@ -39,6 +39,10 @@ ENABLE_TECH_PREVIEW=false
 # By default, only show favorites endpoints on the home view
 # HOME_VIEW_SHOW_FAVORITES_ONLY=false
 
+# Enable users create user endpoints (disabled, admin_only, enabled). Default is disabled
+# admin_only will enable admins to see created user endpoints, but users won't be able to create user endpoints or see them
+USER_ENDPOINTS_ENABLED=disabled
+
 # User Invites
 SMTP_FROM_ADDRESS=Stratos<invite@stratos.com>
 SMTP_HOST=127.0.0.1
