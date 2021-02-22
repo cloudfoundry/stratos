@@ -160,6 +160,10 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		if user.Admin {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - admins are not allowed to connect to user created endpoints")
 		}
+
+		if cnsiRecord.Creator != userID {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - non-admins are not allowed to connect to endpoints created by other non-admins")
+		}
 	}
 
 	// Register as a system endpoint?
