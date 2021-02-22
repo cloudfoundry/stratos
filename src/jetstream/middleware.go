@@ -255,6 +255,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 // endpointAdminMiddleware - checks if user is admin or endpointadmin
 func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log.Debug("endpointAdminMiddleware")
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
@@ -278,6 +279,7 @@ func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 // endpointUpdateDeleteMiddleware - checks if user has necessary permissions to modify endpoint
 func (p *portalProxy) endpointUpdateDeleteMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log.Debug("endpointUpdateDeleteMiddleware")
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
