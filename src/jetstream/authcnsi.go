@@ -166,7 +166,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 	if systemSharedToken {
 		user, err := p.StratosAuthService.GetUser(userID)
 		if err != nil {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect System Shared endpoint - could not check user")
 		}
 
 		// User needs to be an admin
