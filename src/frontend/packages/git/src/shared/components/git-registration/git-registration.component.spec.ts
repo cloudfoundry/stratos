@@ -22,7 +22,7 @@ describe('GitRegistrationComponent', () => {
       providers: [
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
         GitSCMService,
-        { 
+        {
           provide: CATALOGUE_ENTITIES, useFactory: () => {
             const testEntityCatalog = entityCatalog as TestEntityCatalog;
             testEntityCatalog.clear();
@@ -30,7 +30,7 @@ describe('GitRegistrationComponent', () => {
               ...generateStratosEntities(),
               ...gitEntityCatalog.allGitEntities()
             ];
-          }, multi: false 
+          }, multi: false
         },
         {
           provide: ActivatedRoute,
