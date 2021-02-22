@@ -150,8 +150,7 @@ export class UserInviteService {
     ]).pipe(
       map(([cf, auth, endpoint]) =>
         cf.global.isAdmin &&
-        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true' &&
-        endpoint.entity.creator.admin)
+        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 
