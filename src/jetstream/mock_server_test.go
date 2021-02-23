@@ -214,6 +214,18 @@ func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, e
 	return res, e, ctx, pp, db, mock
 }
 
+func setupPortalProxyWithAuthService(mockStratosAuth interfaces.StratosAuth) (*portalProxy, *sql.DB, sqlmock.Sqlmock) {
+	db, mock, dberr := sqlmock.New()
+	if dberr != nil {
+		fmt.Printf("an error '%s' was not expected when opening a stub database connection", dberr)
+	}
+
+	pp := setupPortalProxy(db)
+	pp.StratosAuthService = mockStratosAuth
+
+	return pp, db, mock
+}
+
 func msRoute(route string) mockServerFunc {
 	return func(ms *mockServer) {
 		ms.Route = route
