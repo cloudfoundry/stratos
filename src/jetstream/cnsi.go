@@ -340,27 +340,26 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecor
 	return cnsiList, nil
 }
 
-// listCNSIByAPIEndpoint - receives a URL as string (must be formatted like it's saved)
+// listCNSIByAPIEndpoint - receives a URL as string
 func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("listCNSIByAPIEndpoint")
 
-	var cnsiList []*interfaces.CNSIRecord
 	var err error
-
-	// Remove trailing slash, if there is one
-	apiEndpointURL, err := url.Parse(apiEndpoint)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to get API Endpoint: %s", err)
-	}
+	cnsiList := []*interfaces.CNSIRecord{}
 
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return cnsiList, fmt.Errorf("listCNSIByAPIEndpoint: %s", err)
 	}
 
-	cnsiList, err = cnsiRepo.ListByAPIEndpoint(fmt.Sprintf("%s", apiEndpointURL), p.Config.EncryptionKeyInBytes)
+	cnsiList, err = cnsiRepo.ListByAPIEndpoint(apiEndpoint, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return cnsiList, err
+	}
+
+	for _, cnsi := range cnsiList {
+		// Ensure that trailing slash is removed from the API Endpoint
+		cnsi.APIEndpoint.Path = strings.TrimRight(cnsi.APIEndpoint.Path, "/")
 	}
 
 	return cnsiList, nil
