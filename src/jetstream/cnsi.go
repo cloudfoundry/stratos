@@ -126,18 +126,18 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		isAdmin = currentCreator.Admin
 	}
 
-	// check if we've already got this endpoint in the DB
-	ok := p.adminCNSIRecordExists(apiEndpoint)
-	if ok {
-		// a record with the same api endpoint was found
-		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Can not register same endpoint multiple times",
-			"Can not register same endpoint multiple times",
-		)
-	}
-
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+	if p.GetConfig().UserEndpointsEnabled == config.UserEndpointsConfigEnum.Disabled {
+		// check if we've already got this endpoint in the DB
+		ok := p.adminCNSIRecordExists(apiEndpoint)
+		if ok {
+			// a record with the same api endpoint was found
+			return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+				http.StatusBadRequest,
+				"Can not register same endpoint multiple times",
+				"Can not register same endpoint multiple times",
+			)
+		}
+	} else {
 		// get all endpoints determined by the APIEndpoint
 		duplicateEndpoints, err := p.listCNSIByAPIEndpoint(apiEndpoint)
 		if err != nil {
@@ -147,7 +147,6 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 				"Failed to check other endpoints: %v",
 				err)
 		}
-
 		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
 			if len(duplicate.Creator) == 0 {
