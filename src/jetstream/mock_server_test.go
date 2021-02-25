@@ -1,11 +1,15 @@
 package main
 
 import (
+	"crypto/sha1"
 	"database/sql"
+	"database/sql/driver"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -37,6 +41,19 @@ type mockPGStore struct {
 	Path          string
 	DbPool        *sql.DB
 	StoredSession *sessions.Session
+}
+
+type MockEndpointRequest struct {
+	HTTPTestServer *httptest.Server
+	EchoContext    echo.Context
+	EndpointName   string
+	InsertArgs     []driver.Value
+	QueryArgs      []driver.Value
+}
+
+type MockUser struct {
+	ConnectedUser *interfaces.ConnectedUser
+	SessionValues map[string]interface{}
 }
 
 func (m *mockPGStore) New(r *http.Request, name string) (*sessions.Session, error) {
@@ -226,6 +243,51 @@ func setupPortalProxyWithAuthService(mockStratosAuth interfaces.StratosAuth) (*p
 	return pp, db, mock
 }
 
+func setupMockUser(guid string, admin bool, scopes []string) MockUser {
+	mockUser := MockUser{nil, nil}
+	mockUser.ConnectedUser = &interfaces.ConnectedUser{
+		GUID:   guid,
+		Admin:  admin,
+		Scopes: scopes,
+	}
+	mockUser.SessionValues = make(map[string]interface{})
+	mockUser.SessionValues["user_id"] = guid
+	mockUser.SessionValues["exp"] = time.Now().AddDate(0, 0, 1).Unix()
+
+	return mockUser
+}
+
+// mockV2Info needs to be closed
+func setupMockEndpointRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, overwriteEndpoints bool) MockEndpointRequest {
+
+	// create a request for each endpoint
+	req := setupMockReq("POST", "", map[string]string{
+		"cnsi_name":           endpointName,
+		"api_endpoint":        mockV2Info.URL,
+		"skip_ssl_validation": "true",
+		"cnsi_client_id":      mockClientId,
+		"cnsi_client_secret":  mockClientSecret,
+		"overwrite_endpoints": strconv.FormatBool(overwriteEndpoints),
+	})
+
+	res := httptest.NewRecorder()
+	_, ctx := setupEchoContext(res, req)
+
+	uaaUserGUID := ""
+
+	h := sha1.New()
+	if user.Admin {
+		h.Write([]byte(mockV2Info.URL))
+	} else {
+		h.Write([]byte(mockV2Info.URL + user.GUID))
+		uaaUserGUID = user.GUID
+	}
+	insertArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", uaaUserGUID}
+	queryArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", uaaUserGUID}
+
+	return MockEndpointRequest{mockV2Info, ctx, endpointName, insertArgs, queryArgs}
+}
+
 func msRoute(route string) mockServerFunc {
 	return func(ms *mockServer) {
 		ms.Route = route
@@ -302,6 +364,7 @@ const (
 	insertIntoTokens    = `INSERT INTO tokens`
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
+	deleteFromCNSIs     = `DELETE FROM cnsis WHERE (.+)`
 	insertIntoCNSIs     = `INSERT INTO cnsis`
 	findUserGUID        = `SELECT user_guid FROM local_users WHERE (.+)`
 	addLocalUser        = `INSERT INTO local_users (.+)`
