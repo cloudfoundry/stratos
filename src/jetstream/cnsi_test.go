@@ -270,7 +270,7 @@ func TestGetCFv2InfoWithInvalidEndpoint(t *testing.T) {
 	}
 }
 
-func TestRegisterCFClusterWithUserEndpointsEnabled(t *testing.T) {
+func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 	// execute this in parallel
 	t.Parallel()
 
@@ -575,6 +575,182 @@ func TestRegisterCFClusterWithUserEndpointsEnabled(t *testing.T) {
 			Convey("register existing user endpoint", func() {
 				// todo user endpoints should automatically overwritten?
 			})
+		})
+	})
+}
+
+func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
+	t.Parallel()
+
+	Convey("Request to list endpoints", t, func() {
+
+		// mock StratosAuthService
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		// setup mock DB, PortalProxy and mock StratosAuthService
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+
+		// setup request
+
+		res := httptest.NewRecorder()
+		req := setupMockReq("GET", "", nil)
+		_, ctx := setupEchoContext(res, req)
+
+		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
+		mockUser1 := setupMockUser(mockUserGUID+"1", false, []string{"stratos.endpointadmin"})
+		mockUser2 := setupMockUser(mockUserGUID+"2", false, []string{"stratos.endpointadmin"})
+
+		adminEndpointArgs := createEndpointRowArgs("CF Endpoint 1", "https://127.0.0.1:50001", mockAdmin.ConnectedUser.GUID, mockAdmin.ConnectedUser.Admin)
+		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", "https://127.0.0.1:50002", mockUser1.ConnectedUser.GUID, mockUser1.ConnectedUser.Admin)
+		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", "https://127.0.0.1:50003", mockUser2.ConnectedUser.GUID, mockUser2.ConnectedUser.Admin)
+
+		adminRows := sqlmock.NewRows(rowFieldsForCNSI).
+			AddRow(adminEndpointArgs...)
+		user1Rows := sqlmock.NewRows(rowFieldsForCNSI).
+			AddRow(userEndpoint1Args...)
+		allRows := sqlmock.NewRows(rowFieldsForCNSI).
+			AddRow(adminEndpointArgs...).
+			AddRow(userEndpoint1Args...).
+			AddRow(userEndpoint2Args...)
+
+		Convey("as admin", func() {
+
+			if errSession := pp.setSessionValues(ctx, mockAdmin.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+
+			Convey("with UserEndpointsEnabled = enabled", func() {
+				//expect list all
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+					Return(mockAdmin.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(allRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("with UserEndpointsEnabled = admin_only", func() {
+				//expect list all
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.AdminOnly
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+					Return(mockAdmin.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(allRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+
+			})
+			Convey("with UserEndpointsEnabled = disabled", func() {
+				// expect list creator with ""
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Disabled
+
+				mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(adminRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+
+		})
+		Convey("as user", func() {
+			//expect list creator with "" and user-guid as args
+			if errSession := pp.setSessionValues(ctx, mockUser1.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+
+			Convey("with UserEndpointsEnabled = enabled", func() {
+				// expect list creator with "" and own endpoints
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
+					Return(mockUser1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs(mockUser1.ConnectedUser.GUID).WillReturnRows(user1Rows)
+				mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(adminRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+
+			})
+			Convey("with UserEndpointsEnabled = admin_only", func() {
+				// expect list creator with ""
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.AdminOnly
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
+					Return(mockUser1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(adminRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+
+			})
+			Convey("with UserEndpointsEnabled = disabled", func() {
+				// expect list creator with ""
+				pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Disabled
+
+				mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(adminRows)
+				err := pp.listCNSIs(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+
 		})
 	})
 }

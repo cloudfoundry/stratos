@@ -219,6 +219,20 @@ func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 		AddRow(mockTokenGUID, encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
 }
 
+func createEndpointRowArgs(endpointName string, APIEndpoint string, uaaUserGUID string, userAdmin bool) []driver.Value {
+	creatorGUID := ""
+
+	h := sha1.New()
+	if userAdmin {
+		h.Write([]byte(APIEndpoint))
+	} else {
+		h.Write([]byte(APIEndpoint + uaaUserGUID))
+		creatorGUID = uaaUserGUID
+	}
+
+	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID}
+}
+
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
 	res := httptest.NewRecorder()
 	e, ctx := setupEchoContext(res, req)
@@ -360,19 +374,21 @@ const (
 
 	stringCFType = "cf"
 
-	selectAnyFromTokens = `SELECT (.+) FROM tokens WHERE (.+)`
-	insertIntoTokens    = `INSERT INTO tokens`
-	updateTokens        = `UPDATE tokens`
-	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
-	deleteFromCNSIs     = `DELETE FROM cnsis WHERE (.+)`
-	insertIntoCNSIs     = `INSERT INTO cnsis`
-	findUserGUID        = `SELECT user_guid FROM local_users WHERE (.+)`
-	addLocalUser        = `INSERT INTO local_users (.+)`
-	findPasswordHash    = `SELECT password_hash FROM local_users WHERE (.+)`
-	findUserScope       = `SELECT user_scope FROM local_users WHERE (.+)`
-	updateLastLoginTime = `UPDATE local_users (.+)`
-	findLastLoginTime   = `SELECT last_login FROM local_users WHERE (.+)`
-	getDbVersion        = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
+	selectAnyFromTokens    = `SELECT (.+) FROM tokens WHERE (.+)`
+	insertIntoTokens       = `INSERT INTO tokens`
+	updateTokens           = `UPDATE tokens`
+	selectFromCNSIs        = `SELECT (.+) FROM cnsis`
+	selectAnyFromCNSIs     = `SELECT (.+) FROM cnsis WHERE (.+)`
+	selectCreatorFromCNSIs = `SELECT (.+) FROM cnsis WHERE creator=(.+)`
+	deleteFromCNSIs        = `DELETE FROM cnsis WHERE (.+)`
+	insertIntoCNSIs        = `INSERT INTO cnsis`
+	findUserGUID           = `SELECT user_guid FROM local_users WHERE (.+)`
+	addLocalUser           = `INSERT INTO local_users (.+)`
+	findPasswordHash       = `SELECT password_hash FROM local_users WHERE (.+)`
+	findUserScope          = `SELECT user_scope FROM local_users WHERE (.+)`
+	updateLastLoginTime    = `UPDATE local_users (.+)`
+	findLastLoginTime      = `SELECT last_login FROM local_users WHERE (.+)`
+	getDbVersion           = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
 var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data", "creator"}
