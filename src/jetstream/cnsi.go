@@ -160,7 +160,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 			// cant create same user endpoint
 			// can create same user endpoint if overwriteEndpoint true
-			if duplicate.Creator == userId || !overwriteEndpoints {
+			if duplicate.Creator == userId || isAdmin && !overwriteEndpoints {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same endpoint multiple times",
