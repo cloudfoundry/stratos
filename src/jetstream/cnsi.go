@@ -169,9 +169,10 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			}
 		}
 
-		// because of the check above, no admin endpoint or userendpoint without overwriteEndpoints=true will reach here
-		for _, duplicate := range duplicateEndpoints {
-			p.doUnregisterCluster(duplicate.GUID)
+		if isAdmin && overwriteEndpoints {
+			for _, duplicate := range duplicateEndpoints {
+				p.doUnregisterCluster(duplicate.GUID)
+			}
 		}
 
 	}
