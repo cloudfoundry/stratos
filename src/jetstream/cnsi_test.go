@@ -684,7 +684,6 @@ func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
 
 		})
 		Convey("as user", func() {
-			//expect list creator with "" and user-guid as args
 			if errSession := pp.setSessionValues(ctx, mockUser1.SessionValues); errSession != nil {
 				t.Error(errors.New("unable to mock/stub user in session object"))
 			}
