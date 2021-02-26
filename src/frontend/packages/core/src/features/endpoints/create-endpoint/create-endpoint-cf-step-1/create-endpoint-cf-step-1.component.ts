@@ -18,18 +18,15 @@ import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { SessionService } from '../../../../shared/services/session.service';
+import { CreateEndpointHelperComponent } from '../create-endpoint-helper/create-endpoint-helper.component';
 
-type EndpointObservable = Observable<{
-  names: string[],
-  urls: string[],
-}>;
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
   styleUrls: ['./create-endpoint-cf-step-1.component.scss']
 })
-export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
+export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
   registerForm: FormGroup;
 
@@ -49,11 +46,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     }
   }
 
-  overwritePermission: Observable<StratosCurrentUserPermissions[]>;
-
-  existingEndpoints: EndpointObservable;
-  existingAdminEndpoints: EndpointObservable;
-
   validate: Observable<boolean>;
 
   urlValidation: string;
@@ -71,8 +63,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
-    private sessionService: SessionService
+    sessionService: SessionService
   ) {
+    super(sessionService);
+
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],

@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { StratosCurrentUserPermissions } from '../../../../../core/src/core/permissions/stratos-user-permissions.checker';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
@@ -17,6 +16,7 @@ import { ActionState } from '../../../../../store/src/reducers/api-request-reduc
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
+import { CreateEndpointHelperComponent } from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper/create-endpoint-helper.component';
 
 interface EndpointSubTypes {
   [subType: string]: GithubTypes;
@@ -46,17 +46,12 @@ enum GitTypeKeys {
   GITLAB_ENTERPRISE = 'githubenterprize',
 }
 
-type EndpointObservable = Observable<{
-  names: string[],
-  urls: string[],
-}>;
-
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
 })
-export class GitRegistrationComponent implements OnDestroy {
+export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
 
   public gitTypes: EndpointSubTypes;
 
@@ -72,19 +67,15 @@ export class GitRegistrationComponent implements OnDestroy {
 
   urlValidation: string;
 
-  overwritePermission: Observable<StratosCurrentUserPermissions[]>;
-
-  existingEndpoints: EndpointObservable;
-  existingAdminEndpoints: EndpointObservable;
-
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
-    private sessionService: SessionService,
+    public sessionService: SessionService,
   ) {
+    super(sessionService);
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
@@ -142,24 +133,6 @@ export class GitRegistrationComponent implements OnDestroy {
         }
       }
     };
-
-    const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
-    this.existingAdminEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.filter(ep => ep.creator.admin).map(ep => ep.name),
-        urls: endpoints.filter(ep => ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
-      }))
-    );
-    this.existingEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.map(ep => ep.name),
-        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-      }))
-    );
-
-    this.overwritePermission = this.sessionService.userEndpointsNotDisabled().pipe(
-      map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
-    );
 
     // Check the endpoints and turn off any options for endpoints that are already registered
     this.endpointsService.endpoints$.pipe(first()).subscribe(eps => {

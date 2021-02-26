@@ -8,6 +8,7 @@ import { CreateEndpointBaseStepComponent } from './create-endpoint-base-step/cre
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 import { CreateEndpointComponent } from './create-endpoint.component';
+import { CreateEndpointHelperComponent } from './create-endpoint-helper/create-endpoint-helper.component';
 
 @NgModule({
   imports: [
@@ -20,13 +21,15 @@ import { CreateEndpointComponent } from './create-endpoint.component';
     CreateEndpointCfStep1Component,
     CreateEndpointBaseStepComponent,
     CreateEndpointConnectComponent,
-    ConnectEndpointComponent
+    ConnectEndpointComponent,
+    CreateEndpointHelperComponent
   ],
   exports: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
     CreateEndpointConnectComponent,
-    ConnectEndpointComponent
+    ConnectEndpointComponent,
+    CreateEndpointHelperComponent
   ]
 })
 export class CreateEndpointModule { }
