@@ -171,7 +171,14 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 		if isAdmin && overwriteEndpoints {
 			for _, duplicate := range duplicateEndpoints {
-				p.doUnregisterCluster(duplicate.GUID)
+				err := p.doUnregisterCluster(duplicate.GUID)
+				if err != nil {
+					return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+						http.StatusInternalServerError,
+						"Failed to unregister cluster",
+						"Failed to unregister cluster: %v",
+						err)
+				}
 			}
 		}
 
