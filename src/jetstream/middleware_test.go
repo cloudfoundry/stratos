@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -372,6 +373,245 @@ func Test_apiKeyMiddleware(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(rec.Code, ShouldEqual, 200)
 				So(rec.Body.String(), ShouldEqual, "test")
+			})
+		})
+	})
+}
+
+func TestEndpointAdminMiddleware(t *testing.T) {
+	t.Parallel()
+
+	Convey("new request through endpointAdminMiddleware", t, func() {
+		// mock StratosAuthService
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		// setup mock DB, PortalProxy and mock StratosAuthService
+		pp, db, _ := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+
+		handlerFunc := func(c echo.Context) error {
+			return c.String(http.StatusOK, "test")
+		}
+
+		middleware := pp.endpointAdminMiddleware(handlerFunc)
+
+		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
+		mockEndpointAdmin := setupMockUser(mockUserGUID+"1", false, []string{"stratos.endpointadmin"})
+		mockUser := setupMockUser(mockUserGUID+"2", false, []string{})
+
+		Convey("as admin", func() {
+			ctx, _ := makeNewRequestWithParams("POST", map[string]string{})
+
+			if errSession := pp.setSessionValues(ctx, mockAdmin.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+
+			mockStratosAuth.
+				EXPECT().
+				GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+				Return(mockAdmin.ConnectedUser, nil)
+
+			err := middleware(ctx)
+
+			Convey("request should be successful", func() {
+				So(err, ShouldBeNil)
+			})
+		})
+
+		Convey("as endpointadmin", func() {
+			ctx, _ := makeNewRequestWithParams("POST", map[string]string{})
+
+			if errSession := pp.setSessionValues(ctx, mockEndpointAdmin.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+
+			mockStratosAuth.
+				EXPECT().
+				GetUser(gomock.Eq(mockEndpointAdmin.ConnectedUser.GUID)).
+				Return(mockEndpointAdmin.ConnectedUser, nil)
+
+			err := middleware(ctx)
+
+			Convey("request should be successful", func() {
+				So(err, ShouldBeNil)
+			})
+
+		})
+		Convey("as normal user", func() {
+			ctx, _ := makeNewRequestWithParams("POST", map[string]string{})
+
+			if errSession := pp.setSessionValues(ctx, mockUser.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+
+			mockStratosAuth.
+				EXPECT().
+				GetUser(gomock.Eq(mockUser.ConnectedUser.GUID)).
+				Return(mockUser.ConnectedUser, nil)
+
+			err := middleware(ctx)
+
+			Convey("request should fail", func() {
+				So(err,
+					ShouldResemble,
+					handleSessionError(pp.Config,
+						ctx,
+						errors.New("Unauthorized"),
+						false,
+						"You must be a Stratos admin or endpointAdmin to access this API"))
+			})
+		})
+	})
+}
+
+func TestEndpointUpdateDeleteMiddleware(t *testing.T) {
+	t.Parallel()
+
+	Convey("new request through endpointUpdateDeleteMiddleware", t, func() {
+		// mock StratosAuthService
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		// setup mock DB, PortalProxy and mock StratosAuthService
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+
+		res := httptest.NewRecorder()
+		req := setupMockReq("POST", "", nil)
+		_, ctx := setupEchoContext(res, req)
+		ctx.SetParamNames("id")
+
+		handlerFunc := func(c echo.Context) error {
+			return c.String(http.StatusOK, "test")
+		}
+		middleware := pp.endpointUpdateDeleteMiddleware(handlerFunc)
+
+		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
+		mockEndpointAdmin1 := setupMockUser(mockUserGUID+"1", false, []string{"stratos.endpointadmin"})
+		mockEndpointAdmin2 := setupMockUser(mockUserGUID+"2", false, []string{"stratos.endpointadmin"})
+
+		adminEndpointArgs := createEndpointRowArgs("CF Endpoint 1", "https://127.0.0.1:50001", mockAdmin.ConnectedUser.GUID, mockAdmin.ConnectedUser.Admin)
+		adminEndpointRows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(adminEndpointArgs...)
+
+		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", "https://127.0.0.1:50002", mockEndpointAdmin1.ConnectedUser.GUID, mockEndpointAdmin1.ConnectedUser.Admin)
+		userEndpoint1Rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint1Args...)
+
+		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", "https://127.0.0.1:50003", mockEndpointAdmin2.ConnectedUser.GUID, mockEndpointAdmin2.ConnectedUser.Admin)
+		userEndpoint2Rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint2Args...)
+
+		Convey("as admin", func() {
+			if errSession := pp.setSessionValues(ctx, mockAdmin.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+			Convey("edit admin endpoint", func() {
+				ctx.SetParamValues(fmt.Sprintf("%v", adminEndpointArgs[0]))
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+					Return(mockAdmin.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(adminEndpointArgs[0]).WillReturnRows(adminEndpointRows)
+
+				err := middleware(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("request should be successful", func() {
+					So(err, ShouldBeNil)
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("edit user endpoint", func() {
+				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint1Args[0]))
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+					Return(mockAdmin.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[0]).WillReturnRows(userEndpoint1Rows)
+
+				err := middleware(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("request should be successful", func() {
+					So(err, ShouldBeNil)
+					So(dberr, ShouldBeNil)
+				})
+			})
+		})
+		Convey("as user", func() {
+			if errSession := pp.setSessionValues(ctx, mockEndpointAdmin1.SessionValues); errSession != nil {
+				t.Error(errors.New("unable to mock/stub user in session object"))
+			}
+			Convey("edit admin endpoint", func() {
+				ctx.SetParamValues(fmt.Sprintf("%v", adminEndpointArgs[0]))
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
+					Return(mockEndpointAdmin1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(adminEndpointArgs[0]).WillReturnRows(adminEndpointRows)
+
+				err := middleware(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("request should fail", func() {
+					So(err,
+						ShouldResemble,
+						handleSessionError(pp.Config,
+							ctx,
+							errors.New("Unauthorized"),
+							false,
+							"You must be Stratos admin to modify this endpoint."))
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("edit own endpoint", func() {
+				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint1Args[0]))
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
+					Return(mockEndpointAdmin1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[0]).WillReturnRows(userEndpoint1Rows)
+
+				err := middleware(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("request should be successful", func() {
+					So(err, ShouldBeNil)
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("edit endpoint from different user", func() {
+				ctx.SetParamValues(fmt.Sprintf("%v", userEndpoint2Args[0]))
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
+					Return(mockEndpointAdmin1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint2Args[0]).WillReturnRows(userEndpoint2Rows)
+
+				err := middleware(ctx)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("request should fail", func() {
+					So(err,
+						ShouldResemble,
+						handleSessionError(pp.Config,
+							ctx,
+							errors.New("Unauthorized"),
+							false,
+							"EndpointAdmins are not allowed to modify endpoints created by other endpointAdmins."))
+					So(dberr, ShouldBeNil)
+				})
 			})
 		})
 	})
