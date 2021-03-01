@@ -256,6 +256,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("endpointAdminMiddleware")
+
 		userID, err := p.GetSessionValue(c, "user_id")
 		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
@@ -269,7 +270,7 @@ func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 		endpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
 
 		if endpointAdmin == false && u.Admin == false {
-			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpoint-admin to access this API")
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpointAdmin to access this API")
 		}
 
 		return h(c)
@@ -305,7 +306,7 @@ func (p *portalProxy) endpointUpdateDeleteMiddleware(h echo.HandlerFunc) echo.Ha
 		}
 
 		if !adminEndpoint && !u.Admin && cnsiRecord.Creator != userID.(string) {
-			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "Endpoint-admins are not allowed to modify endpoints created by other endpoint-admins.")
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "EndpointAdmins are not allowed to modify endpoints created by other endpointAdmins.")
 		}
 
 		return h(c)
