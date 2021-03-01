@@ -309,7 +309,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			Convey("as admin", func() {
 				Convey("with overwrite disabled", func() {
 					// setup
-					adminEndpoint := setupMockEndpointRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -343,7 +343,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 					})
 					Convey("overwrite existing user endpoints", func() {
 						// setup
-						userEndpoint := setupMockEndpointRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
+						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
 
 						// mock executions
 						mockStratosAuth.
@@ -375,7 +375,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 				Convey("with overwrite enabled", func() {
 
 					// setup
-					adminEndpoint := setupMockEndpointRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -411,7 +411,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 					Convey("overwrite existing user endpoints", func() {
 
 						// setup
-						userEndpoint := setupMockEndpointRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
+						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
 
 						// mock executions
 						mockStratosAuth.
@@ -451,7 +451,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			Convey("as user", func() {
 				Convey("with overwrite disabled", func() {
 					// setup
-					userEndpoint := setupMockEndpointRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -483,7 +483,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 					Convey("register existing endpoint from different user", func() {
-						userEndpoint2 := setupMockEndpointRequest(t, mockUser2.ConnectedUser, mockV2Info[0], "CF Cluster 2", false)
+						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info[0], "CF Cluster 2", false)
 
 						// mock executions
 						mockStratosAuth.
@@ -536,7 +536,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 					})
 				})
 				Convey("with overwrite enabled", func() {
-					userEndpoint := setupMockEndpointRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))

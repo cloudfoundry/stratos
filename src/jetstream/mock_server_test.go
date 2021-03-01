@@ -272,7 +272,7 @@ func setupMockUser(guid string, admin bool, scopes []string) MockUser {
 }
 
 // mockV2Info needs to be closed
-func setupMockEndpointRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, overwriteEndpoints bool) MockEndpointRequest {
+func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, overwriteEndpoints bool) MockEndpointRequest {
 
 	// create a request for each endpoint
 	req := setupMockReq("POST", "", map[string]string{
