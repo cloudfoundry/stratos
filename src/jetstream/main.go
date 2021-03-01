@@ -1119,6 +1119,19 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
 
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+		stableAdminAPIGroup.Use(p.endpointAdminMiddleware)
+		stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
+		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
+		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
+	} else {
+		stableAdminAPIGroup.Use(p.adminMiddleware)
+		stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
+		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
+		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
+	}
+
+	/* comment this block out to test if e2e tests fail because of the new group
 	stableEndpointAdminAPIGroup := stableAdminAPIGroup.Group("/endpoints")
 
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
@@ -1145,6 +1158,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		stableEndpointAdminAPIGroup.DELETE("/:id", p.unregisterCluster)
 	}
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
+	*/
 
 	// Serve up static resources
 	if staticDirErr == nil {
