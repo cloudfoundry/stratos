@@ -52,7 +52,7 @@ require (
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
-	github.com/labstack/echo/v4 v4.1.17
+	github.com/labstack/echo/v4 v4.2.0
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/mholt/archiver v3.1.1+incompatible
