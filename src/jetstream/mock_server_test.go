@@ -219,7 +219,7 @@ func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 		AddRow(mockTokenGUID, encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
 }
 
-func createEndpointRowArgs(endpointName string, APIEndpoint string, uaaUserGUID string, userAdmin bool) []driver.Value {
+func createEndpointRowArgs(endpointName string, APIEndpoint string, authEndpoint string, tokenEndpoint string, uaaUserGUID string, userAdmin bool) []driver.Value {
 	creatorGUID := ""
 
 	h := sha1.New()
@@ -230,7 +230,7 @@ func createEndpointRowArgs(endpointName string, APIEndpoint string, uaaUserGUID 
 		creatorGUID = uaaUserGUID
 	}
 
-	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID}
+	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, authEndpoint, tokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID}
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {

@@ -603,9 +603,9 @@ func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
 		mockUser1 := setupMockUser(mockUserGUID+"1", false, []string{"stratos.endpointadmin"})
 		mockUser2 := setupMockUser(mockUserGUID+"2", false, []string{"stratos.endpointadmin"})
 
-		adminEndpointArgs := createEndpointRowArgs("CF Endpoint 1", "https://127.0.0.1:50001", mockAdmin.ConnectedUser.GUID, mockAdmin.ConnectedUser.Admin)
-		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", "https://127.0.0.1:50002", mockUser1.ConnectedUser.GUID, mockUser1.ConnectedUser.Admin)
-		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", "https://127.0.0.1:50003", mockUser2.ConnectedUser.GUID, mockUser2.ConnectedUser.Admin)
+		adminEndpointArgs := createEndpointRowArgs("CF Endpoint 1", "https://127.0.0.1:50001", mockAuthEndpoint, mockTokenEndpoint, mockAdmin.ConnectedUser.GUID, mockAdmin.ConnectedUser.Admin)
+		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", "https://127.0.0.1:50002", mockAuthEndpoint, mockTokenEndpoint, mockUser1.ConnectedUser.GUID, mockUser1.ConnectedUser.Admin)
+		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", "https://127.0.0.1:50003", mockAuthEndpoint, mockTokenEndpoint, mockUser2.ConnectedUser.GUID, mockUser2.ConnectedUser.Admin)
 
 		adminRows := sqlmock.NewRows(rowFieldsForCNSI).
 			AddRow(adminEndpointArgs...)
