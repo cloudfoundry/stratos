@@ -119,6 +119,7 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TableCellEndpointCreatorComponent } from './components/list/list-types/endpoint/table-cell-endpoint-creator/table-cell-endpoint-creator.component';
 
 
 @NgModule({
@@ -221,6 +222,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardProgressOverlayComponent,
     MaxListMessageComponent,
     ProfileSettingsComponent,
+    TableCellEndpointCreatorComponent,
   ],
   exports: [
     ApplicationStateIconPipe,

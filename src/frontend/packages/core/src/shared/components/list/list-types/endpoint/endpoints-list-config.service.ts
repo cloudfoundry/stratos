@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { debounceTime, filter, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -14,6 +14,7 @@ import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-ent
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
+import { SessionService } from '../../../../services/session.service';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
@@ -28,6 +29,7 @@ import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address/table-cell-endpoint-address.component';
+import { TableCellEndpointCreatorComponent } from './table-cell-endpoint-creator/table-cell-endpoint-creator.component';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -35,7 +37,7 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 
 
 @Injectable()
-export class EndpointsListConfigService implements IListConfig<EndpointModel> {
+export class EndpointsListConfigService implements IListConfig<EndpointModel>, OnDestroy {
   cardComponent = EndpointCardComponent;
 
   private singleActions: IListAction<EndpointModel>[];
@@ -107,6 +109,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     filter: 'Filter Endpoints'
   };
   enableTextFilter = true;
+  userEndpointsSubscription: Subscription;
 
   constructor(
     private store: Store<AppState>,
@@ -114,13 +117,29 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
-    userFavoriteManager: UserFavoriteManager
+    userFavoriteManager: UserFavoriteManager,
+    sessionService: SessionService
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
+    this.userEndpointsSubscription = sessionService.userEndpointsNotDisabled().subscribe(enabled => {
+      if (enabled){
+        this.columns.splice(4, 0,  {
+          columnId: 'creator',
+          headerCell: () => 'Creator',
+          cellComponent: TableCellEndpointCreatorComponent,
+          sort: {
+            type: 'sort',
+            orderKey: 'creator',
+            field: 'creator.name'
+          },
+          cellFlex: '2'
+        });
+      }
+    });
 
     this.dataSource = new EndpointsDataSource(
       this.store,
@@ -200,5 +219,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         new SetClientFilter(this.dataSource.masterAction, this.dataSource.paginationKey, clientPaginationFilter)
       );
     }
+  }
+
+  ngOnDestroy() {
+    this.userEndpointsSubscription.unsubscribe();
   }
 }
