@@ -2,12 +2,16 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -16,6 +20,8 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/mock_interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -570,7 +576,203 @@ func TestLoginToCNSIWithBadUserIDinSession(t *testing.T) {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
 	})
+}
 
+func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
+	t.Parallel()
+
+	Convey("Login to CNSI with UserEndpoints enabled", t, func() {
+		// mock StratosAuthService
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		// setup mock DB, PortalProxy and mock StratosAuthService
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+
+		pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+		mockUAA := setupMockServer(t,
+			msRoute("/oauth/token"),
+			msMethod("POST"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockUAAResponse)))
+		defer mockUAA.Close()
+
+		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
+		mockEndpointAdmin1 := setupMockUser(mockUserGUID+"1", false, []string{"stratos.endpointadmin"})
+		mockEndpointAdmin2 := setupMockUser(mockUserGUID+"2", false, []string{"stratos.endpointadmin"})
+
+		// setup everything to mock a connection to an admin endpoint
+		adminEndpointArgs := createEndpointRowArgs("CF Endpoint 1", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockAdmin.ConnectedUser.GUID, mockAdmin.ConnectedUser.Admin)
+		adminEndpointRows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(adminEndpointArgs...)
+
+		res := httptest.NewRecorder()
+		req := setupMockReq("POST", "", map[string]string{
+			"username":  "admin",
+			"password":  "changeme",
+			"cnsi_guid": fmt.Sprintf("%v", adminEndpointArgs[0]),
+		})
+		_, ctxConnectToAdmin := setupEchoContext(res, req)
+
+		// setup everything to mock a connection to an user endpoint
+		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin1.ConnectedUser.GUID, mockEndpointAdmin1.ConnectedUser.Admin)
+		userEndpoint1Rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint1Args...)
+
+		res = httptest.NewRecorder()
+		req = setupMockReq("POST", "", map[string]string{
+			"username":  "admin",
+			"password":  "changeme",
+			"cnsi_guid": fmt.Sprintf("%v", userEndpoint1Args[0]),
+		})
+		_, ctxConnectToUser1 := setupEchoContext(res, req)
+
+		// setup everything to mock a connection to a different user endpoint
+		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin2.ConnectedUser.GUID, mockEndpointAdmin2.ConnectedUser.Admin)
+		userEndpoint2Rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint2Args...)
+
+		res = httptest.NewRecorder()
+		req = setupMockReq("POST", "", map[string]string{
+			"username":  "admin",
+			"password":  "changeme",
+			"cnsi_guid": fmt.Sprintf("%v", userEndpoint2Args[0]),
+		})
+		_, ctxConnectToUser2 := setupEchoContext(res, req)
+
+		Convey("As admin", func() {
+
+			Convey("Connect to admin endpoint", func() {
+				if errSession := pp.setSessionValues(ctxConnectToAdmin, mockAdmin.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
+
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(adminEndpointArgs[0], mockAdmin.ConnectedUser.GUID).
+					WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
+				mock.ExpectExec(insertIntoTokens).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				err := pp.loginToCNSI(ctxConnectToAdmin)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to user endpoint", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser1, mockAdmin.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+					Return(mockAdmin.ConnectedUser, nil)
+
+				err := pp.loginToCNSI(ctxConnectToUser1)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("should fail", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - admins are not allowed to connect to user created endpoints"))
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+
+			})
+		})
+		Convey("As user", func() {
+			Convey("Connect to own endpoint", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser1, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
+					Return(mockEndpointAdmin1.ConnectedUser, nil)
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
+				mock.ExpectExec(insertIntoTokens).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				err := pp.loginToCNSI(ctxConnectToUser1)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to admin endpoint", func() {
+				if errSession := pp.setSessionValues(ctxConnectToAdmin, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
+
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
+				mock.ExpectExec(insertIntoTokens).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				err := pp.loginToCNSI(ctxConnectToAdmin)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to endpoint created by another user", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser2, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint2Rows)
+
+				mockStratosAuth.
+					EXPECT().
+					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
+					Return(mockEndpointAdmin1.ConnectedUser, nil)
+
+				err := pp.loginToCNSI(ctxConnectToUser2)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("should fail", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - non-admins are not allowed to connect to endpoints created by other non-admins"))
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+		})
+	})
 }
 
 func TestLogout(t *testing.T) {
