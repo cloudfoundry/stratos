@@ -1119,38 +1119,23 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
 
-	/* delete after tests pass
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
-		stableAdminAPIGroup.Use(p.endpointAdminMiddleware)
-		stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
-		// Use middleware in route directly, because documentation is faulty
-		// Apply middleware to group with .Use() when this issue is resolved:
-		// https://github.com/labstack/echo/issues/1519
-		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
-		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
-	} else {
-		stableAdminAPIGroup.Use(p.adminMiddleware)
-		stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
-		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
-		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
-	}
-	*/
-
-	stableEndpointAdminAPIGroup := stableAdminAPIGroup.Group("/endpoints")
+	// If path "/endpoints" is used, then stableAPIGroup.GET("/endpoints", p.listCNSIs) won't be executed anymore
+	// static html will be returned instead. That's why we use the path ""
+	stableEndpointAdminAPIGroup := stableAdminAPIGroup.Group("")
 
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		stableEndpointAdminAPIGroup.Use(p.endpointAdminMiddleware)
-		stableEndpointAdminAPIGroup.POST("", p.pluginRegisterRouter)
+		stableEndpointAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 		// Use middleware in route directly, because documentation is faulty
 		// Apply middleware to group with .Use() when this issue is resolved:
 		// https://github.com/labstack/echo/issues/1519
-		stableEndpointAdminAPIGroup.POST("/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
-		stableEndpointAdminAPIGroup.DELETE("/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
+		stableEndpointAdminAPIGroup.POST("/endpoints:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
+		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
 	} else {
 		stableEndpointAdminAPIGroup.Use(p.adminMiddleware)
-		stableEndpointAdminAPIGroup.POST("", p.pluginRegisterRouter)
-		stableEndpointAdminAPIGroup.POST("/:id", p.updateEndpoint)
-		stableEndpointAdminAPIGroup.DELETE("/:id", p.unregisterCluster)
+		stableEndpointAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
+		stableEndpointAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
+		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	}
 
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
