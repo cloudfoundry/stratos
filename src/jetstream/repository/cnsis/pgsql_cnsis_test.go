@@ -305,6 +305,255 @@ func TestPgSQLCNSIs(t *testing.T) {
 		})
 	})
 
+	Convey("Given a request for a list of CNSIs from a creator", t, func() {
+
+		var (
+			rowFieldsForCluster = []string{"guid", "name", "cnsi_type", "api_endpoint", "doppler_logging_endpoint", "account", "token_expiry", "skip_ssl_validation", "disconnected", "meta_data", "sub_type", "endpoint_metadata", "creator"}
+			expectedList        []*interfaces.CNSIRecord
+			mockAccount         = "asd-gjfg-bob"
+		)
+
+		// general setup
+		expectedList = make([]*interfaces.CNSIRecord, 0)
+
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer db.Close()
+		Convey("if no records exist in the database", func() {
+
+			rs := sqlmock.NewRows(rowFieldsForCluster)
+			mock.ExpectQuery(selectFromCNSIsWhere).
+				WillReturnRows(rs)
+
+				// Expectations
+			Convey("No CNSIs should be returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(len(results), ShouldEqual, 0)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("the list of returned CNSIs should be empty", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(results, ShouldResemble, expectedList)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be no error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(err, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+
+		Convey("if 2 records exist in the database", func() {
+
+			var (
+				mockClusterList sqlmock.Rows
+			)
+
+			// general setup
+			u, _ := url.Parse(mockAPIEndpoint)
+			r1 := &interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false, Creator: mockAccount}
+			r2 := &interfaces.CNSIRecord{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: "", SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false, Creator: mockAccount}
+			expectedList = append(expectedList, r1, r2)
+
+			mockClusterList = sqlmock.NewRows(rowFieldsForCNSI).
+				AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", mockAccount).
+				AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, false, "", "", mockAccount)
+			mock.ExpectQuery(selectFromCNSIsWhere).
+				WillReturnRows(mockClusterList)
+
+				// Expectations
+			Convey("2 CNSIs should be returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(len(results), ShouldEqual, 2)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("the list returned should match the expected list", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(results, ShouldResemble, expectedList)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be no error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(err, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+
+		Convey("If the database call fails for some reason", func() {
+
+			expectedErrorMessage := fmt.Sprintf("Unable to retrieve CNSI records: %s", unknownDBError)
+
+			mock.ExpectQuery(selectAnyFromCNSIs).
+				WillReturnError(errors.New(unknownDBError))
+
+			Convey("the returned value should be nil", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(results, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be a 'not found' error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByCreator(mockAccount, mockEncryptionKey)
+				So(err, ShouldResemble, errors.New(expectedErrorMessage))
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+	})
+
+	Convey("Given a request for a list of CNSIs with a given APIEndpoint string", t, func() {
+
+		var (
+			rowFieldsForCluster = []string{"guid", "name", "cnsi_type", "api_endpoint", "doppler_logging_endpoint", "account", "token_expiry", "skip_ssl_validation", "disconnected", "meta_data", "sub_type", "endpoint_metadata", "creator"}
+			expectedList        []*interfaces.CNSIRecord
+		)
+
+		// general setup
+		expectedList = make([]*interfaces.CNSIRecord, 0)
+
+		db, mock, err := sqlmock.New()
+		if err != nil {
+			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer db.Close()
+		Convey("if no records exist in the database", func() {
+
+			rs := sqlmock.NewRows(rowFieldsForCluster)
+			mock.ExpectQuery(selectFromCNSIsWhere).
+				WillReturnRows(rs)
+
+				// Expectations
+			Convey("No CNSIs should be returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(len(results), ShouldEqual, 0)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("the list of returned CNSIs should be empty", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(results, ShouldResemble, expectedList)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be no error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(err, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+
+		Convey("if 2 records exist in the database", func() {
+
+			var (
+				mockClusterList sqlmock.Rows
+			)
+
+			// general setup
+			u, _ := url.Parse(mockAPIEndpoint)
+			r1 := &interfaces.CNSIRecord{GUID: mockCFGUID, Name: "Some fancy CF Cluster", CNSIType: "cf", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: mockDopplerEndpoint, SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false, Creator: ""}
+			r2 := &interfaces.CNSIRecord{GUID: mockCEGUID, Name: "Some fancy HCE Cluster", CNSIType: "hce", APIEndpoint: u, AuthorizationEndpoint: mockAuthEndpoint, TokenEndpoint: mockAuthEndpoint, DopplerLoggingEndpoint: "", SkipSSLValidation: true, ClientId: mockClientId, ClientSecret: mockClientSecret, SSOAllowed: false, Creator: ""}
+			expectedList = append(expectedList, r1, r2)
+
+			mockClusterList = sqlmock.NewRows(rowFieldsForCNSI).
+				AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", "").
+				AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, false, "", "", "")
+			mock.ExpectQuery(selectFromCNSIsWhere).
+				WillReturnRows(mockClusterList)
+
+				// Expectations
+			Convey("2 CNSIs should be returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(len(results), ShouldEqual, 2)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("the list returned should match the expected list", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(results, ShouldResemble, expectedList)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be no error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(err, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+
+		Convey("If the database call fails for some reason", func() {
+
+			expectedErrorMessage := fmt.Sprintf("Unable to retrieve CNSI records: %s", unknownDBError)
+
+			mock.ExpectQuery(selectAnyFromCNSIs).
+				WillReturnError(errors.New(unknownDBError))
+
+			Convey("the returned value should be nil", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				results, _ := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(results, ShouldBeNil)
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+
+			Convey("there should be a 'not found' error returned", func() {
+				repository, _ := NewPostgresCNSIRepository(db)
+				_, err := repository.ListByAPIEndpoint(mockAPIEndpoint, mockEncryptionKey)
+				So(err, ShouldResemble, errors.New(expectedErrorMessage))
+
+				dberr := mock.ExpectationsWereMet()
+				So(dberr, ShouldBeNil)
+			})
+		})
+	})
+
 	Convey("Given a request to find a specific CNSI by GUID", t, func() {
 
 		db, mock, err := sqlmock.New()
