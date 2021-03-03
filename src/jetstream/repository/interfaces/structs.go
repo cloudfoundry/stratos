@@ -362,6 +362,7 @@ type PortalConfig struct {
 	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
 	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
 	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	TLSCertGenerate                    bool     `configName:"CONSOLE_PROXY_CERT_GENERATE"`
 	CFClient                           string   `configName:"CF_CLIENT"`
 	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
 	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
