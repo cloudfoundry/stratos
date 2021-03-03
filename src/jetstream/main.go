@@ -1119,9 +1119,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// API endpoints with Swagger documentation and accessible with an API key that require admin permissions
 	stableAdminAPIGroup := stableAPIGroup
 
+	/* delete after tests pass
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		stableAdminAPIGroup.Use(p.endpointAdminMiddleware)
 		stableAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
+		// Use middleware in route directly, because documentation is faulty
+		// Apply middleware to group with .Use() when this issue is resolved:
+		// https://github.com/labstack/echo/issues/1519
 		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
 		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
 	} else {
@@ -1130,35 +1134,26 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		stableAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint)
 		stableAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	}
+	*/
 
-	/* comment this block out to test if e2e tests fail because of the new group
 	stableEndpointAdminAPIGroup := stableAdminAPIGroup.Group("/endpoints")
 
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		stableEndpointAdminAPIGroup.Use(p.endpointAdminMiddleware)
-	} else {
-		stableEndpointAdminAPIGroup.Use(p.adminMiddleware)
-	}
-
-	// route endpoint creation requests to respecive plugins
-	stableEndpointAdminAPIGroup.POST("", p.pluginRegisterRouter)
-
-	// Use middleware in route directly, because documentation is faulty
-	// Apply middleware to group with .Use() when this issue is resolved:
-	// https://github.com/labstack/echo/issues/1519
-
-	// do additional checks if user endpoints are enabled
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
-		// Apply edits for the given endpoint
+		stableEndpointAdminAPIGroup.POST("", p.pluginRegisterRouter)
+		// Use middleware in route directly, because documentation is faulty
+		// Apply middleware to group with .Use() when this issue is resolved:
+		// https://github.com/labstack/echo/issues/1519
 		stableEndpointAdminAPIGroup.POST("/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
 		stableEndpointAdminAPIGroup.DELETE("/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
 	} else {
-		// Apply edits for the given endpoint
+		stableEndpointAdminAPIGroup.Use(p.adminMiddleware)
+		stableEndpointAdminAPIGroup.POST("", p.pluginRegisterRouter)
 		stableEndpointAdminAPIGroup.POST("/:id", p.updateEndpoint)
 		stableEndpointAdminAPIGroup.DELETE("/:id", p.unregisterCluster)
 	}
+
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-	*/
 
 	// Serve up static resources
 	if staticDirErr == nil {
