@@ -47,11 +47,17 @@ func (d *EndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey []byte)
 }
 
 func (d *EndpointStore) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
-	return d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+	local, _, err := ListKubernetes()
+	db, err := d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+	merged := mergeEndpoints(db, local)
+	return merged, err
 }
 
 func (d *EndpointStore) ListByCreator(userGUID string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
-	return d.store.ListByCreator(userGUID, encryptionKey)
+	local, _, err := ListKubernetes()
+	db, err := d.store.ListByCreator(userGUID, encryptionKey)
+	merged := mergeEndpoints(db, local)
+	return merged, err
 }
 
 func (d *EndpointStore) Delete(guid string) error {

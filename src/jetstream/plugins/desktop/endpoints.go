@@ -42,11 +42,17 @@ func (d *DesktopEndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey 
 }
 
 func (d *DesktopEndpointStore) ListByAPIEndpoint(endpoint string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
-	return d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+	local, err := ListCloudFoundry()
+	db, err := d.store.ListByAPIEndpoint(endpoint, encryptionKey)
+	merged := mergeEndpoints(db, local)
+	return merged, err
 }
 
 func (d *DesktopEndpointStore) ListByCreator(userGUID string, encryptionKey []byte) ([]*interfaces.CNSIRecord, error) {
-	return d.store.ListByCreator(userGUID, encryptionKey)
+	local, err := ListCloudFoundry()
+	db, err := d.store.ListByCreator(userGUID, encryptionKey)
+	merged := mergeEndpoints(db, local)
+	return merged, err
 }
 
 func (d *DesktopEndpointStore) Delete(guid string) error {
