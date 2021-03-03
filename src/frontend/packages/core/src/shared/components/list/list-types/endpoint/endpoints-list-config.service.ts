@@ -127,7 +127,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel>, O
     this.columns.push(favoriteCell);
     this.userEndpointsSubscription = sessionService.userEndpointsNotDisabled().subscribe(enabled => {
       if (enabled){
-        this.columns.splice(4, 0,  {
+        this.columns.splice(4, 0, {
           columnId: 'creator',
           headerCell: () => 'Creator',
           cellComponent: TableCellEndpointCreatorComponent,
