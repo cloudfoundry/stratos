@@ -1129,7 +1129,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		// Use middleware in route directly, because documentation is faulty
 		// Apply middleware to group with .Use() when this issue is resolved:
 		// https://github.com/labstack/echo/issues/1519
-		stableEndpointAdminAPIGroup.POST("/endpoints:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
+		stableEndpointAdminAPIGroup.POST("/endpoints/:id", p.updateEndpoint, p.endpointUpdateDeleteMiddleware)
 		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster, p.endpointUpdateDeleteMiddleware)
 	} else {
 		stableEndpointAdminAPIGroup.Use(p.adminMiddleware)
