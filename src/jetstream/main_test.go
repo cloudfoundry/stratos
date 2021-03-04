@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha512"
 	"crypto/x509"
 	"encoding/pem"
 	"testing"
@@ -189,8 +193,17 @@ func TestGenerateTLSCert(t *testing.T) {
 	}
 	privKey, err := x509.ParsePKCS1PrivateKey(privBlock.Bytes)
 	if err != nil {
-		t.Errorf("Could not parse private key: %w", err)
-	} else if !privKey.PublicKey.Equal(cert.PublicKey) {
+		t.Logf("Could not parse private key: %s", err)
+		t.FailNow()
+	}
+	data := []byte("sample data")
+	hash := sha512.Sum512(data)
+	sig, err := rsa.SignPKCS1v15(rand.Reader, privKey, crypto.SHA512, hash[:])
+	if err != nil {
+		t.Logf("Could not sign data: %s", err)
+		t.FailNow()
+	}
+	if err = cert.CheckSignature(x509.SHA512WithRSA, data, sig); err != nil {
 		t.Errorf("Certifcate public key does not match private key")
 	}
 }
