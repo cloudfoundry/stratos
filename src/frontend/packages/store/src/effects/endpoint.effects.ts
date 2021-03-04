@@ -253,9 +253,8 @@ export class EndpointsEffect {
     }));
 
   private processUpdateError(e: HttpErrorResponse): string {
-    const err = e.error ? e.error.error : {};
-    let message = 'There was a problem updating the endpoint' +
-      `${err.error ? ' (' + err.error + ').' : ''}`;
+    let message = 'There was a problem updating the endpoint. ' +
+      httpErrorResponseToSafeString(e);
     if (e.status === 403) {
       message = `${message}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
     }
@@ -263,9 +262,8 @@ export class EndpointsEffect {
   }
 
   private processRegisterError(e: HttpErrorResponse): string {
-    let message = 'There was a problem creating the endpoint. ' +
-      `Please ensure the endpoint address is correct and try again` +
-      `${e.error.error ? ' (' + e.error.error + ').' : ''}`;
+    let message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
+      httpErrorResponseToSafeString(e);
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted`;
     }
