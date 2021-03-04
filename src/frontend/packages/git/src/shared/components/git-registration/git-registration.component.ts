@@ -1,14 +1,17 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import {
+  CreateEndpointHelperComponent,
+} from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
-import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
@@ -16,7 +19,6 @@ import { ActionState } from '../../../../../store/src/reducers/api-request-reduc
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
-import { CreateEndpointHelperComponent } from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper/create-endpoint-helper.component';
 
 interface EndpointSubTypes {
   [subType: string]: GithubTypes;

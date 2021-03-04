@@ -31,7 +31,8 @@ module.exports = {
       {
         'Cloud Foundry': [
           'endpoints/cf/cf',
-          'endpoints/cf/invite-user-guide'
+          'endpoints/cf/invite-user-guide',
+          'endpoints/cf/user-endpoints'
         ]
       },
       'endpoints/k8s',

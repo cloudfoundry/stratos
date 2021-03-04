@@ -1,7 +1,6 @@
 import { AfterContentInit, Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
@@ -12,13 +11,14 @@ import {
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SessionService } from '../../../../shared/services/session.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
-import { SessionService } from '../../../../shared/services/session.service';
-import { CreateEndpointHelperComponent } from '../create-endpoint-helper/create-endpoint-helper.component';
+import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 
 
 @Component({

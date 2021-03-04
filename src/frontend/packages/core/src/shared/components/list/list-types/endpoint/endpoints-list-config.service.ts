@@ -1,7 +1,7 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { debounceTime, filter, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, of } from 'rxjs';
+import { debounceTime, filter, first, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
@@ -29,7 +29,6 @@ import { EndpointCardComponent } from './endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './endpoint-list.helpers';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address/table-cell-endpoint-address.component';
-import { TableCellEndpointCreatorComponent } from './table-cell-endpoint-creator/table-cell-endpoint-creator.component';
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -37,7 +36,7 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 
 
 @Injectable()
-export class EndpointsListConfigService implements IListConfig<EndpointModel>, OnDestroy {
+export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   cardComponent = EndpointCardComponent;
 
   private singleActions: IListAction<EndpointModel>[];
@@ -109,7 +108,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel>, O
     filter: 'Filter Endpoints'
   };
   enableTextFilter = true;
-  userEndpointsSubscription: Subscription;
 
   constructor(
     private store: Store<AppState>,
@@ -125,12 +123,14 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel>, O
       (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
-    this.userEndpointsSubscription = sessionService.userEndpointsNotDisabled().subscribe(enabled => {
-      if (enabled){
+    sessionService.userEndpointsNotDisabled().pipe(first()).subscribe(enabled => {
+      if (enabled) {
         this.columns.splice(4, 0, {
           columnId: 'creator',
           headerCell: () => 'Creator',
-          cellComponent: TableCellEndpointCreatorComponent,
+          cellDefinition: {
+            valuePath: 'creator.name'
+          },
           sort: {
             type: 'sort',
             orderKey: 'creator',
@@ -221,7 +221,4 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel>, O
     }
   }
 
-  ngOnDestroy() {
-    this.userEndpointsSubscription.unsubscribe();
-  }
 }

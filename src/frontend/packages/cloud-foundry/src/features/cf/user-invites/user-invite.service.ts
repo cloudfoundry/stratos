@@ -143,12 +143,11 @@ export class UserInviteService {
       map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
 
-    this.canConfigure$ = combineLatest([
+    this.canConfigure$ = combineLatest(
       waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
-      this.store.select('auth'),
-      cfEndpointService.endpoint$
-    ]).pipe(
-      map(([cf, auth, endpoint]) =>
+      this.store.select('auth')
+    ).pipe(
+      map(([cf, auth]) =>
         cf.global.isAdmin &&
         auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );

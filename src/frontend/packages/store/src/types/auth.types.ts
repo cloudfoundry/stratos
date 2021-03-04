@@ -28,8 +28,17 @@ export enum APIKeysEnabled {
   ALL_USERS = 'all_users'
 }
 export enum UserEndpointsEnabled {
+  /**
+   * No users can see or create their own endpoints. Admins cannot see any previously created user endpoints.
+   */
   DISABLED = 'disabled',
+  /**
+   * No users can see or create their own endpoints. Admins can manage previously created user endpoints
+   */
   ADMIN_ONLY = 'admin_only',
+  /**
+   * Endpoint Admins can see and create their own endpoints. Admins can manage all user endpoints
+   */
   ENABLED = 'enabled'
 }
 export interface SessionDataConfig {

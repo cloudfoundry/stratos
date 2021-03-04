@@ -74,7 +74,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 		cnsiClientSecret = p.GetConfig().CFClientSecret
 	}
 
-	uaaUserID, err := p.GetSessionStringValue(c, "user_id")
+	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusInternalServerError,
@@ -82,7 +82,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 			"Failed to get session user: %v", err)
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, uaaUserID, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, userID, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -171,6 +171,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 		if isAdmin && overwriteEndpoints {
 			for _, duplicate := range duplicateEndpoints {
+				log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('$+v') will be removed", apiEndpoint, duplicate.GUID)
 				err := p.doUnregisterCluster(duplicate.GUID)
 				if err != nil {
 					return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
@@ -187,6 +188,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	h := sha1.New()
 	// see why its generated this way in Issue #4753 / #3031
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
+		// Make the new guid unique per api url AND user id
 		h.Write([]byte(apiEndpointURL.String() + userId))
 	} else {
 		h.Write([]byte(apiEndpointURL.String()))
@@ -321,7 +323,7 @@ func (p *portalProxy) ListEndpoints() ([]*interfaces.CNSIRecord, error) {
 	return cnsiList, nil
 }
 
-//return a CNSI list with endpoints created by the current endpointadmin and all admins
+// ListAdminEndpoints - return a CNSI list with endpoints created by the current user and all admins
 func (p *portalProxy) ListAdminEndpoints(userID string) ([]*interfaces.CNSIRecord, error) {
 	log.Debug("ListAdminEndpoints")
 	// Initialise cnsiList to ensure empty struct (marshals to null) is not returned

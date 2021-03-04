@@ -1,21 +1,16 @@
-import { Component } from '@angular/core';
-import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { SessionService } from '../../../../shared/services/session.service';
+import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
+import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { SessionService } from '../../../shared/services/session.service';
 
 type EndpointObservable = Observable<{
   names: string[],
   urls: string[],
 }>;
 
-@Component({
-  selector: 'app-create-endpoint-helper',
-  template: ''
-})
 export class CreateEndpointHelperComponent {
 
   overwritePermission: Observable<StratosCurrentUserPermissions[]>;

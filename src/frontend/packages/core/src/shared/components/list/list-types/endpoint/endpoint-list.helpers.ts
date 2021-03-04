@@ -1,4 +1,3 @@
-import { isNgTemplate } from '@angular/compiler';
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -16,13 +15,13 @@ import { StratosCurrentUserPermissions } from '../../../../../core/permissions/s
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SessionService } from '../../../../../shared/services/session.service';
 import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { createMetaCardMenuItemSeparator } from '../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { IListAction } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { SessionService } from '../../../../../shared/services/session.service';
 
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;
@@ -111,9 +110,9 @@ export class EndpointListHelper {
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
         createVisible: (row$: Observable<EndpointModel>) => combineLatest([
-            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
-            row$
-          ]).pipe(
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+          row$
+        ]).pipe(
           map(([isAdmin, row]) => {
             const isConnected = row.connectionStatus === 'connected';
             return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
@@ -142,9 +141,11 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, row]) => {
-              if (userEndpointsEnabled && !row.creator.admin && isAdmin){
+              if (userEndpointsEnabled && !row.creator.admin && isAdmin) {
+                // Disable connect for admins if the endpoint was not created by them. Otherwise this could result in an admin connecting to
+                // multiple user endpoints that all have the same url.
                 return false;
-              }else{
+              } else {
                 const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
                 const ep = endpoint ? endpoint.definition : { unConnectable: false };
                 return !ep.unConnectable && row.connectionStatus === 'disconnected';
@@ -178,9 +179,9 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
-              if (!userEndpointsEnabled || row.creator.admin){
+              if (!userEndpointsEnabled || row.creator.admin) {
                 return isAdmin;
-              }else{
+              } else {
                 return isEndpointAdmin || isAdmin;
               }
             })
@@ -202,9 +203,9 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
-              if (!userEndpointsEnabled || row.creator.admin){
+              if (!userEndpointsEnabled || row.creator.admin) {
                 return isAdmin;
-              }else{
+              } else {
                 return isEndpointAdmin || isAdmin;
               }
             })
