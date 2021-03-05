@@ -1123,7 +1123,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// static html will be returned instead. That's why we use the path ""
 	stableEndpointAdminAPIGroup := stableAdminAPIGroup.Group("")
 
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+	if p.GetConfig().UserEndpointsEnabled == config.UserEndpointsConfigEnum.Enabled {
 		stableEndpointAdminAPIGroup.Use(p.endpointAdminMiddleware)
 		stableEndpointAdminAPIGroup.POST("/endpoints", p.pluginRegisterRouter)
 		// Use middleware in route directly, because documentation is faulty
