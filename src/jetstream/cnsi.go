@@ -171,7 +171,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 		if isAdmin && overwriteEndpoints {
 			for _, duplicate := range duplicateEndpoints {
-				log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('$+v') will be removed", apiEndpoint, duplicate.GUID)
+				log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('%+v') will be removed", apiEndpoint, duplicate.GUID)
 				err := p.doUnregisterCluster(duplicate.GUID)
 				if err != nil {
 					return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
