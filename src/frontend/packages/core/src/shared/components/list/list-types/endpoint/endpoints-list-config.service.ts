@@ -15,6 +15,8 @@ import { EndpointModel } from '../../../../../../../store/src/types/endpoint.typ
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { SessionService } from '../../../../services/session.service';
+import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
@@ -116,6 +118,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
     userFavoriteManager: UserFavoriteManager,
+    currentUserPermissionsService: CurrentUserPermissionsService,
     sessionService: SessionService
   ) {
     this.singleActions = endpointListHelper.endpointActions();
@@ -123,7 +126,15 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
-    sessionService.userEndpointsNotDisabled().pipe(first()).subscribe(enabled => {
+    combineLatest([
+      sessionService.userEndpointsEnabled(),
+      sessionService.userEndpointsNotDisabled(),
+      currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+    ]).pipe(
+      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin]) => {
+        return userEndpointsEnabled || (userEndpointsNotDisabled && isAdmin);
+      })
+    ).subscribe(enabled => {
       if (enabled) {
         this.columns.splice(4, 0, {
           columnId: 'creator',

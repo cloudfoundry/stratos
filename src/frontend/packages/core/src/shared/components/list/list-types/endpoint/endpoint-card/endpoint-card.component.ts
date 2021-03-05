@@ -9,7 +9,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { AppState } from '../../../../../../../../store/src/app-state';
@@ -33,6 +33,8 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
 import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { SessionService } from '../../../../../services/session.service';
+import { CurrentUserPermissionsService } from '../../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -55,7 +57,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
   public connectionStatus: string;
-  public enableUserEndpoints$: Observable<boolean>;
+  public viewCreator$: Observable<boolean>;
 
   private componentRef: ComponentRef<EndpointListDetailsComponent>;
 
@@ -123,6 +125,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private endpointListHelper: EndpointListHelper,
     private componentFactoryResolver: ComponentFactoryResolver,
     private userFavoriteManager: UserFavoriteManager,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
     private sessionService: SessionService,
   ) {
     super();
@@ -133,7 +136,15 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row);
     const e = this.endpointCatalogEntity.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
-    this.enableUserEndpoints$ = this.sessionService.userEndpointsNotDisabled();
+    this.viewCreator$ = combineLatest([
+      this.sessionService.userEndpointsEnabled(),
+      this.sessionService.userEndpointsNotDisabled(),
+      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+    ]).pipe(
+      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin]) => {
+        return userEndpointsEnabled || (userEndpointsNotDisabled && isAdmin);
+      })
+    );
   }
 
   ngOnDestroy(): void {
