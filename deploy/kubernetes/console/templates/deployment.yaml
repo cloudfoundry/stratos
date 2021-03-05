@@ -288,6 +288,8 @@ spec:
           value: {{ default "false" .Values.console.techPreview | quote }}
         - name: API_KEYS_ENABLED
           value: {{ default "admin_only" .Values.console.apiKeysEnabled | quote }}
+        - name: USER_ENDPOINTS_ENABLED
+          value: {{ default "disabled" .Values.console.userEndpointsEnabled | quote }}
         - name: HELM_CACHE_FOLDER
           value: /helm-cache
         {{- if .Values.console.ui }}

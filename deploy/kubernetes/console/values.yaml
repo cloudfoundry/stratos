@@ -70,6 +70,9 @@ console:
   # Enable/disable API key-based access to Stratos API
   apiKeysEnabled: admin_only
 
+  # Enable/disable user endpoints
+  userEndpointsEnabled: disabled
+
   ui:
     # Override the default maximum number of entities that a configured list can fetch. When a list meets this amount additional pages are not fetched 
     listMaxSize:

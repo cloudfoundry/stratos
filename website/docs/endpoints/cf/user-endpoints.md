@@ -11,7 +11,7 @@ Stratos provides a way for users to create endpoints without the need to be an a
 
 In order to enable User Endpoints support in Stratos:
 
-1. The environment variable `USER_ENDPOINTS_ENABLED` must be set
+1. The environment variable `USER_ENDPOINTS_ENABLED` or helm chart value `console.userEndpointsEnabled` must be set
 2. The UAA client used by Stratos needs an additional scope `stratos.endpointadmin`
 3. Users need to have the `stratos.endpointadmin` group attached to them
 
@@ -19,7 +19,7 @@ Once all steps have been completed, user within the `stratos.endpointadmin` grou
 
 ## Environment variable
 
-`USER_ENDPOINTS_ENABLED` can be set to three different states:
+`USER_ENDPOINTS_ENABLED` or helm chart value `console.userEndpointsEnabled` can be set to three different states:
 
 1. `disabled` (default) will disable this feature. Neither admins nor users will see user endpoints.
 2. `admin_only` will hide user endpoints from users. Admins can still see all endpoints created by users.
