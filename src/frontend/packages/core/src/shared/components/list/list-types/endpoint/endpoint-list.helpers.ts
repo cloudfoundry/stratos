@@ -172,6 +172,8 @@ export class EndpointListHelper {
         label: 'Unregister',
         description: 'Remove the endpoint',
         createVisible: (row$: Observable<EndpointModel>) => {
+          // I think if we end up using these often there should be specific create,
+          // edit, delete style permissions in the stratos permissions checker
           return combineLatest([
             this.sessionService.userEndpointsNotDisabled(),
             this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),

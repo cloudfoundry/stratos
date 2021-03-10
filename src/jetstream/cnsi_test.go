@@ -570,12 +570,6 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 			})
 		})
-
-		Convey("with UserEndpointsEnabled=disabled", func() {
-			Convey("register existing user endpoint", func() {
-				// todo user endpoints should automatically overwritten?
-			})
-		})
 	})
 }
 
