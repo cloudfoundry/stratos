@@ -301,7 +301,35 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 		}
 
 		if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
-			return p.ListAdminEndpoints(userID.(string))
+			// remove existing system endpoint if user endpoint already exists and sessionuser not admin
+			unfilteredList, err := p.ListAdminEndpoints(userID.(string))
+			if err != nil {
+				return unfilteredList, err
+			}
+
+			filteredList := []*interfaces.CNSIRecord{}
+
+			for _, endpoint := range unfilteredList {
+				duplicateSystemEndpoint := false
+				duplicateEndpointIndex := -1
+
+				for i := 0; i < len(filteredList); i++ {
+					if filteredList[i].APIEndpoint.String() == endpoint.APIEndpoint.String() {
+						duplicateSystemEndpoint = len(filteredList[i].Creator) != 0
+						duplicateEndpointIndex = i
+					}
+				}
+
+				if duplicateEndpointIndex != -1 && !u.Admin {
+					if duplicateSystemEndpoint {
+						filteredList[duplicateEndpointIndex] = endpoint
+					}
+				} else {
+					filteredList = append(filteredList, endpoint)
+				}
+			}
+
+			return filteredList, err
 		}
 	}
 	return p.ListAdminEndpoints("")
