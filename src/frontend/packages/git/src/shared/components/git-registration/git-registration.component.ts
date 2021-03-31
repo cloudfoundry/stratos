@@ -12,6 +12,7 @@ import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
@@ -76,8 +77,9 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
     public sessionService: SessionService,
+    public currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    super(sessionService);
+    super(sessionService, currentUserPermissionsService);
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';

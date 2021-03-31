@@ -149,18 +149,18 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		}
 		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
-			// cant create same admin endpoint
-			if len(duplicate.Creator) == 0 {
+			// cant create same system endpoint
+			if len(duplicate.Creator) == 0 && isAdmin {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
-					"Can not register same admin endpoint multiple times",
-					"Can not register same admin endpoint multiple times",
+					"Can not register same system endpoint multiple times",
+					"Can not register same system endpoint multiple times",
 				)
 			}
 
 			// cant create same user endpoint
 			// can create same user endpoint if overwriteEndpoint true
-			if duplicate.Creator == userId || isAdmin && !overwriteEndpoints {
+			if duplicate.Creator == userId {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same endpoint multiple times",
@@ -169,6 +169,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			}
 		}
 
+		/*
 		if isAdmin && overwriteEndpoints {
 			for _, duplicate := range duplicateEndpoints {
 				log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('%+v') will be removed", apiEndpoint, duplicate.GUID)
@@ -182,6 +183,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 				}
 			}
 		}
+		*/
 
 	}
 

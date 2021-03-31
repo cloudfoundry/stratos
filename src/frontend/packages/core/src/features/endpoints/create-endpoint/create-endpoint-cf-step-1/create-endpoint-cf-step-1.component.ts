@@ -4,17 +4,16 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
 } from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
+import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
@@ -63,9 +62,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
-    sessionService: SessionService
+    sessionService: SessionService,
+    currentUserPermissionsService: CurrentUserPermissionsService
   ) {
-    super(sessionService);
+    super(sessionService, currentUserPermissionsService);
 
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
@@ -77,24 +77,6 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       clientSecretField: ['', []],
       overwriteEndpointsField: [false, []],
     });
-
-    const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
-    this.existingAdminEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.filter(ep => ep.creator.admin).map(ep => ep.name),
-        urls: endpoints.filter(ep => ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
-      }))
-    );
-    this.existingEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.map(ep => ep.name),
-        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-      }))
-    );
-
-    this.overwritePermission = this.sessionService.userEndpointsNotDisabled().pipe(
-      map(enabled => enabled ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT] : [])
-    );
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
