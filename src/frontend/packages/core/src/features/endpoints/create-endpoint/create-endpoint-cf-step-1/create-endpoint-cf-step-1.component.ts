@@ -75,7 +75,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
-      overwriteEndpointsField: [false, []],
+      createUserEndpointField: [false, []],
     });
 
     const epType = getIdFromRoute(activatedRoute, 'type');
@@ -98,7 +98,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
-      this.registerForm.value.overwriteEndpointsField,
+      this.registerForm.value.createUserEndpointField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -149,7 +149,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  toggleOverwriteEndpoints() {
+  toggleCreateUserEndpoint() {
     // wait a tick for validators to adjust to new data in the directive
     setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();

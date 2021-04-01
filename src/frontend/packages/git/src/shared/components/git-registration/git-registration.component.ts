@@ -159,7 +159,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
       skipSllField: [false, []],
-      overwriteEndpointsField: [false, []],
+      createUserEndpointField: [false, []],
     });
     this.updateType();
 
@@ -201,10 +201,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSllField.value :
       false;
-    const overwriteEndpoints = this.registerForm.controls.overwriteEndpointsField.value;
+    const createUserEndpoint = this.registerForm.controls.createUserEndpointField.value;
 
     return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE,
-      this.epSubType, name, url, skipSSL, '', '', false, overwriteEndpoints)
+      this.epSubType, name, url, skipSSL, '', '', false, createUserEndpoint)
       .pipe(
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -240,7 +240,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     return ready + '/' + defn.urlSuffix;
   }
 
-  toggleOverwriteEndpoints() {
+  toggleCreateUserEndpoint() {
     // wait a tick for validators to adjust to new data in the directive
     setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();

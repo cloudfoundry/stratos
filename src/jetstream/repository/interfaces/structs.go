@@ -433,7 +433,7 @@ type RegisterEndpointParams struct {
 	CNSIClientID       string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
 	CNSIClientSecret   string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
 	SubType            string `json:"sub_type" form:"sub_type" query:"sub_type"`
-	OverwriteEndpoints string `json:"overwrite_endpoints" form:"overwrite_endpoints" query:"overwrite_endpoints"`
+	CreateUserEndpoint string `json:"create_user_endpoint" form:"create_user_endpoint" query:"create_user_endpoint"`
 }
 
 type UpdateEndpointParams struct {

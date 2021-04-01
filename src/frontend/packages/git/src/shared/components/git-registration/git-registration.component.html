@@ -31,9 +31,9 @@
             <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
             <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
           </mat-form-field>
-          <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="overwriteEndpoints" 
-            formControlName="overwriteEndpointsField" (change)="toggleOverwriteEndpoints()"
-            [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Automatically overwrite user endpoints
+          <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="createUserEndpoint" 
+            formControlName="createUserEndpointField" (change)="toggleCreateUserEndpoint()"
+            [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a user endpoint (only visible to you and other admins)
           </mat-checkbox>
           <mat-checkbox matInput name="skipSll" formControlName="skipSllField"
             [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Skip SSL validation for the

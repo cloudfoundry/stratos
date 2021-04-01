@@ -63,10 +63,10 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	cnsiClientSecret := params.CNSIClientSecret
 	subType := params.SubType
 
-	overwriteEndpoints, err := strconv.ParseBool(params.OverwriteEndpoints)
+	createUserEndpoint, err := strconv.ParseBool(params.CreateUserEndpoint)
 	if err != nil {
 		// default to false
-		overwriteEndpoints = false
+		createUserEndpoint = false
 	}
 
 	if cnsiClientId == "" {
@@ -82,7 +82,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 			"Failed to get session user: %v", err)
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, userID, ssoAllowed, subType, overwriteEndpoints, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, userID, ssoAllowed, subType, createUserEndpoint, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, overwriteEndpoints bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createUserEndpoint bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 	log.Debug("DoRegisterEndpoint")
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
@@ -170,19 +170,19 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		}
 
 		/*
-		if isAdmin && overwriteEndpoints {
-			for _, duplicate := range duplicateEndpoints {
-				log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('%+v') will be removed", apiEndpoint, duplicate.GUID)
-				err := p.doUnregisterCluster(duplicate.GUID)
-				if err != nil {
-					return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-						http.StatusInternalServerError,
-						"Failed to unregister cluster",
-						"Failed to unregister cluster: %v",
-						err)
+			if isAdmin && overwriteEndpoints {
+				for _, duplicate := range duplicateEndpoints {
+					log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('%+v') will be removed", apiEndpoint, duplicate.GUID)
+					err := p.doUnregisterCluster(duplicate.GUID)
+					if err != nil {
+						return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+							http.StatusInternalServerError,
+							"Failed to unregister cluster",
+							"Failed to unregister cluster: %v",
+							err)
+					}
 				}
 			}
-		}
 		*/
 
 	}
@@ -315,7 +315,7 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 
 				for i := 0; i < len(filteredList); i++ {
 					if filteredList[i].APIEndpoint.String() == endpoint.APIEndpoint.String() {
-						duplicateSystemEndpoint = len(filteredList[i].Creator) != 0
+						duplicateSystemEndpoint = len(filteredList[i].Creator) == 0
 						duplicateEndpointIndex = i
 					}
 				}

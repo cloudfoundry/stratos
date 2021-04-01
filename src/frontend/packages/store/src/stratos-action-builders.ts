@@ -60,7 +60,7 @@ export interface EndpointActionBuilder extends OrchestratedActionBuilders {
     clientID?: string,
     clientSecret?: string,
     ssoAllowed?: boolean,
-    overwriteEndpointsField?: boolean,
+    createUserEndpointField?: boolean,
   ) => RegisterEndpoint;
   update: (
     guid: string,
@@ -105,7 +105,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     clientID?: string,
     clientSecret?: string,
     ssoAllowed?: boolean,
-    overwriteEndpoints?: boolean,
+    createUserEndpoint?: boolean,
   ) => new RegisterEndpoint(
     endpointType,
     endpointSubType,
@@ -115,7 +115,7 @@ export const endpointActionBuilder: EndpointActionBuilder = {
     clientID,
     clientSecret,
     ssoAllowed,
-    overwriteEndpoints,
+    createUserEndpoint,
   ),
   update: (
     guid: string,
