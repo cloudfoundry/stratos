@@ -150,7 +150,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
 			// cant create same system endpoint
-			if len(duplicate.Creator) == 0 && isAdmin {
+			if len(duplicate.Creator) == 0 && isAdmin && !createUserEndpoint {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same system endpoint multiple times",
@@ -159,7 +159,6 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			}
 
 			// cant create same user endpoint
-			// can create same user endpoint if overwriteEndpoint true
 			if duplicate.Creator == userId {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
@@ -168,28 +167,11 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 				)
 			}
 		}
-
-		/*
-			if isAdmin && overwriteEndpoints {
-				for _, duplicate := range duplicateEndpoints {
-					log.Infof("An administrator is registering an endpoint with the same API URL ('%+v') as an endpoint administrator's. The existing duplicate endpoint ('%+v') will be removed", apiEndpoint, duplicate.GUID)
-					err := p.doUnregisterCluster(duplicate.GUID)
-					if err != nil {
-						return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
-							http.StatusInternalServerError,
-							"Failed to unregister cluster",
-							"Failed to unregister cluster: %v",
-							err)
-					}
-				}
-			}
-		*/
-
 	}
 
 	h := sha1.New()
 	// see why its generated this way in Issue #4753 / #3031
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || createUserEndpoint) {
 		// Make the new guid unique per api url AND user id
 		h.Write([]byte(apiEndpointURL.String() + userId))
 	} else {
@@ -222,7 +204,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SubType = subType
 
 	// admins currently can't create user endpoints
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && !isAdmin {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || createUserEndpoint) {
 		newCNSI.Creator = userId
 	}
 

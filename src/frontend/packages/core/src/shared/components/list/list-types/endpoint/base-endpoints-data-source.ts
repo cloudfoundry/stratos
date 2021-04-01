@@ -125,7 +125,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         sso_allowed: false,
         creator: {
           name: '',
-          admin: false
+          admin: false,
+          system: false
         }
       }),
       paginationKey: action.paginationKey,

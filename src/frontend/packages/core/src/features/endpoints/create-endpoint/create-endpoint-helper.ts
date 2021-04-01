@@ -16,25 +16,28 @@ export class CreateEndpointHelperComponent {
 
   userEndpointsAndIsAdmin: Observable<boolean>;
   customEndpoints: EndpointObservable;
+  existingSystemEndpoints: EndpointObservable;
+  existingPersonalEndpoints: EndpointObservable;
+  existingEndpoints: EndpointObservable;
 
   constructor(
     public sessionService: SessionService,
     public currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
-    const existingAdminEndpoints = currentPage$.pipe(
+    this.existingSystemEndpoints = currentPage$.pipe(
       map(endpoints => ({
-        names: endpoints.filter(ep => ep.creator.admin).map(ep => ep.name),
-        urls: endpoints.filter(ep => ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
+        names: endpoints.filter(ep => ep.creator.system).map(ep => ep.name),
+        urls: endpoints.filter(ep => ep.creator.system).map(ep => getFullEndpointApiUrl(ep)),
       }))
     );
-    const existingUserEndpoints = currentPage$.pipe(
+    this.existingPersonalEndpoints = currentPage$.pipe(
       map(endpoints => ({
-        names: endpoints.filter(ep => !ep.creator.admin).map(ep => ep.name),
-        urls: endpoints.filter(ep => !ep.creator.admin).map(ep => getFullEndpointApiUrl(ep)),
+        names: endpoints.filter(ep => !ep.creator.system).map(ep => ep.name),
+        urls: endpoints.filter(ep => !ep.creator.system).map(ep => getFullEndpointApiUrl(ep)),
       }))
     );
-    const existingEndpoints = currentPage$.pipe(
+    this.existingEndpoints = currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.map(ep => ep.name),
         urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
@@ -54,16 +57,16 @@ export class CreateEndpointHelperComponent {
     this.customEndpoints = combineLatest([
       userEndpointsNotDisabled,
       isAdmin,
-      existingEndpoints,
-      existingAdminEndpoints,
-      existingUserEndpoints
+      this.existingEndpoints,
+      this.existingSystemEndpoints,
+      this.existingPersonalEndpoints
     ]).pipe(
-      map(([userEndpointsEnabled, admin, endpoints, adminEndpoints, userEndpoints]) => {
+      map(([userEndpointsEnabled, admin, endpoints, systemEndpoints, personalEndpoints]) => {
         if (userEndpointsEnabled){
           if (admin){
-            return adminEndpoints;
+            return systemEndpoints;
           }else{
-            return userEndpoints;
+            return personalEndpoints;
           }
         }
         return endpoints;

@@ -68,6 +68,7 @@ export interface EndpointUser {
 export interface CreatorInfo {
   name: string;
   admin: boolean;
+  system: boolean;
 }
 
 export interface EndpointState {

@@ -102,18 +102,22 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 
 		// set the creator preemptively as admin, if no id is found
 		endpoint.Creator = &interfaces.CreatorInfo{
-			Name:  "admin",
-			Admin: true,
+			Name:   "system",
+			Admin:  false,
+			System: true,
 		}
 
 		// assume it's a user when len != 0
 		if len(cnsi.Creator) != 0 {
-			endpoint.Creator.Admin = false
+			endpoint.Creator.System = false
 			u, err := p.StratosAuthService.GetUser(cnsi.Creator)
+			// add an anonymous user if no user is found
 			if err != nil {
 				endpoint.Creator.Name = "user"
+				endpoint.Creator.Admin = false
 			} else {
 				endpoint.Creator.Name = u.Name
+				endpoint.Creator.Admin = u.Admin
 			}
 		}
 

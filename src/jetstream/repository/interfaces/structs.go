@@ -195,8 +195,9 @@ type ConnectedUser struct {
 
 // CreatorInfo - additional information about the user who created an endpoint
 type CreatorInfo struct {
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
+	Name   string `json:"name"`
+	Admin  bool   `json:"admin"`
+	System bool   `json:"system"`
 }
 
 type JWTUserTokenInfo struct {
