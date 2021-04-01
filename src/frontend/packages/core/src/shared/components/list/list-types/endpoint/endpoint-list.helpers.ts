@@ -16,6 +16,7 @@ import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { SessionService } from '../../../../../shared/services/session.service';
+import { UserProfileService } from '../../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -68,6 +69,7 @@ export class EndpointListHelper {
     private confirmDialog: ConfirmationDialogService,
     private snackBarService: SnackBarService,
     private sessionService: SessionService,
+    private userProfileService: UserProfileService
   ) { }
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
@@ -137,11 +139,11 @@ export class EndpointListHelper {
         createVisible: (row$: Observable<EndpointModel>) => {
           return combineLatest([
             this.sessionService.userEndpointsNotDisabled(),
-            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+            this.userProfileService.userProfile$,
             row$
           ]).pipe(
-            map(([userEndpointsEnabled, isAdmin, row]) => {
-              if (userEndpointsEnabled && !row.creator.admin && isAdmin) {
+            map(([userEndpointsEnabled, profile, row]) => {
+              if (userEndpointsEnabled && !row.creator.system && profile.userName !== row.creator.name) {
                 // Disable connect for admins if the endpoint was not created by them. Otherwise this could result in an admin connecting to
                 // multiple user endpoints that all have the same url.
                 return false;

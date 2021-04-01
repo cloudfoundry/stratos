@@ -151,18 +151,30 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 	}
 
 	// admins are note allowed to connect to user created endpoints
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && len(cnsiRecord.Creator) != 0 {
-		user, err := p.StratosAuthService.GetUser(userID)
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+
+		// search for system or personal endpoints and check if they are connected
+		// automatically disconnect other endpoint if already connected to same url
+		cnsiList, err := p.listCNSIByAPIEndpoint(cnsiRecord.APIEndpoint.String())
 		if err != nil {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - could not check user")
+			return nil, echo.NewHTTPError(
+				http.StatusBadRequest,
+				"Failed to retrieve list of CNSIs",
+				"Failed to retrieve list of CNSIs: %v", err,
+			)
 		}
 
-		if user.Admin {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - admins are not allowed to connect to user created endpoints")
+		for _, cnsi := range cnsiList {
+			if cnsi.Creator == userID || len(cnsi.Creator) == 0 {
+				_, ok := p.GetCNSITokenRecord(cnsi.GUID, userID)
+				if ok {
+					p.ClearCNSIToken(*cnsi, userID)
+				}
+			}
 		}
 
-		if cnsiRecord.Creator != userID {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - non-admins are not allowed to connect to endpoints created by other non-admins")
+		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
 		}
 	}
 
