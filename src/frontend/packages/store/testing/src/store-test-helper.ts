@@ -49,7 +49,8 @@ export const testSCFEndpoint: EndpointModel = {
   metricsAvailable: false,
   creator: {
     name: 'admin',
-    admin: true
+    admin: true,
+    system: false
   }
 };
 
@@ -305,7 +306,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
           },
           creator: {
             name: 'admin',
-            admin: true
+            admin: true,
+            system: false
           },
           connectionStatus: 'connected',
           system_shared_token: false,

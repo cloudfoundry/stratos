@@ -52,7 +52,8 @@ describe('CurrentUserPermissionsService', () => {
         },
         creator: {
           name: 'admin',
-          admin: true
+          admin: true,
+          system: false
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
@@ -89,7 +90,8 @@ describe('CurrentUserPermissionsService', () => {
         },
         creator: {
           name: 'admin',
-          admin: true
+          admin: true,
+          system: false
         },
         metricsAvailable: false,
         connectionStatus: 'connected',
