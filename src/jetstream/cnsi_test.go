@@ -307,9 +307,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
 
 			Convey("as admin", func() {
-				Convey("with overwrite disabled", func() {
+				Convey("with createUserEndpoint disabled", func() {
 					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -341,9 +341,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
-					Convey("overwrite existing user endpoints", func() {
+					Convey("create system endpoint over existing user endpoints", func() {
 						// setup
-						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
+						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -355,33 +355,24 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint.QueryArgs...)
 						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
 
+						// save cnsi
+						mock.ExpectExec(insertIntoCNSIs).
+							WithArgs(adminEndpoint.InsertArgs...).
+							WillReturnResult(sqlmock.NewResult(1, 1))
+
 						// test
 						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
 						dberr := mock.ExpectationsWereMet()
 
 						Convey("there should be no error", func() {
-							So(err, ShouldResemble, interfaces.NewHTTPShadowError(
-								http.StatusBadRequest,
-								"Can not register same endpoint multiple times",
-								"Can not register same endpoint multiple times",
-							))
+							So(err, ShouldBeNil)
 						})
 
 						Convey("there should be no db error", func() {
 							So(dberr, ShouldBeNil)
 						})
 					})
-				})
-				Convey("with overwrite enabled", func() {
-
-					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true)
-
-					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
-						t.Error(errors.New("unable to mock/stub user in session object"))
-					}
-
-					Convey("overwrite existing admin endpoints", func() {
+					Convey("create system endpoint over existing system endpoints", func() {
 						// mock executions
 						mockStratosAuth.
 							EXPECT().
@@ -399,8 +390,8 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						Convey("should fail ", func() {
 							So(err, ShouldResemble, interfaces.NewHTTPShadowError(
 								http.StatusBadRequest,
-								"Can not register same admin endpoint multiple times",
-								"Can not register same admin endpoint multiple times",
+								"Can not register same system endpoint multiple times",
+								"Can not register same system endpoint multiple times",
 							))
 						})
 
@@ -408,27 +399,29 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
-					Convey("overwrite existing user endpoints", func() {
+				})
+				Convey("with createUserEndpoint enabled", func() {
 
-						// setup
-						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false)
+					// setup
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
+					systemEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, true)
 
+					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
+						t.Error(errors.New("unable to mock/stub user in session object"))
+					}
+
+					Convey("register personal endpoint over system endpoint", func() {
 						// mock executions
 						mockStratosAuth.
 							EXPECT().
 							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
 							Return(mockAdmin.ConnectedUser, nil)
 
-						// return a user endpoint with same apiurl
-						rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(userEndpoint.QueryArgs...)
+						// return a admin endpoint with same apiurl
+						rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(systemEndpoint.QueryArgs...)
 						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
 
-						// user endpoints should be deleted
-						mock.ExpectExec(deleteFromCNSIs).
-							WithArgs(userEndpoint.QueryArgs[0]).
-							WillReturnResult(sqlmock.NewResult(1, 1))
-
-						// a new admin endpoint with same url will be registered
+						// save cnsi
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(adminEndpoint.InsertArgs...).
 							WillReturnResult(sqlmock.NewResult(1, 1))
@@ -445,13 +438,40 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
+					Convey("register personal endpoint twice", func() {
+						// mock executions
+						mockStratosAuth.
+							EXPECT().
+							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
+							Return(mockAdmin.ConnectedUser, nil)
+
+						// return a user endpoint with same apiurl
+						rows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(adminEndpoint.QueryArgs...)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+
+						// test
+						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
+						dberr := mock.ExpectationsWereMet()
+
+						Convey("there should be no error", func() {
+							So(err, ShouldResemble, interfaces.NewHTTPShadowError(
+								http.StatusBadRequest,
+								"Can not register same endpoint multiple times",
+								"Can not register same endpoint multiple times",
+							))
+						})
+
+						Convey("there should be no db error", func() {
+							So(dberr, ShouldBeNil)
+						})
+					})
 				})
 			})
 
 			Convey("as user", func() {
-				Convey("with overwrite disabled", func() {
+				Convey("with createUserEndpoint disabled", func() {
 					// setup
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -483,7 +503,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 					Convey("register existing endpoint from different user", func() {
-						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info[0], "CF Cluster 2", false)
+						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info[0], "CF Cluster 2", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -535,13 +555,13 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 				})
-				Convey("with overwrite enabled", func() {
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false)
+				Convey("with createUserEndpoint enabled", func() {
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
 					}
-					Convey("overwrite existing endpoints from same user, with overwrite enabled", func() {
+					Convey("register existing endpoint from same user", func() {
 						// mock executions
 						mockStratosAuth.
 							EXPECT().

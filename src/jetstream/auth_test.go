@@ -640,14 +640,18 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 		})
 		_, ctxConnectToUser2 := setupEchoContext(res, req)
 
+		adminAndUserEndpointRows := sqlmock.NewRows(rowFieldsForCNSI).AddRow(adminEndpointArgs...).AddRow(userEndpoint1Args...)
+
 		Convey("As admin", func() {
 
-			Convey("Connect to admin endpoint", func() {
+			Convey("Connect to system endpoint", func() {
 				if errSession := pp.setSessionValues(ctxConnectToAdmin, mockAdmin.SessionValues); errSession != nil {
 					t.Error(errors.New("unable to mock/stub user in session object"))
 				}
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockAdmin.ConnectedUser.GUID).
@@ -674,22 +678,16 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
-				mockStratosAuth.
-					EXPECT().
-					GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
-					Return(mockAdmin.ConnectedUser, nil)
-
 				err := pp.loginToCNSI(ctxConnectToUser1)
 				dberr := mock.ExpectationsWereMet()
 
 				Convey("should fail", func() {
-					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - admins are not allowed to connect to user created endpoints"))
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users"))
 				})
 
 				Convey("there should be no db error", func() {
 					So(dberr, ShouldBeNil)
 				})
-
 			})
 		})
 		Convey("As user", func() {
@@ -698,12 +696,9 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 					t.Error(errors.New("unable to mock/stub user in session object"))
 				}
 
-				mockStratosAuth.
-					EXPECT().
-					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
-					Return(mockEndpointAdmin1.ConnectedUser, nil)
-
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -723,12 +718,53 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 					So(dberr, ShouldBeNil)
 				})
 			})
-			Convey("Connect to admin endpoint", func() {
+			Convey("Connect to own endpoint while already connected to same url with system endpoint", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser1, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				// args is the api url
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[3]).WillReturnRows(adminAndUserEndpointRows)
+
+				// connected system endpoint found
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID, mockAdminGUID).
+					WillReturnRows(sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
+						AddRow("", mockUAAToken, mockUAAToken, time.Now().Add(-time.Hour).Unix(), false, "", "", "", nil))
+
+				// remove other connection, since it has the same api url
+				mock.ExpectExec(deleteTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
+
+				mock.ExpectExec(insertIntoTokens).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				err := pp.loginToCNSI(ctxConnectToUser1)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to system endpoint", func() {
 				if errSession := pp.setSessionValues(ctxConnectToAdmin, mockEndpointAdmin1.SessionValues); errSession != nil {
 					t.Error(errors.New("unable to mock/stub user in session object"))
 				}
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -755,16 +791,11 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint2Rows)
 
-				mockStratosAuth.
-					EXPECT().
-					GetUser(gomock.Eq(mockEndpointAdmin1.ConnectedUser.GUID)).
-					Return(mockEndpointAdmin1.ConnectedUser, nil)
-
 				err := pp.loginToCNSI(ctxConnectToUser2)
 				dberr := mock.ExpectationsWereMet()
 
 				Convey("should fail", func() {
-					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - non-admins are not allowed to connect to endpoints created by other non-admins"))
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users"))
 				})
 
 				Convey("there should be no db error", func() {

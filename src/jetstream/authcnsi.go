@@ -153,6 +153,10 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 	// admins are note allowed to connect to user created endpoints
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 
+		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
+		}
+
 		// search for system or personal endpoints and check if they are connected
 		// automatically disconnect other endpoint if already connected to same url
 		cnsiList, err := p.listCNSIByAPIEndpoint(cnsiRecord.APIEndpoint.String())
@@ -165,16 +169,12 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		}
 
 		for _, cnsi := range cnsiList {
-			if cnsi.Creator == userID || len(cnsi.Creator) == 0 {
+			if (cnsi.Creator == userID || len(cnsi.Creator) == 0) && cnsi.GUID != cnsiGUID {
 				_, ok := p.GetCNSITokenRecord(cnsi.GUID, userID)
 				if ok {
 					p.ClearCNSIToken(*cnsi, userID)
 				}
 			}
-		}
-
-		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
 		}
 	}
 

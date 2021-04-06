@@ -283,7 +283,7 @@ func (p *portalProxy) buildCNSIList(c echo.Context) ([]*interfaces.CNSIRecord, e
 		}
 
 		if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.AdminOnly {
-			// remove existing system endpoint if user endpoint already exists and sessionuser not admin
+			// if endpoint with same url exists as system and user endpoint, hide the system endpoint
 			unfilteredList, err := p.ListAdminEndpoints(userID.(string))
 			if err != nil {
 				return unfilteredList, err

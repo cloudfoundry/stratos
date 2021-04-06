@@ -272,15 +272,15 @@ func setupMockUser(guid string, admin bool, scopes []string) MockUser {
 }
 
 // mockV2Info needs to be closed
-func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createUserEndpoint bool) MockEndpointRequest {
+func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createUserEndpoint bool, generateAdminGUID bool) MockEndpointRequest {
 
 	// create a request for each endpoint
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":           endpointName,
-		"api_endpoint":        mockV2Info.URL,
-		"skip_ssl_validation": "true",
-		"cnsi_client_id":      mockClientId,
-		"cnsi_client_secret":  mockClientSecret,
+		"cnsi_name":            endpointName,
+		"api_endpoint":         mockV2Info.URL,
+		"skip_ssl_validation":  "true",
+		"cnsi_client_id":       mockClientId,
+		"cnsi_client_secret":   mockClientSecret,
 		"create_user_endpoint": strconv.FormatBool(createUserEndpoint),
 	})
 
@@ -290,7 +290,7 @@ func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUs
 	uaaUserGUID := ""
 
 	h := sha1.New()
-	if user.Admin {
+	if generateAdminGUID {
 		h.Write([]byte(mockV2Info.URL))
 	} else {
 		h.Write([]byte(mockV2Info.URL + user.GUID))
@@ -377,6 +377,7 @@ const (
 	selectAnyFromTokens    = `SELECT (.+) FROM tokens WHERE (.+)`
 	insertIntoTokens       = `INSERT INTO tokens`
 	updateTokens           = `UPDATE tokens`
+	deleteTokens           = `DELETE FROM tokens WHERE (.+)`
 	selectFromCNSIs        = `SELECT (.+) FROM cnsis`
 	selectAnyFromCNSIs     = `SELECT (.+) FROM cnsis WHERE (.+)`
 	selectCreatorFromCNSIs = `SELECT (.+) FROM cnsis WHERE creator=(.+)`
