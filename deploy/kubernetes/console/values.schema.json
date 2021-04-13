@@ -17,7 +17,7 @@
         "userEndpointsEnabled": {
           "type": "string",
           "enum": ["disabled", "admin_only", "enabled"],
-          "description": "Enable, disable or let only admins view user endpoints"
+          "description": "Enable, disable or let only admins view and create user endpoints"
         },
         "autoRegisterCF": {
           "type": ["string", "null"]

@@ -5,7 +5,7 @@ sidebar_label: Configuring User Endpoints
 
 Stratos provides a way for users to create endpoints without the need to be an administrator.
 
-> Note: Admin endpoint-ID's are generated through a SHA-1 encryption of the URL. Endpoints created by a user will differ in their ID, by using the URL + user-ID for encryption. This should pose no problem in the usual Stratos workflow, but if you depend on the ID to be based solely on the URL, then use this feature with caution.
+> Note: Admin endpoint-ID's are generated through a SHA-1 encryption of the URL. Personal endpoints will differ in their ID, by using the URL + user-ID for encryption. This should pose no problem in the usual Stratos workflow, but if you depend on the ID to be based solely on the URL, then use this feature with caution.
 
 ## Set up
 
@@ -15,16 +15,15 @@ In order to enable User Endpoints support in Stratos:
 2. The UAA client used by Stratos needs an additional scope `stratos.endpointadmin`
 3. Users need to have the `stratos.endpointadmin` group attached to them
 
-Once all steps have been completed, user within the `stratos.endpointadmin` group are allowed to create endpoints. Endpoints created by users are only visible to their respective user and all admins.
+Once all steps have been completed, user within the `stratos.endpointadmin` group are allowed to create personal user endpoints. Endpoints created that way are only visible to their respective user and all admins. Admins will be able to create personal user endpoints after step 1 has been completed.
 
 ## Environment variable
 
 `USER_ENDPOINTS_ENABLED` or helm chart value `console.userEndpointsEnabled` can be set to three different states:
 
 1. `disabled` (default) will disable this feature. Neither admins nor users will see user endpoints.
-2. `admin_only` will hide user endpoints from users. Admins can still see all endpoints created by users.
-3. `enabled` will allow users within the `stratos.endpointadmin` group to create endpoints. The endpoints will only be visible to them or admins.
-
+2. `admin_only` will hide user endpoints from users. Admins can create and see all user endpoints.
+3. `enabled` will allow users within the `stratos.endpointadmin` group and admins to create personal user endpoints. These endpoints will only be visible to them or admins.
 
 ## Adding scopes to the UAA client
 
