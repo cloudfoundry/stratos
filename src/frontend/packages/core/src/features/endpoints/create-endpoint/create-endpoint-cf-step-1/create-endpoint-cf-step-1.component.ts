@@ -2,7 +2,7 @@ import { AfterContentInit, Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
 
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
@@ -14,11 +14,11 @@ import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
+import { UserProfileService } from '../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
-
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -63,9 +63,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
     sessionService: SessionService,
-    currentUserPermissionsService: CurrentUserPermissionsService
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    userProfileService: UserProfileService
   ) {
-    super(sessionService, currentUserPermissionsService);
+    super(sessionService, currentUserPermissionsService, userProfileService);
 
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
@@ -75,7 +76,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
-      createUserEndpointField: [false, []],
+      createSystemEndpointField: [true, []],
     });
 
     const epType = getIdFromRoute(activatedRoute, 'type');
@@ -98,7 +99,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
-      this.registerForm.value.createUserEndpointField,
+      this.registerForm.value.createSystemEndpointField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -149,7 +150,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  toggleCreateUserEndpoint() {
+  toggleCreateSystemEndpoint() {
     // wait a tick for validators to adjust to new data in the directive
     setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();

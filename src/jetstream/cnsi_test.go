@@ -307,9 +307,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
 
 			Convey("as admin", func() {
-				Convey("with createUserEndpoint disabled", func() {
+				Convey("with createSystemEndpoint enabled", func() {
 					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, true)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -400,11 +400,11 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 				})
-				Convey("with createUserEndpoint enabled", func() {
+				Convey("with createSystemEndpoint disabled", func() {
 
 					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
-					systemEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, true)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
+					systemEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -469,9 +469,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			})
 
 			Convey("as user", func() {
-				Convey("with createUserEndpoint disabled", func() {
+				Convey("with createSystemEndpoint enabled", func() {
 					// setup
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -555,8 +555,8 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 				})
-				Convey("with createUserEndpoint enabled", func() {
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
+				Convey("with createSystemEndpoint disabled", func() {
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))

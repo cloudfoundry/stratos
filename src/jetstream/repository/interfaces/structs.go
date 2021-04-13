@@ -426,15 +426,15 @@ type LoginToCNSIParams struct {
 }
 
 type RegisterEndpointParams struct {
-	EndpointType       string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
-	CNSIName           string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
-	APIEndpoint        string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
-	SkipSSLValidation  string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
-	SSOAllowed         string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
-	CNSIClientID       string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
-	CNSIClientSecret   string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
-	SubType            string `json:"sub_type" form:"sub_type" query:"sub_type"`
-	CreateUserEndpoint string `json:"create_user_endpoint" form:"create_user_endpoint" query:"create_user_endpoint"`
+	EndpointType         string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
+	CNSIName             string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
+	APIEndpoint          string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
+	SkipSSLValidation    string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
+	SSOAllowed           string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
+	CNSIClientID         string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
+	CNSIClientSecret     string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
+	SubType              string `json:"sub_type" form:"sub_type" query:"sub_type"`
+	CreateSystemEndpoint string `json:"create_system_endpoint" form:"create_system_endpoint" query:"create_system_endpoint"`
 }
 
 type UpdateEndpointParams struct {

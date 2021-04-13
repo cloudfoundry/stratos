@@ -13,6 +13,7 @@ import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoint
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
@@ -77,9 +78,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
     public sessionService: SessionService,
-    public currentUserPermissionsService: CurrentUserPermissionsService
+    public currentUserPermissionsService: CurrentUserPermissionsService,
+    public userProfileService: UserProfileService
   ) {
-    super(sessionService, currentUserPermissionsService);
+    super(sessionService, currentUserPermissionsService, userProfileService);
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
@@ -159,7 +161,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
       skipSllField: [false, []],
-      createUserEndpointField: [false, []],
+      createSystemEndpointField: [true, []],
     });
     this.updateType();
 
@@ -201,10 +203,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSllField.value :
       false;
-    const createUserEndpoint = this.registerForm.controls.createUserEndpointField.value;
+    const createSystemEndpoint = this.registerForm.controls.createSystemEndpointField.value;
 
     return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE,
-      this.epSubType, name, url, skipSSL, '', '', false, createUserEndpoint)
+      this.epSubType, name, url, skipSSL, '', '', false, createSystemEndpoint)
       .pipe(
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -240,7 +242,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     return ready + '/' + defn.urlSuffix;
   }
 
-  toggleCreateUserEndpoint() {
+  toggleCreateSystemEndpoint() {
     // wait a tick for validators to adjust to new data in the directive
     setTimeout(() => {
       this.registerForm.controls.nameField.updateValueAndValidity();

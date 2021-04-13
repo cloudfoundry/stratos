@@ -215,7 +215,7 @@ export class RegisterEndpoint extends SingleBaseEndpointAction {
     public clientID = '',
     public clientSecret = '',
     public ssoAllowed: boolean,
-    public createUserEndpoint: boolean,
+    public createSystemEndpoint: boolean,
   ) {
     super(
       REGISTER_ENDPOINTS,

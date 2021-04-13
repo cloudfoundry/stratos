@@ -63,10 +63,10 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	cnsiClientSecret := params.CNSIClientSecret
 	subType := params.SubType
 
-	createUserEndpoint, err := strconv.ParseBool(params.CreateUserEndpoint)
+	createSystemEndpoint, err := strconv.ParseBool(params.CreateSystemEndpoint)
 	if err != nil {
-		// default to false
-		createUserEndpoint = false
+		// default to true
+		createSystemEndpoint = true
 	}
 
 	if cnsiClientId == "" {
@@ -82,7 +82,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 			"Failed to get session user: %v", err)
 	}
 
-	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, userID, ssoAllowed, subType, createUserEndpoint, fetchInfo)
+	newCNSI, err := p.DoRegisterEndpoint(params.CNSIName, params.APIEndpoint, skipSSLValidation, cnsiClientId, cnsiClientSecret, userID, ssoAllowed, subType, createSystemEndpoint, fetchInfo)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo interfaces.Info
 	return nil
 }
 
-func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createUserEndpoint bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
+func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createSystemEndpoint bool, fetchInfo interfaces.InfoFunc) (interfaces.CNSIRecord, error) {
 	log.Debug("DoRegisterEndpoint")
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
@@ -150,7 +150,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		// check if we've already got this APIEndpoint in this DB
 		for _, duplicate := range duplicateEndpoints {
 			// cant create same system endpoint
-			if len(duplicate.Creator) == 0 && isAdmin && !createUserEndpoint {
+			if len(duplicate.Creator) == 0 && isAdmin && createSystemEndpoint {
 				return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Can not register same system endpoint multiple times",
@@ -171,7 +171,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 
 	h := sha1.New()
 	// see why its generated this way in Issue #4753 / #3031
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || createUserEndpoint) {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || (isAdmin && !createSystemEndpoint)) {
 		// Make the new guid unique per api url AND user id
 		h.Write([]byte(apiEndpointURL.String() + userId))
 	} else {
@@ -204,7 +204,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SubType = subType
 
 	// admins currently can't create user endpoints
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || createUserEndpoint) {
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || !createSystemEndpoint) {
 		newCNSI.Creator = userId
 	}
 

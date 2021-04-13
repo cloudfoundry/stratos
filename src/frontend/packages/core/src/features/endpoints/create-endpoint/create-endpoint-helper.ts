@@ -5,6 +5,7 @@ import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { UserProfileService } from '../../../core/user-profile.service';
 import { SessionService } from '../../../shared/services/session.service';
 
 type EndpointObservable = Observable<{
@@ -22,7 +23,8 @@ export class CreateEndpointHelperComponent {
 
   constructor(
     public sessionService: SessionService,
-    public currentUserPermissionsService: CurrentUserPermissionsService
+    public currentUserPermissionsService: CurrentUserPermissionsService,
+    public userProfileService: UserProfileService
   ) {
     const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
     this.existingSystemEndpoints = currentPage$.pipe(
@@ -31,10 +33,13 @@ export class CreateEndpointHelperComponent {
         urls: endpoints.filter(ep => ep.creator.system).map(ep => getFullEndpointApiUrl(ep)),
       }))
     );
-    this.existingPersonalEndpoints = currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.filter(ep => !ep.creator.system).map(ep => ep.name),
-        urls: endpoints.filter(ep => !ep.creator.system).map(ep => getFullEndpointApiUrl(ep)),
+    this.existingPersonalEndpoints = combineLatest([
+      currentPage$,
+      this.userProfileService.userProfile$
+    ]).pipe(
+      map(([endpoints, profile]) => ({
+        names: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => ep.name),
+        urls: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => getFullEndpointApiUrl(ep)),
       }))
     );
     this.existingEndpoints = currentPage$.pipe(

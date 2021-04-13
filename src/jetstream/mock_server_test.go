@@ -272,16 +272,16 @@ func setupMockUser(guid string, admin bool, scopes []string) MockUser {
 }
 
 // mockV2Info needs to be closed
-func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createUserEndpoint bool, generateAdminGUID bool) MockEndpointRequest {
+func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createSystemEndpoint bool, generateAdminGUID bool) MockEndpointRequest {
 
 	// create a request for each endpoint
 	req := setupMockReq("POST", "", map[string]string{
-		"cnsi_name":            endpointName,
-		"api_endpoint":         mockV2Info.URL,
-		"skip_ssl_validation":  "true",
-		"cnsi_client_id":       mockClientId,
-		"cnsi_client_secret":   mockClientSecret,
-		"create_user_endpoint": strconv.FormatBool(createUserEndpoint),
+		"cnsi_name":              endpointName,
+		"api_endpoint":           mockV2Info.URL,
+		"skip_ssl_validation":    "true",
+		"cnsi_client_id":         mockClientId,
+		"cnsi_client_secret":     mockClientSecret,
+		"create_system_endpoint": strconv.FormatBool(createSystemEndpoint),
 	})
 
 	res := httptest.NewRecorder()
