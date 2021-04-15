@@ -203,7 +203,6 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 	newCNSI.SSOAllowed = ssoAllowed
 	newCNSI.SubType = subType
 
-	// admins currently can't create user endpoints
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || !createSystemEndpoint) {
 		newCNSI.Creator = userId
 	}

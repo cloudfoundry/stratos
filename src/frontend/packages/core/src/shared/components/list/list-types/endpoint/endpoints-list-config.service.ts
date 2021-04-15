@@ -130,9 +130,11 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       sessionService.userEndpointsEnabled(),
       sessionService.userEndpointsNotDisabled(),
       currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+      currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
     ]).pipe(
-      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin]) => {
-        return userEndpointsEnabled || (userEndpointsNotDisabled && isAdmin);
+      first(),
+      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
+        return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
       })
     ).subscribe(enabled => {
       if (enabled) {

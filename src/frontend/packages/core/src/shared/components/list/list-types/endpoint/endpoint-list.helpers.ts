@@ -183,7 +183,7 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
-              if (!userEndpointsEnabled || row.creator.admin) {
+              if (!userEndpointsEnabled || row.creator.system) {
                 return isAdmin;
               } else {
                 return isEndpointAdmin || isAdmin;
@@ -207,7 +207,7 @@ export class EndpointListHelper {
             row$
           ]).pipe(
             map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
-              if (!userEndpointsEnabled || row.creator.admin) {
+              if (!userEndpointsEnabled || row.creator.system) {
                 return isAdmin;
               } else {
                 return isEndpointAdmin || isAdmin;

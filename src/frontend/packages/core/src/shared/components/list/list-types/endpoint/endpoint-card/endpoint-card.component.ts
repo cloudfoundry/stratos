@@ -140,9 +140,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.sessionService.userEndpointsEnabled(),
       this.sessionService.userEndpointsNotDisabled(),
       this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+      this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
     ]).pipe(
-      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin]) => {
-        return userEndpointsEnabled || (userEndpointsNotDisabled && isAdmin);
+      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
+        return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
       })
     );
   }
