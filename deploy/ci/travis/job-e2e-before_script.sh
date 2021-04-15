@@ -21,9 +21,10 @@ docker run -d -p 8080:8080 splatform/stratos-uaa
 
 # Check that the S3 server is available
 if [ -n "${AWS_ENDPOINT}" ]; then
+  set +e
   curl -k --max-time 20 ${AWS_ENDPOINT}
   if [ $? -ne 0 ]; then
     echo "Can not contact S3 Server"
-    exit 1
+    exit 0 # Don't fail whole run if the server is unavailable
   fi
 fi
