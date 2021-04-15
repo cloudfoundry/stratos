@@ -31,8 +31,7 @@ module.exports = {
       {
         'Cloud Foundry': [
           'endpoints/cf/cf',
-          'endpoints/cf/invite-user-guide',
-          'endpoints/cf/user-endpoints'
+          'endpoints/cf/invite-user-guide'
         ]
       },
       'endpoints/k8s',
@@ -46,6 +45,7 @@ module.exports = {
     ],
     'Advanced Topics': [
       'advanced/sso',
+      'advanced/user-endpoints'
     ],
     'Develop': [
       'developer/contributing',
