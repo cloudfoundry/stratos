@@ -31,6 +31,7 @@
     "test-frontend:git": "NG_TEST_SUITE=git ng test git --code-coverage --watch=false",
     "posttest": "nyc report --reporter=html --reporter=lcovonly --reporter=json --tempDir=coverage/nyc",
     "codecov": "codecov -f coverage/coverage-final.json -F frontend",
+    "codecov-backend": "codecov -f src/jetstream/coverage.txt -F backend",
     "lint": "ng lint --format stylish",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e",

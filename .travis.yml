@@ -59,7 +59,7 @@ jobs:
       script:
         - "./deploy/ci/travis/run-backend-tests.sh"
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -F backend
+        - npm run codecov-backend
     - name: Helm Chart Unit Tests
       script:
         - "./deploy/ci/travis/helm-chart-unit-tests.sh"
