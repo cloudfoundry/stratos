@@ -102,7 +102,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 
 		// set the creator preemptively as admin, if no id is found
 		endpoint.Creator = &interfaces.CreatorInfo{
-			Name:   "Global Endpoint",
+			Name:   "System Endpoint",
 			Admin:  false,
 			System: true,
 		}

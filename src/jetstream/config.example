@@ -40,7 +40,7 @@ ENABLE_TECH_PREVIEW=false
 # HOME_VIEW_SHOW_FAVORITES_ONLY=false
 
 # Enable users create user endpoints (disabled, admin_only, enabled). Default is disabled
-# admin_only will enable admins to see created user endpoints, but users won't be able to create user endpoints or see them
+# admin_only will enable admins to create or see user endpoints, but users won't be able to create user endpoints or see them
 USER_ENDPOINTS_ENABLED=disabled
 
 # User Invites
