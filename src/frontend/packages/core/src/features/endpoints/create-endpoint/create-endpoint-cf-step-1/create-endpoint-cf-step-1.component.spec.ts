@@ -7,6 +7,7 @@ import { CoreTestingModule } from '../../../../../test-framework/core-test.modul
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
+import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 
 describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
@@ -29,8 +30,10 @@ describe('CreateEndpointCfStep1Component', () => {
             queryParams: {},
             params: { type: 'metrics' }
           }
-        }
-      }]
+        },
+      },
+        CurrentUserPermissionsService
+      ]
     })
       .compileComponents();
   }));

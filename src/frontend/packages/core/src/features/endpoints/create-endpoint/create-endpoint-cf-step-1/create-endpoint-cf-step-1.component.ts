@@ -2,9 +2,8 @@ import { AfterContentInit, Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
   StratosCatalogEndpointEntity,
@@ -13,16 +12,20 @@ import { ActionState } from '../../../../../../store/src/reducers/api-request-re
 import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { SessionService } from '../../../../shared/services/session.service';
+import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
+import { UserProfileService } from '../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
+import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
   styleUrls: ['./create-endpoint-cf-step-1.component.scss']
 })
-export class CreateEndpointCfStep1Component implements IStepperStep, AfterContentInit {
+export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
   registerForm: FormGroup;
 
@@ -42,11 +45,6 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
     }
   }
 
-  existingEndpoints: Observable<{
-    names: string[],
-    urls: string[],
-  }>;
-
   validate: Observable<boolean>;
 
   urlValidation: string;
@@ -63,8 +61,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   constructor(
     private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
-    private snackBarService: SnackBarService
+    private snackBarService: SnackBarService,
+    sessionService: SessionService,
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    userProfileService: UserProfileService
   ) {
+    super(sessionService, currentUserPermissionsService, userProfileService);
+
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
@@ -73,14 +76,8 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
+      createSystemEndpointField: [true, []],
     });
-
-    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
-      map(endpoints => ({
-        names: endpoints.map(ep => ep.name),
-        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-      }))
-    );
 
     const epType = getIdFromRoute(activatedRoute, 'type');
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
@@ -102,6 +99,7 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
+      this.registerForm.value.createSystemEndpointField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -150,5 +148,13 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
+  }
+
+  toggleCreateSystemEndpoint() {
+    // wait a tick for validators to adjust to new data in the directive
+    setTimeout(() => {
+      this.registerForm.controls.nameField.updateValueAndValidity();
+      this.registerForm.controls.urlField.updateValueAndValidity();
+    });
   }
 }

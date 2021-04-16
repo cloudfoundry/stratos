@@ -252,6 +252,67 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// endpointAdminMiddleware - checks if user is admin or endpointadmin
+func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("endpointAdminMiddleware")
+
+		userID, err := p.GetSessionValue(c, "user_id")
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		endpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
+
+		if endpointAdmin == false && u.Admin == false {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpointAdmin to access this API")
+		}
+
+		return h(c)
+	}
+}
+
+// endpointUpdateDeleteMiddleware - checks if user has necessary permissions to modify endpoint
+func (p *portalProxy) endpointUpdateDeleteMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("endpointUpdateDeleteMiddleware")
+		userID, err := p.GetSessionValue(c, "user_id")
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		u, err := p.StratosAuthService.GetUser(userID.(string))
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		endpointID := c.Param("id")
+
+		cnsiRecord, err := p.GetCNSIRecord(endpointID)
+		if err != nil {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		// endpoint created by admin when no id is saved
+		adminEndpoint := len(cnsiRecord.Creator) == 0
+
+		if adminEndpoint && !u.Admin {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be Stratos admin to modify this endpoint.")
+		}
+
+		if !adminEndpoint && !u.Admin && cnsiRecord.Creator != userID.(string) {
+			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "EndpointAdmins are not allowed to modify endpoints created by other endpointAdmins.")
+		}
+
+		return h(c)
+	}
+}
+
 func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("errorLoggingMiddleware")

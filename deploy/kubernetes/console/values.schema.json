@@ -14,6 +14,11 @@
           "enum": ["disabled", "admin_only", "all_users"],
           "description": "Enable API keys for admins, all users or nobody"
         },
+        "userEndpointsEnabled": {
+          "type": "string",
+          "enum": ["disabled", "admin_only", "enabled"],
+          "description": "Enable, disable or let only admins view and create user endpoints"
+        },
         "autoRegisterCF": {
           "type": ["string", "null"]
         },

@@ -34,6 +34,7 @@ import {
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { SessionService } from '../../../shared/services/session.service';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -45,7 +46,7 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
   }, EndpointListHelper]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
-  public canRegisterEndpoint = StratosCurrentUserPermissions.ENDPOINT_REGISTER;
+  public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
@@ -68,6 +69,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private snackBarService: SnackBarService,
     cs: CustomizationService,
     currentUserPermissionsService: CurrentUserPermissionsService,
+    public sessionService: SessionService
   ) {
     this.customizations = cs.get();
 
@@ -87,11 +89,21 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       first()
     ).subscribe();
 
+    this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
+      map(enabled => {
+        if (enabled){
+          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
+        }else{
+          return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
+        }
+      })
+    );
+
     // Is the backup/restore plugin available on the backend?
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
       first(),
       map(sessionData => sessionData?.plugins.backup),
-      switchMap(enabled => enabled ? currentUserPermissionsService.can(this.canRegisterEndpoint) : of(false))
+      switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
   }
 

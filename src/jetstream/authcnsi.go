@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
@@ -149,14 +150,42 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
+	// admins are note allowed to connect to user created endpoints
+	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
+
+		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
+			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
+		}
+
+		// search for system or personal endpoints and check if they are connected
+		// automatically disconnect other endpoint if already connected to same url
+		cnsiList, err := p.listCNSIByAPIEndpoint(cnsiRecord.APIEndpoint.String())
+		if err != nil {
+			return nil, echo.NewHTTPError(
+				http.StatusBadRequest,
+				"Failed to retrieve list of CNSIs",
+				"Failed to retrieve list of CNSIs: %v", err,
+			)
+		}
+
+		for _, cnsi := range cnsiList {
+			if (cnsi.Creator == userID || len(cnsi.Creator) == 0) && cnsi.GUID != cnsiGUID {
+				_, ok := p.GetCNSITokenRecord(cnsi.GUID, userID)
+				if ok {
+					p.ClearCNSIToken(*cnsi, userID)
+				}
+			}
+		}
+	}
+
 	// Register as a system endpoint?
 	if systemSharedToken {
-		// User needs to be an admin
 		user, err := p.StratosAuthService.GetUser(userID)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect System Shared endpoint - could not check user")
 		}
 
+		// User needs to be an admin
 		if !user.Admin {
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect System Shared endpoint - user is not an administrator")
 		}

@@ -49,6 +49,7 @@ export interface EndpointModel {
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
   local?: true;
+  creator: CreatorInfo;
 }
 
 export const SystemSharedUserGuid = '00000000-1111-2222-3333-444444444444';
@@ -61,6 +62,13 @@ export interface EndpointUser {
   name: string;
   admin: boolean;
   scopes?: UserScopeStrings[];
+}
+
+// Metadata for the user who created an endpoint
+export interface CreatorInfo {
+  name: string;
+  admin: boolean;
+  system: boolean;
 }
 
 export interface EndpointState {

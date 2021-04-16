@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
-import { debounceTime, filter, map } from 'rxjs/operators';
+import { debounceTime, filter, first, map } from 'rxjs/operators';
 
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
@@ -14,6 +14,9 @@ import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-ent
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
+import { SessionService } from '../../../../services/session.service';
+import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
@@ -114,13 +117,42 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
     endpointListHelper: EndpointListHelper,
-    userFavoriteManager: UserFavoriteManager
+    userFavoriteManager: UserFavoriteManager,
+    currentUserPermissionsService: CurrentUserPermissionsService,
+    sessionService: SessionService
   ) {
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
       (row: EndpointModel) => userFavoriteManager.getFavoriteEndpointFromEntity(row)
     );
     this.columns.push(favoriteCell);
+    combineLatest([
+      sessionService.userEndpointsEnabled(),
+      sessionService.userEndpointsNotDisabled(),
+      currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+      currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT)
+    ]).pipe(
+      first(),
+      map(([userEndpointsEnabled, userEndpointsNotDisabled, isAdmin, isEndpointAdmin]) => {
+        return (userEndpointsEnabled && (isAdmin || isEndpointAdmin)) || (userEndpointsNotDisabled && isAdmin);
+      })
+    ).subscribe(enabled => {
+      if (enabled) {
+        this.columns.splice(4, 0, {
+          columnId: 'creator',
+          headerCell: () => 'Creator',
+          cellDefinition: {
+            valuePath: 'creator.name'
+          },
+          sort: {
+            type: 'sort',
+            orderKey: 'creator',
+            field: 'creator.name'
+          },
+          cellFlex: '2'
+        });
+      }
+    });
 
     this.dataSource = new EndpointsDataSource(
       this.store,
@@ -201,4 +233,5 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       );
     }
   }
+
 }

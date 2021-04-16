@@ -55,6 +55,7 @@ type CNSIRecord struct {
 	SubType                string   `json:"sub_type"`
 	Metadata               string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	Creator                string   `json:"creator"`
 }
 
 // ConnectedEndpoint
@@ -72,6 +73,7 @@ type ConnectedEndpoint struct {
 	SubType                string   `json:"sub_type"`
 	EndpointMetadata       string   `json:"metadata"`
 	Local                  bool     `json:"local"`
+	Creator                string   `json:"creator"`
 }
 
 const (
@@ -191,6 +193,13 @@ type ConnectedUser struct {
 	Scopes []string `json:"scopes"`
 }
 
+// CreatorInfo - additional information about the user who created an endpoint
+type CreatorInfo struct {
+	Name   string `json:"name"`
+	Admin  bool   `json:"admin"`
+	System bool   `json:"system"`
+}
+
 type JWTUserTokenInfo struct {
 	UserGUID    string   `json:"user_id"`
 	UserName    string   `json:"user_name"`
@@ -233,6 +242,7 @@ type Info struct {
 		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled            string `json:"APIKeysEnabled"`
 		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
+		UserEndpointsEnabled      string `json:"userEndpointsEnabled"`
 	} `json:"config"`
 }
 
@@ -241,6 +251,7 @@ type EndpointDetail struct {
 	*CNSIRecord
 	EndpointMetadata  interface{}       `json:"endpoint_metadata,omitempty"`
 	User              *ConnectedUser    `json:"user"`
+	Creator           *CreatorInfo      `json:"creator"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
 	TokenMetadata     string            `json:"-"`
 	SystemSharedToken bool              `json:"system_shared_token"`
@@ -392,8 +403,9 @@ type PortalConfig struct {
 	DatabaseProviderName               string
 	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
 	CanMigrateDatabaseSchema           bool
-	APIKeysEnabled                     config.APIKeysConfigValue `configName:"API_KEYS_ENABLED"`
-	HomeViewShowFavoritesOnly          bool                      `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	APIKeysEnabled                     config.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
+	HomeViewShowFavoritesOnly          bool                            `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	UserEndpointsEnabled               config.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
@@ -414,14 +426,15 @@ type LoginToCNSIParams struct {
 }
 
 type RegisterEndpointParams struct {
-	EndpointType      string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
-	CNSIName          string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
-	APIEndpoint       string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
-	SkipSSLValidation string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
-	SSOAllowed        string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
-	CNSIClientID      string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
-	CNSIClientSecret  string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
-	SubType           string `json:"sub_type" form:"sub_type" query:"sub_type"`
+	EndpointType         string `json:"endpoint_type" form:"endpoint_type" query:"endpoint_type"`
+	CNSIName             string `json:"cnsi_name" form:"cnsi_name" query:"cnsi_name"`
+	APIEndpoint          string `json:"api_endpoint" form:"api_endpoint" query:"api_endpoint"`
+	SkipSSLValidation    string `json:"skip_ssl_validation" form:"skip_ssl_validation" query:"skip_ssl_validation"`
+	SSOAllowed           string `json:"sso_allowed" form:"sso_allowed" query:"sso_allowed"`
+	CNSIClientID         string `json:"cnsi_client_id" form:"cnsi_client_id" query:"cnsi_client_id"`
+	CNSIClientSecret     string `json:"cnsi_client_secret" form:"cnsi_client_secret" query:"cnsi_client_secret"`
+	SubType              string `json:"sub_type" form:"sub_type" query:"sub_type"`
+	CreateSystemEndpoint string `json:"create_system_endpoint" form:"create_system_endpoint" query:"create_system_endpoint"`
 }
 
 type UpdateEndpointParams struct {

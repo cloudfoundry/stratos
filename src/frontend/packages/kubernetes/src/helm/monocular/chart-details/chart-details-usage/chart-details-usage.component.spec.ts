@@ -1,5 +1,6 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { SessionService } from '../../../../../../core/src/shared/services/session.service';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
@@ -15,7 +16,8 @@ describe('Component: ChartDetailsUsage', () => {
       providers: [
         EndpointsService,
         UtilsService,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        SessionService
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

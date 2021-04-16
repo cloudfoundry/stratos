@@ -8,6 +8,7 @@ import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager
 import { BaseTestModulesNoShared } from '../../../test-framework/core-test.helper';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { DialogConfirmComponent } from '../../shared/components/dialog-confirm/dialog-confirm.component';
+import { SessionService } from '../../shared/services/session.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star.component';
 
 describe('EntityFavoriteStarComponent', () => {
@@ -28,7 +29,8 @@ describe('EntityFavoriteStarComponent', () => {
             overlayContainerElement = document.createElement('div');
             return { getContainerElement: () => overlayContainerElement };
           }
-        }
+        },
+        SessionService
       ],
       declarations: [
         DialogConfirmComponent

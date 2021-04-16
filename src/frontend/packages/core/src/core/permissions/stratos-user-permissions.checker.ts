@@ -20,7 +20,8 @@ import {
 
 
 export enum StratosCurrentUserPermissions {
-  ENDPOINT_REGISTER = 'register.endpoint',
+  EDIT_ENDPOINT = 'edit-endpoint',
+  EDIT_ADMIN_ENDPOINT = 'edit-admin-endpoint',
   PASSWORD_CHANGE = 'change-password',
   EDIT_PROFILE = 'edit-profile',
   /**
@@ -35,12 +36,12 @@ export enum StratosPermissionStrings {
   STRATOS_ADMIN = 'isAdmin'
 }
 
-
 export enum StratosScopeStrings {
   STRATOS_CHANGE_PASSWORD = 'password.write',
   SCIM_READ = 'scim.read',
   SCIM_WRITE = 'scim.write',
-  STRATOS_NOAUTH = 'stratos.noauth'
+  STRATOS_NOAUTH = 'stratos.noauth',
+  STRATOS_ENDPOINTADMIN = 'stratos.endpointadmin'
 }
 
 export enum StratosPermissionTypes {
@@ -53,7 +54,11 @@ export enum StratosPermissionTypes {
 // Every group result must be true in order for the permission to be true. A group result is true if all or some of it's permissions are
 // true (see `getCheckFromConfig`).
 export const stratosPermissionConfigs: IPermissionConfigs = {
-  [StratosCurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(
+  [StratosCurrentUserPermissions.EDIT_ENDPOINT]: new PermissionConfig(
+    StratosPermissionTypes.STRATOS_SCOPE,
+    StratosScopeStrings.STRATOS_ENDPOINTADMIN
+  ),
+  [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT]: new PermissionConfig(
     StratosPermissionTypes.STRATOS,
     StratosPermissionStrings.STRATOS_ADMIN
   ),

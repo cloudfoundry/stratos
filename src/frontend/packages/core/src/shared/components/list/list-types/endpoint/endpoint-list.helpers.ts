@@ -15,6 +15,8 @@ import { StratosCurrentUserPermissions } from '../../../../../core/permissions/s
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SessionService } from '../../../../../shared/services/session.service';
+import { UserProfileService } from '../../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -66,6 +68,8 @@ export class EndpointListHelper {
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private snackBarService: SnackBarService,
+    private sessionService: SessionService,
+    private userProfileService: UserProfileService
   ) { }
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
@@ -107,10 +111,10 @@ export class EndpointListHelper {
         },
         label: 'Disconnect',
         description: ``, // Description depends on console user permission
-        createVisible: (row$: Observable<EndpointModel>) => combineLatest(
-          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER),
+        createVisible: (row$: Observable<EndpointModel>) => combineLatest([
+          this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
           row$
-        ).pipe(
+        ]).pipe(
           map(([isAdmin, row]) => {
             const isConnected = row.connectionStatus === 'connected';
             return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
@@ -132,11 +136,25 @@ export class EndpointListHelper {
         },
         label: 'Connect',
         description: '',
-        createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => {
-          const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
-          const ep = endpoint ? endpoint.definition : { unConnectable: false };
-          return !ep.unConnectable && row.connectionStatus === 'disconnected';
-        }))
+        createVisible: (row$: Observable<EndpointModel>) => {
+          return combineLatest([
+            this.sessionService.userEndpointsNotDisabled(),
+            this.userProfileService.userProfile$,
+            row$
+          ]).pipe(
+            map(([userEndpointsEnabled, profile, row]) => {
+              if (userEndpointsEnabled && !row.creator.system && profile.userName !== row.creator.name) {
+                // Disable connect for admins if the endpoint was not created by them. Otherwise this could result in an admin connecting to
+                // multiple user endpoints that all have the same url.
+                return false;
+              } else {
+                const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
+                const ep = endpoint ? endpoint.definition : { unConnectable: false };
+                return !ep.unConnectable && row.connectionStatus === 'disconnected';
+              }
+            })
+          );
+        }
       },
       {
         action: (item) => {
@@ -155,7 +173,24 @@ export class EndpointListHelper {
         },
         label: 'Unregister',
         description: 'Remove the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: (row$: Observable<EndpointModel>) => {
+          // I think if we end up using these often there should be specific create,
+          // edit, delete style permissions in the stratos permissions checker
+          return combineLatest([
+            this.sessionService.userEndpointsNotDisabled(),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
+            row$
+          ]).pipe(
+            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
+              if (!userEndpointsEnabled || row.creator.system) {
+                return isAdmin;
+              } else {
+                return isEndpointAdmin || isAdmin;
+              }
+            })
+          );
+        }
       },
       {
         action: (item) => {
@@ -164,7 +199,22 @@ export class EndpointListHelper {
         },
         label: 'Edit endpoint',
         description: 'Edit the endpoint',
-        createVisible: () => this.currentUserPermissionsService.can(StratosCurrentUserPermissions.ENDPOINT_REGISTER)
+        createVisible: (row$: Observable<EndpointModel>) => {
+          return combineLatest([
+            this.sessionService.userEndpointsNotDisabled(),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT),
+            this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ENDPOINT),
+            row$
+          ]).pipe(
+            map(([userEndpointsEnabled, isAdmin, isEndpointAdmin, row]) => {
+              if (!userEndpointsEnabled || row.creator.system) {
+                return isAdmin;
+              } else {
+                return isEndpointAdmin || isAdmin;
+              }
+            })
+          );
+        }
       },
       ...customActions
     ];

@@ -57,7 +57,7 @@ func (br *BackupRestore) AddSessionGroupRoutes(echoGroup *echo.Group) {
 func (br *BackupRestore) Init() error {
 	enabledStr := br.portalProxy.Env().String("FEATURE_ALLOW_BACKUP", "true")
 	if enabled, err := strconv.ParseBool(enabledStr); err == nil && !enabled {
-		return errors.New("Backup/restoure feature disabled via configuration")
+		return errors.New("Backup/restore feature disabled via configuration")
 	}
 
 	return nil

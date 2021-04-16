@@ -64,6 +64,11 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             CfScopeStrings.CF_READ_SCOPE,
           ]
         },
+        creator: {
+          name: 'admin',
+          admin: true,
+          system: false
+        },
         metricsAvailable: false,
         connectionStatus: 'connected',
         system_shared_token: false,
@@ -101,6 +106,11 @@ describe('CurrentUserPermissionsService with CF checker', () => {
             CfScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP,
             StratosScopeStrings.SCIM_READ
           ]
+        },
+        creator: {
+          name: 'admin',
+          admin: true,
+          system: false
         },
         metricsAvailable: false,
         connectionStatus: 'connected',

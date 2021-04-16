@@ -1,6 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import {
+  CreateEndpointHelperComponent,
+} from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 
@@ -8,6 +11,9 @@ import { EndpointsService } from '../../../../../core/src/core/endpoints.service
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SessionService } from '../../../../../core/src/shared/services/session.service';
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog } from '../../../../../store/src/public-api';
@@ -49,7 +55,7 @@ enum GitTypeKeys {
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
 })
-export class GitRegistrationComponent implements OnDestroy {
+export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
 
   public gitTypes: EndpointSubTypes;
 
@@ -71,7 +77,11 @@ export class GitRegistrationComponent implements OnDestroy {
     private fb: FormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
+    public sessionService: SessionService,
+    public currentUserPermissionsService: CurrentUserPermissionsService,
+    public userProfileService: UserProfileService
   ) {
+    super(sessionService, currentUserPermissionsService, userProfileService);
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
@@ -151,6 +161,7 @@ export class GitRegistrationComponent implements OnDestroy {
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
       skipSllField: [false, []],
+      createSystemEndpointField: [true, []],
     });
     this.updateType();
 
@@ -192,8 +203,10 @@ export class GitRegistrationComponent implements OnDestroy {
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSllField.value :
       false;
+    const createSystemEndpoint = this.registerForm.controls.createSystemEndpointField.value;
 
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE, this.epSubType, name, url, skipSSL, '', '', false)
+    return stratosEntityCatalog.endpoint.api.register<ActionState>(GIT_ENDPOINT_TYPE,
+      this.epSubType, name, url, skipSSL, '', '', false, createSystemEndpoint)
       .pipe(
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -227,5 +240,13 @@ export class GitRegistrationComponent implements OnDestroy {
     }
     const ready = urlTrimmed[urlTrimmed.length - 1] === '/' ? urlTrimmed.substring(0, urlTrimmed.length - 1) : urlTrimmed;
     return ready + '/' + defn.urlSuffix;
+  }
+
+  toggleCreateSystemEndpoint() {
+    // wait a tick for validators to adjust to new data in the directive
+    setTimeout(() => {
+      this.registerForm.controls.nameField.updateValueAndValidity();
+      this.registerForm.controls.urlField.updateValueAndValidity();
+    });
   }
 }

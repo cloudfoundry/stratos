@@ -45,6 +45,7 @@ module.exports = {
     ],
     'Advanced Topics': [
       'advanced/sso',
+      'advanced/user-endpoints'
     ],
     'Develop': [
       'developer/contributing',
