@@ -8,7 +8,7 @@ echo "============================="
 echo "Installing Helm"
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.sh
 chmod 700 get_helm.sh
-./get_helm.sh
+./get_helm.sh -v v2.17.0 # peg to lastest v2 build (script fails to automatically find it - grep of helm release page fails to find v2 in first page)
 
 echo "Helm Init (Client)"
 helm init --client-only
