@@ -77,7 +77,7 @@
     "core-js": "^3.6.5",
     "immer": "^8.0.1",
     "intersect": "^1.0.1",
-    "lodash-es": "^4.17.14",
+    "lodash-es": "^4.17.21",
     "mappy-breakpoints": "^0.2.3",
     "marked": "^1.1.0",
     "moment": "^2.24.0",
