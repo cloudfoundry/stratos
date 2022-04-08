@@ -80,7 +80,7 @@
     "lodash-es": "^4.17.14",
     "mappy-breakpoints": "^0.2.3",
     "marked": "^1.1.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.13",
     "ngrx-store-localstorage": "10.1.1",
     "ngx-moment": "^3.5.0",
