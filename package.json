@@ -81,7 +81,7 @@
     "mappy-breakpoints": "^0.2.3",
     "marked": "^1.1.0",
     "moment": "^2.24.0",
-    "moment-timezone": "^0.5.13",
+    "moment-timezone": "^0.5.35",
     "ngrx-store-localstorage": "10.1.1",
     "ngx-moment": "^3.5.0",
     "ngx-monaco-editor": "^9.0.0",
