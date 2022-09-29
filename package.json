@@ -54,7 +54,7 @@
     "@angular/cdk": "^10.2.0",
     "@angular/common": "^10.2.0",
     "@angular/compiler": "^10.2.0",
-    "@angular/core": "^10.2.0",
+    "@angular/core": "^11.0.5",
     "@angular/flex-layout": "^10.0.0-beta.32",
     "@angular/forms": "^10.2.0",
     "@angular/material": "^10.2.5",
@@ -75,12 +75,12 @@
     "@types/moment-timezone": "^0.5.13",
     "angular2-virtual-scroll": "^0.4.16",
     "core-js": "^3.6.5",
-    "immer": "^8.0.1",
+    "immer": "^9.0.6",
     "intersect": "^1.0.1",
-    "lodash-es": "^4.17.14",
+    "lodash-es": "^4.17.21",
     "mappy-breakpoints": "^0.2.3",
-    "marked": "^1.1.0",
-    "moment": "^2.24.0",
+    "marked": "^4.0.10",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.13",
     "ngrx-store-localstorage": "10.1.1",
     "ngx-moment": "^3.5.0",
@@ -96,7 +96,7 @@
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
     "zone.js": "~0.10.2",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.21"
   },
   "engines": {
     "node": "12.13.0"
