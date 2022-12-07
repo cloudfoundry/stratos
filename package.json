@@ -61,7 +61,7 @@
     "@ngrx/router-store": "^7.2.0",
     "@ngrx/store": "^7.2.0",
     "@ngrx/store-devtools": "^7.2.0",
-    "@swimlane/ngx-charts": "^10.1.0",
+    "@swimlane/ngx-charts": "^20.1.2",
     "@types/moment-timezone": "^0.5.12",
     "@types/marked": "^0.6.5",
     "angular2-virtual-scroll": "^0.3.1",
