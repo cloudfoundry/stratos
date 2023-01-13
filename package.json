@@ -70,7 +70,7 @@
     "@ngrx/store": "^10.0.1",
     "@ngrx/store-devtools": "^10.0.1",
     "@swimlane/ngx-charts": "^16.0.0",
-    "@swimlane/ngx-graph": "^7.2.0",
+    "@swimlane/ngx-graph": "^8.0.3",
     "@types/marked": "^1.1.0",
     "@types/moment-timezone": "^0.5.13",
     "angular2-virtual-scroll": "^0.4.16",
