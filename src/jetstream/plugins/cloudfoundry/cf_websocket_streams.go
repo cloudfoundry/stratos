@@ -1,17 +1,20 @@
 package cloudfoundry
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
+	logcache "code.cloudfoundry.org/go-log-cache"
+	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/noaa/consumer"
-	noaa_errors "github.com/cloudfoundry/noaa/errors"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -31,19 +34,19 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-func (c CloudFoundrySpecification) appStream(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) appStream(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, appStreamHandler)
 }
 
-func (c CloudFoundrySpecification) firehose(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) firehose(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, firehoseStreamHandler)
 }
 
-func (c CloudFoundrySpecification) appFirehose(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) appFirehose(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, appFirehoseStreamHandler)
 }
 
-func (c CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
+func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
 	ac, err := c.openNoaaConsumer(echoContext)
 	if err != nil {
 		return err
@@ -67,13 +70,14 @@ func (c CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context,
 }
 
 type AuthorizedConsumer struct {
-	consumer     *consumer.Consumer
-	authToken    string
-	refreshToken func() error
+	consumer       *consumer.Consumer
+	logCacheClient *logcache.Client
+	authToken      string
+	refreshToken   func() error
 }
 
 // Refresh the Authorization token if needed and create a new Noaa consumer
-func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*AuthorizedConsumer, error) {
+func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*AuthorizedConsumer, error) {
 
 	ac := &AuthorizedConsumer{}
 
@@ -118,32 +122,75 @@ func (c CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*
 	log.Debugf("Creating Noaa consumer for Doppler endpoint %s", dopplerAddress)
 	ac.consumer = consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
 
+	//Open a LogCache client to the log cache endpoint
+	logCacheUrl := strings.Replace(cnsiRecord.APIEndpoint.String(), "api.sys.", "log-cache.sys.", 1)
+	log.Debugf("Creating LogCache client for endpoint %s", logCacheUrl)
+	ac.logCacheClient = logcache.NewClient(logCacheUrl, logcache.WithHTTPClient(
+		NewLogCacheHttpClient(func() string {
+			return ac.authToken
+		})),
+	)
+
 	return ac, nil
 }
 
-// Attempts to get the recent logs, if we get an unauthorized error we will refresh the auth token and retry once
-func getRecentLogs(ac *AuthorizedConsumer, cnsiGUID, appGUID string) ([]*events.LogMessage, error) {
-	log.Debug("getRecentLogs")
-	messages, err := ac.consumer.RecentLogs(appGUID, ac.authToken)
-	if err != nil {
-		errorPattern := "Failed to get recent messages for App %s on CNSI %s [%v]"
-		if _, ok := err.(*noaa_errors.UnauthorizedError); ok {
-			// If unauthorized, we may need to refresh our Auth token
-			// Note: annoyingly, older versions of CF also send back "401 - Unauthorized" when the app doesn't exist...
-			// This means we sometimes end up here even when our token is legit
-			if err := ac.refreshToken(); err != nil {
-				return nil, fmt.Errorf(errorPattern, appGUID, cnsiGUID, err)
-			}
-			messages, err = ac.consumer.RecentLogs(appGUID, ac.authToken)
+// Attempts to relay the recent logs, if we get an unauthorized error we will refresh the auth token and retry once
+func relayRecentLogsFromCache(relay func(msg *events.LogMessage), ac *AuthorizedConsumer, appGUID string) error {
+	logLineRequestCount := 1000
+	var envelopes []*loggregator_v2.Envelope
+	var err error
+
+	for logLineRequestCount >= 1 {
+		envelopes, err = ac.logCacheClient.Read(
+			context.Background(),
+			appGUID,
+			time.Time{},
+			logcache.WithEnvelopeTypes(logcache_v1.EnvelopeType_LOG),
+			logcache.WithLimit(logLineRequestCount),
+		)
+		if err != nil && err.Error() == "unexpected status code 429" {
+			err = ac.refreshToken()
 			if err != nil {
-				msg := fmt.Sprintf(errorPattern, appGUID, cnsiGUID, err)
-				return nil, echo.NewHTTPError(http.StatusUnauthorized, msg)
+				return fmt.Errorf("cannot refresh token when reading from cache again cause %v", err)
 			}
-		} else {
-			return nil, fmt.Errorf(errorPattern, appGUID, cnsiGUID, err)
+			err = nil
+			continue
 		}
+		if err == nil || err.Error() != "unexpected status code 429" {
+			break
+		}
+		logLineRequestCount /= 2
 	}
-	return messages, nil
+	if err != nil {
+		return fmt.Errorf("failed to retrieve logs from Log Cache: %s", err)
+	}
+
+	for _, envelope := range envelopes {
+		logEnvelope, ok := envelope.GetMessage().(*loggregator_v2.Envelope_Log)
+		if !ok {
+			continue
+		}
+		log := logEnvelope.Log
+		relay(&events.LogMessage{
+			Message: log.Payload,
+			MessageType: func(t loggregator_v2.Log_Type) *events.LogMessage_MessageType {
+				var r events.LogMessage_MessageType
+				switch t {
+				case loggregator_v2.Log_OUT:
+					r = events.LogMessage_OUT
+				case loggregator_v2.Log_ERR:
+					r = events.LogMessage_ERR
+				}
+				return &r
+			}(log.Type),
+			Timestamp:      func(i int64) *int64 { return &i }(envelope.GetTimestamp()),
+			AppId:          &appGUID,
+			SourceType:     func(s string) *string { return &s }(envelope.GetTags()["source_type"]),
+			SourceInstance: &envelope.InstanceId,
+		})
+	}
+
+	return err
 }
 
 func drainErrors(errorChan <-chan error) {
@@ -184,11 +231,6 @@ func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWe
 	appGUID := echoContext.Param("appGuid")
 
 	log.Infof("Received request for log stream for App ID: %s - in CNSI: %s", appGUID, cnsiGUID)
-
-	messages, err := getRecentLogs(ac, cnsiGUID, appGUID)
-	if err != nil {
-		return err
-	}
 	// Reusable closure to pump messages from Noaa to the client WebSocket
 	// N.B. We convert protobuf messages to JSON for ease of use in the frontend
 	relayLogMsg := func(msg *events.LogMessage) {
@@ -202,9 +244,15 @@ func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWe
 		}
 	}
 
-	// Send the recent messages, sorted in Chronological order
-	for _, msg := range noaa.SortRecent(messages) {
-		relayLogMsg(msg)
+	/*
+	 * Split into two parts…
+	 *   1. LogCache Read for recent logs - inspired by CF CLI in order to replace noaa RecentLogs
+	 *      https://github.com/cloudfoundry/stratos/issues/5037
+	 *   2. Stream subsequent logs as before
+	 */
+	err := relayRecentLogsFromCache(relayLogMsg, ac, appGUID)
+	if err != nil {
+		log.Errorf("Cannot relay recent logs via cache cause %v", err)
 	}
 
 	msgChan, errorChan := ac.consumer.TailingLogs(appGUID, ac.authToken)
