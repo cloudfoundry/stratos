@@ -148,3 +148,8 @@ website/versions-repo
 /electron/dev-ssl
 /electron/jetstream
 /electron/version
+
+# Packager
+/stratos-ui/
+/stratos-ui-packaged.zip
+

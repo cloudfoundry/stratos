@@ -31,6 +31,7 @@ Tested with Browserstack
 
 # Stratos UI pre-packager
 
+
 This feature helps in pre-building the
 [Stratos](https://github.com/cloudfoundry-community/stratos) web application
 so that it can be deployed faster in Cloud Foundry, or be run offline.
@@ -64,21 +65,25 @@ genesis <env-name> do stratos sgs
 ```
 Note: `sgs` creates security groups the first time, upgrades do not use `sgs`.
 
-## Usage
+## Packaging
 
-Golang is required, and version 1.12 is recommended as this is the version used
-by the Stratos build system.
+Golang is required, and version 1.12 is recommended as this is the version used by the Stratos build system.
 
 When you want to build the `4.1.2` tag in
 [Stratos UI releases](https://github.com/cloudfoundry-community/stratos/releases),
 run this command:
 
+```bash
+./bin/package
 ```
-TRAVIS_TAG=4.1.2 ./package.sh
+OR to package a specific tag
+```bash
+TAG="4.1.2" ./bin/package 
 ```
 
 ### NOTE
-The original code for this feature can be found in the [Orange Cloud foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/). 
+The original code for this feature can be found in the
+[Orange Cloud foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/). 
 Many thanks to Benjamin & Arthur, we appreciate you both!
 
 ## License

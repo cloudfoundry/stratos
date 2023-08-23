@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+node::install() {
+  local download_file
+  download_file="${TMP_DIR}/node${NODE_VERSION}.tar.gz"
+  
+  export node_install_dir="/tmp/node${NODE_VERSION}"
+  export node_dir="${node_install_dir}/node-v${NODE_VERSION}-linux-x64"
+  
+  mkdir -p "${node_install_dir}"
+  
+  if [[ ! -f "${node_install_dir}/go/bin/go" ]]; then
+    NODE_MD5="5bda713bd4aa39394536fc48c744854b"
+    URL=https://buildpacks.cloudfoundry.org/dependencies/node/node-${NODE_VERSION}-linux-x64-40e8e080.tgz
+  
+    echo "-----> Download Nodejs ${NODE_VERSION}"
+    curl -s -L --retry 15 --retry-delay 2 $URL -o ${download_file}
+  
+    DOWNLOAD_MD5=$(md5sum ${download_file} | cut -d ' ' -f 1)
+  
+    if [[ ${DOWNLOAD_MD5} != ${NODE_MD5} ]]; then
+      echo "       **ERROR** MD5 mismatch: got $DOWNLOAD_MD5 expected $NODE_MD5"
+      exit 1
+    fi
+  
+    tar xzf "${download_file}" -C "${node_install_dir}"
+    rm "${download_file}"
+  fi
+  
+  if [[ ! -f "${node_dir}/bin/node" ]]; then
+    echo "       **ERROR** Could not download nodejs"
+    exit 1
+  fi
+  
+  export NODE_HOME="${node_dir}"
+}
+
+declare git_url git_tag work_dir
+declare -x TAG NODE_VERSION TMP_DIR
+
+git_url="https://github.com/cloudfoundry-community/stratos.git"
+git_tag="${TAG:-master}}"
+work_dir="${PWD}"
+NODE_VERSION="${NODE_VERISON:-8.11.2}"
+TMP_DIR=/tmp
+
+git clone "${git_url}" stratos-ui || true
+
+if [[ -n ${git_tag} ]]; then
+	pushd stratos-ui
+	git checkout "${git_tag}"
+  export stratos_version="${git_tag}"
+	popd
+fi
+
+function exit_trap() {
+  # See: install_nodejs.sh
+  NODE_VERSION="8.11.2"
+  rm -rf "/tmp/node${NODE_VERSION}.tar.gz" "/tmp/node${NODE_VERSION}"
+}
+trap exit_trap EXIT
+
+if ! which npm > /dev/null; then
+  node::install
+  export PATH="${NODE_HOME}/bin:$PATH"
+else
+  npm_location="$(which npm)"
+  export NODE_HOME="${npm_location%%/bin/npm}"
+fi
+
+mkdir -p cache
+build_dir="${work_dir}/stratos-ui"
+
+# Fix the "authenticity of host can't be established" error during build
+ssh-keyscan "bitbucket.org" >> ~/.ssh/known_hosts
+
+# prebuild ui
+cd stratos-ui
+npm install
+npm run prebuild-ui
+rm -Rf ./dist
+
+# Actually build Stratos
+bash -x deploy/cloud-foundry/build.sh "${build_dir}" "${work_dir}/cache"
+cd "${work_dir}"
+
+# Remove build artifacts (node_modules & bower_components)
+if [[ -d "${build_dir}/node_modules" ]]; then
+  rm -rf "${build_dir}/node_modules"
+fi
+
+if [[ -d "${build_dir}/bower_components" ]]; then
+  rm -rf "${build_dir}/bower_components"
+fi
+
+echo "web: ./deploy/cloud-foundry/start.sh" > "${build_dir}/Procfile"
+
+ls -lah "${build_dir}"
+cd "${build_dir}"
+zip -r "${work_dir}}/stratos-ui-packaged.zip" ./*
+cd "${work_dir}"
+
+exit 0
