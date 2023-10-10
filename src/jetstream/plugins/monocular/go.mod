@@ -10,7 +10,7 @@ require (
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
-	github.com/lib/pq v1.0.0 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
