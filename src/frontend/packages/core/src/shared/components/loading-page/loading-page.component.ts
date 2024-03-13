@@ -1,12 +1,8 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
+import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
-
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-
 
 @Component({
   selector: 'app-loading-page',

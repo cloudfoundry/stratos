@@ -13,7 +13,7 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/helm"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 const (
@@ -101,7 +101,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	}
 
 	// Upgrade to a web socket
-	ws, pingTicker, err := interfaces.UpgradeToWebSocket(ec)
+	ws, pingTicker, err := api.UpgradeToWebSocket(ec)
 	if err != nil {
 		return err
 	}

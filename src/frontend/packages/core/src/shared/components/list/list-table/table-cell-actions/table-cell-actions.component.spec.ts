@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { of as observableOf } from 'rxjs';
 
@@ -13,7 +13,7 @@ describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
   let fixture: ComponentFixture<TableCellActionsComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
         ListConfig

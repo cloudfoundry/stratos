@@ -10,17 +10,17 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // UaaUserInfo for UAA User Info
 type UaaUserInfo struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 	echo        echo.Context
 }
 
 // InitUaaUserInfo creates a new UAA user info provider
-func InitUaaUserInfo(portalProxy interfaces.PortalProxy, c echo.Context) Provider {
+func InitUaaUserInfo(portalProxy api.PortalProxy, c echo.Context) Provider {
 	return &UaaUserInfo{portalProxy: portalProxy, echo: c}
 }
 
@@ -145,7 +145,7 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 		copyHeaderIfSet(echoReq, req, "X-Identity-Zone-Subdomain")
 	}
 
-	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation)
+	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation, "")
 	res, err = client.Do(req)
 	if err != nil {
 		log.Debugf("Request failed: %v", err)

@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin tile-selector-theme($theme, $app-theme) {
   $background-color: map-get($app-theme, app-background-color);
   $background: map-get($theme, background);

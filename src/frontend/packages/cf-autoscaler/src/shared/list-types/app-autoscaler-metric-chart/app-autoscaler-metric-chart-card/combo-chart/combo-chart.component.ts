@@ -14,6 +14,7 @@ import {
   calculateViewDimensions,
   ColorHelper,
   LineSeriesComponent,
+  ScaleType,
   ViewDimensions,
 } from '@swimlane/ngx-charts';
 import { scaleBand, scaleLinear, scalePoint, scaleTime } from 'd3-scale';
@@ -43,7 +44,7 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
   @Input() gradient: boolean;
   @Input() showGridLines = true;
   @Input() activeEntries: any[] = [];
-  @Input() schemeType: string;
+  @Input() schemeType: ScaleType;
   @Input() xAxisTickFormatting: any;
   @Input() yAxisTickFormatting: any;
   @Input() roundDomains = false;
@@ -344,7 +345,7 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
       domain = this.yDomain;
     }
     this.colors = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
-    this.colorsLine = new ColorHelper(this.colorSchemeLine, this.schemeType, domain, this.customColors);
+    this.colorsLine = new ColorHelper({ domain: this.colorSchemeLine, name: "colorsSchemeLine", selectable: true, group: this.schemeType }, this.schemeType, domain, this.customColors);
     this.colorsExtra = new ColorHelper(this.scheme, this.schemeType, domain, this.customColors);
   }
 
@@ -377,7 +378,7 @@ export class AppAutoscalerComboChartComponent extends BaseChartComponent {
     opts.colors.customColors = this.legendData;
     this.legendData.map((item) => {
       opts.colors.colorDomain.push(item.value);
-      opts.colors.domain.push(item.name);
+      (opts.colors.domain as any[]).push(item.name);
       opts.domain.push(item.name);
     });
     return opts;

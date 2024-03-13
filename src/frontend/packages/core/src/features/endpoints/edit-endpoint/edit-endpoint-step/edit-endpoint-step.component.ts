@@ -1,20 +1,20 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import {
+  EndpointModel,
+  getFullEndpointApiUrl,
+  EntityCatalogSchemas,
+  IStratosEndpointDefinition,
+  stratosEntityCatalog,
+  entityCatalog,
+  ActionState,
+} from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
-import {
-  EntityCatalogSchemas,
-  IStratosEndpointDefinition,
-} from './../../../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from './../../../../../../store/src/types/endpoint.types';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
 
@@ -31,7 +31,7 @@ interface EndpointModelMap {
 export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
   endpointID: string;
-  editEndpoint: FormGroup;
+  editEndpoint: UntypedFormGroup;
   showAdvancedFields = false;
   clientRedirectURI: string;
   endpointTypeSupportsSSO = false;
@@ -43,18 +43,20 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   formChangeSub: Subscription;
   setClientInfo = false;
   show = false;
+  showCACertField = false;
+  lastSkipSSLValue = false;
 
   constructor(
     activatedRoute: ActivatedRoute,
   ) {
-    this.editEndpoint = new FormGroup({
-      name: new FormControl('', [Validators.required as any]),
-      url: new FormControl('', [Validators.required as any]),
-      skipSSL: new FormControl(false),
-      setClientInfo: new FormControl(false),
-      clientID: new FormControl(''),
-      clientSecret: new FormControl(''),
-      allowSSO: new FormControl(false),
+    this.editEndpoint = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required as any]),
+      url: new UntypedFormControl('', [Validators.required as any]),
+      skipSSL: new UntypedFormControl(false),
+      setClientInfo: new UntypedFormControl(false),
+      clientID: new UntypedFormControl(''),
+      clientSecret: new UntypedFormControl(''),
+      allowSSO: new UntypedFormControl(false),
     });
 
     this.clientRedirectURI = getSSOClientRedirectURI();
@@ -90,6 +92,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       first()
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
+      this.lastSkipSSLValue = endpoint.skip_ssl_validation;
+      this.showCACertField = !!endpoint.caCert;
+      this.updateSSLFieldCheckbox();
       this.editEndpoint.setValue({
         name: endpoint.name,
         url: getFullEndpointApiUrl(endpoint),
@@ -130,17 +135,20 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     return this.endpoint$.pipe(
       first(),
       switchMap(endpoint => {
+        const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
+        const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL;
         return stratosEntityCatalog.endpoint.api.update<ActionState>(
           this.endpointID,
           this.endpointID, {
           endpointType: endpoint.cnsi_type,
           id: this.endpointID,
           name: this.editEndpoint.value.name,
-          skipSSL: this.editEndpoint.value.skipSSL,
+          skipSSL,
           setClientInfo: this.editEndpoint.value.setClientInfo,
           clientID: this.editEndpoint.value.clientID,
           clientSecret: this.editEndpoint.value.clientSecret,
           allowSSO: this.editEndpoint.value.allowSSO,
+          caCert,
         }
         ).pipe(
           pairwise(),
@@ -170,4 +178,22 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.endpointTypeSupportsSSO = isCloudFoundry;
   }
 
+  toggleCACertField() {
+    this.showCACertField = !this.showCACertField;
+    if (this.showCACertField) {
+      this.lastSkipSSLValue = this.editEndpoint.value.skipSSL;
+      this.editEndpoint.controls.skipSSL.setValue(false);
+    } else {
+      this.editEndpoint.controls.skipSSL.setValue(this.lastSkipSSLValue);
+    }
+    this.updateSSLFieldCheckbox();
+  }
+
+  private updateSSLFieldCheckbox() {
+    if (this.showCACertField) {
+      this.editEndpoint.controls.skipSSL.disable();
+    } else {
+      this.editEndpoint.controls.skipSSL.enable();
+    }
+  }
 }

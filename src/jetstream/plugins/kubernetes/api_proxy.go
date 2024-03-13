@@ -7,7 +7,7 @@ import (
 	// Import the OIDC auth plugin
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // KubeProxyError represents error when a proxied request to the Kube API failes
@@ -16,7 +16,7 @@ type KubeProxyError struct {
 }
 
 // KubeProxyFunc represents a function to proxy to the Kube API
-type KubeProxyFunc func(*interfaces.ConnectedEndpoint, chan KubeProxyResponse)
+type KubeProxyFunc func(*api.ConnectedEndpoint, chan KubeProxyResponse)
 
 // KubeProxyResponse represents a response from a proxy request to the Kube API
 type KubeProxyResponse struct {
@@ -32,7 +32,7 @@ type KubeProxyResponses map[string]interface{}
 func (c *KubernetesSpecification) ProxyKubernetesAPI(userID string, f KubeProxyFunc) (KubeProxyResponses, error) {
 
 	var p = c.portalProxy
-	k8sList := make([]*interfaces.ConnectedEndpoint, 0)
+	k8sList := make([]*api.ConnectedEndpoint, 0)
 	eps, err := p.ListEndpointsByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("Could not get endpints Client for endpoint: %v+", err)

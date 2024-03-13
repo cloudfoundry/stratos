@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { stratosEntityCatalog } from '@stratosui/store';
 
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import { CoreModule } from '../../core/core.module';
 import { BaseEndpointAuth } from '../../core/endpoint-auth';
 import { SharedModule } from '../../shared/shared.module';
@@ -11,19 +11,16 @@ import { MetricsComponent } from './metrics/metrics.component';
 import { MetricsService } from './services/metrics-service';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    CommonModule,
-    SharedModule,
-    MetricsRoutingModule,
-  ],
-  declarations: [MetricsComponent, MetricsEndpointDetailsComponent],
-  providers: [
-    MetricsService,
-  ],
-  entryComponents: [
-    MetricsEndpointDetailsComponent,
-  ]
+    imports: [
+        CoreModule,
+        CommonModule,
+        SharedModule,
+        MetricsRoutingModule,
+    ],
+    declarations: [MetricsComponent, MetricsEndpointDetailsComponent],
+    providers: [
+        MetricsService,
+    ]
 })
 export class MetricsModule {
 

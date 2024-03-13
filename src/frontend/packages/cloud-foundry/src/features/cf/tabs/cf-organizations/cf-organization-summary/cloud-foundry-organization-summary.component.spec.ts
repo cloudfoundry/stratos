@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import {
@@ -21,7 +21,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
   let component: CloudFoundryOrganizationSummaryComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSummaryComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryOrganizationSummaryComponent,
@@ -40,7 +40,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSummaryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

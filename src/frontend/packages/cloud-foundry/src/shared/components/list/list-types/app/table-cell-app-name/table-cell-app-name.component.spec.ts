@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
@@ -11,7 +11,7 @@ describe('TableCellAppNameComponent', () => {
   let component: TableCellAppNameComponent<any>;
   let fixture: ComponentFixture<TableCellAppNameComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellAppNameComponent],
       imports: [

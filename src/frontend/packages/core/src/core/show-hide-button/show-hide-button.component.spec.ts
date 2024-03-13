@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ShowHideButtonComponent } from './show-hide-button.component';
 
@@ -6,7 +6,7 @@ describe('ShowHideButtonComponent', () => {
   let component: ShowHideButtonComponent;
   let fixture: ComponentFixture<ShowHideButtonComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ShowHideButtonComponent ]
     })

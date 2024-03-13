@@ -4,7 +4,7 @@ import { PaginationMonitor } from '../../monitors/pagination-monitor';
 import { PaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.types';
 import { PaginatedAction } from '../../types/pagination.types';
 import { OrchestratedActionBuilders, OrchestratedActionCoreBuilders } from '../action-orchestrator/action-orchestrator';
-import { FilteredByNotReturnType, FilteredByReturnType, KnownKeys, NeverKeys } from './type.helpers';
+import { FilteredByNotReturnType, FilteredByReturnType, NeverKeys, RemoveIndex } from './type.helpers';
 
 
 /**
@@ -46,7 +46,10 @@ export interface CoreEntityCatalogEntityStore<Y, ABC extends OrchestratedActionB
 /**
  * Filter out all common builders in OrchestratedActionCoreBuilders from ABC
  */
-type CustomBuilders<ABC> = Omit<Pick<ABC, KnownKeys<ABC>>, keyof OrchestratedActionCoreBuilders>;
+type CustomBuilders<ABC> = Omit<
+  RemoveIndex<ABC>,
+  keyof OrchestratedActionCoreBuilders
+>;
 
 /**
  * Mark builders that don't return a pagination action as `never`

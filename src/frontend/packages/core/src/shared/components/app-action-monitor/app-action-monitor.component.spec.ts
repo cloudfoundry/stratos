@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AppActionMonitorComponent } from './app-action-monitor.component';
@@ -7,7 +7,7 @@ describe('AppActionMonitorComponent', () => {
   let component: AppActionMonitorComponent<any>;
   let fixture: ComponentFixture<AppActionMonitorComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: BaseTestModules
     })

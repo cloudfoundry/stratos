@@ -4,7 +4,7 @@ applications:
       image: splatform/stratos:stable
     instances: 1
     memory: 128M
-    disk_quota: 384M
+    disk_quota: 512M
     # services:
     #   - console_db
     # env:

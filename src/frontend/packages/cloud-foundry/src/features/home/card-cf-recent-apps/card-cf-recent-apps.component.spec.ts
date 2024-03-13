@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
 import {
@@ -25,7 +25,7 @@ describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
   let fixture: ComponentFixture<CardCfRecentAppsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardCfRecentAppsComponent,

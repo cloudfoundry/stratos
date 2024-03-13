@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
@@ -8,7 +8,7 @@ describe('TableCellExpanderComponent', () => {
   let component: TableCellExpanderComponent;
   let fixture: ComponentFixture<TableCellExpanderComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellExpanderComponent],
       imports: [

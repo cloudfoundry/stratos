@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -10,7 +10,7 @@ describe('KubernetesHomeCardComponent', () => {
   let component: KubernetesHomeCardComponent;
   let fixture: ComponentFixture<KubernetesHomeCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ KubernetesHomeCardComponent ],
       imports: [...KubernetesBaseTestModules],

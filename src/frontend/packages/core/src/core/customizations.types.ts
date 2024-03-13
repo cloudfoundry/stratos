@@ -7,6 +7,7 @@ export interface CustomizationsMetadata {
   hasEula?: boolean;
   copyright?: string;
   logoText?: string;
+  appName?: string;
   aboutInfoComponent?: any;
   supportInfoComponent?: any;
   noEndpointsComponent?: any;
@@ -22,4 +23,10 @@ export class CustomizationService {
 
   set = (cm: CustomizationsMetadata) => this.customizationMetadata = cm;
   get = () => this.customizationMetadata;
+
+  setAppNameFromTitle() {
+    if (!this.customizationMetadata.appName) {
+      this.customizationMetadata.appName = document.title || 'Stratos';
+    }
+  }
 }

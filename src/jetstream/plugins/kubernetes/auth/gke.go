@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -34,13 +34,13 @@ type GKEConfig struct {
 
 // GKEKubeAuth is GKE Authentication for Kubernetes
 type GKEKubeAuth struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 const authConnectTypeGKE = "gke-auth"
 
 // InitGKEKubeAuth creates a GKEKubeAuth
-func InitGKEKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
+func InitGKEKubeAuth(portalProxy api.PortalProxy) KubeAuthProvider {
 	return &GKEKubeAuth{portalProxy: portalProxy}
 }
 
@@ -49,7 +49,7 @@ func (c *GKEKubeAuth) GetName() string {
 	return authConnectTypeGKE
 }
 
-func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 	gkeInfo := &GKEConfig{}
 	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &gkeInfo)
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfac
 }
 
 // FetchToken will create a token for the GKE Authentication using the POSTed data
-func (c *GKEKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (GKE)")
 
 	// We should already have the refresh token in the body sent to us
@@ -113,7 +113,7 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Conte
 }
 
 // GetUserFromToken gets the username from the GKE Token
-func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
 	log.Debug("GetUserFromToken (GKE)")
 
 	gkeInfo := &GKEConfig{}
@@ -122,13 +122,13 @@ func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.
 		return nil, false
 	}
 
-	return &interfaces.ConnectedUser{
+	return &api.ConnectedUser{
 		GUID: gkeInfo.Email,
 		Name: gkeInfo.Email,
 	}, true
 }
 
-func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doGKEFlowRequest")
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshGKEToken)
@@ -136,7 +136,7 @@ func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *ht
 }
 
 // RefreshGKEToken will refresh a GKE token
-func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("RefreshGKEToken")
 	now := time.Now()
 
@@ -166,12 +166,12 @@ func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID
 	return userToken, nil
 }
 
-func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u interfaces.UAAResponse, err error) {
+func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u api.UAAResponse, err error) {
 	log.Debug("refreshGKEToken")
-	tokenInfo := interfaces.UAAResponse{}
+	tokenInfo := api.UAAResponse{}
 
 	// Go and get a new access token
-	httpClient := c.portalProxy.GetHttpClient(skipSSLValidation)
+	httpClient := c.portalProxy.GetHttpClient(skipSSLValidation, "")
 	body := fmt.Sprintf("client_secret=%s&refresh_token=%s&client_id=%s&grant_type=refresh_token", url.QueryEscape(clientSecret), url.QueryEscape(refreshToken), url.QueryEscape(clientID))
 	resp, err := httpClient.Post(googleOAuthEndpoint, "application/x-www-form-urlencoded", strings.NewReader(body))
 	if err != nil {
@@ -194,9 +194,9 @@ func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSe
 	return tokenInfo, err
 }
 
-func (c *GKEKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+func (c *GKEKubeAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 	// Register auth type with Jetstream
-	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+	c.portalProxy.AddAuthProvider(c.GetName(), api.AuthProvider{
 		Handler:  c.DoFlowRequest,
 		UserInfo: c.GetUserFromToken,
 	})

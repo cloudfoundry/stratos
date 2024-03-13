@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
@@ -17,7 +17,7 @@ describe('AutoscalerScaleHistoryPageComponent', () => {
   let component: AutoscalerScaleHistoryPageComponent;
   let fixture: ComponentFixture<AutoscalerScaleHistoryPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AutoscalerScaleHistoryPageComponent],
       imports: [

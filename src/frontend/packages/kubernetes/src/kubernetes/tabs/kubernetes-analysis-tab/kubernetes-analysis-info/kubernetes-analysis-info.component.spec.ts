@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SharedModule } from '../../../../../../core/src/public-api';
 import { SidePanelService } from '../../../../../../core/src/shared/services/side-panel.service';
@@ -13,7 +13,7 @@ describe('KubernetesAnalysisInfoComponent', () => {
   let component: KubernetesAnalysisInfoComponent;
   let fixture: ComponentFixture<KubernetesAnalysisInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAnalysisInfoComponent, AnalysisInfoCardComponent],
       imports: [

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -83,7 +83,7 @@ func TestAddAPIKey(t *testing.T) {
 			})
 
 			Convey("should return an API key", func() {
-				So(apiKey, ShouldHaveSameTypeAs, &interfaces.APIKey{})
+				So(apiKey, ShouldHaveSameTypeAs, &api.APIKey{})
 			})
 
 			Convey("API key secret should not be empty", func() {
@@ -127,7 +127,7 @@ func TestListAPIKeys(t *testing.T) {
 			})
 
 			Convey("result should be of correct type", func() {
-				expectedList := make([]interfaces.APIKey, 0)
+				expectedList := make([]api.APIKey, 0)
 				So(results, ShouldResemble, expectedList)
 			})
 		})
@@ -135,7 +135,7 @@ func TestListAPIKeys(t *testing.T) {
 		Convey("if records exist in the DB", func() {
 			t := time.Now()
 
-			r1 := &interfaces.APIKey{
+			r1 := &api.APIKey{
 				GUID:     "00000000-0000-0000-0000-000000000000",
 				Secret:   "",
 				UserGUID: userID,
@@ -143,7 +143,7 @@ func TestListAPIKeys(t *testing.T) {
 				LastUsed: &t,
 			}
 
-			r2 := &interfaces.APIKey{
+			r2 := &api.APIKey{
 				GUID:     "11111111-1111-1111-1111-111111111111",
 				Secret:   "",
 				UserGUID: userID,
@@ -151,7 +151,7 @@ func TestListAPIKeys(t *testing.T) {
 				LastUsed: nil,
 			}
 
-			expectedList := []interfaces.APIKey{*r1, *r2}
+			expectedList := []api.APIKey{*r1, *r2}
 
 			mockRows := sqlmock.NewRows(rowFields).
 				AddRow(r1.GUID, r1.UserGUID, r1.Comment, r1.LastUsed).
@@ -216,7 +216,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 		Convey("if records exist in the DB", func() {
 			t := time.Now()
 
-			r := &interfaces.APIKey{
+			r := &api.APIKey{
 				GUID:     "00000000-0000-0000-0000-000000000000",
 				Secret:   "",
 				UserGUID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",

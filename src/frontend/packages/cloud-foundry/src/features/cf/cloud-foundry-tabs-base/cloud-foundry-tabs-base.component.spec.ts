@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { populateStoreWithTestEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
@@ -14,7 +14,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryTabsBaseComponent],
         imports: generateCfBaseTestModules(),

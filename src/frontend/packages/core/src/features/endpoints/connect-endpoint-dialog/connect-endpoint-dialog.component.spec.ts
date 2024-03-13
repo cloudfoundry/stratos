@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -31,7 +31,7 @@ describe('ConnectEndpointDialogComponent', () => {
   let component: ConnectEndpointDialogComponent;
   let fixture: ComponentFixture<ConnectEndpointDialogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },

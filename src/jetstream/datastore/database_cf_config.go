@@ -131,8 +131,7 @@ func getDBCredentialsValue(val interface{}) string {
 }
 
 func findDatabaseConfigurations(vcapServices map[string][]VCAPService) map[string]VCAPService {
-	var configs map[string]VCAPService
-	configs = make(map[string]VCAPService)
+	configs := make(map[string]VCAPService)
 
 	for _, services := range vcapServices {
 		for _, service := range services {
@@ -170,7 +169,7 @@ func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, stri
 	n1 := re.SubexpNames()
 	matches := re.FindAllStringSubmatch(uri, -1)
 	if len(matches) < 1 {
-		return "", "", "", 0, "", errors.New("Failed to parse database URI")
+		return "", "", "", 0, "", errors.New("failed to parse database URI")
 	}
 
 	r2 := matches[0]

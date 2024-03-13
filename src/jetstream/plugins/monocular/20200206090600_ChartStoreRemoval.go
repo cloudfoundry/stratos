@@ -3,26 +3,25 @@ package monocular
 import (
 	"database/sql"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
-
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	datastore.RegisterMigration(20200206090600, "ChartStoreRemoval", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20200206090600, nil)
+}
 
-		dropChartsTable := "DROP TABLE IF EXISTS charts";
-		_, err := txn.Exec(dropChartsTable)
-		if err != nil {
-			return err
-		}
+func Up20200206090600(txn *sql.Tx) error {
+	dropChartsTable := "DROP TABLE IF EXISTS charts"
+	_, err := txn.Exec(dropChartsTable)
+	if err != nil {
+		return err
+	}
 
-		dropChartFilesTable := "DROP TABLE IF EXISTS chart_files;"
-		_, err = txn.Exec(dropChartFilesTable)
-		if err != nil {
-			return err
-		}
+	dropChartFilesTable := "DROP TABLE IF EXISTS chart_files;"
+	_, err = txn.Exec(dropChartFilesTable)
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	return nil
 }

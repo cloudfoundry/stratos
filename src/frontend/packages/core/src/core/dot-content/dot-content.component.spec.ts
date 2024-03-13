@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DotContentComponent } from './dot-content.component';
 
@@ -6,7 +6,7 @@ describe('DotContentComponent', () => {
   let component: DotContentComponent;
   let fixture: ComponentFixture<DotContentComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DotContentComponent]
     })

@@ -1,5 +1,5 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -12,7 +12,7 @@ describe('CloudFoundryUsersComponent', () => {
   let component: CloudFoundryUsersComponent;
   let fixture: ComponentFixture<CloudFoundryUsersComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryUsersComponent],
       imports: generateCfBaseTestModules(),

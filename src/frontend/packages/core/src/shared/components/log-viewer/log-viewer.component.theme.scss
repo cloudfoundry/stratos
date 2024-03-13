@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 
 @function ansi-colour($ansi-colours, $colour-name, $intense) {
   @if map-has-key($ansi-colours, $colour-name) {

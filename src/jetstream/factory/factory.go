@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 )
 
@@ -14,18 +14,18 @@ type DefaultStoreFactory struct {
 }
 
 // NewDefaultStoreFactory creates a new default store factory
-func NewDefaultStoreFactory(dbPool *sql.DB) interfaces.StoreFactory {
+func NewDefaultStoreFactory(dbPool *sql.DB) api.StoreFactory {
 	return &DefaultStoreFactory{
 		databaseConnectionPool: dbPool,
 	}
 }
 
 // EndpointStore gets store for obtaining endpoint information
-func (f *DefaultStoreFactory) EndpointStore() (interfaces.EndpointRepository, error) {
+func (f *DefaultStoreFactory) EndpointStore() (api.EndpointRepository, error) {
 	return cnsis.NewPostgresCNSIRepository(f.databaseConnectionPool)
 }
 
 // TokenStore gets store for obtaining endpoint information
-func (f *DefaultStoreFactory) TokenStore() (interfaces.TokenRepository, error) {
+func (f *DefaultStoreFactory) TokenStore() (api.TokenRepository, error) {
 	return tokens.NewPgsqlTokenRepository(f.databaseConnectionPool)
 }

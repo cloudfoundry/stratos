@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import { CoreModule } from '../../../../core/core.module';
@@ -12,7 +12,7 @@ describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
   let fixture: ComponentFixture<CardsComponent<EntityInfo>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

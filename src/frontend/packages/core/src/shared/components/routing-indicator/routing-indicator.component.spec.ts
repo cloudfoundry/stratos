@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RoutingIndicatorComponent } from './routing-indicator.component';
 import { CoreModule } from '../../../core/core.module';
@@ -9,7 +9,7 @@ describe('RoutingIndicatorComponent', () => {
   let component: RoutingIndicatorComponent;
   let fixture: ComponentFixture<RoutingIndicatorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         RoutingIndicatorComponent

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -39,7 +39,7 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
-  editSpecificDateForm: FormGroup;
+  editSpecificDateForm: UntypedFormGroup;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public currentPolicy: AppAutoscalerPolicyLocal;
@@ -54,7 +54,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   constructor(
     public applicationService: ApplicationService,
     private store: Store<AppState>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private entityServiceFactory: EntityServiceFactory,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute

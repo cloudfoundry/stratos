@@ -5,7 +5,6 @@ const {
   SpecReporter
 } = require('jasmine-spec-reporter');
 
-const HtmlReporter = require('stratos-protractor-reporter');
 const moment = require('moment');
 const skipPlugin = require('./src/test-e2e/skip-plugin.js');
 const globby = require('globby');
@@ -217,15 +216,6 @@ const config = {
     require('ts-node').register({
       project: 'src/test-e2e/tsconfig.e2e.json'
     });
-    jasmine.getEnv().addReporter(new HtmlReporter({
-      baseDirectory: E2E_REPORT_FOLDER,
-      takeScreenShotsOnlyForFailedSpecs: true,
-      docTitle: 'E2E Test Report: ' + timestamp,
-      docName: 'index.html',
-      logIgnore: [
-        /\/auth\/session\/verify - Failed to load resource/g
-      ]
-    }).getJasmine2Reporter());
     jasmine.getEnv().addReporter(new SpecReporter({
       spec: {
         displayStacktrace: 'raw',

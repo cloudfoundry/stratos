@@ -17,9 +17,9 @@ BOLD="\033[1m"
 
 # Set defaults
 PROD_RELEASE=false
-DOCKER_REGISTRY=docker.io
-DOCKER_ORG=splatform
-BASE_IMAGE_TAG=leap15_2
+DOCKER_REGISTRY=ghcr.io
+DOCKER_ORG=anynines
+BASE_IMAGE_TAG=centos7
 OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"

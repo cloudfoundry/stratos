@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
@@ -20,13 +20,13 @@ import { AppNameUniqueChecking } from '../../../../shared/directives/app-name-un
 })
 export class CreateApplicationStep2Component implements OnInit {
 
-  constructor(private store: Store<CFAppState>, private fb: FormBuilder) { }
+  constructor(private store: Store<CFAppState>, private fb: UntypedFormBuilder) { }
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   validate: Observable<boolean>;
 
-  appName = new FormControl();
+  appName = new UntypedFormControl();
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   name: string;
@@ -41,7 +41,7 @@ export class CreateApplicationStep2Component implements OnInit {
   }
 
   ngOnInit() {
-    this.form = new FormGroup({ appName: this.appName });
+    this.form = new UntypedFormGroup({ appName: this.appName });
     this.validate = this.form.statusChanges.pipe(
       map(() => {
         return this.form.valid;

@@ -1,14 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { InternalAppState, RouterRedirect, RouterNav, Login, VerifySession, AuthState } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
 
-import { Login, VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { InternalAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { RouterRedirect } from '../../../../../store/src/reducers/routing.reducer';
 import { queryParamMap } from '../../../core/auth-guard.service';
 
 @Component({

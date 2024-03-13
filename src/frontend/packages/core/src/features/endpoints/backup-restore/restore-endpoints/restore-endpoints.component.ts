@@ -1,19 +1,16 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Store } from '@ngrx/store';
+import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable, of, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
-
 
 @Component({
   selector: 'app-restore-endpoints',
@@ -27,7 +24,7 @@ export class RestoreEndpointsComponent {
 
   // Step 2
   passwordValid$: Observable<boolean>;
-  passwordForm: FormGroup;
+  passwordForm: UntypedFormGroup;
   show = false;
 
   constructor(
@@ -39,8 +36,8 @@ export class RestoreEndpointsComponent {
   }
 
   setupPasswordStep() {
-    this.passwordForm = new FormGroup({
-      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    this.passwordForm = new UntypedFormGroup({
+      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
     });
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {

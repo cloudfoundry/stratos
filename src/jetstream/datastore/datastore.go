@@ -2,12 +2,16 @@ package datastore
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/custom_errors"
+	"github.com/samber/lo"
 
 	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/govau/cf-common/env"
@@ -20,7 +24,7 @@ import (
 	// Sqlite driver
 	_ "github.com/mattn/go-sqlite3"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 const (
@@ -34,6 +38,42 @@ const (
 	// TimeoutBoundary is the max time in minutes to wait for the DB Schema to be initialized
 	TimeoutBoundary = 10
 )
+
+var (
+	columnNamesForCNSIsBase              = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data", "creator", "ca_cert"}
+	columnNamesForTokensBase             = []string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token", "enabled"}
+	columnNamesForConnectedEndpointsBase = append(append(GetColumnNamesForCSNIs("meta_data"), []string{"account", "endpoint_metadata"}...), columnNamesForTokensBase...)
+	columnNamesForVersionsBase           = []string{"version_id"}
+)
+
+func GetColumnNamesForCSNIs(exclude ...string) []string {
+	return lo.Without(columnNamesForCNSIsBase, exclude...)
+}
+
+func GetColumnNamesForTokens(exclude ...string) []string {
+	return lo.Without(columnNamesForTokensBase, exclude...)
+}
+
+func GetColumnNamesForConnectedEndpoints(exclude ...string) []string {
+	return lo.Without(columnNamesForConnectedEndpointsBase, exclude...)
+}
+
+func GetColumnNamesForVersions(exclude ...string) []string {
+	return lo.Without(columnNamesForVersionsBase, exclude...)
+}
+
+func GetColumnNames(databaseName string, exclude ...string) []string {
+	switch databaseName {
+	case "cnsis":
+		return lo.Without(columnNamesForCNSIsBase, exclude...)
+	case "tokens":
+		return lo.Without(columnNamesForTokensBase, exclude...)
+	case "versions":
+		return lo.Without(columnNamesForVersionsBase, exclude...)
+	default:
+		panic("Unknown database name")
+	}
+}
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
@@ -108,7 +148,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 			return dc, nil
 		}
 		// Invalid SSL mode
-		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
+		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
 	} else if dc.DatabaseProvider == MYSQL {
 		// Map default of disabled to false for MySQL
 		if dc.SSLMode == "disable" {
@@ -118,9 +158,9 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 			return dc, nil
 		}
 		// Invalid SSL mode
-		return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
+		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
 	}
-	return dc, fmt.Errorf("Invalid provider %v", dc)
+	return dc, fmt.Errorf("invalid provider %v", dc)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
@@ -142,44 +182,35 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 }
 
 // GetConnection returns a database connection to either MySQL, PostgreSQL or SQLite
-func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
+func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("GetConnection")
+	db, err := NewGooseDBConf(dc, env)
 
-	// Get a Goose Configuration so that we can pass that to the schema migrator
-	conf, err := NewGooseDBConf(dc, env)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	db, err := sql.Open(conf.Driver.Name, conf.Driver.OpenStr)
-	return db, conf, err
+	return db, err
 }
 
 // GetInMemorySQLLiteConnection returns an SQLite DB Connection
-func GetInMemorySQLLiteConnection() (*sql.DB, *goose.DBConf, error) {
+func GetInMemorySQLLiteConnection() (*sql.DB, error) {
 
 	databaseFile := "file::memory:?cache=shared"
 	log.Info("Using In Memory Database file")
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	driver := newDBDriver("sqlite3", databaseFile)
-	conf := &goose.DBConf{
-		Driver: driver,
-	}
+	goose.SetDialect("sqlite3")
 
-	err = ApplyMigrations(conf, db)
+	err = ApplyMigrations(db)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return db, conf, nil
+	return db, nil
 }
 
 // NewGooseDBConf creates a new Goose config for database migrations
-func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
+func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	var openStr, name string
 
@@ -201,39 +232,10 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
 		}
 	}
 
-	driver := newDBDriver(name, openStr)
-	return &goose.DBConf{
-		MigrationsDir: ".",
-		Env:           fmt.Sprintf("%s_dbenv", name),
-		Driver:        driver,
-		PgSchema:      "",
-	}, nil
-}
+	goose.SetDialect(name)
+	db, err := sql.Open(name, openStr)
 
-// Create a new DBDriver and populate driver specific
-// fields for drivers that we know about.
-func newDBDriver(name, open string) goose.DBDriver {
-
-	d := goose.DBDriver{
-		Name:    name,
-		OpenStr: open,
-	}
-
-	switch name {
-	case "postgres":
-		d.Import = "github.com/lib/pq"
-		d.Dialect = &goose.PostgresDialect{}
-
-	case "mysql":
-		d.Import = "github.com/go-sql-driver/mysql"
-		d.Dialect = &goose.MySqlDialect{}
-
-	case "sqlite3":
-		d.Import = "github.com/mattn/go-sqlite3"
-		d.Dialect = &goose.Sqlite3Dialect{}
-	}
-
-	return d
+	return db, err
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -300,7 +302,7 @@ func Ping(db *sql.DB) error {
 	log.Debug("Ping database")
 	err := db.Ping()
 	if err != nil {
-		return fmt.Errorf("Unable to ping the database: %+v", err)
+		return fmt.Errorf("unable to ping the database: %+v", err)
 	}
 
 	return nil
@@ -311,7 +313,7 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
-		sqlParamReplace := regexp.MustCompile("\\$[0-9]+")
+		sqlParamReplace := regexp.MustCompile(`\$[0-9]+`)
 		return sqlParamReplace.ReplaceAllString(sql, "?")
 	}
 
@@ -321,8 +323,15 @@ func ModifySQLStatement(sql string, databaseProvider string) string {
 
 // WaitForMigrations will wait until all migrations have been applied
 func WaitForMigrations(db *sql.DB) error {
-	migrations := GetOrderedMigrations()
-	targetVersion := migrations[len(migrations)-1]
+	migrations, err := goose.CollectMigrations(".", minVersion, maxVersion)
+	if err != nil {
+		return err
+	}
+
+	targetVersion, err := migrations.Last()
+	if err != nil {
+		return err
+	}
 
 	// Timeout after which we will give up
 	timeout := time.Now().Add(time.Minute * TimeoutBoundary)
@@ -332,9 +341,9 @@ func WaitForMigrations(db *sql.DB) error {
 		databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
 		if err != nil {
 			var errorMsg = err.Error()
-			if strings.Contains(err.Error(), "no such table") {
+			if errors.Is(err, custom_errors.ErrNoSuchTable) {
 				errorMsg = "Waiting for versions table to be created"
-			} else if strings.Contains(err.Error(), "No database versions found") {
+			} else if errors.Is(err, custom_errors.ErrNoDatabaseVersionsFound) {
 				errorMsg = "Versions table is empty - waiting for migrations"
 			}
 			log.Infof("Database schema check: %s", errorMsg)
@@ -346,12 +355,12 @@ func WaitForMigrations(db *sql.DB) error {
 		}
 
 		// If our timeout boundary has been exceeded, bail out
-		if timeout.Sub(time.Now()) < 0 {
+		if time.Until(timeout) < 0 {
 			// If we timed out and the last request was a db error, show the error
 			if err != nil {
 				log.Error(err)
 			}
-			return fmt.Errorf("Timed out waiting for database schema to be initialized")
+			return fmt.Errorf("timed out waiting for database schema to be initialized")
 		}
 
 		time.Sleep(3 * time.Second)

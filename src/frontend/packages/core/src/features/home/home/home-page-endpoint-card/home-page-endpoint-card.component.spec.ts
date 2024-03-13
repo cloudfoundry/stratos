@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
@@ -13,7 +13,7 @@ describe('HomePageEndpointCardComponent', () => {
   let component: HomePageEndpointCardComponent;
   let fixture: ComponentFixture<HomePageEndpointCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ HomePageEndpointCardComponent ],
       imports: [

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { GithubCommitAuthorComponent } from './github-commit-author.component';
 
@@ -7,7 +7,7 @@ describe('GithubCommitAuthorComponent', () => {
   let fixture: ComponentFixture<GithubCommitAuthorComponent>;
   let element: HTMLElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [GithubCommitAuthorComponent]
     })

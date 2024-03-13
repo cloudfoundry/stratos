@@ -8,7 +8,7 @@ import (
 	"time"
 
 	// "github.com/SermoDigital/jose/jws"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -17,7 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/kubernetes-sigs/aws-iam-authenticator/pkg/token"
+	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
 // AWSIAMUserInfo is the user info needed to connect to AWS Kubernetes
@@ -29,13 +29,13 @@ type AWSIAMUserInfo struct {
 
 // AWSKubeAuth is AWS IAM Authentication for Kubernetes
 type AWSKubeAuth struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 const authConnectTypeAWSIAM = "aws-iam"
 
 // InitAWSKubeAuth creates a GKEKubeAuth
-func InitAWSKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
+func InitAWSKubeAuth(portalProxy api.PortalProxy) KubeAuthProvider {
 	return &AWSKubeAuth{portalProxy: portalProxy}
 }
 
@@ -44,7 +44,7 @@ func (c *AWSKubeAuth) GetName() string {
 	return authConnectTypeAWSIAM
 }
 
-func (c *AWSKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *AWSKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 	awsInfo := &AWSIAMUserInfo{}
 	err := json.Unmarshal([]byte(tokenRec.RefreshToken), &awsInfo)
 	if err != nil {
@@ -74,7 +74,7 @@ func (c *AWSIAMUserInfo) IsExpired() bool {
 	return true
 }
 
-func (c *AWSKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchIAMToken")
 
 	// Place the IAM properties into a JSON Struct and store that in the Refresh Token
@@ -111,15 +111,15 @@ func (c *AWSKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Conte
 	return &tokenRecord, &cnsiRecord, nil
 }
 
-func (c *AWSKubeAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
-	return &interfaces.ConnectedUser{
+func (c *AWSKubeAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
+	return &api.ConnectedUser{
 		GUID: "AWS IAM",
 		Name: "IAM",
 	}, true
 }
 
 func (c *AWSKubeAuth) getTokenIAM(info AWSIAMUserInfo) (string, error) {
-	generator, err := token.NewGenerator(false)
+	generator, err := token.NewGenerator(false, false)
 	if err != nil {
 		return "", fmt.Errorf("AWS IAM: Failed to create generator due to %+v", err)
 	}
@@ -143,22 +143,22 @@ func (c *AWSKubeAuth) getTokenIAM(info AWSIAMUserInfo) (string, error) {
 	return tok.Token, nil
 }
 
-func (c *AWSKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+func (c *AWSKubeAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 	// Register auth type with Jetstream
-	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+	c.portalProxy.AddAuthProvider(c.GetName(), api.AuthProvider{
 		Handler:  c.DoFlowRequest,
 		UserInfo: c.GetUserFromToken,
 	})
 }
 
-func (c *AWSKubeAuth) DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (c *AWSKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doAWSIAMFlowRequest")
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshIAMToken)
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
-func (c *AWSKubeAuth) RefreshIAMToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (c *AWSKubeAuth) RefreshIAMToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("RefreshIAMToken")
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)

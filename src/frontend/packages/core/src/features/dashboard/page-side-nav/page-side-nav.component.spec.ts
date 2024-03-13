@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
@@ -9,7 +9,7 @@ describe('PageSideNavComponent', () => {
   let component: PageSideNavComponent;
   let fixture: ComponentFixture<PageSideNavComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [BaseTestModulesNoShared],
       declarations: [PageSideNavComponent],

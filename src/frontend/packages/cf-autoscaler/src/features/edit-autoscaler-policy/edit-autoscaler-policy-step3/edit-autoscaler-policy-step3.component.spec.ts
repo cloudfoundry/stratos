@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
@@ -16,7 +16,7 @@ describe('EditAutoscalerPolicyStep3Component', () => {
   let component: EditAutoscalerPolicyStep3Component;
   let fixture: ComponentFixture<EditAutoscalerPolicyStep3Component>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditAutoscalerPolicyStep3Component],
       imports: [

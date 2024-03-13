@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
@@ -9,7 +9,7 @@ describe('StackedInputActionComponent', () => {
   let component: StackedInputActionComponent;
   let fixture: ComponentFixture<StackedInputActionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [StackedInputActionComponent, BooleanIndicatorComponent],
       imports: [...BaseTestModulesNoShared],
@@ -17,7 +17,7 @@ describe('StackedInputActionComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
     component.stateIn$ = observableOf({
@@ -27,7 +27,7 @@ describe('StackedInputActionComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', async(() => {
+  it('should create', waitForAsync(() => {
     expect(component).toBeTruthy();
   }));
 });

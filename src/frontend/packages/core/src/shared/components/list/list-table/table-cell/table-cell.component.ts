@@ -8,8 +8,8 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { MultiActionListEntity } from '@stratosui/store';
 
-import { MultiActionListEntity } from '../../../../../../../store/src/monitors/pagination-monitor';
 import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
@@ -41,7 +41,6 @@ import { TableCellSidePanelComponent } from '../table-cell-side-panel/table-cell
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 
-
 export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
@@ -63,13 +62,10 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
 ];
 
 @Component({
-  selector: 'app-table-cell',
-  templateUrl: './table-cell.component.html',
-  styleUrls: ['./table-cell.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  // When we look at modules we should think about swapping this approach (create + insert in code, hard code types here) with
-  // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
-  entryComponents: [...listTableCells]
+    selector: 'app-table-cell',
+    templateUrl: './table-cell.component.html',
+    styleUrls: ['./table-cell.component.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef, static: true })

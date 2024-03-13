@@ -1,5 +1,5 @@
 import { Component, ComponentFactoryResolver, Injector, OnDestroy } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
@@ -91,7 +91,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     public store: Store<AppState>,
     public resolver: ComponentFactoryResolver,
     private injector: Injector,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private endpointsService: EndpointsService,
   ) {
   }

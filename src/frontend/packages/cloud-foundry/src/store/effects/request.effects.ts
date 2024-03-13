@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -41,7 +41,7 @@ export class CfValidateEffects {
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
    *    been dropped because their count is over 50
    */
-  @Effect() validateEntities$ = this.actions$.pipe(
+   validateEntities$ = createEffect(() => this.actions$.pipe(
     ofType<CfValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE),
     mergeMap(action => {
       const validateAction: CfValidateEntitiesStart = action;
@@ -92,9 +92,9 @@ export class CfValidateEffects {
           return [];
         }));
     })
-  );
+  ));
 
-  @Effect() completeEntities$ = this.actions$.pipe(
+   completeEntities$ = createEffect(() => this.actions$.pipe(
     ofType<CfValidateEntitiesComplete>(EntitiesPipelineActionTypes.COMPLETE),
     mergeMap(action => {
       const completeAction: CfValidateEntitiesComplete = action;
@@ -103,7 +103,7 @@ export class CfValidateEffects {
         this.update(completeAction.apiAction, false, null);
       }
       return actions;
-    }));
+    })));
 
 
   update(apiAction, busy: boolean, error: string) {

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModules,
@@ -12,7 +12,7 @@ describe('EditSpaceStepComponent', () => {
   let component: EditSpaceStepComponent;
   let fixture: ComponentFixture<EditSpaceStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceStepComponent],
       imports: generateCfBaseTestModules(),

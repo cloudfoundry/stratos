@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -11,7 +11,7 @@ describe('TableCellServiceInstanceTagsComponent', () => {
   let component: TableCellServiceInstanceTagsComponent;
   let fixture: ComponentFixture<TableCellServiceInstanceTagsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
       imports: generateCfBaseTestModulesNoShared(),
@@ -21,7 +21,7 @@ describe('TableCellServiceInstanceTagsComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(TableCellServiceInstanceTagsComponent);
     component = fixture.componentInstance;
     component.row = {
@@ -53,7 +53,7 @@ describe('TableCellServiceInstanceTagsComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', async(() => {
+  it('should create', waitForAsync(() => {
     expect(component).toBeTruthy();
   }));
 });

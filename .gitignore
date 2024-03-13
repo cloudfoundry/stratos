@@ -25,6 +25,7 @@
 !.vscode/extensions.json
 
 # misc
+/.angular/cache
 /.sass-cache
 /connect.lock
 /coverage
@@ -138,6 +139,9 @@ website/versioned_docs
 website/versioned_sidebars
 website/versions.json
 website/versions-repo
+
+# Npm package builds
+/npm_pkg
 
 /scan_tmp
 

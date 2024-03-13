@@ -154,7 +154,9 @@ By making a contribution to this project, I certify that:
 
 Then you just add a line to each git commit message:
 
+```
     Signed-off-by: Joe Smith <joe.smith@email.com>
+```
 
 Use your real name (sorry, no pseudonyms or anonymous contributions.)
 

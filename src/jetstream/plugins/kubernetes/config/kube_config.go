@@ -6,8 +6,7 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
-
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
 	"gopkg.in/yaml.v2"
 )
 

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
@@ -13,7 +13,7 @@ describe('TableCellTCPRouteComponent', () => {
   let fixture: ComponentFixture<TableCellTCPRouteComponent>;
 
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellTCPRouteComponent, BooleanIndicatorComponent],
       imports: [

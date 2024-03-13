@@ -1,6 +1,6 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { Component } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of as observableOf } from 'rxjs';
 
@@ -40,7 +40,7 @@ describe('TableRowComponent', () => {
   const elementShown = (element: Element) => element && window.getComputedStyle(element).display !== 'none';
 
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableRowComponent, TestHostComponent],
       imports: [
@@ -65,7 +65,7 @@ describe('TableRowComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show error', async(() => {
+  it('should show error', waitForAsync(() => {
     fixture.detectChanges();
     const [error1, error2] = getElements('table-row__error');
     const errorShown = elementShown(error1);

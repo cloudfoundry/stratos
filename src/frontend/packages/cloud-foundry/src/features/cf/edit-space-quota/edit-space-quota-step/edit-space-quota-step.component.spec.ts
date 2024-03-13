@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -10,7 +10,7 @@ describe('EditSpaceQuotaStepComponent', () => {
   let component: EditSpaceQuotaStepComponent;
   let fixture: ComponentFixture<EditSpaceQuotaStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceQuotaStepComponent, SpaceQuotaDefinitionFormComponent],
       imports: [

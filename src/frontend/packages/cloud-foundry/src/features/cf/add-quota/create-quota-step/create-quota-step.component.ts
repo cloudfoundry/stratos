@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ export class CreateQuotaStepComponent {
 
   quotasSubscription: Subscription;
   cfGuid: string;
-  quotaForm: FormGroup;
+  quotaForm: UntypedFormGroup;
 
   @ViewChild('form', { static: true })
   form: QuotaDefinitionFormComponent;

@@ -1,15 +1,10 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { ActionState } from '../../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
 import {

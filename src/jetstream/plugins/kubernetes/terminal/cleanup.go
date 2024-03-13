@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"context"
 	"math/rand"
 	"strconv"
 	"time"
@@ -30,11 +31,14 @@ func (k *KubeTerminal) cleanup() {
 
 		// Get all pods with a given label
 		podClient, secretClient, err := k.getClients()
+
+		ctx := context.Background()
+
 		if err == nil {
 			// Only want the pods that are kube terminals
 			options := metaV1.ListOptions{}
 			options.LabelSelector = "stratos-role=kube-terminal"
-			pods, err := podClient.List(options)
+			pods, err := podClient.List(ctx, options)
 			if err == nil {
 				for _, pod := range pods.Items {
 					if sessionID, ok := pod.Annotations[stratosSessionAnnotation]; ok {
@@ -43,7 +47,7 @@ func (k *KubeTerminal) cleanup() {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
 								log.Debugf("Deleting pod %s", pod.Name)
-								podClient.Delete(pod.Name, nil)
+								podClient.Delete(ctx, pod.Name, metaV1.DeleteOptions{})
 							}
 						}
 					}
@@ -54,7 +58,7 @@ func (k *KubeTerminal) cleanup() {
 			}
 
 			// Only want the secrets that are kube terminals
-			secrets, err := secretClient.List(options)
+			secrets, err := secretClient.List(ctx, options)
 			if err == nil {
 				for _, secret := range secrets.Items {
 					if sessionID, ok := secret.Annotations[stratosSessionAnnotation]; ok {
@@ -63,7 +67,7 @@ func (k *KubeTerminal) cleanup() {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
 								log.Debugf("Deleting secret %s", secret.Name)
-								secretClient.Delete(secret.Name, nil)
+								secretClient.Delete(ctx, secret.Name, metaV1.DeleteOptions{})
 							}
 						}
 					}

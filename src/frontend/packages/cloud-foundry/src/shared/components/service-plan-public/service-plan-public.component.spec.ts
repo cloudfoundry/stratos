@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { EntityService } from '../../../../../store/src/entity-service';
@@ -22,7 +22,7 @@ describe('ServicePlanPublicComponent', () => {
   let element: HTMLElement;
   let servicesService: ServicesServiceMock;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ServicePlanPublicComponent],
       imports: generateCfBaseTestModulesNoShared(),

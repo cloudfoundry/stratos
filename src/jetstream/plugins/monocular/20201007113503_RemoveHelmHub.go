@@ -3,19 +3,19 @@ package monocular
 import (
 	"database/sql"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
-
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	datastore.RegisterMigration(20201007113503, "RemoveHelmHub", func(txn *sql.Tx, conf *goose.DBConf) error {
-		cleanCNSIS := "DELETE FROM cnsis WHERE cnsi_type='helm' AND sub_type='hub';"
-		_, err := txn.Exec(cleanCNSIS)
-		if err != nil {
-			return err
-		}
+	goose.AddMigration(Up20201007113503, nil)
+}
 
-		return nil
-	})
+func Up20201007113503(txn *sql.Tx) error {
+	cleanCNSIS := "DELETE FROM cnsis WHERE cnsi_type='helm' AND sub_type='hub';"
+	_, err := txn.Exec(cleanCNSIS)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

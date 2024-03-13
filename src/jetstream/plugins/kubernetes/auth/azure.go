@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +20,7 @@ type AzureKubeAuth struct {
 }
 
 // InitAzureKubeAuth creates a AzureKubeAuth
-func InitAzureKubeAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
+func InitAzureKubeAuth(portalProxy api.PortalProxy) KubeAuthProvider {
 	return &AzureKubeAuth{*InitCertKubeAuth(portalProxy)}
 }
 
@@ -29,7 +29,7 @@ func (c *AzureKubeAuth) GetName() string {
 	return authConnectTypeKubeConfigAz
 }
 
-func (p *AzureKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (p *AzureKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	req := ec.Request()
 
 	// Need to extract the parameters from the request body
@@ -99,9 +99,9 @@ func isAKSAuth(k *config.KubeConfigUser) bool {
 	return true
 }
 
-func (c *AzureKubeAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+func (c *AzureKubeAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 	// Register auth type with Jetstream
-	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+	c.portalProxy.AddAuthProvider(c.GetName(), api.AuthProvider{
 		Handler:  c.DoFlowRequest,
 		UserInfo: c.GetUserFromToken,
 	})

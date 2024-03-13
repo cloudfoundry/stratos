@@ -31,7 +31,7 @@ function Version() {
               <tr>
                 <th>{latestVersion}</th>
                 <td>
-                  <Link to={useBaseUrl('/docs')}>Documentation</Link>
+                  <Link to={useBaseUrl('/docs/introduction')}>Documentation</Link>
                 </td>
                 <td>
                   <a href={`${repoUrl}/releases/tag/${latestVersion}`}>
@@ -72,7 +72,7 @@ function Version() {
                   <tr key={version[0]}>
                     <th>{version[0]}</th>
                     <td>
-                      <Link to={useBaseUrl(`/docs/${version[0]}`)}>
+                      <Link to={useBaseUrl(`/docs/${version[0]}/introduction`)}>
                         Documentation
                         </Link>
                     </td>

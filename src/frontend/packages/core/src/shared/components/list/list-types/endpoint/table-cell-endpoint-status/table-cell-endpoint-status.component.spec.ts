@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { CoreModule } from '../../../../../../core/core.module';
@@ -8,7 +8,7 @@ describe('TableCellEndpointStatusComponent', () => {
   let component: TableCellEndpointStatusComponent;
   let fixture: ComponentFixture<TableCellEndpointStatusComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellEndpointStatusComponent],
       imports: [

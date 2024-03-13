@@ -1,5 +1,5 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { async, TestBed } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MockChartService } from '../../shared/services/chart.service.mock';
 import { ChartsService } from '../../shared/services/charts.service';
@@ -8,7 +8,7 @@ import { ChartDetailsInfoComponent } from './chart-details-info.component';
 
 describe('Component: ChartDetailsInfo', () => {
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [ChartDetailsInfoComponent],
         imports: [],

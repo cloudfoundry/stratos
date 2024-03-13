@@ -1,3 +1,32 @@
+### 4.5.0 -  2023-11-10
+* Make builds work and abstract away architecture (#1)
+* Improvements in vulnerability checking (#8)
+* Fix the CVEs in the jetstream backend (#12)
+* Fix backend unit tests (also code quality improvements) (#15)
+* Theme Builder: Cast types (#16)
+* Update required disk space (#17)
+* Migrate to github.com/pressly/goose (#18)
+* Move repository/interfaces to its own submodule: api (#19)
+* Build and push base images on push to develop (#11)
+* Add Helm support for local repos in desktop mode (#14)
+* Fix dependency for database migrations (#20)
+* Adapt https://github.com/cloudfoundry/stratos/pull/4580: Update store references in core package to refer to @stratosui/store (#26)
+* Fix database migrations by casting dialect correctly (#22)
+* add Github Actions for Backend and Frontend Tests (#29)
+* Add script to help with building as packages and fix devkit and package info
+* Fix typo (#31)
+* Code quality improvements via `staticcheck` (#24)
+* tidy up github action workflow for backend tests to resolve wrong golang version during tests (#32)
+* Update to node v20 (#34)
+* Remove sass-lint and stratos-protractor-reporter (#37)
+* Apply changes from https://github.com/cloudfoundry/stratos/pull/4583 (#33)
+* Upgrade code.cloudfoundry.org/cli to v8 (#42)
+* Cherry pick commit 69ac7dc from other branch; now works without any restrictions; original commit message: (#45)
+* fix gogoproto related panic when retrieving logs upgrade github.com/cloudfoundry/noaa/consumer to 2.3.0 (#46)
+* Fix frontend CVEs (#40)
+* feat: add errorz package to combine errors as enum in there (#47)
+* allow newer pgsql versions (#51)
+
 # Change Log
 
 ## 4.4.0

@@ -18,12 +18,16 @@ export class SassHandler {
   public apply(webpackConfig: any, config: StratosConfig) {
     // Find the node-saas plugin and add a custom import resolver
     webpackConfig.module.rules.forEach(rule => {
-      if (rule.include) {
-        rule.use.forEach(p => {
-          if (p.loader && p.loader.indexOf('sass-loader') > 0) {
-            p.options.sassOptions = {
-              importer: this.customSassImport(config)
-            };
+      if (rule.rules !== undefined) {
+        rule.rules.forEach(innerRule => {
+          if (innerRule.use !== undefined) {
+            innerRule.use.forEach(p => {
+              if (p.loader && p.loader.indexOf('sass-loader') > 0) {
+                p.options.sassOptions = {
+                  importer: this.customSassImport(config)
+                };
+              }
+            });
           }
         });
       }

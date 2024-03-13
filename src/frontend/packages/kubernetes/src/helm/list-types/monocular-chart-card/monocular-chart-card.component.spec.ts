@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
@@ -12,7 +12,7 @@ describe('MonocularChartCardComponent', () => {
   let component: MonocularChartCardComponent;
   let fixture: ComponentFixture<MonocularChartCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         MonocularChartCardComponent,

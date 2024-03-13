@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
 import { ApiRequestTypes } from 'frontend/packages/store/src/reducers/api-request-reducer/request-helpers';
@@ -104,8 +104,8 @@ export class KubernetesEffects {
 
   constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>) { }
 
-  @Effect()
-  fetchDashboardInfo$ = this.actions$.pipe(
+  
+  fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesDashboard>(GET_KUBE_DASHBOARD),
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
@@ -142,43 +142,43 @@ export class KubernetesEffects {
           })
         ]));
     })
-  );
+  ));
 
-  @Effect()
-  fetchNodesInfo$ = this.actions$.pipe(
+  
+  fetchNodesInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesNodes>(GET_NODES_INFO),
     flatMap(action => this.processNodeAction(action))
-  );
+  ));
 
-  @Effect()
-  fetchNodeInfo$ = this.actions$.pipe(
+  
+  fetchNodeInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesNode>(GET_NODE_INFO),
     flatMap(action => this.processSingleItemAction<KubernetesNode>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/nodes/${action.nodeName}`
     ))
-  );
+  ));
 
-  @Effect()
-  fetchNamespaceInfo$ = this.actions$.pipe(
+  
+  fetchNamespaceInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesNamespace>(GET_NAMESPACE_INFO),
     flatMap(action => this.processSingleItemAction<KubernetesNamespace>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}`)
     )
-  );
+  ));
 
-  @Effect()
-  fetchPodsInfo$ = this.actions$.pipe(
+  
+  fetchPodsInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesPods>(GET_POD_INFO),
     flatMap(action => this.processListAction<KubernetesPod>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/pods`
     ))
-  );
+  ));
 
-  @Effect()
-  fetchPodsOnNodeInfo$ = this.actions$.pipe(
+  
+  fetchPodsOnNodeInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesPodsOnNode>(GET_PODS_ON_NODE_INFO),
     flatMap(action =>
       this.processListAction<KubernetesPod>(
@@ -187,56 +187,56 @@ export class KubernetesEffects {
         // Note - filtering done via param in action
       )
     )
-  );
+  ));
 
-  @Effect()
-  fetchPodsInNamespaceInfo$ = this.actions$.pipe(
+  
+  fetchPodsInNamespaceInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesPodsInNamespace>(GET_PODS_IN_NAMESPACE_INFO),
     flatMap(action => this.processListAction<KubernetesPod>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods`,
     ))
-  );
+  ));
 
-  @Effect()
-  fetchServicesInNamespaceInfo$ = this.actions$.pipe(
+  
+  fetchServicesInNamespaceInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesServicesInNamespace>(GET_SERVICES_IN_NAMESPACE_INFO),
     flatMap(action => this.processListAction<KubeService>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/services`,
     ))
-  );
+  ));
 
-  @Effect()
-  fetchPodInfo$ = this.actions$.pipe(
+  
+  fetchPodInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesPod>(GET_KUBE_POD),
     flatMap(action => this.processSingleItemAction<KubernetesPod>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces/${action.namespaceName}/pods/${action.podName}`,
     ))
-  );
+  ));
 
-  @Effect()
-  fetchServicesInfo$ = this.actions$.pipe(
+  
+  fetchServicesInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesServices>(GET_SERVICE_INFO),
     flatMap(action => this.processListAction<KubeService>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/services`,
     ))
-  );
+  ));
 
-  @Effect()
-  fetchNamespacesInfo$ = this.actions$.pipe(
+  
+  fetchNamespacesInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesNamespaces>(GET_NAMESPACES_INFO),
     flatMap(action => this.processListAction<KubernetesNamespace>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/api/v1/namespaces`,
     ))
-  );
+  ));
 
 
-  @Effect()
-  createNamespace$ = this.actions$.pipe(
+  
+  createNamespace$ = createEffect(() => this.actions$.pipe(
     ofType<CreateKubernetesNamespace>(CREATE_NAMESPACE),
     flatMap(action => this.processSingleItemAction<KubernetesNamespace>(
       action,
@@ -250,32 +250,32 @@ export class KubernetesEffects {
       }
     )
     )
-  );
+  ));
 
-  @Effect()
-  fetchStatefulSets$ = this.actions$.pipe(
+  
+  fetchStatefulSets$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesStatefulSets>(GET_KUBE_STATEFULSETS),
     flatMap(action => this.processListAction<KubernetesStatefulSet>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/statefulsets`,
     ))
-  );
+  ));
 
-  @Effect()
-  fetchDeployments$ = this.actions$.pipe(
+  
+  fetchDeployments$ = createEffect(() => this.actions$.pipe(
     ofType<GeKubernetesDeployments>(GET_KUBE_DEPLOYMENT),
     flatMap(action => this.processListAction<KubernetesDeployment>(
       action,
       `/pp/${this.proxyAPIVersion}/proxy/apis/apps/v1/deployments`,
     ))
-  );
+  ));
 
   // =======================================================================================
   // Generic resource effects
   // =======================================================================================
 
-  @Effect()
-  fetchKubeResources$ = this.actions$.pipe(
+  
+  fetchKubeResources$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES),
     flatMap((action: GetKubernetesResources) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
@@ -291,10 +291,10 @@ export class KubernetesEffects {
 
       throw new Error('Kubernetes Resource request - but no API information is available');
     })
-  );
+  ));
 
-  @Effect()
-  fetchKubeResourcesInNamespace$ = this.actions$.pipe(
+  
+  fetchKubeResourcesInNamespace$ = createEffect(() => this.actions$.pipe(
     ofType<GetKubernetesResources>(GET_KUBE_RESOURCES_IN_NAMESPACE),
     flatMap((action: GetKubernetesResourcesInNamespace) => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
@@ -310,12 +310,12 @@ export class KubernetesEffects {
 
       throw new Error('Kubernetes Resource request - but no API information is available');
     })
-  );
+  ));
 
   // =======================================================================================
 
-  @Effect()
-  deleteKubeResource$ = this.actions$.pipe(
+  
+  deleteKubeResource$ = createEffect(() => this.actions$.pipe(
     ofType<DeleteKubernetesResource>(DELETE_KUBE_RESOURCE),
     flatMap(action => {
       const catalog = entityCatalog.getEntity(action.endpointType, action.entityType);
@@ -332,7 +332,7 @@ export class KubernetesEffects {
         }
       }
     })
-  );
+  ));
 
   // =======================================================================================
 

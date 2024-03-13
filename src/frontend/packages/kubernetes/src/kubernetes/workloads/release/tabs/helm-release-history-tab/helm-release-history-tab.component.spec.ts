@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -8,7 +8,7 @@ describe('HelmReleaseHistoryTabComponent', () => {
   let component: HelmReleaseHistoryTabComponent;
   let fixture: ComponentFixture<HelmReleaseHistoryTabComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ HelmReleaseHistoryTabComponent ],
       providers: [

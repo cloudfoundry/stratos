@@ -11,7 +11,7 @@
             <a target="metrics" href="{{ ep.provider.token_endpoint }}">{{ ep.provider.token_endpoint }}</a>
           </h2>
           <div *ngIf="error">
-            <p>This metrics endpoint does not provide a Stratos metadata file</p>
+            <p>This metrics endpoint does not provide a <app-product-name></app-product-name> metadata file</p>
           </div>
         </div>
       </div>
@@ -61,10 +61,10 @@
                     <div class="metrics-unknown">
                       <mat-icon class="text-warning">warning</mat-icon>
                       <div>The metrics endpoint reports that it provides data for this endpoint which is not registered
-                        with Stratos</div>
+                        with <app-product-name></app-product-name></div>
                     </div>
                     <div class="metrics-unknown__detail">This could be intentional or there may be a mismatch in the
-                      endpoint address used by this Metrics endpoint and that which is registered with Stratos.</div>
+                      endpoint address used by this Metrics endpoint and that which is registered with <app-product-name></app-product-name>.</div>
                   </div>
                 </div>
               </div>

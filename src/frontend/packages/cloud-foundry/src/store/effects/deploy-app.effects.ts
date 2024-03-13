@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { GitSCMService } from '@stratosui/git';
 import { of as observableOf } from 'rxjs';
@@ -26,8 +26,8 @@ export class DeployAppEffects {
     private gitSCMService: GitSCMService
   ) { }
 
-  @Effect()
-  checkAppExists$ = this.actions$.pipe(
+  
+  checkAppExists$ = createEffect(() => this.actions$.pipe(
     ofType<CheckProjectExists>(CHECK_PROJECT_EXISTS),
     withLatestFrom(this.store.select(selectDeployAppState)),
     filter(([, state]) => {
@@ -42,6 +42,6 @@ export class DeployAppEffects {
         ))
       );
     })
-  );
+  ));
 
 }

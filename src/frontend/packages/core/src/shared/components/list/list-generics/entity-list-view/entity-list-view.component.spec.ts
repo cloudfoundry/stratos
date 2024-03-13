@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { STRATOS_ENDPOINT_TYPE, systemInfoEntityType } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
@@ -8,7 +8,7 @@ describe('EntityListViewComponent', () => {
   let component: EntityListViewComponent;
   let fixture: ComponentFixture<EntityListViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,

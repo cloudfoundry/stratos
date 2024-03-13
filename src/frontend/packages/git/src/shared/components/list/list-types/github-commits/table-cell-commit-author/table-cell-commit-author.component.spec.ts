@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../../../../core/test-framework/core-test.helper';
 import { GithubCommitAuthorComponent } from '../../../../github-commit-author/github-commit-author.component';
@@ -8,7 +8,7 @@ describe('TableCellCommitAuthorComponent', () => {
   let component: TableCellCommitAuthorComponent<any>;
   let fixture: ComponentFixture<TableCellCommitAuthorComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellCommitAuthorComponent, GithubCommitAuthorComponent],
       imports: [...BaseTestModulesNoShared]

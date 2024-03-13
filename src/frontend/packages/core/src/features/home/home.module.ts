@@ -12,7 +12,6 @@ import { HomePageEndpointCardComponent } from './home/home-page-endpoint-card/ho
 import { HomePageComponent } from './home/home-page.component';
 import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.component';
 
-
 @NgModule({
   imports: [
     CoreModule,

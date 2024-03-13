@@ -20,7 +20,7 @@ function log {
 
 log "Preparing application folder for Cloud Foundry deployment" $CYAN $BOLD
 
-CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOP_LEVEL=${CF_DIR}/../../
 
 export STRATOS_TEMP=$(mktemp -d)
@@ -97,7 +97,7 @@ rm -rf ./tmp
 
 log "Disk usage for cache and app folders:" $CYAN
 
-du -h -c --summarize ${CACHE_DIR}
-du -h -c --summarize ${BUILD_DIR}
+du -h -c -s ${CACHE_DIR}
+du -h -c -s ${BUILD_DIR}
 
 log "All done" $CYAN $BOLD

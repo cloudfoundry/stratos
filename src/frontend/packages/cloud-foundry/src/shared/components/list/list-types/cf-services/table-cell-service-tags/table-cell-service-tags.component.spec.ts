@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import {
@@ -11,7 +11,7 @@ describe('TableCellServiceTagsComponent', () => {
   let component: TableCellServiceTagsComponent;
   let fixture: ComponentFixture<TableCellServiceTagsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellServiceTagsComponent,

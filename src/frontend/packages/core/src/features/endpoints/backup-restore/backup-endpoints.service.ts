@@ -1,13 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { BrowserStandardEncoder } from '../../../../../store/src/browser-encoder';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import {
   BackupEndpointConfigUI,
   BackupEndpointConnectionTypes,
@@ -15,7 +12,6 @@ import {
   BackupEndpointTypes,
   BaseEndpointConfig,
 } from './backup-restore.types';
-
 
 interface BackupRequest {
   state: BackupEndpointsConfig<BaseEndpointConfig>;
@@ -176,7 +172,5 @@ export class BackupEndpointsService {
   //     first()
   //   );
   // }
-
-
 
 }

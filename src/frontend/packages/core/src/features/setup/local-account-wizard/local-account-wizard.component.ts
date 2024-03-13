@@ -1,14 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import {
+  InternalAppState,
+  UAASetupState,
+  LocalAdminSetupData,
+  AuthState,
+  VerifySession,
+  SetupSaveConfig,
+} from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, filter, map, take, tap } from 'rxjs/operators';
 
-import { VerifySession } from '../../../../../store/src/actions/auth.actions';
-import { SetupSaveConfig } from '../../../../../store/src/actions/setup.actions';
-import { InternalAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { LocalAdminSetupData, UAASetupState } from '../../../../../store/src/types/uaa-setup.types';
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
@@ -19,7 +22,7 @@ import { StepOnNextFunction } from '../../../shared/components/stepper/step/step
 })
 export class LocalAccountWizardComponent implements OnInit {
 
-  passwordForm: FormGroup;
+  passwordForm: UntypedFormGroup;
   validateLocalAuthForm: Observable<boolean>;
   applyingSetup$ = new BehaviorSubject<boolean>(false);
 
@@ -28,9 +31,9 @@ export class LocalAccountWizardComponent implements OnInit {
   constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) { }
 
   ngOnInit() {
-    this.passwordForm = new FormGroup({
-      adminPassword: new FormControl('', [Validators.required as any]),
-      adminPasswordConfirm: new FormControl('', [Validators.required as any])
+    this.passwordForm = new UntypedFormGroup({
+      adminPassword: new UntypedFormControl('', [Validators.required as any]),
+      adminPasswordConfirm: new UntypedFormControl('', [Validators.required as any])
     });
 
     this.validateLocalAuthForm = this.passwordForm.valueChanges.pipe(

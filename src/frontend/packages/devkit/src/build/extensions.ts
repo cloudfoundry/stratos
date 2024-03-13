@@ -68,7 +68,7 @@ export class ExtensionsHandler {
 
     // Ignore changed in the overrides file - otherwise with ng serve we will build twice
     // The user needs to restart `ng serve` anyway if new extensions are added
-    webpackConfig.plugins.push(new WatchIgnorePlugin([overrideFile]));
+    webpackConfig.plugins.push(new WatchIgnorePlugin({ paths: [overrideFile] }));
 
     webpackConfig.plugins.push(new NormalModuleReplacementPlugin(
       regex,

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -15,7 +15,7 @@ describe('DeleteAppInstancesComponent', () => {
   let fixture: ComponentFixture<DeleteAppServiceInstancesComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DeleteAppServiceInstancesComponent],
       imports: generateCfBaseTestModules(),

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -9,7 +9,7 @@ describe('TableCellSelectComponent', () => {
   let component: TableCellSelectComponent<any>;
   let fixture: ComponentFixture<TableCellSelectComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellSelectComponent],
       imports: [

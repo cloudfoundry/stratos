@@ -1,5 +1,5 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateActiveRouteCfOrgSpaceMock,
@@ -14,7 +14,7 @@ describe('InviteUsersCreateComponent', () => {
   let component: InviteUsersCreateComponent;
   let fixture: ComponentFixture<InviteUsersCreateComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [InviteUsersCreateComponent],
       imports: generateCfBaseTestModules(),

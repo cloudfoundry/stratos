@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -61,18 +61,18 @@ export class RecursiveDeleteEffect {
     private store: Store<GeneralEntityAppState>
   ) { }
 
-  @Effect()
-  delete$ = this.actions$.pipe(
+  
+  delete$ = createEffect(() => this.actions$.pipe(
     ofType<RecursiveDelete>(RECURSIVE_ENTITY_DELETE),
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
       return new SetTreeDeleting(action.guid, tree);
     })
-  );
+  ));
 
-  @Effect()
-  deleteComplete$ = this.actions$.pipe(
+  
+  deleteComplete$ = createEffect(() => this.actions$.pipe(
     ofType<RecursiveDeleteComplete>(RECURSIVE_ENTITY_DELETE_COMPLETE),
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     mergeMap(([action, state]) => {
@@ -83,17 +83,17 @@ export class RecursiveDeleteEffect {
       actions.unshift(new SetTreeDeleted(action.guid, tree));
       return actions;
     })
-  );
+  ));
 
-  @Effect()
-  deleteFailed$ = this.actions$.pipe(
+  
+  deleteFailed$ = createEffect(() => this.actions$.pipe(
     ofType<RecursiveDeleteFailed>(RECURSIVE_ENTITY_DELETE_FAILED),
     withLatestFrom(this.store.select(getAPIRequestDataState)),
     map(([action, state]) => {
       const tree = this.getTree(action, state);
       return new ResetTreeDelete(action.guid, tree);
     })
-  );
+  ));
 
   private getTree(action: IRecursiveDelete, state: GeneralRequestDataState) {
     const tree = this.entityTreeCache[action.guid] ?

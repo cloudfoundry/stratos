@@ -20,9 +20,10 @@ import (
 	"github.com/labstack/echo/v4"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/factory"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
@@ -52,7 +53,7 @@ type MockEndpointRequest struct {
 }
 
 type MockUser struct {
-	ConnectedUser *interfaces.ConnectedUser
+	ConnectedUser *api.ConnectedUser
 	SessionValues map[string]interface{}
 }
 
@@ -140,7 +141,7 @@ func setupMockPGStore(db *sql.DB) *mockPGStore {
 	return pgs
 }
 
-func initCFPlugin(pp *portalProxy) interfaces.StratosPlugin {
+func initCFPlugin(pp *portalProxy) api.StratosPlugin {
 	plugin, _ := cloudfoundry.Init(pp)
 
 	return plugin
@@ -151,8 +152,8 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	//_, _ = rand.Read(key)
 
 	urlP, _ := url.Parse("https://login.52.38.188.107.nip.io:50450")
-	pc := interfaces.PortalConfig{
-		ConsoleConfig: &interfaces.ConsoleConfig{
+	pc := api.PortalConfig{
+		ConsoleConfig: &api.ConsoleConfig{
 			ConsoleClient:       "console",
 			ConsoleClientSecret: "",
 			UAAEndpoint:         urlP,
@@ -168,7 +169,7 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	pp := newPortalProxy(pc, db, nil, nil, env.NewVarSet())
 	pp.SessionStore = setupMockPGStore(db)
 	initialisedEndpoint := initCFPlugin(pp)
-	pp.Plugins = make(map[string]interfaces.StratosPlugin)
+	pp.Plugins = make(map[string]api.StratosPlugin)
 	pp.Plugins["cf"] = initialisedEndpoint
 
 	pp.SessionStoreOptions = new(sessions.Options)
@@ -183,40 +184,32 @@ func setupPortalProxy(db *sql.DB) *portalProxy {
 	return pp
 }
 
-func expectNoRows() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0")
+func expectCFRow() *sqlmock.Rows {
+	return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "", "")
 }
 
-func expectOneRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("1")
+func expectCERow() *sqlmock.Rows {
+	return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, true, "", "", "", "")
 }
 
-func expectCFRow() sqlmock.Rows {
-	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "")
+func expectCFAndCERows() *sqlmock.Rows {
+	return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", "", "").
+		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, false, "", "", "", "")
 }
 
-func expectCERow() sqlmock.Rows {
-	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, true, "", "", "")
+func expectTokenRow() *sqlmock.Rows {
+	return sqlmock.NewRows(datastore.GetColumnNamesForTokens()).
+		AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil, false)
 }
 
-func expectCFAndCERows() sqlmock.Rows {
-	return sqlmock.NewRows(rowFieldsForCNSI).
-		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", "").
-		AddRow(mockCEGUID, "Some fancy HCE Cluster", "hce", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, "", true, mockClientId, cipherClientSecret, false, "", "", "")
-}
-
-func expectTokenRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
-		AddRow(mockTokenGUID, mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
-}
-
-func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
+func expectEncryptedTokenRow(mockEncryptionKey []byte) *sqlmock.Rows {
 
 	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
-	return sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token"}).
-		AddRow(mockTokenGUID, encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil)
+	return sqlmock.NewRows(datastore.GetColumnNamesForTokens()).
+		AddRow(mockTokenGUID, encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "", mockUserGUID, nil, false)
 }
 
 func createEndpointRowArgs(endpointName string, APIEndpoint string, authEndpoint string, tokenEndpoint string, uaaUserGUID string, userAdmin bool) []driver.Value {
@@ -230,7 +223,7 @@ func createEndpointRowArgs(endpointName string, APIEndpoint string, authEndpoint
 		creatorGUID = uaaUserGUID
 	}
 
-	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, authEndpoint, tokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID}
+	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, authEndpoint, tokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID, ""}
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
@@ -245,7 +238,7 @@ func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, e
 	return res, e, ctx, pp, db, mock
 }
 
-func setupPortalProxyWithAuthService(mockStratosAuth interfaces.StratosAuth) (*portalProxy, *sql.DB, sqlmock.Sqlmock) {
+func setupPortalProxyWithAuthService(mockStratosAuth api.StratosAuth) (*portalProxy, *sql.DB, sqlmock.Sqlmock) {
 	db, mock, dberr := sqlmock.New()
 	if dberr != nil {
 		fmt.Printf("an error '%s' was not expected when opening a stub database connection", dberr)
@@ -259,7 +252,7 @@ func setupPortalProxyWithAuthService(mockStratosAuth interfaces.StratosAuth) (*p
 
 func setupMockUser(guid string, admin bool, scopes []string) MockUser {
 	mockUser := MockUser{nil, nil}
-	mockUser.ConnectedUser = &interfaces.ConnectedUser{
+	mockUser.ConnectedUser = &api.ConnectedUser{
 		GUID:   guid,
 		Admin:  admin,
 		Scopes: scopes,
@@ -272,7 +265,7 @@ func setupMockUser(guid string, admin bool, scopes []string) MockUser {
 }
 
 // mockV2Info needs to be closed
-func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createSystemEndpoint bool, generateAdminGUID bool) MockEndpointRequest {
+func setupMockEndpointRegisterRequest(t *testing.T, user *api.ConnectedUser, mockV2Info *httptest.Server, endpointName string, createSystemEndpoint bool, generateAdminGUID bool) MockEndpointRequest {
 
 	// create a request for each endpoint
 	req := setupMockReq("POST", "", map[string]string{
@@ -296,8 +289,8 @@ func setupMockEndpointRegisterRequest(t *testing.T, user *interfaces.ConnectedUs
 		h.Write([]byte(mockV2Info.URL + user.GUID))
 		uaaUserGUID = user.GUID
 	}
-	insertArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", uaaUserGUID}
-	queryArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", uaaUserGUID}
+	insertArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", uaaUserGUID, ""}
+	queryArgs := []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", uaaUserGUID, ""}
 
 	return MockEndpointRequest{mockV2Info, ctx, endpointName, insertArgs, queryArgs}
 }
@@ -358,7 +351,7 @@ const mockUAAToken = `eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eX
 
 var mockTokenExpiry = time.Now().AddDate(0, 0, 1).Unix()
 
-var mockUAAResponse = interfaces.UAAResponse{
+var mockUAAResponse = api.UAAResponse{
 	AccessToken:  mockUAAToken,
 	RefreshToken: mockUAAToken,
 }
@@ -392,19 +385,17 @@ const (
 	getDbVersion           = `SELECT version_id FROM goose_db_version WHERE is_applied = '1' ORDER BY id DESC LIMIT 1`
 )
 
-var rowFieldsForCNSI = []string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data", "creator"}
-
 var mockEncryptionKey = make([]byte, 32)
 
 var cipherClientSecret, _ = crypto.EncryptToken(mockEncryptionKey, mockClientSecret)
 
-var mockV2InfoResponse = interfaces.V2Info{
+var mockV2InfoResponse = api.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
 }
 
-var mockInfoResponse = interfaces.V2Info{
+var mockInfoResponse = api.V2Info{
 	AuthorizationEndpoint: mockAuthEndpoint,
 	TokenEndpoint:         mockTokenEndpoint,
 }

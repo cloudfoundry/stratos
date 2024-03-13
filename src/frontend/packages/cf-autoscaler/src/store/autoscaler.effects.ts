@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { catchError, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -89,8 +89,8 @@ export class AutoscalerEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect()
-  fetchAutoscalerInfo$ = this.actions$.pipe(
+  
+  fetchAutoscalerInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -113,10 +113,10 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  fetchAppAutoscalerHealth$ = this.actions$.pipe(
+  
+  fetchAppAutoscalerHealth$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -139,15 +139,15 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch health info', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  createAppAutoscalerPolicy$ = this.actions$.pipe(
+  
+  createAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
     ofType<CreateAppAutoscalerPolicyAction>(CREATE_APP_AUTOSCALER_POLICY),
-    mergeMap(action => this.createUpdatePolicy(action)));
+    mergeMap(action => this.createUpdatePolicy(action))));
 
-  @Effect()
-  updateAppAutoscalerPolicy$ = this.actions$.pipe(
+  
+  updateAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateAppAutoscalerPolicyAction>(UPDATE_APP_AUTOSCALER_POLICY),
     mergeMap(action => {
       const actionType = 'update';
@@ -173,16 +173,16 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  getAppAutoscalerPolicy$ = this.actions$.pipe(
+  
+  getAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerPolicyAction>(APP_AUTOSCALER_POLICY),
     mergeMap(action => this.fetchPolicy(action))
-  );
+  ));
 
-  @Effect()
-  detachAppAutoscalerPolicy$ = this.actions$.pipe(
+  
+  detachAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
     ofType<DetachAppAutoscalerPolicyAction>(DETACH_APP_AUTOSCALER_POLICY),
     mergeMap(action => {
       const actionType = 'delete';
@@ -205,16 +205,16 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  fetchAppAutoscalerPolicyTrigger$ = this.actions$.pipe(
+  
+  fetchAppAutoscalerPolicyTrigger$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerPolicyTriggerAction>(APP_AUTOSCALER_POLICY_TRIGGER),
     mergeMap(action => this.fetchPolicy(new GetAppAutoscalerPolicyAction(action.guid, action.endpointGuid), action))
-  );
+  ));
 
-  @Effect()
-  updateAppAutoscalerCredential$ = this.actions$.pipe(
+  
+  updateAppAutoscalerCredential$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateAppAutoscalerCredentialAction>(UPDATE_APP_AUTOSCALER_CREDENTIAL),
     mergeMap(action => {
       const actionType = 'update';
@@ -240,10 +240,10 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  deleteAppAutoscalerCredential$ = this.actions$.pipe(
+  
+  deleteAppAutoscalerCredential$ = createEffect(() => this.actions$.pipe(
     ofType<DeleteAppAutoscalerCredentialAction>(DELETE_APP_AUTOSCALER_CREDENTIAL),
     mergeMap(action => {
       const actionType = 'delete';
@@ -266,10 +266,10 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  fetchAppAutoscalerScalingHistory$ = this.actions$.pipe(
+  
+  fetchAppAutoscalerScalingHistory$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerScalingHistoryAction>(APP_AUTOSCALER_SCALING_HISTORY),
     withLatestFrom(this.store),
     mergeMap(([action, state]) => {
@@ -318,10 +318,10 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
           ]));
-    }));
+    })));
 
-  @Effect()
-  fetchAppAutoscalerAppMetric$ = this.actions$.pipe(
+  
+  fetchAppAutoscalerAppMetric$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerMetricAction>(FETCH_APP_AUTOSCALER_METRIC),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -349,7 +349,7 @@ export class AutoscalerEffects {
           catchError(err => [
             new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
           ]));
-    }));
+    })));
 
   private createUpdatePolicy(
     action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction,

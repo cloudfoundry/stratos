@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
@@ -16,7 +16,7 @@ describe('TableCellSelectOrgComponent', () => {
   let component: TableCellSelectOrgComponent;
   let fixture: ComponentFixture<TableCellSelectOrgComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfStoreModules(),

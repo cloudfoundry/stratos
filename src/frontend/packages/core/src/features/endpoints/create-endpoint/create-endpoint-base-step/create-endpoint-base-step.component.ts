@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  RouterNav,
+  GeneralEntityAppState,
+  entityCatalog,
+  selectSessionData,
+} from '@stratosui/store';
 import { map } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
-import { GeneralEntityAppState } from '../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectSessionData } from '../../../../../../store/src/reducers/auth.reducer';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';

@@ -45,12 +45,13 @@ RUN useradd -ms /bin/bash stratos -K MAIL_DIR=/dev/null
 RUN chown -R stratos /stratos && \
     chgrp -R users /stratos
 
-# Remove a few packages
-RUN zypper rm -y diffutils shadow fillup openssl
+# Keep them for the time being, as their removal was causing problems
+# # Remove a few packages
+# RUN zypper rm -y diffutils shadow fillup openssl
 
-# Remove zypper
-RUN zypper rm -y dirmngr && \
-    rm -rf /usr/bin/rpm*
+# # Remove zypper
+# RUN zypper rm -y dirmngr && \
+#     rm -rf /usr/bin/rpm*
 
 USER stratos
 WORKDIR /home/stratos

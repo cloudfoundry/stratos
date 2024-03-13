@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -9,7 +9,7 @@ describe('RestoreEndpointsComponent', () => {
   let component: RestoreEndpointsComponent;
   let fixture: ComponentFixture<RestoreEndpointsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [RestoreEndpointsComponent],
       imports: [

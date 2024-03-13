@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,7 +27,7 @@ const (
 
 // Monocular is a plugin for Monocular
 type Monocular struct {
-	portalProxy     interfaces.PortalProxy
+	portalProxy     api.PortalProxy
 	chartSvcRoutes  http.Handler
 	ChartStore      store.ChartStore
 	FoundationDBURL string
@@ -46,11 +46,11 @@ type HelmHubChartResponse struct {
 }
 
 func init() {
-	interfaces.AddPlugin("monocular", []string{"kubernetes"}, Init)
+	api.AddPlugin("monocular", []string{"kubernetes"}, Init)
 }
 
 // Init creates a new Monocular
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	store.InitRepositoryProvider(portalProxy.GetConfig().DatabaseProviderName)
 	return &Monocular{portalProxy: portalProxy}, nil
 }
@@ -115,7 +115,7 @@ func (m *Monocular) syncOnStartup() {
 		if ep.CNSIType == helmEndpointType {
 			if ep.SubType == helmRepoEndpointType {
 				helmRepos[ep.GUID] = true
-				m.Sync(interfaces.EndpointRegisterAction, ep)
+				m.Sync(api.EndpointRegisterAction, ep)
 			} else {
 				metadata := "{}"
 				m.portalProxy.UpdateEndpointMetadata(ep.GUID, metadata)
@@ -147,7 +147,7 @@ func arrayContainsString(a []string, x string) bool {
 }
 
 // OnEndpointNotification handles notification that endpoint has been remoevd
-func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
+func (m *Monocular) OnEndpointNotification(action api.EndpointAction, endpoint *api.CNSIRecord) {
 	if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmRepoEndpointType {
 		m.Sync(action, endpoint)
 	} else if endpoint.CNSIType == helmEndpointType && endpoint.SubType == helmHubEndpointType && action == 1 {
@@ -157,17 +157,17 @@ func (m *Monocular) OnEndpointNotification(action interfaces.EndpointAction, end
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (m *Monocular) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (m *Monocular) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (m *Monocular) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (m *Monocular) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return m, nil
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (m *Monocular) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (m *Monocular) GetRoutePlugin() (api.RoutePlugin, error) {
 	return m, nil
 }
 
@@ -223,7 +223,7 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 // isExternalMonocularRequest .. Should this request go out to an external monocular instance? IF so returns external monocular endpoint
-func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*interfaces.CNSIRecord, error) {
+func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*api.CNSIRecord, error) {
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	// If this has a cnsi then test if it for an external monocular instance
@@ -235,7 +235,7 @@ func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*interfaces.CNSI
 }
 
 // validateExternalMonocularEndpoint .. Is this endpoint related to an external moncular instance (not stratos's)
-func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*interfaces.CNSIRecord, error) {
+func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*api.CNSIRecord, error) {
 	endpoint, err := m.portalProxy.GetCNSIRecord(cnsi)
 	if err != nil {
 		err := errors.New("Failed to fetch endpoint")

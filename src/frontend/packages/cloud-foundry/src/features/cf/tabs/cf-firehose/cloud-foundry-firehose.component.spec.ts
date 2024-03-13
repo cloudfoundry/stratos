@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModules,
@@ -11,7 +11,7 @@ describe('CloudFoundryFirehoseComponent', () => {
   let fixture: ComponentFixture<CloudFoundryFirehoseComponent>;
 
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
         imports: generateCfBaseTestModules(),

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../../../store/src/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
@@ -20,7 +20,7 @@ describe('ServiceInstanceCardComponent', () => {
   let component: ServiceInstanceCardComponent;
   let fixture: ComponentFixture<ServiceInstanceCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceInstanceCardComponent,

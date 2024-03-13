@@ -49,48 +49,34 @@ import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 
 @NgModule({
-  imports: [
-    EntityCatalogModule.forFeature(() => kubeEntityCatalog.allKubeEntities()),
-    CoreModule,
-    CommonModule,
-    SharedModule,
-    KubernetesStoreModule
-  ],
-  declarations: [
-    KubernetesCertsAuthFormComponent,
-    KubernetesAWSAuthFormComponent,
-    KubernetesConfigAuthFormComponent,
-    KubernetesGKEAuthFormComponent,
-    KubernetesSATokenAuthFormComponent,
-    KubeConfigRegistrationComponent,
-    KubeConfigSelectionComponent,
-    KubeConfigImportComponent,
-    KubeConfigTableSelectComponent,
-    KubeConfigTableUserSelectComponent,
-    KubeConfigTableImportStatusComponent,
-    KubeConfigTableSubTypeSelectComponent,
-    KubeConfigTableNameComponent,
-    KubeConfigTableCertComponent
-  ],
-  providers: [
-    BaseKubeGuid,
-    KubernetesEndpointService,
-    KubernetesUIConfigService,
-  ],
-  entryComponents: [
-    KubernetesCertsAuthFormComponent,
-    KubernetesAWSAuthFormComponent,
-    KubernetesConfigAuthFormComponent,
-    KubernetesGKEAuthFormComponent,
-    KubernetesSATokenAuthFormComponent,
-    KubeConfigRegistrationComponent,
-    KubeConfigTableSelectComponent,
-    KubeConfigTableUserSelectComponent,
-    KubeConfigTableImportStatusComponent,
-    KubeConfigTableSubTypeSelectComponent,
-    KubeConfigTableNameComponent,
-    KubeConfigTableCertComponent
-  ]
+    imports: [
+        EntityCatalogModule.forFeature(() => kubeEntityCatalog.allKubeEntities()),
+        CoreModule,
+        CommonModule,
+        SharedModule,
+        KubernetesStoreModule
+    ],
+    declarations: [
+        KubernetesCertsAuthFormComponent,
+        KubernetesAWSAuthFormComponent,
+        KubernetesConfigAuthFormComponent,
+        KubernetesGKEAuthFormComponent,
+        KubernetesSATokenAuthFormComponent,
+        KubeConfigRegistrationComponent,
+        KubeConfigSelectionComponent,
+        KubeConfigImportComponent,
+        KubeConfigTableSelectComponent,
+        KubeConfigTableUserSelectComponent,
+        KubeConfigTableImportStatusComponent,
+        KubeConfigTableSubTypeSelectComponent,
+        KubeConfigTableNameComponent,
+        KubeConfigTableCertComponent
+    ],
+    providers: [
+        BaseKubeGuid,
+        KubernetesEndpointService,
+        KubernetesUIConfigService,
+    ]
 })
 export class KubernetesSetupModule {
   constructor(

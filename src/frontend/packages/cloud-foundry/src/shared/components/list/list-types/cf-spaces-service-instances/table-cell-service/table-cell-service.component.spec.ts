@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   LongRunningCfOperationsService,
@@ -17,7 +17,7 @@ describe('TableCellServiceComponent', () => {
   let component: TableCellServiceComponent;
   let fixture: ComponentFixture<TableCellServiceComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellServiceComponent,

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -10,7 +10,7 @@ describe('KubernetesNamespaceLinkComponent', () => {
   let component: KubernetesNamespaceLinkComponent;
   let fixture: ComponentFixture<KubernetesNamespaceLinkComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNamespaceLinkComponent],
       imports: KubernetesBaseTestModules,

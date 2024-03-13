@@ -1,7 +1,7 @@
-import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
-import { YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult, MetricsAction } from '@stratosui/store';
+
 import { MetricsConfig } from './metrics-chart.component';
+import { YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
 
 export class MetricsChartHelpers {
   static getDateSeriesName(value: number) {

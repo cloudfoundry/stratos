@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, NgZone } from '@angular/core';
-import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
+import { ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
@@ -119,7 +119,7 @@ describe('ListComponent', () => {
     let component: ListComponent<EndpointModel>;
     let fixture: ComponentFixture<ListComponent<EndpointModel>>;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
       TestBed.configureTestingModule({
         providers: [
           { provide: ListConfig, useClass: EndpointsListConfigService },
@@ -260,7 +260,7 @@ describe('ListComponent', () => {
         // expect(sortSection.hidden).toBeFalsy();
       });
 
-      it('First filter hidden if only one option', async(() => {
+      it('First filter hidden if only one option', () => {
         component.config.getMultiFiltersConfigs = () => {
           return [
             {
@@ -301,8 +301,8 @@ describe('ListComponent', () => {
         const multiFilterSection: HTMLElement = hostElement.querySelector('.list-component__header__left--multi-filters');
         expect(multiFilterSection.hidden).toBeFalsy();
         expect(multiFilterSection.childElementCount).toBe(0);
-
-      }));
+                
+      });
     });
 
 

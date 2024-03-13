@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { KubernetesStatus } from '../../store/kube.types';
@@ -8,7 +8,7 @@ describe('KubernetesLabelsCellComponent', () => {
   let component: KubernetesLabelsCellComponent;
   let fixture: ComponentFixture<KubernetesLabelsCellComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesLabelsCellComponent],
       imports: BaseTestModules

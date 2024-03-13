@@ -3,14 +3,14 @@ package monocular
 import (
 	"encoding/json"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
 type SyncJob struct {
-	Action   interfaces.EndpointAction
-	Endpoint *interfaces.CNSIRecord
+	Action   api.EndpointAction
+	Endpoint *api.CNSIRecord
 }
 
 type SyncMetadata struct {
@@ -35,17 +35,17 @@ func (m *Monocular) syncRepo(c echo.Context) error {
 	guid := c.Param("guid")
 	endpoint, err := p.GetCNSIRecord(guid)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not find Helm Repository: %v+", err)
+		return api.NewJetstreamErrorf("Could not find Helm Repository: %v+", err)
 	}
 
-	m.Sync(interfaces.EndpointRegisterAction, &endpoint)
+	m.Sync(api.EndpointRegisterAction, &endpoint)
 
 	response := "OK"
 	return c.JSON(200, response)
 }
 
 // Sync schedules a sync action for the given endpoint
-func (m *Monocular) Sync(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
+func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 	// Delete and Update are Synchronously handled
 	// Add (Sync) is handled Asynchronously via a SyncJob
 	if action == 0 {

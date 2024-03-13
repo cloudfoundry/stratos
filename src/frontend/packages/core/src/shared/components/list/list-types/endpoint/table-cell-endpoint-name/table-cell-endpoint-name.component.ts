@@ -1,10 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { stratosEntityCatalog } from '../../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { TableCellCustom } from '../../../list.types';
 

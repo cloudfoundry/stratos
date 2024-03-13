@@ -4,19 +4,19 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("userinvite", []string{"cloudfoundry"}, Init)
+	api.AddPlugin("userinvite", []string{"cloudfoundry"}, Init)
 }
 
 // UserInvite is a plugin to allow user invitations
 type UserInvite struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 	Config      *Config
 }
 
@@ -30,7 +30,7 @@ const UserInvitePluginConfigSetting = "userInvitationsEnabled"
 const UAAClientAuthType = "uaa-client"
 
 // Init creates a new UserInvite
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 
 	init := &UserInvite{portalProxy: portalProxy}
 	c, err := init.LoadConfig(*portalProxy.Env())
@@ -43,17 +43,17 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (userinvite *UserInvite) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (userinvite *UserInvite) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (userinvite *UserInvite) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (userinvite *UserInvite) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return userinvite, nil
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (userinvite *UserInvite) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (userinvite *UserInvite) GetRoutePlugin() (api.RoutePlugin, error) {
 	return userinvite, nil
 }
 
@@ -81,7 +81,7 @@ func (userinvite *UserInvite) Init() error {
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
 	userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken)
-	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, interfaces.AuthProvider{
+	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, api.AuthProvider{
 		Handler:  userinvite.doUAAClientAuthFlow,
 		UserInfo: userinvite.getCNSIUserFromUAAClientToken,
 	})

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -27,7 +27,7 @@ import { ApplicationService } from '../application.service';
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 
-  editAppForm: FormGroup;
+  editAppForm: UntypedFormGroup;
 
   uniqueNameValidator: AppNameUniqueDirective;
 
@@ -36,7 +36,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   constructor(
     public applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private http: HttpClient,
   ) {
     this.uniqueNameValidator = new AppNameUniqueDirective(this.store, this.http);

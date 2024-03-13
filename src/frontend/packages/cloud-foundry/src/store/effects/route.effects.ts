@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
@@ -16,8 +16,8 @@ export class RouteEffect {
     private store: Store<CFAppState>
   ) { }
 
-  @Effect({ dispatch: false })
-  unmapEffect$ = this.actions$.pipe(
+  
+  unmapEffect$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(RouteEvents.UNMAP_ROUTE_SUCCESS),
     map((action: APISuccessOrFailedAction) => {
       const unmapAction: UnmapRoute = action.apiAction as UnmapRoute;
@@ -26,5 +26,5 @@ export class RouteEffect {
         this.store.dispatch(new ClearPaginationOfEntity(action.apiAction, action.apiAction.guid, unmapAction.clearPaginationKey));
       }
     })
-  );
+  ), { dispatch: false });
 }

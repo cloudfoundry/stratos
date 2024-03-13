@@ -21,35 +21,26 @@ import { EndpointsPageComponent } from './endpoints-page/endpoints-page.componen
 import { EndpointsRoutingModule } from './endpoints.routing';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    EndpointsRoutingModule,
-    CreateEndpointModule,
-  ],
-  declarations: [
-    EndpointsPageComponent,
-    ConnectEndpointDialogComponent,
-    CredentialsAuthFormComponent,
-    SSOAuthFormComponent,
-    NoneAuthFormComponent,
-    EditEndpointComponent,
-    EditEndpointStepComponent,
-    BackupRestoreEndpointsComponent,
-    BackupEndpointsComponent,
-    RestoreEndpointsComponent,
-    BackupCheckboxCellComponent,
-    BackupConnectionCellComponent,
-    TokenEndpointComponent,
-  ],
-  entryComponents: [
-    ConnectEndpointDialogComponent,
-    CredentialsAuthFormComponent,
-    SSOAuthFormComponent,
-    NoneAuthFormComponent,
-    BackupCheckboxCellComponent,
-    BackupConnectionCellComponent,
-    TokenEndpointComponent
-  ]
+    imports: [
+        CoreModule,
+        SharedModule,
+        EndpointsRoutingModule,
+        CreateEndpointModule,
+    ],
+    declarations: [
+        EndpointsPageComponent,
+        ConnectEndpointDialogComponent,
+        CredentialsAuthFormComponent,
+        SSOAuthFormComponent,
+        NoneAuthFormComponent,
+        EditEndpointComponent,
+        EditEndpointStepComponent,
+        BackupRestoreEndpointsComponent,
+        BackupEndpointsComponent,
+        RestoreEndpointsComponent,
+        BackupCheckboxCellComponent,
+        BackupConnectionCellComponent,
+        TokenEndpointComponent,
+    ]
 })
 export class EndpointsModule { }

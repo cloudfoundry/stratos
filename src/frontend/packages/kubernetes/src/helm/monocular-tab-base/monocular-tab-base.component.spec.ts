@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../core/src/tab-nav.service';
 import { BaseTestModulesNoShared } from '../../../../core/test-framework/core-test.helper';
@@ -9,7 +9,7 @@ describe('MonocularTabBaseComponent', () => {
   let component: MonocularTabBaseComponent;
   let fixture: ComponentFixture<MonocularTabBaseComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [],
       imports: [

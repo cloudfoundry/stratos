@@ -1,15 +1,15 @@
 package kubernetes
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 	log "github.com/sirupsen/logrus"
 )
 
 // Desktop - Desktop hosting for Kubernetes
 type Desktop struct {
-	portalProxy   interfaces.PortalProxy
-	factory       interfaces.StoreFactory
+	portalProxy   api.PortalProxy
+	factory       api.StoreFactory
 	endpointStore EndpointStore
 	tokenStore    TokenStore
 }
@@ -17,7 +17,7 @@ type Desktop struct {
 var br *Desktop
 
 // Init performs plugin initialization
-func Init(portalProxy interfaces.PortalProxy) error {
+func Init(portalProxy api.PortalProxy) error {
 
 	// TODO: Check we are running in desktop environment
 
@@ -48,11 +48,11 @@ func Init(portalProxy interfaces.PortalProxy) error {
 }
 
 // EndpointStore gets store for obtaining endpoint information
-func (br *Desktop) EndpointStore() (interfaces.EndpointRepository, error) {
+func (br *Desktop) EndpointStore() (api.EndpointRepository, error) {
 	return &br.endpointStore, nil
 }
 
 // TokenStore gets store for obtaining endpoint information
-func (br *Desktop) TokenStore() (interfaces.TokenRepository, error) {
+func (br *Desktop) TokenStore() (api.TokenRepository, error) {
 	return &br.tokenStore, nil
 }

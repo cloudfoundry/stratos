@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -23,7 +23,7 @@ type KubeConfigAuth struct {
 }
 
 // InitKubeConfigAuth
-func InitKubeConfigAuth(portalProxy interfaces.PortalProxy) KubeAuthProvider {
+func InitKubeConfigAuth(portalProxy api.PortalProxy) KubeAuthProvider {
 	return &KubeConfigAuth{*InitOIDCKubeAuth(portalProxy)}
 }
 
@@ -31,12 +31,12 @@ func (c *KubeConfigAuth) GetName() string {
 	return AuthConnectTypeKubeConfig
 }
 
-func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 	log.Error("KubeConfigAuth: AddAuthInfo: Not supported")
 	return fmt.Errorf("Not supported: %s", tokenRec.AuthType)
 }
 
-func (c *KubeConfigAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (KubeConfigAuth)")
 
 	req := ec.Request()
@@ -76,7 +76,7 @@ func (c *KubeConfigAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Co
 	return nil, nil, fmt.Errorf("OIDC: Unsupported authentication provider for user: %s", kubeConfigUser.User.AuthProvider.Name)
 }
 
-func (c *KubeConfigAuth) GetCertAuth(cnsiRecord interfaces.CNSIRecord, user *config.KubeConfigUser) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *KubeConfigAuth) GetCertAuth(cnsiRecord api.CNSIRecord, user *config.KubeConfigUser) (*api.TokenRecord, *api.CNSIRecord, error) {
 
 	kubeCertAuth := &KubeCertificate{}
 
@@ -110,9 +110,9 @@ func (c *KubeConfigAuth) GetCertAuth(cnsiRecord interfaces.CNSIRecord, user *con
 	return &tokenRecord, &cnsiRecord, nil
 }
 
-func (c *KubeConfigAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+func (c *KubeConfigAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 	// Register auth type with Jetstream
-	c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+	c.portalProxy.AddAuthProvider(c.GetName(), api.AuthProvider{
 		Handler:  c.portalProxy.DoOidcFlowRequest,
 		UserInfo: nil,
 	})

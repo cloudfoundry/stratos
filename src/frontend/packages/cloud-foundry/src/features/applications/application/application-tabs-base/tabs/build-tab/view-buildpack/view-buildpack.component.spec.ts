@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ViewBuildpackComponent } from './view-buildpack.component';
 
@@ -6,7 +6,7 @@ describe('ViewBuildpackComponent', () => {
   let component: ViewBuildpackComponent;
   let fixture: ComponentFixture<ViewBuildpackComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ViewBuildpackComponent ]
     })

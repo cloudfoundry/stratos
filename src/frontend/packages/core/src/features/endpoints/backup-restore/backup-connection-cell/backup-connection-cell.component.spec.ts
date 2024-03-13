@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
@@ -9,7 +9,7 @@ describe('BackupConnectionCellComponent', () => {
   let component: BackupConnectionCellComponent;
   let fixture: ComponentFixture<BackupConnectionCellComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         BackupConnectionCellComponent,

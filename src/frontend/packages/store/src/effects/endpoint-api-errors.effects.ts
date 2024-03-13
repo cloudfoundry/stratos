@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
@@ -18,7 +18,7 @@ export class EndpointApiError {
     private store: Store<InternalAppState>,
   ) { }
 
-  @Effect({ dispatch: false }) endpointApiError$ = this.actions$.pipe(
+   endpointApiError$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionFailed>(RequestTypes.FAILED),
     map(action => {
       const internalEndpointError = action.internalEndpointError;
@@ -42,5 +42,5 @@ export class EndpointApiError {
           ),
         );
       }
-    }));
+    })), { dispatch: false });
 }

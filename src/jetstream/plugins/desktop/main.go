@@ -3,8 +3,9 @@ package desktop
 import (
 	"errors"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/desktop/helm"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/desktop/kubernetes"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 
 	log "github.com/sirupsen/logrus"
@@ -12,34 +13,34 @@ import (
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("desktop", nil, Init)
+	api.AddPlugin("desktop", nil, Init)
 }
 
 // Desktop - Desktop hosting plugin
 type Desktop struct {
-	portalProxy   interfaces.PortalProxy
-	factory       interfaces.StoreFactory
+	portalProxy   api.PortalProxy
+	factory       api.StoreFactory
 	endpointStore DesktopEndpointStore
 	tokenStore    TokenStore
 }
 
 // Init creates a new Autoscaler
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &Desktop{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (br *Desktop) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (br *Desktop) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (br *Desktop) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (br *Desktop) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (br *Desktop) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (br *Desktop) GetRoutePlugin() (api.RoutePlugin, error) {
 	return br, nil
 }
 
@@ -77,16 +78,19 @@ func (br *Desktop) Init() error {
 	// Now add the Kubernetes Desktop support in
 	kubernetes.Init(br.portalProxy)
 
+	// Add the Helm Desktop support in
+	helm.Init(br.portalProxy)
+
 	return nil
 }
 
 // EndpointStore gets store for obtaining endpoint information
-func (br *Desktop) EndpointStore() (interfaces.EndpointRepository, error) {
+func (br *Desktop) EndpointStore() (api.EndpointRepository, error) {
 	return &br.endpointStore, nil
 }
 
 // TokenStore gets store for obtaining endpoint information
-func (br *Desktop) TokenStore() (interfaces.TokenRepository, error) {
+func (br *Desktop) TokenStore() (api.TokenRepository, error) {
 	return &br.tokenStore, nil
 	//return br.factory.TokenStore()
 }

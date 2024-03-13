@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
@@ -30,7 +30,7 @@ import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-s
 describe('AppAutoscalerMetricChartCardComponent', () => {
   let component: AppAutoscalerMetricChartCardComponent;
   let fixture: ComponentFixture<AppAutoscalerMetricChartCardComponent>;
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppAutoscalerMetricChartCardComponent,

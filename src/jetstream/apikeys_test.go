@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/mock_interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
+	mock_api "github.com/cloudfoundry-incubator/stratos/src/jetstream/api/mock"
+	mock_apikeys "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -26,8 +26,8 @@ func Test_addAPIKey(t *testing.T) {
 		userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 
 		ctrl := gomock.NewController(t)
-		mockAPIRepo := apikeys.NewMockRepository(ctrl)
-		mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+		mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
+		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 		pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 		defer ctrl.Finish()
 		defer pp.DatabaseConnectionPool.Close()
@@ -74,7 +74,7 @@ func Test_addAPIKey(t *testing.T) {
 					ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": comment})
 					ctx.Set("user_id", userID)
 
-					connectedUser := &interfaces.ConnectedUser{
+					connectedUser := &api.ConnectedUser{
 						GUID:  userID,
 						Admin: false,
 					}
@@ -95,12 +95,12 @@ func Test_addAPIKey(t *testing.T) {
 			Convey("when user is an admin", func() {
 				Convey("when API key comment is present", func() {
 					comment := "Test API key"
-					retval := interfaces.APIKey{UserGUID: userID, Comment: comment}
+					retval := api.APIKey{UserGUID: userID, Comment: comment}
 
 					ctx, rec := makeNewRequestWithParams("POST", map[string]string{"comment": comment})
 					ctx.Set("user_id", userID)
 
-					connectedUser := &interfaces.ConnectedUser{
+					connectedUser := &api.ConnectedUser{
 						GUID:  userID,
 						Admin: true,
 					}
@@ -179,7 +179,7 @@ func Test_addAPIKey(t *testing.T) {
 
 			Convey("when API key comment is present", func() {
 				comment := "Test API key"
-				retval := interfaces.APIKey{UserGUID: userID, Comment: comment}
+				retval := api.APIKey{UserGUID: userID, Comment: comment}
 
 				mockAPIRepo.
 					EXPECT().
@@ -227,8 +227,8 @@ func Test_listAPIKeys(t *testing.T) {
 	log.SetLevel(log.PanicLevel)
 
 	ctrl := gomock.NewController(t)
-	mockAPIRepo := apikeys.NewMockRepository(ctrl)
-	mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
+	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
 	defer pp.DatabaseConnectionPool.Close()
@@ -269,7 +269,7 @@ func Test_listAPIKeys(t *testing.T) {
 			})
 
 			Convey("when DB no errors occur", func() {
-				r1 := &interfaces.APIKey{
+				r1 := &api.APIKey{
 					GUID:     "00000000-0000-0000-0000-000000000000",
 					Secret:   "",
 					UserGUID: userID,
@@ -277,7 +277,7 @@ func Test_listAPIKeys(t *testing.T) {
 					LastUsed: nil,
 				}
 
-				r2 := &interfaces.APIKey{
+				r2 := &api.APIKey{
 					GUID:     "11111111-1111-1111-1111-111111111111",
 					Secret:   "",
 					UserGUID: userID,
@@ -285,7 +285,7 @@ func Test_listAPIKeys(t *testing.T) {
 					LastUsed: nil,
 				}
 
-				retval := []interfaces.APIKey{*r1, *r2}
+				retval := []api.APIKey{*r1, *r2}
 
 				mockAPIRepo.
 					EXPECT().
@@ -316,8 +316,8 @@ func Test_deleteAPIKeys(t *testing.T) {
 	log.SetLevel(log.PanicLevel)
 
 	ctrl := gomock.NewController(t)
-	mockAPIRepo := apikeys.NewMockRepository(ctrl)
-	mockStratosAuth := mock_interfaces.NewMockStratosAuth(ctrl)
+	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
+	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
 	defer pp.DatabaseConnectionPool.Close()

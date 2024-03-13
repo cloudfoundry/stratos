@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubeConfigSelectionComponent } from './kube-config-selection.component';
@@ -7,7 +7,7 @@ describe('KubeConfigSelectionComponent', () => {
   let component: KubeConfigSelectionComponent;
   let fixture: ComponentFixture<KubeConfigSelectionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules

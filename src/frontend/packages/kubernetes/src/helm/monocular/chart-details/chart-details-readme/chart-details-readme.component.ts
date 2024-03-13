@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import markdown from 'marked';
+import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -21,7 +21,7 @@ export class ChartDetailsReadmeComponent {
 
   public loading = false;
   public readmeContent$: Observable<string>;
-  private renderer = new markdown.Renderer();
+  private renderer = new marked.Renderer();
   private loadingDelay: any;
 
   constructor(private chartsService: ChartsService) {
@@ -36,7 +36,7 @@ export class ChartDetailsReadmeComponent {
       map(resp => {
         clearTimeout(this.loadingDelay);
         this.loading = false;
-        return markdown(resp, {
+        return marked(resp, {
           renderer: this.renderer
         });
       }),

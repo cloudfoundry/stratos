@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeIpsComponent } from './kubernetes-node-ips.component';
@@ -7,7 +7,7 @@ describe('KubernetesNodeIpsComponent', () => {
   let component: KubernetesNodeIpsComponent;
   let fixture: ComponentFixture<KubernetesNodeIpsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeIpsComponent],
       imports: BaseTestModules

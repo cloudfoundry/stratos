@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *portalProxy) getVersionsData() (*interfaces.Versions, error) {
+func (p *portalProxy) getVersionsData() (*api.Versions, error) {
 	proxyVersion := p.Config.ConsoleVersion
 	if proxyVersion == "" {
 		proxyVersion = "dev"
@@ -19,12 +19,12 @@ func (p *portalProxy) getVersionsData() (*interfaces.Versions, error) {
 	dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
 	databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
 	if err != nil {
-		return &interfaces.Versions{}, errors.New("Error trying to get current database version")
+		return &api.Versions{}, errors.New("Error trying to get current database version")
 	}
 
 	databaseVersion := databaseVersionRec.VersionID
 
-	resp := &interfaces.Versions{
+	resp := &api.Versions{
 		ProxyVersion:    proxyVersion,
 		DatabaseVersion: databaseVersion,
 	}

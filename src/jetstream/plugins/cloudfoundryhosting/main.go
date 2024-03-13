@@ -15,7 +15,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // Constants
@@ -32,22 +32,22 @@ const (
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("cloudfoundryhosting", nil, Init)
+	api.AddPlugin("cloudfoundryhosting", nil, Init)
 }
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
-	portalProxy  interfaces.PortalProxy
+	portalProxy  api.PortalProxy
 	endpointType string
 }
 
 // Package initialization
 func init() {
-	interfaces.RegisterJetstreamConfigPlugin(ConfigInit)
+	api.RegisterJetstreamConfigPlugin(ConfigInit)
 }
 
 // ConfigInit updates the config if needed
-func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig) {
+func ConfigInit(envLookup *env.VarSet, jetstreamConfig *api.PortalConfig) {
 
 	// Check we are deployed in Cloud Foundry
 	if !envLookup.IsSet(VCapApplication) {
@@ -91,13 +91,13 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *interfaces.PortalConfig)
 }
 
 // Init creates a new CFHosting plugin
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 
 	return &CFHosting{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (ch *CFHosting) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	if ch.portalProxy.Env().IsSet(VCapApplication) {
 		return ch, nil
 	}
@@ -105,12 +105,12 @@ func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) 
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (ch *CFHosting) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (ch *CFHosting) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (ch *CFHosting) GetRoutePlugin() (api.RoutePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
@@ -124,7 +124,7 @@ func (ch *CFHosting) Init() error {
 		// Record that we are deployed in Cloud Foundry
 		ch.portalProxy.GetConfig().IsCloudFoundry = true
 
-		ch.portalProxy.GetConfig().ConsoleConfig = new(interfaces.ConsoleConfig)
+		ch.portalProxy.GetConfig().ConsoleConfig = new(api.ConsoleConfig)
 
 		// We are using the CF UAA - so the Console must use the same Client and Secret as CF
 		ch.portalProxy.GetConfig().ConsoleConfig.ConsoleClient = ch.portalProxy.GetConfig().CFClient
@@ -153,7 +153,7 @@ func (ch *CFHosting) Init() error {
 		}
 
 		// Get the cf_api value from the JSON
-		var appData interfaces.VCapApplicationData
+		var appData api.VCapApplicationData
 		vCapApp, _ := ch.portalProxy.Env().Lookup(VCapApplication)
 		data := []byte(vCapApp)
 		err := json.Unmarshal(data, &appData)
@@ -197,7 +197,7 @@ func (ch *CFHosting) Init() error {
 
 		log.Infof("Using Cloud Foundry API URL: %s", appData.API)
 		cfEndpointSpec, _ := ch.portalProxy.GetEndpointTypeSpec("cf")
-		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true)
+		newCNSI, _, err := cfEndpointSpec.Info(appData.API, true, "")
 		if err != nil {
 			log.Fatalf("Could not get the info for Cloud Foundry: %+v", err)
 			return nil
@@ -234,7 +234,7 @@ func (ch *CFHosting) Init() error {
 
 		// Store the space and id of the Console application - we can use these to prevent stop/delete in the front-end
 		if ch.portalProxy.GetConfig().CloudFoundryInfo == nil {
-			ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{}
+			ch.portalProxy.GetConfig().CloudFoundryInfo = &api.CFInfo{}
 		}
 		ch.portalProxy.GetConfig().CloudFoundryInfo.SpaceGUID = appData.SpaceID
 		ch.portalProxy.GetConfig().CloudFoundryInfo.AppGUID = appData.ApplicationID
@@ -267,7 +267,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return h(c)
 		}
 
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"X-Forwarded-Proto not found and is required",
 			"X-Forwarded-Proto not found and is required",

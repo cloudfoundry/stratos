@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
@@ -9,7 +9,7 @@ describe('SimpleUsageChartComponent', () => {
   let component: SimpleUsageChartComponent;
   let fixture: ComponentFixture<SimpleUsageChartComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [CoreModule, NgxChartsModule, NoopAnimationsModule],
       declarations: [SimpleUsageChartComponent]

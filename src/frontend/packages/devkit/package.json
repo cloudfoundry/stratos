@@ -1,6 +1,9 @@
 {
   "name": "@stratosui/devkit",
   "version": "0.0.1",
+  "description": "Stratos Development Kit for apps and extensions",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/cloudfoundry/stratos",
   "scripts": {
     "build": "tsc && node build.js",
     "tsc": "tsc"
@@ -11,7 +14,7 @@
     "typescript": "~3.8.2"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^1.0.0"
+    "@angular-devkit/architect": "^0.901.7"
   },
   "builders": "builders/builders.json",
   "schematics": "./schematics/collection.json"

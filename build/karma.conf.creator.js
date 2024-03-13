@@ -12,7 +12,7 @@ module.exports = function (project) {
         require('karma-jasmine'),
         require('karma-chrome-launcher'),
         require('karma-jasmine-html-reporter'),
-        require('karma-coverage-istanbul-reporter'),
+        require('karma-coverage'),
         require('karma-spec-reporter'),
         require('@angular-devkit/build-angular/plugins/karma'),
         require(path.join(repoRoot, 'build/karma.test.reporter.js'))
@@ -24,16 +24,14 @@ module.exports = function (project) {
           random: false
         }
       },
-      coverageIstanbulReporter: {
+      coverageReporter: {
         dir: path.join(repoRoot, 'coverage', project),
-        reports: ['html', 'lcovonly', 'json'],
-        fixWebpackSourcePaths: true,
-        'report-config': {
-          json: {
-            // Collate all coverage-final files into a single dir for nyc to combine (it can't pick them out from `coverage`)
-            file: path.join('..', 'nyc', project + '-coverage-final.json')
-          }
-        },
+        subdir: ".",
+        reporters: [
+          { type: 'html' },
+          { type: 'json', file: path.join('..', 'nyc', project + '-coverage-final.json')},
+          { type: 'lcovonly' }
+        ],
       },
       reporters: ['spec', 'kjhtml', 'stratos'],
       specReporter: {

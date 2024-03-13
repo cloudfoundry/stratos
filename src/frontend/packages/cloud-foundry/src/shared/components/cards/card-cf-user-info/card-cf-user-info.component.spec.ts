@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import {
@@ -12,7 +12,7 @@ describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [CardCfUserInfoComponent, MetadataItemComponent, CopyToClipboardComponent, CardCfUserInfoComponent],
         imports: generateCfBaseTestModulesNoShared(),

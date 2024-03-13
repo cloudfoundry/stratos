@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
@@ -35,7 +35,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   applicationName$: Observable<string>;
 
-  public editCredentialForm: FormGroup;
+  public editCredentialForm: UntypedFormGroup;
   public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
 
   private appAutoscalerCredentialErrorSub: Subscription;
@@ -49,16 +49,16 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appAutoscalerCredentialSnackBar: MatSnackBar,
     private confirmDialog: ConfirmationDialogService,
   ) {
     this.editCredentialForm = this.fb.group({
-      actype: new FormControl({ value: true }),
-      acusername: new FormControl({ value: '', disabled: true }, Validators.required),
-      acpassword: new FormControl({ value: '', disabled: true }, Validators.required),
+      actype: new UntypedFormControl({ value: true }),
+      acusername: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
+      acpassword: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
     });
   }
 

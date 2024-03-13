@@ -10,11 +10,10 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
@@ -57,7 +56,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
   public container: ViewContainerRef;
 
-  public endpointForm: FormGroup;
+  public endpointForm: UntypedFormGroup;
 
   private bodyContent = '';
 
@@ -72,7 +71,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private resolver: ComponentFactoryResolver,
   ) { }
 
@@ -86,7 +85,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     } else {
       this.authTypesForEndpoint = endpoint.definition.authTypes.filter(authType => authType.value !== BaseEndpointAuth.SSO.value);
     }
-
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
     this.canShareEndpointToken = endpoint.definition.tokenSharing;

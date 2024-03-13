@@ -14,11 +14,11 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // RefreshToken will refresh the token for the client
-func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*interfaces.UAAResponse, *interfaces.TokenRecord, error) {
+func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*api.UAAResponse, *api.TokenRecord, error) {
 	endpoint, err := invite.checkEndpoint(cfGUID)
 	if err != nil {
 		return nil, nil, err
@@ -30,7 +30,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 	}
 
 	if err = invite.portalProxy.SaveEndpointToken(cfGUID, UserInviteUserID, *tokenRecord); err != nil {
-		return nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, api.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Unable to save user invite token",
 			"Unable to save user invite token: %+v", err,
@@ -40,7 +40,7 @@ func (invite *UserInvite) RefreshToken(cfGUID, clientID, clientSecret string) (*
 	return uaaRecord, tokenRecord, nil
 }
 
-func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint interfaces.CNSIRecord) (*interfaces.UAAResponse, *interfaces.TokenRecord, error) {
+func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint api.CNSIRecord) (*api.UAAResponse, *api.TokenRecord, error) {
 	now := time.Now()
 	clientSecret = strings.TrimSpace(clientSecret)
 	authEndpoint := fmt.Sprintf("%s/oauth/token", endpoint.TokenEndpoint)
@@ -59,12 +59,12 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 		return nil, nil, fmt.Errorf(msg, err)
 	}
 
-	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation)
+	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	res, err := client.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Warnf("Error performing http request - response: %v, error: %v", res, err)
+		log.Warnf("User Invite: Error performing http request - response: %v, error: %v", res, err)
 
 		// Try and get the error details form the WWW-Authenticate hehader
 		errMsg := "Error checking UAA Client"
@@ -73,7 +73,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 			errMsg = fmt.Sprintf("Could not check Client: %s", data["error_description"])
 		}
 
-		return nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, api.NewHTTPShadowError(
 			res.StatusCode,
 			errMsg,
 			errMsg,
@@ -85,22 +85,22 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 	// Check error code
 	if res.StatusCode != http.StatusOK {
 		errMessage := "Error validating Client ID and Client Secret"
-		authError := &interfaces.UAAErrorResponse{}
+		authError := &api.UAAErrorResponse{}
 		uaaResponse, _ := ioutil.ReadAll(res.Body)
 		if err := json.Unmarshal([]byte(uaaResponse), authError); err == nil {
 			errMessage = errMessage + " - " + authError.ErrorDescription
 		}
-		return nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, api.NewHTTPShadowError(
 			res.StatusCode,
 			errMessage,
 			errMessage+" %+v", err,
 		)
 	}
 
-	var uaaResponse interfaces.UAAResponse
+	var uaaResponse api.UAAResponse
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&uaaResponse); err != nil {
-		return nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Error parsing response from UAA",
 			"Error parsing response from UAA: %+v", err,
@@ -109,7 +109,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 
 	duration := time.Duration(uaaResponse.ExpiresIn) * time.Second
 	expiry := now.Add(duration).Unix()
-	tokenRecord := &interfaces.TokenRecord{
+	tokenRecord := &api.TokenRecord{
 		RefreshToken: fmt.Sprintf("%s:%s", clientID, clientSecret),
 		AuthToken:    uaaResponse.AccessToken,
 		TokenExpiry:  expiry,
@@ -119,12 +119,12 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint i
 	return &uaaResponse, tokenRecord, nil
 }
 
-func (invite *UserInvite) checkEndpoint(cfGUID string) (interfaces.CNSIRecord, error) {
+func (invite *UserInvite) checkEndpoint(cfGUID string) (api.CNSIRecord, error) {
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
 		// Could find the endpoint
-		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+		return api.CNSIRecord{}, api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Can not find enpoint",
 			"Can not find enpoint: %s", cfGUID,
@@ -132,7 +132,7 @@ func (invite *UserInvite) checkEndpoint(cfGUID string) (interfaces.CNSIRecord, e
 	}
 
 	if endpoint.CNSIType != "cf" {
-		return interfaces.CNSIRecord{}, interfaces.NewHTTPShadowError(
+		return api.CNSIRecord{}, api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Not a Cloud Foundry endpoint",
 			"Not a Cloud Foundry endpoint: %s", cfGUID,
@@ -174,20 +174,20 @@ func parseAuthHeader(v string) map[string]string {
 	return nameValues
 }
 
-func (invite *UserInvite) doUAAClientAuthFlow(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+func (invite *UserInvite) doUAAClientAuthFlow(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doUAAClientAuthFlow")
 	authHandler := invite.portalProxy.OAuthHandlerFunc(cnsiRequest, req, invite.refreshUAAClientToken)
 	return invite.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
-func (invite *UserInvite) getCNSIUserFromUAAClientToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+func (invite *UserInvite) getCNSIUserFromUAAClientToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
 	log.Debug("getCNSIUserFromUAAClientToken")
-	return &interfaces.ConnectedUser{}, true
+	return &api.ConnectedUser{}, true
 }
 
-func (invite *UserInvite) refreshUAAClientToken(skipSSLValidation bool, cnsiGUID, userGUID, clientID, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (invite *UserInvite) refreshUAAClientToken(skipSSLValidation bool, cnsiGUID, userGUID, clientID, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("refreshUAAClientToken")
-	refreshedToken := &interfaces.TokenRecord{}
+	refreshedToken := &api.TokenRecord{}
 
 	// See if we can get a token for the invite user
 	token, ok := invite.portalProxy.GetCNSITokenRecord(cnsiGUID, userGUID)

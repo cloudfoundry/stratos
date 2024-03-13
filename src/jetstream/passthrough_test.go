@@ -9,7 +9,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/testutils"
 )
 
 func TestPassthroughDoRequest(t *testing.T) {
@@ -26,14 +27,14 @@ func TestPassthroughDoRequest(t *testing.T) {
 		uri, err := url.Parse(mockCFServer.URL + "/v2/info")
 		So(err, ShouldBeNil)
 
-		mockCNSIRequest := interfaces.CNSIRequest{
+		mockCNSIRequest := api.CNSIRequest{
 			GUID:     mockCFGUID,
 			UserGUID: mockUserGUID,
 			Method:   "GET",
 			URL:      uri,
 		}
 
-		var mockTokenRecord = interfaces.TokenRecord{
+		var mockTokenRecord = api.TokenRecord{
 			AuthToken:    mockUAAToken,
 			RefreshToken: mockUAAToken,
 			TokenExpiry:  mockTokenExpiry,
@@ -47,7 +48,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCFGUID, mockUserGUID).
-			WillReturnRows(expectNoRows())
+			WillReturnRows(testutils.ExpectNoRows())
 
 		// set up the database expectation for pp.setCNSITokenRecord
 		mock.ExpectExec(insertIntoTokens).
@@ -65,7 +66,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		})
 
 		// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers
-		done := make(chan *interfaces.CNSIRequest)
+		done := make(chan *api.CNSIRequest)
 
 		// Set up database expectation for pp.doOauthFlowRequest
 		//  p.getCNSIRequestRecords(cnsiRequest) ->
@@ -215,7 +216,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 	t.Parallel()
 
 	Convey("Passthrough request should succeed", t, func() {
-		expectedCNSIRequest := interfaces.CNSIRequest{
+		expectedCNSIRequest := api.CNSIRequest{
 			GUID:     mockCFGUID,
 			UserGUID: "user1",
 			Method:   "GET",
@@ -223,7 +224,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 			Header:   nil,
 		}
 
-		var cr interfaces.CNSIRequest
+		var cr api.CNSIRequest
 
 		req := setupMockReq("GET", "", nil)
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)
@@ -272,8 +273,8 @@ func TestValidateCNSIListWithValidGUID(t *testing.T) {
 		_, _, _, pp, db, mock := setupHTTPTest(req)
 		defer db.Close()
 
-		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data", ""}).
-			AddRow("valid-guid-abc123", "mock-name", "cf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "")
+		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "allow_sso", "sub_type", "meta_data", "", "ca_cert"}).
+			AddRow("valid-guid-abc123", "mock-name", "cf", "http://localhost", "http://localhost", "http://localhost", mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "", "")
 		mock.ExpectQuery(selectAnyFromCNSIs).
 			WithArgs("valid-guid-abc123").
 			WillReturnRows(expectedCNSIRecordRow)

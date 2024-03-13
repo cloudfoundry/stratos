@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
@@ -11,7 +11,7 @@ describe('TableCellAServicePlanExtrasComponent', () => {
   let component: TableCellAServicePlanExtrasComponent;
   let fixture: ComponentFixture<TableCellAServicePlanExtrasComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellAServicePlanExtrasComponent,

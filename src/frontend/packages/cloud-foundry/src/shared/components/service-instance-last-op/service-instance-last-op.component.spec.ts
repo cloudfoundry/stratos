@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   BooleanIndicatorComponent,
@@ -10,7 +10,7 @@ describe('ServiceInstanceLastOpComponent', () => {
   let component: ServiceInstanceLastOpComponent;
   let fixture: ComponentFixture<ServiceInstanceLastOpComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceInstanceLastOpComponent,
