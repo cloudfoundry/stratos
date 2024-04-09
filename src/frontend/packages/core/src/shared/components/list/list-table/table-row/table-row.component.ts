@@ -18,7 +18,6 @@ import { ListExpandedComponentType } from '../../list.component.types';
 import { CardCell } from '../../list.types';
 import { TableRowExpandedService } from './table-row-expanded-service';
 
-
 @Component({
   selector: 'app-table-row',
   templateUrl: './table-row.component.html',

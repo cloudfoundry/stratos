@@ -1,5 +1,5 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
@@ -19,7 +19,7 @@ describe('EntityFavoriteStarComponent', () => {
   let favorite: UserFavorite;
   let overlayContainerElement: HTMLElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
         ConfirmationDialogService,

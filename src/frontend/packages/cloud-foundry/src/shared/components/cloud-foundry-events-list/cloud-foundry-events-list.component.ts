@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -20,7 +20,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
    */
   @Input() typeMustContain: string;
 
-  filtersFormGroup: FormGroup;
+  filtersFormGroup: UntypedFormGroup;
   typeValues: string[] = [
     'app.crash',
     'audit.app.copy-bits',
@@ -114,9 +114,9 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   constructor(
     listConfig: ListConfig<APIResource>,
   ) {
-    this.filtersFormGroup = new FormGroup({
-      actee: new FormControl(null, []),
-      type: new FormControl(null, []),
+    this.filtersFormGroup = new UntypedFormGroup({
+      actee: new UntypedFormControl(null, []),
+      type: new UntypedFormControl(null, []),
     });
     this.config = (listConfig as CfEventsConfigService);
 

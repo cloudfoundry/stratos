@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 	"github.com/gorilla/websocket"
 )
@@ -81,7 +81,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	log.Debugf("Kubernetes Version: %s", version)
 
 	// Upgrade the web socket for the incoming request
-	ws, pingTicker, err := interfaces.UpgradeToWebSocket(c)
+	ws, pingTicker, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -9,7 +9,7 @@ describe('CfAdminAddUserWarningComponent', () => {
   let component: CfAdminAddUserWarningComponent;
   let fixture: ComponentFixture<CfAdminAddUserWarningComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CfAdminAddUserWarningComponent],
       imports: generateCfBaseTestModules(),

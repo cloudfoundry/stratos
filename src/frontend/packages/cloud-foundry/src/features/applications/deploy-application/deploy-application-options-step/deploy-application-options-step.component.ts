@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -36,7 +36,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   valid$: Observable<boolean>;
   domains$: Observable<APIResource<IDomain>[]>;
   stacks$: Observable<APIResource<IDomain>[]>;
-  deployOptionsForm: FormGroup;
+  deployOptionsForm: UntypedFormGroup;
   subs: Subscription[] = [];
   appGuid: string;
   stepOpts: any;
@@ -46,7 +46,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private store: Store<CFAppState>,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private activatedRoute: ActivatedRoute

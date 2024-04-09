@@ -11,14 +11,14 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 func (uf *UserFavorites) getAll(c echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable to get favorites store",
 			"Unable to get favorites store")
@@ -26,7 +26,7 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	userGUID := c.Get("user_id").(string)
 	list, err := store.List(userGUID)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable to get favorites from favorites store",
 			"Unable to get favorites from favorites store")
@@ -34,7 +34,7 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 
 	jsonString, err := json.Marshal(list)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable Marshal favorites from favorites json",
 			"Unable Marshal favorites from favorites json")
@@ -105,7 +105,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable to connect to User Favorite store",
 			"Unable to connect to User Favorite store")
@@ -119,14 +119,14 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	favorite := userfavoritesstore.UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Unable to parse User Favorite from request body",
 			"Unable to parse User Favorite from request body")
 	}
 
 	if len(favorite.EndpointID) == 0 || len(favorite.EndpointType) == 0 {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Invalid request - must provide EndpointID and EndpointType",
 			"Invalid request - must provide EndpointID and EndpointType")
@@ -136,7 +136,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	favorite.UserGUID = userGUID
 	updatedFavorite, err := store.Save(favorite)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to save favorite to db",
 			"Failed to save favorite to db %+v",
@@ -146,7 +146,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 
 	jsonString, err := json.Marshal(updatedFavorite)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to Marshal favorite from db",
 			"Failed to Marshal favorite from db %+v",

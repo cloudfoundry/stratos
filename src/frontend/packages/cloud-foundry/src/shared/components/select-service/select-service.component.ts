@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -32,7 +32,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   cfGuid: string;
   serviceSubscription: Subscription;
   services$: Observable<APIResource<IService>[]>;
-  stepperForm: FormGroup;
+  stepperForm: UntypedFormGroup;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isFetching$: Observable<boolean>;
   selectedService$: Observable<APIResource<IService>>;
@@ -43,8 +43,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private csiGuidService: CsiGuidsService,
     private servicesWallService: ServicesWallService
   ) {
-    this.stepperForm = new FormGroup({
-      service: new FormControl('', [Validators.required as any]),
+    this.stepperForm = new UntypedFormGroup({
+      service: new UntypedFormControl('', [Validators.required as any]),
     });
     const cfSpaceGuid$ =
       combineLatest(

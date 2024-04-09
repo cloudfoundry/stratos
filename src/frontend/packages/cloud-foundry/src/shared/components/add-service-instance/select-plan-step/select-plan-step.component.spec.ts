@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import {
@@ -22,7 +22,7 @@ describe('SelectPlanStepComponent', () => {
   let component: SelectPlanStepComponent;
   let fixture: ComponentFixture<SelectPlanStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         SelectPlanStepComponent,

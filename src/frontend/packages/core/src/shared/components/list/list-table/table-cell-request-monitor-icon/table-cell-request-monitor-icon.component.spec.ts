@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { endpointEntityType, stratosEntityFactory } from '../../../../../../../store/src/helpers/stratos-entity-factory';
 import { BaseTestModules } from '../../../../../../test-framework/core-test.helper';
@@ -9,7 +9,7 @@ describe('TableCellRequestMonitorIconComponent', () => {
   let component: TableCellRequestMonitorIconComponent;
   let fixture: ComponentFixture<TableCellRequestMonitorIconComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         BaseTestModules,

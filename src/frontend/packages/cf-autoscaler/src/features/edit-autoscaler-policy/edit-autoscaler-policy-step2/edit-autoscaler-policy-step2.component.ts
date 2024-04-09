@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -39,7 +39,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
   metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
-  editTriggerForm: FormGroup;
+  editTriggerForm: UntypedFormGroup;
   // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public currentPolicy: AppAutoscalerPolicyLocal;
@@ -52,7 +52,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute
   ) {

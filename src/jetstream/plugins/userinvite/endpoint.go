@@ -3,7 +3,7 @@ package userinvite
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 
 	log "github.com/sirupsen/logrus"
@@ -20,21 +20,21 @@ func (invite *UserInvite) Register(echoContext echo.Context) error {
 }
 
 // Connect is not implemented
-func (invite *UserInvite) Connect(echoContext echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (invite *UserInvite) Connect(echoContext echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	return nil, false, errors.New("Not implemented")
 }
 
 // Info is not implemented
-func (invite *UserInvite) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
-	return interfaces.CNSIRecord{}, nil, errors.New("Not implemented")
+func (invite *UserInvite) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
+	return api.CNSIRecord{}, nil, errors.New("Not implemented")
 }
 
-func (invite *UserInvite) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+func (invite *UserInvite) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
 	return errors.New("Not implemented")
 }
 
 // UpdateMetadata will add metadata for each Cloud Foundry endpoint to indicate if user invitation is allowed
-func (invite *UserInvite) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+func (invite *UserInvite) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
 	log.Debug("User Invite:: UpdateMetadata")
 	endpoints, err := invite.portalProxy.ListEndpointsByUser(UserInviteUserID)
 	if err == nil {
@@ -48,7 +48,7 @@ func (invite *UserInvite) UpdateMetadata(info *interfaces.Info, userGUID string,
 	}
 }
 
-func hasInviteToken(endpoints []*interfaces.ConnectedEndpoint, guid string) string {
+func hasInviteToken(endpoints []*api.ConnectedEndpoint, guid string) string {
 	for _, ep := range endpoints {
 		if ep.GUID == guid {
 			return "true"

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SharedModule } from '../../../../../core/src/public-api';
 import { SidePanelService } from '../../../../../core/src/shared/services/side-panel.service';
@@ -11,7 +11,7 @@ describe('AnalysisReportRunnerComponent', () => {
   let component: AnalysisReportRunnerComponent;
   let fixture: ComponentFixture<AnalysisReportRunnerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AnalysisReportRunnerComponent],
       imports: [

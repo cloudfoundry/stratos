@@ -2,56 +2,56 @@ package monocular
 
 import (
 	"database/sql"
-	"strings"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
-
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	datastore.RegisterMigration(20190307115301, "ChartStore", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20190307115301, nil)
+}
 
-		createChartsTable := "CREATE TABLE IF NOT EXISTS charts ("
-		createChartsTable += "id                  VARCHAR(255) NOT NULL,"
-		createChartsTable += "name                VARCHAR(255) NOT NULL,"
-		createChartsTable += "repo_name           VARCHAR(255) NOT NULL,"
-		createChartsTable += "update_batch        VARCHAR(64)  NOT NULL,"
-		createChartsTable += "content             TEXT,"
-		createChartsTable += "last_updated        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-		createChartsTable += "PRIMARY KEY (id) );"
+func Up20190307115301(txn *sql.Tx) error {
+	dialect := goose.GetDialect()
 
-		_, err := txn.Exec(createChartsTable)
-		if err != nil {
-			return err
-		}
+	createChartsTable := "CREATE TABLE IF NOT EXISTS charts ("
+	createChartsTable += "id                  VARCHAR(255) NOT NULL,"
+	createChartsTable += "name                VARCHAR(255) NOT NULL,"
+	createChartsTable += "repo_name           VARCHAR(255) NOT NULL,"
+	createChartsTable += "update_batch        VARCHAR(64)  NOT NULL,"
+	createChartsTable += "content             TEXT,"
+	createChartsTable += "last_updated        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+	createChartsTable += "PRIMARY KEY (id) );"
 
-		createIndex := "CREATE INDEX charts_id ON charts (id);"
-		_, err = txn.Exec(createIndex)
-		if err != nil {
-			return err
-		}
+	_, err := txn.Exec(createChartsTable)
+	if err != nil {
+		return err
+	}
 
-		binaryDataType := "BYTEA"
-		if strings.Contains(conf.Driver.Name, "mysql") {
-			binaryDataType = "BLOB"
-		}
+	createIndex := "CREATE INDEX charts_id ON charts (id);"
+	_, err = txn.Exec(createIndex)
+	if err != nil {
+		return err
+	}
 
-		createChartFilesTable := "CREATE TABLE IF NOT EXISTS chart_files ("
-		createChartFilesTable += "id                  VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "filename            VARCHAR(64)  NOT NULL,"
-		createChartFilesTable += "chart_id            VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "name                VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "repo_name           VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "digest              VARCHAR(255) NOT NULL,"
-		createChartFilesTable += "content             " + binaryDataType + ","
-		createChartFilesTable += "PRIMARY KEY (id, filename) );"
+	binaryDataType := "BYTEA"
+	if _, ok := dialect.(*goose.MySQLDialect); ok {
+		binaryDataType = "BLOB"
+	}
 
-		_, err = txn.Exec(createChartFilesTable)
-		if err != nil {
-			return err
-		}
+	createChartFilesTable := "CREATE TABLE IF NOT EXISTS chart_files ("
+	createChartFilesTable += "id                  VARCHAR(255) NOT NULL,"
+	createChartFilesTable += "filename            VARCHAR(64)  NOT NULL,"
+	createChartFilesTable += "chart_id            VARCHAR(255) NOT NULL,"
+	createChartFilesTable += "name                VARCHAR(255) NOT NULL,"
+	createChartFilesTable += "repo_name           VARCHAR(255) NOT NULL,"
+	createChartFilesTable += "digest              VARCHAR(255) NOT NULL,"
+	createChartFilesTable += "content             " + binaryDataType + ","
+	createChartFilesTable += "PRIMARY KEY (id, filename) );"
 
-		return nil
-	})
+	_, err = txn.Exec(createChartFilesTable)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

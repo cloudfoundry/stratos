@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../core/src/tab-nav.service';
@@ -9,7 +9,7 @@ describe('KubernetesDashboardTabComponent', () => {
   let component: KubernetesDashboardTabComponent;
   let fixture: ComponentFixture<KubernetesDashboardTabComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesDashboardTabComponent],
       imports: [...KubernetesBaseTestModules],

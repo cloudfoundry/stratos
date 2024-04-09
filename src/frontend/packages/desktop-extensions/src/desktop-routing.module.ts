@@ -27,7 +27,7 @@ const customRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(customRoutes),
+    RouterModule.forRoot(customRoutes, { relativeLinkResolution: 'legacy' }),
   ],
   declarations: []
 })

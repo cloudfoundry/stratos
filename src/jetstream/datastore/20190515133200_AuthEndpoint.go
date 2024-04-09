@@ -3,18 +3,19 @@ package datastore
 import (
 	"database/sql"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	RegisterMigration(20190515133200, "AuthEndpoint", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20190515133200, nil)
+}
 
-		addColumn := "ALTER TABLE console_config ADD auth_endpoint VARCHAR(255)"
-		_, err := txn.Exec(addColumn)
-		if err != nil {
-			return err
-		}
+func Up20190515133200(txn *sql.Tx) error {
+	addColumn := "ALTER TABLE console_config ADD auth_endpoint VARCHAR(255)"
+	_, err := txn.Exec(addColumn)
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	return nil
 }

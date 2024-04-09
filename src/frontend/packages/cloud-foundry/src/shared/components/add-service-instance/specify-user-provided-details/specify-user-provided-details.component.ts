@@ -1,7 +1,7 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -48,21 +48,21 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
 
-    this.createEditServiceInstance = new FormGroup({
-      name: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-      syslog_drain_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
-      credentials: new FormControl('', isValidJsonValidator()),
-      route_service_url: new FormControl('', [Validators.pattern(urlValidationExpression)]),
-      tags: new FormControl([]),
+    this.createEditServiceInstance = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required, Validators.maxLength(50)]),
+      syslog_drain_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
+      credentials: new UntypedFormControl('', isValidJsonValidator()),
+      route_service_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
+      tags: new UntypedFormControl([]),
     });
-    this.bindExistingInstance = new FormGroup({
-      serviceInstances: new FormControl('', [Validators.required]),
+    this.bindExistingInstance = new UntypedFormGroup({
+      serviceInstances: new UntypedFormControl('', [Validators.required]),
     });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
   }
-  public createEditServiceInstance: FormGroup;
-  public bindExistingInstance: FormGroup;
+  public createEditServiceInstance: UntypedFormGroup;
+  public bindExistingInstance: UntypedFormGroup;
   public separatorKeysCodes = [ENTER, COMMA, SPACE];
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];

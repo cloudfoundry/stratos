@@ -1,10 +1,10 @@
 <app-page-header [logoutOnly]="true">
-  Stratos
+  <app-product-name></app-product-name>
 </app-page-header>
 
 <app-show-page-header></app-show-page-header>
 
 <app-no-content-message class="full-screen-centered" [icon]="'device_hub'"
   [firstLine]="'There are no registered endpoints'" [secondLine]="{
-  text: 'In order to use Stratos, you must connect to a registered endpoint. Registered endpoints are provided by your system administrator. Please contact your administrator about registering endpoints.'
+  text: 'At least one registered endpoint is required to continue. Registered endpoints are provided by your system administrator. Please contact your administrator.'
 }"></app-no-content-message>

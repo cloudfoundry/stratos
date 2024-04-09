@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -12,7 +12,7 @@ describe('SteppersComponent', () => {
   let component: SteppersComponent;
   let fixture: ComponentFixture<SteppersComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SteppersComponent],
       imports: [

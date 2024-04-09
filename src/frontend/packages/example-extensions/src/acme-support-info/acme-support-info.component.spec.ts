@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AcmeSupportInfoComponent } from './acme-support-info.component';
 import { CoreModule } from '../../core/core.module';
@@ -8,7 +8,7 @@ describe('AcmeSupportInfoComponent', () => {
   let component: AcmeSupportInfoComponent;
   let fixture: ComponentFixture<AcmeSupportInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ AcmeSupportInfoComponent ],
       imports: [

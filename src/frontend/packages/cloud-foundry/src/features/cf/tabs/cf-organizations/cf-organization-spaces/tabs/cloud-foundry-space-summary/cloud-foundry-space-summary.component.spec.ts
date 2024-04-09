@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../../../core/src/tab-nav.service';
 import {
@@ -29,7 +29,7 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
   let component: CloudFoundrySpaceSummaryComponent;
   let fixture: ComponentFixture<CloudFoundrySpaceSummaryComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundrySpaceSummaryComponent,

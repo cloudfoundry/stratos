@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModulesNoShared,
@@ -9,7 +9,7 @@ describe('TableCellSpaceNameComponent', () => {
   let component: TableCellSpaceNameComponent;
   let fixture: ComponentFixture<TableCellSpaceNameComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellSpaceNameComponent],
       imports: generateCfBaseTestModulesNoShared()

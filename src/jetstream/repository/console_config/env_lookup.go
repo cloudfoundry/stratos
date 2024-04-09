@@ -6,7 +6,7 @@ import (
 	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 const (
@@ -43,7 +43,7 @@ func InitializeConfEnvProvider(configStore Repository) error {
 }
 
 // MigrateSetupData will migrate the old data if needed
-func MigrateSetupData(portal interfaces.PortalProxy, configStore Repository) error {
+func MigrateSetupData(portal api.PortalProxy, configStore Repository) error {
 
 	// Determine if we need to migrate data first
 	_, ok, err := configStore.GetValue(systemGroupName, configSetupNeededMarker)

@@ -35,6 +35,10 @@ img.cf-logo {
   width: auto;
 }
 
+.toggleButton_node_modules-\@docusaurus-theme-classic-lib-theme-ColorModeToggle-styles-module {
+  color: #fff;
+}
+
 .navbar {
   background-color: #333;
 }
@@ -49,6 +53,12 @@ img.cf-logo {
 
 .navbar__brand:hover {
   color: var(--ifm-link-hover-color);
+}
+
+.navbar__logo {
+  b {
+    display: none;
+  }
 }
 
 .main-wrapper .hero {

@@ -1,20 +1,53 @@
+$checkbox-margin: 30px;
+
 :host {
   flex: 1;
 }
 
 mat-checkbox {
-  padding-top: 40px;
+  padding-top: $checkbox-margin;
+}
+
+form.stepper-form {
+  max-width: unset;
+  mat-form-field,
+  mat-checkbox {
+    max-width: 450px;
+  }
+  P {
+    max-width: unset;
+  }
 }
 
 .edit-endpoint {
   &__section {
-    margin-top: 40px;
+    margin-top: $checkbox-margin;
 
     &-title {
       font-size: 16px;
     }
   }
   &__sso {
-    margin-top: 40px;
+    margin-top: $checkbox-margin;
+  }
+  &__advanced {
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    margin-left: 24px;
+    overflow: hidden;
+  }
+  &__cacert-title {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  &__cacert {
+    font-family: "Source Code Pro";
+    font-size: 14px;
+    line-break: anywhere;
+    max-width: 580px;
+  }  
+  &__shown {
+    height: auto;
   }
 }

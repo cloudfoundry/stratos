@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
@@ -9,7 +9,7 @@ import { EntitySchema } from '../../../../../../../../store/src/helpers/entity-s
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { ComponentEntityMonitorConfig, StratosStatus } from '../../../../../../../../store/src/types/shared.types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
+import { UserFavoriteManager } from '@stratosui/store';
 import { CoreTestingModule } from '../../../../../../../test-framework/core-test.modules';
 import { SharedModule } from '../../../../../shared.module';
 import { MetaCardComponent } from './meta-card.component';
@@ -32,6 +32,10 @@ class UserFavoriteManagerMock {
 
   getIsFavoriteObservable() {
     return of(true);
+  }
+
+  getFavorite() {
+    return null;
   }
 }
 
@@ -69,7 +73,7 @@ describe('MetaCardComponent', () => {
   let element: HTMLElement;
   let entityMonitorFactory: EntityMonitorFactoryMock;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         SharedModule,

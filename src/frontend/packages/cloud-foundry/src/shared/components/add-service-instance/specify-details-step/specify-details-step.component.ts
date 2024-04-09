@@ -1,6 +1,6 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
 import {
@@ -81,8 +81,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   formMode: CreateServiceFormMode;
 
-  selectExistingInstanceForm: FormGroup;
-  createNewInstanceForm: FormGroup;
+  selectExistingInstanceForm: UntypedFormGroup;
+  createNewInstanceForm: UntypedFormGroup;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   cSIHelperService: CreateServiceInstanceHelper;
@@ -256,12 +256,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private setupForms() {
-    this.createNewInstanceForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
-      tags: new FormControl(''),
+    this.createNewInstanceForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
+      tags: new UntypedFormControl(''),
     });
-    this.selectExistingInstanceForm = new FormGroup({
-      serviceInstances: new FormControl('', [Validators.required]),
+    this.selectExistingInstanceForm = new UntypedFormGroup({
+      serviceInstances: new UntypedFormControl('', [Validators.required]),
     });
   }
 

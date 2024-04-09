@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MockChartService } from '../../../helm/monocular/shared/services/chart.service.mock';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
@@ -13,7 +13,7 @@ describe('UpgradeReleaseComponent', () => {
   let component: UpgradeReleaseComponent;
   let fixture: ComponentFixture<UpgradeReleaseComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ UpgradeReleaseComponent ],
       imports: [

@@ -7,7 +7,7 @@
     <app-steppers>
       <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
         <div class="uaa-wizard__form">
-          <p class="uaa-wizard__form-section">Please enter the following information to allow Stratos to authenticate
+          <p class="uaa-wizard__form-section">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
             with
             your UAA:</p>
           <form class="uaa-wizard__form" [formGroup]="uaaForm" class="stepper-form">
@@ -15,7 +15,7 @@
               <mat-form-field>
                 <input matInput formControlName="apiUrl" placeholder="UAA Endpoint Url">
               </mat-form-field>
-              <mat-checkbox matInput formControlName="skipSll">Skip SSL validation for the UAA</mat-checkbox>
+              <mat-checkbox matInput formControlName="skipSSL">Skip SSL validation for the UAA</mat-checkbox>
               <mat-form-field>
                 <input matInput formControlName="clientId" placeholder="Client ID">
               </mat-form-field>
@@ -45,10 +45,10 @@
             <!-- Single Sign-on -->
             <p class="uaa-wizard__form-section">UAA Single Sign On (SSO)</p>
             <div class="uaa-wizard__form-block">
-              <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the Stratos
+              <mat-checkbox matInput formControlName="useSSO">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
                 login UI)</mat-checkbox>
               <p *ngIf="uaaForm.value.useSSO" class="uaa-wizard__sso-block">You must ensure that the client specified
-                above has its 'redirect_uri' configured to include the Stratos SSO Callback URL:
+                above has its 'redirect_uri' configured to include the <app-product-name></app-product-name> SSO Callback URL:
                 <code>{{ clientRedirectURI }}</code>
               </p>
             </div>
@@ -56,11 +56,11 @@
           </form>
         </div>
       </app-step>
-      <app-step title="Stratos Admin Scope" [onNext]="uaaScopeNext">
+      <app-step title="Admin Scope" [onNext]="uaaScopeNext">
         <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
           text="Please wait - this will take a few moments">
           <div class="uaa-wizard__form">
-            <p>Please select the UAA scope to use to identify users as Stratos Administrators:</p>
+            <p>Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
             <form class="stepper-form">
               <mat-form-field>
                 <mat-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">

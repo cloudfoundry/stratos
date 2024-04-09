@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
@@ -26,7 +26,7 @@ describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
   let fixture: ComponentFixture<CardAppInstancesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppInstancesComponent,

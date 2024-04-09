@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 // Legacy
@@ -146,7 +146,7 @@ func (c *ConsoleConfigRepository) GetValues(group string) (map[string]string, er
 	return values, nil
 }
 
-func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig, error) {
+func (c *ConsoleConfigRepository) GetConsoleConfig() (*api.ConsoleConfig, error) {
 	log.Debug("Get ConsoleConfig")
 	rows, err := c.db.Query(getConsoleConfig)
 	if err != nil {
@@ -156,7 +156,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 
 	rowCount := 0
 
-	var consoleConfig *interfaces.ConsoleConfig
+	var consoleConfig *api.ConsoleConfig
 	for rows.Next() {
 		var (
 			uaaEndpoint      string
@@ -168,7 +168,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig,
 			return nil, errors.New("Multiple configuration data detected")
 		}
 
-		consoleConfig = new(interfaces.ConsoleConfig)
+		consoleConfig = new(api.ConsoleConfig)
 		err := rows.Scan(&authEndpointType, &uaaEndpoint, &authEndpoint, &consoleConfig.ConsoleAdminScope, &consoleConfig.ConsoleClient,
 			&consoleConfig.ConsoleClientSecret, &consoleConfig.SkipSSLValidation, &consoleConfig.UseSSO)
 		if err != nil {

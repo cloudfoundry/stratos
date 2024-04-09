@@ -1,5 +1,5 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import {
@@ -15,7 +15,7 @@ describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
   let fixture: ComponentFixture<BindAppsStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         BindAppsStepComponent,

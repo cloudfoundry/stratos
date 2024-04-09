@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   BooleanIndicatorComponent,
@@ -17,7 +17,7 @@ describe('ServiceSummaryCardComponent', () => {
   let component: ServiceSummaryCardComponent;
   let fixture: ComponentFixture<ServiceSummaryCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceSummaryCardComponent,

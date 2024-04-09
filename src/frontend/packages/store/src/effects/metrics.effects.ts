@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ export class MetricsEffect {
     private store: Store<DispatchOnlyAppState>
   ) { }
 
-  @Effect() metrics$ = this.actions$.pipe(
+   metrics$ = createEffect(() => this.actions$.pipe(
     ofType<MetricsAction>(METRICS_START),
     mergeMap(action => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
@@ -68,9 +68,9 @@ export class MetricsEffect {
           )
         ];
       }));
-    }));
+    })));
 
-  @Effect() metricsAPI$ = this.actions$.pipe(
+   metricsAPI$ = createEffect(() => this.actions$.pipe(
     ofType<MetricsAPIAction>(METRIC_API_START),
     mergeMap(action => {
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(action.url, {
@@ -88,7 +88,7 @@ export class MetricsEffect {
           }
         ];
       }));
-    }));
+    })));
 
   private buildFullUrl(action: MetricsAction) {
     return `${action.url}/${action.queryType}?query=${getFullMetricQueryQuery(action.query)}`;

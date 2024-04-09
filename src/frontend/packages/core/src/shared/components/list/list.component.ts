@@ -20,6 +20,23 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { SortDirection } from '@angular/material/sort';
 import { Store } from '@ngrx/store';
 import {
+  SetClientFilterKey,
+  SetPage,
+  entityCatalog,
+  getListStateObservables,
+  GeneralAppState,
+  ListFilter,
+  ListPagination,
+  ListSort,
+  ListView,
+  SetListViewAction,
+  EntityCatalogEntityConfig,
+  ActionState,
+  ResetPagination,
+  ResetPaginationSortFilter,
+  PaginatedAction,
+} from '@stratosui/store';
+import {
   asapScheduler,
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -44,25 +61,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  ListFilter,
-  ListPagination,
-  ListSort,
-  ListView,
-  SetListViewAction,
-} from '../../../../../store/src/actions/list.actions';
-import {
-  ResetPagination,
-  ResetPaginationSortFilter,
-  SetClientFilterKey,
-  SetPage,
-} from '../../../../../store/src/actions/pagination.actions';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogEntityConfig } from '../../../../../store/src/entity-catalog/entity-catalog.types';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { getListStateObservables } from '../../../../../store/src/reducers/list.reducer';
-import { PaginatedAction } from '../../../../../store/src/types/pagination.types';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import {
   EntitySelectConfig,

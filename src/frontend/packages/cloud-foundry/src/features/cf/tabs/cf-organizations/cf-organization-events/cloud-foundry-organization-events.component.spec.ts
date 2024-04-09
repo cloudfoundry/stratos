@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { CFBaseTestModules } from '../../../../../../test-framework/cf-test-helper';
@@ -21,7 +21,7 @@ describe('CloudFoundryOrganizationEventsComponent', () => {
   let component: CloudFoundryOrganizationEventsComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationEventsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryOrganizationEventsComponent,

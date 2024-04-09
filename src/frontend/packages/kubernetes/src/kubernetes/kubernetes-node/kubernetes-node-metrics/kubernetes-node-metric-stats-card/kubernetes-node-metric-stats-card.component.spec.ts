@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
@@ -11,7 +11,7 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
   let component: KubernetesNodeMetricStatsCardComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricStatsCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeMetricStatsCardComponent, KubernetesNodeSimpleMetricComponent],
       imports: KubernetesBaseTestModules,

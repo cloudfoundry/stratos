@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
@@ -11,7 +11,7 @@ describe('ApplicationDeleteComponent', () => {
   let fixture: ComponentFixture<ApplicationDeleteComponent<any>>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...generateCfBaseTestModules(),

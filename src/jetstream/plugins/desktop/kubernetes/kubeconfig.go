@@ -9,7 +9,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 
 	"k8s.io/client-go/tools/clientcmd"
@@ -30,7 +30,7 @@ type CFConfigFile struct {
 }
 
 // ListKubernetes will list Cloud Foundry endpoints configured locally (can be only one)
-func ListKubernetes() ([]*interfaces.CNSIRecord, *clientcmdapi.Config, error) {
+func ListKubernetes() ([]*api.CNSIRecord, *clientcmdapi.Config, error) {
 
 	cfg, err := readKubeConfigFile()
 	if err != nil {
@@ -39,11 +39,11 @@ func ListKubernetes() ([]*interfaces.CNSIRecord, *clientcmdapi.Config, error) {
 	}
 
 	// Add an endpoint for each cluster
-	var eps []*interfaces.CNSIRecord
+	var eps []*api.CNSIRecord
 	for name, cluster := range cfg.Clusters {
 		apiEndpoint, err := url.Parse(cluster.Server)
 		if err == nil {
-			eps = append(eps, &interfaces.CNSIRecord{
+			eps = append(eps, &api.CNSIRecord{
 				GUID:                   getEndpointGUID(cluster.Server),
 				Name:                   name,
 				CNSIType:               "k8s",
@@ -64,7 +64,7 @@ func ListKubernetes() ([]*interfaces.CNSIRecord, *clientcmdapi.Config, error) {
 }
 
 // ListConnectedCloudFoundry will list Cloud Foundry endpoints configured locally (can be only one)
-func ListConnectedKubernetes() ([]*interfaces.ConnectedEndpoint, error) {
+func ListConnectedKubernetes() ([]*api.ConnectedEndpoint, error) {
 
 	cfg, err := readKubeConfigFile()
 	if err != nil {
@@ -73,11 +73,11 @@ func ListConnectedKubernetes() ([]*interfaces.ConnectedEndpoint, error) {
 	}
 
 	// Add an endpoint for each cluster
-	var eps []*interfaces.ConnectedEndpoint
+	var eps []*api.ConnectedEndpoint
 	for name, cluster := range cfg.Clusters {
 		apiEndpoint, err := url.Parse(cluster.Server)
 		if err == nil {
-			eps = append(eps, &interfaces.ConnectedEndpoint{
+			eps = append(eps, &api.ConnectedEndpoint{
 				GUID:                   getEndpointGUID(cluster.Server),
 				Name:                   name,
 				CNSIType:               "k8s",
@@ -95,7 +95,7 @@ func ListConnectedKubernetes() ([]*interfaces.ConnectedEndpoint, error) {
 	return eps, nil
 }
 
-func getKubeConfigUser(config *clientcmdapi.Config, endpoint *interfaces.CNSIRecord) (*clientcmdapi.AuthInfo, bool) {
+func getKubeConfigUser(config *clientcmdapi.Config, endpoint *api.CNSIRecord) (*clientcmdapi.AuthInfo, bool) {
 
 	// Find the first context for this endpoint
 	for _, context := range config.Contexts {

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { MDAppModule } from '../../../../../core/src/core/md.module';
@@ -12,7 +12,7 @@ describe('CliInfoComponent', () => {
   let component: CliInfoComponent;
   let fixture: ComponentFixture<CliInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CliInfoComponent, CodeBlockComponent, CopyToClipboardComponent],
       imports: [

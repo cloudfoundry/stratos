@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
 
@@ -21,8 +21,8 @@ export class APIEffect {
     private httpClient: PipelineHttpClient
   ) { }
 
-  @Effect()
-  apiRequest$ = this.actions$.pipe(
+  
+  apiRequest$ = createEffect(() => this.actions$.pipe(
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
     mergeMap(([action, appState]) => {
@@ -41,12 +41,12 @@ export class APIEffect {
         appState
       });
     }),
-  );
+  ));
 
   // Whenever we spot a delete success operation, look to see if the action
   // fulfils the entity delete requirements and dispatch an entity delete action if it does
-  @Effect()
-  apiDeleteRequest$ = this.actions$.pipe(
+  
+  apiDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
     withLatestFrom(this.store),
     mergeMap(([action, appState]) => {
@@ -59,6 +59,6 @@ export class APIEffect {
       }
       return [];
     })
-  );
+  ));
 
 }

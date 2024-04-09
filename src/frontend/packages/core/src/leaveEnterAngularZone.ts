@@ -1,7 +1,6 @@
 import { NgZone } from '@angular/core';
 import { Scheduler, Subscription } from 'rxjs';
 
-
 class LeaveZoneScheduler {
   constructor(private zone: NgZone, private scheduler: Scheduler) { }
 

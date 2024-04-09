@@ -18,7 +18,7 @@
         <div *ngIf="!!service.unparsableFileContent || !(service.validDb$ | async)" class="file-step__error">
           <div *ngIf="!service.unparsableFileContent && !(service.validDb$ | async)" class="file-step__chunk">
             <p>
-              <mat-icon>warning</mat-icon> The database version of Stratos
+              <mat-icon>warning</mat-icon> The database version of <app-product-name></app-product-name>
               (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
               (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
             </p>

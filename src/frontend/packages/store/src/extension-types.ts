@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Schema, schema } from 'normalizr';
 
 // Allowable endpoint types
@@ -24,7 +24,7 @@ export interface EndpointAuthTypeConfig {
  * Interface that an Endpoint Auth Form Component must implement
  */
 export interface IAuthForm {
-  formGroup: FormGroup;
+  formGroup: UntypedFormGroup;
   /**
    * Generic property for any additional config
    */

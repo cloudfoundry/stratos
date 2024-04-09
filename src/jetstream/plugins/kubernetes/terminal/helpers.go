@@ -1,6 +1,7 @@
 package terminal
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 
 	"github.com/gorilla/websocket"
 	v1 "k8s.io/api/core/v1"
@@ -65,6 +66,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	secretName := fmt.Sprintf("terminal-%s", id)
 	podName := secretName
 	podClient, secretClient, err := k.getClients()
+	ctx := context.Background()
 	result := &PodCreationData{}
 	result.Namespace = k.Namespace
 
@@ -102,7 +104,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	}
 
 	sendProgressMessage(ws, startingProgressMessage)
-	_, err = secretClient.Create(secretSpec)
+
+	_, err = secretClient.Create(ctx, secretSpec, metav1.CreateOptions{})
 	if err != nil {
 		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
 		return result, err
@@ -161,7 +164,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	sendProgressMessage(ws, startingProgressMessage)
 
 	// Create a new pod
-	pod, err := podClient.Create(podSpec)
+	pod, err := podClient.Create(ctx, podSpec, metav1.CreateOptions{})
 	if err != nil {
 		log.Warnf("Kubernetes Terminal: Unable to create Pod: %+v", err)
 		// Secret will get cleaned up by caller
@@ -177,7 +180,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	for {
 		// This ensures we keep the web socket alive while the container is creating
 		sendProgressMessage(ws, startingProgressMessage)
-		status, err := podClient.Get(pod.Name, statusOptions)
+		status, err := podClient.Get(ctx, pod.Name, statusOptions)
 		if err == nil && status.Status.Phase == "Running" {
 			break
 		}
@@ -207,6 +210,7 @@ func setResourcMetadata(metadata *metav1.ObjectMeta, sessionID string) {
 
 // Cleanup the pod and secret
 func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
+	ctx := context.Background()
 	if podData == nil {
 		// Already been cleaned up
 		return nil
@@ -214,17 +218,17 @@ func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
 
 	if len(podData.PodName) > 0 {
 		//captureBashHistory(podData)
-		podData.PodClient.Delete(podData.PodName, nil)
+		podData.PodClient.Delete(ctx, podData.PodName, metav1.DeleteOptions{})
 	}
 
 	if len(podData.SecretName) > 0 {
-		podData.SecretClient.Delete(podData.SecretName, nil)
+		podData.SecretClient.Delete(ctx, podData.SecretName, metav1.DeleteOptions{})
 	}
 
 	return nil
 }
 
-func getHelmRepoSetupScript(portalProxy interfaces.PortalProxy) string {
+func getHelmRepoSetupScript(portalProxy api.PortalProxy) string {
 	str := ""
 
 	// Get all of the helm endpoints

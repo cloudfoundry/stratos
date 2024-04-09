@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -16,7 +17,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 const chartCollection = "charts"
@@ -56,17 +57,17 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	var params installRequest
 	err := json.Unmarshal(buf.Bytes(), &params)
 	if err != nil {
-		return interfaces.NewJetstreamUserErrorf("Could not get Create Release Parameters: %v+", err)
+		return api.NewJetstreamUserErrorf("Could not get Create Release Parameters: %v+", err)
 	}
 
 	// Client must give us the download URL for the chart
 	if len(params.ChartURL) == 0 {
-		return interfaces.NewJetstreamUserError("Client did not supply Chart download URL")
+		return api.NewJetstreamUserError("Client did not supply Chart download URL")
 	}
 
 	chart, err := c.loadChart(params.ChartURL)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not load chart: %v+", err)
+		return api.NewJetstreamErrorf("Could not load chart: %v+", err)
 	}
 
 	endpointGUID := params.Endpoint
@@ -74,7 +75,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, params.Namespace)
 	if err != nil {
-		return interfaces.NewJetstreamUserErrorf("Could not get Helm Configuration for endpoint: %+v", err)
+		return api.NewJetstreamUserErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
@@ -82,23 +83,24 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	userSuppliedValues := map[string]interface{}{}
 	if err := yaml.Unmarshal([]byte(params.Values), &userSuppliedValues); err != nil {
 		// Could not parse the user's values
-		return interfaces.NewJetstreamUserErrorf("Could not parse values: %+v", err)
+		return api.NewJetstreamUserErrorf("Could not parse values: %+v", err)
 	}
 
 	// In Helm 3, the namespace must already exist
 	kubeClient, _ := c.GetConfigForEndpointUser(endpointGUID, userGUID)
 	clientset, _ := kubernetes.NewForConfig(kubeClient)
 	coreclient := clientset.CoreV1()
-	_, err = coreclient.Namespaces().Get(params.Namespace, metav1.GetOptions{})
+		ctx := context.Background()
+	_, err = coreclient.Namespaces().Get(ctx, params.Namespace, metav1.GetOptions{})
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Namespace '%s' does not exist", params.Namespace)
+		return api.NewJetstreamErrorf("Namespace '%s' does not exist", params.Namespace)
 	}
 
 	// Check release name is valid and does not already exist
 	statusAction := action.NewStatus(config)
 	_, err = statusAction.Run(params.Name)
 	if err == nil {
-		return interfaces.NewJetstreamUserError("A Release with that name already exists - please choose another")
+		return api.NewJetstreamUserError("A Release with that name already exists - please choose another")
 	}
 
 	install := action.NewInstall(config)
@@ -107,7 +109,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	release, err := install.Run(chart, userSuppliedValues)
 	if err != nil {
-		return interfaces.NewJetstreamUserErrorf(fmt.Sprintf("Error installing: %+v", err))
+		return api.NewJetstreamUserErrorf(fmt.Sprintf("Error installing: %+v", err))
 	}
 
 	return ec.JSON(200, release)
@@ -118,7 +120,7 @@ func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, e
 	log.Debugf("Helm Chart Download URL: %s", downloadURL)
 
 	// NWM: Should we look up Helm Repository endpoint and use the value from that
-	httpClient := c.portalProxy.GetHttpClient(false)
+	httpClient := c.portalProxy.GetHttpClient(false, "")
 	resp, err := httpClient.Get(downloadURL)
 	if err != nil {
 		return nil, fmt.Errorf("Could not download Chart Archive: %s", err)
@@ -142,7 +144,7 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, namespace)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
+		return api.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
@@ -150,7 +152,7 @@ func (c *KubernetesSpecification) DeleteRelease(ec echo.Context) error {
 	uninstall := action.NewUninstall(config)
 	deleteResponse, err := uninstall.Run(releaseName)
 	if err != nil {
-		return interfaces.NewJetstreamError("Could not delete Helm Release")
+		return api.NewJetstreamError("Could not delete Helm Release")
 	}
 
 	return ec.JSON(200, deleteResponse)
@@ -166,7 +168,7 @@ func (c *KubernetesSpecification) GetReleaseHistory(ec echo.Context) error {
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, namespace)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
+		return api.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
@@ -174,7 +176,7 @@ func (c *KubernetesSpecification) GetReleaseHistory(ec echo.Context) error {
 	history := action.NewHistory(config)
 	historyResponse, err := history.Run(releaseName)
 	if err != nil {
-		return interfaces.NewJetstreamError("Could not get history for the Helm Release")
+		return api.NewJetstreamError("Could not get history for the Helm Release")
 	}
 
 	return ec.JSON(200, historyResponse)
@@ -195,22 +197,22 @@ func (c *KubernetesSpecification) UpgradeRelease(ec echo.Context) error {
 	var params upgradeRequest
 	err := json.Unmarshal(buf.Bytes(), &params)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Upgrade Release Parameters: %+v", err)
+		return api.NewJetstreamErrorf("Could not get Upgrade Release Parameters: %+v", err)
 	}
 
 	// Client must give us the download URL for the chart
 	if len(params.ChartURL) == 0 {
-		return interfaces.NewJetstreamErrorf("Client did not supply Chart download URL")
+		return api.NewJetstreamErrorf("Client did not supply Chart download URL")
 	}
 
 	chart, err := c.loadChart(params.ChartURL)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not load chart for upgrade: %+v", err)
+		return api.NewJetstreamErrorf("Could not load chart for upgrade: %+v", err)
 	}
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userGUID, namespace)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
+		return api.NewJetstreamErrorf("Could not get Helm Configuration for endpoint: %+v", err)
 	}
 
 	defer hc.Cleanup()
@@ -218,13 +220,13 @@ func (c *KubernetesSpecification) UpgradeRelease(ec echo.Context) error {
 	userSuppliedValues := map[string]interface{}{}
 	if err := yaml.Unmarshal([]byte(params.Values), &userSuppliedValues); err != nil {
 		// Could not parse the user's values
-		return interfaces.NewJetstreamErrorf("Could not parse values: %+v", err)
+		return api.NewJetstreamErrorf("Could not parse values: %+v", err)
 	}
 
 	upgrade := action.NewUpgrade(config)
 	upgradeResponse, err := upgrade.Run(releaseName, chart, userSuppliedValues)
 	if err != nil {
-		return interfaces.NewJetstreamErrorf("Could not upgrade Helm Release: %+v", err)
+		return api.NewJetstreamErrorf("Could not upgrade Helm Release: %+v", err)
 	}
 
 	return ec.JSON(200, upgradeResponse)

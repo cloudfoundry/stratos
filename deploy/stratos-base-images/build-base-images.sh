@@ -7,30 +7,56 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-BASE_IMAGE=opensuse/leap:15.2
-REGISTRY=docker.io
-ORGANIZATION=splatform
-TAG=leap15_2
+BASE_IMAGE=centos:7
+REGISTRY=ghcr.io
+ORGANIZATION=anynines
+TAG=centos7
+ARCH=amd64
 PROG=$(basename ${BASH_SOURCE[0]})
 SQUASH_ARGS="--squash"
 NO_SQUASH="stratos-base"
 DIR=$(dirname $PROG)
 
+NODE_ARCH=x64
+GO_ARCH=amd64
+MARIADB_ARCH=centos7-amd64
+GOSU_ARCH=amd64
+NGINX_ARCH=centos/7/x86_64
+
 function usage {
-    echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-p] [h]"
+    echo "usage: $PROG [-b BASE] [-r REGISTRY] [-o ORGANIZATION] [-t TAG] [-s] [-p] [h]"
+    echo "       -a Value   System Architecture (amd64 or arm64)"
     echo "       -b Value   Base Image"
     echo "       -r Value   Docker registry"
     echo "       -o Value   Organization in Docker registry"
+    echo "       -s         Don't squash images"
     echo "       -t Value   Tag for images"
     echo "       -p         Push images to registry"
-    echo "       -s         Is SLE build"
     echo "       -h         Help"
     exit 1
 }
 
 
-while getopts "b:r:o:t:psh" opt ; do
+while getopts "a:b:r:o:t:ph:s" opt ; do
     case $opt in
+        a)
+            ARCH=${OPTARG}
+            case $ARCH in
+                amd64)
+                    ;;
+                arm64)
+                    NODE_ARCH=arm64
+                    GO_ARCH=arm64
+                    MARIADB_ARCH=centos7-aarch64
+                    GOSU_ARCH=arm64
+                    NGINX_ARCH=centos/7/aarch64
+                    ;;
+                *)
+                    echo "Invalid architecture $OPTARG" >&2
+                    usage
+                    ;;
+            esac
+            ;;
         b)
             BASE_IMAGE=${OPTARG}
             ;;
@@ -46,11 +72,11 @@ while getopts "b:r:o:t:psh" opt ; do
         p)
             PUSH_IMAGES=true
             ;;
-        s)
-            IS_SLE="true"
-            ;;
         h)
             usage
+            ;;
+        s)
+            SQUASH_ARGS=""
             ;;
         \?)
             echo "Invalid option -$OPTARG" >&2
@@ -65,11 +91,12 @@ echo "Stratos Base Image Builder"
 echo "=========================="
 printf "${CYAN}"
 echo ""
+echo "ARCHITECTURE : ${ARCH}"
 echo "BASE IMAGE   : ${BASE_IMAGE}"
 echo "REGISTRY     : ${REGISTRY}"
 echo "ORG          : ${ORGANIZATION}"
 echo "TAG          : ${TAG}"
-echo "IS_SLE       : ${IS_SLE}"
+echo "SQUASH:      : ${SQUASH_ARGS}"
 echo "PUSH IMAGES  : ${PUSH_IMAGES}"
 echo ""
 printf "${RESET}"
@@ -78,14 +105,6 @@ if [ -z ${PUSH_IMAGES} ]; then
   echo "========================================"
   echo "Images will NOT be pushed"
   echo "========================================"
-fi
-
-if [ -n "${IS_SLE}" ]; then
-  # Check env vars
-  : "${ZYP_REPO_BASE_GA?Environment variable must be set when building SLE images}"
-  : "${ZYP_REPO_BASE_UPDATE?Environment variable must be set when building SLE images}"
-  : "${ZYP_REPO_SP_GA?Environment variable must be set when building SLE images}"
-  : "${ZYP_REPO_SP_UPDATE?Environment variable must be set when building SLE images}"
 fi
 
 set -x
@@ -104,7 +123,7 @@ cp ${__DIRNAME}/install-ruby.sh .
 
 GO_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-go-build-base:${TAG}
 for i in ${DOCKERFILES}; do
-  BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} IS_SLE=${IS_SLE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
+  BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} ARCH=${ARCH} NODE_ARCH=${NODE_ARCH} GO_ARCH=${GO_ARCH} MARIADB_ARCH=${MARIADB_ARCH} GOSU_ARCH=${GOSU_ARCH} NGINX_ARCH=${NGINX_ARCH} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
 
 pwd

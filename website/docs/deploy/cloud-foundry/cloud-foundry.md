@@ -134,7 +134,7 @@ Deploy Stratos using the [`splatform/stratos`](https://hub.docker.com/r/splatfor
 > **NOTE:** Your Cloud Foundry must have docker support [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
 
 ```
-cf push console -o splatform/stratos:stable -m 128M -k 384M
+cf push console -o splatform/stratos:stable -m 128M -k 512M
 ```
 > Note: You can replace `console` in the command above with a name of your choice for the application
 
@@ -148,7 +148,7 @@ Alternatively cf push using a manifest
         image: splatform/stratos:stable
       instances: 1
       memory: 128M
-      disk_quota: 384M
+      disk_quota: 512M
     ```
 - now, you can simply push it to Cloud Foundry:
     ```

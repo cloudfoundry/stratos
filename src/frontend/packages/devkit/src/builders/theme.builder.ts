@@ -27,7 +27,7 @@ async function commandBuilder(
 
     // Copy all files from root to the outPath
 
-    FS.copySync(prjMetadata.root, outPath);
+    FS.copySync(prjMetadata.root as string, outPath);
 
     // We can remove scripts from the package.json file
     const pkgFile = Packages.loadPackageFile(outPath);

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SharedModule } from '../../../../../../../../core/src/shared/shared.module';
 import {
@@ -12,7 +12,7 @@ describe('CfUserPermissionCellComponent', () => {
   let component: CfOrgPermissionCellComponent;
   let fixture: ComponentFixture<CfOrgPermissionCellComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CfOrgPermissionCellComponent

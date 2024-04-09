@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
@@ -12,7 +12,7 @@ describe('EditEndpointStepComponent', () => {
   let component: EditEndpointStepComponent;
   let fixture: ComponentFixture<EditEndpointStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditEndpointStepComponent],
       imports: [

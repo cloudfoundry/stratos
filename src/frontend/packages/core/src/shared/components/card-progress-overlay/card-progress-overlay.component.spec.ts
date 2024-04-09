@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CardProgressOverlayComponent } from './card-progress-overlay.component';
 import { CoreModule } from '../../../core/core.module';
@@ -7,7 +7,7 @@ describe('CardProgressOverlayComponent', () => {
   let component: CardProgressOverlayComponent;
   let fixture: ComponentFixture<CardProgressOverlayComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

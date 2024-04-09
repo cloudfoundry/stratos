@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, ViewEncapsulation } from '@angular/core';
-import { ColorHelper } from '@swimlane/ngx-charts';
+import { ColorHelper, ScaleType } from '@swimlane/ngx-charts';
 
 @Component({
   selector: 'app-ring-chart',
@@ -44,7 +44,7 @@ export class RingChartComponent implements OnInit, OnChanges {
       // Not set yet, can't set colour without it
       return;
     }
-    this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, this.customColors || []);
+    this.colors = new ColorHelper(this.scheme, ScaleType.Ordinal, this.domain, this.customColors || []);
   }
 
   getDomain(): any[] {

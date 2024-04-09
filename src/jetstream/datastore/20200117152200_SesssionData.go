@@ -3,11 +3,13 @@ package datastore
 import (
 	"database/sql"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	RegisterMigration(20200117152200, "SesssionData", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20200117152200, nil)
+}
+func Up20200117152200(txn *sql.Tx) error {
 		sessionDataTable := "CREATE TABLE IF NOT EXISTS session_data ("
 		sessionDataTable += "  session           VARCHAR(255)      NOT NULL,"
 		sessionDataTable += "  groupName         VARCHAR(32)       NOT NULL,"
@@ -18,5 +20,5 @@ func init() {
 
 		_, err := txn.Exec(sessionDataTable)
 		return err
-	})
+	
 }

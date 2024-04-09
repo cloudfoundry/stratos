@@ -3,11 +3,13 @@ package datastore
 import (
 	"database/sql"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	RegisterMigration(20200814140918, "ApiKeys", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20200814140918, nil)
+}
+func Up20200814140918(txn *sql.Tx) error {
 		apiTokenTable := "CREATE TABLE IF NOT EXISTS api_keys ("
 		apiTokenTable += "guid            VARCHAR(36) NOT NULL UNIQUE,"
 		apiTokenTable += "secret          VARCHAR(64) NOT NULL UNIQUE,"
@@ -18,5 +20,5 @@ func init() {
 
 		_, err := txn.Exec(apiTokenTable)
 		return err
-	})
+	
 }

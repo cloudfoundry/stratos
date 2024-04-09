@@ -1,5 +1,5 @@
 import { CoreModule } from '../../../core/core.module';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NoContentMessageComponent } from './no-content-message.component';
 
@@ -7,7 +7,7 @@ describe('NoContentMessageComponent', () => {
   let component: NoContentMessageComponent;
   let fixture: ComponentFixture<NoContentMessageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [],
       imports: [

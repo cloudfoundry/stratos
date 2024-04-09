@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin action-monitor-icon-theme($theme, $app-theme) {
   $status-colors: map-get($app-theme, status);
   .monitor-icon {

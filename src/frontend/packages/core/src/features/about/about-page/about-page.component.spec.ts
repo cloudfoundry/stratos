@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -13,7 +13,7 @@ describe('AboutPageComponent', () => {
   let component: AboutPageComponent;
   let fixture: ComponentFixture<AboutPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AboutPageComponent],
       imports: [

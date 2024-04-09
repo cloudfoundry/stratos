@@ -1,5 +1,5 @@
 import { promise } from 'protractor';
-import request from 'request-promise-native';
+import request from '@cypress/request';
 
 import { e2e } from '../e2e';
 import { E2EUaa } from '../e2e.types';

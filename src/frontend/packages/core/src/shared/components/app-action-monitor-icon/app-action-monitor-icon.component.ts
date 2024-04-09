@@ -1,11 +1,14 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
+import {
+  EntityMonitor,
+  EntityMonitorFactory,
+  ActionState,
+  RequestInfoState,
+  rootUpdatingKey,
+  EntitySchema,
+} from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
-
-import { EntitySchema } from '../../../../../store/src/helpers/entity-schema';
-import { EntityMonitor } from '../../../../../store/src/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
-import { ActionState, RequestInfoState, rootUpdatingKey } from '../../../../../store/src/reducers/api-request-reducer/types';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -84,7 +87,6 @@ export class ActionMonitorComponentState {
     (requestState.updating[this.updateKey] || { busy: false, error: false, message: '' })
   private getUpdatingState(entityMonitor: EntityMonitor): Observable<IActionMonitorComponentState> {
 
-
     const completed$ = this.getHasCompletedObservable(
       entityMonitor.entityRequest$.pipe(
         map(requestState => this.fetchUpdatingState(requestState).busy),
@@ -113,8 +115,6 @@ export class ActionMonitorComponentState {
     );
   }
 }
-
-
 
 @Component({
   selector: 'app-action-monitor-icon',

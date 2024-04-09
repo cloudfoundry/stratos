@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import {
@@ -10,7 +10,7 @@ describe('TableCellServiceActiveComponent', () => {
   let component: TableCellServiceActiveComponent;
   let fixture: ComponentFixture<TableCellServiceActiveComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServiceActiveComponent, BooleanIndicatorComponent],
       imports: [CoreModule]

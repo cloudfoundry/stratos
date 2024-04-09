@@ -1,8 +1,6 @@
 import { Store } from '@ngrx/store';
+import { AppState, GetAllApiKeys, ApiKey } from '@stratosui/store';
 
-import { GetAllApiKeys } from '../../../../../../../store/src/actions/apiKey.actions';
-import { ApiKey } from '../../../../../../../store/src/apiKey.types';
-import { AppState } from '../../../../../../../store/src/app-state';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 

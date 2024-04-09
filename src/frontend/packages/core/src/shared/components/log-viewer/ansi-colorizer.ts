@@ -1,4 +1,3 @@
-
 // Ansi code to reset all colours
 const RESET = '\x1B[0m';
 

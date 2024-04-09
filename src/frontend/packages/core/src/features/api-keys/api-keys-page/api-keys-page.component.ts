@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';

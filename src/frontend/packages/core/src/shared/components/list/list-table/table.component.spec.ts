@@ -1,6 +1,6 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { Component, ViewChild } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { EMPTY, of as observableOf } from 'rxjs';
@@ -97,7 +97,7 @@ describe('TableComponent', () => {
   let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

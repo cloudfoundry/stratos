@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -10,7 +10,7 @@ describe('TableCellQuotaComponent', () => {
   let component: TableCellQuotaComponent;
   let fixture: ComponentFixture<TableCellQuotaComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellQuotaComponent],
       imports: [

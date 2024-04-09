@@ -1,10 +1,9 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { stratosEntityCatalog, InternalAppState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
-import { InternalAppState } from '../../../../store/src/app-state';
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
 import {
   CurrentUserPermissions,
   PermissionConfig,
@@ -17,7 +16,6 @@ import {
   IPermissionCheckCombiner,
 } from './current-user-permissions.types';
 import { StratosUserPermissionsChecker } from './stratos-user-permissions.checker';
-
 
 export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
 

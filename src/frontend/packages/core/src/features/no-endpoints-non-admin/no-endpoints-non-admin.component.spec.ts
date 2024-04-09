@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -13,7 +13,7 @@ describe('NoEndpointsNonAdminComponent', () => {
   let component: NoEndpointsNonAdminComponent;
   let fixture: ComponentFixture<NoEndpointsNonAdminComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [NoEndpointsNonAdminComponent],
       imports: [

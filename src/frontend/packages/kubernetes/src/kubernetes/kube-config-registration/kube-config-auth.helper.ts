@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, Injector } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
 import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -132,7 +132,7 @@ export class KubeConfigAuthHelper {
   }
 
   // Use the auto component to get the data in the correct format for connecting to the endpoint
-  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
+  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: UntypedFormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
     let data = null;

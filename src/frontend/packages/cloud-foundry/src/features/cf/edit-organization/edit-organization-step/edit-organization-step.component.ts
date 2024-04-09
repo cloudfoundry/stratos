@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
@@ -48,7 +48,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   currentStatus: string;
   originalName: string;
   org$: Observable<IOrganization>;
-  editOrgName: FormGroup;
+  editOrgName: UntypedFormGroup;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
@@ -62,9 +62,9 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
-    this.editOrgName = new FormGroup({
-      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new FormControl(),
+    this.editOrgName = new UntypedFormGroup({
+      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
+      quotaDefinition: new UntypedFormControl(),
       // toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
@@ -10,7 +10,7 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   styleUrls: ['./kubernetes-certs-auth-form.component.scss']
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

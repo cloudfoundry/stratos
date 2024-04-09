@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
-import markdown from 'marked';
+import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -13,7 +13,7 @@ export class AnalysisInfoCardComponent {
 
   public loading = true;
   public content$: Observable<string>;
-  private renderer = new markdown.Renderer();
+  private renderer = new marked.Renderer();
 
   public mAanalyzer = {};
 
@@ -37,7 +37,7 @@ export class AnalysisInfoCardComponent {
     return this.http.get(url, { responseType: 'text' }).pipe(
       map(resp => {
         this.loading = false;
-        return markdown(resp, {
+        return marked(resp, {
           renderer: this.renderer
         });
       }),

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -9,7 +9,7 @@ describe('ServicePlanPriceComponent', () => {
   let component: ServicePlanPriceComponent;
   let fixture: ComponentFixture<ServicePlanPriceComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ServicePlanPriceComponent],
       imports: [

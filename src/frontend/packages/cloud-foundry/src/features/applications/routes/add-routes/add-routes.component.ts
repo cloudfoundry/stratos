@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
@@ -30,9 +30,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   model: Route;
   domains: APIResource<IDomain>[] = [];
-  addTCPRoute: FormGroup;
-  addHTTPRoute: FormGroup;
-  domainFormGroup: FormGroup;
+  addTCPRoute: UntypedFormGroup;
+  addHTTPRoute: UntypedFormGroup;
+  domainFormGroup: UntypedFormGroup;
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
@@ -58,21 +58,21 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
     this.addRouteMode = this.addRouteModes[0];
-    this.domainFormGroup = new FormGroup({
-      domain: new FormControl('', [Validators.required as any])
+    this.domainFormGroup = new UntypedFormGroup({
+      domain: new UntypedFormControl('', [Validators.required as any])
     });
 
-    this.addHTTPRoute = new FormGroup({
-      host: new FormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
-      path: new FormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
+    this.addHTTPRoute = new UntypedFormGroup({
+      host: new UntypedFormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
+      path: new UntypedFormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
     });
 
-    this.addTCPRoute = new FormGroup({
-      port: new FormControl('', [
+    this.addTCPRoute = new UntypedFormGroup({
+      port: new UntypedFormControl('', [
         Validators.required,
         Validators.pattern('[0-9]*')
       ]),
-      useRandomPort: new FormControl(false)
+      useRandomPort: new UntypedFormControl(false)
     });
   }
 

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
@@ -14,7 +14,7 @@ describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;
   let fixture: ComponentFixture<ServiceRecentInstancesCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceRecentInstancesCardComponent,

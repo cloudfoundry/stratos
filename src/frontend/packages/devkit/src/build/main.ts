@@ -1,7 +1,7 @@
-import { StratosConfig } from '../lib/stratos.config';
-import { AssetsHandler } from './assets';
-import { ExtensionsHandler } from './extensions';
-import { SassHandler } from './sass';
+import { StratosConfig } from "../lib/stratos.config";
+import { AssetsHandler } from "./assets";
+import { ExtensionsHandler } from "./extensions";
+import { SassHandler } from "./sass";
 
 /**
  * Webpack customizations for Stratos
@@ -11,12 +11,13 @@ import { SassHandler } from './sass';
  */
 
 class StratosBuilder {
-
-  constructor(public webpackConfig, public options) { }
+  constructor(public webpackConfig, public options) {}
 
   public run() {
+    const dir = this.webpackConfig.context || __dirname;
+
     // Read in the Stratos config file if present (and do so config initialization)
-    const sConfig = new StratosConfig(__dirname, this.options);
+    const sConfig = new StratosConfig(dir, this.options);
 
     // Sass handler for themes and themable packages
     const sass = new SassHandler();
@@ -32,10 +33,20 @@ class StratosBuilder {
   }
 }
 
+// TODO: tmp solution until webpack is updated to v5
+// This resolves the following error:
+// Error: error:0308010C:digital envelope routines::unsupported
+const crypto = require("crypto");
+const cryptoOrigCreateHash = crypto.createHash;
+crypto.createHash = (algorithm) =>
+  cryptoOrigCreateHash(algorithm == "md4" ? "sha256" : algorithm);
+
 // Apply the Stratos customizations to the webpack configuration
 const runBuilder = (config, options) => {
   const builder = new StratosBuilder(config, options);
   builder.run();
+  // TODO: also remove with update to webpack v5
+  config.output.hashFunction = "sha256";
   return config;
 };
 

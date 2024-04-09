@@ -1,20 +1,18 @@
 package main
 
 import (
-
 	"fmt"
 	"testing"
 	"time"
 
-	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
-	
 )
 
 const (
@@ -36,16 +34,16 @@ func TestAddLocalUser(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		guid, err := pp.AddLocalUser(ctx)
-		
+
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
-        mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
+		mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
 		fetchedGUID, err := pp.FindUserGUID(ctx)
 
 		Convey("Should not fail to login", func() {
 			So(err, ShouldBeNil)
 			So(guid, ShouldEqual, fetchedGUID)
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
@@ -71,7 +69,7 @@ func TestAddLocalUserMissingUsername(t *testing.T) {
 			So(err, ShouldNotBeNil)
 			So(guid, ShouldEqual, "")
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
@@ -97,7 +95,7 @@ func TestAddLocalUserMissingPassword(t *testing.T) {
 			So(err, ShouldNotBeNil)
 			So(guid, ShouldEqual, "")
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
@@ -165,9 +163,9 @@ func TestFindPasswordHash(t *testing.T) {
 
 		username := "testuser"
 		password := "changeme"
-		email    := "test.person@somedomain.com"
-		scope    := "stratos.admin"
-		
+		email := "test.person@somedomain.com"
+		scope := "stratos.admin"
+
 		//Hash the password
 		generatedPasswordHash, _ := crypto.HashPassword(password)
 
@@ -175,7 +173,7 @@ func TestFindPasswordHash(t *testing.T) {
 		userGUID := uuid.NewV4().String()
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
+		user := api.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
 			log.Errorf("Error hashing user password: %v", err)
@@ -188,7 +186,7 @@ func TestFindPasswordHash(t *testing.T) {
 		Convey("Password hashes should match", func() {
 			So(fetchedPasswordHash, ShouldResemble, generatedPasswordHash)
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})
@@ -210,9 +208,9 @@ func TestUpdateLastLoginTime(t *testing.T) {
 
 		username := "testuser"
 		password := "changeme"
-		email    := "test.person@somedomain.com"
-		scope    := "stratos.admin"
-		
+		email := "test.person@somedomain.com"
+		scope := "stratos.admin"
+
 		//Hash the password
 		generatedPasswordHash, _ := crypto.HashPassword(password)
 
@@ -221,15 +219,15 @@ func TestUpdateLastLoginTime(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
+		user := api.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
 		localUsersRepo.AddLocalUser(user)
 
 		//Now generate and update the login time
 		generatedLoginTime := time.Now()
 
-		mock.ExpectExec(updateLastLoginTime).WillReturnResult(sqlmock.NewResult(1,1))
+		mock.ExpectExec(updateLastLoginTime).WillReturnResult(sqlmock.NewResult(1, 1))
 		localUsersRepo.UpdateLastLoginTime(userGUID, generatedLoginTime)
-		
+
 		expectedLastLoginTimeRow := sqlmock.NewRows([]string{"login_time"}).AddRow(generatedLoginTime)
 		mock.ExpectQuery(findLastLoginTime).WillReturnRows(expectedLastLoginTimeRow)
 		fetchedLoginTime, _ := localUsersRepo.FindLastLoginTime(userGUID)
@@ -237,7 +235,7 @@ func TestUpdateLastLoginTime(t *testing.T) {
 		Convey("Login times should match", func() {
 			So(fetchedLoginTime, ShouldEqual, generatedLoginTime)
 		})
-		
+
 		Convey("Expectations should be met", func() {
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
 		})

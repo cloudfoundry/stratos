@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -18,12 +18,12 @@ import (
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("metrics", nil, Init)
+	api.AddPlugin("metrics", nil, Init)
 }
 
 // MetricsSpecification is a plugin to support the metrics endpoint type
 type MetricsSpecification struct {
-	portalProxy  interfaces.PortalProxy
+	portalProxy  api.PortalProxy
 	endpointType string
 }
 
@@ -49,7 +49,7 @@ type MetricsMetadata struct {
 
 type EndpointMetricsRelation struct {
 	metrics  *MetricsMetadata
-	endpoint *interfaces.ConnectedEndpoint
+	endpoint *api.ConnectedEndpoint
 }
 
 type PrometheusQueryResponse struct {
@@ -81,22 +81,22 @@ type MetricsAuth struct {
 }
 
 // Init creates a new MetricsSpecification
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &MetricsSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (m *MetricsSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (m *MetricsSpecification) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return m, nil
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (m *MetricsSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (m *MetricsSpecification) GetRoutePlugin() (api.RoutePlugin, error) {
 	return m, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (m *MetricsSpecification) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -127,15 +127,15 @@ func (m *MetricsSpecification) Register(echoContext echo.Context) error {
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
-func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
 	return nil
 }
 
-func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 
-	params := new(interfaces.LoginToCNSIParams)
-	err := interfaces.BindOnce(params, ec)
+	params := new(api.LoginToCNSIParams)
+	err := api.BindOnce(params, ec)
 	if err != nil {
 		return nil, false, err
 	}
@@ -146,13 +146,13 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	}
 
 	switch connectType {
-	case interfaces.AuthConnectTypeCreds:
+	case api.AuthConnectTypeCreds:
 		auth.Username = params.Username
 		auth.Password = params.Password
-		if connectType == interfaces.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
+		if connectType == api.AuthConnectTypeCreds && (len(auth.Username) == 0 || len(auth.Password) == 0) {
 			return nil, false, errors.New("Need username and password")
 		}
-	case interfaces.AuthConnectTypeNone:
+	case api.AuthConnectTypeNone:
 		auth.Username = "none"
 		auth.Password = "none"
 	default:
@@ -162,8 +162,8 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	authString := fmt.Sprintf("%s:%s", auth.Username, auth.Password)
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
-	tr := &interfaces.TokenRecord{
-		AuthType:     interfaces.AuthTypeHttpBasic,
+	tr := &api.TokenRecord{
+		AuthType:     api.AuthTypeHttpBasic,
 		AuthToken:    base64EncodedAuthString,
 		RefreshToken: auth.Username,
 	}
@@ -180,7 +180,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	}
 	m.addAuth(req, auth)
 
-	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
+	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
 	res, err := h.Do(req)
 	// Error performing the request?
 	if err != nil {
@@ -189,7 +189,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		if res.StatusCode == http.StatusUnauthorized {
 			errMessage = ": Unauthorized"
 		}
-		return nil, false, interfaces.NewHTTPShadowError(
+		return nil, false, api.NewHTTPShadowError(
 			res.StatusCode,
 			fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
 			"Could not connect to the endpoint: %s", err)
@@ -215,13 +215,13 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 		response, err := h.Do(req)
 		if err != nil {
 			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
-			return nil, false, interfaces.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(res, err)
 		}
 
 		defer response.Body.Close()
 		if response.StatusCode != http.StatusOK {
 			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
-			return nil, false, interfaces.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(res, err)
 		}
 
 		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
@@ -237,7 +237,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 }
 
 func (m *MetricsSpecification) addAuth(req *http.Request, auth *MetricsAuth) {
-	if auth.Type == interfaces.AuthConnectTypeCreds {
+	if auth.Type == api.AuthConnectTypeCreds {
 		req.SetBasicAuth(url.QueryEscape(auth.Username), url.QueryEscape(auth.Password))
 	}
 }
@@ -255,23 +255,23 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 	defer res.Body.Close()
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Errorf("Unexpected response: %v", err)
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 
 	queryResponse := &PrometheusQueryResponse{}
 	err = json.Unmarshal(body, queryResponse)
 	if err != nil {
 		log.Errorf("Failed to unmarshal response: %v", err)
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 	if len(queryResponse.Data.Result) == 0 {
 		log.Errorf("No series detecthed! No Firehose exporter currently connected")
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 
 	if len(queryResponse.Data.Result) > 1 {
@@ -280,7 +280,7 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 
 	if queryResponse.Data.Result[0].Metric.Environment == "" {
 		log.Errorf("No environmnent detected in %v", queryResponse)
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 
 	environment := queryResponse.Data.Result[0].Metric.Environment
@@ -304,7 +304,7 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 
 	jsonMsg, err := json.Marshal(metricsMetadata)
 	if err != nil {
-		return "", interfaces.LogHTTPError(res, err)
+		return "", api.LogHTTPError(res, err)
 	}
 	return string(jsonMsg), nil
 }
@@ -314,10 +314,10 @@ func (m *MetricsSpecification) Init() error {
 	return nil
 }
 
-func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
 	log.Debug("Metrics Info")
-	var v2InfoResponse interfaces.V2Info
-	var newCNSI interfaces.CNSIRecord
+	var v2InfoResponse api.V2Info
+	var newCNSI api.CNSIRecord
 
 	newCNSI.CNSIType = EndpointType
 
@@ -326,7 +326,7 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 		return newCNSI, nil, err
 	}
 
-	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	resp, err := httpClient.Get(apiEndpoint)
 	if err != nil {
 		return newCNSI, nil, err
@@ -343,7 +343,7 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 	return newCNSI, v2InfoResponse, nil
 }
 
-func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+func (m *MetricsSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
 
 	metricsProviders := make([]MetricsMetadata, 0)
 	// Go through the metrics endpoints and get the corresponding services from the token metadata
@@ -444,7 +444,7 @@ func trimPath(path string) string {
 func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {
 
 	metricsProviders := make([]MetricsMetadata, 0)
-	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
+	endpointsMap := make(map[string]*api.ConnectedEndpoint)
 	results := make(map[string]EndpointMetricsRelation)
 
 	// Get Endpoints the user is connected to

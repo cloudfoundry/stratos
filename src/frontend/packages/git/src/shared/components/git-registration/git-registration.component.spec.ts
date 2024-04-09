@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { SharedModule } from '@stratosui/core';
 import { getGitHubAPIURL, gitEntityCatalog, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
@@ -12,7 +12,7 @@ describe('GitRegistrationComponent', () => {
   let component: GitRegistrationComponent;
   let fixture: ComponentFixture<GitRegistrationComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ GitRegistrationComponent ],
       imports: [

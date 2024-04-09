@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../core/core.module';
 import { AppChipsComponent } from './chips.component';
@@ -15,7 +15,7 @@ describe('AppChipsComponent', () => {
     { value: 'value5', custom: 'custom5' }
   ];
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AppChipsComponent],
       imports: [

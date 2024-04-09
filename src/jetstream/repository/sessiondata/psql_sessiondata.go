@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
 )
 
 var getSessionDataValues = `SELECT name, value FROM session_data WHERE expired=false AND session=$1 AND groupName = $1`
@@ -33,7 +33,7 @@ type SessionDataRepository struct {
 }
 
 // NewPostgresSessionDataRepository will create a new instance of the SessionDataRepository
-func NewPostgresSessionDataRepository(dcp *sql.DB) (interfaces.SessionDataStore, error) {
+func NewPostgresSessionDataRepository(dcp *sql.DB) (api.SessionDataStore, error) {
 	return &SessionDataRepository{db: dcp}, nil
 }
 

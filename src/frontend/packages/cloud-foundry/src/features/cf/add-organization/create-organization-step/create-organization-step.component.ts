@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -36,7 +36,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   orgs$: Observable<APIResource<IOrganization>[]>;
   quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
   cfUrl: string;
-  addOrg: FormGroup;
+  addOrg: UntypedFormGroup;
 
   get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
 
@@ -51,9 +51,9 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.addOrg = new FormGroup({
-      orgName: new FormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new FormControl(),
+    this.addOrg = new UntypedFormGroup({
+      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
+      quotaDefinition: new UntypedFormControl(),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(

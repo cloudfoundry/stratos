@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
@@ -9,7 +9,7 @@ describe('CloudFoundryCellChartsComponent', () => {
   let component: CloudFoundryCellChartsComponent;
   let fixture: ComponentFixture<CloudFoundryCellChartsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryCellChartsComponent,

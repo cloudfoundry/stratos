@@ -1,6 +1,6 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { MDAppModule } from '../../../../../core/src/public-api';
@@ -11,7 +11,7 @@ describe('ChartValuesEditorComponent', () => {
   let component: ChartValuesEditorComponent;
   let fixture: ComponentFixture<ChartValuesEditorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ChartValuesEditorComponent],
       providers: [

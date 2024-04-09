@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { browser, promise } from 'protractor';
-import request from 'request-promise-native';
+import request from '@cypress/request';
 
 import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from './e2e-helpers';

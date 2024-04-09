@@ -1,10 +1,9 @@
 
-import { map } from 'rxjs/operators';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState } from '../../../store/src/app-state';
+import { AuthOnlyAppState, AuthState } from '@stratosui/store';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class UserService {

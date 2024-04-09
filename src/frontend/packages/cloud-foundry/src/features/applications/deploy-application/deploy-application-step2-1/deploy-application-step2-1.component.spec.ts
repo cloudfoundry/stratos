@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../../core/src/shared/shared.module';
@@ -10,7 +10,7 @@ describe('DeployApplicationStep21Component', () => {
   let component: DeployApplicationStep21Component;
   let fixture: ComponentFixture<DeployApplicationStep21Component>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         DeployApplicationStep21Component,

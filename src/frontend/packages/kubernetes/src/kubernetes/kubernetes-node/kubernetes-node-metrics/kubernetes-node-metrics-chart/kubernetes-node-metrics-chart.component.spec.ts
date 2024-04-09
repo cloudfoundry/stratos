@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KubernetesNodeMetricsChartComponent } from './kubernetes-node-metrics-chart.component';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -7,7 +7,7 @@ describe('KubernetesNodeMetricsChartComponent', () => {
   let component: KubernetesNodeMetricsChartComponent;
   let fixture: ComponentFixture<KubernetesNodeMetricsChartComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeMetricsChartComponent],
       imports: KubernetesBaseTestModules

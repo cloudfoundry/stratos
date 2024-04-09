@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
-import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
 

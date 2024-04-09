@@ -14,7 +14,7 @@ func TestConsoleSetup(t *testing.T) {
 
 	Convey("Check that we can migrate data from the old console_config table", t, func() {
 
-		db, _, err := datastore.GetInMemorySQLLiteConnection()
+		db, err := datastore.GetInMemorySQLLiteConnection()
 		if err != nil {
 			t.Errorf("can not open sqlite database for testing: %v", err)
 		}

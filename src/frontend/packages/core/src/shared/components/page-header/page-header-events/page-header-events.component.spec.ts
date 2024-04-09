@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { PageHeaderEventsComponent } from './page-header-events.component';
 import { SharedModule } from '../../../shared.module';
@@ -10,7 +10,7 @@ describe('PageHeaderEventsComponent', () => {
   let component: PageHeaderEventsComponent;
   let fixture: ComponentFixture<PageHeaderEventsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [InternalEventMonitorFactory],
       imports: [

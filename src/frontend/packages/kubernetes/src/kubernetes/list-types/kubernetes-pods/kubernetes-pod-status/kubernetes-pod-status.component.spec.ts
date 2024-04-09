@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KubernetesPod, KubernetesStatus } from '../../../store/kube.types';
 import { KubernetesPodStatusComponent } from './kubernetes-pod-status.component';
@@ -7,7 +7,7 @@ describe('KubernetesPodStatusComponent', () => {
   let component: KubernetesPodStatusComponent;
   let fixture: ComponentFixture<KubernetesPodStatusComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         KubernetesPodStatusComponent

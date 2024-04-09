@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-
-import { IAuthForm } from '../../../../../../store/src/extension-types';
+import { UntypedFormGroup } from '@angular/forms';
+import { IAuthForm } from '@stratosui/store';
 
 @Component({
   selector: 'app-sso-auth-form',
@@ -9,5 +8,5 @@ import { IAuthForm } from '../../../../../../store/src/extension-types';
   styleUrls: ['./sso-auth-form.component.scss']
 })
 export class SSOAuthFormComponent implements IAuthForm {
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
 }

@@ -1,6 +1,6 @@
 import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -34,7 +34,7 @@ describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
   let fixture: ComponentFixture<DeployApplicationComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         DeployApplicationComponent,

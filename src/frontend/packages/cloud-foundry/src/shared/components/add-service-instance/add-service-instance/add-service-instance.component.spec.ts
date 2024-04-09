@@ -1,5 +1,5 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
 import {
   ApplicationStateIconComponent,
@@ -85,7 +85,7 @@ describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
   let fixture: ComponentFixture<AddServiceInstanceComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppNameUniqueDirective,

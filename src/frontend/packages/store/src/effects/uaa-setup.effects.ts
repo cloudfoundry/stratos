@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { isHttpErrorResponse } from '../jetstream';
@@ -26,7 +26,7 @@ export class UAASetupEffect {
   getSetupScopesUrl = '/pp/v1/setup/check';
   saveSetupUrl = '/pp/v1/setup/save';
 
-  @Effect() setupGetScopes$ = this.actions$.pipe(
+   setupGetScopes$ = createEffect(() => this.actions$.pipe(
     ofType<SetupConsoleGetScopes>(SETUP_GET_SCOPES),
     switchMap(({ setupData }) => {
       const params = this.getParams(setupData);
@@ -36,9 +36,9 @@ export class UAASetupEffect {
         map(data => new SetupSuccess(data)),
         catchError((err, caught) => [new SetupFailed(`Failed to save configuration. ${this.fetchError(err)}`)])
       );
-    }));
+    })));
 
-  @Effect() setupSaveConfiguration$ = this.actions$.pipe(
+   setupSaveConfiguration$ = createEffect(() => this.actions$.pipe(
     ofType<SetupSaveConfig>(SETUP_SAVE_CONFIG),
     switchMap(({ setupData }) => {
       const params = this.getParams(setupData);
@@ -48,7 +48,7 @@ export class UAASetupEffect {
         map(data => new SetupSuccess(data)),
         catchError((err, caught) => [new SetupFailed(`Failed to setup Administrator scope. ${this.fetchError(err)}`)])
       );
-    }));
+    })));
 
   private fetchError(err): string {
     const httpResponse = isHttpErrorResponse(err);

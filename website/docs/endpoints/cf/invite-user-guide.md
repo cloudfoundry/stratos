@@ -59,7 +59,7 @@ This action must be performed by an Administrator in Stratos.
 1) Use the `Configure` button in the `User Invitation Support` section.
 1) Supply the uaa client id and secret and click `Configure`
 
-> Note: If Stratos has been deployed via `cf push` and the steps under the `Pre-configure invite UAA client` header in the  [CF deploy guide](../../deploy/cloud-foundry/cloud-foundry)  have been followed, you will not follow these steps for the default CF.
+> Note: If Stratos has been deployed via `cf push` and the steps under the `Pre-configure invite UAA client` header in the  [CF deploy guide](../../deploy/cloud-foundry/cloud-foundry.md)  have been followed, you will not follow these steps for the default CF.
 
 ## Configuration for CF Push
 

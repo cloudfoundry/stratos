@@ -157,7 +157,7 @@ describe('Endpoints', () => {
           register.form.fill({
             name: selfSignedEndpoint.name,
             url: selfSignedEndpoint.url,
-            skipsll: false
+            skipssl: false
           });
           register.stepper.next();
 
@@ -175,7 +175,7 @@ describe('Endpoints', () => {
           register.form.fill({
             name: validEndpoint.name,
             url: validEndpoint.url,
-            skipsll: true
+            skipssl: true
           });
 
           expect(register.stepper.canNext()).toBeTruthy();
@@ -214,7 +214,7 @@ describe('Endpoints', () => {
         register.form.fill({
           name: validEndpoint.name,
           url: validEndpoint.url,
-          skipsll: true
+          skipssl: true
         });
 
         expect(register.stepper.canNext()).toBeTruthy();

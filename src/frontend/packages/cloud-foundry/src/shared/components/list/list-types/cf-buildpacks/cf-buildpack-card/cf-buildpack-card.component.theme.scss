@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin cf-buildpack-card-theme($theme) {
   $primary: map-get($theme, primary);
   $warn: map-get($theme, warn);

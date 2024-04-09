@@ -90,7 +90,7 @@ import { InviteUsersComponent } from './users/invite-users/invite-users.componen
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
 import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
-const usersRoles = [
+const usersRoles: Routes = [
   {
     path: 'users/manage',
     component: UsersRolesComponent,

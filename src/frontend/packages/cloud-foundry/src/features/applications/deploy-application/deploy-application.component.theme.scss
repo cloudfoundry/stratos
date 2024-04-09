@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin app-deploy-app-theme($theme, $app-theme) {
   $is-dark: map-get($theme, is-dark);
 

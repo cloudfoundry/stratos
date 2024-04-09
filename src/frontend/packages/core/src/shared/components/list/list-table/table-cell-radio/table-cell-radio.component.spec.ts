@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { CoreModule } from '../../../../../core/core.module';
@@ -10,7 +10,7 @@ describe('TableCellRadioComponent', () => {
   let fixture: ComponentFixture<TableCellRadioComponent<any>>;
 
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [TableCellRadioComponent],
         imports: [CoreModule],

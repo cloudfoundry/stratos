@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Logout, AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { Logout } from '../../../../../store/src/actions/auth.actions';
-import { AppState } from '../../../../../store/src/app-state';
 
 @Component({
   selector: 'app-logout-page',

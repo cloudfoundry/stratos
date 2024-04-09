@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
@@ -12,7 +12,7 @@ describe('CfOrgSpaceLinksComponent', () => {
   let fixture: ComponentFixture<CfOrgSpaceLinksComponent>;
   let service;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CfOrgSpaceLinksComponent],
       imports: [

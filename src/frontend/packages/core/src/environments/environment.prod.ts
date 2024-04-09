@@ -1,4 +1,4 @@
-import { cfAPIVersion, proxyAPIVersion } from '../../../store/src/jetstream';
+import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
 
 export const environment = {
   production: true,

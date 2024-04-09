@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin copy-to-clipboard-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   .copy {

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KubernetesServicePortsComponent } from './kubernetes-service-ports.component';
 
@@ -6,7 +6,7 @@ describe('KubernetesServicePortsComponent', () => {
   let component: KubernetesServicePortsComponent;
   let fixture: ComponentFixture<KubernetesServicePortsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesServicePortsComponent]
     })

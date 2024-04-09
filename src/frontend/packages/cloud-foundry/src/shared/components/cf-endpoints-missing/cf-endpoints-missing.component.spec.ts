@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
@@ -12,7 +12,7 @@ describe('CfEndpointsMissingComponent', () => {
   let component: CfEndpointsMissingComponent;
   let fixture: ComponentFixture<CfEndpointsMissingComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CfEndpointsMissingComponent],
       imports: [

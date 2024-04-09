@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
@@ -10,7 +10,7 @@ describe('TableCellEndpointNameComponent', () => {
   let component: TableCellEndpointNameComponent;
   let fixture: ComponentFixture<TableCellEndpointNameComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

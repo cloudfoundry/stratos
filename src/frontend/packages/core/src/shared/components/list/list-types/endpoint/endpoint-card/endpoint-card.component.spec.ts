@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 
 import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
@@ -14,7 +14,7 @@ describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;
   let fixture: ComponentFixture<EndpointCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MetricsEndpointDetailsComponent],
       imports: [

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { testSessionData } from '@stratosui/store/testing';
 
@@ -20,7 +20,7 @@ describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CfOrgCardComponent,

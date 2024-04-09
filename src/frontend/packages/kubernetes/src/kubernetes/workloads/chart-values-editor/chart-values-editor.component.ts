@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { JsonSchemaFormComponent } from '@cfstratos/ajsf-core';
+import { JsonSchemaFormComponent } from '@ajsf/core';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';

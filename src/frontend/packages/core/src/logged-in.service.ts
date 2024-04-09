@@ -2,14 +2,10 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
-import { VerifySession } from '../../store/src/actions/auth.actions';
-import { AppState } from '../../store/src/app-state';
-import { AuthState } from '../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../store/src/selectors/dashboard.selectors';
-import { DashboardState } from '../../store/src/types/dashboard.types';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';

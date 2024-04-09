@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf, throwError as observableThrowError } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -28,7 +28,7 @@ export class CreateAppPageEffects {
   proxyAPIVersion: string;
   cfAPIVersion: string;
 
-  @Effect() CheckAppNameIsFree$ = this.actions$.pipe(
+   CheckAppNameIsFree$ = createEffect(() => this.actions$.pipe(
     ofType<IsNewAppNameFree>(CHECK_NAME),
     withLatestFrom(this.store.select(selectNewAppCFDetails)),
     switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
@@ -49,7 +49,7 @@ export class CreateAppPageEffects {
         catchError(err => {
           return observableOf(new AppNameTaken(action.name));
         }));
-    }));
+    })));
 }
 
 export const selectNewAppState = (state: CFAppState): CreateNewApplicationState => state.createApplication;

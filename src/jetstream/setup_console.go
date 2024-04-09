@@ -1,23 +1,23 @@
 package main
 
 import (
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
 )
 
@@ -31,8 +31,8 @@ const (
 	systemGroupName        = "env"
 )
 
-func parseConsoleConfigFromForm(c echo.Context) (*interfaces.ConsoleConfig, error) {
-	consoleConfig := new(interfaces.ConsoleConfig)
+func parseConsoleConfigFromForm(c echo.Context) (*api.ConsoleConfig, error) {
+	consoleConfig := new(api.ConsoleConfig)
 
 	// Local admin user configuration?
 	password := c.FormValue("local_admin_password")
@@ -90,22 +90,23 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 	authEndpoint := fmt.Sprintf("%s/oauth/token", consoleConfig.UAAEndpoint)
 	uaaRes, err := p.getUAATokenWithCreds(consoleConfig.SkipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
 	if err != nil {
-		errInfo, ok := err.(interfaces.ErrHTTPRequest)
+		errInfo, ok := err.(api.ErrHTTPRequest)
 		if ok {
 			if errInfo.Status == 0 {
-				if strings.Contains(errInfo.Error(), "x509: certificate") {
-					return interfaces.NewHTTPShadowError(
+				var certError *x509.CertificateInvalidError
+				if errors.As(err, certError) {
+					return api.NewHTTPShadowError(
 						http.StatusBadRequest,
 						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting",
 						"Could not connect to the UAA - Certificate error - check Skip SSL validation setting: %+v", err)
 				}
-				return interfaces.NewHTTPShadowError(
+				return api.NewHTTPShadowError(
 					http.StatusBadRequest,
 					"Could not connect to the UAA - check UAA Endpoint URL",
 					"Could not connect to the UAA - check UAA Endpoint URL: %+v", err)
 			}
 		}
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to authenticate with UAA - check Client ID, Secret and credentials",
 			"Failed to authenticate with UAA due to %s", err)
@@ -113,7 +114,7 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 
 	userTokenInfo, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Failed to authenticate with UAA - check Client ID, Secret and credentials",
 			"Failed to authenticate with UAA due to %s", err)
@@ -123,15 +124,15 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 	return nil
 }
 
-func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
-	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
+	if api.AuthEndpointTypes[consoleConfig.AuthEndpointType] == api.Local {
 		return saveLocalUserConsoleConfig(consoleRepo, consoleConfig)
 	}
 
 	return saveUAAConsoleConfig(consoleRepo, consoleConfig)
 }
 
-func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
 
 	log.Debug("saveLocalUserConsoleConfig")
 
@@ -161,7 +162,7 @@ func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleCo
 	return nil
 }
 
-func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *interfaces.ConsoleConfig) error {
+func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
 	log.Debugf("Saving ConsoleConfig: %+v", consoleConfig)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
@@ -217,18 +218,18 @@ func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 
 	err = saveConsoleConfig(consoleRepo, consoleConfig)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to store Console configuration data",
 			"Console configuration data storage failed due to %s", err)
 	}
 
 	// If setting up with a local admin user, then log the user in
-	if interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType] == interfaces.Local {
+	if api.AuthEndpointTypes[consoleConfig.AuthEndpointType] == api.Local {
 		consoleConfig.LocalUser = "admin"
 		if consoleConfig.IsSetupComplete() {
 			p.GetConfig().ConsoleConfig.AuthEndpointType = "local"
-			p.InitStratosAuthService(interfaces.Local)
+			p.InitStratosAuthService(api.Local)
 			c.Request().Form.Add("username", "admin")
 			c.Request().Form.Add("password", consoleConfig.LocalUserPassword)
 			c.Request().RequestURI = "/pp/v1/login"
@@ -241,31 +242,31 @@ func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 	return nil
 }
 
-func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interfaces.ConsoleConfig, error) {
+func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.ConsoleConfig, error) {
 	log.Debug("initialiseConsoleConfig")
 
-	consoleConfig := &interfaces.ConsoleConfig{}
+	consoleConfig := &api.ConsoleConfig{}
 	if err := config.Load(consoleConfig, envLookup.Lookup); err != nil {
-		return consoleConfig, fmt.Errorf("Unable to load Console configuration. %v", err)
+		return consoleConfig, fmt.Errorf("unable to load Console configuration. %v", err)
 	}
 
 	if len(consoleConfig.AuthEndpointType) == 0 {
 		//return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE not found")
 		//Until front-end support is implemented, default to "remote" if AUTH_ENDPOINT_TYPE is not set
-		consoleConfig.AuthEndpointType = string(interfaces.Remote)
+		consoleConfig.AuthEndpointType = string(api.Remote)
 	}
 
-	val, endpointTypeSupported := interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType]
+	val, endpointTypeSupported := api.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
-		if val == interfaces.AuthNone {
+		if val == api.AuthNone {
 			return consoleConfig, nil
-		} else if val == interfaces.Local {
+		} else if val == api.Local {
 			//Auth endpoint type is set to "local", so load the local user config
 			err := initialiseLocalUsersConfiguration(consoleConfig, p)
 			if err != nil {
 				return consoleConfig, err
 			}
-		} else if val == interfaces.Remote {
+		} else if val == api.Remote {
 			// Auth endpoint type is set to "remote", so need to load local user config vars
 			// Default authorization endpoint to be UAA endpoint
 			if consoleConfig.AuthorizationEndpoint == nil {
@@ -284,7 +285,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*interface
 	return consoleConfig, nil
 }
 
-func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) error {
+func initialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p *portalProxy) error {
 
 	var err error
 	localUserName, found := p.Env().Lookup("LOCAL_USER")
@@ -310,7 +311,7 @@ func initialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, 
 	return setupInitialiseLocalUsersConfiguration(consoleConfig, p)
 }
 
-func setupInitialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleConfig, p *portalProxy) error {
+func setupInitialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p *portalProxy) error {
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -327,7 +328,7 @@ func setupInitialiseLocalUsersConfiguration(consoleConfig *interfaces.ConsoleCon
 	}
 	scope := consoleConfig.LocalUserScope
 	email := ""
-	user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: consoleConfig.LocalUser, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
+	user := api.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: consoleConfig.LocalUser, Email: email, Scope: scope, GivenName: "Admin", FamilyName: "User"}
 
 	// Don't add the user if they already exist
 	_, err = localUsersRepo.FindUserGUID(consoleConfig.LocalUser)
@@ -423,7 +424,7 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
-		portalProxy.InitStratosAuthService(interfaces.AuthEndpointTypes[consoleConfig.AuthEndpointType])
+		portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType])
 	}
 
 	return consoleConfig.IsSetupComplete()

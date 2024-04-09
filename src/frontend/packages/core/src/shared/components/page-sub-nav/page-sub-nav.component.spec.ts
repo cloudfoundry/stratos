@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { TabNavService } from '../../../tab-nav.service';
@@ -8,7 +8,7 @@ describe('PageSubNavComponent', () => {
   let component: PageSubNavComponent;
   let fixture: ComponentFixture<PageSubNavComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       declarations: [PageSubNavComponent],

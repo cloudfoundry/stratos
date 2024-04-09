@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  SessionData,
+  EntityService,
+  AuthState,
+  stratosEntityCatalog,
+  AppState,
+  ActionState,
+  getDefaultActionState,
+  UserProfileInfo,
+  UserProfileInfoEmail,
+  UserProfileInfoUpdates,
+} from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
-
-import { AppState } from '../../../store/src/app-state';
-import { EntityService } from '../../../store/src/entity-service';
-import { ActionState, getDefaultActionState } from '../../../store/src/reducers/api-request-reducer/types';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { SessionData } from '../../../store/src/types/auth.types';
-import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../../store/src/types/user-profile.types';
 
 
 @Injectable()

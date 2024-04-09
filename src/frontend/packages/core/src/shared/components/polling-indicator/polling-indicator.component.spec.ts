@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../core/core.module';
 import { PollingIndicatorComponent } from './polling-indicator.component';
@@ -8,7 +8,7 @@ describe('PollingIndicatorComponent', () => {
   let component: PollingIndicatorComponent;
   let fixture: ComponentFixture<PollingIndicatorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PollingIndicatorComponent],
       imports: [CoreModule]

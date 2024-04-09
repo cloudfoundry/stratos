@@ -2,7 +2,6 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { TabNavItem } from '../../../tab-nav.types';
 
-
 @Component({
   selector: 'app-nested-tabs',
   templateUrl: './nested-tabs.component.html',
