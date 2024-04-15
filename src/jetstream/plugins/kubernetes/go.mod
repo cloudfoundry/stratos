@@ -1,6 +1,6 @@
 module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes
 
-go 1.21.0
+go 1.21
 
 toolchain go1.21.5
 

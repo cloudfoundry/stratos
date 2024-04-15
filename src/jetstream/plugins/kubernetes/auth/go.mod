@@ -1,6 +1,6 @@
 module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth
 
-go 1.21.0
+go 1.21
 
 replace (
 	github.com/cloudfoundry-incubator/stratos/src/jetstream/api => ../../../api
