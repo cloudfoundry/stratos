@@ -23,6 +23,14 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+type ApiRoot struct {
+	Links struct {
+		LogCache struct {
+			Href string `json:"href"`
+		} `json:"log_cache"`
+	} `json:"links"`
+}
+
 // V2Info is the response for the Cloud Foundry /v2/info API
 type V2Info struct {
 	AuthorizationEndpoint    string `json:"authorization_endpoint"`
@@ -35,6 +43,11 @@ type V2Info struct {
 	RoutingEndpoint          string `json:"routing_endpoint"`
 	MinCLIVersion            string `json:"min_cli_version"`
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
+}
+
+type EndpointInfo struct {
+	ApiRoot ApiRoot
+	V2Info V2Info
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool, caCert string) (CNSIRecord, interface{}, error)

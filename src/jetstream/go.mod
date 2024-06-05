@@ -26,7 +26,6 @@ replace (
 require (
 	code.cloudfoundry.org/go-log-cache v1.0.1-0.20230224210401-5e305670b626
 	code.cloudfoundry.org/go-loggregator/v8 v8.0.5
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonlindstrom/pgstore v0.0.0-20220421113606-e3a6e3fed12a
 	github.com/cf-stratos/mysqlstore v0.0.0-20170822100912-304308519d13
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
@@ -50,6 +49,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
 	github.com/pressly/goose v2.7.0+incompatible
+	github.com/samber/lo v1.38.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smartystreets/goconvey v1.8.1
@@ -192,7 +192,6 @@ require (
 	github.com/rubenv/sql-migrate v1.3.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94 // indirect
-	github.com/samber/lo v1.38.1 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect

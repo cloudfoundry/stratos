@@ -26,16 +26,17 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 		return err
 	}
 
-	if info, ok := endpointInfo.(api.V2Info); ok {
+	if info, ok := endpointInfo.(api.EndpointInfo); ok {
 		// Got the info we need - update the config with it
 		config.SetTargetInformation(
 			configv3.TargetInformationArgs{
 				Api:               apiEndpoint,
-				ApiVersion:        info.APIVersion,
-				Auth:              info.AuthorizationEndpoint,
-				MinCLIVersion:     info.MinCLIVersion,
-				Doppler:           info.DopplerLoggingEndpoint,
-				Routing:           info.RoutingEndpoint,
+				ApiVersion:        info.V2Info.APIVersion,
+				Auth:              info.V2Info.AuthorizationEndpoint,
+				MinCLIVersion:     info.V2Info.MinCLIVersion,
+				Doppler:           info.V2Info.DopplerLoggingEndpoint,
+				LogCache:          info.ApiRoot.Links.LogCache.Href,
+				Routing:           info.V2Info.RoutingEndpoint,
 				SkipSSLValidation: skipSSLValidation,
 			},
 		)

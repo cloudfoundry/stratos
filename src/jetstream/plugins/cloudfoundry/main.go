@@ -202,6 +202,8 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
 	log.Debug("Info")
 	var v2InfoResponse api.V2Info
+	var apiRootResponse api.ApiRoot
+	var endpointInfo api.EndpointInfo
 	var newCNSI api.CNSIRecord
 
 	newCNSI.CNSIType = EndpointType
@@ -211,7 +213,6 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		return newCNSI, nil, err
 	}
 
-	uri.Path = "v2/info"
 	h := c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 
 	res, err := h.Get(uri.String())
@@ -228,15 +229,36 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	}
 
 	dec := json.NewDecoder(res.Body)
-	if err = dec.Decode(&v2InfoResponse); err != nil {
+	if err = dec.Decode(&apiRootResponse); err != nil {
 		return newCNSI, nil, err
 	}
 
+	uri.Path = "v2/info"
+
+	res, err = h.Get(uri.String())
+	if err != nil {
+		return newCNSI, nil, err
+	}
+
+	if res.StatusCode != 200 {
+		buf := &bytes.Buffer{}
+		io.Copy(buf, res.Body)
+		defer res.Body.Close()
+
+		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+	}
+
+	dec = json.NewDecoder(res.Body)
+	if err = dec.Decode(&v2InfoResponse); err != nil {
+		return newCNSI, nil, err
+	}
 	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
 	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
 	newCNSI.DopplerLoggingEndpoint = v2InfoResponse.DopplerLoggingEndpoint
 
-	return newCNSI, v2InfoResponse, nil
+	endpointInfo.ApiRoot = apiRootResponse
+	endpointInfo.V2Info = v2InfoResponse
+	return newCNSI, endpointInfo, nil
 }
 
 func (c *CloudFoundrySpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
