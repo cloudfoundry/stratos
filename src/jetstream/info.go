@@ -6,18 +6,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
 // Endpoint - This represents the CNSI endpoint
 type Endpoint struct {
-	GUID     string                    `json:"guid"`
-	Name     string                    `json:"name"`
-	Version  string                    `json:"version"`
+	GUID     string             `json:"guid"`
+	Name     string             `json:"name"`
+	Version  string             `json:"version"`
 	User     *api.ConnectedUser `json:"user"`
-	CNSIType string                    `json:"type"`
+	CNSIType string             `json:"type"`
 }
 
 func (p *portalProxy) info(c echo.Context) error {

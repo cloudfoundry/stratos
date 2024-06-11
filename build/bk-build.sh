@@ -39,6 +39,9 @@ swag init --parseDependency
 
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
+  echo "Disk Space ${PWD}"
+  df -hT
+
   echo "Building version: ${VERSION}"
   go build -ldflags -X=main.appVersion=${VERSION}
   echo "Build complete ..."

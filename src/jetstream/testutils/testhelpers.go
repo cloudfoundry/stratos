@@ -4,10 +4,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/tokens"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 

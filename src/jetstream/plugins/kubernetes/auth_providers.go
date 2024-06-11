@@ -3,7 +3,7 @@ package kubernetes
 import (
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth"
 )
 
 var kubeAuthProviders map[string]auth.KubeAuthProvider

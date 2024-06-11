@@ -3,7 +3,7 @@ package helm
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 
 	log "github.com/sirupsen/logrus"
 )

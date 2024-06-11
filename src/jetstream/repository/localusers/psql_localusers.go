@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -98,7 +98,7 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 	return userGUID.String, nil
 }
 
-//FindUser finds and returns meatdata for the given user
+// FindUser finds and returns meatdata for the given user
 func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, error) {
 	log.Debug("FindUser")
 
@@ -145,7 +145,7 @@ func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, er
 	return user, nil
 }
 
-//FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
+// FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
 	log.Debug("FindUserScope")
 	if userGUID == "" {
@@ -169,8 +169,8 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 	return userScope, nil
 }
 
-//UpdateLastLoginTime called when a local user logs in.
-//It updates the last_login timestamp field in the local_users table for the given user.
+// UpdateLastLoginTime called when a local user logs in.
+// It updates the last_login timestamp field in the local_users table for the given user.
 func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
 	log.Debug("UpdateLastLoginTime")
 
@@ -199,7 +199,7 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 	return err
 }
 
-//FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
+// FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Time, error) {
 	log.Debug("FindLastLoginTime")
 

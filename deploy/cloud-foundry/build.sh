@@ -63,6 +63,8 @@ fi
 log "Building back-end" $CYAN
 ./build/bk-build.sh
 
+log "Copying executable" $CYAN
+
 # Copy backend executable here
 cp src/jetstream/jetstream .
 

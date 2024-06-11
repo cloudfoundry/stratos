@@ -3,9 +3,9 @@ package factory
 import (
 	"database/sql"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/cnsis"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/tokens"
 )
 
 // DefaultStoreFactory is default factory for getting store interfaces

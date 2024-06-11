@@ -4,7 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 )
 

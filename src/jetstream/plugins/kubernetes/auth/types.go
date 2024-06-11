@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/labstack/echo/v4"

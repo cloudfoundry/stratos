@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/apikeys"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/apikeys"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v4"

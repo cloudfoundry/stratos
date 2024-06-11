@@ -11,14 +11,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 )
 
 const (
 	noAuthUserID = "10000000-1111-2222-3333-444444444444"
 )
 
-//More fields will be moved into here as global portalProxy struct is phased out
+// More fields will be moved into here as global portalProxy struct is phased out
 type noAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
@@ -30,22 +30,22 @@ func (a *noAuth) ShowConfig(config *api.ConsoleConfig) {
 	log.Info("... !!!!! No Authentication !!!!!")
 }
 
-//Login provides no-auth specific Stratos login
+// Login provides no-auth specific Stratos login
 func (a *noAuth) Login(c echo.Context) error {
 	return errors.New("can not login when there is no auth")
 }
 
-//Logout provides no-auth specific Stratos login
+// Logout provides no-auth specific Stratos login
 func (a *noAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
-//GetUsername gets the user name for the specified local user
+// GetUsername gets the user name for the specified local user
 func (a *noAuth) GetUsername(userid string) (string, error) {
 	return api.DefaultAdminUserName, nil
 }
 
-//GetUser gets the user guid for the specified local user
+// GetUser gets the user guid for the specified local user
 func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 	var scopes = make([]string, 1)
 	scopes[0] = "stratos.noauth"
@@ -84,12 +84,12 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	}
 }
 
-//VerifySession for no authentication - always passes
+// VerifySession for no authentication - always passes
 func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	return nil
 }
 
-//generateLoginSuccessResponse
+// generateLoginSuccessResponse
 func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
 	log.Debug("generateLoginResponse")
 
@@ -129,7 +129,7 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 	return err
 }
 
-//logout
+// logout
 func (a *noAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 

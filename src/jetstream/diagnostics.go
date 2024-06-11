@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	goosedbversion "github.com/cloudfoundry-community/stratos/src/jetstream/repository/goose-db-version"
 )
 
 func (p *portalProxy) StoreDiagnostics() {

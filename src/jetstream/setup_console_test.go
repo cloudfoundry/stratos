@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/console_config"
 
 	"github.com/govau/cf-common/env"
 	. "github.com/smartystreets/goconvey/convey"
