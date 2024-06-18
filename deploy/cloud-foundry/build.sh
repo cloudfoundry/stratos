@@ -10,7 +10,7 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-VENDOR_FOLDER=tmp/go/src/github.com/cloudfoundry-incubator/stratos/vendor
+VENDOR_FOLDER=tmp/go/src/github.com/cloudfoundry-community/stratos/vendor
 
 function log {
   COLOR=${2:-}

@@ -1,4 +1,4 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular
+module github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular
 
 go 1.21
 
@@ -6,8 +6,8 @@ toolchain go1.21.5
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	github.com/cloudfoundry-incubator/stratos/src/jetstream v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/pressly/goose v2.7.0+incompatible
 	github.com/satori/go.uuid v1.2.0
@@ -43,12 +43,12 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream => ../../
+replace github.com/cloudfoundry-community/stratos/src/jetstream => ../../
 
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/api => ../../api
+replace github.com/cloudfoundry-community/stratos/src/jetstream/api => ../../api
 
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush => ../cfapppush
+replace github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush => ../cfapppush
 
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ../kubernetes
+replace github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes => ../kubernetes
 
-replace github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth => ../kubernetes/auth
+replace github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth => ../kubernetes/auth
