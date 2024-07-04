@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/testutils"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )

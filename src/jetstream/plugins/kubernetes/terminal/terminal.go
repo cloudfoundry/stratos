@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	jetstream_api "github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	jetstream_config "github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/api"
+	jetstream_api "github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	jetstream_config "github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/api"
 
 	log "github.com/sirupsen/logrus"
 )

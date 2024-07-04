@@ -1,18 +1,20 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream
+module github.com/cloudfoundry-community/stratos/src/jetstream
 
-go 1.21.0
+go 1.21
+
+toolchain go1.21.9
 
 replace (
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api => ./api
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config => ./api/config
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto => ./crypto
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/docs => ./docs
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth => ./plugins/kubernetes/auth
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/terminal => ./plugins/kubernetes/terminal
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular => ./plugins/monocular
+	github.com/cloudfoundry-community/stratos/src/jetstream/api => ./api
+	github.com/cloudfoundry-community/stratos/src/jetstream/api/config => ./api/config
+	github.com/cloudfoundry-community/stratos/src/jetstream/crypto => ./crypto
+	github.com/cloudfoundry-community/stratos/src/jetstream/docs => ./docs
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth => ./plugins/kubernetes/auth
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/terminal => ./plugins/kubernetes/terminal
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular => ./plugins/monocular
 )
 
 // ported from plugins/kubernetes
@@ -26,15 +28,14 @@ replace (
 require (
 	code.cloudfoundry.org/go-log-cache v1.0.1-0.20230224210401-5e305670b626
 	code.cloudfoundry.org/go-loggregator/v8 v8.0.5
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonlindstrom/pgstore v0.0.0-20220421113606-e3a6e3fed12a
 	github.com/cf-stratos/mysqlstore v0.0.0-20170822100912-304308519d13
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes v0.0.0-20210416105629-f34f428ca775
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular v0.0.0-20210416105629-f34f428ca775
+	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes v0.0.0-20210416105629-f34f428ca775
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular v0.0.0-20210416105629-f34f428ca775
 	github.com/cloudfoundry/noaa/v2 v2.3.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20230911203642-fa89d986ae20
 	github.com/domodwyer/mailyak v3.1.1+incompatible
@@ -50,6 +51,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/nwmac/sqlitestore v0.0.0-20180824125213-7d2ab221fb3f
 	github.com/pressly/goose v2.7.0+incompatible
+	github.com/samber/lo v1.38.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/smartystreets/goconvey v1.8.1
@@ -192,7 +194,6 @@ require (
 	github.com/rubenv/sql-migrate v1.3.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94 // indirect
-	github.com/samber/lo v1.38.1 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect

@@ -3,7 +3,7 @@ package localusers
 import (
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 )
 
 // Repository is an application of the repository pattern for storing local users

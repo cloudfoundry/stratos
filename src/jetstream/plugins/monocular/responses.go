@@ -16,18 +16,18 @@ limitations under the License.
 
 package monocular
 
-//BodyAPIListResponse is an API body response in list format including the number of results pages
+// BodyAPIListResponse is an API body response in list format including the number of results pages
 type BodyAPIListResponse struct {
 	Data *APIListResponse `json:"data"`
 	Meta Meta             `json:"meta,omitempty"`
 }
 
-//BodyAPIResponse is an API body response in non-list format
+// BodyAPIResponse is an API body response in non-list format
 type BodyAPIResponse struct {
 	Data APIResponse `json:"data"`
 }
 
-//APIResponse is an API response in non-list format
+// APIResponse is an API response in non-list format
 type APIResponse struct {
 	ID            string      `json:"id"`
 	Type          string      `json:"type"`
@@ -36,24 +36,24 @@ type APIResponse struct {
 	Relationships RelMap      `json:"relationships"`
 }
 
-//APIListResponse is an API response in list format
+// APIListResponse is an API response in list format
 type APIListResponse []*APIResponse
 
-//SelfLink the self-referencing URL to a chart in a response
+// SelfLink the self-referencing URL to a chart in a response
 type SelfLink struct {
 	Self string `json:"self"`
 }
 
-//RelMap maps elements e.g. Charts to other elements of a response e.g. Chart Versions
+// RelMap maps elements e.g. Charts to other elements of a response e.g. Chart Versions
 type RelMap map[string]Rel
 
-//Rel describes a relationship between element(s) in a response
+// Rel describes a relationship between element(s) in a response
 type Rel struct {
 	Data  interface{} `json:"data"`
 	Links SelfLink    `json:"links"`
 }
 
-//Meta the number of pages in the response
+// Meta the number of pages in the response
 type Meta struct {
 	TotalPages int `json:"totalPages"`
 }

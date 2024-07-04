@@ -18,12 +18,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
-	mock_api "github.com/cloudfoundry-incubator/stratos/src/jetstream/api/mock"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/testutils"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
+	mock_api "github.com/cloudfoundry-community/stratos/src/jetstream/api/mock"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/yamlgenerated"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/yamlgenerated"
 )
 
 func (pp *portalProxy) loadPlugins() {

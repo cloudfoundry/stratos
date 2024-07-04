@@ -17,7 +17,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 )
 
 const chartCollection = "charts"
@@ -90,7 +90,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 	kubeClient, _ := c.GetConfigForEndpointUser(endpointGUID, userGUID)
 	clientset, _ := kubernetes.NewForConfig(kubeClient)
 	coreclient := clientset.CoreV1()
-		ctx := context.Background()
+	ctx := context.Background()
 	_, err = coreclient.Namespaces().Get(ctx, params.Namespace, metav1.GetOptions{})
 	if err != nil {
 		return api.NewJetstreamErrorf("Namespace '%s' does not exist", params.Namespace)

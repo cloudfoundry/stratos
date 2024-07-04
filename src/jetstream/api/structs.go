@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"reflect"
 
-	api "github.com/cloudfoundry-incubator/stratos/src/jetstream/api/config"
+	api "github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 )

@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/localusers"
 )
 
 // LocalUserInfo is a plugin to fetch user info
@@ -145,7 +145,7 @@ func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordC
 	return 200, nil
 }
 
-//HashPassword accepts a plaintext password string and generates a salted hash
+// HashPassword accepts a plaintext password string and generates a salted hash
 func HashPassword(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return bytes, err

@@ -3,7 +3,7 @@ package custom_errors
 import (
 	"fmt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/custom_errors/constants"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/custom_errors/constants"
 )
 
 type GooseDBNoDatabaseVersionsFoundError struct{}

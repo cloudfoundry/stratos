@@ -1,10 +1,10 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth
+module github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth
 
-go 1.21.0
+go 1.21
 
 replace (
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api => ../../../api
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes => ../../kubernetes
+	github.com/cloudfoundry-community/stratos/src/jetstream/api => ../../../api
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes => ../../kubernetes
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
 	k8s.io/client-go => k8s.io/client-go v0.23.17
 )
@@ -12,8 +12,8 @@ replace (
 require (
 	github.com/SermoDigital/jose v0.9.1
 	github.com/aws/aws-sdk-go v1.44.324
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/sirupsen/logrus v1.9.3
 	k8s.io/client-go v0.27.3

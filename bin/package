@@ -11,17 +11,26 @@ node::install() {
   
   mkdir -p "${node_install_dir}"
   
-  if [[ ! -f "${node_install_dir}/go/bin/go" ]]; then
-    NODE_MD5="5bda713bd4aa39394536fc48c744854b"
-    URL=https://buildpacks.cloudfoundry.org/dependencies/node/node-${NODE_VERSION}-linux-x64-40e8e080.tgz
+  if [[ ! -f "${node_install_dir}/bin/node" ]]; then
+# - name: node
+#  version: 20.13.1
+#  uri: https://buildpacks.cloudfoundry.org/dependencies/node/node_20.13.1_linux_x64_cflinuxfs4_71ec5c92.tgz
+#  sha256: 71ec5c92b35770170dad21ff65130f3e4201e8a0bcd32986e5dcf32b57f379e6
+#  cf_stacks:
+#  - cflinuxfs4
+#  source: https://nodejs.org/dist/v20.13.1/node-v20.13.1.tar.gz
+#  source_sha256: a85ee53aa0a5c2f5ca94fa414cdbceb91eb7d18a77fc498358512c14cc6c6991
+
+    NODE_SHA2="71ec5c92b35770170dad21ff65130f3e4201e8a0bcd32986e5dcf32b57f379e6"
+    URL=https://buildpacks.cloudfoundry.org/dependencies/node/node_${NODE_VERSION}_linux_x64_cflinuxfs4_71ec5c92.tgz
   
     echo "-----> Download Nodejs ${NODE_VERSION}"
     curl -s -L --retry 15 --retry-delay 2 $URL -o ${download_file}
   
-    DOWNLOAD_MD5=$(md5sum ${download_file} | cut -d ' ' -f 1)
+    DOWNLOAD_SHA2=$(sha256sum ${download_file} | cut -d ' ' -f 1)
   
-    if [[ ${DOWNLOAD_MD5} != ${NODE_MD5} ]]; then
-      echo "       **ERROR** MD5 mismatch: got $DOWNLOAD_MD5 expected $NODE_MD5"
+    if [[ ${DOWNLOAD_SHA2} != ${NODE_SHA2} ]]; then
+      echo "       **ERROR** MD5 mismatch: got $DOWNLOAD_SHA2 expected $NODE_SHA2"
       exit 1
     fi
   
@@ -41,9 +50,9 @@ declare git_url git_tag work_dir
 declare -x TAG NODE_VERSION TMP_DIR
 
 git_url="https://github.com/cloudfoundry-community/stratos.git"
-git_tag="${TAG:-master}}"
+git_tag="${TAG:-master}"
 work_dir="${PWD}"
-NODE_VERSION="${NODE_VERISON:-8.11.2}"
+NODE_VERSION="${NODE_VERISON:-20.13.1}"
 TMP_DIR=/tmp
 
 git clone "${git_url}" stratos-ui || true
@@ -57,7 +66,7 @@ fi
 
 function exit_trap() {
   # See: install_nodejs.sh
-  NODE_VERSION="8.11.2"
+  NODE_VERSION="20.13.1"
   rm -rf "/tmp/node${NODE_VERSION}.tar.gz" "/tmp/node${NODE_VERSION}"
 }
 trap exit_trap EXIT
@@ -99,7 +108,7 @@ echo "web: ./deploy/cloud-foundry/start.sh" > "${build_dir}/Procfile"
 
 ls -lah "${build_dir}"
 cd "${build_dir}"
-zip -r "${work_dir}}/stratos-ui-packaged.zip" ./*
+zip -r "${work_dir}/stratos-ui-packaged.zip" ./*
 cd "${work_dir}"
 
 exit 0

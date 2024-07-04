@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/release"
 	appsv1 "k8s.io/api/apps/v1"
@@ -185,7 +185,7 @@ func (r *HelmRelease) processYamlResource(obj interface{}, data []byte) {
 }
 
 // process a yaml resource from the helm manifest
-//func (r *HelmRelease) processResource(obj runtime.Object) {
+// func (r *HelmRelease) processResource(obj runtime.Object) {
 func (r *HelmRelease) processKubeResource(obj interface{}, t KubeResource) {
 	t.Resource = obj
 	t.Manifest = true
