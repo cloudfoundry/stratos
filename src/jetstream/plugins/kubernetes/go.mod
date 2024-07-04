@@ -1,12 +1,12 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes
+module github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes
 
 go 1.21
 
 toolchain go1.21.5
 
 require (
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/satori/go.uuid v1.2.0
@@ -172,9 +172,9 @@ require (
 
 replace (
 	github.com/SermoDigital/jose => github.com/SermoDigital/jose v0.9.2-0.20180104203859-803625baeddc
-	github.com/cloudfoundry-incubator/stratos/src/jetstream => ../../../jetstream
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/api => ../../../jetstream/api
-	github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth => ./auth
+	github.com/cloudfoundry-community/stratos/src/jetstream => ../../../jetstream
+	github.com/cloudfoundry-community/stratos/src/jetstream/api => ../../../jetstream/api
+	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth => ./auth
 	github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2

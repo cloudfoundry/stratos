@@ -83,7 +83,7 @@ export class FetchCommits implements PaginatedAction {
 
   /**
    * Creates an instance of FetchCommits.
-   * @param projectName For example `cloudfoundry-incubator/stratos`
+   * @param projectName For example `cloudfoundry-community/stratos`
    * @param sha Branch name, tag, etc
    */
   constructor(

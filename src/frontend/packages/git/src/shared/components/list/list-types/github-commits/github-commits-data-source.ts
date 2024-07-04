@@ -17,7 +17,7 @@ export class GithubCommitsDataSource extends ListDataSource<GitCommit> {
 
   /**
    * Creates an instance of GithubCommitsDataSource.
-   * @param projectName For example `cloudfoundry-incubator/stratos`
+   * @param projectName For example `cloudfoundry-community/stratos`
    * @param sha Branch name, tag, etc
    */
   constructor(
