@@ -44,7 +44,7 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env = variables[0].entity.environment_json;
+        const env = (variables[0].entity.environment_json) ? variables[0].entity.environment_json : {};
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),
