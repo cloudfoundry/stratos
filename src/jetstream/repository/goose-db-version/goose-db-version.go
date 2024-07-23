@@ -1,7 +1,7 @@
 package goosedbversion
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 )
 
 // Repository - the repository required to talk to this table of data

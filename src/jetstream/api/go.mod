@@ -1,6 +1,6 @@
-module github.com/cloudfoundry-incubator/stratos/src/jetstream/api
+module github.com/cloudfoundry-community/stratos/src/jetstream/api
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/golang/mock v1.6.0

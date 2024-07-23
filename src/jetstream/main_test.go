@@ -5,8 +5,8 @@ import (
 
 	"github.com/govau/cf-common/env"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
 )
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests

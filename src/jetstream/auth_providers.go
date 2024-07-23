@@ -1,6 +1,6 @@
 package main
 
-import "github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+import "github.com/cloudfoundry-community/stratos/src/jetstream/api"
 
 // log "github.com/sirupsen/logrus"
 

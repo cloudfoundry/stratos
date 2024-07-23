@@ -4,7 +4,7 @@ applications:
     disk_quota: 1024M
     host: console
     timeout: 180
-    buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v4.0
+    buildpack: https://github.com/cloudfoundry-community/stratos-buildpack#v5
     health-check-type: port
 #    env:
 # Override CF API endpoint URL inferred from VCAP_APPLICATION env 

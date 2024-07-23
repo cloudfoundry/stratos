@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 
 	restclient "k8s.io/client-go/rest"
 )

@@ -1,7 +1,7 @@
 package dashboard
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 )
 
 const stratosServiceAccountSelector = "stratos-role%3Dkubernetes-dashboard-user"
@@ -10,10 +10,10 @@ const stratosServiceAccountSelector = "stratos-role%3Dkubernetes-dashboard-user"
 func KubeDashboardStatus(p api.PortalProxy, endpointGUID, userGUID string, includeToken bool) (*StatusResponse, error) {
 
 	status := &StatusResponse{
-		Endpoint:  endpointGUID,
-		Installed: false,
-		Running:   false,
-		HasToken:  false,
+		Endpoint:         endpointGUID,
+		Installed:        false,
+		Running:          false,
+		HasToken:         false,
 		StratosInstalled: false,
 	}
 

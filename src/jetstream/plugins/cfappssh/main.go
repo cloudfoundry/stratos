@@ -3,7 +3,7 @@ package cfappssh
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 )
 

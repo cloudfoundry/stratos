@@ -3,8 +3,8 @@ package userfavorites
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/labstack/echo/v4"
 )
 
