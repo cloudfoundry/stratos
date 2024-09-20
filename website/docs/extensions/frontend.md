@@ -266,6 +266,7 @@ A customization service provides a number of smaller extension points.
 
 |Property | Description|
 |--|--|
+|appName| Product name, default is 'Stratos' but can be changed to an arbitrary string |
 |hasEula| True if there's a EULA to show. When set to true the asset `/core/eula.html` must exist. For information about custom package assets see the images section [here](./theming#new-images).  |
 |copyright| Text shown at the bottom of the side nav|
 |logoText| Text shown with the side nav logo|
