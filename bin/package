@@ -69,7 +69,7 @@ else
   echo "Using local checked out copy on stratos-ui"
 fi
 
-if [[ -z ${VERSION:-""}]]; then
+if [[ -z ${VERSION:-""} ]] ; then
   export stratos_version="${$VERSION}"  # Will be tagged on publish in Concourse
 fi
 
