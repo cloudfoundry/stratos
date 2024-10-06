@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -xeuo pipefail
 
 node::install() {
   local download_file
@@ -50,18 +50,27 @@ declare git_url git_tag work_dir
 declare -x TAG NODE_VERSION TMP_DIR
 
 git_url="https://github.com/cloudfoundry-community/stratos.git"
-git_tag="${TAG:-master}"
+git_tag="${TAG:-develop}"
 work_dir="${PWD}"
 NODE_VERSION="${NODE_VERISON:-20.13.1}"
 TMP_DIR=/tmp
 
-git clone "${git_url}" stratos-ui || true
+if [[ -z ${USE_LOCAL:-""} ]] ; then
 
-if [[ -n ${git_tag} ]]; then
-	pushd stratos-ui
-	git checkout "${git_tag}"
-  export stratos_version="${git_tag}"
-	popd
+  git clone "${git_url}" stratos-ui || true
+
+  if [[ -n ${git_tag} ]]; then
+    pushd stratos-ui
+    git checkout "${git_tag}"
+    export stratos_version="${git_tag}"
+    popd
+  fi
+else
+  echo "Using local checked out copy on stratos-ui"
+fi
+
+if [[ -z ${VERSION:-""}]]; then
+  export stratos_version="${$VERSION}"  # Will be tagged on publish in Concourse
 fi
 
 function exit_trap() {
@@ -108,7 +117,11 @@ echo "web: ./deploy/cloud-foundry/start.sh" > "${build_dir}/Procfile"
 
 ls -lah "${build_dir}"
 cd "${build_dir}"
-zip -r "${work_dir}/stratos-ui-packaged.zip" ./*
+if [[ -z ${BUILD_ROOT:-"" }]] ; then
+  zip -r -x@exclude.lst "${BUILD_ROOT}/stratos-ui-packaged.zip" ./*
+else
+  zip -r -x@exclude.lst "${work_dir}/stratos-ui-packaged.zip" ./*
+fi
 cd "${work_dir}"
 
 exit 0
