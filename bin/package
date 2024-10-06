@@ -117,7 +117,7 @@ echo "web: ./deploy/cloud-foundry/start.sh" > "${build_dir}/Procfile"
 
 ls -lah "${build_dir}"
 cd "${build_dir}"
-if [[ -z ${BUILD_ROOT:-"" }]] ; then
+if [[ -z ${BUILD_ROOT:-"" } ]] ; then
   zip -r -x@exclude.lst "${BUILD_ROOT}/stratos-ui-packaged.zip" ./*
 else
   zip -r -x@exclude.lst "${work_dir}/stratos-ui-packaged.zip" ./*
