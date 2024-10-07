@@ -7,7 +7,7 @@ node::install() {
   download_file="${TMP_DIR}/node${NODE_VERSION}.tar.gz"
   
   export node_install_dir="/tmp/node${NODE_VERSION}"
-  export node_dir="${node_install_dir}/node-v${NODE_VERSION}-linux-x64"
+  #export node_dir="${node_install_dir}/node-v${NODE_VERSION}-linux-x64"
   
   mkdir -p "${node_install_dir}"
   
@@ -38,12 +38,12 @@ node::install() {
     rm "${download_file}"
   fi
   
-  if [[ ! -f "${node_dir}/bin/node" ]]; then
+  if [[ ! -f "${node_install_dir}/bin/node" ]]; then
     echo "       **ERROR** Could not download nodejs"
     exit 1
   fi
   
-  export NODE_HOME="${node_dir}"
+  export NODE_HOME="${node_install_dir}"
 }
 
 declare git_url git_tag work_dir
