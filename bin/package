@@ -70,7 +70,7 @@ else
 fi
 
 if [[ -z ${VERSION:-""} ]] ; then
-  export stratos_version="${$VERSION}"  # Will be tagged on publish in Concourse
+  export stratos_version="${VERSION}"  # Will be tagged on publish in Concourse
 fi
 
 function exit_trap() {
