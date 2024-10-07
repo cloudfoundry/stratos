@@ -92,7 +92,7 @@ mkdir -p cache
 build_dir="${work_dir}/stratos-ui"
 
 # Fix the "authenticity of host can't be established" error during build
-ssh-keyscan "bitbucket.org" >> ~/.ssh/known_hosts
+#ssh-keyscan "bitbucket.org" >> ~/.ssh/known_hosts
 
 # prebuild ui
 cd stratos-ui
