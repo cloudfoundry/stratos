@@ -79,6 +79,7 @@ exit_trap() {
   # See: install_nodejs.sh
   [[ -d "${TMP_DIR}/node${NODE_VERSION}" ]] && rm -rf "${TMP_DIR}/node${NODE_VERSION}"
   [[ -f "${TMP_DIR}/node${NODE_VERSION}.tar.gz" ]] && rm -rf "${TMP_DIR}/node${NODE_VERSION}.tar.gz"
+  true
 }
 trap exit_trap EXIT
 
