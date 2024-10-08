@@ -99,6 +99,9 @@ build_dir="${work_dir}/stratos-ui"
 
 # prebuild ui
 cd stratos-ui
+if [[ -n "${stratos_version:-""}" ]]; then
+  sed -i package.json -e 's/"version": .*/"version": "'"$stratos_version"'"/'
+fi
 npm install
 npm run prebuild-ui
 rm -Rf ./dist
@@ -122,7 +125,7 @@ ls -lah "${build_dir}"
 cd "${build_dir}"
 package_version="${stratos_version:-"dev-$(date +%Y%m%d%H%M%S)"}"
 if [[ -n ${RELEASE_DIR:-""} ]] ; then
-  zip -r -x@exclude.lst "${RELEASE_DIR}/stratos-ui-${package_version}.zip" ./*
+  zip -r -x@exclude.lst "${work_dir}/${RELEASE_DIR}/stratos-ui-${package_version}.zip" ./*
 else
   zip -r -x@exclude.lst "${work_dir}/stratos-ui-${package_version}.zip" ./*
 fi
