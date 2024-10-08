@@ -100,7 +100,7 @@ build_dir="${work_dir}/stratos-ui"
 # prebuild ui
 cd stratos-ui
 if [[ -n "${stratos_version:-""}" ]]; then
-  sed -i package.json -e 's/"version": .*/"version": "'"$stratos_version"'"/'
+  sed -i package.json -e 's/"version": ".*",$/"version": "'"$stratos_version"'",/'
 fi
 npm install
 npm run prebuild-ui
