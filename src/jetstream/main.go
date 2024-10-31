@@ -20,8 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/custombinder"
-	_ "github.com/cloudfoundry-community/stratos/src/jetstream/docs"
+	"github.com/cloudfoundry/stratos/src/jetstream/custombinder"
+	_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
 
 	"github.com/antonlindstrom/pgstore"
 	"github.com/cf-stratos/mysqlstore"
@@ -35,17 +35,17 @@ import (
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/factory"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/apikeys"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/cnsis"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/console_config"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/localusers"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/sessiondata"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/tokens"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry/stratos/src/jetstream/factory"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/cnsis"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/console_config"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/sessiondata"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
 )
 
 // @title Stratos API

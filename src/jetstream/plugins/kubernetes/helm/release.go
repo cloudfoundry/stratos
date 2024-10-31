@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/release"
 	appsv1 "k8s.io/api/apps/v1"

@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 func (uf *UserFavorites) getAll(c echo.Context) error {

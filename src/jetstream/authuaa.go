@@ -15,8 +15,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/stringutils"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/stringutils"
 )
 
 // UAAAdminIdentifier - The identifier that UAA uses to convey administrative level perms

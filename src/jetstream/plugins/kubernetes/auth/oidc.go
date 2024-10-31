@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 
 	"github.com/SermoDigital/jose/jws"
 	"github.com/labstack/echo/v4"

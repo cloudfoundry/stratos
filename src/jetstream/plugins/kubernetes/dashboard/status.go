@@ -1,7 +1,7 @@
 package dashboard
 
 import (
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 const stratosServiceAccountSelector = "stratos-role%3Dkubernetes-dashboard-user"

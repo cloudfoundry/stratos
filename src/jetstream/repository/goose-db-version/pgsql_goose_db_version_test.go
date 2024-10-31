@@ -8,8 +8,8 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/custom_errors"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/custom_errors"
 )
 
 func TestPgSQLGooseDB(t *testing.T) {

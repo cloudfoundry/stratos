@@ -1,7 +1,7 @@
 package helm
 
 import (
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // TokenStore is a token store that combines local tokens with the usual database stored tokens

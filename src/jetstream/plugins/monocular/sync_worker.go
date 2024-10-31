@@ -7,7 +7,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular/store"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )

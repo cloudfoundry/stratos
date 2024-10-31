@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"

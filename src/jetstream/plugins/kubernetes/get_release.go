@@ -12,8 +12,8 @@ import (
 
 	"helm.sh/helm/v3/pkg/action"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/helm"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/helm"
 )
 
 const (

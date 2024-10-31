@@ -4,6 +4,7 @@
 /tmp
 /out-tsc
 /out
+/jetstream
 
 # dependencies
 /node_modules

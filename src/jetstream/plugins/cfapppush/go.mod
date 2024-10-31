@@ -1,9 +1,9 @@
-module github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush
+module github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush
 
 go 1.21
 
 replace (
-	github.com/cloudfoundry-community/stratos/src/jetstream/api => ../../api
+	github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 	github.com/cloudfoundry/cli-plugin-repo => code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
 	github.com/moby/moby => github.com/moby/moby v20.10.25+incompatible
 	github.com/sabhiram/go-gitignore => github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
@@ -13,7 +13,7 @@ replace (
 require (
 	code.cloudfoundry.org/cli v0.0.0-20230912192837-efd1d03e7292
 	code.cloudfoundry.org/clock v1.1.0
-	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/mholt/archiver/v3 v3.5.1

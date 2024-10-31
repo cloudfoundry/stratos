@@ -1,20 +1,20 @@
-module github.com/cloudfoundry-community/stratos/src/jetstream
+module github.com/cloudfoundry/stratos/src/jetstream
 
 go 1.21
 
 toolchain go1.21.9
 
 replace (
-	github.com/cloudfoundry-community/stratos/src/jetstream/api => ./api
-	github.com/cloudfoundry-community/stratos/src/jetstream/api/config => ./api/config
-	github.com/cloudfoundry-community/stratos/src/jetstream/crypto => ./crypto
-	github.com/cloudfoundry-community/stratos/src/jetstream/docs => ./docs
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth => ./plugins/kubernetes/auth
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/terminal => ./plugins/kubernetes/terminal
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular => ./plugins/monocular
+	github.com/cloudfoundry/stratos/src/jetstream/api => ./api
+	github.com/cloudfoundry/stratos/src/jetstream/api/config => ./api/config
+	github.com/cloudfoundry/stratos/src/jetstream/crypto => ./crypto
+	github.com/cloudfoundry/stratos/src/jetstream/docs => ./docs
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth => ./plugins/kubernetes/auth
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/terminal => ./plugins/kubernetes/terminal
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular => ./plugins/monocular
 )
 
 // ported from plugins/kubernetes
@@ -31,11 +31,11 @@ require (
 	github.com/antonlindstrom/pgstore v0.0.0-20220421113606-e3a6e3fed12a
 	github.com/cf-stratos/mysqlstore v0.0.0-20170822100912-304308519d13
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
-	github.com/cloudfoundry-community/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes v0.0.0-20210416105629-f34f428ca775
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
-	github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular v0.0.0-20210416105629-f34f428ca775
+	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes v0.0.0-20210416105629-f34f428ca775
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-00010101000000-000000000000
+	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular v0.0.0-20210416105629-f34f428ca775
 	github.com/cloudfoundry/noaa/v2 v2.3.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20230911203642-fa89d986ae20
 	github.com/domodwyer/mailyak v3.1.1+incompatible

@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 func (p *portalProxy) doHttpBasicFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {

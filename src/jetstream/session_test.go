@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	. "github.com/smartystreets/goconvey/convey"

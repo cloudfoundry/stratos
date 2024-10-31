@@ -16,9 +16,9 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesendpoints"
 )
 
 const dbReferenceError = "unable to establish a database reference: '%v'"

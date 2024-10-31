@@ -7,7 +7,7 @@ package mock_api
 import (
 	reflect "reflect"
 
-	api "github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	api "github.com/cloudfoundry/stratos/src/jetstream/api"
 	gomock "github.com/golang/mock/gomock"
 	echo "github.com/labstack/echo/v4"
 )

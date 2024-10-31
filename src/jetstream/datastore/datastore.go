@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/custom_errors"
+	"github.com/cloudfoundry/stratos/src/jetstream/custom_errors"
 	"github.com/samber/lo"
 
-	goosedbversion "github.com/cloudfoundry-community/stratos/src/jetstream/repository/goose-db-version"
+	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 

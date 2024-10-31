@@ -1,17 +1,19 @@
 # Stratos
 
-<a href="https://travis-ci.com/cloudfoundry-community/stratos/branches"><img src="https://travis-ci.com/cloudfoundry-community/stratos.svg?branch=master"></a>&nbsp;<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-community/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
-<a href="https://goreportcard.com/report/github.com/cloudfoundry-community/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
+<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-community/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
+<a href="https://goreportcard.com/report/github.com/cloudfoundry/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
 <a href="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master"><img src="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master/graph/badge.svg"/></a>
-[![GitHub release](https://img.shields.io/github/release/cloudfoundry-community/stratos.svg)](https://github.com/cloudfoundry-community/stratos/releases/latest)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry-community/stratos/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/cloudfoundry-community/stratos.svg)](https://github.com/cloudfoundry/stratos/releases/latest)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry/stratos/blob/master/LICENSE)
 [![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
+
+(Please note:  The official repository is at cloudfoundry/stratos and the cloudfoundry-community/stratos will track this but may be used for some testing purposes)
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
 ![Stratos Application view](website/static/images/screenshots/app-summary.png)
 
-Please visit our new [documentation site](https://stratos.app/). There you can discover
+Please visit our new [documentation site](https://stratos.app/). There you can discover (* This is currently being updated from the 4.4.0 docs)
 
 1. Our [introduction](https://stratos.app/docs/), including quick start, contributing and troubleshooting guides.
 1. How to [deploy](https://stratos.app/docs/deploy/overview) Stratos in a number of environments.
@@ -33,11 +35,11 @@ Tested with Browserstack
 
 
 This feature helps in pre-building the
-[Stratos](https://github.com/cloudfoundry-community/stratos) web application
+[Stratos](https://github.com/cloudfoundry/stratos) web application
 so that it can be deployed faster in Cloud Foundry, or be run offline.
 
 You can find pre-built versions of Stratos UI in the
-[releases](https://github.com/cloudfoundry-community/stratos/releases)
+[releases](https://github.com/cloudfoundry/stratos/releases)
 of this repository.
 
 To run those `.zip` packages inside Cloud Foundry, unzip it, write a manifest,
@@ -67,10 +69,10 @@ Note: `sgs` creates security groups the first time, upgrades do not use `sgs`.
 
 ## Packaging
 
-Golang is required, and version 1.12 is recommended as this is the version used by the Stratos build system.
+Golang is required, and version 1.21 is recommended as this is the version used by the Stratos build system.
 
-When you want to build the `4.1.2` tag in
-[Stratos UI releases](https://github.com/cloudfoundry-community/stratos/releases),
+When you want to build the `4.8.1` tag in
+[Stratos UI releases](https://github.com/cloudfoundry/stratos/releases),
 run this command:
 
 ```bash
@@ -78,7 +80,7 @@ run this command:
 ```
 OR to package a specific tag
 ```bash
-TAG="4.1.2" ./bin/package 
+TAG="4.8.1" ./bin/package
 ```
 
 ### NOTE

@@ -1,6 +1,6 @@
 package apikeys
 
-import "github.com/cloudfoundry-community/stratos/src/jetstream/api"
+import "github.com/cloudfoundry/stratos/src/jetstream/api"
 
 // Repository - API keys repository
 type Repository interface {

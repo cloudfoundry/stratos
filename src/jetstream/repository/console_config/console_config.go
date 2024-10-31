@@ -1,7 +1,7 @@
 package console_config
 
 import (
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 type Repository interface {

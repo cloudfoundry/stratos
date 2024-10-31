@@ -14,9 +14,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
 // More fields will be moved into here as global portalProxy struct is phased out

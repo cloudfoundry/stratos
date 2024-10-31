@@ -1,8 +1,8 @@
 package userfavoritesendpoints
 
 import (
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
 )
 
 type userFavoriteEndpoints struct {

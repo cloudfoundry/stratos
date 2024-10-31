@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )

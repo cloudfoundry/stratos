@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/monocular/store"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )

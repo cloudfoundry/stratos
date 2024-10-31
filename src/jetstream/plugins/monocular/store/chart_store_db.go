@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	log "github.com/sirupsen/logrus"
 )
 

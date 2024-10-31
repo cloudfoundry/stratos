@@ -14,11 +14,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api/config"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/console_config"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/console_config"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
 const (

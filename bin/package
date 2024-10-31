@@ -6,7 +6,7 @@ set -xeuo pipefail
 declare git_url git_tag work_dir
 declare -x TAG NODE_VERSION TMP_DIR
 
-git_url="https://github.com/cloudfoundry-community/stratos.git"
+git_url="https://github.com/cloudfoundry/stratos.git"
 git_tag="${TAG:-develop}"
 work_dir="${PWD}"
 NODE_VERSION="${NODE_VERISON:-20.13.1}"

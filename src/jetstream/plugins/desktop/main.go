@@ -3,9 +3,9 @@ package desktop
 import (
 	"errors"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/desktop/helm"
-	"github.com/cloudfoundry-community/stratos/src/jetstream/plugins/desktop/kubernetes"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/desktop/helm"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/desktop/kubernetes"
 	"github.com/labstack/echo/v4"
 
 	log "github.com/sirupsen/logrus"

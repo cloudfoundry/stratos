@@ -1,4 +1,4 @@
-module github.com/cloudfoundry-community/stratos/src/jetstream/api
+module github.com/cloudfoundry/stratos/src/jetstream/api
 
 go 1.21
 

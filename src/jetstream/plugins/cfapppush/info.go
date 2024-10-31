@@ -3,7 +3,7 @@ package cfapppush
 import (
 	"errors"
 
-	"github.com/cloudfoundry-community/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 
 	"code.cloudfoundry.org/cli/util/configv3"
 	log "github.com/sirupsen/logrus"
