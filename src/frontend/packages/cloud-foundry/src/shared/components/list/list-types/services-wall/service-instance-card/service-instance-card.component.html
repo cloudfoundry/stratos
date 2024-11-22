@@ -46,6 +46,13 @@
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
+    <app-meta-card-key> Last Service Binding </app-meta-card-key>
+      <app-meta-card-value>
+        <app-service-instance-last-service-binding [alignRight]="true" [serviceInstance]="serviceInstanceEntity">
+        </app-service-instance-last-service-binding>
+      </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Dashboard</app-meta-card-key>
     <app-meta-card-value>
       <div *ngIf="!!serviceInstanceEntity.entity.dashboard_url ; then dashboardUrl; else none"></div>
