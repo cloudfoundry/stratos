@@ -47,7 +47,7 @@
     </mat-checkbox>
     <div *ngIf="!!registerForm.controls.ssoAllowedField.value">
       <p>
-        Please ensure that you have added the Stratos SSO Callback URL shown below to the client's 'redirect_uri'.
+        Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
       </p>
       <pre>{{clientRedirectURI}}</pre>
     </div>
