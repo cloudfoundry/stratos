@@ -49,6 +49,12 @@ const entityCache: {
   [key: string]: EntitySchema;
 } = {};
 
+// Auto scaler Info
+export const appAutoscalerInfoEntityType = 'autoscalerInfo';
+
+const AutoscalerInfoSchema = new CFEntitySchema(appAutoscalerInfoEntityType, {}, { idAttribute: getAPIResourceGuid });
+entityCache[appAutoscalerInfoEntityType] = AutoscalerInfoSchema;
+
 const AppSummarySchema = new CFEntitySchema(appSummaryEntityType, {}, { idAttribute: 'guid' });
 entityCache[appSummaryEntityType] = AppSummarySchema;
 

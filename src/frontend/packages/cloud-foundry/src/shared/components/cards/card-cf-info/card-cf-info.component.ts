@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
+import { fetchAutoscalerInfo } from '../../../../autoscaler-available';
 import { ICfV2Info } from '../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
@@ -28,7 +28,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     public userInviteService: UserInviteService,
     public userInviteConfigureService: UserInviteConfigureService,
     private dialog: MatDialog,
-    private esf: EntityServiceFactory
+    private esf: EntityServiceFactory,
   ) { }
 
   description$: Observable<string>;
@@ -45,8 +45,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
       map(entity => this.getDescription(entity))
     );
 
-    // FIXME: CF should not depend on autoscaler. See #3916
-    // FIXME: Remove hard link between cf and autoscaler packages #4416
     this.autoscalerVersion$ = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf).pipe(
       map(e => e.entityRequestInfo.error ?
         null :

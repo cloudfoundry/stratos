@@ -1,12 +1,5 @@
 import { AutoscalerQuery } from './app-autoscaler.actions';
 
-export interface AutoscalerInfo {
-  name: string;
-  build: string;
-  support: string;
-  description: string;
-}
-
 export interface AppAutoscalerPolicy {
   instance_min_count: number;
   instance_max_count: number;

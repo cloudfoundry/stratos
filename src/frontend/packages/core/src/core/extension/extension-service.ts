@@ -30,6 +30,7 @@ export interface StratosTabMetadata {
     activatedRoute: ActivatedRoute,
     cups: CurrentUserPermissionsService
   ) => Observable<boolean>;
+  loadChildren?: any;
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
@@ -60,7 +61,8 @@ export type StratosRouteType = StratosTabType | StratosActionType;
 
 export interface StratosExtensionRoutes {
   path: string;
-  component: any;
+  component?: any;
+  loadChildren?: any;
 }
 
 // Stores the extension metadata as defined by the decorators
@@ -97,10 +99,18 @@ function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMeta
     extensionMetadata.extensionRoutes[tab] = [];
   }
 
-  extensionMetadata.extensionRoutes[tab].push({
+  const tabRoute: StratosExtensionRoutes = {
     path: props.link,
-    component: target
-  });
+    loadChildren: props.loadChildren,
+  };
+
+  if (props.loadChildren) {
+    tabRoute.loadChildren = props.loadChildren;
+  } else {
+    tabRoute.component = target;
+
+  }
+  extensionMetadata.extensionRoutes[tab].push(tabRoute);
   extensionMetadata.tabs[tab].push({
     ...props
   });
@@ -113,7 +123,7 @@ function addExtensionAction(action: StratosActionType, target: any, props: Strat
   }
   extensionMetadata.extensionRoutes[action].push({
     path: props.link,
-    component: target
+    component: target,
   });
   extensionMetadata.actions[action].push(props);
 }

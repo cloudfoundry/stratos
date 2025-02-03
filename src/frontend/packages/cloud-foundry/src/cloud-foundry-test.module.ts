@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 
-import { generateASEntities } from '../../cf-autoscaler/src/store/autoscaler-entity-generator';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule } from '../../store/src/entity-catalog.module';
 import { entityCatalog, TestEntityCatalog } from '../../store/src/entity-catalog/entity-catalog';
 import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
@@ -28,7 +27,6 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
             return [
               ...generateCFEntities(),
               ...generateStratosEntities(),
-              ...generateASEntities(), // FIXME: Remove hard link between cf and autoscaler packages #4416
             ];
           },
           multi: true
@@ -50,4 +48,9 @@ import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
     }
   ]
 })
-export class CloudFoundryTestingModule { }
+export class CloudFoundryTestingModule {
+
+  constructor() {
+    console.log('CloudFoundryTestingModule');
+  }
+ }

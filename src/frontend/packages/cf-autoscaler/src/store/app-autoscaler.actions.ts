@@ -10,7 +10,6 @@ import {
   appAutoscalerAppMetricEntityType,
   appAutoscalerCredentialEntityType,
   appAutoscalerHealthEntityType,
-  appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
   appAutoscalerScalingHistoryEntityType,
@@ -52,22 +51,8 @@ export const DELETE_APP_AUTOSCALER_CREDENTIAL = '[New App Autoscaler] Delete cre
 export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
-export const AUTOSCALER_INFO = '[Autoscaler] Fetch Info';
 
 export const UPDATE_APP_AUTOSCALER_POLICY_STEP = '[Edit Autoscaler Policy] Step';
-
-export class GetAppAutoscalerInfoAction implements EntityRequestAction {
-  public guid: string;
-  constructor(
-    public endpointGuid: string,
-  ) {
-    this.guid = endpointGuid;
-  }
-  type = AUTOSCALER_INFO;
-  entity = autoscalerEntityFactory(appAutoscalerInfoEntityType);
-  entityType = appAutoscalerInfoEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-}
 
 export class GetAppAutoscalerHealthAction implements EntityRequestAction {
   public guid: string;

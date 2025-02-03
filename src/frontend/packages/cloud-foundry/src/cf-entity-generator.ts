@@ -30,6 +30,7 @@ import { PaginatedAction, PaginationEntityState } from '../../store/src/types/pa
 import { ICFAction } from '../../store/src/types/request.types';
 import { IFavoriteMetadata } from '../../store/src/types/user-favorites.types';
 import { CfValidateEntitiesStart } from './actions/relations-actions';
+import { AutoscalerInfo } from './autoscaler-available';
 import {
   IService,
   IServiceBinding,
@@ -57,7 +58,7 @@ import {
   IStack,
 } from './cf-api.types';
 import { cfEntityCatalog } from './cf-entity-catalog';
-import { cfEntityFactory } from './cf-entity-factory';
+import { appAutoscalerInfoEntityType, cfEntityFactory } from './cf-entity-factory';
 import {
   appEnvVarsEntityType,
   applicationEntityType,
@@ -422,7 +423,8 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
     generateCFQuotaDefinitionEntity(endpointDefinition),
-    generateCFMetrics(endpointDefinition)
+    generateCFMetrics(endpointDefinition),
+    generateAutoscalerInfoEntity(endpointDefinition),
   ];
 }
 
@@ -1196,4 +1198,13 @@ function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinitio
     }
   );
   return cfEntityCatalog.metric;
+}
+
+function generateAutoscalerInfoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition = {
+    type: appAutoscalerInfoEntityType,
+    schema: cfEntityFactory(appAutoscalerInfoEntityType),
+    endpoint: endpointDefinition
+  };
+  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AutoscalerInfo>>(definition);
 }
