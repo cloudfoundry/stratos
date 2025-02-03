@@ -1,6 +1,12 @@
 package main
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha512"
+	"crypto/x509"
+	"encoding/pem"
 	"testing"
 
 	"github.com/govau/cf-common/env"
@@ -153,5 +159,51 @@ func TestLoadDatabaseConfigWithInvalidSSLMode(t *testing.T) {
 
 	if err == nil {
 		t.Errorf("Unexpected success - should not be able to load database configs with an invalid SSL Mode specified.")
+	}
+}
+
+func TestGenerateTLSCert(t *testing.T) {
+	pc := interfaces.PortalConfig{}
+	err := generateTLSCert(&pc)
+	if err != nil {
+		t.Errorf("Error generating TLS certificate: %w", err)
+		return
+	}
+	certBlock, rest := pem.Decode([]byte(pc.TLSCert))
+	if len(rest) > 0 {
+		t.Errorf("Extra bytes after certificate: %s", rest)
+	}
+	if certBlock.Type != "CERTIFICATE" {
+		t.Errorf("Invalid cerificate block type %s", certBlock.Type)
+	}
+	cert, err := x509.ParseCertificate(certBlock.Bytes)
+	if err != nil {
+		t.Errorf("Error parsing certificate: %w", err)
+		return
+	}
+	if err := cert.VerifyHostname("localhost"); err != nil {
+		t.Errorf("Certificate does not work for localhost: %w", err)
+	}
+	privBlock, rest := pem.Decode([]byte(pc.TLSCertKey))
+	if len(rest) > 0 {
+		t.Errorf("Extra bytes after private key: %s", rest)
+	}
+	if privBlock.Type != "RSA PRIVATE KEY" {
+		t.Errorf("Invalid private key block type %s", privBlock.Type)
+	}
+	privKey, err := x509.ParsePKCS1PrivateKey(privBlock.Bytes)
+	if err != nil {
+		t.Logf("Could not parse private key: %s", err)
+		t.FailNow()
+	}
+	data := []byte("sample data")
+	hash := sha512.Sum512(data)
+	sig, err := rsa.SignPKCS1v15(rand.Reader, privKey, crypto.SHA512, hash[:])
+	if err != nil {
+		t.Logf("Could not sign data: %s", err)
+		t.FailNow()
+	}
+	if err = cert.CheckSignature(x509.SHA512WithRSA, data, sig); err != nil {
+		t.Errorf("Certifcate public key does not match private key")
 	}
 }

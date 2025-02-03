@@ -1,16 +1,22 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"database/sql"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	"net"
 	"net/http"
 	"os"
@@ -137,8 +143,6 @@ func main() {
 			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
 		}
 	}
-
-	rand.Seed(time.Now().UnixNano())
 
 	log.SetOutput(os.Stdout)
 
@@ -660,6 +664,14 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 		return pc.TLSCertPath, pc.TLSCertKeyPath, nil
 	}
 
+	// Check if we should generate self-signed certificates
+	if pc.TLSCertGenerate {
+		log.Info("Generating TLS certificates")
+		if err := generateTLSCert(&pc); err != nil {
+			return "", "", err
+		}
+	}
+
 	err := ioutil.WriteFile(certFilename, []byte(pc.TLSCert), 0600)
 	if err != nil {
 		return "", "", err
@@ -670,6 +682,37 @@ func detectTLSCert(pc interfaces.PortalConfig) (string, string, error) {
 		return "", "", err
 	}
 	return certFilename, certKeyFilename, nil
+}
+
+// generateTLSCert generates a self-signed TLS certificate for localhost.  The
+// resulting certificate is stored in the PortalConfig as TLSCert and TLSCertKey.
+func generateTLSCert(pc *interfaces.PortalConfig) error {
+	priv, err := rsa.GenerateKey(rand.Reader, 4096)
+	if err != nil {
+		return  fmt.Errorf("could not generate TLS certificate private key: %w", err)
+	}
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().UnixNano()),
+		Subject: pkix.Name{CommonName: "localhost"},
+		NotBefore: time.Now(),
+		NotAfter: time.Now().Add(time.Hour * 24 * 365 * 100),
+		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		IPAddresses: []net.IP{net.IPv4(127,0,0,1), net.ParseIP("::1")},
+		DNSNames: []string{"localhost"},
+	}
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		return fmt.Errorf("could not generate TLS certificate: %w", err)
+	}
+	out := &bytes.Buffer{}
+	pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	pc.TLSCert = out.String()
+	out.Reset()
+	pem.Encode(out, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+	pc.TLSCertKey = out.String()
+	return nil
 }
 
 func newPortalProxy(pc interfaces.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
