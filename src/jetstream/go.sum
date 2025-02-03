@@ -108,6 +108,7 @@ github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1/go.mod h1:sAoA1zHC
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cloudfoundry-community/go-cfenv v1.17.0 h1:qfxEfn8qKkaHY3ZEk/Y2noY79HBASvNgmtHK9x4+6GY=
 github.com/cloudfoundry-community/go-cfenv v1.17.0/go.mod h1:2UgWvQTRXUuIZ/x3KnW6fk6CgPBhcV4UQb/UGIrUyyI=
+github.com/cloudfoundry-incubator/stratos v2.0.0-beta-001+incompatible h1:UUxNbLjhv2cfymub5yNN1tjjqYkteHBBagb4jcbXEIQ=
 github.com/cloudfoundry/bosh-cli v5.4.0+incompatible h1:KpT2PBB7nP1QnK8guXeZ/D2k7FZYAOxcveKgYTDEDBI=
 github.com/cloudfoundry/bosh-cli v5.4.0+incompatible/go.mod h1:rzIB+e1sn7wQL/TJ54bl/FemPKRhXby5BIMS3tLuWFM=
 github.com/cloudfoundry/bosh-utils v0.0.0-20190206192830-9a0affed2bf1 h1:TxcGamw+BaxXTFwZFORzkWNMCHAWjhThxnI24CLS7iE=
@@ -452,6 +453,7 @@ github.com/mattn/go-sqlite3 v1.13.0 h1:LnJI81JidiW9r7pS/hXe6cFeO5EXNq7KbfvoJLRI6
 github.com/mattn/go-sqlite3 v1.13.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mattn/go-sqlite3 v1.14.5 h1:1IdxlwTNazvbKJQSxoJ5/9ECbEeaTTyeU7sEAZ5KKTQ=
 github.com/mattn/go-sqlite3 v1.14.5/go.mod h1:WVKg1VTActs4Qso6iwGbiFih2UIHo0ENGwNd0Lj+XmI=
+github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/matttproud/golang_protobuf_extensions v1.0.1 h1:4hp9jkHxhMHkqkrB3Ix0jegS5sx/RkqARlsWZ6pIwiU=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
 github.com/mholt/archiver v3.1.1+incompatible h1:1dCVxuqs0dJseYEhi5pl7MYPH9zDa1wBi7mF09cbNkU=
