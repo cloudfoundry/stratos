@@ -102,9 +102,9 @@
     "node": "12.13.0"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^10.0.1",
+    "@angular-builders/custom-webpack": "^14.1.0",
     "@angular-devkit/architect": "^0.1002.0",
-    "@angular-devkit/build-angular": "^0.1002.0",
+    "@angular-devkit/build-angular": "^14.2.9",
     "@angular-devkit/build-ng-packagr": "~0.1002.0",
     "@angular-devkit/core": "^10.2.0",
     "@angular-devkit/schematics": "^10.2.0",
