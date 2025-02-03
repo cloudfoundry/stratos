@@ -20,7 +20,7 @@ import { PageAutoscalerMetricBase } from './po/page-autoscaler-metric-base.po';
 
 let applicationE2eHelper: ApplicationE2eHelper;
 
-describe('Autoscaler -', () => {
+describe('Autoscaler', () => {
 
   const validateFormDate = (fromForm: promise.Promise<any>, toEqual: moment.Moment, label: string) => {
     fromForm.then(fieldInput => {
@@ -348,7 +348,7 @@ describe('Autoscaler -', () => {
     });
   });
 
-  describe('Autoscaler Edit Policy -', () => {
+  describe('Autoscaler Edit Policy', () => {
     const loggingPrefix = 'Edit AutoScaler Policy:';
     let createPolicy: CreateAutoscalerPolicy;
 

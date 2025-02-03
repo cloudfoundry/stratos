@@ -24,6 +24,7 @@ describe('Endpoints', () => {
 
         it('Successfully unregister', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
+          endpointsPage.cards.waitUntilShown();
 
           // Should have a single row initially
           expect(endpointsPage.cards.getCardCount()).toBe(1);
@@ -34,6 +35,7 @@ describe('Endpoints', () => {
             const menu = new MenuComponent();
             menu.waitUntilShown();
             menu.clickItem('Unregister');
+            menu.waitUntilNotShown();
             ConfirmDialogComponent.expectDialogAndConfirm('Unregister', 'Unregister Endpoint');
             endpointsPage.list.waitForNoLoadingIndicator();
             // Should have removed the only row, so we should see welcome message again

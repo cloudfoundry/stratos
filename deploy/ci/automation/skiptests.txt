@@ -1,0 +1,16 @@
+Create Service Instance
+Application Deploy/Redeploy
+CF/Org Level/Remove user roles (only spaces)
+Cf Users List
+Autoscaler
+Service Instance from Marketplace
+CF - Org - Invite User
+CF - Space - Invite User
+CF - Space Level - Remove user
+CF - Invite User Configuration
+Application Deploy Docker
+Create Service Instance with binding
+Delete Service Instance
+Manage Space
+Manage Space Quota
+Create Service Instance of Private Service

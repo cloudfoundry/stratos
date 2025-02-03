@@ -10,7 +10,7 @@ import { E2EHelpers } from '../helpers/e2e-helpers';
 import { ListComponent } from '../po/list.po';
 import { CreateMarketplaceServiceInstance } from './create-marketplace-service-instance.po';
 
-const customServiceLabel = E2EHelpers.e2eItemPrefix + process.env.USER;
+const customServiceLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
 const until = protractor.ExpectedConditions;
 
 export class ServicesHelperE2E {

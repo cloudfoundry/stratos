@@ -47,12 +47,14 @@ describe('Endpoints', () => {
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
-        endpointsPage.cards.findCardByTitle(toConnect.name)
+        endpointsPage.cards.waitUntilShown();
+        endpointsPage.cards.waitForCardByTitle(toConnect.name)
           .then(card => card.openActionMenu())
-          .then(actionMenu => actionMenu.getItem('Connect'))
-          .then(connect => {
+          .then(actionMenu => {
+            const connect = actionMenu.getItem('Connect');
             expect(connect).toBeDefined();
             connect.click();
+            actionMenu.waitUntilNotShown();
             connectDialog.waitUntilShown();
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
@@ -143,7 +145,7 @@ describe('Endpoints', () => {
 
       it('should update row in table when disconnected', () => {
         endpointsPage.navigateTo();
-
+        endpointsPage.cards.waitUntilShown();
         endpointsPage.cards.findCardByTitle(toDisconnect.name).then(card => {
           card.openActionMenu();
           const menu = new MenuComponent();

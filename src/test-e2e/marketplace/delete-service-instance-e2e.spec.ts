@@ -39,6 +39,8 @@ describe('Delete Service Instance', () => {
 
     const serviceInstanceName1 = servicesHelperE2E.createServiceInstanceName();
     names.push(serviceInstanceName1);
+    // Ensure we get a different name for the service instance
+    e2e.sleep(1000);
     const serviceInstanceName2 = servicesHelperE2E.createServiceInstanceName();
     names.push(serviceInstanceName2);
 

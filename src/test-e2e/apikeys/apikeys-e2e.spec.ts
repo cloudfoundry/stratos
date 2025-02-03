@@ -23,8 +23,8 @@ describe('API Keys -', () => {
 
   beforeAll(() => {
     const setup = e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .getInfo(ConsoleUserType.admin);
+    .clearAllEndpoints()
+    .getInfo(ConsoleUserType.admin);
     helper = new ApiKeyE2eHelper(setup);
 
     newKeysComment = E2EHelpers.createCustomName(customApiKeyLabel).toLowerCase();

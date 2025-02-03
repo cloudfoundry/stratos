@@ -126,34 +126,37 @@ jobs:
           target_name: prod-build
           tag: stratos/deploy/ci/tasks/build-images/nightly-tag
           prebuild_script: build/store-git-metadata.sh
-- name: create-chart
-  plan:
-  - get: stratos
-    passed: [build-images]
-    trigger: true
-  - get: helm-repo
-  - do:
-    - task: build
-      privileged: true
-      timeout: 30m
-      file: stratos/deploy/ci/tasks/dev-releases/create-nightly-chart.yml
-      params:
-        GIT_USER: ((concourse-user))
-        GIT_EMAIL: ((concourse-email))
-        GITHUB_ORG: ((stratos-repository-organization))
-        GITHUB_REPO: ((stratos-repository))
-        GIT_PRIVATE_KEY: ((github-private-key))
-        HELM_REPO_BRANCH: ((helm-repo-branch))
-        DOCKER_ORG: ((docker-organization))
-        DOCKER_REGISTRY: ((docker-registry))
-    - put: helm-chart-tarball
-      params:
-       file: helm-chart/*.tgz
-       acl: public-read
-    - put: nightly-gh-release
-      params:
-        name: stratos/deploy/ci/tasks/dev-releases/nightly-release-name
-        tag: stratos/deploy/ci/tasks/build-images/nightly-tag
-        body: stratos/deploy/ci/tasks/dev-releases/nightly-release-description
-        globs:
-        - helm-chart-tarball/*.tgz
+# TODO: Do we want to create a nightly chart?
+# If so, where should it live - probably just in the helm repository
+# Otherwise as a release/tag it pollutes the release history          
+# - name: create-chart
+#   plan:
+#   - get: stratos
+#     passed: [build-images]
+#     trigger: true
+#   - get: helm-repo
+#   - do:
+#     - task: build
+#       privileged: true
+#       timeout: 30m
+#       file: stratos/deploy/ci/tasks/dev-releases/create-nightly-chart.yml
+#       params:
+#         GIT_USER: ((concourse-user))
+#         GIT_EMAIL: ((concourse-email))
+#         GITHUB_ORG: ((stratos-repository-organization))
+#         GITHUB_REPO: ((stratos-repository))
+#         GIT_PRIVATE_KEY: ((github-private-key))
+#         HELM_REPO_BRANCH: ((helm-repo-branch))
+#         DOCKER_ORG: ((docker-organization))
+#         DOCKER_REGISTRY: ((docker-registry))
+#     - put: helm-chart-tarball
+#       params:
+#        file: helm-chart/*.tgz
+#        acl: public-read
+#     - put: nightly-gh-release
+#       params:
+#         name: stratos/deploy/ci/tasks/dev-releases/nightly-release-name
+#         tag: stratos/deploy/ci/tasks/build-images/nightly-tag
+#         body: stratos/deploy/ci/tasks/dev-releases/nightly-release-description
+#         globs:
+#         - helm-chart-tarball/*.tgz

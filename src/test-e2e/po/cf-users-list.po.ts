@@ -32,6 +32,7 @@ export class UserRoleChip extends ChipComponent {
   remove(): promise.Promise<void> {
     this.getCross().click();
     const confirm = new ConfirmDialogComponent();
+    confirm.waitUntilShown();
     confirm.waitForMessage(this.roleText);
     confirm.confirm();
     confirm.waitUntilNotShown('Confirmation dialog');
