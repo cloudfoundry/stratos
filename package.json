@@ -96,7 +96,7 @@
     "xterm": "^4.5.0",
     "xterm-addon-fit": "^0.3.0",
     "zone.js": "~0.10.2",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.21"
   },
   "engines": {
     "node": "12.13.0"
