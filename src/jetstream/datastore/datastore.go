@@ -20,7 +20,7 @@ import (
 	// Sqlite driver
 	_ "github.com/mattn/go-sqlite3"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 const (
@@ -142,44 +142,35 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 }
 
 // GetConnection returns a database connection to either MySQL, PostgreSQL or SQLite
-func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, *goose.DBConf, error) {
+func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 	log.Debug("GetConnection")
+	db, err := NewGooseDBConf(dc, env)
 
-	// Get a Goose Configuration so that we can pass that to the schema migrator
-	conf, err := NewGooseDBConf(dc, env)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	db, err := sql.Open(conf.Driver.Name, conf.Driver.OpenStr)
-	return db, conf, err
+	return db, err
 }
 
 // GetInMemorySQLLiteConnection returns an SQLite DB Connection
-func GetInMemorySQLLiteConnection() (*sql.DB, *goose.DBConf, error) {
+func GetInMemorySQLLiteConnection() (*sql.DB, error) {
 
 	databaseFile := "file::memory:?cache=shared"
 	log.Info("Using In Memory Database file")
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	driver := newDBDriver("sqlite3", databaseFile)
-	conf := &goose.DBConf{
-		Driver: driver,
-	}
+	goose.SetDialect("sqlite3")
 
-	err = ApplyMigrations(conf, db)
+	err = ApplyMigrations(db)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return db, conf, nil
+	return db, nil
 }
 
 // NewGooseDBConf creates a new Goose config for database migrations
-func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
+func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	var openStr, name string
 
@@ -201,39 +192,10 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*goose.DBConf, error) {
 		}
 	}
 
-	driver := newDBDriver(name, openStr)
-	return &goose.DBConf{
-		MigrationsDir: ".",
-		Env:           fmt.Sprintf("%s_dbenv", name),
-		Driver:        driver,
-		PgSchema:      "",
-	}, nil
-}
+	goose.SetDialect(name)
+	db, err := sql.Open(name, openStr)
 
-// Create a new DBDriver and populate driver specific
-// fields for drivers that we know about.
-func newDBDriver(name, open string) goose.DBDriver {
-
-	d := goose.DBDriver{
-		Name:    name,
-		OpenStr: open,
-	}
-
-	switch name {
-	case "postgres":
-		d.Import = "github.com/lib/pq"
-		d.Dialect = &goose.PostgresDialect{}
-
-	case "mysql":
-		d.Import = "github.com/go-sql-driver/mysql"
-		d.Dialect = &goose.MySqlDialect{}
-
-	case "sqlite3":
-		d.Import = "github.com/mattn/go-sqlite3"
-		d.Dialect = &goose.Sqlite3Dialect{}
-	}
-
-	return d
+	return db, err
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
@@ -321,8 +283,15 @@ func ModifySQLStatement(sql string, databaseProvider string) string {
 
 // WaitForMigrations will wait until all migrations have been applied
 func WaitForMigrations(db *sql.DB) error {
-	migrations := GetOrderedMigrations()
-	targetVersion := migrations[len(migrations)-1]
+	migrations, err := goose.CollectMigrations(".", minVersion, maxVersion)
+	if err != nil {
+		return err
+	}
+
+	targetVersion, err := migrations.Last()
+	if err != nil {
+		return err
+	}
 
 	// Timeout after which we will give up
 	timeout := time.Now().Add(time.Minute * TimeoutBoundary)
