@@ -7,7 +7,17 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry/stratos/blob/master/LICENSE)
 [![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
 
+# Roadmap
+
+1. Upgrade Stratos Frontend to Angular >= v17 LTS (currently in progress)
+1. Convert GoLang backend (Jetstream) to use Cloud Foundry V3 API and remove Vi2 API calls
+1. Convert Frontend to call either Jetstream API or V3 API directly.  V3 API calls can require more roundtrips than the V2 APIs they replace.
+1. Upgrade Stratos Frontend to Angular v18-v20 Active/LTS (v17 EOL is 2025-05-15)
+
+
 (Please note:  The official repository is at cloudfoundry/stratos and the cloudfoundry-community/stratos will track this but may be used for some testing purposes)
+
+# About
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
@@ -17,7 +27,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
 
 1. Our [introduction](https://stratos.app/docs/), including quick start, contributing and troubleshooting guides.
 1. How to [deploy](https://stratos.app/docs/deploy/overview) Stratos in a number of environments.
-    1. [Cloud Foundry](https://stratos.app/docs/deploy/cloud-foundry/cloud-foundry), as an application.
+    1. [Cloud Foundry](https://stratos.app/docs/deploy/cloud-foundry/cloud-foundry), as an application. (Recommended)
     1. [Kubernetes](https://stratos.app/docs/deploy/kubernetes), using a Helm chart.
     1. [Docker](https://stratos.app/docs/deploy/all-in-one), as a single container deploying all components.
 1. Configuring advanced features such a [Single Sign On](https://stratos.app/docs/advanced/sso) and Cloud Foundry '[invite to org](https://stratos.app/docs/advanced/invite-user-guide)'.
