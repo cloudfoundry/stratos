@@ -1,5 +1,5 @@
 import { TitleCasePipe } from '@angular/common';
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
@@ -93,6 +93,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
     public modeService: CsiModeService,
+    private changeDetectorRef: ChangeDetectorRef,
     route: ActivatedRoute
   ) {
     const cfGuid = getIdFromRoute(this.activatedRoute, 'endpointId');
@@ -122,6 +123,9 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       this.title$ = observableOf(`Create Service Instance`);
     }
 
+    // Fix for title$ change error NG0100: Expression has changed after it was checked
+    this.changeDetectorRef.detectChanges();
+
     if (!this.initialisedService$) {
       this.initialisedService$ = observableOf(true);
     }
@@ -140,6 +144,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       publishReplay(1),
       refCount(),
     );
+
+    // Invoke the observable - required -> otherwise the pipe above won't trigger
+    this.apps$.subscribe()
+
     this.skipApps$ = this.apps$.pipe(
       map(apps => apps.length === 0),
       publishReplay(1),

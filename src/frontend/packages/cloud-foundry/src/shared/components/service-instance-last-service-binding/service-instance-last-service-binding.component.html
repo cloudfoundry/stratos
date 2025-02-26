@@ -1,0 +1,20 @@
+<div class="last-service-op" [ngClass]="{ 'align-right': alignRight}" *ngIf="serviceInstance.entity.service_bindings?.length > 0; else noServiceBinding">
+  <div *ngIf="serviceInstance.entity.service_bindings as sb">
+    <div *ngIf="sb[sb.length -1].entity.last_operation as sb_lo">
+      <div class="last-service-op--row1">
+        {{sb_lo.type | titlecase }}
+        <app-boolean-indicator *ngIf="sb_lo.state==='in progress'; else normalIndicator" class="last-service-op--item" [isTrue]="true" 
+          type="progress-progress" [subtle]="false" [showText]="false"></app-boolean-indicator>
+        <ng-template #normalIndicator>
+          <app-boolean-indicator class="last-service-op--item" [isTrue]="sb_lo.state==='succeeded'" type="yes-no" [subtle]="false" 
+            [showText]="false">
+          </app-boolean-indicator>
+        </ng-template>
+      </div>
+      <div class="last-service-op--row2">{{ sb_lo.created_at | date:'medium' }}</div>
+    </div>
+  </div>
+</div>
+
+<ng-template #noServiceBinding>-</ng-template>
+

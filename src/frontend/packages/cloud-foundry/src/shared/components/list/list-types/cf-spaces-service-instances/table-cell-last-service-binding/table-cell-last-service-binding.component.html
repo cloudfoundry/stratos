@@ -1,0 +1,3 @@
+<app-service-instance-last-service-binding *ngIf="isUserProvidedServiceInstance === false; else upsi" [serviceInstance]="row"
+  [alignRight]="false"></app-service-instance-last-service-binding >
+<ng-template #upsi>-</ng-template>
