@@ -12,32 +12,28 @@ import {
 import { GitSCMService } from './scm/scm.service';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    CommonModule,
-    SharedModule,
-    MDAppModule,
-    // Need to import this so that the git register endpoints process can use the generic register and connect steps
-    // HOWEVER as this module is not lazy loaded it will be brought in on app load
-    CreateEndpointModule
-  ],
-  declarations: [
-    TableCellCommitAuthorComponent,
-    GithubCommitAuthorComponent,
-    GitRegistrationComponent,
-    GitEndpointDetailsComponent,
-  ],
-  exports: [
-    GithubCommitAuthorComponent,
-    GitRegistrationComponent,
-    GitEndpointDetailsComponent,
-  ],
-  entryComponents: [
-    TableCellCommitAuthorComponent,
-    GitRegistrationComponent
-  ],
-  providers: [
-    GitSCMService
-  ]
+    imports: [
+        CoreModule,
+        CommonModule,
+        SharedModule,
+        MDAppModule,
+        // Need to import this so that the git register endpoints process can use the generic register and connect steps
+        // HOWEVER as this module is not lazy loaded it will be brought in on app load
+        CreateEndpointModule
+    ],
+    declarations: [
+        TableCellCommitAuthorComponent,
+        GithubCommitAuthorComponent,
+        GitRegistrationComponent,
+        GitEndpointDetailsComponent,
+    ],
+    exports: [
+        GithubCommitAuthorComponent,
+        GitRegistrationComponent,
+        GitEndpointDetailsComponent,
+    ],
+    providers: [
+        GitSCMService
+    ]
 })
 export class GitSharedModule { }

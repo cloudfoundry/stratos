@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
 import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
@@ -14,7 +14,7 @@ describe('HelmReleaseAnalysisTabComponent', () => {
   let component: HelmReleaseAnalysisTabComponent;
   let fixture: ComponentFixture<HelmReleaseAnalysisTabComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [HelmReleaseAnalysisTabComponent, AnalysisReportSelectorComponent, AnalysisReportViewerComponent],
       imports: [

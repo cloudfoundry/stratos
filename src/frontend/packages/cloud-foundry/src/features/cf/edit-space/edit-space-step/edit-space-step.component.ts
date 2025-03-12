@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
@@ -26,7 +26,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   space: string;
   space$: Observable<any>;
   spaceGuid: string;
-  editSpaceForm: FormGroup;
+  editSpaceForm: UntypedFormGroup;
   originalSpaceQuotaGuid: string;
   spaceName: string;
 
@@ -38,10 +38,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   ) {
     super(store, activatedRoute, activeRouteCfOrgSpace);
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
-    this.editSpaceForm = new FormGroup({
-      spaceName: new FormControl('', this.spaceNameTakenValidator()),
-      toggleSsh: new FormControl(false),
-      quotaDefinition: new FormControl(),
+    this.editSpaceForm = new UntypedFormGroup({
+      spaceName: new UntypedFormControl('', this.spaceNameTakenValidator()),
+      toggleSsh: new UntypedFormControl(false),
+      quotaDefinition: new UntypedFormControl(),
     });
     this.space$ = this.cfSpaceService.space$.pipe(
       map(o => o.entity.entity),

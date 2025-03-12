@@ -6,14 +6,14 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/command"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // PushConnectionWrapper can wrap a given connection allowing the wrapper to modify
 // all requests going in and out of the given connection.
 type PushConnectionWrapper struct {
 	inner       cloudcontroller.Connection
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 	config      *CFPushAppConfig
 	cmdConfig   command.Config
 }

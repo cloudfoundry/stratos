@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EnumerateComponent } from './enumerate.component';
 
@@ -6,7 +6,7 @@ describe('EnumerateComponent', () => {
   let component: EnumerateComponent;
   let fixture: ComponentFixture<EnumerateComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ EnumerateComponent ]
     })

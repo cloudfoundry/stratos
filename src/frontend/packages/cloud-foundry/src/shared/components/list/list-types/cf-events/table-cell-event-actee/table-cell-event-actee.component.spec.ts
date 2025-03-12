@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   CopyToClipboardComponent,
@@ -11,7 +11,7 @@ describe('TableCellEventActeeComponent', () => {
   let component: TableCellEventActeeComponent;
   let fixture: ComponentFixture<TableCellEventActeeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellEventActeeComponent,

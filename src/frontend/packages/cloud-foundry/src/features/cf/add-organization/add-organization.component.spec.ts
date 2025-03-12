@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
@@ -9,7 +9,7 @@ describe('AddOrganizationComponent', () => {
   let component: AddOrganizationComponent;
   let fixture: ComponentFixture<AddOrganizationComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AddOrganizationComponent, CreateOrganizationStepComponent],
       imports: generateCfBaseTestModules(),

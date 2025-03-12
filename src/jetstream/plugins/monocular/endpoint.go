@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,21 +27,21 @@ func (m *Monocular) Register(echoContext echo.Context) error {
 }
 
 // Validate validates the connection to the endpoint - verifies that we can actually connect and call its API
-func (m *Monocular) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+func (m *Monocular) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
 	return nil
 }
 
 // Connect to the endpoint
-func (m *Monocular) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (m *Monocular) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	// Note: Helm Repositories don't support connecting
 	return nil, false, errors.New("Connecting not support for a Helm Repository")
 }
 
 // Info checks the endpoint type and fetches any metadata
-func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
 	log.Debug("Helm Repository Info")
-	var v2InfoResponse interfaces.V2Info
-	var newCNSI interfaces.CNSIRecord
+	var v2InfoResponse api.V2Info
+	var newCNSI api.CNSIRecord
 
 	newCNSI.CNSIType = helmEndpointType
 
@@ -51,7 +51,7 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces
 	}
 
 	// Just check that we can fetch index.yaml
-	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = m.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	res, err := httpClient.Get(apiEndpoint + "/index.yaml")
 	if err != nil {
 		// This should ultimately catch 503 cert errors
@@ -71,5 +71,5 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool) (interfaces
 }
 
 // UpdateMetadata not needed for Helm endpoints
-func (m *Monocular) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+func (m *Monocular) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
 }

@@ -10,7 +10,7 @@ YELLOW="\033[93m"
 RESET="\033[0m"
 BOLD="\033[1m"
 
-VENDOR_FOLDER=tmp/go/src/github.com/cloudfoundry-incubator/stratos/vendor
+VENDOR_FOLDER=tmp/go/src/github.com/cloudfoundry/stratos/vendor
 
 function log {
   COLOR=${2:-}
@@ -20,7 +20,7 @@ function log {
 
 log "Preparing application folder for Cloud Foundry deployment" $CYAN $BOLD
 
-CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOP_LEVEL=${CF_DIR}/../../
 
 export STRATOS_TEMP=$(mktemp -d)
@@ -63,6 +63,8 @@ fi
 log "Building back-end" $CYAN
 ./build/bk-build.sh
 
+log "Copying executable" $CYAN
+
 # Copy backend executable here
 cp src/jetstream/jetstream .
 
@@ -97,7 +99,7 @@ rm -rf ./tmp
 
 log "Disk usage for cache and app folders:" $CYAN
 
-du -h -c --summarize ${CACHE_DIR}
-du -h -c --summarize ${BUILD_DIR}
+du -h -c -s ${CACHE_DIR}
+du -h -c -s ${BUILD_DIR}
 
 log "All done" $CYAN $BOLD

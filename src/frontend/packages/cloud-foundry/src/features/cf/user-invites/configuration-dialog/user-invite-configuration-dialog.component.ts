@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscription } from 'rxjs';
@@ -29,7 +29,7 @@ export class UserInviteConfigurationDialogComponent {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm: FormGroup;
+  public endpointForm: UntypedFormGroup;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -40,7 +40,7 @@ export class UserInviteConfigurationDialogComponent {
   public showSecret = false;
 
   constructor(
-    public fb: FormBuilder,
+    public fb: UntypedFormBuilder,
     public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: MatSnackBar,
     public userInviteConfigureService: UserInviteConfigureService,

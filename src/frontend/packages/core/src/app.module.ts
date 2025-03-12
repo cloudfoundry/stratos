@@ -2,28 +2,34 @@ import { Injectable, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { DefaultRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { FullRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+import {
+  SetRecentlyVisitedEntityAction,
+  GeneralEntityAppState,
+  GeneralRequestDataState,
+  EntityCatalogModule,
+  entityCatalog,
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  endpointEntityType,
+  STRATOS_ENDPOINT_TYPE,
+  getAPIRequestDataState,
+  selectEntity,
+  internalEventStateSelector,
+  recentlyVisitedSelector,
+  AppStoreModule,
+  stratosEntityCatalog,
+  generateStratosEntities,
+  EndpointModel,
+  IFavoriteMetadata,
+  UserFavorite,
+  UserFavoriteManager
+} from '@stratosui/store';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
-import { SetRecentlyVisitedEntityAction } from '../../store/src/actions/recently-visited.actions';
-import { GeneralEntityAppState, GeneralRequestDataState } from '../../store/src/app-state';
-import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
-import { entityCatalog } from '../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogHelper } from '../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityCatalogHelpers } from '../../store/src/entity-catalog/entity-catalog.helper';
-import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../store/src/helpers/stratos-entity-factory';
-import { getAPIRequestDataState, selectEntity } from '../../store/src/selectors/api.selectors';
-import { internalEventStateSelector } from '../../store/src/selectors/internal-events.selectors';
-import { recentlyVisitedSelector } from '../../store/src/selectors/recently-visitied.selectors';
-import { AppStoreModule } from '../../store/src/store.module';
-import { stratosEntityCatalog } from '../../store/src/stratos-entity-catalog';
-import { generateStratosEntities } from '../../store/src/stratos-entity-generator';
-import { EndpointModel } from '../../store/src/types/endpoint.types';
-import { IFavoriteMetadata, UserFavorite } from '../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../store/src/user-favorite-manager';
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
@@ -107,7 +113,7 @@ class AppStoreDebugModule { }
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule.forRoot({ serializer: DefaultRouterStateSerializer }), // Create action for router navigation
+    StoreRouterConnectingModule.forRoot({ serializer: FullRouterStateSerializer }), // Create action for router navigation
     AboutModule,
     CustomImportModule,
     XSRFModule,
@@ -132,7 +138,8 @@ export class AppModule {
     private store: Store<GeneralEntityAppState>,
     eventService: GlobalEventService,
     private userFavoriteManager: UserFavoriteManager,
-    ech: EntityCatalogHelper
+    ech: EntityCatalogHelper,
+    customizationService: CustomizationService,
   ) {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
 
@@ -248,6 +255,8 @@ export class AppModule {
         });
       }
     );
+
+    customizationService.setAppNameFromTitle();
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {

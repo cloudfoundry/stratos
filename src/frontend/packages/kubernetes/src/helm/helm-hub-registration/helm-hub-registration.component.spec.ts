@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { UserService } from '../../../../core/src/core/user.service';
@@ -9,7 +9,7 @@ describe('HelmHubRegistrationComponent', () => {
   let component: HelmHubRegistrationComponent;
   let fixture: ComponentFixture<HelmHubRegistrationComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModules],
       declarations: [HelmHubRegistrationComponent],

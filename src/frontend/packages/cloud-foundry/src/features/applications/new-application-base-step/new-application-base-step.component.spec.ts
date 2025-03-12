@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
@@ -12,7 +12,7 @@ describe('NewApplicationBaseStepComponent', () => {
   let component: NewApplicationBaseStepComponent;
   let fixture: ComponentFixture<NewApplicationBaseStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [NewApplicationBaseStepComponent],
       imports: [

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { createBasicStoreModule } from '../../../../../store/testing/src/store-test-helper';
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
@@ -11,7 +11,7 @@ describe('MetricsEndpointDetailsComponent', () => {
   let component: MetricsEndpointDetailsComponent;
   let fixture: ComponentFixture<MetricsEndpointDetailsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

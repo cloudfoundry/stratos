@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeCapacityComponent } from './kubernetes-node-capacity.component';
@@ -7,7 +7,7 @@ describe('KubernetesNodeCapacityComponent', () => {
   let component: KubernetesNodeCapacityComponent<any>;
   let fixture: ComponentFixture<KubernetesNodeCapacityComponent<any>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodeCapacityComponent],
       imports: BaseTestModules

@@ -5,13 +5,13 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-func getTokenFromAuthInfo(jetstream interfaces.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*interfaces.TokenRecord, error) {
+func getTokenFromAuthInfo(jetstream api.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*api.TokenRecord, error) {
 
 	if len(authInfo.ClientCertificateData) > 0 && len(authInfo.ClientKeyData) > 0 {
 		return getTokenFromCert(jetstream, authInfo)
@@ -25,7 +25,7 @@ func getTokenFromAuthInfo(jetstream interfaces.PortalProxy, authInfo *clientcmda
 
 }
 
-func getTokenFromCert(jetstream interfaces.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*interfaces.TokenRecord, error) {
+func getTokenFromCert(jetstream api.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*api.TokenRecord, error) {
 
 	kubeCertAuth := auth.KubeCertificate{
 		Certificate:    string(authInfo.ClientCertificateData),
@@ -35,7 +35,7 @@ func getTokenFromCert(jetstream interfaces.PortalProxy, authInfo *clientcmdapi.A
 	return handleCert(jetstream, kubeCertAuth)
 }
 
-func getTokenFromCertFiles(jetstream interfaces.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*interfaces.TokenRecord, error) {
+func getTokenFromCertFiles(jetstream api.PortalProxy, authInfo *clientcmdapi.AuthInfo) (*api.TokenRecord, error) {
 
 	cert, err := ioutil.ReadFile(authInfo.ClientCertificate)
 	if err != nil {
@@ -55,7 +55,7 @@ func getTokenFromCertFiles(jetstream interfaces.PortalProxy, authInfo *clientcmd
 	return handleCert(jetstream, kubeCertAuth)
 }
 
-func handleCert(jetstream interfaces.PortalProxy, kubeCertAuth auth.KubeCertificate) (*interfaces.TokenRecord, error) {
+func handleCert(jetstream api.PortalProxy, kubeCertAuth auth.KubeCertificate) (*api.TokenRecord, error) {
 
 	jsonString, err := kubeCertAuth.GetJSON()
 	if err != nil {
@@ -82,7 +82,7 @@ func handleCert(jetstream interfaces.PortalProxy, kubeCertAuth auth.KubeCertific
 
 // }
 
-// func (c *CertKubeAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+// func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 // log.Debug("Kube Certs - FetchToken")
 
 // kubeCertAuth, err := c.extractCerts(ec)

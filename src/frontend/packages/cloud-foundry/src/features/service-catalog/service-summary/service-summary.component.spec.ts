@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
@@ -22,7 +22,7 @@ describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ServiceSummaryComponent,
@@ -41,7 +41,7 @@ describe('ServiceSummaryComponent', () => {
       .compileComponents();
   }));
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(ServiceSummaryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

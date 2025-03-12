@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  ListView,
+  AppState,
+  InternalEventMonitorFactory,
+  EndpointModel,
+  PaginationEntityState,
+  SetClientFilter,
+  entityCatalog,
+  EntityMonitorFactory,
+  PaginationMonitorFactory,
+  stratosEntityCatalog,
+} from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { debounceTime, filter, first, map } from 'rxjs/operators';
 
-import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { SetClientFilter } from '../../../../../../../store/src/actions/pagination.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
-import { PaginationEntityState } from '../../../../../../../store/src/types/pagination.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
 import { SessionService } from '../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
@@ -34,8 +36,6 @@ import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address
 import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details/table-cell-endpoint-details.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-
-
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {

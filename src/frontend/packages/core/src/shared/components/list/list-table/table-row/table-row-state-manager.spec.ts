@@ -1,7 +1,7 @@
 import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
 import { Observable, Subscription } from 'rxjs';
-import { async } from '@angular/core/testing';
+import { waitForAsync } from '@angular/core/testing';
 import { TableRowStateManager } from './table-row-state-manager';
 
 
@@ -20,7 +20,7 @@ describe('TableRowStateManager', () => {
     expect(actualState).not.toEqual(fake);
     expect(stateManager.rowState).not.toEqual(fake);
   };
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     stateManager = new TableRowStateManager();
     obs = stateManager.observable;
     if (sub) {
@@ -29,7 +29,7 @@ describe('TableRowStateManager', () => {
   }));
 
 
-  it('should init the state', async(() => {
+  it('should init the state', waitForAsync(() => {
     const initState = {
       1: {
         error: true
@@ -49,7 +49,7 @@ describe('TableRowStateManager', () => {
       })
     ).subscribe();
   }));
-  it('should update the row state', async(() => {
+  it('should update the row state', waitForAsync(() => {
     const initState = {
       1: {
         error: true,
@@ -90,7 +90,7 @@ describe('TableRowStateManager', () => {
     ).subscribe();
     stateManager.updateRowState('1', updateState);
   }));
-  it('should update the state', async(() => {
+  it('should update the state', waitForAsync(() => {
     const initState = {
       1: {
         error: true,
@@ -133,7 +133,7 @@ describe('TableRowStateManager', () => {
     stateManager.updateState(updateState);
   }));
 
-  it('should set the state', async(() => {
+  it('should set the state', waitForAsync(() => {
     const initState = {
       1: {
         error: true,
@@ -165,7 +165,7 @@ describe('TableRowStateManager', () => {
     stateManager.setState(setState);
   }));
 
-  it('should set the row state', async((done) => {
+  it('should set the row state', waitForAsync((done) => {
     const initState = {
       1: {
         error: true,

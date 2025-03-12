@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/store"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/labstack/echo/v4"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -101,7 +101,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 	}
 
 	// Fetch index of charts usign the search API
-	httpClient := m.portalProxy.GetHttpClient(true)
+	httpClient := m.portalProxy.GetHttpClient(true, "")
 	resp, err := httpClient.Get(searchURL)
 	if err != nil {
 		return err
@@ -448,7 +448,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 
 	if fetch {
 		infoURL := fmt.Sprintf("https://artifacthub.io/api/v1/packages/helm/%s/%s%s", repo, name, versionPart)
-		httpClient := m.portalProxy.GetHttpClient(true)
+		httpClient := m.portalProxy.GetHttpClient(true, "")
 		resp, err := httpClient.Get(infoURL)
 		if err != nil {
 			return nil, err
@@ -534,7 +534,7 @@ func filterSourceLinks(links []Repo) []string {
 
 // Download the Helm Repository index and look for the specified chart and version and return the download URL for the chart
 func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
-	httpClient := m.portalProxy.GetHttpClient(true)
+	httpClient := m.portalProxy.GetHttpClient(true, "")
 
 	helmIndexURL := joinURL(repoURL, "index.yaml")
 	resp, err := httpClient.Get(helmIndexURL)

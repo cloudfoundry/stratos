@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MaterialDesignFrameworkModule } from '@cfstratos/ajsf-material';
+import { MaterialDesignFrameworkModule } from '@ajsf/material';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MonacoEditorModule, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 
@@ -34,37 +34,34 @@ const monacoConfig: NgxMonacoEditorConfig = {
 };
 
 @NgModule({
-  imports: [
-    CoreModule,
-    CommonModule,
-    SharedModule,
-    WorkloadsStoreModule,
-    WorkloadsRouting,
-    NgxGraphModule,
-    KubernetesModule,
-    MaterialDesignFrameworkModule,
-    MonacoEditorModule.forRoot(monacoConfig),
-  ],
-  declarations: [
-    HelmReleasesTabComponent,
-    HelmReleaseTabBaseComponent,
-    HelmReleaseSummaryTabComponent,
-    HelmReleaseNotesTabComponent,
-    HelmReleaseValuesTabComponent,
-    HelmReleaseResourceGraphComponent,
-    HelmReleaseCardComponent,
-    HelmReleaseAnalysisTabComponent,
-    ChartValuesEditorComponent,
-    CreateReleaseComponent,
-    WorkloadLiveReloadComponent,
-    UpgradeReleaseComponent,
-    HelmReleaseHistoryTabComponent,
-  ],
-  entryComponents: [
-    HelmReleaseCardComponent
-  ],
-  providers: [
-    DatePipe,
-  ]
+    imports: [
+        CoreModule,
+        CommonModule,
+        SharedModule,
+        WorkloadsStoreModule,
+        WorkloadsRouting,
+        NgxGraphModule,
+        KubernetesModule,
+        MaterialDesignFrameworkModule,
+        MonacoEditorModule.forRoot(monacoConfig),
+    ],
+    declarations: [
+        HelmReleasesTabComponent,
+        HelmReleaseTabBaseComponent,
+        HelmReleaseSummaryTabComponent,
+        HelmReleaseNotesTabComponent,
+        HelmReleaseValuesTabComponent,
+        HelmReleaseResourceGraphComponent,
+        HelmReleaseCardComponent,
+        HelmReleaseAnalysisTabComponent,
+        ChartValuesEditorComponent,
+        CreateReleaseComponent,
+        WorkloadLiveReloadComponent,
+        UpgradeReleaseComponent,
+        HelmReleaseHistoryTabComponent,
+    ],
+    providers: [
+        DatePipe,
+    ]
 })
 export class WorkloadsModule { }

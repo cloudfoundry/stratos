@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { AppTabExtensionComponent } from './app-tab-extension.component';
 import { CoreModule } from '../../core/core.module';
@@ -10,7 +10,7 @@ describe('AppTabExtensionComponent', () => {
   let component: AppTabExtensionComponent;
   let fixture: ComponentFixture<AppTabExtensionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ AppTabExtensionComponent ],
       imports: [

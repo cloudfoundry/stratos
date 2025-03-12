@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
@@ -10,7 +10,7 @@ describe('BackupCheckboxCellComponent', () => {
   let component: BackupCheckboxCellComponent;
   let fixture: ComponentFixture<BackupCheckboxCellComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BackupCheckboxCellComponent],
       imports: [

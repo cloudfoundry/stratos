@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin loading-page-theme($theme, $app-theme) {
   .loading-page {
     background-color: map-get($app-theme, app-background-color);

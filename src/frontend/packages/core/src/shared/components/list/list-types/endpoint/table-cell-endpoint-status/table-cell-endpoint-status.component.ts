@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { entityCatalog, EndpointModel } from '@stratosui/store';
 
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({

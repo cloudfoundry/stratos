@@ -1,0 +1,25 @@
+---
+
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: 
+      interval: "daily"
+  
+  - package-ecosystem: "npm"
+    directory: "/electron"
+    schedule: 
+      interval: "daily"
+  
+  - package-ecosystem: "npm"
+    directory: "/website"
+    schedule: 
+      interval: "daily"
+  
+  - package-ecosystem: "gomod"
+    directory: "src/jetstream/"
+    schedule:
+      interval: "daily"
+    

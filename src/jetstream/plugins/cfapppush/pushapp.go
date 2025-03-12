@@ -4,19 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-
 	"fmt"
 	"html/template"
 	"io"
+	"strconv"
 	"strings"
 
-	"code.cloudfoundry.org/cli/actor/pushaction"
 	"code.cloudfoundry.org/cli/actor/sharedaction"
-	"code.cloudfoundry.org/cli/actor/v2action"
-	"code.cloudfoundry.org/cli/actor/v2v3action"
-	"code.cloudfoundry.org/cli/actor/v3action"
+	"code.cloudfoundry.org/cli/actor/v7action"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
 	"code.cloudfoundry.org/cli/command"
+	"code.cloudfoundry.org/clock"
 
 	"code.cloudfoundry.org/cli/util/configv3"
 	"code.cloudfoundry.org/cli/util/progressbar"
@@ -27,20 +26,19 @@ import (
 
 	"code.cloudfoundry.org/cli/command/flag"
 	"code.cloudfoundry.org/cli/command/translatableerror"
-	v6 "code.cloudfoundry.org/cli/command/v6"
-	"code.cloudfoundry.org/cli/command/v6/shared"
-	sharedV3 "code.cloudfoundry.org/cli/command/v6/shared"
+	v7 "code.cloudfoundry.org/cli/command/v7"
+	"code.cloudfoundry.org/cli/command/v7/shared"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // CFPushApp abstracts the push functionality form the CLI library
 type CFPushApp struct {
-	pushCommand *v6.PushCommand
+	pushCommand *v7.PushCommand
 	flagContext flags.FlagContext
 	deps        commandregistry.Dependency
 	config      *CFPushAppConfig
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // CFPushAppConfig is the configuration used
@@ -51,6 +49,7 @@ type CFPushAppConfig struct {
 	APIEndpointURL         string
 	DopplerLoggingEndpoint string
 	SkipSSLValidation      bool
+	CACert                 string
 	AuthToken              string
 	OrgGUID                string
 	OrgName                string
@@ -116,9 +115,8 @@ func (p *PushError) Error() string {
 }
 
 // Constructor returns a CFPush based on the supplied config
-func Constructor(config *CFPushAppConfig, portalProxy interfaces.PortalProxy) CFPush {
-
-	pushCmd := &v6.PushCommand{}
+func Constructor(config *CFPushAppConfig, portalProxy api.PortalProxy) CFPush {
+	pushCmd := &v7.PushCommand{}
 	cfPush := &CFPushApp{
 		pushCommand: pushCmd,
 		config:      config,
@@ -134,7 +132,6 @@ func (c *CFPushApp) init(config *CFPushAppConfig) error {
 
 // Init initializes the push operation with the specified application directory and manifest path
 func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushAppOverrides) error {
-
 	// App name
 	if len(overrides.Name) > 0 {
 		c.pushCommand.OptionalArgs = flag.OptionalAppName{
@@ -150,16 +147,11 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 
 	// Start Command
 	if len(overrides.StartCmd) > 0 {
-		c.pushCommand.Command = flag.Command{}
-		err := c.pushCommand.Command.UnmarshalFlag(overrides.StartCmd)
+		c.pushCommand.StartCommand = flag.Command{}
+		err := c.pushCommand.StartCommand.UnmarshalFlag(overrides.StartCmd)
 		if err != nil {
 			return err
 		}
-	}
-
-	// Domain
-	if len(overrides.Domain) > 0 {
-		c.pushCommand.Domain = overrides.Domain
 	}
 
 	// HealthCheckType
@@ -170,11 +162,6 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 		}
 	}
 
-	// Hostname
-	if len(overrides.Host) > 0 {
-		c.pushCommand.Hostname = overrides.Host
-	}
-
 	// App instances
 	if overrides.Instances != nil {
 		c.pushCommand.Instances = flag.Instances{}
@@ -183,20 +170,12 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 
 	// Disk Quota
 	if len(overrides.DiskQuota) > 0 {
-		c.pushCommand.DiskQuota = flag.Megabytes{}
-		err := c.pushCommand.DiskQuota.UnmarshalFlag(overrides.DiskQuota)
-		if err != nil {
-			return err
-		}
+		c.pushCommand.Disk = overrides.DiskQuota
 	}
 
 	// Memory Quota
 	if len(overrides.MemQuota) > 0 {
-		c.pushCommand.Memory = flag.Megabytes{}
-		err := c.pushCommand.Memory.UnmarshalFlag(overrides.MemQuota)
-		if err != nil {
-			return err
-		}
+		c.pushCommand.Memory = overrides.MemQuota
 	}
 
 	// No Route
@@ -210,21 +189,21 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 
 	// Route path
 	if len(overrides.Path) > 0 {
-		c.pushCommand.RoutePath = flag.V6RoutePath{}
-		err := c.pushCommand.RoutePath.UnmarshalFlag(overrides.Path)
-		if err != nil {
-			return err
-		}
+		c.pushCommand.AppPath = flag.PathWithExistenceCheck(overrides.Path)
 	}
 
 	// Stack
 	if len(overrides.Stack) > 0 {
-		c.pushCommand.StackName = overrides.Stack
+		c.pushCommand.Stack = overrides.Stack
 	}
 
 	// Health check time
 	if overrides.Time != nil {
-		c.pushCommand.HealthCheckTimeout = uint64(*overrides.Time)
+		c.pushCommand.HealthCheckTimeout = flag.PositiveInteger{}
+		err := c.pushCommand.HealthCheckTimeout.UnmarshalFlag(strconv.Itoa(int(*overrides.Time)))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Docker image
@@ -243,7 +222,7 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 	}
 
 	// Manifest path
-	c.pushCommand.PathToManifest = flag.PathWithExistenceCheck(manifestPath)
+	c.pushCommand.PathToManifest = flag.ManifestPathWithExistenceCheck(manifestPath)
 
 	return nil
 }
@@ -257,7 +236,6 @@ func (c *CFPushApp) setConfig(config *configv3.Config) error {
 
 // Run performs the actual push
 func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *websocket.Conn) error {
-
 	// Get a CF Config
 	config, err := configv3.LoadConfig()
 	if err != nil {
@@ -285,7 +263,7 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 	defer commandUI.FlushDeferred()
 
 	err = c.setup(config, commandUI, msgSender, clientWebsocket)
-	//err = c.pushCommand.Setup(config, commandUI)
+	// err = c.pushCommand.Setup(config, commandUI)
 	if err != nil {
 		return handleError(err, *commandUI)
 	}
@@ -316,7 +294,7 @@ func (c *CFPushApp) setup(config command.Config, ui command.UI, msgSender Deploy
 	sharedActor := sharedaction.NewActor(config)
 	cmd.SharedActor = sharedActor
 
-	ccClient, uaaClient, err := shared.GetNewClientsAndConnectToCF(config, ui)
+	ccClient, uaaClient, routingClient, err := shared.GetNewClientsAndConnectToCF(config, ui, ccversion.MinSupportedClientVersionV8)
 	if err != nil {
 		return err
 	}
@@ -330,26 +308,14 @@ func (c *CFPushApp) setup(config command.Config, ui command.UI, msgSender Deploy
 
 	ccClient.WrapConnection(pushConnectionWrapper)
 
-	ccClientV3, _, err := sharedV3.NewV3BasedClients(config, ui, true)
+	ccClientV3 := shared.NewWrappedCloudControllerClient(config, ui, pushConnectionWrapper)
 	if err != nil {
 		return err
 	}
 
-	v2Actor := v2action.NewActor(ccClient, uaaClient, config)
-	v3Actor := v3action.NewActor(ccClientV3, config, sharedActor, nil)
+	v7Actor := v7action.NewActor(ccClientV3, config, sharedActor, uaaClient, routingClient, clock.NewClock())
 
-	stratosV2Actor := cfV2Actor{
-		wrapped:         v2Actor,
-		msgSender:       msgSender,
-		clientWebsocket: clientWebsocket,
-	}
-
-	cmd.RestartActor = v2Actor
-	cmd.Actor = pushaction.NewActor(stratosV2Actor, v3Actor, sharedActor)
-
-	cmd.ApplicationSummaryActor = v2v3action.NewActor(v2Actor, v3Actor)
-
-	cmd.NOAAClient = shared.NewNOAAClient(ccClient.DopplerEndpoint(), config, uaaClient, ui)
+	cmd.Actor = v7Actor
 
 	cmd.ProgressBar = progressbar.NewProgressBar()
 	return nil

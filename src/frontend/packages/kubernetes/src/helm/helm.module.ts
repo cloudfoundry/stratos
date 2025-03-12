@@ -11,24 +11,20 @@ import { MonocularModule } from './monocular/monocular.module';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    CommonModule,
-    SharedModule,
-    HelmRoutingModule,
-    MonocularModule
-  ],
-  declarations: [
-    MonocularTabBaseComponent,
-    CatalogTabComponent,
-    MonocularChartCardComponent,
-    MonocularChartViewComponent,
-  ],
-  providers: [
-  ],
-  entryComponents: [
-    MonocularChartCardComponent,
-  ]
+    imports: [
+        CoreModule,
+        CommonModule,
+        SharedModule,
+        HelmRoutingModule,
+        MonocularModule
+    ],
+    declarations: [
+        MonocularTabBaseComponent,
+        CatalogTabComponent,
+        MonocularChartCardComponent,
+        MonocularChartViewComponent,
+    ],
+    providers: []
 })
 export class HelmModule { }
 

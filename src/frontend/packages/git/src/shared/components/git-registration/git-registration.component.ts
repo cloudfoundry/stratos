@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
   CreateEndpointHelperComponent,
@@ -61,7 +61,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   public epSubType: GIT_ENDPOINT_SUB_TYPES;
 
-  registerForm: FormGroup;
+  registerForm: UntypedFormGroup;
 
   private sub: Subscription;
 
@@ -74,7 +74,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
     public sessionService: SessionService,
@@ -160,7 +160,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       selectedType: [defaultSelection, []],
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
-      skipSllField: [false, []],
+      skipSSLField: [false, []],
       createSystemEndpointField: [true, []],
     });
     this.updateType();
@@ -201,7 +201,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const url: string = this.updateUrlWithSuffix(defn.url || this.registerForm.controls.urlField.value, defn);
     // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
-      this.registerForm.controls.skipSllField.value :
+      this.registerForm.controls.skipSSLField.value :
       false;
     const createSystemEndpoint = this.registerForm.controls.createSystemEndpointField.value;
 

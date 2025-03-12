@@ -3,103 +3,58 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"sort"
 
 	log "github.com/sirupsen/logrus"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
-// StratosMigration applies a migration step. Use with RegisterMigration()
-type StratosMigration func(txn *sql.Tx, conf *goose.DBConf) error
-
-// RegisterMigration registers a migration step. This should be called from an init() function
-func RegisterMigration(version int64, name string, f StratosMigration) {
-	migrationSteps = append(migrationSteps, StratosMigrationStep{
-		Version: version,
-		Name:    name,
-		Apply:   f,
-	})
-}
-
-// StratosMigrationStep represents a migaration step
-type StratosMigrationStep struct {
-	Version int64
-	Name    string
-	Apply   StratosMigration
-}
-
-var migrationSteps []StratosMigrationStep
-
-// GetOrderedMigrations returns an order list of migrations to run
-func GetOrderedMigrations() []StratosMigrationStep {
-	sort.Slice(migrationSteps, func(i, j int) bool {
-		return migrationSteps[i].Version < migrationSteps[j].Version
-	})
-	return migrationSteps
-}
-
-// SetMigrations replces the current list of migrations - used only by tests internally
-func SetMigrations(steps []StratosMigrationStep) {
-	migrationSteps = steps
-}
+var (
+	minVersion = int64(0)
+	maxVersion = int64((1 << 63) - 1)
+)
 
 // ApplyMigrations will perform the migrations
-func ApplyMigrations(conf *goose.DBConf, db *sql.DB) error {
-	current, err := goose.EnsureDBVersion(conf, db)
+func ApplyMigrations(db *sql.DB) error {
+	current, err := goose.EnsureDBVersion(db)
 	if err != nil {
-		return fmt.Errorf("Failed to get database version: %s", err.Error())
+		return fmt.Errorf("failed to get database version: %s", err.Error())
 	}
 
 	log.Println("========================")
 	log.Println("= Stratos DB Migration =")
 	log.Println("========================")
-	log.Printf("Database provider: %s", conf.Driver.Name)
+	log.Printf("Database provider: %v", goose.GetDialect())
 	log.Printf("Current %d", current)
 
-	stratosMigrations := GetOrderedMigrations()
+	goose.SetLogger(log.StandardLogger())
 
-	if len(stratosMigrations) == 0 {
-		return fmt.Errorf("No Database Migrations found")
+	migrations, err := goose.CollectMigrations(".", minVersion, maxVersion)
+	if err != nil {
+		return err
 	}
 
-	// Target is always the last migration
-	target := stratosMigrations[len(stratosMigrations)-1].Version
-	log.Printf("Target: %d", target)
+	if len(migrations) == 0 {
+		return fmt.Errorf("no Database Migrations found")
+	}
 
-	log.Println("Running migrations ....")
-	didRun := false
-	for _, step := range stratosMigrations {
-		if step.Version > current {
-			log.Printf("Running migration: %d_%s", step.Version, step.Name)
+	for {
+		current, err := goose.GetDBVersion(db)
+		if err != nil {
+			return err
+		}
 
-			txn, err := db.Begin()
-			if err != nil {
-				log.Error("db.Begin:", err)
-				return err
+		next, err := migrations.Next(current)
+		if err != nil {
+			if err == goose.ErrNoNextVersion {
+				log.Printf("No migrations to run. current version: %d\n", current)
+				return nil
 			}
+			return err
+		}
 
-			err = step.Apply(txn, conf)
-			if err != nil {
-				log.Error("Apply() failed:", err)
-				return err
-			}
-
-			err = goose.FinalizeMigration(conf, txn, true, step.Version)
-			if err != nil {
-				log.Error("Commit() failed:", err)
-				return err
-			}
-
-			didRun = true
-		} else {
-			log.Printf("Skipping migration: %d", step.Version)
+		if err = next.Up(db); err != nil {
+			return err
 		}
 	}
-
-	if !didRun {
-		log.Println("No migrations to run.")
-	}
-
-	return nil
 }

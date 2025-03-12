@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { CFBaseTestModules } from '../../../../test-framework/cf-test-helper';
@@ -9,7 +9,7 @@ describe('AddSpaceComponent', () => {
   let component: AddSpaceComponent;
   let fixture: ComponentFixture<AddSpaceComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [AddSpaceComponent, CreateSpaceStepComponent],
       imports: [

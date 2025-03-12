@@ -8,8 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
 var getSessionDataValues = `SELECT name, value FROM session_data WHERE expired=false AND session=$1 AND groupName = $1`
@@ -19,13 +19,13 @@ var insertSessionDataValue = `INSERT INTO session_data (session, groupName, name
 var deleteSessionGroupData = `DELETE FROM session_data WHERE session=$1 AND groupName=$2`
 
 // Expire data for sessions that no longer exist
-var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT id from sessions)`
+var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT id::varchar from http_sessions)`
 
 // Delete data for sessions that no longer exist
 var deleteSessionData = `DELETE FROM session_data WHERE expired=true AND keep_on_expire=false`
 
 // Check if a session valid
-var isValidSession = `SELECT id, expires_on from sessions WHERE id=$1`
+var isValidSession = `SELECT id, expires_on from http_sessions WHERE id=$1`
 
 // SessionDataRepository is a RDB-backed Session Data repository
 type SessionDataRepository struct {
@@ -33,7 +33,7 @@ type SessionDataRepository struct {
 }
 
 // NewPostgresSessionDataRepository will create a new instance of the SessionDataRepository
-func NewPostgresSessionDataRepository(dcp *sql.DB) (interfaces.SessionDataStore, error) {
+func NewPostgresSessionDataRepository(dcp *sql.DB) (api.SessionDataStore, error) {
 	return &SessionDataRepository{db: dcp}, nil
 }
 

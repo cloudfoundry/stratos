@@ -9,12 +9,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../../../../store/src/types/auth.types';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 
 @Component({

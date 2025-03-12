@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/api"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
+	jetstream_api "github.com/cloudfoundry/stratos/src/jetstream/api"
+	jetstream_config "github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/api"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -27,7 +27,7 @@ const (
 
 // KubeTerminal supports spawning pods to provide a CLI environment to the user
 type KubeTerminal struct {
-	PortalProxy interfaces.PortalProxy
+	PortalProxy jetstream_api.PortalProxy
 	Namespace   string `configName:"STRATOS_KUBERNETES_NAMESPACE"`
 	Image       string `configName:"STRATOS_KUBERNETES_TERMINAL_IMAGE"`
 	Token       []byte
@@ -36,7 +36,7 @@ type KubeTerminal struct {
 }
 
 // NewKubeTerminal checks that the environment is set up to support the Kube Terminal
-func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
+func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	// Only enabled in tech preview
 	if !p.GetConfig().EnableTechPreview {
 		log.Info("Kube Terminal not enabled - requires tech preview")
@@ -46,7 +46,7 @@ func NewKubeTerminal(p interfaces.PortalProxy) *KubeTerminal {
 	kt := &KubeTerminal{
 		PortalProxy: p,
 	}
-	if err := config.Load(kt, p.Env().Lookup); err != nil {
+	if err := jetstream_config.Load(kt, p.Env().Lookup); err != nil {
 		log.Warnf("Unable to load Kube Terminal configuration. %v", err)
 		return nil
 	}

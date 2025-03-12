@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/analysis/store"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -29,32 +29,32 @@ const (
 
 // Analysis - Plugin to allow analysers to run over an endpoint cluster
 type Analysis struct {
-	portalProxy    interfaces.PortalProxy
+	portalProxy    api.PortalProxy
 	analysisServer string
 }
 
 func init() {
-	interfaces.AddPlugin("analysis", []string{"kubernetes"}, Init)
+	api.AddPlugin("analysis", []string{"kubernetes"}, Init)
 }
 
 // Init creates a new Analysis
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	store.InitRepositoryProvider(portalProxy.GetConfig().DatabaseProviderName)
 	return &Analysis{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (analysis *Analysis) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (analysis *Analysis) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (analysis *Analysis) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (analysis *Analysis) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (analysis *Analysis) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (analysis *Analysis) GetRoutePlugin() (api.RoutePlugin, error) {
 	return analysis, nil
 }
 
@@ -110,8 +110,8 @@ func (analysis *Analysis) Init() error {
 }
 
 // OnEndpointNotification called when for endpoint events
-func (analysis *Analysis) OnEndpointNotification(action interfaces.EndpointAction, endpoint *interfaces.CNSIRecord) {
-	if action == interfaces.EndpointUnregisterAction {
+func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endpoint *api.CNSIRecord) {
+	if action == api.EndpointUnregisterAction {
 		// An endpoint was unregistered, so remove all reports
 		dbStore, err := store.NewAnalysisDBStore(analysis.portalProxy.GetDatabaseConnection())
 		if err == nil {

@@ -2,37 +2,40 @@ package datastore
 
 import (
 	"database/sql"
-	"strings"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 func init() {
-	RegisterMigration(20190930092500, "LocalUsersTriggerFix", func(txn *sql.Tx, conf *goose.DBConf) error {
+	goose.AddMigration(Up20190930092500, nil)
+}
 
-		var dropTrigger string
+func Up20190930092500(txn *sql.Tx) error {
+	dialect := goose.GetDialect()
 
-		if strings.Contains(conf.Driver.Name, "sqlite") {
-			//SQLITE
-			dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
-		}
-		if strings.Contains(conf.Driver.Name, "postgres") {
-			// POSTGRESQL
-			dropTrigger = "DROP TRIGGER IF EXISTS update_trigger ON local_users;"
-		} else if strings.Contains(conf.Driver.Name, "mysql") {
-			// MYSQL
-			dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
-			// Ignore error - most likely permission bug issue on Mysql
-			txn.Exec(dropTrigger)
-			return nil
-		}
+	var dropTrigger string
 
-		if len(dropTrigger) > 0 {
-			// Remove the trigger
-			_, err := txn.Exec(dropTrigger)
-			return err
-		}
+	if _, ok := dialect.(*goose.Sqlite3Dialect); ok {
+		//SQLITE
+		dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
+	}
 
+	if _, ok := dialect.(*goose.PostgresDialect); ok {
+		// POSTGRESQL
+		dropTrigger = "DROP TRIGGER IF EXISTS update_trigger ON local_users;"
+	} else if _, ok := dialect.(*goose.MySQLDialect); ok {
+		// MYSQL
+		dropTrigger = "DROP TRIGGER IF EXISTS update_last_updated;"
+		// Ignore error - most likely permission bug issue on Mysql
+		txn.Exec(dropTrigger)
 		return nil
-	})
+	}
+
+	if len(dropTrigger) > 0 {
+		// Remove the trigger
+		_, err := txn.Exec(dropTrigger)
+		return err
+	}
+
+	return nil
 }

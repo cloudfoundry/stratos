@@ -1,0 +1,8 @@
+{
+    "name": "@stratosui/extension",
+    "version": "0.0.1",
+    "peerDependencies": {
+      "@angular/common": "^9.1.6",
+      "@angular/core": "^9.1.6"
+    }
+}

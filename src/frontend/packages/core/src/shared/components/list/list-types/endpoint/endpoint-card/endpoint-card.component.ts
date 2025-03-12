@@ -9,20 +9,21 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  getFullEndpointApiUrl,
+  entityCatalog,
+  MenuItem,
+  StratosStatus,
+  StratosCatalogEndpointEntity,
+  EndpointModel,
+  UserFavoriteEndpoint,
+  UserFavoriteManager,
+  RouterNav,
+  AppState,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { AppState } from '../../../../../../../../store/src/app-state';
-import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
-import {
-  StratosCatalogEndpointEntity,
-} from '../../../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { EndpointModel } from '../../../../../../../../store/src/types/endpoint.types';
-import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
-import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
-import { UserFavoriteEndpoint } from '../../../../../../../../store/src/types/user-favorites.types';
-import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
 import { coreEndpointListDetailsComponents } from '../../../../../../features/endpoints/endpoint-helpers';
@@ -30,17 +31,15 @@ import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/m
 import { CardCell } from '../../../list.types';
 import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
-import { RouterNav } from './../../../../../../../../store/src/actions/router.actions';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { SessionService } from '../../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
 
 @Component({
-  selector: 'app-endpoint-card',
-  templateUrl: './endpoint-card.component.html',
-  styleUrls: ['./endpoint-card.component.scss'],
-  entryComponents: [...coreEndpointListDetailsComponents]
+    selector: 'app-endpoint-card',
+    templateUrl: './endpoint-card.component.html',
+    styleUrls: ['./endpoint-card.component.scss']
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
 
@@ -179,7 +178,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.component.row = this.row;
     this.componentRef.changeDetectorRef.detectChanges();
-
 
     this.updateCardStatus();
   }

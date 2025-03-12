@@ -4,7 +4,6 @@ import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from 
 import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
-
 @Injectable()
 export class CustomReuseStrategy extends RouteReuseStrategy {
   shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }

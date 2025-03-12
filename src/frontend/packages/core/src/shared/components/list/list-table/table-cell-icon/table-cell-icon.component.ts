@@ -14,7 +14,6 @@ export interface TableCellIconComponentConfig<T> {
 })
 export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
 
-
   @Input('row')
   get row() { return super.row; }
   set row(row: T) {

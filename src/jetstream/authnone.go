@@ -11,14 +11,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 const (
 	noAuthUserID = "10000000-1111-2222-3333-444444444444"
 )
 
-//More fields will be moved into here as global portalProxy struct is phased out
+// More fields will be moved into here as global portalProxy struct is phased out
 type noAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
@@ -26,34 +26,33 @@ type noAuth struct {
 	p                      *portalProxy
 }
 
-func (a *noAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+func (a *noAuth) ShowConfig(config *api.ConsoleConfig) {
 	log.Info("... !!!!! No Authentication !!!!!")
 }
 
-//Login provides no-auth specific Stratos login
+// Login provides no-auth specific Stratos login
 func (a *noAuth) Login(c echo.Context) error {
-	return errors.New("Can not login when there is no auth")
+	return errors.New("can not login when there is no auth")
 }
 
-//Logout provides no-auth specific Stratos login
+// Logout provides no-auth specific Stratos login
 func (a *noAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
-//GetUsername gets the user name for the specified local user
+// GetUsername gets the user name for the specified local user
 func (a *noAuth) GetUsername(userid string) (string, error) {
-	return interfaces.DefaultAdminUserName, nil
+	return api.DefaultAdminUserName, nil
 }
 
-//GetUser gets the user guid for the specified local user
-func (a *noAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
-	var scopes []string
-	scopes = make([]string, 1)
+// GetUser gets the user guid for the specified local user
+func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
+	var scopes = make([]string, 1)
 	scopes[0] = "stratos.noauth"
 
-	connectdUser := &interfaces.ConnectedUser{
+	connectdUser := &api.ConnectedUser{
 		GUID:   noAuthUserID,
-		Name:   interfaces.DefaultAdminUserName,
+		Name:   api.DefaultAdminUserName,
 		Admin:  true,
 		Scopes: scopes,
 	}
@@ -63,8 +62,7 @@ func (a *noAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 
 func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	var err error
-	var expiry int64
-	expiry = math.MaxInt64
+	var expiry int64 = math.MaxInt64
 
 	session, err := a.p.GetSession(c)
 	if err != nil {
@@ -86,18 +84,17 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	}
 }
 
-//VerifySession for no authentication - always passes
+// VerifySession for no authentication - always passes
 func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	return nil
 }
 
-//generateLoginSuccessResponse
+// generateLoginSuccessResponse
 func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64
-	expiry = math.MaxInt64
+	var expiry int64 = math.MaxInt64
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID
@@ -115,7 +112,7 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 		return err
 	}
 
-	resp := &interfaces.LoginRes{
+	resp := &api.LoginRes{
 		Account:     username,
 		TokenExpiry: expiry,
 		APIEndpoint: nil,
@@ -132,7 +129,7 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 	return err
 }
 
-//logout
+// logout
 func (a *noAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 

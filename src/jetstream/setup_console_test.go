@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/console_config"
 
 	"github.com/govau/cf-common/env"
 	. "github.com/smartystreets/goconvey/convey"
@@ -14,7 +14,7 @@ func TestConsoleSetup(t *testing.T) {
 
 	Convey("Check that we can migrate data from the old console_config table", t, func() {
 
-		db, _, err := datastore.GetInMemorySQLLiteConnection()
+		db, err := datastore.GetInMemorySQLLiteConnection()
 		if err != nil {
 			t.Errorf("can not open sqlite database for testing: %v", err)
 		}

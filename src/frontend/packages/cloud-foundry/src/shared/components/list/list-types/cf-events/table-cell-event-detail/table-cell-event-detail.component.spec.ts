@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { ValuesPipe } from '../../../../../../../../core/src/shared/pipes/values.pipe';
@@ -11,7 +11,7 @@ describe('TableCellEventDetailComponent', () => {
   let component: TableCellEventDetailComponent;
   let fixture: ComponentFixture<TableCellEventDetailComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellEventDetailComponent, ValuesPipe, EventMetadataComponent],
       imports: [CoreModule]

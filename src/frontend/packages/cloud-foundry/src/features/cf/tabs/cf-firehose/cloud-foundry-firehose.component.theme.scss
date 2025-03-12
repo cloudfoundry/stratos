@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 @mixin app-cloud-foundry-firehose-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $warn: map-get($theme, warn);

@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
+import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-
-import { GeneralEntityAppState } from '../../../../../store/src/app-state';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { SessionData } from '../../../../../store/src/types/auth.types';
 
 @Component({
   selector: 'app-diagnostics-page',

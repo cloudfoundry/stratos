@@ -24,14 +24,14 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 
 }
 
-//HashPassword accepts a plaintext password string and generates a salted hash
+// HashPassword accepts a plaintext password string and generates a salted hash
 func HashPassword(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return bytes, err
 }
 
-//CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
-//It verifies the password against the salted hash
+// CheckPasswordHash accepts a bcrypt salted hash and plaintext password.
+// It verifies the password against the salted hash
 func CheckPasswordHash(password string, hash []byte) error {
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	return err

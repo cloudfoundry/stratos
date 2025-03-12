@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -35,8 +35,8 @@ export class GitEffects {
     private httpClient: HttpClient
   ) { }
 
-  @Effect()
-  fetchRep$ = this.actions$.pipe(
+  
+  fetchRep$ = createEffect(() => this.actions$.pipe(
     ofType<FetchGitHubRepoInfo>(FETCH_GITHUB_REPO),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -62,10 +62,10 @@ export class GitEffects {
           new WrapperRequestActionFailed(action.meta.scm.parseErrorAsString(err), action, actionType)
         ]
         ));
-    }));
+    })));
 
-  @Effect()
-  fetchBranches$ = this.actions$.pipe(
+  
+  fetchBranches$ = createEffect(() => this.actions$.pipe(
     ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -93,10 +93,10 @@ export class GitEffects {
         catchError(err => [
           new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
-    }));
+    })));
 
-  @Effect()
-  fetchBranch$ = this.actions$.pipe(
+  
+  fetchBranch$ = createEffect(() => this.actions$.pipe(
     ofType<FetchBranchForProject>(FETCH_BRANCH_FOR_PROJECT),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -121,10 +121,10 @@ export class GitEffects {
         catchError(err => [
           new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
-    }));
+    })));
 
-  @Effect()
-  fetchCommit$ = this.actions$.pipe(
+  
+  fetchCommit$ = createEffect(() => this.actions$.pipe(
     ofType<FetchCommit>(FETCH_COMMIT),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -148,10 +148,10 @@ export class GitEffects {
         catchError(err => [
           new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
-    }));
+    })));
 
-  @Effect()
-  fetchCommits$ = this.actions$.pipe(
+  
+  fetchCommits$ = createEffect(() => this.actions$.pipe(
     ofType<FetchCommits>(FETCH_COMMITS),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -178,7 +178,7 @@ export class GitEffects {
         catchError(err => [
           new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
         ]));
-    }));
+    })));
 
   updateCommit(scmType: string, projectName: string, commit: GitCommit, endpointGuid: string, action: EntityRequestAction): GitCommit {
     const newCommit = {

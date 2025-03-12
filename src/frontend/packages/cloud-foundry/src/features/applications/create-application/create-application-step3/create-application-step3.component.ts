@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -33,12 +33,12 @@ import { createGetApplicationAction } from '../../application.service';
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  setDomainHost: FormGroup;
+  setDomainHost: UntypedFormGroup;
 
   constructor(private store: Store<CFAppState>) {
-    this.setDomainHost = new FormGroup({
-      domain: new FormControl('', [Validators.required]),
-      host: new FormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
+    this.setDomainHost = new UntypedFormGroup({
+      domain: new UntypedFormControl('', [Validators.required]),
+      host: new UntypedFormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
     });
   }
 

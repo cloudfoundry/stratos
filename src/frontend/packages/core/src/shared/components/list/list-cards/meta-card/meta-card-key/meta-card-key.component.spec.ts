@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SharedModule } from '../../../../../shared.module';
 import { MetaCardKeyComponent } from './meta-card-key.component';
@@ -7,7 +7,7 @@ describe('MetaCardKeyComponent', () => {
   let component: MetaCardKeyComponent;
   let fixture: ComponentFixture<MetaCardKeyComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         SharedModule

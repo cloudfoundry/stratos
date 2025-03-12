@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import moment from 'moment-timezone';
@@ -33,7 +33,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   policyAlert = PolicyAlert;
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
-  editRecurringScheduleForm: FormGroup;
+  editRecurringScheduleForm: UntypedFormGroup;
 
   public currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
@@ -47,7 +47,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute
   ) {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
 
@@ -21,14 +21,14 @@ export class AppEffects {
     private store: Store<EndpointOnlyAppState>,
   ) { }
 
-  @Effect({ dispatch: false }) updateSummary$ = this.actions$.pipe(
+   updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
     map(action => {
       cfEntityCatalog.appSummary.api.get(action.apiAction.guid, action.apiAction.endpointGuid);
     }),
-  );
+  ), { dispatch: false });
 
-  @Effect({ dispatch: false }) clearCellMetrics$ = this.actions$.pipe(
+   clearCellMetrics$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(CF_APP_UPDATE_SUCCESS),
     map(action => {
       // User's can scale down instances and previous instance data is kept in store, when the user scales up again this stale data can
@@ -45,5 +45,5 @@ export class AppEffects {
         });
       }
     }),
-  );
+  ), { dispatch: false });
 }

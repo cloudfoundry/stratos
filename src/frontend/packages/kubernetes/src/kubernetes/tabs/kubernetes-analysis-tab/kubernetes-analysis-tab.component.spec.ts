@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MDAppModule } from '../../../../../core/src/public-api';
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
@@ -13,7 +13,7 @@ describe('KubernetesAnalysisTabComponent', () => {
   let component: KubernetesAnalysisTabComponent;
   let fixture: ComponentFixture<KubernetesAnalysisTabComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesAnalysisTabComponent, AnalysisReportViewerComponent],
       imports: [

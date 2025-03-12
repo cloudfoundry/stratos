@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MDAppModule } from '../../../core/md.module';
 import { ApplicationStateIconComponent } from './application-state-icon/application-state-icon.component';
@@ -9,7 +9,7 @@ describe('ApplicationStateComponent', () => {
   let component: ApplicationStateComponent;
   let fixture: ComponentFixture<ApplicationStateComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ApplicationStateComponent,

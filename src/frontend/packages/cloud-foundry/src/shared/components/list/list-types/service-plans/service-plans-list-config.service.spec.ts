@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, inject, TestBed } from '@angular/core/testing';
+import { inject, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../../../../features/service-catalog/services.service';
@@ -18,7 +18,7 @@ describe('ServicePlansListConfigService', () => {
     });
   });
 
-  it('should be created', async(inject([ServicePlansListConfigService], (service: ServicePlansListConfigService) => {
+  it('should be created', waitForAsync(inject([ServicePlansListConfigService], (service: ServicePlansListConfigService) => {
     expect(service).toBeTruthy();
   })));
 });

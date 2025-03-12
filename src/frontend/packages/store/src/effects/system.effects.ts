@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -18,7 +18,7 @@ export class SystemEffects {
     private store: Store<InternalAppState>
   ) { }
 
-  @Effect() getInfo$ = this.actions$.pipe(
+   getInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetSystemInfo>(GET_SYSTEM_INFO),
     mergeMap(action => {
       // Associated action with be either get endpoint or get all endpoints/
@@ -39,5 +39,5 @@ export class SystemEffects {
             new WrapperRequestActionFailed('Could not fetch system info', action)
           ];
         }));
-    }));
+    })));
 }

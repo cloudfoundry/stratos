@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
@@ -48,7 +48,7 @@ type StatusResponse struct {
 }
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
-func getKubeDashboardPod(p interfaces.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.Pod, error) {
+func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.Pod, error) {
 	log.Debug("kubeDashboardStatus request")
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector="+labelSelector, nil, nil)
@@ -75,7 +75,7 @@ func getKubeDashboardPod(p interfaces.PortalProxy, cnsiGUID, userGUID string, la
 }
 
 // Get the service for the kubernetes dashboard
-func getKubeDashboardService(p interfaces.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (ServiceInfo, error) {
+func getKubeDashboardService(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (ServiceInfo, error) {
 	log.Debug("getKubeDashboardService request")
 
 	info := ServiceInfo{}
@@ -116,7 +116,7 @@ func getKubeDashboardService(p interfaces.PortalProxy, cnsiGUID, userGUID string
 	return info, nil
 }
 
-func getKubeDashboardServiceInfo(p interfaces.PortalProxy, endpointGUID, userGUID string) (ServiceInfo, error) {
+func getKubeDashboardServiceInfo(p api.PortalProxy, endpointGUID, userGUID string) (ServiceInfo, error) {
 	svc, err := getKubeDashboardService(p, endpointGUID, userGUID, "app%3Dkubernetes-dashboard")
 	if err != nil {
 		svc, err = getKubeDashboardService(p, endpointGUID, userGUID, "k8s-app%3Dkubernetes-dashboard")
@@ -125,7 +125,7 @@ func getKubeDashboardServiceInfo(p interfaces.PortalProxy, endpointGUID, userGUI
 }
 
 // Get the service account for the kubernetes dashboard
-func getKubeDashboardServiceAccount(p interfaces.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.ServiceAccount, error) {
+func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.ServiceAccount, error) {
 	log.Debug("getKubeDashboardService request")
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/serviceaccounts?labelSelector="+labelSelector, nil, nil)
@@ -152,7 +152,7 @@ func getKubeDashboardServiceAccount(p interfaces.PortalProxy, cnsiGUID, userGUID
 }
 
 // Get the service account for the kubernetes dashboard
-func getKubeDashboardSecretToken(p interfaces.PortalProxy, cnsiGUID, userGUID string, sa *v1.ServiceAccount) (string, error) {
+func getKubeDashboardSecretToken(p api.PortalProxy, cnsiGUID, userGUID string, sa *v1.ServiceAccount) (string, error) {
 	log.Debug("getKubeDashboardSecretToken request")
 
 	namespace := sa.Namespace

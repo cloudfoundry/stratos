@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mergeMap } from 'rxjs/operators';
 
 import { WrapperRequestActionSuccess } from '../../../../store/src/types/request.types';
@@ -15,7 +15,7 @@ export class UpdateAppEffects {
   ) {
   }
 
-  @Effect() UpdateAppInStore$ = this.actions$.pipe(
+   UpdateAppInStore$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
     mergeMap((action: WrapperRequestActionSuccess) => {
       const updateAction = action.apiAction as UpdateExistingApplication;
@@ -48,5 +48,5 @@ export class UpdateAppEffects {
       });
 
       return actions;
-    }));
+    })));
 }

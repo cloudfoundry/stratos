@@ -1,24 +1,28 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
+import {
+  endpointEntitiesSelector,
+  endpointStatusSelector,
+  EndpointOnlyAppState,
+  EntityCatalogHelpers,
+  IRequestEntityTypeState,
+  IEndpointFavMetadata,
+  UserFavorite,
+  entityCatalog,
+  AuthState,
+  RouterNav,
+  EndpointHealthCheck,
+  EndpointModel,
+  EndpointState,
+} from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
 
-import { RouterNav } from '../../../store/src/actions/router.actions';
-import { EndpointOnlyAppState, IRequestEntityTypeState } from '../../../store/src/app-state';
-import { entityCatalog } from '../../../store/src/entity-catalog/entity-catalog';
-import { EntityCatalogHelpers } from '../../../store/src/entity-catalog/entity-catalog.helper';
-import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { AuthState } from '../../../store/src/reducers/auth.reducer';
-import { endpointEntitiesSelector, endpointStatusSelector } from '../../../store/src/selectors/endpoint.selectors';
-import { EndpointModel, EndpointState } from '../../../store/src/types/endpoint.types';
-import { IEndpointFavMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
-
-
 
 @Injectable()
 export class EndpointsService implements CanActivate {

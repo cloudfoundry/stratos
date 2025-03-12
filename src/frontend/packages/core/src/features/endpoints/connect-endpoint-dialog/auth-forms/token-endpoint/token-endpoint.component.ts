@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../../../store/src/extension-types';
 
@@ -11,7 +11,7 @@ import { IAuthForm } from '../../../../../../../store/src/extension-types';
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;
 
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
 
   @Input() config: any = {};
 }

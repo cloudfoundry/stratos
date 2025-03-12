@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/core-test.helper';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
@@ -9,7 +9,7 @@ describe('TableCellBooleanIndicatorComponent', () => {
   let component: TableCellBooleanIndicatorComponent;
   let fixture: ComponentFixture<TableCellBooleanIndicatorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellBooleanIndicatorComponent, BooleanIndicatorComponent],
       imports: [...BaseTestModulesNoShared]

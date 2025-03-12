@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../core/core.module';
 import { DisplayValueComponent } from '../display-value/display-value.component';
@@ -9,7 +9,7 @@ describe('EditableDisplayValueComponent', () => {
   let component: EditableDisplayValueComponent;
   let fixture: ComponentFixture<EditableDisplayValueComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         EditableDisplayValueComponent,

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -11,7 +11,7 @@ describe('CloudFoundryRoutesComponent', () => {
   let component: CloudFoundryRoutesComponent;
   let fixture: ComponentFixture<CloudFoundryRoutesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryRoutesComponent],
       imports: generateCfBaseTestModules(),

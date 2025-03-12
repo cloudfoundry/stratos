@@ -2,25 +2,28 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import {
+  InternalEventSeverity,
+  IFavoriteMetadata,
+  UserFavorite,
+  AddRecentlyVisitedEntityAction,
+  StratosStatus,
+  selectDashboardState,
+  ToggleSideNav,
+  AppState,
+  selectIsMobile,
+  UserProfileInfo,
+} from '@stratosui/store';
 import moment from 'moment';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
-import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
-import { InternalEventSeverity } from '../../../../../store/src/types/internal-events.types';
-import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-side-nav.component';
 import { TabNavService } from '../../../tab-nav.service';
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
-import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
-import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';

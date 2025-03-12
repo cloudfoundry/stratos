@@ -5,8 +5,8 @@ import (
 
 	"github.com/govau/cf-common/env"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests
@@ -60,7 +60,7 @@ func (e *echoContextMock) Reset(engine.Request, engine.Response)               {
 */
 
 func TestLoadPortalConfig(t *testing.T) {
-	var pc interfaces.PortalConfig
+	var pc api.PortalConfig
 
 	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
 		"HTTP_CLIENT_TIMEOUT_IN_SECS":             "10",

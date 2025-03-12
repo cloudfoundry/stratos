@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
@@ -51,21 +51,21 @@ export class EndpointsEffect {
     private store: Store<DispatchOnlyAppState>
   ) { }
 
-  @Effect() getEndpoint$ = this.actions$.pipe(
+   getEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<GetEndpoint>(GET_ENDPOINT),
     mergeMap((action: GetEndpoint) => [
       stratosEntityCatalog.systemInfo.actions.getSystemInfo(false, action)
     ])
-  );
+  ));
 
-  @Effect() getAllEndpointsBySystemInfo$ = this.actions$.pipe(
+   getAllEndpointsBySystemInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetAllEndpoints>(GET_ENDPOINTS),
     mergeMap((action: GetAllEndpoints) => [
       stratosEntityCatalog.systemInfo.actions.getSystemInfo(false, action)
     ])
-  );
+  ));
 
-  @Effect() getAllEndpoints$ = this.actions$.pipe(
+   getAllEndpoints$ = createEffect(() => this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
     mergeMap(action => {
       const { associatedAction } = action;
@@ -98,9 +98,9 @@ export class EndpointsEffect {
         new WrapperRequestActionSuccess(mappedData, associatedAction, 'fetch'),
         new GetAllEndpointsSuccess(mappedData, isLogin),
       ];
-    }));
+    })));
 
-  @Effect() connectEndpoint$ = this.actions$.pipe(
+   connectEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
     mergeMap(action => {
       // Special-case SSO login - redirect to the back-end
@@ -151,9 +151,9 @@ export class EndpointsEffect {
         body,
         response => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
       );
-    }));
+    })));
 
-  @Effect() disconnect$ = this.actions$.pipe(
+   disconnect$ = createEffect(() => this.actions$.pipe(
     ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
     mergeMap(action => {
 
@@ -167,9 +167,9 @@ export class EndpointsEffect {
         null,
         'DELETE'
       );
-    }));
+    })));
 
-  @Effect() unregister$ = this.actions$.pipe(
+   unregister$ = createEffect(() => this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
     mergeMap(action => {
       return this.doEndpointAction(
@@ -182,20 +182,20 @@ export class EndpointsEffect {
         null,
         'DELETE'
       );
-    }));
+    })));
 
-  @Effect() register$ = this.actions$.pipe(
+   register$ = createEffect(() => this.actions$.pipe(
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
-
       const paramsObj = {
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
         skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
-        cnsi_client_id: action.clientID,
-        cnsi_client_secret: action.clientSecret,
+        cnsi_client_id: action.clientID || '',
+        cnsi_client_secret: action.clientSecret || '',
         sso_allowed: action.ssoAllowed ? 'true' : 'false',
-        create_system_endpoint: action.createSystemEndpoint ? 'true' : 'false'
+        create_system_endpoint: action.createSystemEndpoint ? 'true' : 'false',
+        ca_cert: action.caCert || '',
       };
       // Do not include sub_type in HttpParams if it doesn't exist (falsies get stringified and sent)
       if (action.endpointSubType) {
@@ -221,18 +221,19 @@ export class EndpointsEffect {
         body,
         this.processRegisterError
       );
-    }));
+    })));
 
-  @Effect() updateEndpoint$ = this.actions$.pipe(
+   updateEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
     mergeMap((action: UpdateEndpoint) => {
       const paramsObj = {
         name: action.name,
         skipSSL: action.skipSSL,
         setClientInfo: action.setClientInfo,
-        clientID: action.clientID,
-        clientSecret: action.clientSecret,
+        clientID: action.clientID || '',
+        clientSecret: action.clientSecret || '',
         allowSSO: action.allowSSO,
+        ca_cert: action.caCert || '',
       };
 
       // Encode auth values in the body, not the query string
@@ -250,7 +251,7 @@ export class EndpointsEffect {
         body,
         this.processUpdateError
       );
-    }));
+    })));
 
   private processUpdateError(e: HttpErrorResponse): string {
     let message = 'There was a problem updating the endpoint. ' +

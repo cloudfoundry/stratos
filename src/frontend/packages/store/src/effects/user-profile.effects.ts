@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
@@ -28,7 +28,7 @@ export class UserProfileEffect {
     private httpClient: HttpClient,
   ) { }
 
-  @Effect() getUserProfileInfo$ = this.actions$.pipe(
+   getUserProfileInfo$ = createEffect(() => this.actions$.pipe(
     ofType<FetchUserProfileAction>(GET_USERPROFILE),
     mergeMap(action => {
       this.store.dispatch(new StartRequestAction(action));
@@ -44,9 +44,9 @@ export class UserProfileEffect {
           new WrapperRequestActionFailed('Could not get User Profile Info', action),
         ])
       );
-    }));
+    })));
 
-  @Effect() updateUserProfileInfo$ = this.actions$.pipe(
+   updateUserProfileInfo$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE),
     mergeMap((action: UpdateUserProfileAction) => {
       this.store.dispatch(new StartRequestAction(action, 'update'));
@@ -69,9 +69,9 @@ export class UserProfileEffect {
         catchError((e) => [
           new WrapperRequestActionFailed('Could not update User Profile Info', action),
         ]));
-    }));
+    })));
 
-  @Effect() updateUserPassword$ = this.actions$.pipe(
+   updateUserPassword$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD),
     mergeMap((action: UpdateUserPasswordAction) => {
       this.store.dispatch(new StartRequestAction(action, 'update'));
@@ -93,5 +93,5 @@ export class UserProfileEffect {
           new WrapperRequestActionFailed('Could not update User Password', action),
         ])
       );
-    }));
+    })));
 }

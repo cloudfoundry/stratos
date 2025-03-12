@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
 import {
@@ -11,7 +11,7 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
   let component: TableCellConfirmRoleAddRemComponent;
   let fixture: ComponentFixture<TableCellConfirmRoleAddRemComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         MDAppModule,

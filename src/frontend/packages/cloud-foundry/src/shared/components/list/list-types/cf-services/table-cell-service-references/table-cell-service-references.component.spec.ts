@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModulesNoShared,
@@ -10,7 +10,7 @@ describe('TableCellServiceReferencesComponent', () => {
   let component: TableCellServiceReferencesComponent;
   let fixture: ComponentFixture<TableCellServiceReferencesComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellServiceReferencesComponent,

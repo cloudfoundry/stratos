@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 
 @function gradient-generator($color) {
   @return linear-gradient(to right, $color 0%, $color 50%, transparent 100%);

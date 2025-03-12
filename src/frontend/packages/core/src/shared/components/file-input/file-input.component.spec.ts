@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { FileInputComponent } from './file-input.component';
@@ -7,7 +7,7 @@ describe('FileInputComponent', () => {
   let component: FileInputComponent;
   let fixture: ComponentFixture<FileInputComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [FileInputComponent],
       imports: [...BaseTestModulesNoShared]

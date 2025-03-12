@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
@@ -10,7 +10,7 @@ describe('StackedInputActionsComponent', () => {
   let component: StackedInputActionsComponent;
   let fixture: ComponentFixture<StackedInputActionsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [StackedInputActionsComponent, BooleanIndicatorComponent, StackedInputActionComponent],
       imports: [...BaseTestModulesNoShared],

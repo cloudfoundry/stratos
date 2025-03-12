@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { StratosStatus, GeneralEntityAppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
-
-import { StratosStatus } from '../../../store/src/types/shared.types';
-import { GeneralEntityAppState } from './../../../store/src/app-state';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 

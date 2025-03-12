@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // CFError is the error info returned from the CF API
@@ -83,37 +83,37 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	endpoint, err := invite.portalProxy.GetCNSIRecord(cfGUID)
 	if err != nil {
 		// Could find the endpoint
-		return interfaces.NewHTTPError(http.StatusServiceUnavailable, "Can not find endpoint")
+		return api.NewHTTPError(http.StatusServiceUnavailable, "Can not find endpoint")
 	}
 
 	if endpoint.CNSIType != "cf" {
-		return interfaces.NewHTTPError(http.StatusServiceUnavailable, "Not a Cloud Foundry endpoint")
+		return api.NewHTTPError(http.StatusServiceUnavailable, "Not a Cloud Foundry endpoint")
 	}
 
 	// Check we can unmarshall the request
 	body, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
 	userInviteRequest := &UserInviteReq{}
 	if err = json.Unmarshal(body, userInviteRequest); err != nil {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
+		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body - could not parse JSON")
 	}
 
 	// Check we have at least one email address
 	if len(userInviteRequest.Emails) == 0 {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no email addresses provided")
+		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body - no email addresses provided")
 	}
 
 	// Must provide an Orgs
 	if len(userInviteRequest.Org) == 0 {
-		return interfaces.NewHTTPError(http.StatusBadRequest, "Invalid request body - no org provided")
+		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body - no org provided")
 	}
 
 	// Check user has correct permissions before making the call to the UAA
 	if err = invite.checkPermissions(c, endpoint, userInviteRequest); err != nil {
-		return interfaces.NewHTTPError(http.StatusUnauthorized, "You are not authorized to invite users")
+		return api.NewHTTPError(http.StatusUnauthorized, "You are not authorized to invite users")
 	}
 
 	inviteResponse, err := invite.processUserInvites(c, endpoint, userInviteRequest)
@@ -124,14 +124,14 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	// Send back the response to the client
 	jsonString, err := json.Marshal(inviteResponse)
 	if err != nil {
-		return interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
+		return api.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
 	}
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
 	return nil
 }
 
-func (invite *UserInvite) processUserInvites(c echo.Context, endpoint interfaces.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
+func (invite *UserInvite) processUserInvites(c echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
 	cfGUID := c.Param("id")
 	userGUID := c.Get("user_id").(string)
 
@@ -162,7 +162,7 @@ func (invite *UserInvite) processUserInvites(c echo.Context, endpoint interfaces
 	return inviteResponse, nil
 }
 
-func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteRequest *UserInviteReq, user UserInviteUser, endpoint interfaces.CNSIRecord) (UserInviteUser, bool) {
+func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteRequest *UserInviteReq, user UserInviteUser, endpoint api.CNSIRecord) (UserInviteUser, bool) {
 	log.Debugf("Creating CF User for: %s", user.Email)
 	// Create the user in Cloud Foundry
 	if cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID); err != nil {
@@ -196,19 +196,19 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 }
 
 // UAAUserInvite makes the request to the UAA to create accounts and invite links
-func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
+func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint api.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
 	log.Debug("Requesting invite links from UAA")
 
 	// See if we can get a token for the invite user
 	token, ok := invite.portalProxy.GetCNSITokenRecord(endpoint.GUID, UserInviteUserID)
 	if !ok {
 		// Not configured
-		return nil, interfaces.NewHTTPError(http.StatusServiceUnavailable, "User Invite not available")
+		return nil, api.NewHTTPError(http.StatusServiceUnavailable, "User Invite not available")
 	}
 
 	client := strings.Split(token.RefreshToken, ":")
 	if len(client) != 2 {
-		return nil, interfaces.NewHTTPError(http.StatusBadRequest, "Invalid client ID and client Secret configuration")
+		return nil, api.NewHTTPError(http.StatusBadRequest, "Invalid client ID and client Secret configuration")
 	}
 
 	returnURL := getReturnURL(c)
@@ -226,7 +226,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 		}
 		token, ok = invite.portalProxy.GetCNSITokenRecord(endpoint.GUID, UserInviteUserID)
 		if !ok {
-			return nil, interfaces.NewHTTPError(http.StatusServiceUnavailable, "User Invite not available - could not get token after refresh")
+			return nil, api.NewHTTPError(http.StatusServiceUnavailable, "User Invite not available - could not get token after refresh")
 		}
 	}
 
@@ -234,7 +234,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 	uaaReq.Emails = uaaInviteReq.Emails
 	uaaReqJSON, err := json.Marshal(uaaReq)
 	if err != nil {
-		return nil, interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to serialize email")
+		return nil, api.NewHTTPError(http.StatusInternalServerError, "Failed to serialize email")
 	}
 
 	// Make request to the UAA to invite the users
@@ -248,18 +248,18 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 	req.Header.Set("Authorization", "bearer "+token.AuthToken)
 	req.Header.Set("Accept", "application/json")
 
-	httpClient := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation)
+	httpClient := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
-		return nil, interfaces.LogHTTPError(res, err)
+		return nil, api.LogHTTPError(res, err)
 	}
 
 	// Read the response
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, interfaces.NewHTTPShadowError(
+		return nil, api.NewHTTPShadowError(
 			http.StatusInternalServerError,
 			"Failed to request user invite links",
 			"Failed to request user invite links: %+v",
@@ -269,7 +269,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint interfaces.CNSI
 
 	inviteResponse := &UserInviteResponse{}
 	if err = json.Unmarshal(body, inviteResponse); err != nil {
-		return nil, interfaces.NewHTTPError(http.StatusInternalServerError, "Failed to request invites for users")
+		return nil, api.NewHTTPError(http.StatusInternalServerError, "Failed to request invites for users")
 	}
 
 	return inviteResponse, nil
@@ -384,7 +384,7 @@ func getReturnURL(c echo.Context) string {
 }
 
 // Check that the user has permissions required - i.e. is an Org Manager of the Org
-func (invite *UserInvite) checkPermissions(c echo.Context, endpoint interfaces.CNSIRecord, userInviteRequest *UserInviteReq) error {
+func (invite *UserInvite) checkPermissions(c echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) error {
 	cfGUID := c.Param("id")
 	userGUID := c.Get("user_id").(string)
 

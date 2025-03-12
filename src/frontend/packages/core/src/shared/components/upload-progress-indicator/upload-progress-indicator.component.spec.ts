@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { UploadProgressIndicatorComponent } from './upload-progress-indicator.component';
 import { MDAppModule } from '../../../core/md.module';
@@ -9,7 +9,7 @@ describe('UploadProgressIndicatorComponent', () => {
   let component: UploadProgressIndicatorComponent;
   let fixture: ComponentFixture<UploadProgressIndicatorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ UploadProgressIndicatorComponent ],
       imports: [

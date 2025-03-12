@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 
@@ -32,7 +32,7 @@ export class ApiKeyEffect {
   ) {
   }
 
-  @Effect() add = this.actions$.pipe(
+   add = createEffect(() => this.actions$.pipe(
     ofType<AddApiKey>(API_KEY_ADD),
     mergeMap(action => {
       const actionType = 'create';
@@ -64,9 +64,9 @@ export class ApiKeyEffect {
         })
       );
     })
-  );
+  ));
 
-  @Effect() delete = this.actions$.pipe(
+   delete = createEffect(() => this.actions$.pipe(
     ofType<DeleteApiKey>(API_KEY_DELETE),
     mergeMap(action => {
       const actionType = 'delete';
@@ -90,9 +90,9 @@ export class ApiKeyEffect {
         })
       );
     })
-  );
+  ));
 
-  @Effect() getAll = this.actions$.pipe(
+   getAll = createEffect(() => this.actions$.pipe(
     ofType<GetAllApiKeys>(API_KEY_GET_ALL),
     mergeMap(action => {
       const actionType = 'fetch';
@@ -123,7 +123,7 @@ export class ApiKeyEffect {
         })
       );
     })
-  );
+  ));
 
   private convertErrorToString(err: any): string {
     // We should look into beefing this up / combining with generic error handling

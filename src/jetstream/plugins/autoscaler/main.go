@@ -3,37 +3,37 @@ package autoscaler
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 )
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("autoscaler", []string{"cloudfoundry"}, Init)
+	api.AddPlugin("autoscaler", []string{"cloudfoundry"}, Init)
 }
 
 // Autoscaler is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type Autoscaler struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // Init creates a new Autoscaler
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &Autoscaler{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (a *Autoscaler) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (a *Autoscaler) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (a *Autoscaler) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (a *Autoscaler) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (a *Autoscaler) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (a *Autoscaler) GetRoutePlugin() (api.RoutePlugin, error) {
 	return a, nil
 }
 

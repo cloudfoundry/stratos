@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { StratosStatus } from '../../../../store/src/types/shared.types';
 import { MDAppModule } from '../md.module';
@@ -9,7 +9,7 @@ describe('StatefulIconComponent', () => {
   let fixture: ComponentFixture<StatefulIconComponent>;
   let element: HTMLElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [StatefulIconComponent],
       imports: [

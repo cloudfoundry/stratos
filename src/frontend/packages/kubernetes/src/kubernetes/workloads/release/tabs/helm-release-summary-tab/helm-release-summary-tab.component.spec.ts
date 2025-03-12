@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SidePanelService } from '../../../../../../../core/src/shared/services/side-panel.service';
 import { TabNavService } from '../../../../../../../core/src/tab-nav.service';
@@ -15,7 +15,7 @@ describe('HelmReleaseSummaryTabComponent', () => {
   let component: HelmReleaseSummaryTabComponent;
   let fixture: ComponentFixture<HelmReleaseSummaryTabComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...WorkloadsBaseTestingModule

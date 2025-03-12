@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { HelmReleaseGuidMock } from '../../../../helm/helm-testing.module';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -10,7 +10,7 @@ describe('WorkloadLiveReloadComponent', () => {
   let component: WorkloadLiveReloadComponent;
   let fixture: ComponentFixture<WorkloadLiveReloadComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
@@ -8,7 +8,7 @@ describe('CloudFoundryCellAppsComponent', () => {
   let component: CloudFoundryCellAppsComponent;
   let fixture: ComponentFixture<CloudFoundryCellAppsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         CloudFoundryCellAppsComponent,

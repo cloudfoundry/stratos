@@ -1,5 +1,5 @@
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
@@ -9,7 +9,7 @@ describe('TableCellEditVariableComponent', () => {
   let component: TableCellEditVariableComponent;
   let fixture: ComponentFixture<TableCellEditVariableComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellEditVariableComponent],
       imports: [

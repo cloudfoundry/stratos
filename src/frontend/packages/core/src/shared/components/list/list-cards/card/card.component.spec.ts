@@ -1,6 +1,6 @@
 
 import { CoreModule } from '../../../../../core/core.module';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CardComponent, listCards } from './card.component';
 import { SharedModule } from '../../../../shared.module';
 import { EntityInfo } from '../../../../../../../store/src/types/api.types';
@@ -9,7 +9,7 @@ describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;
   let fixture: ComponentFixture<CardComponent<EntityInfo>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,

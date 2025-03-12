@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../core/src/core/core.module';
 import { SharedModule } from '../../../../../core/src/shared/shared.module';
@@ -8,7 +8,7 @@ describe('GitEndpointDetailsComponent', () => {
   let component: GitEndpointDetailsComponent;
   let fixture: ComponentFixture<GitEndpointDetailsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [GitEndpointDetailsComponent],
       imports: [

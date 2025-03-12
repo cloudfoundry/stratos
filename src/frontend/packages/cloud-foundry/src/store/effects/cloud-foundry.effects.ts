@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
@@ -24,8 +24,8 @@ export class CloudFoundryEffects {
     private store: Store<CFAppState>
   ) { }
 
-  @Effect()
-  fetchInfo$ = this.actions$.pipe(
+  
+  fetchInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetCFInfo>(GET_CF_INFO),
     flatMap(action => {
       const actionType = 'fetch';
@@ -66,5 +66,5 @@ export class CloudFoundryEffects {
           ])
         );
     })
-  );
+  ));
 }

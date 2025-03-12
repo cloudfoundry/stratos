@@ -12,8 +12,8 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 )
 
 const (
@@ -45,9 +45,9 @@ type SessionValueNotFound struct {
 
 // SessionInfoEnvelope -- contains response status, data and/or errors
 type SessionInfoEnvelope struct {
-	Status string           `json:"status"`
-	Error  string           `json:"error"`
-	Data   *interfaces.Info `json:"data"`
+	Status string    `json:"status"`
+	Error  string    `json:"error"`
+	Data   *api.Info `json:"data"`
 }
 
 func (e *SessionValueNotFound) Error() string {
@@ -209,7 +209,7 @@ func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {
 	c.Response().Header().Set(sessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
 
 	expiry := expOn.(time.Time)
-	expiryDuration := expiry.Sub(time.Now())
+	expiryDuration := time.Until(expiry)
 
 	// Subtract time now to get the duration add this to the time provided by the client
 	clientDate := c.Request().Header.Get(clientRequestDateHeader)
@@ -250,20 +250,20 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 
 	p.StratosAuthService.BeforeVerifySession(c)
 
-	collectErrors := func(p *portalProxy, c echo.Context) (*interfaces.Info, error) {
+	collectErrors := func(p *portalProxy, c echo.Context) (*api.Info, error) {
 		sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
 		if err != nil {
-			return nil, errors.New("Could not find session date")
+			return nil, errors.New("could not find session date")
 		}
 
 		sessionUser, err := p.GetSessionStringValue(c, "user_id")
 		if err != nil {
-			return nil, errors.New("Could not find user_id in Session")
+			return nil, errors.New("could not find user_id in Session")
 		}
 
 		err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
 		if err != nil {
-			return nil, errors.New("Could not verify user")
+			return nil, errors.New("could not verify user")
 		}
 
 		// Still need to extend the expires_on of the Session (set session will save session, in save we update `expires_on`)

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -16,11 +16,11 @@ const authTypeHttpBasic = "HttpBasic"
 
 // KubeBasicAuth is HTTP Basic Authentication
 type KubeBasicAuth struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // InitKubeBasicAuth creates a GKEKubeAuth
-func InitKubeBasicAuth(portalProxy interfaces.PortalProxy) *KubeBasicAuth {
+func InitKubeBasicAuth(portalProxy api.PortalProxy) *KubeBasicAuth {
 	return &KubeBasicAuth{portalProxy: portalProxy}
 }
 
@@ -29,7 +29,7 @@ func (c *KubeBasicAuth) GetName() string {
 	return authConnectTypeBasicAuth
 }
 
-func (c *KubeBasicAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubeBasicAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 	// Decode the token
 	authString, err := base64.StdEncoding.DecodeString(tokenRec.AuthToken)
 	if err != nil {
@@ -44,7 +44,7 @@ func (c *KubeBasicAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interf
 	return nil
 }
 
-func (c *KubeBasicAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
+func (c *KubeBasicAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 
 	log.Info("FetchToken")
 
@@ -58,7 +58,7 @@ func (c *KubeBasicAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 	authString := fmt.Sprintf("%s:%s", username, password)
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
-	tr := &interfaces.TokenRecord{
+	tr := &api.TokenRecord{
 		AuthType:     authConnectTypeBasicAuth,
 		AuthToken:    base64EncodedAuthString,
 		RefreshToken: username,
@@ -67,20 +67,20 @@ func (c *KubeBasicAuth) FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Con
 	return tr, &cnsiRecord, nil
 }
 
-func (c *KubeBasicAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
-	return &interfaces.ConnectedUser{
+func (c *KubeBasicAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
+	return &api.ConnectedUser{
 		// RefreshjToken is the username
 		GUID: fmt.Sprintf("%s-%s", cnsiGUID, cfTokenRecord.RefreshToken),
 		Name: cfTokenRecord.RefreshToken,
 	}, true
 }
 
-func (c *KubeBasicAuth) RegisterJetstreamAuthType(portal interfaces.PortalProxy) {
+func (c *KubeBasicAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 	// Register auth type with Jetstream - use the same as the HttpBasic auth
 
 	auth := c.portalProxy.GetAuthProvider(authTypeHttpBasic)
 	if auth.Handler != nil {
-		c.portalProxy.AddAuthProvider(c.GetName(), interfaces.AuthProvider{
+		c.portalProxy.AddAuthProvider(c.GetName(), api.AuthProvider{
 			Handler:  auth.Handler,
 			UserInfo: auth.UserInfo,
 		})

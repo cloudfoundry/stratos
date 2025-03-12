@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { UsageGaugeComponent } from './usage-gauge.component';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
@@ -9,7 +9,7 @@ describe('UsageGaugeComponent', () => {
   let component: UsageGaugeComponent;
   let fixture: ComponentFixture<UsageGaugeComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         UsageGaugeComponent,

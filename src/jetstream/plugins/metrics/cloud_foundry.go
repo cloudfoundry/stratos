@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 var (
@@ -56,11 +56,11 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	return m.makePrometheusRequest(c, cnsiList, "application_id=\""+appID+"\"")
 }
 
-func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []interfaces.ProxyRequestInfo {
+func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []api.ProxyRequestInfo {
 	// Construct the metadata for proxying
-	requests := make([]interfaces.ProxyRequestInfo, 0)
+	requests := make([]api.ProxyRequestInfo, 0)
 	for _, metric := range metrics {
-		req := interfaces.ProxyRequestInfo{}
+		req := api.ProxyRequestInfo{}
 		req.UserGUID = userGUID
 		req.ResultGUID = metric.endpoint.GUID
 		req.EndpointGUID = metric.metrics.EndpointGUID
@@ -154,7 +154,7 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 
 	// Only proceed if the user is an Cloud Foundry admin of all of the endpoints we are requesting metrics for
 	if !canAccessMetrics {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"You must be a Cloud Foundry admin to access CF-level metrics",
 			"You must be a Cloud Foundry admin to access CF-level metrics")

@@ -1,28 +1,28 @@
 package kubernetes
 
 import (
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/terminal"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/terminal"
 )
 
 // KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
 type KubernetesSpecification struct {
-	portalProxy  interfaces.PortalProxy
+	portalProxy  api.PortalProxy
 	endpointType string
 	kubeTerminal *terminal.KubeTerminal
 }
@@ -61,11 +61,11 @@ const (
 )
 
 func init() {
-	interfaces.AddPlugin("kubernetes", nil, Init)
+	api.AddPlugin("kubernetes", nil, Init)
 }
 
 // Init creates a new instance of the Kubernetes plugin
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	kubeTerminal := terminal.NewKubeTerminal(portalProxy)
 	kube := &KubernetesSpecification{portalProxy: portalProxy, endpointType: kubeEndpointType, kubeTerminal: kubeTerminal}
 	if kubeTerminal != nil {
@@ -74,15 +74,15 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 	return kube, nil
 }
 
-func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (c *KubernetesSpecification) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return c, nil
 }
 
-func (c *KubernetesSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (c *KubernetesSpecification) GetRoutePlugin() (api.RoutePlugin, error) {
 	return c, nil
 }
 
-func (c *KubernetesSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (c *KubernetesSpecification) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
@@ -99,7 +99,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interfaces.CNSIRecord, tokenRecord interfaces.TokenRecord) error {
+func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
 	log.Debugf("Validating Kubernetes endpoint connection for user: %s", userGUID)
 	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
@@ -116,7 +116,7 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord interface
 	return nil
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userID string) (*interfaces.TokenRecord, bool, error) {
+func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userID string) (*api.TokenRecord, bool, error) {
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
@@ -193,11 +193,11 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	}
 }
 
-func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
 
 	log.Debug("Kubernetes Info")
-	var v2InfoResponse interfaces.V2Info
-	var newCNSI interfaces.CNSIRecord
+	var v2InfoResponse api.V2Info
+	var newCNSI api.CNSIRecord
 
 	newCNSI.CNSIType = kubeEndpointType
 
@@ -207,7 +207,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	}
 
 	log.Debug("Request Kube API Versions")
-	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation)
+	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	res, err := httpClient.Get(apiEndpoint + "/api")
 	if err != nil {
 		// This should ultimately catch 503 cert errors
@@ -272,14 +272,14 @@ func parseErrorResponse(body []byte) error {
 	return errors.New("Could not understand response from Kubernetes endpoint")
 }
 
-func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+func (c *KubernetesSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
 }
 
 func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
 	url := ec.QueryParam("url")
 
 	log.Debug("Request Kube API Versions")
-	var httpClient = c.portalProxy.GetHttpClient(false)
+	var httpClient = c.portalProxy.GetHttpClient(false, "")
 	_, err := httpClient.Get(url + "/api")
 	var response struct {
 		Status   int
@@ -288,7 +288,7 @@ func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
 		Message  string
 	}
 	if err != nil {
-		if strings.Contains(err.Error(), "x509: certificate") {
+		if errors.Is(err, new(x509.CertificateInvalidError)) {
 			response.Status = http.StatusOK
 			response.Required = true
 		} else {

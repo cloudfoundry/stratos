@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
@@ -9,7 +9,7 @@ describe('ShowPageHeaderComponent', () => {
   let component: ShowPageHeaderComponent;
   let fixture: ComponentFixture<ShowPageHeaderComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ShowPageHeaderComponent],
       providers: [

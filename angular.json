@@ -63,9 +63,7 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -78,9 +76,7 @@
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": false,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": false,
@@ -95,7 +91,6 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "aot": true,
             "sslCert": "dev-ssl/server.crt",
             "proxyConfig": "proxy.conf.js",
             "ssl": true,
@@ -154,7 +149,7 @@
       "schematics": {},
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "preserveSymlinks": true,
             "outputPath": "dist/core",
@@ -168,20 +163,22 @@
           },
           "configurations": {
             "production": {
-              "budgets": [{
-                "type": "anyComponentStyle",
-                "maximumWarning": "6kb"
-              }],
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }],
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true
@@ -214,18 +211,6 @@
               }
             ]
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/core/tslint.json",
-            "files": [
-              "src/frontend/packages/core/src/**/*.ts"
-            ]
-          }
         }
       }
     },
@@ -236,7 +221,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "src/frontend/packages/store/tsconfig.lib.json",
             "project": "src/frontend/packages/store/ng-package.json"
@@ -254,6 +239,34 @@
             "tsConfig": "src/frontend/packages/store/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/store/karma.conf.js"
           }
+        }
+      }
+    },
+    "extension": {
+      "root": "src/frontend/packages/extension",
+      "sourceRoot": "src/frontend/packages/extension/src",
+      "projectType": "library",
+      "prefix": "ext",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "src/frontend/packages/extension/tsconfig.lib.json",
+            "project": "src/frontend/packages/extension/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "src/frontend/packages/extension/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "src/frontend/packages/extension/src/test.ts",
+            "tsConfig": "src/frontend/packages/extension/tsconfig.spec.json",
+            "karmaConfig": "src/frontend/packages/extension/karma.conf.js"
+          }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
@@ -261,14 +274,14 @@
             "tsConfig": [
               "src/tsconfig.json"
             ],
-            "tslintConfig": "src/frontend/packages/store/tslint.json",
+            "tslintConfig": "src/frontend/packages/extension/tslint.json",
             "files": [
-              "src/frontend/packages/store/src/**/*.ts"
+              "src/frontend/packages/extension/src/**/*.ts"
             ]
           }
         }
       }
-    },
+    },    
     "shared": {
       "root": "src/frontend/packages/shared",
       "sourceRoot": "src/frontend/packages/shared/src",
@@ -276,7 +289,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "src/frontend/packages/shared/tsconfig.lib.json",
             "project": "src/frontend/packages/shared/ng-package.json"
@@ -289,14 +302,6 @@
             "tsConfig": "src/frontend/packages/shared/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/shared/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": ["src/tsconfig.json"],
-            "tslintConfig": "src/frontend/packages/shared/tslint.json",
-            "files": ["src/frontend/packages/shared/src/**/*.ts"]
-          }
         }
       }
     },
@@ -307,7 +312,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.lib.json",
             "project": "src/frontend/packages/cloud-foundry/ng-package.json"
@@ -325,18 +330,6 @@
             "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/cloud-foundry/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/cloud-foundry/tslint.json",
-            "files": [
-              "src/frontend/packages/cloud-foundry/src/**/*.ts"
-            ]
-          }
         }
       }
     },
@@ -347,7 +340,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
             "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.json",
             "project": "src/frontend/packages/cf-autoscaler/ng-package.json"
@@ -365,18 +358,6 @@
             "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/cf-autoscaler/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/cf-autoscaler/tslint.json",
-            "files": [
-              "src/frontend/packages/cf-autoscaler/src/**/*.ts"
-            ]
-          }
         }
       }
     },
@@ -392,18 +373,6 @@
             "main": "src/frontend/packages/kubernetes/src/test.ts",
             "tsConfig": "src/frontend/packages/kubernetes/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/kubernetes/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/kubernetes/tslint.json",
-            "files": [
-              "src/frontend/packages/kubernetes/src/**/*.ts"
-            ]
           }
         }
       }
@@ -421,24 +390,11 @@
             "tsConfig": "src/frontend/packages/git/tsconfig.spec.json",
             "karmaConfig": "src/frontend/packages/git/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "src/tsconfig.json"
-            ],
-            "tslintConfig": "src/frontend/packages/git/tslint.json",
-            "files": [
-              "src/frontend/packages/git/src/**/*.ts"
-            ]
-          }
         }
       }
     }
 
   },
-  "defaultProject": "stratos",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
@@ -447,5 +403,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

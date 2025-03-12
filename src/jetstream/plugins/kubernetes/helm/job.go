@@ -3,7 +3,7 @@ package helm
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // KubeResourceJob = Resource(s) that we need to go and fetch
@@ -28,12 +28,12 @@ type KubeResourceJobResult struct {
 
 // KubeAPIJob represents a set of jobs to run against the Kube API
 type KubeAPIJob struct {
-	Jetstream interfaces.PortalProxy
+	Jetstream api.PortalProxy
 	Jobs      []KubeResourceJob
 }
 
 // NewKubeAPIJob returns a helper that can execute all jobs and return results
-func NewKubeAPIJob(jetstream interfaces.PortalProxy, jobs []KubeResourceJob) *KubeAPIJob {
+func NewKubeAPIJob(jetstream api.PortalProxy, jobs []KubeResourceJob) *KubeAPIJob {
 	r := &KubeAPIJob{
 		Jetstream: jetstream,
 		Jobs:      jobs,
@@ -67,7 +67,7 @@ func (j *KubeAPIJob) Run() []KubeResourceJobResult {
 	return res
 }
 
-func (j *KubeAPIJob) restWorker(jetstream interfaces.PortalProxy, id int, jobs <-chan KubeResourceJob, results chan<- KubeResourceJobResult) {
+func (j *KubeAPIJob) restWorker(jetstream api.PortalProxy, id int, jobs <-chan KubeResourceJob, results chan<- KubeResourceJobResult) {
 	for job := range jobs {
 		response, err := j.Jetstream.DoProxySingleRequest(job.Endpoint, job.User, "GET", job.URL, nil, nil)
 		log.Debugf("Rest Worker finished for: %s - %d", job.URL, response.StatusCode)

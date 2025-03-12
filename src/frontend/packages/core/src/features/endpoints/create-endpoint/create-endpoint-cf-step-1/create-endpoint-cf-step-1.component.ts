@@ -1,15 +1,15 @@
 import { AfterContentInit, Component, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
-
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import {
-  StratosCatalogEndpointEntity,
-} from '../../../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
+  ActionState,
+  stratosEntityCatalog,
+  entityCatalog,
+  StratosCatalogEndpointEntity
+} from '@stratosui/store';
+import { Observable } from 'rxjs';
+import { filter, map, pairwise } from 'rxjs/operators';
+
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
@@ -27,7 +27,7 @@ import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
-  registerForm: FormGroup;
+  registerForm: UntypedFormGroup;
 
   @Input() finalStep: boolean;
   private pFixedUrl: string;
@@ -56,10 +56,12 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   endpoint: StratosCatalogEndpointEntity;
   show = false;
 
+  showCACertField = false;
   showAdvancedOptions = false;
+  lastSkipSSLValue = false;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
     sessionService: SessionService,
@@ -71,12 +73,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.registerForm = this.fb.group({
       nameField: ['', [Validators.required]],
       urlField: ['', [Validators.required]],
-      skipSllField: [false, []],
+      skipSSLField: [false, []],
       ssoAllowedField: [false, []],
       // Optional Client ID and Client Secret
       clientIDField: ['', []],
       clientSecretField: ['', []],
       createSystemEndpointField: [true, []],
+      caCertField: ['', []],
     });
 
     const epType = getIdFromRoute(activatedRoute, 'type');
@@ -90,16 +93,24 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   onNext: StepOnNextFunction = () => {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
+
+    // SSL Setttings
+    let sslAllow = this.registerForm.value.skipSSLField;
+    if (this.showCACertField) {
+      sslAllow = false;
+    }
+
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
       this.registerForm.value.nameField,
       this.registerForm.value.urlField,
-      this.registerForm.value.skipSllField,
+      sslAllow,
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,
       this.registerForm.value.ssoAllowedField,
       this.registerForm.value.createSystemEndpointField,
+      this.registerForm.value.caCertField,
     ).pipe(
       pairwise(),
       filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
@@ -148,6 +159,16 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
+  }
+
+  toggleCACertField() {
+    this.showCACertField = !this.showCACertField;
+    if (this.showCACertField) {
+      this.lastSkipSSLValue = this.registerForm.value.skipSSLField;
+      this.registerForm.controls.skipSSLField.setValue(false);
+    } else {
+      this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue);
+    }
   }
 
   toggleCreateSystemEndpoint() {

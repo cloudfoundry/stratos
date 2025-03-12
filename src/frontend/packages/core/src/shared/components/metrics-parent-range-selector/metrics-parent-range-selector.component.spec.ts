@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
@@ -14,7 +14,7 @@ describe('MetricsParentRangeSelectorComponent', () => {
   let component: MetricsParentRangeSelectorComponent;
   let fixture: ComponentFixture<MetricsParentRangeSelectorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MetricsParentRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
       imports: [

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -59,7 +59,7 @@ type apiVersionAndKind struct {
 }
 
 // CreateServiceAccount will create a service account for accessing the Kubernetes Dashboard
-func CreateServiceAccount(p interfaces.PortalProxy, endpointGUID, userGUID string) error {
+func CreateServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
 	log.Debug("CreateServiceAccount")
 
 	svc, err := getKubeDashboardServiceInfo(p, endpointGUID, userGUID)
@@ -102,7 +102,7 @@ func replaceNamespace(definition, namespace string) []byte {
 }
 
 // DeleteServiceAccount will delete the service account
-func DeleteServiceAccount(p interfaces.PortalProxy, endpointGUID, userGUID string) error {
+func DeleteServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
 	log.Debug("DeleteServiceAccount")
 
 	svcAccount, err := getKubeDashboardServiceAccount(p, endpointGUID, userGUID, stratosServiceAccountSelector)
@@ -126,7 +126,7 @@ func DeleteServiceAccount(p interfaces.PortalProxy, endpointGUID, userGUID strin
 	return nil
 }
 
-func addErrorMessage(msg, prefix string, response *interfaces.CNSIRequest, err error) string {
+func addErrorMessage(msg, prefix string, response *api.CNSIRequest, err error) string {
 	errMsg := ""
 	if err != nil {
 		errMsg = fmt.Sprintf("%s - Error: %v", prefix, err.Error())
@@ -145,7 +145,7 @@ func addErrorMessage(msg, prefix string, response *interfaces.CNSIRequest, err e
 }
 
 // InstallDashboard will install the dashboard into a Kubernetes cluster
-func InstallDashboard(p interfaces.PortalProxy, endpointGUID, userGUID string) error {
+func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 	// Download the Yaml for the dashboard
 	kubeDashboardImage := p.Env().String("STRATOS_KUBERNETES_DASHBOARD_IMAGE", "")
 	if len(kubeDashboardImage) == 0 {
@@ -154,7 +154,7 @@ func InstallDashboard(p interfaces.PortalProxy, endpointGUID, userGUID string) e
 
 	log.Debugf("InstallDashboard: %s", kubeDashboardImage)
 
-	http := p.GetHttpClient(false)
+	http := p.GetHttpClient(false, "")
 	resp, err := http.Get(kubeDashboardImage)
 	if err != nil {
 		return fmt.Errorf("Could not download YAML to install the dashboard: %+v", err)
@@ -224,7 +224,7 @@ func isClusterAPI(api string) bool {
 }
 
 // DeleteDashboard will delete the dashboard from Kubernetes cluster
-func DeleteDashboard(p interfaces.PortalProxy, endpointGUID, userGUID string) error {
+func DeleteDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 	log.Debug("DeleteDashboard")
 
 	// Delete the service

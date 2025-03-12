@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MDAppModule } from '../../../../../../../../core/src/core/md.module';
@@ -14,7 +14,7 @@ describe('MetricsTabComponent', () => {
   let fixture: ComponentFixture<MetricsTabComponent>;
   const appId = '1';
   const cfId = '2';
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MetricsTabComponent],
       imports: [

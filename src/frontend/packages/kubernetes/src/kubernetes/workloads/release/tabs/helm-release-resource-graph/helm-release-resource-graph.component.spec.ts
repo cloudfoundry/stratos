@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 
@@ -16,7 +16,7 @@ describe('HelmReleaseResourceGraphComponent', () => {
   let component: HelmReleaseResourceGraphComponent;
   let fixture: ComponentFixture<HelmReleaseResourceGraphComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ...KubernetesBaseTestModules,

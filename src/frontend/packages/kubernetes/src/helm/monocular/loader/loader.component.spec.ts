@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CoreModule } from '@stratosui/core';
 
 import { LoaderComponent } from './loader.component';
@@ -8,7 +8,7 @@ describe('LoaderComponent', () => {
   let fixture: ComponentFixture<LoaderComponent>;
 
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         imports: [CoreModule],
         declarations: [LoaderComponent]

@@ -19,7 +19,13 @@
       textarea {
         max-height: 75px;
         min-height: 60px;
+        font-family: "Source Code Pro";
+        font-size: 14px;
+        line-break: anywhere;
       }
+    }
+    &__label {
+      font-size: 14px;
     }
   }
 }

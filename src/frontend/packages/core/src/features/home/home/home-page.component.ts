@@ -11,19 +11,22 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import {
+  IUserFavoritesGroups,
+  EndpointModel,
+  entityCatalog,
+  AuthState,
+  RouterNav,
+  AppState,
+  UserFavoriteManager,
+  selectDashboardState,
+  SetHomeCardLayoutAction,
+  SetDashboardStateValueAction,
+} from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
-import { SetHomeCardLayoutAction } from '../../../../../store/src/actions/dashboard-actions';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { EndpointModel, entityCatalog } from '../../../../../store/src/public-api';
-import { AuthState } from '../../../../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { UserFavoriteManager } from '../../../../../store/src/user-favorite-manager';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { SetDashboardStateValueAction } from './../../../../../store/src/actions/dashboard-actions';
-import { IUserFavoritesGroups } from './../../../../../store/src/types/favorite-groups.types';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
 

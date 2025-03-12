@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, EMPTY, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -28,7 +28,7 @@ export class PermissionsEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect() getCurrentUsersPermissions$ = this.actions$.pipe(
+   getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS),
     switchMap(action => {
       const allRequestsCompleted = entityCatalog.getAllBaseEndpointTypes().reduce((res, endpointType) => {
@@ -45,10 +45,10 @@ export class PermissionsEffects {
       console.warn('Failed to fetch current user permissions: ', err);
       return of(failedAction);
     })
-  );
+  ));
 
 
-  @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.pipe(
+   getPermissionForNewlyConnectedEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS),
     switchMap(action => {
       const endpointType = entityCatalog.getEndpoint(action.endpointType);
@@ -67,5 +67,5 @@ export class PermissionsEffects {
       console.warn('Failed to fetch current user permissions after endpoint connected: ', err);
       return of(failedAction);
     })
-  );
+  ));
 }

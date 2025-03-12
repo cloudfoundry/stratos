@@ -14,12 +14,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
-//More fields will be moved into here as global portalProxy struct is phased out
+// More fields will be moved into here as global portalProxy struct is phased out
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
@@ -27,17 +27,17 @@ type localAuth struct {
 	p                      *portalProxy
 }
 
-func (a *localAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+func (a *localAuth) ShowConfig(config *api.ConsoleConfig) {
 	log.Infof("... Local User              : %s", config.LocalUser)
 	log.Infof("... Local User Scope        : %s", config.LocalUserScope)
 }
 
-//Login provides Local-auth specific Stratos login
+// Login provides Local-auth specific Stratos login
 func (a *localAuth) Login(c echo.Context) error {
 
 	//This check will remain in until auth is factored down into its own package
-	if interfaces.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != interfaces.Local {
-		err := interfaces.NewHTTPShadowError(
+	if api.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != api.Local {
+		err := api.NewHTTPShadowError(
 			http.StatusNotFound,
 			"Local Login is not enabled",
 			"Local Login is not enabled")
@@ -50,7 +50,7 @@ func (a *localAuth) Login(c echo.Context) error {
 	if err != nil {
 		//Login failed, return response.
 		errMessage := err.Error()
-		err := interfaces.NewHTTPShadowError(
+		err := api.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			errMessage,
 			"Login failed: %v", err)
@@ -62,12 +62,12 @@ func (a *localAuth) Login(c echo.Context) error {
 	return err
 }
 
-//Logout provides Local-auth specific Stratos login
+// Logout provides Local-auth specific Stratos login
 func (a *localAuth) Logout(c echo.Context) error {
 	return a.logout(c)
 }
 
-//GetUsername gets the user name for the specified local user
+// GetUsername gets the user name for the specified local user
 func (a *localAuth) GetUsername(userid string) (string, error) {
 	log.Debug("GetUsername")
 
@@ -86,8 +86,8 @@ func (a *localAuth) GetUsername(userid string) (string, error) {
 	return localUser.Username, nil
 }
 
-//GetUser gets the user guid for the specified local user
-func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
+// GetUser gets the user guid for the specified local user
+func (a *localAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 	log.Debug("GetUser")
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
@@ -103,13 +103,12 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 
 	uaaAdmin := (user.Scope == a.p.Config.ConsoleConfig.ConsoleAdminScope)
 
-	var scopes []string
-	scopes = make([]string, 3)
+	scopes := make([]string, 3)
 	scopes[0] = user.Scope
 	scopes[1] = "password.write"
 	scopes[2] = "scim.write"
 
-	connectdUser := &interfaces.ConnectedUser{
+	connectdUser := &api.ConnectedUser{
 		GUID:   userGUID,
 		Name:   user.Username,
 		Admin:  uaaAdmin,
@@ -121,7 +120,7 @@ func (a *localAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) 
 
 func (a *localAuth) BeforeVerifySession(c echo.Context) {}
 
-//VerifySession verifies the session the specified local user, currently just verifies user exists
+// VerifySession verifies the session the specified local user, currently just verifies user exists
 func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
 	if err != nil {
@@ -133,7 +132,7 @@ func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExp
 	return err
 }
 
-//localLogin verifies local user credentials against our DB
+// localLogin verifies local user credentials against our DB
 func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	log.Debug("doLocalLogin")
 
@@ -141,7 +140,7 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	password := c.FormValue("password")
 
 	if len(username) == 0 || len(password) == 0 {
-		return "", username, errors.New("Needs usernameand password")
+		return "", username, errors.New("needs usernameand password")
 	}
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
@@ -158,21 +157,21 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	// Get the GUID for the specified user
 	guid, err := localUsersRepo.FindUserGUID(username)
 	if err != nil {
-		return guid, username, fmt.Errorf("Access Denied - Invalid username/password credentials")
+		return guid, username, fmt.Errorf("access Denied - Invalid username/password credentials")
 	}
 
 	//Attempt to find the password has for the given user
 	if hash, authError = localUsersRepo.FindPasswordHash(guid); authError != nil {
-		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
+		authError = fmt.Errorf("access Denied - Invalid username/password credentials")
 		//Check the password hash
 	} else if authError = crypto.CheckPasswordHash(password, hash); authError != nil {
-		authError = fmt.Errorf("Access Denied - Invalid username/password credentials")
+		authError = fmt.Errorf("access Denied - Invalid username/password credentials")
 	} else {
 		//Ensure the local user has some kind of admin role configured and we check for it here
 		localUserScope, authError = localUsersRepo.FindUserScope(guid)
 		scopeOK = strings.Contains(localUserScope, a.localUserScope)
 		if (authError != nil) || (!scopeOK) {
-			authError = fmt.Errorf("Access Denied - User scope invalid")
+			authError = fmt.Errorf("access Denied - User scope invalid")
 		} else {
 			//Update the last login time here if login was successful
 			loginTime := time.Now()
@@ -185,13 +184,12 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 	return guid, username, authError
 }
 
-//generateLoginSuccessResponse
+// generateLoginSuccessResponse
 func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64
-	expiry = math.MaxInt64
+	var expiry int64 = math.MaxInt64
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID
@@ -209,7 +207,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 		return err
 	}
 
-	resp := &interfaces.LoginRes{
+	resp := &api.LoginRes{
 		Account:     username,
 		TokenExpiry: expiry,
 		APIEndpoint: nil,
@@ -226,7 +224,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 	return err
 }
 
-//logout
+// logout
 func (a *localAuth) logout(c echo.Context) error {
 	log.Debug("logout")
 

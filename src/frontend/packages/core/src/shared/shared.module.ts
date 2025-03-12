@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { InternalEventMonitorFactory } from '@stratosui/store';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
@@ -83,6 +83,7 @@ import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubNavSectionComponent } from './components/page-sub-nav-section/page-sub-nav-section.component';
 import { PageSubNavComponent } from './components/page-sub-nav/page-sub-nav.component';
 import { PollingIndicatorComponent } from './components/polling-indicator/polling-indicator.component';
+import { ProductNameComponent } from './components/product-name.ccomponent';
 import { ProfileSettingsComponent } from './components/profile-settings/profile-settings.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RoutingIndicatorComponent } from './components/routing-indicator/routing-indicator.component';
@@ -119,7 +120,6 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
-
 
 @NgModule({
   imports: [
@@ -221,6 +221,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardProgressOverlayComponent,
     MaxListMessageComponent,
     ProfileSettingsComponent,
+    ProductNameComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -313,7 +314,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     CardProgressOverlayComponent,
     MaxListMessageComponent,
     ...listTableCells,
-    ProfileSettingsComponent
+    ProfileSettingsComponent,
+    ProductNameComponent,
   ],
   providers: [
     ListConfig,

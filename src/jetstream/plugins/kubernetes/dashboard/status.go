@@ -1,19 +1,19 @@
 package dashboard
 
 import (
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 const stratosServiceAccountSelector = "stratos-role%3Dkubernetes-dashboard-user"
 
 // KubeDashboardStatus will determine if the specified Kube endpoint has the dashboard installed and ready
-func KubeDashboardStatus(p interfaces.PortalProxy, endpointGUID, userGUID string, includeToken bool) (*StatusResponse, error) {
+func KubeDashboardStatus(p api.PortalProxy, endpointGUID, userGUID string, includeToken bool) (*StatusResponse, error) {
 
 	status := &StatusResponse{
-		Endpoint:  endpointGUID,
-		Installed: false,
-		Running:   false,
-		HasToken:  false,
+		Endpoint:         endpointGUID,
+		Installed:        false,
+		Running:          false,
+		HasToken:         false,
 		StratosInstalled: false,
 	}
 

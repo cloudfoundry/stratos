@@ -3,37 +3,37 @@ package cfappssh
 import (
 	"errors"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 )
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("cfappssh", []string{"cloudfoundry"}, Init)
+	api.AddPlugin("cfappssh", []string{"cloudfoundry"}, Init)
 }
 
 // CFAppSSH - Plugin to allow SSH into an application instance
 type CFAppSSH struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // Init creates a new CFAppSSH
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &CFAppSSH{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (CFAppSSH *CFAppSSH) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (CFAppSSH *CFAppSSH) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (CFAppSSH *CFAppSSH) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (CFAppSSH *CFAppSSH) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (CFAppSSH *CFAppSSH) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (CFAppSSH *CFAppSSH) GetRoutePlugin() (api.RoutePlugin, error) {
 	return CFAppSSH, nil
 }
 

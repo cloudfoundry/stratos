@@ -1,7 +1,6 @@
 /*eslint-disable*/
 /*tslint:disable*/
 
-
 export class MD5 {
 
   private static _string: string;

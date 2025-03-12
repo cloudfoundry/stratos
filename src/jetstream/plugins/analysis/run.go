@@ -11,7 +11,7 @@ import (
 	"net/textproto"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/analysis/store"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
 	"github.com/labstack/echo/v4"
 	uuid "github.com/satori/go.uuid"

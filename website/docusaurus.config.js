@@ -5,6 +5,8 @@ module.exports = {
   baseUrl: '/',
   favicon: 'img/favicon.ico',
   organizationName: 'cloudfoundry',
+  onBrokenLinks: 'warn',
+  onBrokenMarkdownLinks: 'warn',
   projectName: 'stratos',
   themeConfig: {
     navbar: {
@@ -16,10 +18,10 @@ module.exports = {
       items: [{
         type: 'docsVersionDropdown',
         position: 'right',
-        nextVersionLabel: 'Latest',
+        dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
       },
       {
-        to: 'docs/',
+        to: 'docs/introduction',
         activeBasePath: 'docs',
         label: 'Docs',
         position: 'right',
@@ -35,7 +37,7 @@ module.exports = {
         title: 'Docs',
         items: [{
           label: 'Getting Started',
-          to: 'docs/',
+          to: 'docs/introduction',
         },
         {
           label: 'Deploying Stratos',
@@ -70,16 +72,6 @@ module.exports = {
       defaultMode: 'light',
       disableSwitch: false,
       respectPrefersColorScheme: true,
-      switchConfig: {
-        darkIcon: '🌙',
-        darkIconStyle: {
-          marginLeft: '2px',
-        },
-        lightIcon: '☀️',
-        lightIconStyle: {
-          marginLeft: '1px',
-        },
-      },
     },
   },
   presets: [
@@ -88,7 +80,6 @@ module.exports = {
       {
         docs: {
           // It is recommended to set document id as docs home page (`docs/` path).
-          homePageId: 'introduction',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl: 'https://github.com/cloudfoundry/stratos/edit/master/website/',

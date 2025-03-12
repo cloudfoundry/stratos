@@ -4,7 +4,7 @@ title: Associate a Cloud Foundry database service
 sidebar_label: Database service bindings
 ---
 
-As described in the standard `cf push` instructions [here](cloud-foundry) Stratos, when deployed via `cf push`,
+As described in the standard `cf push` instructions [here](cloud-foundry.md) Stratos, when deployed via `cf push`,
 does not contain any way to persist data over application restarts and db entries such as registered endpoints
 and user tokens are lost. To resolve this a Cloud Foundry db service can be bound to to it. Run through
 the steps below to implement.

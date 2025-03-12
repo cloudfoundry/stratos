@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	. "github.com/smartystreets/goconvey/convey"
@@ -32,7 +32,7 @@ func (p *sessionTestPortalProxy) GetSession(c echo.Context) (*sessions.Session, 
 }
 
 type testSessionStore struct {
-	interfaces.SessionStorer
+	api.SessionStorer
 }
 
 func (p *testSessionStore) Get(req *http.Request, name string) (*sessions.Session, error) {

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
@@ -34,8 +34,8 @@ export class AnalysisEffects {
     private store: Store<AppState>,
   ) { }
 
-  @Effect()
-  fetchAnalysisReports$ = this.actions$.pipe(
+  
+  fetchAnalysisReports$ = createEffect(() => this.actions$.pipe(
     ofType<GetAnalysisReports>(GET_ANALYSIS_REPORTS_TYPES[0]),
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
@@ -70,10 +70,10 @@ export class AnalysisEffects {
         ])
       );
     })
-  );
+  ));
 
-  @Effect()
-  fetchAnalysisReportById$ = this.actions$.pipe(
+  
+  fetchAnalysisReportById$ = createEffect(() => this.actions$.pipe(
     ofType<GetAnalysisReportById>(GET_ANALYSIS_REPORT_BY_ID_TYPES[0]),
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
@@ -110,10 +110,10 @@ export class AnalysisEffects {
         ])
       );
     })
-  );
+  ));
 
-  @Effect()
-  fetchAnalysisReportByPath$ = this.actions$.pipe(
+  
+  fetchAnalysisReportByPath$ = createEffect(() => this.actions$.pipe(
     ofType<GetAnalysisReportsByPath>(GET_ANALYSIS_REPORTS_BY_PATH_TYPES[0]),
     flatMap(action => {
       this.store.dispatch(new StartRequestAction(action));
@@ -151,10 +151,10 @@ export class AnalysisEffects {
         ])
       );
     })
-  );
+  ));
 
-  @Effect()
-  deleteAnalysisReport$ = this.actions$.pipe(
+  
+  deleteAnalysisReport$ = createEffect(() => this.actions$.pipe(
     ofType<DeleteAnalysisReport>(DELETE_ANALYSIS_REPORT_TYPES[0]),
     flatMap(action => {
       const type: ApiRequestTypes = 'delete';
@@ -187,10 +187,10 @@ export class AnalysisEffects {
         ])
       );
     })
-  );
+  ));
 
-  @Effect()
-  runAnalysisReport$ = this.actions$.pipe(
+  
+  runAnalysisReport$ = createEffect(() => this.actions$.pipe(
     ofType<RunAnalysisReport>(RUN_ANALYSIS_REPORT_TYPES[0]),
     flatMap(action => {
       const type: ApiRequestTypes = 'create';
@@ -230,7 +230,7 @@ export class AnalysisEffects {
       );
 
     })
-  );
+  ));
 
 
   private processReport(report: any) {

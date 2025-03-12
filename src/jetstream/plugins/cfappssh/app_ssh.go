@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -68,12 +68,12 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return sendSSHError("Can not get Cloud Foundry endpoint plugin")
 	}
 
-	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation)
+	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
 	if err != nil {
 		return sendSSHError("Can not get Cloud Foundry info")
 	}
 
-	cfInfo, found := info.(interfaces.V2Info)
+	cfInfo, found := info.(api.V2Info)
 	if !found {
 		return sendSSHError("Can not get Cloud Foundry info")
 	}
@@ -123,7 +123,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 	defer connection.Close()
 
 	// Upgrade the web socket
-	ws, pingTicker, err := interfaces.UpgradeToWebSocket(c)
+	ws, pingTicker, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}

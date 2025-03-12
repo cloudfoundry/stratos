@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
@@ -35,7 +35,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   kubeEndpoints$: Observable<any>;
   validate$: Observable<boolean>;
 
-  details: FormGroup;
+  details: UntypedFormGroup;
   namespaces$: Observable<string[]>;
 
   private endpointChanged = new BehaviorSubject(null);
@@ -70,11 +70,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   private setupDetailsStep() {
-    this.details = new FormGroup({
-      endpoint: new FormControl('', Validators.required),
-      releaseName: new FormControl('', Validators.required),
-      releaseNamespace: new FormControl('', Validators.required),
-      createNamespace: new FormControl(false),
+    this.details = new UntypedFormGroup({
+      endpoint: new UntypedFormControl('', Validators.required),
+      releaseName: new UntypedFormControl('', Validators.required),
+      releaseNamespace: new UntypedFormControl('', Validators.required),
+      createNamespace: new UntypedFormControl(false),
     });
     this.details.controls.createNamespace.disable();
 

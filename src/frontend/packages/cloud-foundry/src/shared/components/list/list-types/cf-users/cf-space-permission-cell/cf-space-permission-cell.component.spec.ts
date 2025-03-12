@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModules,
@@ -10,7 +10,7 @@ describe('CfSpacePermissionCellComponent', () => {
   let component: CfSpacePermissionCellComponent;
   let fixture: ComponentFixture<CfSpacePermissionCellComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CfSpacePermissionCellComponent],
       imports: generateCfBaseTestModules(),

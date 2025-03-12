@@ -6,39 +6,39 @@ import (
 	"net/http"
 	"strconv"
 
-	goosedbversion "github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
 // Module init will register plugin
 func init() {
-	interfaces.AddPlugin("backup", nil, Init)
+	api.AddPlugin("backup", nil, Init)
 }
 
 // BackupRestore - Backup or restore endpoints and tokens
 type BackupRestore struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // Init creates a new backup/restore plugin
-func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
+func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &BackupRestore{portalProxy: portalProxy}, nil
 }
 
 // GetMiddlewarePlugin gets the middleware plugin for this plugin
-func (br *BackupRestore) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (br *BackupRestore) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
-func (br *BackupRestore) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (br *BackupRestore) GetEndpointPlugin() (api.EndpointPlugin, error) {
 	return nil, errors.New("Not implemented")
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
-func (br *BackupRestore) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (br *BackupRestore) GetRoutePlugin() (api.RoutePlugin, error) {
 	return br, nil
 }
 
@@ -73,7 +73,7 @@ func (br *BackupRestore) backupEndpoints(c echo.Context) error {
 
 	version, err := getDBVersion(br.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
+		return api.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
 	}
 
 	ctb := &cnsiTokenBackup{
@@ -97,7 +97,7 @@ func (br *BackupRestore) restoreEndpoints(c echo.Context) error {
 
 	version, err := getDBVersion(br.portalProxy.GetDatabaseConnection())
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
+		return api.NewHTTPShadowError(http.StatusBadGateway, "Could not find database version", "Could not find database version: %+v", err)
 	}
 
 	ctb := &cnsiTokenBackup{

@@ -9,12 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/dashboard"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/dashboard"
 )
 
 // Get the config for the endpoint
-func (k *KubernetesSpecification) getConfig(cnsiRecord *interfaces.CNSIRecord, tokenRecord *interfaces.TokenRecord) (*rest.Config, error) {
+func (k *KubernetesSpecification) getConfig(cnsiRecord *api.CNSIRecord, tokenRecord *api.TokenRecord) (*rest.Config, error) {
 	masterURL := cnsiRecord.APIEndpoint.String()
 	return k.GetConfigForEndpoint(masterURL, *tokenRecord)
 }
@@ -59,7 +59,7 @@ func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
 	status, _ := dashboard.KubeDashboardStatus(p, endpointGUID, userGUID, false)
 	jsonString, err := json.Marshal(status)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(
+		return api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Could not Kubernetes Dashboard status",
 			"Could not Kubernetes Dashboard status")
@@ -85,7 +85,7 @@ func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c echo.Conte
 
 	err := dashboard.CreateServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -101,7 +101,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c echo.Conte
 
 	err := dashboard.DeleteServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -117,7 +117,7 @@ func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c echo.Context) 
 
 	err := dashboard.InstallDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -133,7 +133,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c echo.Context) e
 
 	err := dashboard.DeleteDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return interfaces.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")

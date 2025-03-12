@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map } from 'rxjs/operators';
 
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
@@ -14,7 +14,7 @@ export class AppVariablesEffect {
     private actions$: Actions,
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.pipe(
+   apiRequestStart$ = createEffect(() => this.actions$.pipe(
     ofType<AppVariablesUpdate>(AppVariables.UPDATE),
     map((apiAction: AppVariablesUpdate) => cfEntityCatalog.application.actions.update(
       apiAction.appGuid,
@@ -23,5 +23,5 @@ export class AppVariablesEffect {
       null,
       [AppMetadataTypes.ENV_VARS]
     ))
-  );
+  ));
 }

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { generateCfBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
@@ -14,7 +14,7 @@ describe('CloudFoundryCellsComponent', () => {
   let component: CloudFoundryCellsComponent;
   let fixture: ComponentFixture<CloudFoundryCellsComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryCellsComponent],
       imports: generateCfBaseTestModules(),

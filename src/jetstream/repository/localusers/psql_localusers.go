@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -98,11 +98,11 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 	return userGUID.String, nil
 }
 
-//FindUser finds and returns meatdata for the given user
-func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (interfaces.LocalUser, error) {
+// FindUser finds and returns meatdata for the given user
+func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, error) {
 	log.Debug("FindUser")
 
-	var user interfaces.LocalUser
+	var user api.LocalUser
 	user.UserGUID = userGUID
 	if userGUID == "" {
 		msg := "Unable to find user without a valid user GUID"
@@ -145,7 +145,7 @@ func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (interfaces.LocalU
 	return user, nil
 }
 
-//FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
+// FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
 	log.Debug("FindUserScope")
 	if userGUID == "" {
@@ -169,8 +169,8 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 	return userScope, nil
 }
 
-//UpdateLastLoginTime called when a local user logs in.
-//It updates the last_login timestamp field in the local_users table for the given user.
+// UpdateLastLoginTime called when a local user logs in.
+// It updates the last_login timestamp field in the local_users table for the given user.
 func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
 	log.Debug("UpdateLastLoginTime")
 
@@ -199,7 +199,7 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 	return err
 }
 
-//FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
+// FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Time, error) {
 	log.Debug("FindLastLoginTime")
 
@@ -226,7 +226,7 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 
 // AddLocalUser - Add a new local user to the datastore.
 // Email is optional
-func (p *PgsqlLocalUsersRepository) AddLocalUser(user interfaces.LocalUser) error {
+func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 
 	log.Debug("AddLocalUser")
 
@@ -276,7 +276,7 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user interfaces.LocalUser) erro
 	return err
 }
 
-func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user interfaces.LocalUser) error {
+func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 	log.Debug("UpdateLocalUser")
 
 	//Validate args

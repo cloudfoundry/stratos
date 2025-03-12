@@ -23,7 +23,7 @@ if (backendPlugins.length === 0) {
 
     // Check that the plugin exists
     if (fs.existsSync(path.join(backendFolder, 'plugins', pkg))) {
-      fs.appendFileSync(backendPluginsFile, `import _ "github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/${pkg}"\n`);
+      fs.appendFileSync(backendPluginsFile, `import _ "github.com/cloudfoundry/stratos/src/jetstream/plugins/${pkg}"\n`);
       console.log(` + ${pkg}`)
     } else {
       console.log(` + ${pkg} : WARNING: Backend plugin does not exist`);

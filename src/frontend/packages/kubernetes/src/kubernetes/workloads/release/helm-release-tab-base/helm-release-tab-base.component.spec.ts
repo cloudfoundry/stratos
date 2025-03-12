@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { HelmReleaseProviders, KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -11,7 +11,7 @@ describe('HelmReleaseTabBaseComponent', () => {
   let component: HelmReleaseTabBaseComponent;
   let fixture: ComponentFixture<HelmReleaseTabBaseComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [...KubernetesBaseTestModules],
       declarations: [HelmReleaseTabBaseComponent],

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, first, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -116,8 +116,8 @@ export class HelmEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
   // Ensure that we refresh the charts when a repository finishes synchronizing
-  @Effect()
-  updateOnSyncFinished$ = this.actions$.pipe(
+  
+  updateOnSyncFinished$ = createEffect(() => this.actions$.pipe(
     ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
     flatMap(action => {
       // Look to see if we have any endpoints that are synchronizing
@@ -140,10 +140,10 @@ export class HelmEffects {
       }
       return [];
     })
-  );
+  ));
 
-  @Effect()
-  fetchCharts$ = this.actions$.pipe(
+  
+  fetchCharts$ = createEffect(() => this.actions$.pipe(
     ofType<GetMonocularCharts>(GET_MONOCULAR_CHARTS),
     withLatestFrom(this.store),
     flatMap(([action, appState]) => {
@@ -180,10 +180,10 @@ export class HelmEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  fetchVersions$ = this.actions$.pipe(
+  
+  fetchVersions$ = createEffect(() => this.actions$.pipe(
     ofType<GetHelmVersions>(GET_HELM_VERSIONS),
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
@@ -210,10 +210,10 @@ export class HelmEffects {
         return processedData;
       }, []);
     })
-  );
+  ));
 
-  @Effect()
-  fetchChartVersions$ = this.actions$.pipe(
+  
+  fetchChartVersions$ = createEffect(() => this.actions$.pipe(
     ofType<GetHelmChartVersions>(GET_MONOCULAR_CHART_VERSIONS),
     flatMap(action => {
       const entityKey = entityCatalog.getEntityKey(action);
@@ -240,10 +240,10 @@ export class HelmEffects {
           ''
       });
     })
-  );
+  ));
 
-  @Effect()
-  helmInstall$ = this.actions$.pipe(
+  
+  helmInstall$ = createEffect(() => this.actions$.pipe(
     ofType<HelmInstall>(HELM_INSTALL),
     flatMap(action => {
       const requestType: ApiRequestTypes = 'create';
@@ -271,10 +271,10 @@ export class HelmEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  helmSynchronise$ = this.actions$.pipe(
+  
+  helmSynchronise$ = createEffect(() => this.actions$.pipe(
     ofType<HelmSynchronise>(HELM_SYNCHRONISE),
     flatMap(action => {
       const requestArgs = {
@@ -291,10 +291,10 @@ export class HelmEffects {
       });
       return [];
     })
-  );
+  ));
 
-  @Effect()
-  endpointUnregister$ = this.actions$.pipe(
+  
+  endpointUnregister$ = createEffect(() => this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS_SUCCESS),
     flatMap(action => stratosEntityCatalog.endpoint.store.getEntityMonitor(action.guid).entity$.pipe(
       first(),
@@ -309,10 +309,10 @@ export class HelmEffects {
         ];
       })
     ))
-  );
+  ));
 
-  @Effect()
-  registerEndpoint$ = this.actions$.pipe(
+  
+  registerEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<EndpointActionComplete>(REGISTER_ENDPOINTS_SUCCESS),
     flatMap(action => {
       const endpoint: EndpointModel = action.endpoint as EndpointModel;
@@ -323,7 +323,7 @@ export class HelmEffects {
       }
       return [];
     })
-  );
+  ));
 
   private static createHelmErrorMessage(err: any): string {
     if (err) {

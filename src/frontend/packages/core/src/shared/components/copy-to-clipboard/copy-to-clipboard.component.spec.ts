@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
@@ -9,7 +9,7 @@ describe('CopyToClipboardComponent', () => {
   let component: CopyToClipboardComponent;
   let fixture: ComponentFixture<CopyToClipboardComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CopyToClipboardComponent],
       imports: [

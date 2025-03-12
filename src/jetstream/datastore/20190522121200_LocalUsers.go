@@ -2,9 +2,8 @@ package datastore
 
 import (
 	"database/sql"
-	"strings"
 
-	"bitbucket.org/liamstask/goose/lib/goose"
+	"github.com/pressly/goose"
 )
 
 // NOTE: This migration script has been modified
@@ -13,52 +12,57 @@ import (
 // Upgrades will still remove the trigger if it exists
 
 func init() {
-	RegisterMigration(20190522121200, "LocalUsers", func(txn *sql.Tx, conf *goose.DBConf) error {
-		binaryDataType := "BYTEA"
-		if strings.Contains(conf.Driver.Name, "mysql") {
-			binaryDataType = "BLOB"
-		}
+	goose.AddMigration(Up20190522121200, nil)
+}
 
-		//Add auth_endpoint_type to console_config table - allows ability to enable local users.
-		addColumn := "ALTER TABLE console_config ADD auth_endpoint_type VARCHAR(255);"
-		_, err := txn.Exec(addColumn)
-		if err != nil {
-			return err
-		}
+func Up20190522121200(txn *sql.Tx) error {
+	dialect := goose.GetDialect()
 
-		createLocalUsers := "CREATE TABLE IF NOT EXISTS local_users ("
-		createLocalUsers += "user_guid     VARCHAR(36) UNIQUE NOT NULL, "
-		createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
-		createLocalUsers += "user_name     VARCHAR(128)  UNIQUE NOT NULL, "
-		createLocalUsers += "user_email    VARCHAR(254), "
-		createLocalUsers += "user_scope    VARCHAR(64), "
-		createLocalUsers += "last_login    TIMESTAMP, "
-		createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-		createLocalUsers += "PRIMARY KEY (user_guid) )"
+	binaryDataType := "BYTEA"
 
-		//Configure Postgres migration options
-		if strings.Contains(conf.Driver.Name, "postgres") {
-			createLocalUsers += " WITH (OIDS=FALSE);"
-		} else {
-			createLocalUsers += ";"
-		}
+	if _, ok := dialect.(*goose.MySQLDialect); ok {
+		binaryDataType = "BLOB"
+	}
 
-		_, err = txn.Exec(createLocalUsers)
-		if err != nil {
-			return err
-		}
+	//Add auth_endpoint_type to console_config table - allows ability to enable local users.
+	addColumn := "ALTER TABLE console_config ADD auth_endpoint_type VARCHAR(255);"
+	_, err := txn.Exec(addColumn)
+	if err != nil {
+		return err
+	}
 
-		createIndex := "CREATE INDEX local_users_user_guid ON local_users (user_guid);"
-		_, err = txn.Exec(createIndex)
-		if err != nil {
-			return err
-		}
-		createIndex = "CREATE INDEX local_users_user_name ON local_users (user_name);"
-		_, err = txn.Exec(createIndex)
-		if err != nil {
-			return err
-		}
+	createLocalUsers := "CREATE TABLE IF NOT EXISTS local_users ("
+	createLocalUsers += "user_guid     VARCHAR(36) UNIQUE NOT NULL, "
+	createLocalUsers += "password_hash " + binaryDataType + "       NOT NULL, "
+	createLocalUsers += "user_name     VARCHAR(128)  UNIQUE NOT NULL, "
+	createLocalUsers += "user_email    VARCHAR(254), "
+	createLocalUsers += "user_scope    VARCHAR(64), "
+	createLocalUsers += "last_login    TIMESTAMP, "
+	createLocalUsers += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+	createLocalUsers += "PRIMARY KEY (user_guid) )"
 
-		return nil
-	})
+	//Configure Postgres migration options
+	if _, ok := dialect.(*goose.PostgresDialect); ok {
+		createLocalUsers += " WITH (OIDS=FALSE);"
+	} else {
+		createLocalUsers += ";"
+	}
+
+	_, err = txn.Exec(createLocalUsers)
+	if err != nil {
+		return err
+	}
+
+	createIndex := "CREATE INDEX local_users_user_guid ON local_users (user_guid);"
+	_, err = txn.Exec(createIndex)
+	if err != nil {
+		return err
+	}
+	createIndex = "CREATE INDEX local_users_user_name ON local_users (user_name);"
+	_, err = txn.Exec(createIndex)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

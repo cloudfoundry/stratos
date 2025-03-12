@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-
-import { IAuthForm } from '../../../../../../store/src/extension-types';
+import { UntypedFormGroup } from '@angular/forms';
+import { IAuthForm } from '@stratosui/store';
 
 @Component({
   selector: 'app-credentials-auth-form',
@@ -18,7 +17,7 @@ export class CredentialsAuthFormComponent implements IAuthForm {
     passwordLabel: 'Password'
   };
 
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
 
   get config(): any {
     return this.pConfig;

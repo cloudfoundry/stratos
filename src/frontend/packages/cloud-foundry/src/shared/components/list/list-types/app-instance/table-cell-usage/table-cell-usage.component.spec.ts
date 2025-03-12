@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';
 import { UtilsService } from '../../../../../../../../core/src/core/utils.service';
@@ -11,7 +11,7 @@ describe('TableCellUsageComponent', () => {
   let component: TableCellUsageComponent<EntityInfo>;
   let fixture: ComponentFixture<TableCellUsageComponent<EntityInfo>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         TableCellUsageComponent,

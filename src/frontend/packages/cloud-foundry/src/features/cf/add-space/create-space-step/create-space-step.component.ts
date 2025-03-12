@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -21,7 +21,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
   cfUrl: string;
-  createSpaceForm: FormGroup;
+  createSpaceForm: UntypedFormGroup;
   quotaSubscription: Subscription;
 
   get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
@@ -46,9 +46,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   ngOnInit() {
-    this.createSpaceForm = new FormGroup({
-      spaceName: new FormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
-      quotaDefinition: new FormControl(),
+    this.createSpaceForm = new UntypedFormGroup({
+      spaceName: new UntypedFormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
+      quotaDefinition: new UntypedFormControl(),
     });
 
     this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {

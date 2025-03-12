@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
@@ -37,7 +37,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;
   cfGuid: string;
   allQuotas: string[];
-  formGroup: FormGroup;
+  formGroup: UntypedFormGroup;
 
   @Input() quota: IQuotaDefinition;
 
@@ -55,18 +55,18 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   setupForm() {
     const quota: any = this.quota || {};
 
-    this.formGroup = new FormGroup({
-      name: new FormControl(quota.name || '', [Validators.required, this.nameTakenValidator()]),
-      totalServices: new FormControl(quota.total_services),
-      totalRoutes: new FormControl(quota.total_routes),
-      memoryLimit: new FormControl(quota.memory_limit),
-      instanceMemoryLimit: new FormControl(quota.instance_memory_limit),
-      nonBasicServicesAllowed: new FormControl(quota.non_basic_services_allowed || false),
-      totalReservedRoutePorts: new FormControl(quota.total_reserved_route_ports),
-      appInstanceLimit: new FormControl(quota.app_instance_limit),
-      totalServiceKeys: new FormControl(quota.total_service_keys),
-      totalPrivateDomains: new FormControl(quota.total_private_domains),
-      appTasksLimit: new FormControl(quota.app_task_limit),
+    this.formGroup = new UntypedFormGroup({
+      name: new UntypedFormControl(quota.name || '', [Validators.required, this.nameTakenValidator()]),
+      totalServices: new UntypedFormControl(quota.total_services),
+      totalRoutes: new UntypedFormControl(quota.total_routes),
+      memoryLimit: new UntypedFormControl(quota.memory_limit),
+      instanceMemoryLimit: new UntypedFormControl(quota.instance_memory_limit),
+      nonBasicServicesAllowed: new UntypedFormControl(quota.non_basic_services_allowed || false),
+      totalReservedRoutePorts: new UntypedFormControl(quota.total_reserved_route_ports),
+      appInstanceLimit: new UntypedFormControl(quota.app_instance_limit),
+      totalServiceKeys: new UntypedFormControl(quota.total_service_keys),
+      totalPrivateDomains: new UntypedFormControl(quota.total_private_domains),
+      appTasksLimit: new UntypedFormControl(quota.app_task_limit),
     });
   }
 

@@ -9,7 +9,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // CFConfigFile represents the data we need for CF config file
@@ -26,7 +26,7 @@ type CFConfigFile struct {
 }
 
 // ListCloudFoundry will list Cloud Foundry endpoints configured locally (can be only one)
-func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
+func ListCloudFoundry() ([]*api.CNSIRecord, error) {
 	cfg, apiEndpoint, err := readCFFile()
 	if err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
 		return nil, nil
 	}
 
-	eps := make([]*interfaces.CNSIRecord, 1)
-	eps[0] = &interfaces.CNSIRecord{
+	eps := make([]*api.CNSIRecord, 1)
+	eps[0] = &api.CNSIRecord{
 		GUID:                   getEndpointGUID(cfg.APIEndpoint),
 		Name:                   "CF",
 		CNSIType:               "cf",
@@ -56,7 +56,7 @@ func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
 }
 
 // ListConnectedCloudFoundry will list Cloud Foundry endpoints configured locally (can be only one)
-func ListConnectedCloudFoundry() ([]*interfaces.ConnectedEndpoint, error) {
+func ListConnectedCloudFoundry() ([]*api.ConnectedEndpoint, error) {
 	cfg, apiEndpoint, err := readCFFile()
 	if err != nil {
 		return nil, err
@@ -68,8 +68,8 @@ func ListConnectedCloudFoundry() ([]*interfaces.ConnectedEndpoint, error) {
 	}
 
 	//TODO: Token expiry
-	eps := make([]*interfaces.ConnectedEndpoint, 1)
-	eps[0] = &interfaces.ConnectedEndpoint{
+	eps := make([]*api.ConnectedEndpoint, 1)
+	eps[0] = &api.ConnectedEndpoint{
 		GUID:                   getEndpointGUID(cfg.APIEndpoint),
 		Name:                   "CF",
 		CNSIType:               "cf",
@@ -161,7 +161,7 @@ func IsLocalCloudFoundry(cnsiGUID string) bool {
 	return record != nil
 }
 
-func FindLocalCloudFoundry(cnsiGUID string) (*interfaces.CNSIRecord, error) {
+func FindLocalCloudFoundry(cnsiGUID string) (*api.CNSIRecord, error) {
 
 	local, err := ListCloudFoundry()
 	if err != nil {

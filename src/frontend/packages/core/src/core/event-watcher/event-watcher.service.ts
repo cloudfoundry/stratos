@@ -1,10 +1,10 @@
-
-import {fromEvent as observableFromEvent,  Observable } from 'rxjs';
-
-import {map, debounceTime} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 
 import { WindowRef } from '../window-ref/window-ref.service';
+
+import {fromEvent as observableFromEvent } from 'rxjs';
+import {map, debounceTime} from 'rxjs/operators';
+
 
 export class ResizeEventData {
   innerWidth: number;

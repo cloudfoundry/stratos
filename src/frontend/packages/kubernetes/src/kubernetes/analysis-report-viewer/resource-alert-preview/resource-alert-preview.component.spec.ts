@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ResourceAlertPreviewComponent } from './resource-alert-preview.component';
 import { ResourceAlertViewComponent } from './resource-alert-view/resource-alert-view.component';
@@ -9,7 +9,7 @@ describe('ResourceAlertPreviewComponent', () => {
   let component: ResourceAlertPreviewComponent;
   let fixture: ComponentFixture<ResourceAlertPreviewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ResourceAlertPreviewComponent, ResourceAlertViewComponent ],
       imports: [

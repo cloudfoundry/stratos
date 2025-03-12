@@ -6,7 +6,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/action"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // ListReleases will list the helm releases for all endpoints
@@ -25,7 +25,7 @@ func (c *KubernetesSpecification) ListReleases(ec echo.Context) error {
 }
 
 // List releases for a single endpoint
-func (c *KubernetesSpecification) listReleases(ep *interfaces.ConnectedEndpoint, done chan KubeProxyResponse) {
+func (c *KubernetesSpecification) listReleases(ep *api.ConnectedEndpoint, done chan KubeProxyResponse) {
 
 	response := KubeProxyResponse{
 		Endpoint: ep.GUID,

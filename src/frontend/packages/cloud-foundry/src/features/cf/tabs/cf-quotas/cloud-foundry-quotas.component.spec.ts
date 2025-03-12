@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import { CFBaseTestModules } from '../../../../../test-framework/cf-test-helper';
@@ -10,7 +10,7 @@ describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryQuotasComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryQuotasComponent],
       providers: [generateTestCfEndpointServiceProvider(), TabNavService, DatePipe],

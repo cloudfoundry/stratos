@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/analysis/store"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
 	"github.com/labstack/echo/v4"
 

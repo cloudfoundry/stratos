@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { UserProfileBannerComponent } from './user-profile-banner.component';
 import { MDAppModule } from '../../../core/md.module';
@@ -8,7 +8,7 @@ describe('UserProfileBannerComponent', () => {
   let component: UserProfileBannerComponent;
   let fixture: ComponentFixture<UserProfileBannerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ UserProfileBannerComponent ],
       imports: [

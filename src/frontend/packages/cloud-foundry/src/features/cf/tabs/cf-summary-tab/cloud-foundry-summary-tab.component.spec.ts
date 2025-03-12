@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TabNavService } from '../../../../../../core/src/tab-nav.service';
 import {
@@ -14,7 +14,7 @@ describe('CloudFoundrySummaryTabComponent', () => {
   let component: CloudFoundrySummaryTabComponent;
   let fixture: ComponentFixture<CloudFoundrySummaryTabComponent>;
   beforeEach(
-    async(() => {
+    waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [
           CloudFoundrySummaryTabComponent,

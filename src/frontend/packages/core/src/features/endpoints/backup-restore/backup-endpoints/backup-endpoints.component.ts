@@ -1,13 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import moment from 'moment';
+import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
-import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
-import { httpErrorResponseToSafeString } from '../../../../../../store/src/jetstream';
-import { stratosEntityCatalog } from '../../../../../../store/src/stratos-entity-catalog';
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -68,7 +65,7 @@ export class BackupEndpointsComponent implements OnDestroy {
 
   // Step 2
   passwordValid$: Observable<boolean>;
-  passwordForm: FormGroup;
+  passwordForm: UntypedFormGroup;
   showPassword: boolean[] = [];
 
   constructor(
@@ -109,9 +106,9 @@ export class BackupEndpointsComponent implements OnDestroy {
   }
 
   setupPasswordStep() {
-    this.passwordForm = new FormGroup({
-      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-      password2: new FormControl(''),
+    this.passwordForm = new UntypedFormGroup({
+      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
+      password2: new UntypedFormControl(''),
     });
     this.sub = this.passwordForm.controls.password.valueChanges.subscribe(value => this.passwordForm.controls.password2.setValidators(
       [Validators.required, Validators.pattern(value)]

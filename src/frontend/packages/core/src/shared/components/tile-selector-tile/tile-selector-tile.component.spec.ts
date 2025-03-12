@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TileSelectorTileComponent } from './tile-selector-tile.component';
 import { ITileImgConfig } from '../tile/tile-selector.types';
@@ -8,7 +8,7 @@ describe('TileSelectorTileComponent', () => {
   let component: TileSelectorTileComponent<ITileImgConfig>;
   let fixture: ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         MDAppModule

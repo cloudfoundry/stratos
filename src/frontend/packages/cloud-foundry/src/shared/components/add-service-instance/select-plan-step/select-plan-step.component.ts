@@ -7,7 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -65,7 +65,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
-  stepperForm: FormGroup;
+  stepperForm: UntypedFormGroup;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   displayNames: { [guid: string]: string } = {};
 
@@ -77,8 +77,8 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
-    this.stepperForm = new FormGroup({
-      servicePlans: new FormControl('', Validators.required),
+    this.stepperForm = new UntypedFormGroup({
+      servicePlans: new UntypedFormControl('', Validators.required),
     });
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(

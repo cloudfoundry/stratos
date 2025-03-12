@@ -4,24 +4,24 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // TokenStore is a token store that combines local tokens with the usual database stored tokens
 type TokenStore struct {
-	portalProxy interfaces.PortalProxy
-	store       interfaces.TokenRepository
+	portalProxy api.PortalProxy
+	store       api.TokenRepository
 }
 
-func (d *TokenStore) FindAuthToken(userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (d *TokenStore) FindAuthToken(userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 	return d.store.FindAuthToken(userGUID, encryptionKey)
 }
 
-func (d *TokenStore) SaveAuthToken(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error {
+func (d *TokenStore) SaveAuthToken(userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error {
 	return d.store.SaveAuthToken(userGUID, tokenRecord, encryptionKey)
 }
 
-func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 
 	// Main method that we need to override to get the token for the given endpoint
 	local, err := ListCloudFoundry()
@@ -35,7 +35,7 @@ func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionK
 					if strings.HasPrefix(authToken, "bearer ") {
 						authToken = authToken[7:]
 					}
-					return interfaces.TokenRecord{
+					return api.TokenRecord{
 						TokenGUID:      cnsiGUID,
 						AuthToken:      authToken,
 						RefreshToken:   cfg.RefreshToken,
@@ -56,7 +56,7 @@ func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionK
 	return d.store.FindCNSIToken(cnsiGUID, userGUID, encryptionKey)
 }
 
-func (d *TokenStore) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (interfaces.TokenRecord, error) {
+func (d *TokenStore) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 	// Main method that we need to override to get the token for the given endpoint
 	if IsLocalCloudFoundry(cnsiGUID) {
 		return d.FindCNSIToken(cnsiGUID, userGUID, encryptionKey)
@@ -65,7 +65,7 @@ func (d *TokenStore) FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID 
 	return d.store.FindCNSITokenIncludeDisconnected(cnsiGUID, userGUID, encryptionKey)
 }
 
-func (d *TokenStore) FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byte) ([]interfaces.BackupTokenRecord, error) {
+func (d *TokenStore) FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byte) ([]api.BackupTokenRecord, error) {
 	return d.store.FindAllCNSITokenBackup(cnsiGUID, encryptionKey)
 }
 
@@ -83,12 +83,12 @@ func (d *TokenStore) DeleteCNSITokens(cnsiGUID string) error {
 	return d.store.DeleteCNSITokens(cnsiGUID)
 }
 
-func (d *TokenStore) SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error {
+func (d *TokenStore) SaveCNSIToken(cnsiGUID string, userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error {
 	return d.store.SaveCNSIToken(cnsiGUID, userGUID, tokenRecord, encryptionKey)
 }
 
 // UpdateTokenAuth will update a token's auth data
-func (d *TokenStore) UpdateTokenAuth(userGUID string, tokenRecord interfaces.TokenRecord, encryptionKey []byte) error {
+func (d *TokenStore) UpdateTokenAuth(userGUID string, tokenRecord api.TokenRecord, encryptionKey []byte) error {
 	if IsLocalCloudFoundry(tokenRecord.TokenGUID) {
 		updates := make(map[string]string)
 		updates["AccessToken"] = fmt.Sprintf("bearer %s", tokenRecord.AuthToken)

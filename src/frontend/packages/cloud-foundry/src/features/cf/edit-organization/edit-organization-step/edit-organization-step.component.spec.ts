@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {
   generateCfBaseTestModules,
@@ -14,7 +14,7 @@ describe('EditOrganizationStepComponent', () => {
   let component: EditOrganizationStepComponent;
   let fixture: ComponentFixture<EditOrganizationStepComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationStepComponent],
       imports: generateCfBaseTestModules(),

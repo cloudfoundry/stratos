@@ -6,17 +6,17 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
 // LocalUserInfo is a plugin to fetch user info
 type LocalUserInfo struct {
-	portalProxy interfaces.PortalProxy
+	portalProxy api.PortalProxy
 }
 
 // InitLocalUserInfo creates a new local user info provider
-func InitLocalUserInfo(portalProxy interfaces.PortalProxy) Provider {
+func InitLocalUserInfo(portalProxy api.PortalProxy) Provider {
 	return &LocalUserInfo{portalProxy: portalProxy}
 }
 
@@ -124,7 +124,7 @@ func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordC
 	err = bcrypt.CompareHashAndPassword(hash, []byte(passwordInfo.OldPassword))
 	if err != nil {
 		// Old password is incorrect
-		return 500, interfaces.NewHTTPShadowError(
+		return 500, api.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Current password is incorrect",
 			"Current password is incorrect: %v", err,
@@ -145,7 +145,7 @@ func (userInfo *LocalUserInfo) UpdatePassword(id string, passwordInfo *passwordC
 	return 200, nil
 }
 
-//HashPassword accepts a plaintext password string and generates a salted hash
+// HashPassword accepts a plaintext password string and generates a salted hash
 func HashPassword(password string) ([]byte, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return bytes, err

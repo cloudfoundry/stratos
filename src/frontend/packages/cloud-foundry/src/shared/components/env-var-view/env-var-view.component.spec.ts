@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
@@ -12,7 +12,7 @@ describe('EnvVarViewComponent', () => {
   let component: EnvVarViewComponent;
   let fixture: ComponentFixture<EnvVarViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         EnvVarViewComponent,

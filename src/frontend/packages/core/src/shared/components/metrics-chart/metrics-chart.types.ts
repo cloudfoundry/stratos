@@ -1,4 +1,4 @@
-import { MetricsAction } from '../../../../../store/src/actions/metrics.actions';
+import { MetricsAction } from '@stratosui/store';
 
 export interface IMetricsConfig<T = any> {
   metricsAction: MetricsAction;

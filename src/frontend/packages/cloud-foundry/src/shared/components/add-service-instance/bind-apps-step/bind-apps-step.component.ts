@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
@@ -28,7 +28,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   validateSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(true);
   serviceInstanceGuid: string;
-  stepperForm: FormGroup;
+  stepperForm: UntypedFormGroup;
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan: APIResource<IServicePlan>;
   bindingParams: object = {};
@@ -37,8 +37,8 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   constructor(
     private store: Store<CFAppState>,
   ) {
-    this.stepperForm = new FormGroup({
-      apps: new FormControl(''),
+    this.stepperForm = new UntypedFormGroup({
+      apps: new UntypedFormControl(''),
     });
   }
 

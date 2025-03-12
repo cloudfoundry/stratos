@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -21,7 +21,7 @@ func (m *Monocular) getRepoStatuses(c echo.Context) error {
 	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return interfaces.NewJetstreamError("Could not read request body")
+		return api.NewJetstreamError("Could not read request body")
 	}
 
 	info := helmStatusInfo{}
@@ -39,7 +39,7 @@ func (m *Monocular) getRepoStatuses(c echo.Context) error {
 			info[guid] = newVal
 		}
 	} else {
-		return interfaces.NewJetstreamError("Could not parse Helm Endpoint IDs")
+		return api.NewJetstreamError("Could not parse Helm Endpoint IDs")
 	}
 
 	return c.JSON(200, info)

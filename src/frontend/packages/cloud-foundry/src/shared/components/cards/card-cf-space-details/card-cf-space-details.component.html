@@ -19,7 +19,7 @@
             <ng-template #fallBackQuota>
               None assigned
               <span *ngIf="cfSpaceService.quotaDefinition$ | async as quotaDefinition"> - <a
-                  [routerLink]="" (click)="goToOrgQuota($event)">view organization's quota</a>
+                  [routerLink]="[]" (click)="goToOrgQuota($event)">view organization's quota</a>
               </span>
             </ng-template>
           </app-metadata-item>

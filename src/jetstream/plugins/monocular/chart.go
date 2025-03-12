@@ -54,8 +54,8 @@ type ChartVersion struct {
 	Schema     string    `json:"schema"`
 }
 
-//RepoCheck describes the state of a repository in terms its current checksum and last update time.
-//It is used to determine whether or not to re-sync a respository.
+// RepoCheck describes the state of a repository in terms its current checksum and last update time.
+// It is used to determine whether or not to re-sync a respository.
 type RepoCheck struct {
 	ID         string    `bson:"_id"`
 	LastUpdate time.Time `bson:"last_update"`

@@ -10,11 +10,11 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // GetConfigForEndpoint gets a config for the Kubernetes go-client for the specified endpoint
-func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token interfaces.TokenRecord) (*restclient.Config, error) {
+func (c *KubernetesSpecification) GetConfigForEndpoint(masterURL string, token api.TokenRecord) (*restclient.Config, error) {
 	return clientcmd.BuildConfigFromKubeconfigGetter(masterURL, func() (*clientcmdapi.Config, error) {
 		return c.getKubeConfigForEndpoint(masterURL, token, "")
 	})
@@ -55,7 +55,7 @@ func (c *KubernetesSpecification) GetKubeConfigForEndpointUser(endpointID, userI
 	return c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRec, "")
 }
 
-func (c *KubernetesSpecification) getKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (*clientcmdapi.Config, error) {
+func (c *KubernetesSpecification) getKubeConfigForEndpoint(masterURL string, token api.TokenRecord, namespace string) (*clientcmdapi.Config, error) {
 
 	name := "cluster-0"
 
@@ -90,7 +90,7 @@ func (c *KubernetesSpecification) getKubeConfigForEndpoint(masterURL string, tok
 }
 
 // GetKubeConfigForEndpoint gets a Kube Config file contents for the specified endpoint
-func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token interfaces.TokenRecord, namespace string) (string, error) {
+func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, token api.TokenRecord, namespace string) (string, error) {
 
 	config, err := c.getKubeConfigForEndpoint(masterURL, token, namespace)
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, tok
 	return string(kconfig), nil
 }
 
-func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error {
+func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 
 	log.Debug("addAuthInfoForEndpoint")
 	var authProvider = c.GetAuthProvider(tokenRec.AuthType)

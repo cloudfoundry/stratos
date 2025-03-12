@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/labstack/echo/v4"
@@ -14,16 +14,16 @@ import (
 // KubeAuthProvider is the interface for Kubernetes Authentication Providers
 type KubeAuthProvider interface {
 	GetName() string
-	AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec interfaces.TokenRecord) error
-	FetchToken(cnsiRecord interfaces.CNSIRecord, ec echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error)
+	AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error
+	FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error)
 
-	RegisterJetstreamAuthType(portal interfaces.PortalProxy)
+	RegisterJetstreamAuthType(portal api.PortalProxy)
 }
 
 // KubeJetstreamAuthProvider is the optional interface that can be implemented if you want to control Jetstream Auth Registration
 type KubeJetstreamAuthProvider interface {
-	DoFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error)
-	GetUserFromToken(cnsiGUID string, tokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool)
+	DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error)
+	GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool)
 }
 
 // KubeCertificate represents certificate infor for Kube Authentication

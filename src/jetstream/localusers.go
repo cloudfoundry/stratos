@@ -7,16 +7,16 @@ import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/localusers"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
 func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
 	username := c.FormValue("username")
 
 	if len(username) == 0 {
-		return "", errors.New("Needs username")
+		return "", errors.New("needs username")
 	}
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
@@ -43,7 +43,7 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	email := c.FormValue("email")
 
 	if len(username) == 0 || len(password) == 0 || len(scope) == 0 {
-		return "", errors.New("Needs username, password and scope")
+		return "", errors.New("needs username, password and scope")
 	}
 
 	//Generate a user GUID and hash the password
@@ -58,7 +58,7 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	if err != nil {
 		log.Errorf("Database error getting repo for local users: %v", err)
 	} else {
-		user := interfaces.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
+		user := api.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
 			log.Errorf("Error adding local user %v", err)

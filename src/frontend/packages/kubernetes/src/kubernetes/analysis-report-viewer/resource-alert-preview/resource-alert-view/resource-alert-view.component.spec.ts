@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { MDAppModule } from '../../../../../../core/src/public-api';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
@@ -10,7 +10,7 @@ describe('ResourceAlertViewComponent', () => {
   let component: ResourceAlertViewComponent;
   let fixture: ComponentFixture<ResourceAlertViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ResourceAlertViewComponent],
       imports: [

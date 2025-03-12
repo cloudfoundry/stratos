@@ -1,4 +1,5 @@
 import { ITileConfig, ITileData, ITileGraphic } from './tile-selector.types';
+
 /**
  * deprecated
  */

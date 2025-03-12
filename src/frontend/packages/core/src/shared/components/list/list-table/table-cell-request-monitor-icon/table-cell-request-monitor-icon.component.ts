@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { getRowMetadata } from '@stratosui/store';
+import { getRowMetadata, EntitySchema, APIResource } from '@stratosui/store';
 
-import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellCustom } from '../../list.types';
 

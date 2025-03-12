@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/release"
 	appsv1 "k8s.io/api/apps/v1"
@@ -59,7 +59,7 @@ func (r *KubeResource) getID() string {
 }
 
 // NewHelmRelease represents extended info about a Helm Release
-func NewHelmRelease(info *release.Release, endpoint, user string, jetstream interfaces.PortalProxy) *HelmRelease {
+func NewHelmRelease(info *release.Release, endpoint, user string, jetstream api.PortalProxy) *HelmRelease {
 	r := &HelmRelease{
 		Release:  info,
 		Endpoint: endpoint,
@@ -185,7 +185,7 @@ func (r *HelmRelease) processYamlResource(obj interface{}, data []byte) {
 }
 
 // process a yaml resource from the helm manifest
-//func (r *HelmRelease) processResource(obj runtime.Object) {
+// func (r *HelmRelease) processResource(obj runtime.Object) {
 func (r *HelmRelease) processKubeResource(obj interface{}, t KubeResource) {
 	t.Resource = obj
 	t.Manifest = true
@@ -256,7 +256,7 @@ func (r *HelmRelease) processPodSelector(kres KubeResource, selector *metav1.Lab
 
 // UpdatePods will run the jobs needed to get the pods
 // This uses the selectors to find the pods - so new pods should be picked up
-func (r *HelmRelease) UpdatePods(jetstream interfaces.PortalProxy) {
+func (r *HelmRelease) UpdatePods(jetstream api.PortalProxy) {
 	var jobs []KubeResourceJob
 	for _, job := range r.PodJobs {
 		jobs = append(jobs, job)
@@ -338,7 +338,7 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 	}
 }
 
-func (r *HelmRelease) UpdateResources(jetstream interfaces.PortalProxy) {
+func (r *HelmRelease) UpdateResources(jetstream api.PortalProxy) {
 	// This will be an array of resources
 	runner := NewKubeAPIJob(jetstream, r.Jobs)
 	res := runner.Run()

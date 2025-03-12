@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import {
+  ThemeService,
+  UserProfileInfo,
+} from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ThemeService } from '../../../../../store/src/theme.service';
-import { UserProfileInfo } from '../../../../../store/src/types/user-profile.types';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';

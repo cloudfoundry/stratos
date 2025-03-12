@@ -11,13 +11,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, first, map, switchMap, tap } from 'rxjs/operators';
 
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { EndpointOnlyAppState } from '../../../../../store/src/app-state';
-import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
