@@ -12,12 +12,14 @@ import (
 
 	"code.cloudfoundry.org/cli/actor/sharedaction"
 	"code.cloudfoundry.org/cli/actor/v7action"
+	"code.cloudfoundry.org/cli/actor/v7pushaction"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
 	"code.cloudfoundry.org/cli/cf/commandregistry"
 	"code.cloudfoundry.org/cli/command"
 	"code.cloudfoundry.org/clock"
 
 	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/util/manifestparser"
 	"code.cloudfoundry.org/cli/util/progressbar"
 	"code.cloudfoundry.org/cli/util/ui"
 	"github.com/gorilla/websocket"
@@ -223,6 +225,8 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 
 	// Manifest path
 	c.pushCommand.PathToManifest = flag.ManifestPathWithExistenceCheck(manifestPath)
+	c.pushCommand.ManifestLocator = manifestparser.NewLocator()
+	c.pushCommand.ManifestParser = manifestparser.ManifestParser{}
 
 	return nil
 }
@@ -231,6 +235,8 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 func (c *CFPushApp) setConfig(config *configv3.Config) error {
 	config.SetOrganizationInformation(c.config.OrgGUID, c.config.OrgName)
 	config.SetSpaceInformation(c.config.SpaceGUID, c.config.SpaceName, false)
+	c.pushCommand.VersionActor = c.pushCommand.Actor
+	c.pushCommand.PushActor = v7pushaction.NewActor(c.pushCommand.Actor, sharedaction.NewActor(config))
 	return nil
 }
 
@@ -263,7 +269,11 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 	defer commandUI.FlushDeferred()
 
 	err = c.setup(config, commandUI, msgSender, clientWebsocket)
-	// err = c.pushCommand.Setup(config, commandUI)
+	if err != nil {
+		return handleError(err, *commandUI)
+	}
+
+	err = c.pushCommand.Setup(config, commandUI)
 	if err != nil {
 		return handleError(err, *commandUI)
 	}
@@ -276,6 +286,7 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 
 	// Set to a null progress bar
 	c.pushCommand.ProgressBar = &cfPushProgressBar{}
+	c.pushCommand.DiffDisplayer = shared.NewManifestDiffDisplayer(commandUI)
 
 	// Perform the push
 	args := make([]string, 0)
@@ -294,7 +305,7 @@ func (c *CFPushApp) setup(config command.Config, ui command.UI, msgSender Deploy
 	sharedActor := sharedaction.NewActor(config)
 	cmd.SharedActor = sharedActor
 
-	ccClient, uaaClient, routingClient, err := shared.GetNewClientsAndConnectToCF(config, ui, ccversion.MinSupportedClientVersionV8)
+	ccClient, uaaClient, routingClient, err := shared.GetNewClientsAndConnectToCF(config, ui, ccversion.MinSupportedV2ClientVersion)
 	if err != nil {
 		return err
 	}
@@ -313,6 +324,7 @@ func (c *CFPushApp) setup(config command.Config, ui command.UI, msgSender Deploy
 		return err
 	}
 
+	ccClientV3.Requester = ccClient.Requester
 	v7Actor := v7action.NewActor(ccClientV3, config, sharedActor, uaaClient, routingClient, clock.NewClock())
 
 	cmd.Actor = v7Actor
