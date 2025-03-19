@@ -3,6 +3,7 @@ import { ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/t
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
+import { PaginationEntityState } from 'frontend/packages/store/src/types/pagination.types';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -16,6 +17,7 @@ import { CoreTestingModule } from '../../../../test-framework/core-test.modules'
 import { CoreModule } from '../../../core/core.module';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { SharedModule } from '../../shared.module';
+import { getFilterFunction } from './data-sources-controllers/local-filtering-sorting';
 import { EndpointCardComponent } from './list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './list-types/endpoint/endpoint-list.helpers';
 import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list-config.service';
@@ -319,6 +321,48 @@ describe('ListComponent', () => {
       const noEntriesMessage: HTMLElement = hostElement.querySelector('.list-component__default-no-entries');
       expect(noEntriesMessage.hidden).toBeFalsy();
     });
+
+    it ('getFilterFunction correctly filters entities when the field value is an array', () => {
+      const filterbyTags = getFilterFunction({
+        type: 'filter',
+        field: 'entity.tags'
+      })
+
+      const entities: APIResource[] = [
+        {
+          metadata: { created_at: '2025-02-02', guid: '1', updated_at: '2025-02-03', url: '/url1' },
+          entity: { tags: ['hello', 'world'] }
+        },
+        {
+          metadata: { created_at: '2022-01-02', guid: '2', updated_at: '2022-01-03', url: '/url2' },
+          entity: { tags: ['bye', 'world'] }
+        },
+      ]
+
+      const paginationState: PaginationEntityState = {
+        currentPage: 1,
+        totalResults: 2,
+        pageCount: 1,
+        ids: {},
+        params: {},
+        pageRequests: {},
+        clientPagination: {
+          pageSize: 10,
+          currentPage: 1,
+          filter: {
+            string: 'hello', // Filtering for 'hello'
+            items: {}
+          },
+          totalResults: 2
+        },
+        maxedState: {},
+        isListPagination: false
+      };
+      const result = filterbyTags(entities, paginationState)
+
+      expect(result.length).toBe(1);
+      expect(result[0].entity.tags).toEqual(['hello', 'world']);
+    })
 
   });
 

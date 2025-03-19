@@ -1,5 +1,6 @@
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
+import { getDataFunctionList } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { serviceEntityType } from '../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -29,9 +30,24 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
       paginationKey,
       isLocal: true,
       transformEntities: [
-        {
-          type: 'filter',
-          field: 'entity.label'
+        (entities: APIResource[], paginationState: PaginationEntityState) => {
+          const [filterByLabel, filterByTags] = getDataFunctionList(
+            [{
+              type: 'filter',
+              field: 'entity.label'
+            },
+            {
+              type: 'filter',
+              field: 'entity.tags'
+            }]
+          )
+          console.log("before")
+          console.log(entities[0])
+          const labels = filterByLabel(entities, paginationState)
+          const tags = filterByTags(entities, paginationState)
+          console.log("after")
+          console.log(entities[0])
+          return [...labels, ...tags]
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           const cfGuid = paginationState.clientPagination.filter.items.cf;

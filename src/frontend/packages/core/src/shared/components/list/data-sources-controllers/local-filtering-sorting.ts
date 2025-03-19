@@ -21,7 +21,7 @@ function getFieldArray(def: DataFunctionDefinition) {
   return def.field.split('.');
 }
 
-function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
+export function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
     const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
@@ -30,11 +30,14 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
     }
     return entities.filter(e => {
       e = extractActualListEntity(e);
-      const value = getValue(e, fieldArray, 0, true);
+      let value = getValue(e, fieldArray, 0, true);
       if (!value) {
         return false;
       }
-      return value.toUpperCase().includes(upperCaseFilter);
+      if (Array.isArray(value)) {
+        value = value.join(",")
+        return value.toUpperCase().includes(upperCaseFilter);
+      }
     });
   };
 }
