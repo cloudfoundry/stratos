@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -9,4 +9,13 @@ import { IService } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-bindable.component.html',
   styleUrls: ['./table-cell-service-bindable.component.scss']
 })
-export class TableCellServiceBindableComponent extends TableCellCustom<APIResource<IService>>  { }
+export class TableCellServiceBindableComponent extends TableCellCustom<APIResource<IService>>  {
+  @Input()
+  set row(row: APIResource<IService>) {
+    super.row = row;
+  }
+
+  get row(): any {
+    return super.row;
+  }
+ }
