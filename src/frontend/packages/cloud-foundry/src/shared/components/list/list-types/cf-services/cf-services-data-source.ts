@@ -41,12 +41,10 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
               field: 'entity.tags'
             }]
           )
-          console.log("before")
-          console.log(entities[0])
+
           const labels = filterByLabel(entities, paginationState)
           const tags = filterByTags(entities, paginationState)
-          console.log("after")
-          console.log(entities[0])
+
           return [...labels, ...tags]
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
