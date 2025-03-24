@@ -143,6 +143,7 @@ website/versions-repo
 
 # Npm package builds
 /npm_pkg
+.npmrc
 
 /scan_tmp
 

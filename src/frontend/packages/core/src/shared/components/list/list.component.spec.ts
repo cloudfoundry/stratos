@@ -322,23 +322,7 @@ describe('ListComponent', () => {
       expect(noEntriesMessage.hidden).toBeFalsy();
     });
 
-    it ('getFilterFunction correctly filters entities when the field value is an array', () => {
-      const filterbyTags = getFilterFunction({
-        type: 'filter',
-        field: 'entity.tags'
-      })
-
-      const entities: APIResource[] = [
-        {
-          metadata: { created_at: '2025-02-02', guid: '1', updated_at: '2025-02-03', url: '/url1' },
-          entity: { tags: ['hello', 'world'] }
-        },
-        {
-          metadata: { created_at: '2022-01-02', guid: '2', updated_at: '2022-01-03', url: '/url2' },
-          entity: { tags: ['bye', 'world'] }
-        },
-      ]
-
+    describe('getFilterFunction filters entities ', () => {
       const paginationState: PaginationEntityState = {
         currentPage: 1,
         totalResults: 2,
@@ -358,10 +342,52 @@ describe('ListComponent', () => {
         maxedState: {},
         isListPagination: false
       };
-      const result = filterbyTags(entities, paginationState)
 
-      expect(result.length).toBe(1);
-      expect(result[0].entity.tags).toEqual(['hello', 'world']);
+      it ('by label', () => {
+        const filterbyLabel = getFilterFunction({
+          type: 'filter',
+          field: 'entity.label'
+        },)
+
+        const entities: APIResource[] = [
+          {
+            metadata: { created_at: '2025-02-02', guid: '1', updated_at: '2025-02-03', url: '/url1' },
+            entity: {label: 'hello'}
+          },
+          {
+            metadata: { created_at: '2022-01-02', guid: '2', updated_at: '2022-01-03', url: '/url2' },
+            entity: {label: 'world' }
+          },
+        ]
+
+        const result = filterbyLabel(entities, paginationState)
+
+        expect(result.length).toBe(1);
+        expect(result[0].entity.label).toEqual('hello');
+      })
+
+      it ('by tags', () => {
+        const filterbyTags = getFilterFunction({
+          type: 'filter',
+          field: 'entity.tags'
+        })
+
+        const entities: APIResource[] = [
+          {
+            metadata: { created_at: '2025-02-02', guid: '1', updated_at: '2025-02-03', url: '/url1' },
+            entity: { tags: ['hello', 'world'] }
+          },
+          {
+            metadata: { created_at: '2022-01-02', guid: '2', updated_at: '2022-01-03', url: '/url2' },
+            entity: { tags: ['bye', 'world'] }
+          },
+        ]
+
+        const result = filterbyTags(entities, paginationState)
+
+        expect(result.length).toBe(1);
+        expect(result[0].entity.tags).toEqual(['hello', 'world']);
+      })
     })
 
   });

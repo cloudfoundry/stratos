@@ -36,8 +36,9 @@ export function getFilterFunction(def: DataFunctionDefinition): DataFunction<any
       }
       if (Array.isArray(value)) {
         value = value.join(",")
-        return value.toUpperCase().includes(upperCaseFilter);
       }
+
+      return value.toUpperCase().includes(upperCaseFilter);
     });
   };
 }
