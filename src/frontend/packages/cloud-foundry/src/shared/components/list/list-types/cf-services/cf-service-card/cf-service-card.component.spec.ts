@@ -77,8 +77,6 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('active field should be true', () => {
-    fixture.detectChanges();``
-
     const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active');
     const statusText = activeStatus.querySelector('app-boolean-indicator div').textContent.trim()
 
@@ -86,10 +84,8 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('bindable field should be true', () => {
-    fixture.detectChanges();``
-
-    const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable');
-    const statusText = activeStatus.querySelector('app-boolean-indicator div').textContent.trim()
+    const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable');
+    const statusText = bindableStatus.querySelector('app-boolean-indicator div').textContent.trim()
 
     expect(statusText).toContain('Yes');
   });
