@@ -9,13 +9,4 @@ import { IService } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-active.component.html',
   styleUrls: ['./table-cell-service-active.component.scss']
 })
-export class TableCellServiceActiveComponent extends TableCellCustom<APIResource<IService>>  {
-  @Input()
-  set row(row: APIResource<IService>) {
-    super.row = row;
-  }
-
-  get row(): any {
-    return super.row;
-  }
-}
+export class TableCellServiceActiveComponent extends TableCellCustom<APIResource<IService>>  { }
