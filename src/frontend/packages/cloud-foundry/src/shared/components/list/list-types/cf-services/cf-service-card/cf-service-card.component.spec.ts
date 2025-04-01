@@ -76,17 +76,33 @@ describe('CfServiceCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('active field should be true', () => {
-    const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active');
-    const statusText = activeStatus.querySelector('app-boolean-indicator div').textContent.trim()
+  it('active field should be true/YES', () => {
+    const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active').textContent;
 
-    expect(statusText).toContain('Yes');
+    expect(activeStatus).toContain('Yes');
   });
 
-  it('bindable field should be true', () => {
-    const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable');
-    const statusText = bindableStatus.querySelector('app-boolean-indicator div').textContent.trim()
+  it('active field should be false/NO', () => {
+    component.serviceEntity.entity.active = 0;
+    fixture.detectChanges();
 
-    expect(statusText).toContain('Yes');
+    const activeStatus = fixture.nativeElement.querySelector('app-table-cell-service-active').textContent;
+
+    expect(activeStatus).toContain('No');
+  });
+
+  it('bindable field should be true/YES', () => {
+    const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable').textContent;
+
+    expect(bindableStatus).toContain('Yes');
+  });
+
+  it('bindable field should be false/NO', () => {
+    component.serviceEntity.entity.bindable = 0;
+    fixture.detectChanges();
+
+    const bindableStatus = fixture.nativeElement.querySelector('app-table-cell-service-bindable').textContent;
+
+    expect(bindableStatus).toContain('No');
   });
 });
