@@ -78,7 +78,7 @@
     "@angular/animations": "^14.3.0",
     "@angular/cdk": "^14.2.7",
     "@angular/common": "^14.3.0",
-    "@angular/core": "^14.3.0",
+    "@angular/core": "^19.2.7",
     "@angular/flex-layout": "^14.0.0-beta.41",
     "@angular/forms": "^14.3.0",
     "@angular/material": "^14.2.7",
