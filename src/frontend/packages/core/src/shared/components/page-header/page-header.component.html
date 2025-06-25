@@ -37,6 +37,24 @@
           ">
                 |
               </span>
+              <button mat-icon-button [matMenuTriggerFor]="token">
+                <mat-icon class="page-header__credential">vpn_key</mat-icon>
+              </button>
+              <mat-menu #token="matMenu" [overlapTrigger]="false" class="page-header__menu">
+                <div class="page-header__token">
+                  <h3 class="page-header__token-title">UAA Tokens</h3>
+                  <div (click)="copy(authToken$)" matTooltip="Click to copy">
+                    <h4>Auth Token</h4>
+                    <div class="page-header__token-text">{{ authToken$ | async }}</div>
+                  </div>
+                  <div (click)="copy(refreshToken$)" matTooltip="Click to copy">
+                    <h4>Refresh Token</h4>
+                    <div class="page-header__token-text">{{ refreshToken$ | async }}</div>
+                  </div>
+                  <h4>Expiry</h4>
+                  <div class="page-header__token-text">{{ tokenExpiry$ | async }}</div>
+                </div>
+              </mat-menu>
               <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button
                 [matMenuTriggerFor]="history">
                 <mat-icon class="page-header__nav-toggle">schedule</mat-icon>

@@ -72,10 +72,31 @@ export interface SessionData {
   config: SessionDataConfig;
 }
 
+export interface TokenData {
+  token_guid: string
+  auth_token: string
+  refresh_token: string
+  token_expiry: number
+  disconnected: boolean
+  auth_type: string
+  metadata: string
+  system_shared: boolean
+  linked_guid: string
+  certificate: string
+  certificate_key: string
+  enabled: boolean
+}
+
 export interface SessionDataEnvelope {
   status: string;
   error?: string;
   data?: SessionData;
+}
+
+export interface AuthTokenEnvelope {
+  status: string;
+  error?: string;
+  data?: TokenData;
 }
 
 export interface Diagnostics {

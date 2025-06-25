@@ -13,10 +13,12 @@ import {
   AppState,
   selectIsMobile,
   UserProfileInfo,
+  AuthTokenEnvelope,
 } from '@stratosui/store';
 import moment from 'moment';
-import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { map, startWith, tap } from 'rxjs/operators';
+import { ClipboardService } from 'ngx-clipboard';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -27,6 +29,7 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-page-header',
@@ -40,6 +43,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: IPageSideNavTab[];
+  private tokenEnvelope: AuthTokenEnvelope;
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
@@ -115,6 +119,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public user$: Observable<UserProfileInfo>;
   public allowGravatar$: Observable<boolean>;
   public canLogout$: Observable<boolean>;
+  public authToken$: Observable<string>;
+  public refreshToken$: Observable<string>;
+  public tokenExpiry$: Observable<Date>;
 
   public actionsKey: string;
 
@@ -146,6 +153,18 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.router.navigate(['/login/logout']);
   }
 
+  getUAAToken() {
+    const url = `/api/${environment.proxyAPIVersion}/auth/token`;
+
+    return this.http
+      .get<AuthTokenEnvelope>(url)
+  }
+
+  async copy(input: Observable<string>) {
+    const copyable = await input.toPromise()
+    this.clipboardService.copy(copyable);
+  }
+
   public toggleSidenav() {
     this.store.dispatch(new ToggleSideNav());
   }
@@ -160,6 +179,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private cups: CurrentUserPermissionsService,
     private endpointsService: EndpointsService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
+    private http: HttpClient,
+    private clipboardService: ClipboardService
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])
@@ -202,6 +223,22 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       map(noLogout => !noLogout)
     );
 
+    const tokenEnvelope = this.getUAAToken() 
+
+    this.authToken$ = tokenEnvelope
+      .pipe(
+        map((token) => token.data.auth_token)
+      );
+
+    this.refreshToken$ = tokenEnvelope
+      .pipe(
+        map((token) => token.data.refresh_token)
+      );
+
+    this.tokenExpiry$ = tokenEnvelope
+      .pipe(
+        map((token) => new Date(token.data.token_expiry*1000))
+      );
   }
 
   ngOnDestroy() {

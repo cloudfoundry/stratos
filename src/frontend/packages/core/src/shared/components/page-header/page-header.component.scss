@@ -64,7 +64,8 @@ $bottom-index: $top-index - 1;
     margin-right: 20px;
   }
   &__nav-toggle,
-  &__logout {
+  &__logout,
+  &__credential {
     cursor: pointer;
   }
   &__breadcrumb,
@@ -129,6 +130,16 @@ $bottom-index: $top-index - 1;
   }
   &__favorite {
     margin-left: 10px;
+  }
+  &__token {
+    min-width: 200px;
+    padding: 2px 10px 10px;
+  }
+  &__token-title {
+    margin: 0 0 10px;
+  }
+  &__token-text {
+    word-wrap: break-word;
   }
 }
 

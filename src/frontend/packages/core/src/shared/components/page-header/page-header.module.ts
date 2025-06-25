@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 
 import { CoreModule } from '../../../core/core.module';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
@@ -9,6 +10,7 @@ import { ShowPageHeaderComponent } from './show-page-header/show-page-header.com
 @NgModule({
   imports: [
     CoreModule,
+    HttpClientModule,
   ],
   declarations: [
     ExtensionButtonsComponent,

@@ -8,7 +8,7 @@ export * from './helpers/store-helpers';
 // Used by store testing module
 export { getDefaultRequestState } from './reducers/api-request-reducer/types';
 export { getDefaultPaginationEntityState } from './reducers/pagination-reducer/pagination-reducer-reset-pagination';
-export { SessionDataEndpoint } from './types/auth.types';
+export { SessionDataEndpoint, AuthTokenEnvelope } from './types/auth.types';
 export { getDefaultRolesRequestState } from './types/current-user-roles.types';
 export { BaseEntityValues } from './types/entity.types';
 export { WrapperRequestActionSuccess } from './types/request.types';
