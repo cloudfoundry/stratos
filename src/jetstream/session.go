@@ -50,6 +50,12 @@ type SessionInfoEnvelope struct {
 	Data   *api.Info `json:"data"`
 }
 
+type AuthTokenEnvelope struct {
+	Status string           `json:"status"`
+	Error  string           `json:"error"`
+	Data   *api.TokenRecord `json:"data"`
+}
+
 func (e *SessionValueNotFound) Error() string {
 	return fmt.Sprintf("Session value not found %s", e.msg)
 }
@@ -315,6 +321,65 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		SessionInfoEnvelope{
 			Status: "ok",
 			Data:   info,
+		},
+	)
+}
+
+func (p *portalProxy) retrieveToken(c echo.Context) error {
+	log.Debug("retrieveToken")
+
+	p.StratosAuthService.BeforeVerifySession(c)
+
+	sessionExpireTime, err := p.GetSessionInt64Value(c, "exp")
+	if err != nil {
+		return c.JSON(
+			http.StatusOK,
+			AuthTokenEnvelope{
+				Status: "error",
+				Error:  err.Error(),
+			},
+		)
+	}
+
+	sessionUser, err := p.GetSessionStringValue(c, "user_id")
+	if err != nil {
+		return c.JSON(
+			http.StatusOK,
+			AuthTokenEnvelope{
+				Status: "error",
+				Error:  err.Error(),
+			},
+		)
+	}
+
+	err = p.StratosAuthService.VerifySession(c, sessionUser, sessionExpireTime)
+	if err != nil {
+		return c.JSON(
+			http.StatusOK,
+			AuthTokenEnvelope{
+				Status: "error",
+				Error:  err.Error(),
+			},
+		)
+	}
+
+	record, err := p.GetUAATokenRecord(sessionUser)
+
+	if err != nil {
+		return c.JSON(
+			http.StatusOK,
+			AuthTokenEnvelope{
+				Status: "error",
+				Error:  err.Error(),
+			},
+		)
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		AuthTokenEnvelope{
+			Status: "ok",
+			Data:   &record,
 		},
 	)
 }

@@ -911,6 +911,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Verify Session
 	api.GET("/v1/auth/verify", p.verifySession)
 
+	api.GET("/v1/auth/token", p.retrieveToken)
+
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
 
