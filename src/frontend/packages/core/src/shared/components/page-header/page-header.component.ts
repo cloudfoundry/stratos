@@ -223,7 +223,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       map(noLogout => !noLogout)
     );
 
-    const tokenEnvelope = this.getUAAToken() 
+    this.tokenEnvelope = this.getUAAToken() 
 
     this.authToken$ = tokenEnvelope
       .pipe(
