@@ -225,7 +225,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
     this.tokenEnvelope = this.getUAAToken() 
 
-    this.authToken$ = tokenEnvelope
+    this.authToken$ = this.tokenEnvelope
       .pipe(
         map((token) => token.data.auth_token)
       );
