@@ -43,7 +43,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public eventSeverity = InternalEventSeverity;
   public pFavorite: UserFavorite<IFavoriteMetadata>;
   private pTabs: IPageSideNavTab[];
-  private tokenEnvelope: AuthTokenEnvelope;
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
@@ -223,9 +222,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       map(noLogout => !noLogout)
     );
 
-    this.tokenEnvelope = this.getUAAToken() 
+    const tokenEnvelope = this.getUAAToken()
 
-    this.authToken$ = this.tokenEnvelope
+    this.authToken$ = tokenEnvelope
       .pipe(
         map((token) => token.data.auth_token)
       );
