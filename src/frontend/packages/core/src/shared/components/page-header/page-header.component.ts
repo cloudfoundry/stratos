@@ -30,6 +30,7 @@ import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { HttpClient } from '@angular/common/http';
+import { SnackBarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-page-header',
@@ -162,6 +163,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   async copy(input: Observable<string>) {
     const copyable = await input.toPromise()
     this.clipboardService.copy(copyable);
+    this.snackBarService.show('Successfully copied!', 'Close')
   }
 
   public toggleSidenav() {
@@ -179,7 +181,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     private endpointsService: EndpointsService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private http: HttpClient,
-    private clipboardService: ClipboardService
+    private clipboardService: ClipboardService,
+    private snackBarService: SnackBarService
   ) {
     this.events$ = eventService.events$.pipe(
       startWith([])

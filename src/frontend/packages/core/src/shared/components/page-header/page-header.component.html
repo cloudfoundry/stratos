@@ -45,13 +45,13 @@
                   <h3 class="page-header__token-title">UAA Tokens</h3>
                   <div (click)="copy(authToken$)" matTooltip="Click to copy">
                     <h4>Auth Token</h4>
-                    <div class="page-header__token-text">{{ authToken$ | async }}</div>
+                    <div class="page-header__token-text" hidden>{{ authToken$ | async }}</div>
                   </div>
                   <div (click)="copy(refreshToken$)" matTooltip="Click to copy">
                     <h4>Refresh Token</h4>
-                    <div class="page-header__token-text">{{ refreshToken$ | async }}</div>
+                    <div class="page-header__token-text" hidden>{{ refreshToken$ | async }}</div>
                   </div>
-                  <h4>Expiry</h4>
+                  <h4>Token Expiry</h4>
                   <div class="page-header__token-text">{{ tokenExpiry$ | async }}</div>
                 </div>
               </mat-menu>
