@@ -20,11 +20,7 @@ import (
 func TestRegisterCFCluster(t *testing.T) {
 	t.Parallel()
 
-	mockV2Info := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
+	mockV2Info := setupMockEndpointServer(t)
 
 	defer mockV2Info.Close()
 
@@ -64,11 +60,7 @@ func TestRegisterCFCluster(t *testing.T) {
 func TestRegisterCFClusterWithMissingName(t *testing.T) {
 	t.Parallel()
 
-	mockV2Info := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
+	mockV2Info := setupMockEndpointServer(t)
 
 	defer mockV2Info.Close()
 
@@ -104,11 +96,7 @@ func getCFPlugin(p *portalProxy, endpointType string) api.EndpointPlugin {
 func TestRegisterCFClusterWithMissingAPIEndpoint(t *testing.T) {
 	t.Parallel()
 
-	mockV2Info := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
+	mockV2Info := setupMockEndpointServer(t)
 
 	defer mockV2Info.Close()
 
@@ -128,11 +116,7 @@ func TestRegisterCFClusterWithMissingAPIEndpoint(t *testing.T) {
 func TestRegisterCFClusterWithInvalidAPIEndpoint(t *testing.T) {
 	t.Parallel()
 
-	mockV2Info := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
+	mockV2Info := setupMockEndpointServer(t)
 
 	defer mockV2Info.Close()
 
@@ -180,11 +164,7 @@ func TestRegisterCFClusterWithBadV2Request(t *testing.T) {
 func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	t.Parallel()
 
-	mockV2Info := setupMockServer(t,
-		msRoute("/v2/info"),
-		msMethod("GET"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockV2InfoResponse)))
+	mockV2Info := setupMockEndpointServer(t)
 
 	defer mockV2Info.Close()
 
@@ -287,16 +267,8 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 		defer db.Close()
 
 		// mock individual APIEndpoints
-		mockV2Info := []*httptest.Server{}
-		for i := 0; i < 1; i++ {
-			server := setupMockServer(t,
-				msRoute("/v2/info"),
-				msMethod("GET"),
-				msStatus(http.StatusOK),
-				msBody(jsonMust(mockV2InfoResponse)))
-			defer server.Close()
-			mockV2Info = append(mockV2Info, server)
-		}
+		mockV2Info := setupMockEndpointServer(t)
+		defer mockV2Info.Close()
 
 		// mock different users
 		mockAdmin := setupMockUser(mockAdminGUID, true, []string{})
@@ -310,7 +282,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			Convey("as admin", func() {
 				Convey("with createSystemEndpoint enabled", func() {
 					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, true)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info, "CF Cluster 1", true, true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -324,7 +296,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 						// return no already saved endpoints
 						rows := testutils.GetEmptyCNSIRows()
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(adminEndpoint.InsertArgs...).
@@ -344,7 +316,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 					})
 					Convey("create system endpoint over existing user endpoints", func() {
 						// setup
-						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1 User", false, false)
+						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1 User", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -354,7 +326,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 						// return a user endpoint with same apiurl
 						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						// save cnsi
 						mock.ExpectExec(insertIntoCNSIs).
@@ -382,7 +354,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 						// return a admin endpoint with same apiurl
 						rows := testutils.GetEmptyCNSIRows().AddRow(adminEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						// test
 						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
@@ -404,8 +376,8 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 				Convey("with createSystemEndpoint disabled", func() {
 
 					// setup
-					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
-					systemEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, true)
+					adminEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info, "CF Cluster 1", false, false)
+					systemEndpoint := setupMockEndpointRegisterRequest(t, mockAdmin.ConnectedUser, mockV2Info, "CF Cluster 1", false, true)
 
 					if errSession := pp.setSessionValues(adminEndpoint.EchoContext, mockAdmin.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -420,7 +392,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 						// return a admin endpoint with same apiurl
 						rows := testutils.GetEmptyCNSIRows().AddRow(systemEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						// save cnsi
 						mock.ExpectExec(insertIntoCNSIs).
@@ -448,7 +420,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 
 						// return a user endpoint with same apiurl
 						rows := testutils.GetEmptyCNSIRows().AddRow(adminEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						// test
 						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
@@ -472,7 +444,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 			Convey("as user", func() {
 				Convey("with createSystemEndpoint enabled", func() {
 					// setup
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", true, false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1", true, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -486,7 +458,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							Return(mockUser1.ConnectedUser, nil)
 
 						rows := testutils.GetEmptyCNSIRows()
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(userEndpoint.InsertArgs...).
@@ -504,7 +476,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 					Convey("register existing endpoint from different user", func() {
-						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info[0], "CF Cluster 2", false, false)
+						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info, "CF Cluster 2", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -513,7 +485,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							Return(mockUser1.ConnectedUser, nil)
 
 						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint2.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(userEndpoint.InsertArgs...).
@@ -538,7 +510,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							Return(mockUser1.ConnectedUser, nil)
 
 						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						err := pp.RegisterEndpoint(userEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
 						dberr := mock.ExpectationsWereMet()
@@ -557,7 +529,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 					})
 				})
 				Convey("with createSystemEndpoint disabled", func() {
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info[0], "CF Cluster 1", false, false)
+					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1", false, false)
 
 					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
 						t.Error(errors.New("unable to mock/stub user in session object"))
@@ -570,7 +542,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							Return(mockUser1.ConnectedUser, nil)
 
 						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info[0].URL).WillReturnRows(rows)
+						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
 
 						err := pp.RegisterEndpoint(userEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
 						dberr := mock.ExpectationsWereMet()

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -319,6 +320,36 @@ func msBody(body string) mockServerFunc {
 	}
 }
 
+func setupMockEndpointServer(t *testing.T) *httptest.Server {
+
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var responseBody []byte
+		var err error
+
+		if r.URL.Path == "/" {
+			responseBody, err = json.Marshal(mockApiRootResponse)
+
+		} else if r.URL.Path == "/v2/info" {
+			responseBody, err = json.Marshal(mockV2InfoResponse)
+
+		} else {
+			t.Errorf("No API Setup path / or /v1/info, got path '%s'", r.URL.Path)
+		}
+
+		if err != nil {
+			t.Errorf("Could not Marshal mock response '%s'", err)
+		}
+
+		if r.Method != http.MethodGet {
+			t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(responseBody))
+	}))
+
+	return server
+}
+
 func setupMockServer(t *testing.T, modifiers ...mockServerFunc) *httptest.Server {
 	mServer := &mockServer{}
 	for _, mod := range modifiers {
@@ -364,6 +395,7 @@ const (
 	mockClientId        = "stratos_clientid"
 	mockClientSecret    = "big_secret"
 	mockProxyVersion    = 20161117141922
+	mockLogCache        = "https://log-cache.127.0.0.1"
 
 	stringCFType = "cf"
 
@@ -393,6 +425,14 @@ var mockV2InfoResponse = api.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
+}
+
+var mockApiRootResponse = api.ApiRoot{
+	Links: api.ApiRootLinks{
+		LogCache: api.LogCacheLink{
+			Href: mockLogCache,
+		},
+	},
 }
 
 var mockInfoResponse = api.V2Info{

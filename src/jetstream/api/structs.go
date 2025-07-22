@@ -23,12 +23,16 @@ type AuthProvider struct {
 	UserInfo GetUserInfoFromToken
 }
 
+type LogCacheLink struct {
+	Href string `json:"href"`
+}
+
+type ApiRootLinks struct {
+	LogCache LogCacheLink `json:"log_cache"`
+}
+
 type ApiRoot struct {
-	Links struct {
-		LogCache struct {
-			Href string `json:"href"`
-		} `json:"log_cache"`
-	} `json:"links"`
+	Links ApiRootLinks
 }
 
 // V2Info is the response for the Cloud Foundry /v2/info API
@@ -47,7 +51,7 @@ type V2Info struct {
 
 type EndpointInfo struct {
 	ApiRoot ApiRoot
-	V2Info V2Info
+	V2Info  V2Info
 }
 
 type InfoFunc func(apiEndpoint string, skipSSLValidation bool, caCert string) (CNSIRecord, interface{}, error)
