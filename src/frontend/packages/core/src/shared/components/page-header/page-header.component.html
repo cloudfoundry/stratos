@@ -43,15 +43,15 @@
               <mat-menu #token="matMenu" [overlapTrigger]="false" class="page-header__menu">
                 <div class="page-header__token">
                   <h3 class="page-header__token-title">UAA Tokens</h3>
-                  <div (click)="copy(authToken$)" matTooltip="Click to copy">
-                    <h4>Auth Token</h4>
+                  <button mat-stroked-button (click)="copy(authToken$)" matTooltip="Click to copy auth token">
+                    <span>Copy Auth Token</span>
                     <div class="page-header__token-text" hidden>{{ authToken$ | async }}</div>
-                  </div>
-                  <div (click)="copy(refreshToken$)" matTooltip="Click to copy">
-                    <h4>Refresh Token</h4>
+                  </button>
+                  <button mat-stroked-button (click)="copy(refreshToken$)" matTooltip="Click to copy refresh token">
+                    <span>Copy Refresh Token</span>
                     <div class="page-header__token-text" hidden>{{ refreshToken$ | async }}</div>
-                  </div>
-                  <h4>Token Expiry</h4>
+                  </button>
+                  <h3>Token Expiry</h3>
                   <div class="page-header__token-text">{{ tokenExpiry$ | async }}</div>
                 </div>
               </mat-menu>
