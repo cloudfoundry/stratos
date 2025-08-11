@@ -346,7 +346,7 @@ func (invite *UserInvite) AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUI
 	}
 
 	if res.StatusCode != http.StatusCreated {
-		return parseCFError(res.Response), fmt.Errorf(fmt.Sprintf("Failed to associate user with Space Role (%s)", roleName))
+		return parseCFError(res.Response), fmt.Errorf("Failed to associate user with Space Role (%s)", roleName)
 	}
 
 	return nil, nil

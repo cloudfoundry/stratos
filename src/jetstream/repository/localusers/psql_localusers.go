@@ -257,7 +257,7 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 	var result sql.Result
 	if result, err = p.db.Exec(insertLocalUser, user.UserGUID, user.PasswordHash, user.Username, user.Email, user.Scope, user.GivenName, user.FamilyName); err != nil {
 		msg := "unable to INSERT local user: %v"
-		log.Debugf(msg)
+		log.Debugf(msg, err)
 		err = fmt.Errorf(msg, err)
 	}
 
@@ -306,7 +306,7 @@ func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 	var result sql.Result
 	if result, err = p.db.Exec(updateLocalUser, user.PasswordHash, user.Username, user.Email, user.Scope, user.GivenName, user.FamilyName, user.UserGUID); err != nil {
 		msg := "unable to UPDATE local user: %v"
-		log.Debugf(msg)
+		log.Debugf(msg, err)
 		err = fmt.Errorf(msg, err)
 	}
 

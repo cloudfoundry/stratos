@@ -54,7 +54,7 @@ func handleSessionError(config api.PortalConfig, c echo.Context, err error, doNo
 	if doNotLog {
 		return api.NewHTTPShadowError(
 			http.StatusUnauthorized,
-			msg, msg,
+			msg, "%s", msg,
 		)
 	}
 
@@ -211,7 +211,7 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return api.NewHTTPShadowError(
 				http.StatusBadRequest,
 				err,
-				err,
+				"%s", err,
 			)
 		}
 		return h(c)

@@ -95,7 +95,7 @@ func (a *uaaAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 	if err != nil {
 		msg := "unable to retrieve UAA token record"
 		log.Error(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, fmt.Errorf("%s", msg)
 	}
 
 	// get the scope out of the JWT token data

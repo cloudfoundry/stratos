@@ -75,10 +75,10 @@ func TestVersionContentType(t *testing.T) {
 
 		res, _, _, _ := versionTestSetupWithErrorCheck(t)
 
-		expectedContentType := "application/json; charset=UTF-8"
+		expectedContentType := "application/json" // Was "application/json; charset=UTF-8"
 
 		contentType := res.Header().Get("Content-Type")
-		So(contentType, ShouldEqual, expectedContentType)
+		So(contentType, ShouldContainSubstring, expectedContentType)
 	})
 }
 

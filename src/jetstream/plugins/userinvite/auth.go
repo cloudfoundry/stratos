@@ -76,7 +76,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint a
 		return nil, nil, api.NewHTTPShadowError(
 			res.StatusCode,
 			errMsg,
-			errMsg,
+			errMsg+" %+v", err,
 		)
 	}
 
