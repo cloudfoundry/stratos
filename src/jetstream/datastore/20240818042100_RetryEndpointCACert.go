@@ -12,9 +12,14 @@ func init() {
 }
 
 func CheckIfMigrationExists(db *sql.Tx, migration string, args ...interface{}) (bool, error) {
-	query := "SELECT 1 FROM goose_db_version WHERE version_id = $1 LIMIT 1"
+	query_psql := "SELECT 1 FROM goose_db_version WHERE version_id = $1 LIMIT 1"
+	query_mysql := "SELECT 1 FROM goose_db_version WHERE version_id = ? LIMIT 1"
 	var exists bool
-	err := db.QueryRow(query, migration).Scan(&exists)
+
+	err := db.QueryRow(query_psql, migration).Scan(&exists)
+	if err { // Might not be PSQL try MySQL 
+		err := db.QueryRow(query_msql, migration).Scan(&exists)
+	}
 	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}
