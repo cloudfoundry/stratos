@@ -12,9 +12,21 @@
             <div class="github-project-details">
               <div>
                 <mat-form-field>
+                  <input type="text" matInput [(ngModel)]="gh"
+                    placeholder="GitHub Enterprise url (optional)" name="githubEnterpriseUrl">
+                </mat-form-field>
+                <mat-error
+                  *ngIf="githubEnterpriseUrlInvalid">
+                  GitHub Enterprise deployment url is not valid
+                </mat-error>
+                <mat-form-field>
+                  <input type="text" matInput [(ngModel)]="access_token"
+                    placeholder="GitHub Access Token (optional)" name="githubAccessToken">
+                </mat-form-field>
+                <mat-form-field>
                   <input type="text" matInput [matAutocomplete]="auto" [disabled]="isRedeploy" [(ngModel)]="repository"
                     placeholder="Project" name="projectName"
-                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required>
+                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid + ',' + (access_token || '')" required>
                   <!-- Repository auto complete helper -->
                   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
                     <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo.name">

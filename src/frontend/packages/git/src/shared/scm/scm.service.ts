@@ -17,10 +17,10 @@ export class GitSCMService {
   ) {
   }
 
-  public getSCM(type: GitSCMType, endpointGuid: string): GitSCM {
+  public getSCM(type: GitSCMType, endpointGuid: string, access_token?: string): GitSCM {
     switch (type) {
       case 'github':
-        return new GitHubSCM(this.gitHubURL, endpointGuid);
+        return (access_token && access_token != "") ? new GitHubSCM(this.gitHubURL, endpointGuid, access_token) : new GitHubSCM(this.gitHubURL, endpointGuid);
       case 'gitlab':
         return new GitLabSCM(endpointGuid);
     }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap } from 'rxjs/operators';
 
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
 import { GitSuggestedRepo } from './../../store/git.public-types';
@@ -14,12 +14,29 @@ import {
 import { GitSCM, SCMIcon } from './scm';
 import { BaseSCM, GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
+import { HttpOptions } from 'frontend/packages/core/src/core/core.types';
 
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
-  constructor(gitHubURL: string, endpointGuid: string) {
+  private options: HttpOptions;
+
+  constructor(gitHubURL: string, endpointGuid: string, access_token?: string) {
     super(gitHubURL);
     this.endpointGuid = endpointGuid;
+    if (access_token) {
+      this.setAccessToken(access_token);
+    }
+  }
+
+  setAccessToken(input: string) {
+    this.options = new HttpOptions();
+    this.options.headers = {"Authorization": `Bearer ${input}`};
+  }
+
+  clearAccessToken() {
+    if (this.options) {
+      this.options.headers = {};
+    }
   }
 
   getType(): GitSCMType {
@@ -38,19 +55,20 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
-    return this.getAPI().pipe(
-      switchMap(api => httpClient.get<GitRepo>(`${api.url}/repos/${projectName}`, api.requestArgs))
+    return this.getAPI(this.options).pipe(
+      switchMap(api => {
+        return httpClient.get<GitRepo>(`${api.url}/repos/${projectName}`, api.requestArgs)
+      })
     );
   }
 
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => httpClient.get<GitBranch>(`${api.url}/repos/${projectName}/branches/${branchName}`, api.requestArgs))
     );
   }
-
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => {
         const url = `${api.url}/repos/${projectName}/branches`;
         const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url, api.requestArgs);
@@ -71,7 +89,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       map(api => ({
         ...api,
         url: `${api.url}/repos/${projectName}/commits/${commitSha}`,
@@ -80,7 +98,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => httpClient.get<GitCommit[]>(
         `${api.url}/repos/${projectName}/commits?sha=${ref}`, {
         ...api.requestArgs,
@@ -98,7 +116,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => {
         const prjParts = projectName.split('/');
         let url = `${api.url}/search/repositories?q=${projectName}+in:name+fork:true`;

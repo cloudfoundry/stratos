@@ -50,6 +50,8 @@ import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factor
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
+import { GitHubSCM } from 'frontend/packages/git/src/shared/scm/github-scm';
+import { BaseSCM } from 'frontend/packages/git/src/shared/scm/scm-base';
 
 
 
@@ -98,6 +100,11 @@ export class DeployApplicationStep2Component
   // We don't have any repositories to suggest initially - need user to start typing
   suggestedRepos$: Observable<GitSuggestedRepo[]>;
 
+  // GitHub Enterprise/private repos
+  githubEnterpriseUrlInvalid: boolean;
+  access_token: string;
+  // --------------
+
   // Git URL
   gitUrl: string;
   gitUrlBranchName: string;
@@ -141,6 +148,7 @@ export class DeployApplicationStep2Component
           projectName: this.repository,
           branch: this.repositoryBranch,
           url: repo.entity.clone_url,
+          accessToken: this.access_token,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
         }, null));
@@ -345,6 +353,21 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setProjectName.subscribe());
 
     this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
+      tap(form => {
+        const url_valid = (input: string) => { try { var url = new URL(input); return Boolean(url) } catch (e) { return false } }
+        
+        this.githubEnterpriseUrlInvalid = form.githubEnterpriseUrl && !url_valid(form.githubEnterpriseUrl)
+        
+        if (form.githubEnterpriseUrl && !this.githubEnterpriseUrlInvalid) {
+          (this.scm as unknown as BaseSCM).setPublicApi(form.githubEnterpriseUrl)
+        }
+
+        if (form.githubAccessToken) {
+          (this.scm as GitHubSCM).setAccessToken(form.githubAccessToken)
+        } else {
+          (this.scm as GitHubSCM).clearAccessToken()
+        }
+      }),
       map(form => form.projectName),
       startWith(''),
       pairwise(),

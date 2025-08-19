@@ -71,6 +71,7 @@ export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
   endpointGuid: string;
+  accessToken?: string;
   commit?: string;
   branchName?: string;
   url?: string;
