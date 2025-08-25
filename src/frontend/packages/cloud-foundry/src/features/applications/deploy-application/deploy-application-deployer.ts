@@ -58,6 +58,7 @@ interface DockerImageSourceInfo extends DeploySource {
   applicationName: string;
   dockerImage: string;
   dockerUsername: string;
+  dockerPassword: string;
 }
 
 interface FolderSourceInfo extends DeploySource {
@@ -284,6 +285,7 @@ export class DeployApplicationDeployer {
       applicationName: appSource.dockerDetails.applicationName,
       dockerImage: appSource.dockerDetails.dockerImage,
       dockerUsername: appSource.dockerDetails.dockerUsername,
+      dockerPassword: appSource.dockerDetails.dockerPassword,
       type: appSource.type.id
     };
 

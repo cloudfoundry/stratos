@@ -107,6 +107,7 @@ export class DeployApplicationStep2Component
   dockerAppName: string;
   dockerImg: string;
   dockerUsername: string;
+  dockerPassword: string;
   // --------------
 
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
@@ -162,6 +163,7 @@ export class DeployApplicationStep2Component
         applicationName: this.dockerAppName,
         dockerImage: this.dockerImg,
         dockerUsername: this.dockerUsername,
+        dockerPassword: this.dockerPassword,
       }));
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });

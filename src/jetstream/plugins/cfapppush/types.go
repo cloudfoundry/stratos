@@ -64,6 +64,7 @@ type DockerImageSourceInfo struct {
 	ApplicationName string `json:"applicationName"`
 	DockerImage     string `json:"dockerImage"`
 	DockerUsername  string `json:"dockerUsername"`
+	DockerPassword  string `json:"dockerPassword"`
 }
 
 type FolderSourceInfo struct {

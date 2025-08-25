@@ -24,6 +24,7 @@ export interface EnvVarStratosProjectSource {
   commit?: string;
   dockerImage?: string;
   dockerUsername?: string;
+  dockerPassword?: string;
 }
 
 @Injectable()

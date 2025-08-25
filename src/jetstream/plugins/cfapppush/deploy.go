@@ -531,6 +531,12 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 		Name: info.ApplicationName,
 	}
 
+	if info.DockerPassword != "" && info.DockerUsername != "" {
+		applicationData.EnvironmentVariables = map[string]string{
+			"CF_DOCKER_PASSWORD": info.DockerPassword,
+		}
+	}
+
 	manifest := Applications{
 		Applications: []RawManifestApplication{applicationData},
 	}

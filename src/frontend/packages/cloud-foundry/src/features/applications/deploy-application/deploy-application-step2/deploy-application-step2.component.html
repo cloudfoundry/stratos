@@ -110,7 +110,7 @@
           </mat-form-field>
           <mat-form-field>
             <input matInput [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
-            <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
+            <input matInput [(ngModel)]="dockerPassword" placeholder="Docker Password" name="dockerPassword" type="password">
           </mat-form-field>
         </div>
       </div>

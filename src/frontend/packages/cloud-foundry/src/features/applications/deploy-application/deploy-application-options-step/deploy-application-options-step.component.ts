@@ -76,7 +76,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         Validators.min(0)
       ]],
       dockerImage: null,
-      dockerUsername: null
+      dockerUsername: null,
+      dockerPassword: null
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -112,6 +113,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
         this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
         this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
         this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
+        this.deployOptionsForm.controls.dockerPassword.setValue(deployAppState.applicationSource.dockerDetails.dockerPassword);
       }
     }));
 
@@ -199,7 +201,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       stack: controls.stack.value,
       time: controls.time.value,
       dockerImage: controls.dockerImage.value,
-      dockerUsername: controls.dockerUsername.value
+      dockerUsername: controls.dockerUsername.value,
+      dockerPassword: controls.dockerPassword.value
     };
   }
 
@@ -224,6 +227,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.time.setValue(overrides.time);
     controls.dockerImage.setValue(overrides.dockerImage);
     controls.dockerUsername.setValue(overrides.dockerUsername);
+    controls.dockerPassword.setValue(overrides.dockerPassword);
   }
 
   onEnter = (opts: any) => {

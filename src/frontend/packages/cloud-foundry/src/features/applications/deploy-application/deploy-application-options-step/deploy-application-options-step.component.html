@@ -64,7 +64,7 @@
       </mat-form-field>
       <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
         <input matInput placeholder="Docker Username" formControlName="dockerUsername">
-        <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
+        <input matInput placeholder="Docker Password" formControlName="dockerPassword" type="password">
       </mat-form-field>
       <!--- End Section -->
     </div>

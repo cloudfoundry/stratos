@@ -65,6 +65,7 @@ export interface DockerAppDetails {
   applicationName: string;
   dockerImage: string;
   dockerUsername?: string;
+  dockerPassword?: string;
 }
 
 export interface GitAppDetails {
@@ -94,6 +95,7 @@ export interface OverrideAppDetails {
   time: number;
   dockerImage: string;
   dockerUsername: string;
+  dockerPassword: string;
 }
 
 export interface ProjectExists {
