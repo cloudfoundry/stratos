@@ -3,8 +3,8 @@ module github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush
 go 1.21
 
 replace (
-	github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 	github.com/cloudfoundry/cli-plugin-repo => code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
+	github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 	github.com/moby/moby => github.com/moby/moby v20.10.25+incompatible
 	github.com/sabhiram/go-gitignore => github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
 	github.com/vito/go-interact => github.com/vito/go-interact v1.0.0
@@ -87,7 +87,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tedsuo/rata v1.0.1-0.20170830210128-07d200713958 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vito/go-interact v1.0.0 // indirect
