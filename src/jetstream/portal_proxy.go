@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -25,10 +27,15 @@ type portalProxy struct {
 	EmptyCookieMatcher     *regexp.Regexp // Used to detect and remove empty Cookies sent by certain browsers
 	AuthProviders          map[string]api.AuthProvider
 	env                    *env.VarSet
-	StratosAuthService     api.StratosAuth
-	APIKeysRepository      apikeys.Repository
-	PluginRegisterRoutes   map[string]func(echo.Context) error
-	StoreFactory           api.StoreFactory
+	refreshRoutines        struct {
+		wg      sync.WaitGroup
+		context context.Context
+		cancel  context.CancelFunc
+	}
+	StratosAuthService   api.StratosAuth
+	APIKeysRepository    apikeys.Repository
+	PluginRegisterRoutes map[string]func(echo.Context) error
+	StoreFactory         api.StoreFactory
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions

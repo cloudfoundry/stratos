@@ -21,6 +21,10 @@ func (d *TokenStore) SaveAuthToken(userGUID string, tokenRecord api.TokenRecord,
 	return d.store.SaveAuthToken(userGUID, tokenRecord, encryptionKey)
 }
 
+func (d *TokenStore) ListAllEnabledConnectedCNSITokens(encryptionKey []byte) ([]api.BackupTokenRecord, error) {
+	return d.store.ListAllEnabledConnectedCNSITokens(encryptionKey)
+}
+
 func (d *TokenStore) FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (api.TokenRecord, error) {
 
 	// Main method that we need to override to get the token for the given endpoint
