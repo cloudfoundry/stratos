@@ -1,0 +1,57 @@
+// Modern Angular Material v20 theme configuration for Stratos
+@use '@angular/material' as mat;
+@import './all-theme';
+
+// Import the theme - re-enable the existing Stratos theme system
+@import '~@stratosui/theme';
+
+$stratos-dark-theme-supported: false !default;
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+@include mat.core();
+
+// Define the default theme configuration
+$stratos-themes: stratos-theme();
+
+// stratos-theme() can return a single theme rather than a map of default and dark themes
+@if type-of($stratos-themes) != map or not map-has-key($stratos-themes, default) {
+  $stratos-themes: (
+    default: $stratos-themes
+  );
+}
+
+// Import any custom scss that the theme defines
+// This import defines the mixin 'apply-theme'
+@import '~@stratosui/theme/extensions';
+
+// Default theme ( = light theme)
+$stratos-theme: map-get($stratos-themes, default);
+$theme: map-get($stratos-theme, theme);
+
+// Check if dark theme is supported and apply themes accordingly
+@if map-has-key($stratos-themes, dark) {
+  $stratos-dark-theme-supported: true !global;
+  $dark-stratos-theme: map-get($stratos-themes, dark);
+  $dark-theme: map-get($dark-stratos-theme, theme);
+
+  body.stratos {
+    .dark-theme {
+      @include mat.all-component-themes($dark-theme);
+      @include app-theme($dark-stratos-theme);
+      // Apply theme to extensions
+      @include apply-theme($dark-stratos-theme);
+    }
+  }
+}
+
+.default {
+  // Apply Angular Material theme
+  @include mat.all-component-themes($theme);
+  
+  // Apply custom app theme
+  @include app-theme($stratos-theme);
+  
+  // Apply theme to extensions
+  @include apply-theme($stratos-theme);
+}
