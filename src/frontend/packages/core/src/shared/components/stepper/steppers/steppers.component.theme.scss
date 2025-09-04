@@ -1,10 +1,17 @@
+// Fallback function for compatibility
+@function mat-color($palette, $hue: default) {
+  @if type-of($palette) == map {
+    @return map-get($palette, $hue);
+  }
+  @return $palette;
+}
+
 @mixin steppers-theme($theme, $app-theme) {
-  $color: mat.m2-get-color-config($theme);
-  $background-colors: mat.m2-get-color-from-palette($color, background);
-  $foreground-colors: mat.m2-get-color-from-palette($color, foreground);
+  $background-colors: map-get($theme, background);
+  $foreground-colors: map-get($theme, foreground);
   
   .steppers {
-    background-color: mat.m2-get-color-from-palette($background-colors, background);
-    color: mat.m2-get-color-from-palette($foreground-colors, base);
+    background-color: mat-color($background-colors, background);
+    color: map-get($foreground-colors, base);
   }
 }

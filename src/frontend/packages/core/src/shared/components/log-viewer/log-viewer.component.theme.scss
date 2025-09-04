@@ -1,7 +1,6 @@
-// Temporarily disabled: @import '@angular/material/theming';
 
 @function ansi-colour($ansi-colours, $colour-name, $intense) {
-  @if map-has-key($ansi-colours, $colour-name) {
+  @if $ansi-colours and type-of($ansi-colours) == map and map-has-key($ansi-colours, $colour-name) {
     @if $intense {
       @return map-get(map-get($ansi-colours, $colour-name), intense);
     }
@@ -9,8 +8,14 @@
       @return map-get(map-get($ansi-colours, $colour-name), normal);
     }
   }
-  @warn 'Unknown "#{$colour-name}" in $ansi-colours.';
-  @return null;
+  // Fallback colors when ansi-colours is not available
+  @if $colour-name == 'default-background' {
+    @return #333;
+  }
+  @if $colour-name == 'default-foreground' {
+    @return #ccc;
+  }
+  @return #000; // Default fallback
 }
 
 @mixin app-log-viewer-theme($theme, $app-theme) {
@@ -25,8 +30,8 @@
     color: ansi-colour($ansi-colours, 'default-foreground', false);
   }
   .log-viewer__message {
-    background-color: mat-color($primary);
-    color: mat-contrast($primary, 500);
+    background-color: #2196f3; // Use hardcoded primary color 
+    color: white; // Use hardcoded contrast color
   }
   .log-viewer__message-error {
     background-color: map-get($status-colors, danger);

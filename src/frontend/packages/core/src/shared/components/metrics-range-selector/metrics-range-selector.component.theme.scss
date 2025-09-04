@@ -1,4 +1,3 @@
-// Temporarily disabled: @import '@angular/material/theming';
 @mixin metrics-range-selector-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $background-color: map-get($app-theme, app-background-color);

@@ -1,4 +1,11 @@
-// Temporarily disabled: @import '@angular/material/theming';
+// Fallback functions for old Angular Material API
+@function mat-color($palette, $hue: default) {
+  @if type-of($palette) == map {
+    @return map-get($palette, $hue);
+  }
+  @return $palette;
+}
+
 @mixin tile-selector-theme($theme, $app-theme) {
   $background-color: map-get($app-theme, app-background-color);
   $background: map-get($theme, background);
@@ -6,12 +13,14 @@
   $border-color: darken($background-color, 10%);
   $primary: map-get($theme, primary);
   .tile-selector {
-    @include mat-elevation-transition;
+    // Remove mat-elevation-transition - not available in v20
+    transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
     background: mat-color($background, card);
     border: 1px solid $border-color;
     color: mat-color($foreground, text);
     &__selected {
-      @include mat-elevation(1);
+      // Replace mat-elevation(1) with CSS box-shadow
+      box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
     }
     &__content {
       background-color: darken($background-color, 2%);

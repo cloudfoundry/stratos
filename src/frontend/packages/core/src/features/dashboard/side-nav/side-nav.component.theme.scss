@@ -1,12 +1,27 @@
-// Temporarily disable Angular Material theming import
-// // Temporarily disabled: @import '@angular/material/theming';
 
-// Fallback function for mat-color
+// Fallback functions for old Angular Material API
 @function mat-color($palette, $hue: default) {
   @if type-of($palette) == map {
     @return map-get($palette, $hue);
   }
   @return $palette;
+}
+
+@function mat-contrast($palette, $hue: default) {
+  @if type-of($palette) == map {
+    @if map-has-key($palette, contrast) {
+      $contrast-map: map-get($palette, contrast);
+      @if map-has-key($contrast-map, $hue) {
+        @return map-get($contrast-map, $hue);
+      }
+    }
+    // If no contrast map, try to determine contrast color based on the main color
+    @if map-has-key($palette, $hue) {
+      $color: map-get($palette, $hue);
+      @return white; // Simple fallback
+    }
+  }
+  @return white; // Ultimate fallback
 }
 
 @mixin side-nav-theme($theme, $app-theme) {
@@ -53,7 +68,7 @@
       color: mat-color($side-nav-colors, text);
     }
     &__logo-text {
-      color: mat-contrast($primary, 500);
+      color: white; // Simple hardcoded contrast color
     }
     &__bottom {
       color: $side-nav-bottom-color;

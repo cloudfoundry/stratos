@@ -40,7 +40,6 @@ $mappy-queries: (
   wide: mappy-bp(xlarge)
 );
 
-// Import the library. I need to import it after the breakpoints definition
 // Temporarily disabled due to import issues - fallback mixin provided below
 // @import '~mappy-breakpoints/mappy-breakpoints';
 

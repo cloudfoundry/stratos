@@ -1,4 +1,3 @@
-// Temporarily disabled: @import '@angular/material/theming';
 @import '../../../../sass/mixins';
 @mixin list-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);

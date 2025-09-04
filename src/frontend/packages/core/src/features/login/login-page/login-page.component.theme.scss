@@ -1,14 +1,29 @@
+// Fallback function for mat-color compatibility
+@function mat-color($palette, $hue: default) {
+  @if type-of($palette) == map {
+    @return map-get($palette, $hue);
+  }
+  @return $palette;
+}
+
+@function mat-contrast($palette, $hue: default) {
+  @if type-of($palette) == map and map-has-key($palette, contrast) {
+    $contrast-map: map-get($palette, contrast);
+    @return map-get($contrast-map, $hue);
+  }
+  @return white; // fallback
+}
+
 @mixin login-page-theme($theme, $app-theme) {
-  $color: mat.m2-get-color-config($theme);
-  $primary: mat.m2-get-color-from-palette($color, primary);
+  $primary: map-get($theme, primary);
 
   .login {
     background-color: map-get($app-theme, app-background-color);
     &__title {
-      color: mat.m2-get-color-from-palette($primary, default);
+      color: mat-color($primary);
     }
     &-message {
-      color: mat.m2-get-contrast-color-from-palette($primary, 500);
+      color: mat-contrast($primary, 500);
     }
   }
 }

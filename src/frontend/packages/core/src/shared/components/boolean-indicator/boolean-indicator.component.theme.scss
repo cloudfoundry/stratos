@@ -1,4 +1,3 @@
-// Temporarily disabled: @import '@angular/material/theming';
 @mixin app-boolean-indicator-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $status: map-get($app-theme, status);
