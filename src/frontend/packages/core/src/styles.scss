@@ -1,4 +1,4 @@
-// @import "@angular/material/prebuilt-themes/indigo-pink.css";
+@import "@angular/material/prebuilt-themes/indigo-pink.css";
 @import '../sass/fonts';
 @import '../sass/icons';
 @import '../sass/theme';
@@ -70,9 +70,7 @@ button.mat-simple-snackbar-action {
 // }
 
 
-// Add selector so that the UI can detect if a dark theme is available
-@if $stratos-dark-theme-supported {
-  .dark-theme-supported {
-    margin: 0;
-  }
+// Dark theme support disabled for now
+.dark-theme-supported {
+  display: none;
 }

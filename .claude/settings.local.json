@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\sass/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\sass/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\theme/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\theme/**)",
+      "Bash(npm run build-dev:*)",
+      "Bash(ng build:*)",
+      "Bash(npm run ng:*)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\theme/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\sass/**)",
+      "WebSearch",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\shared\\components\\stepper\\steppers/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\features\\login\\login-page/**)",
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\features\\dashboard\\side-nav/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

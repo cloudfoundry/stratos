@@ -1,93 +1,30 @@
-// Temporarily disable Angular Material theming import
-// // Temporarily disabled: @import '@angular/material/theming';
-@import './all-theme';
+// Use just the prebuilt Angular Material theme for simplicity
+@use '@angular/material' as mat;
 
-// Import the theme
-// Temporarily disabled due to custom SASS handler compatibility issues
-// @import '~@stratosui/theme';
+// Include Angular Material core styles
+@include mat.core();
 
-$stratos-dark-theme-supported: false !default;
-
-// Themes - stratos-theme() function must be supplied by the theme
-// Fallback function for stratos-theme
-@function stratos-theme() {
-  @return (
-    default: (
-      theme: (
-        primary: #3371e3,
-        accent: #00bcd4,
-        warn: #f44336,
-        background: (
-          background: #fafafa,
-          card: #ffffff,
-          dialog: #ffffff
-        ),
-        foreground: (
-          base: #000000,
-          text: #212121,
-          secondary-text: #757575
-        )
-      ),
-      app-theme: (
-        app-background-color: #fafafa,
-        subdued-color: #707070,
-        side-nav: (
-          background: #2196f3,
-          text: white,
-          hover: rgba(255, 255, 255, 0.1)
-        ),
-        status: (
-          success: #4caf50,
-          warning: #ff9800,
-          danger: #f44336,
-          tentative: #9e9e9e,
-          info: #2196f3
-        )
-      )
-    )
-  );
+// Use Material 3 simplified theming
+html {
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$blue-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+  ));
 }
 
-$stratos-themes: stratos-theme();
-
-// stratos-theme() can return a single theme rather than a map of default and dark themes
-@if not map-has-key($stratos-themes, 'default') {
-  $tmp: $stratos-themes;
-  $stratos-themes: (
-    default: $tmp
-  )
+// Basic Stratos styling without complex theming
+html {
+  background-color: #fafafa;
 }
 
-// Import any custom scss that the theme defines
-// This import defines the mixin 'apply-theme'
-// Temporarily disabled due to custom SASS handler compatibility issues
-// @import '~@stratosui/theme/extensions';
-
-// Default theme ( = light theme)
-$stratos-theme: map-get($stratos-themes, default);
-$theme: map-get($stratos-theme, theme);
-
-@if map-has-key($stratos-themes, 'dark') {
-  $stratos-dark-theme-supported: true;
-  $dark-stratos-theme: map-get($stratos-themes, dark);
-  $dark-theme: map-get($dark-stratos-theme, theme);
-
-  body.stratos {
-    .dark-theme {
-      // Temporarily disabled: @include angular-material-theme($dark-theme);
-      // Temporarily disabled: @include app-theme($dark-stratos-theme);
-      // Apply theme to extensions
-      // Temporarily disabled: @include apply-theme($dark-stratos-theme);
-    }
+.dashboard {
+  .mat-drawer-content {
+    overflow: visible;
+  }
+  .mat-drawer-side {
+    border: 0;
   }
 }
-
-.default {
-  // Temporarily disabled: @include angular-material-theme($theme);
-  // Temporarily disabled: @include app-theme($stratos-theme);
-  // Apply theme to extensions
-  // Temporarily disabled: @include apply-theme($stratos-theme);
-}
-
-// Import mat-core
-// Temporarily disabled: @include mat-core;

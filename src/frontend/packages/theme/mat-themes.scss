@@ -25,17 +25,14 @@ $mat-grey: ( 50: #fafafa, 100: #f5f5f5, 200: #eeeeee, 300: #e0e0e0, 400: #bdbdbd
 $mat-blue-grey: ( 50: #eceff1, 100: #cfd8dc, 200: #b0bec5, 300: #90a4ae, 400: #78909c, 500: #607d8b, 600: #546e7a, 700: #455a64, 800: #37474f, 900: #263238, A100: #cfd8dc, A200: #b0bec5, A400: #78909c, A700: #455a64, contrast: ( 50: $black-87-opacity, 100: $black-87-opacity, 200: $black-87-opacity, 300: $black-87-opacity, 400: white, 500: white, 600: $white-87-opacity, 700: $white-87-opacity, 800: $white-87-opacity, 900: $white-87-opacity, A100: $black-87-opacity, A200: $black-87-opacity, A400: white, A700: $white-87-opacity, ));
 @use '@angular/material' as mat;
 
-$base-theme-primary: mat.define-palette($mat-blue);
-$base-theme-accent: mat.define-palette($mat-purple);
-// The warn palette is optional (defaults to red).
-$base-theme-warn: mat.define-palette($mat-red);
-// Create the theme object using modern Angular Material v20 API
-$base-theme: mat.define-light-theme((
+// Base theme using Material 2 API for backward compatibility  
+$base-theme-primary: mat.m2-define-palette($mat-blue);
+$base-theme-accent: mat.m2-define-palette($mat-cyan);
+$base-theme-warn: mat.m2-define-palette($mat-red);
+$base-theme: mat.m2-define-light-theme((
   color: (
     primary: $base-theme-primary,
     accent: $base-theme-accent,
     warn: $base-theme-warn,
   ),
-  typography: mat.define-typography-config(),
-  density: 0,
 ));
