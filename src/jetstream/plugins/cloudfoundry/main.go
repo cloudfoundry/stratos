@@ -213,6 +213,7 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		return newCNSI, nil, err
 	}
 
+	log.Debugf("CF:Info: SkipSSL %t Cert '%s'", skipSSLValidation, caCert)
 	h := c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 
 	res, err := h.Get(uri.String())
