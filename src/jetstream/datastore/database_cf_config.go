@@ -79,12 +79,18 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 		db.Username = getDBCredentialsValue(dbCredentials["username"])
 		db.Password = getDBCredentialsValue(dbCredentials["password"])
 		db.Host = getDBCredentialsValue(dbCredentials["host"])
+		if db.Host == "" { // If host is empty, use hostname
+			db.Host = getDBCredentialsValue(dbCredentials["hostname"])
+		}
 		db.SSLMode = env.String("DB_SSL_MODE", "disable")
 		db.Port, _ = strconv.Atoi(getDBCredentialsValue(dbCredentials["port"]))
 		// Note - Both isPostgresService and isMySQLService look at the credentials uri & tags
 		if isPostgresService(service) {
 			db.DatabaseProvider = "pgsql"
 			db.Database = getDBCredentialsValue(dbCredentials["name"])
+			if db.Database == "" { // If database name is empty, use dbname
+				db.Database = getDBCredentialsValue(dbCredentials["dbname"])
+			}
 			if db.SSLMode == string(SSLVerifyCA) {
 				log.Infof("Attempting to use SSL for database connection")
 				tempFile, err := os.CreateTemp("", "postgres-ssl-*.crt")

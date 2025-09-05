@@ -70,13 +70,16 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 
 	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
 	if err != nil {
-		return sendSSHError("Can not get Cloud Foundry info")
+		return sendSSHError("[cfPlugin.Info] Can not get Cloud Foundry info: %s", err.Error())
+	}
+	log.Debugf("CF Info: %+v", info)
+
+	endpointInfo, ok := info.(api.EndpointInfo)
+	if !ok {
+		return sendSSHError("[Info] Invalid Cloud Foundry EndpointInfo structure")
 	}
 
-	cfInfo, found := info.(api.V2Info)
-	if !found {
-		return sendSSHError("Can not get Cloud Foundry info")
-	}
+	cfInfo := endpointInfo.V2Info
 
 	appGUID := c.Param("appGuid")
 	appInstance := c.Param("appInstance")
