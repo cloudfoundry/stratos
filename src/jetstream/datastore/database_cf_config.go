@@ -99,7 +99,8 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 					if err != nil {
 						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not create temp file: %s", err.Error())
 						return false
-					}					_, err = tempFile.WriteString(getDBCredentialsValue(dbCredentials["cacrt"]))
+					}
+					_, err = tempFile.WriteString(getDBCredentialsValue(dbCredentials["cacrt"]))
 					if err != nil {
 						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not write to temp file: %s", err.Error())
 						return false
