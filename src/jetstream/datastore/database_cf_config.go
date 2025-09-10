@@ -93,25 +93,28 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 			}
 			if db.SSLMode == string(SSLVerifyCA) {
 				log.Infof("Attempting to use SSL for database connection")
-				tempFile, err := os.CreateTemp("", "postgres-ssl-*.crt")
-				if err != nil {
-					log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not create temp file: %s", err.Error())
-					return false
-				}
+				if (dbCredentials["cacrt"] != nil) && (dbCredentials["cacrt"] != "") { // Check if CA certificate is present
+					log.Infof("Found service CA in VCAP_SERICES, will use it to verify the database connection")
+					tempFile, err := os.CreateTemp("", "postgres-ssl-*.crt")
+					if err != nil {
+						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not create temp file: %s", err.Error())
+						return false
+					}					_, err = tempFile.WriteString(getDBCredentialsValue(dbCredentials["cacrt"]))
+					if err != nil {
+						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not write to temp file: %s", err.Error())
+						return false
+					}
 
-				_, err = tempFile.WriteString(getDBCredentialsValue(dbCredentials["cacrt"]))
-				if err != nil {
-					log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not write to temp file: %s", err.Error())
-					return false
-				}
+					err = tempFile.Close()
+					if err != nil {
+						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not save temp file after writing: %s", err.Error())
+						return false
+					}
 
-				err = tempFile.Close()
-				if err != nil {
-					log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not save temp file after writing: %s", err.Error())
-					return false
+					db.SSLRootCertificate = tempFile.Name()
+				} else {
+					log.Infof("No CA certificate found in VCAP_SERVICES, using system CA certificates")
 				}
-
-				db.SSLRootCertificate = tempFile.Name()
 			}
 		} else if isMySQLService(service) {
 			db.DatabaseProvider = "mysql"
