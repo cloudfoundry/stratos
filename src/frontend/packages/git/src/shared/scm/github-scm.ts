@@ -20,11 +20,11 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
 
   private options: HttpOptions;
 
-  constructor(gitHubURL: string, endpointGuid: string, access_token?: string) {
+  constructor(gitHubURL: string, endpointGuid: string, accessToken?: string) {
     super(gitHubURL);
     this.endpointGuid = endpointGuid;
-    if (access_token) {
-      this.setAccessToken(access_token);
+    if (accessToken && accessToken.trim() != "") {
+      this.setAccessToken(accessToken);
     }
   }
 

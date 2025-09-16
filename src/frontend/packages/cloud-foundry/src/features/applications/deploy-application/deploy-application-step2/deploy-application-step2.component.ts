@@ -101,8 +101,8 @@ export class DeployApplicationStep2Component
   suggestedRepos$: Observable<GitSuggestedRepo[]>;
 
   // GitHub Enterprise/private repos
-  githubEnterpriseUrlInvalid: boolean;
-  access_token: string;
+  isInvalidGithubEnterpriseUrl: boolean;
+  accessToken: string;
   // --------------
 
   // Git URL
@@ -148,7 +148,7 @@ export class DeployApplicationStep2Component
           projectName: this.repository,
           branch: this.repositoryBranch,
           url: repo.entity.clone_url,
-          accessToken: this.access_token,
+          accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
         }, null));
@@ -354,11 +354,11 @@ export class DeployApplicationStep2Component
 
     this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
       tap(form => {
-        const url_valid = (input: string) => { try { var url = new URL(input); return Boolean(url) } catch (e) { return false } }
+        const isValidUrl = (input: string) => { try { var url = new URL(input); return Boolean(url) } catch (e) { return false } }
         
-        this.githubEnterpriseUrlInvalid = form.githubEnterpriseUrl && !url_valid(form.githubEnterpriseUrl)
+        this.isInvalidGithubEnterpriseUrl = form.githubEnterpriseUrl && !isValidUrl(form.githubEnterpriseUrl)
         
-        if (form.githubEnterpriseUrl && !this.githubEnterpriseUrlInvalid) {
+        if (form.githubEnterpriseUrl && !this.isInvalidGithubEnterpriseUrl) {
           (this.scm as unknown as BaseSCM).setPublicApi(form.githubEnterpriseUrl)
         }
 
