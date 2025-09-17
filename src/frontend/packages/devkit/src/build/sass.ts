@@ -32,7 +32,6 @@ export class SassHandler {
                   // Don't override implementation, let Angular CLI handle it
                   // Just set up our custom importer for theme resolution
                   p.options.sassOptions.importer = this.customSassImport(config);
-                  console.log('SASS loader configured with modern Angular Material v20 support');
                 } catch (e) {
                   console.warn('Could not configure SASS importer:', e);
                 }

@@ -1,4 +1,4 @@
-import { CdkTableModule } from '@angular/cdk/table';
+// Removed CDK table dependency
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -128,7 +128,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CdkTableModule,
     NgxChartsModule,
   ],
   declarations: [
