@@ -86,6 +86,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 		db.Port, _ = strconv.Atoi(getDBCredentialsValue(dbCredentials["port"]))
 		// Note - Both isPostgresService and isMySQLService look at the credentials uri & tags
 		if isPostgresService(service) {
+			log.Debugf("REMOVE ME: dbCredentials %+v", dbCredentials)
 			db.DatabaseProvider = "pgsql"
 			db.Database = getDBCredentialsValue(dbCredentials["name"])
 			if db.Database == "" { // If database name is empty, use dbname
