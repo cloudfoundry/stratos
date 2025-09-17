@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '../../../../../core/src/shared/services/tailwind-error-state-matcher';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
@@ -27,7 +27,7 @@ selector: 'app-edit-autoscaler-credential',
   templateUrl: './edit-autoscaler-credential.component.html',
   styleUrls: ['./edit-autoscaler-credential.component.scss'],
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher },
   ],
   standalone: false
 })

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '../../../../../core/src/shared/services/tailwind-error-state-matcher';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import moment from 'moment-timezone';
@@ -33,7 +33,7 @@ selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
   styleUrls: ['./edit-autoscaler-policy-step4.component.scss'],
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
   standalone: false
 })
