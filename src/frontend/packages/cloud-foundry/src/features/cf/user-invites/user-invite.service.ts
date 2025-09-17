@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
@@ -58,7 +58,7 @@ export class UserInviteConfigureService {
 
   constructor(
     private http: HttpClient,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService,
   ) { }
 

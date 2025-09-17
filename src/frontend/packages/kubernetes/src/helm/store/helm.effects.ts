@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -106,7 +106,7 @@ export class HelmEffects {
     private httpClient: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
-    public snackBar: MatSnackBar,
+    public snackBar: TailwindSnackBarService,
   ) { }
 
   // Endpoints that we know are synchronizing

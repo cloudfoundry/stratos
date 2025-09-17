@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
@@ -126,8 +127,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerScalingHistoryErrorSub: Subscription;
-  private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
-  private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private appAutoscalerPolicySnackBarRef: TailwindSnackBarRef<any>;
+  private appAutoscalerScalingHistorySnackBarRef: TailwindSnackBarRef<any>;
   private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
 
   appAutoscalerAppMetrics = {};
@@ -162,8 +163,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private appAutoscalerPolicySnackBar: MatSnackBar,
-    private appAutoscalerScalingHistorySnackBar: MatSnackBar,
+    private appAutoscalerPolicySnackBar: TailwindSnackBarService,
+    private appAutoscalerScalingHistorySnackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService
   ) { }
 

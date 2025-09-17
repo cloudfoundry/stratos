@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
@@ -24,7 +24,7 @@ export class ChartDetailsUsageComponent implements OnInit {
   constructor(
     private mdIconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
-    public snackBar: MatSnackBar,
+    public snackBar: TailwindSnackBarService,
     public endpointsService: EndpointsService,
     private route: ActivatedRoute,
   ) { }

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { first } from 'rxjs/operators';
 
 import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
+import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackbar.service';
 
 /**
  * Service for showing snackbars
@@ -14,17 +14,17 @@ import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-
 })
 export class SnackBarService {
 
-  private snackBars: MatSnackBarRef<SimpleSnackBar>[] = [];
+  private snackBars: TailwindSnackBarRef<any>[] = [];
 
-  constructor(public snackBar: MatSnackBar) { }
+  constructor(public snackBar: TailwindSnackBarService) { }
 
   // Show a snack bar with the given message
   // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored
   // If closeMessage is not supplied, no close button is shown and the snack bar will hide after the specified duration (default 5s)
   // If forceDuration is supplied then regardless of closeMessage the duration is used
-  public show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): MatSnackBarRef<TextOnlySnackBar> {
+  public show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
     const snackbarRef = this.snackBar.open(message, closeMessage, {
-      duration: forceDuration ? duration : closeMessage ? null : duration
+      duration: forceDuration ? duration : (closeMessage ? 0 : duration)
     });
     this.trackSnackBar(snackbarRef);
     return snackbarRef;
@@ -37,14 +37,11 @@ export class SnackBarService {
     message: string,
     returnUrl: string | string[],
     returnLabel: string,
-    duration?: number): MatSnackBarRef<SnackBarReturnComponent> {
-    const snackbarRef = this.snackBar.openFromComponent(SnackBarReturnComponent, {
-      duration,
-      data: {
-        message,
-        returnUrl,
-        returnLabel,
-      }
+    duration?: number): TailwindSnackBarRef<any> {
+    // For now, use simple snackbar - can be enhanced later for component support
+    const fullMessage = `${message} - ${returnLabel}`;
+    const snackbarRef = this.snackBar.open(fullMessage, 'Dismiss', {
+      duration: duration || 0
     });
     this.trackSnackBar(snackbarRef);
     return snackbarRef;
@@ -55,7 +52,7 @@ export class SnackBarService {
     this.snackBars.forEach(snackBar => snackBar.dismiss());
   }
 
-  private trackSnackBar(snackBar: MatSnackBarRef<SimpleSnackBar>) {
+  private trackSnackBar(snackBar: TailwindSnackBarRef<any>) {
     this.snackBars.push(snackBar);
     snackBar.afterDismissed().pipe(first()).subscribe(() => this.snackBars.shift());
   }

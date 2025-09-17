@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
@@ -40,7 +40,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
 
   private appAutoscalerCredentialErrorSub: Subscription;
-  private appAutoscalerCredentialSnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private appAutoscalerCredentialSnackBarRef: TailwindSnackBarRef<any>;
 
 
   private creating = new BehaviorSubject(false);
@@ -53,7 +53,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     private fb: UntypedFormBuilder,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
-    private appAutoscalerCredentialSnackBar: MatSnackBar,
+    private appAutoscalerCredentialSnackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService,
   ) {
     this.editCredentialForm = this.fb.group({

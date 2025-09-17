@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
@@ -56,7 +56,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public isHead$: Observable<boolean>;
 
   private gitSCMRepoErrorSub: Subscription;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
   public noContentFirstLine = 'Unable to fetch details';
   public noContentSecondLine: NoContentMessageLine = {
@@ -78,7 +78,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
   constructor(
     public appService: ApplicationService,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     private scmService: GitSCMService
   ) { }
 

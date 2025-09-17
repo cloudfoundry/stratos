@@ -8,7 +8,7 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
@@ -49,7 +49,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   stepValidateSub: Subscription = null;
 
   private enterData;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -58,7 +58,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   constructor(
     private steppersService: SteppersService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     private route: ActivatedRoute
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());

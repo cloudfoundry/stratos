@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -43,7 +43,7 @@ export class UserInviteConfigurationDialogComponent {
   constructor(
     public fb: UntypedFormBuilder,
     public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
-    public snackBar: MatSnackBar,
+    public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
     @Inject(MAT_DIALOG_DATA) public data: {
       guid: string
