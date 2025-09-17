@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { SortDirection } from '@angular/material/sort';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
   SetClientFilterKey,

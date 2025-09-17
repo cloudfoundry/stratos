@@ -50,7 +50,8 @@
       "Bash(do echo \"$pkg:\")",
       "Bash(for pkg in devkit example-extensions example-theme extension theme)",
       "Bash(while read pkg)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

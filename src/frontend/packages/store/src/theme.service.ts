@@ -1,4 +1,4 @@
-import { OverlayContainer } from '@angular/cdk/overlay';
+// Removed Angular CDK overlay dependency - using custom theme system
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';

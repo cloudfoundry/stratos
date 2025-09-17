@@ -1,29 +1,35 @@
-// Temporarily disable Angular Material theme to isolate issues
-// @use '@angular/material' as mat;
+// Angular Material theme disabled - using Tailwind CSS utilities
+// Converted to Tailwind CSS custom properties and utilities
 
-// Custom palette for monocular.
-$color-base: #3371e3;
+// Primary color palette - now using Tailwind custom colors
+:root {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3371e3;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
 
-// Define theme variables for backward compatibility with existing components
-$monocular-app-primary: $color-base;
-$monocular-app-accent: #00bcd4;
-$monocular-app-warn: #f44336;
+  --color-accent-500: #00bcd4;
+  --color-warning-500: #f44336;
 
-// Base palette for the project
-$layout-dark: #333239;
-$layout-base: #303030;
-$layout-light: #f8f8f8;
-$layout-text: #38383F;
-$text-white: white;
-$background-light: #EAEDEF;
-$background-white: white;
-$header-backgound-gradient: linear-gradient(to left, $layout-base, $color-base);
-$border-color: #D7D9DD;
+  // Layout colors converted to CSS custom properties
+  --color-layout-dark: #333239;
+  --color-layout-base: #303030;
+  --color-layout-light: #f8f8f8;
+  --color-layout-text: #38383F;
+  --color-background-light: #EAEDEF;
+  --color-border: #D7D9DD;
 
-// Other common sizes
-$border-radius: 8px;
-$layout-max-width: 1280px;
-$header-bar-height: 70px;
+  // Common sizes as CSS custom properties
+  --border-radius: 8px;
+  --layout-max-width: 1280px;
+  --header-bar-height: 70px;
+}
 
 // Responsive. They represents the min width of every display.
 $breakpoints: (
@@ -60,31 +66,21 @@ $mappy-queries: (
   }
 }
 
-// Add more classes to Material2 components
-mat-form-field {
-  &.mat-input--full {
-    width: 100%;
-  }
+// Material components converted to Tailwind utility classes
+// These styles are now handled by Tailwind classes:
 
-  .mat-input-infix {
-    border-top: 0;
-  }
+// mat-form-field.mat-input--full -> .w-full
+// mat-form-field.mat-input--reverse -> .input-reverse (custom class)
+// mat-form-field.mat-input--big -> .text-2xl
+// .mat-input-infix -> handled by input base styles
+// .mat-input-placeholder -> placeholder: text-gray-500
 
-  &.mat-input--reverse {
-    .mat-input-underline {
-      background-color: $layout-light;
-    }
-    .mat-input-element {
-      color: $layout-light;
-    }
-  }
+// Custom input classes for special cases
+.input-reverse {
+  @apply bg-gray-100 text-gray-100;
 
-  &:not(.mat-focused) .mat-input-placeholder {
-     color: darken($layout-light, 25);
-  }
-
-  &.mat-input--big {
-    font-size: 1.5em;
+  &::placeholder {
+    @apply text-gray-400;
   }
 }
 

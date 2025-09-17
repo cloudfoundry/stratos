@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SortDirection } from '@angular/material/sort';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
 

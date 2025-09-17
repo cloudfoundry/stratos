@@ -1,4 +1,3 @@
-import { OverlayContainer } from '@angular/cdk/overlay';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -17,19 +16,11 @@ describe('EntityFavoriteStarComponent', () => {
   let element: HTMLElement;
   let userFavoriteManager: UserFavoriteManager;
   let favorite: UserFavorite;
-  let overlayContainerElement: HTMLElement;
-
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
         ConfirmationDialogService,
         PaginationMonitorFactory,
-        {
-          provide: OverlayContainer, useFactory: () => {
-            overlayContainerElement = document.createElement('div');
-            return { getContainerElement: () => overlayContainerElement };
-          }
-        },
         SessionService
       ],
       declarations: [

@@ -1,3 +1,6 @@
+// Page header component styles - migrated to Tailwind CSS compatibility
+// Uses Tailwind utilities where appropriate, custom styles for complex layouts
+
 $top-index: 2;
 $bottom-index: $top-index - 1;
 .page-header {
@@ -30,8 +33,7 @@ $bottom-index: $top-index - 1;
     display: inline-block;
   }
   &__menu-icon {
-    border-radius: 50%;
-    box-shadow: 0 6px 8px 3px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, 0);
+    @apply rounded-full shadow-lg;
     height: 26px;
     padding: 1px;
     position: absolute;
