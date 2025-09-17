@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Custom Properties for theme customization */
+:root {
+  /* Default theme colors */
+  --color-primary: #2196f3;
+  --color-secondary: #00bcd4;
+  --color-accent: #ff9800;
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-danger: #f44336;
+  --color-info: #2196f3;
+
+  /* Navigation colors */
+  --nav-bg: #2196f3;
+  --nav-text: #ffffff;
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-active: rgba(255, 255, 255, 0.2);
+
+  /* Layout colors */
+  --app-bg: #fafafa;
+  --app-text: rgba(0, 0, 0, 0.87);
+  --header-bg: #2196f3;
+  --header-text: #ffffff;
+
+  /* Login page */
+  --login-bg: #f5f5f5;
+  --login-bg-image: url('/assets/core/login-bg.jpg');
+  --login-card-bg: #ffffff;
+
+  /* Logo */
+  --logo-bg: #ffffff;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  @apply h-full;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+body {
+  @apply h-full m-0 p-0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Component base styles */
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply text-white shadow-sm;
+    background-color: var(--color-primary);
+  }
+
+  .btn-primary:hover {
+    @apply shadow-md;
+    background-color: color-mix(in srgb, var(--color-primary) 85%, black);
+  }
+
+  .btn-secondary {
+    @apply text-gray-700 bg-white border-gray-300 shadow-sm;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-gray-50;
+  }
+
+  .btn-danger {
+    @apply text-white shadow-sm;
+    background-color: var(--color-danger);
+  }
+
+  .btn-danger:hover {
+    @apply shadow-md;
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
+  }
+
+  /* Input styles */
+  .input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent;
+    focus:ring-color: var(--color-primary);
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg shadow border border-gray-200;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200;
+  }
+
+  /* Status indicators */
+  .status-success {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    background-color: var(--color-success);
+  }
+
+  .status-warning {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    background-color: var(--color-warning);
+  }
+
+  .status-danger {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    background-color: var(--color-danger);
+  }
+
+  .status-info {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    background-color: var(--color-info);
+  }
+
+  /* Navigation styles */
+  .nav {
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+  }
+
+  .nav-item {
+    @apply transition-colors duration-200;
+  }
+
+  .nav-item:hover {
+    background-color: var(--nav-hover);
+  }
+
+  .nav-item.active {
+    background-color: var(--nav-active);
+  }
+
+  /* Header styles */
+  .header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+  }
+
+  /* Login page styles */
+  .login-page {
+    background-color: var(--login-bg);
+    background-image: var(--login-bg-image);
+    @apply bg-cover bg-center min-h-screen;
+  }
+
+  .login-card {
+    background-color: var(--login-card-bg);
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 border-r-transparent rounded-full animate-spin;
+  }
+
+  .spinner-primary {
+    border-color: var(--color-primary);
+    border-right-color: transparent;
+  }
+
+  /* Table styles */
+  .table {
+    @apply min-w-full divide-y divide-gray-200;
+  }
+
+  .table th {
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  .table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  .table tbody tr {
+    @apply even:bg-gray-50;
+  }
+
+  /* List styles */
+  .list-item {
+    @apply border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-150;
+  }
+
+  /* Progress bar */
+  .progress {
+    @apply w-full bg-gray-200 rounded-full h-2;
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full transition-all duration-300;
+    background-color: var(--color-primary);
+  }
+
+  /* Alert styles */
+  .alert {
+    @apply p-4 rounded-md border-l-4;
+  }
+
+  .alert-success {
+    @apply bg-green-50 border-green-400 text-green-800;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 border-yellow-400 text-yellow-800;
+  }
+
+  .alert-danger {
+    @apply bg-red-50 border-red-400 text-red-800;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 border-blue-400 text-blue-800;
+  }
+
+  /* Modal styles */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+  }
+
+  .modal {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+  }
+
+  .modal-container {
+    @apply flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+  }
+
+  .modal-panel {
+    @apply transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip transition-opacity duration-300;
+  }
+
+  .tooltip.show {
+    @apply visible opacity-100;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-secondary {
+    border-color: var(--color-secondary);
+  }
+
+  .focus\:ring-primary:focus {
+    --tw-ring-color: var(--color-primary);
+  }
+}

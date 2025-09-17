@@ -1,8 +1,0 @@
-@mixin copy-to-clipboard-theme($theme, $app-theme) {
-  $primary: map-get($theme, primary);
-  .copy {
-    &__copied-icon {
-      color: mat-color($primary);
-    }
-  }
-}

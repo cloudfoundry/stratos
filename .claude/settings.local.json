@@ -38,7 +38,10 @@
       "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\features\\error-page\\error-page/**)",
       "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\features\\dashboard\\page-side-nav/**)",
       "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\src\\features\\about\\about-page/**)",
-      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\sass/**)"
+      "Read(/C:\\Users\\redst\\OneDrive\\Documents\\GitHub\\stratos\\src\\frontend\\packages\\core\\sass/**)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

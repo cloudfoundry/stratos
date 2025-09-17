@@ -1,0 +1,39 @@
+{
+  "colors": {
+    "primary": "#2196f3",
+    "secondary": "#00bcd4",
+    "accent": "#ff9800",
+    "success": "#4caf50",
+    "warning": "#ff9800",
+    "danger": "#f44336",
+    "info": "#2196f3"
+  },
+  "navigation": {
+    "background": "#2196f3",
+    "text": "#ffffff",
+    "hover": "rgba(255, 255, 255, 0.1)",
+    "active": "rgba(255, 255, 255, 0.2)"
+  },
+  "layout": {
+    "background": "#fafafa",
+    "text": "rgba(0, 0, 0, 0.87)",
+    "headerBackground": "#2196f3",
+    "headerText": "#ffffff"
+  },
+  "branding": {
+    "logo": "/assets/core/logo.png",
+    "navLogo": "/assets/core/nav-logo.png",
+    "navLogoIcon": "/assets/core/nav-logo-icon.png",
+    "favicon": "/assets/favicon.ico",
+    "companyName": "Stratos",
+    "loginTitle": "Stratos Console",
+    "loginSubtitle": "Multi-Cloud Management Platform"
+  },
+  "login": {
+    "showLogo": true,
+    "showTitle": true,
+    "backgroundImage": "/assets/core/login-bg.jpg",
+    "backgroundColor": "#f5f5f5",
+    "cardBackground": "#ffffff"
+  }
+}

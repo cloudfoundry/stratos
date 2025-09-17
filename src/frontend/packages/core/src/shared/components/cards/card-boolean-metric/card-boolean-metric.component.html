@@ -1,26 +1,26 @@
 <ng-template #content>
   <div class="boolean-metric-card">
-    <mat-card *ngIf="!textOnly; else textOnlyTemplate" class="boolean-metric-card__container">
-      <mat-icon *ngIf="icon" [fontSet]="iconFont" class="boolean-metric-card__icon">{{ icon }}</mat-icon>
-      <div>
-        <div class="boolean-metric-card__value">{{ formattedValue }}</div>
-        <div class="boolean-metric-card__label">{{ label }}</div>
+    <div *ngIf="!textOnly; else textOnlyTemplate" class="card p-4 flex items-center space-x-4">
+      <span *ngIf="icon" class="material-icons text-2xl" [class]="'material-icons-' + (iconFont || 'outlined')">{{ icon }}</span>
+      <div class="flex-1">
+        <div class="boolean-metric-card-value text-2xl font-bold text-gray-900">{{ formattedValue }}</div>
+        <div class="boolean-metric-card-label text-sm text-gray-500">{{ label }}</div>
       </div>
-    </mat-card>
+    </div>
   </div>
 </ng-template>
 
 <ng-template #textOnlyTemplate>
-  <div class="boolean-metric-card__container">
+  <div class="boolean-metric-card-container p-2">
     <div>
-      <div class="boolean-metric-card__value">{{ formattedValue }}</div>
-      <div class="boolean-metric-card__label">{{ label }}</div>
+      <div class="boolean-metric-card-value text-xl font-semibold text-gray-900">{{ formattedValue }}</div>
+      <div class="boolean-metric-card-label text-xs text-gray-500">{{ label }}</div>
     </div>
   </div>
 </ng-template>
 
 <ng-container #text *ngIf="link; else noLink">
-  <a (click)="goToLink()" class="boolean-metric-card__anchor">
+  <a (click)="goToLink()" class="boolean-metric-card-anchor cursor-pointer hover:bg-gray-50 transition-colors rounded-lg">
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </a>
 </ng-container>

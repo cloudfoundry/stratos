@@ -1,6 +1,0 @@
-@mixin start-end-theme($theme, $app-theme) {
-  $status: map-get($app-theme, status);
-  .invalid-message {
-    color: map-get($status, danger);
-  }
-}

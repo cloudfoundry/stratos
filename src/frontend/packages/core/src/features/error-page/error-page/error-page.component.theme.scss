@@ -1,8 +1,0 @@
-@mixin error-page-theme($theme, $app-theme) {
-  $background-color: map-get($app-theme, app-background-color);
-  .error-page {
-    &__json-response {
-      background-color: $background-color;
-    }
-  }
-}
