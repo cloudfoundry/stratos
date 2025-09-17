@@ -51,7 +51,8 @@
       "Bash(for pkg in devkit example-extensions example-theme extension theme)",
       "Bash(while read pkg)",
       "Bash(powershell:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm view:*)"
     ],
     "deny": [],
     "ask": []

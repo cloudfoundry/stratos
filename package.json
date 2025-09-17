@@ -61,12 +61,6 @@
     "@swimlane/ngx-charts": {
       "d3-color": "^3.1.0"
     },
-    "@ajsf/core": {
-      "@angular/flex-layout": "14.0.0-beta.41"
-    },
-    "@ajsf/material": {
-      "@angular/flex-layout": "14.0.0-beta.41"
-    },
     "minimist": ">=1.2.6",
     "xml2js": "0.5.0",
     "postcss": "8.4.31",
@@ -74,8 +68,6 @@
     "ajv": "8.17.1"
   },
   "dependencies": {
-    "@ajsf/core": "0.8.0",
-    "@ajsf/material": "0.8.0",
     "@angular/animations": "20.1.7",
     "@angular/common": "20.1.7",
     "@angular/core": "20.1.7",

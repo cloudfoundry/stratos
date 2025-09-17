@@ -1,0 +1,37 @@
+.form-field {
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.25rem;
+}
+
+/* Custom styles for dark mode support */
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .form-group input:focus,
+.dark .form-group textarea:focus,
+.dark .form-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Error state */
+.border-red-500 {
+  border-color: #ef4444 !important;
+}
+
+.dark .border-red-500 {
+  border-color: #ef4444 !important;
+}

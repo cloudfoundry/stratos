@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { JsonSchemaFormComponent } from '@ajsf/core';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
+import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
 import { ThemeService } from '../../../../../store/src/theme.service';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
@@ -61,6 +61,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Editor mode - either 'editor' for the Monaco Code Editor or 'form' for the JSON Schema Form editor
   public mode: EditorMode = EditorMode.CodeEditor;
 
+  // Menu state
+  public menuOpen = false;
+
   // Content shown in the code editor
   public code = '';
 
@@ -113,7 +116,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Reference to the editor, so we can adjust its size to fit
   @ViewChild('monacoEditor', { read: ElementRef }) monacoEditor: ElementRef;
 
-  @ViewChild('schemaForm') schemaForm: JsonSchemaFormComponent;
+  @ViewChild('schemaForm') schemaForm: TailwindJsonSchemaFormComponent;
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(
@@ -432,5 +435,15 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       code = '';
     }
     return code;
+  }
+
+  // Toggle menu open/closed
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  // Close menu
+  closeMenu() {
+    this.menuOpen = false;
   }
 }

@@ -72,7 +72,7 @@
       </div>
     </div>
     <json-schema-form *ngIf="hasSchema" (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
-      [options]="{ addSubmit: false }" [schema]="schema" framework="material-design" [data]="initialFormData">
+      [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
     </json-schema-form>
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
