@@ -1,22 +1,24 @@
 <ng-container *ngIf="canShow$ | async">
-  <div *ngIf="analyzers$ | async as analyzers">
-    <mat-menu #appMenu="matMenu">
-      <button (click)="onSelected(analyzer)" mat-menu-item
-        *ngFor="let analyzer of analyzers">{{ analyzer.title }}</button>
-      <mat-divider class="analysis-menu-divider" *ngIf="analyzers.length > 0"></mat-divider>
-      <button (click)="refreshReports($event)" mat-menu-item>Refresh</button>
-    </mat-menu>
+  <div *ngIf="analyzers$ | async as analyzers" class="relative">
+    <div *ngIf="isMenuOpen" class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-48">
+      <button (click)="onSelected(analyzer); closeMenu()"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md"
+              *ngFor="let analyzer of analyzers">{{ analyzer.title }}</button>
+      <div class="border-t border-gray-200 my-1" *ngIf="analyzers.length > 0"></div>
+      <button (click)="refreshReports($event); closeMenu()"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Refresh</button>
+    </div>
 
     <!--
       See #417
       Note - it would be good to only show if there's no reports `*ngIf="analyzers.length > 0"`. However this causes
-      issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and 
+      issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and
       doesn't contain the new report. This leaves user with no way to see report/refresh reports list
     -->
-    <button mat-button [matMenuTriggerFor]="appMenu" class="analysis-menu-divider__overlay">
-      <span>{{ prompt }}</span>
-      <span *ngIf="selection">: {{ selection.title }}</span>
-      <mat-icon>arrow_drop_down</mat-icon>
+    <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <span class="text-gray-700">{{ prompt }}</span>
+      <span *ngIf="selection" class="text-gray-900">: {{ selection.title }}</span>
+      <span class="material-icons text-gray-400 ml-2">arrow_drop_down</span>
     </button>
   </div>
 </ng-container>

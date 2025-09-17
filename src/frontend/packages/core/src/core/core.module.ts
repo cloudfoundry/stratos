@@ -39,7 +39,9 @@ import { WindowRef } from './window-ref/window-ref.service';
     imports: [
         MDAppModule,
         RouterModule,
-        MomentModule
+        MomentModule,
+        FormsModule,
+        ReactiveFormsModule
     ],
     exports: [
         MDAppModule,
