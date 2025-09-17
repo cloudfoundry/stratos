@@ -11,28 +11,26 @@
           <div *ngIf="sourceType.group === 'gitscm'">
             <div class="github-project-details">
               <div>
-                <mat-form-field>
-                  <input type="text" matInput [matAutocomplete]="auto" [disabled]="isRedeploy" [(ngModel)]="repository"
+                <div class="form-field">
+                  <input type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
                     placeholder="Project" name="projectName"
-                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required>
-                  <!-- Repository auto complete helper -->
-                  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-                    <mat-option *ngFor="let repo of suggestedRepos$ | async" [value]="repo.name">
-                      <div class="git-repo-suggestion">
-                        <div class="git-repo-suggestion__label">{{repo.name}}</div>
-                        <mat-icon class="git-repo-suggestion__icon" *ngIf="repo.private">lock</mat-icon>
-                      </div>
-                    </mat-option>
-                  </mat-autocomplete>
+                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required
+                    list="repo-suggestions">
+                  <!-- Repository suggestions datalist -->
+                  <datalist id="repo-suggestions">
+                    <option *ngFor="let repo of suggestedRepos$ | async" [value]="repo.name">
+                      {{repo.name}} <span *ngIf="repo.private">(Private)</span>
+                    </option>
+                  </datalist>
 
-                  <mat-error
+                  <div class="text-red-500 text-sm mt-1"
                     *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
                     Project does not exist
-                  </mat-error>
-                  <mat-error *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
+                  </div>
+                  <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
                     {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
-                  </mat-error>
-                </mat-form-field>
+                  </div>
+                </div>
               </div>
               <div *ngIf="projectInfo$ | async as projectInfo" class="deploy-step2-form__project-info-group">
                 <div>
@@ -48,16 +46,17 @@
                 </div>
               </div>
             </div>
-            <mat-form-field>
-              <mat-select class="reset-margin" placeholder="Branch"
+            <div class="form-field">
+              <select class="input"
                 [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
                 [(ngModel)]="repositoryBranch" name="repositoryBranch"
-                (selectionChange)="updateBranchName($event.value)" required>
-                <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
+                (change)="updateBranchName($event.target.value)" required>
+                <option value="" disabled>Branch</option>
+                <option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
                   {{ branch.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+                </option>
+              </select>
+            </div>
             <div *ngIf="isRedeploy && commitInfo"
               class="deploy-step2-form__project-info-group deploy-step2-form__commit">
               <div>
@@ -82,36 +81,36 @@
             </div>
           </div>
           <div *ngIf="sourceType.id === DEPLOY_TYPES_IDS.GIT_URL">
-            <mat-form-field>
-              <input matInput [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
-            </mat-form-field>
-            <mat-form-field>
-              <input matInput [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
-            </mat-form-field>
+            <div class="form-field">
+              <input class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
+            </div>
+            <div class="form-field">
+              <input class="input" [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
+            </div>
           </div>
         </div>
         <div *ngIf="sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG">
-          <mat-form-field>
-            <input matInput [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="Application Name"
+          <div class="form-field">
+            <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="Application Name"
               name="dockerAppName" required>
-            <mat-error *ngIf="sourceSelectionForm.controls.dockerAppName?.errors?.required">
+            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerAppName?.errors?.required">
               Application name is required
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field>
-            <input matInput [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
+            </div>
+          </div>
+          <div class="form-field">
+            <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
               required>
-            <mat-error *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.required">
+            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.required">
               Image is required
-            </mat-error>
-            <mat-error *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid">
+            </div>
+            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid">
               Invalid Image
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field>
-            <input matInput [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
-            <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
-          </mat-form-field>
+            </div>
+          </div>
+          <div class="form-field">
+            <input class="input" [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
+            <p class="mt-1 text-sm text-gray-500">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
+          </div>
         </div>
       </div>
     </div>

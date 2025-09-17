@@ -3,33 +3,53 @@
     <h1>{{title}} Setup with Local Admin Account</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
-  <div class="local-setup-wizard">
+  <div class="p-6">
     <app-steppers>
-      <app-step title="Local Account Informatiomn" [valid]="validateLocalAuthForm | async" [onNext]="next">
+      <app-step title="Local Account Information" [valid]="validateLocalAuthForm | async" [onNext]="next">
         <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
           text="Please wait - this will take a few moments">
-          <div class="local-setup-wizard__form">
-            <p class="local-setup-wizard__form-section">
-              Please choose a password to use for the local Administrator account.</p>
-            <p>This will configure <app-product-name></app-product-name> with a single, built-in account with the username <span
-                class="local-setup-wizard__form-username">admin</span>
-              and the password that you choose below.</p>
-            <form class="local-setup-wizard__form" [formGroup]="passwordForm" class="stepper-form">
-              <div class="local-setup-wizard__form-block">
-                <mat-form-field>
-                  <input matInput formControlName="adminPassword" placeholder="Password" name="password" required
-                    [type]="!showPassword[1] ? 'password' : 'text'">
-                  <span matSuffix>
-                    <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
-                  </span>
-                </mat-form-field>
-                <mat-form-field>
-                  <input matInput formControlName="adminPasswordConfirm" placeholder="Confirm Password"
-                    name="adminPasswordConfirm" required [type]="!showPassword[2] ? 'password' : 'text'">
-                  <span matSuffix>
-                    <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
-                  </span>
-                </mat-form-field>
+          <div class="space-y-6">
+            <div class="space-y-4">
+              <p class="text-gray-700">
+                Please choose a password to use for the local Administrator account.</p>
+              <p class="text-gray-700">This will configure <app-product-name></app-product-name> with a single, built-in account with the username <span
+                  class="font-mono bg-gray-100 px-2 py-1 rounded text-sm">admin</span>
+                and the password that you choose below.</p>
+            </div>
+            <form [formGroup]="passwordForm" class="space-y-4">
+              <div class="space-y-4">
+                <div class="form-field">
+                  <label class="form-label" for="adminPassword">Password</label>
+                  <div class="relative">
+                    <input
+                      id="adminPassword"
+                      class="input pr-10"
+                      formControlName="adminPassword"
+                      placeholder="Password"
+                      name="password"
+                      required
+                      [type]="!showPassword[1] ? 'password' : 'text'">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label class="form-label" for="adminPasswordConfirm">Confirm Password</label>
+                  <div class="relative">
+                    <input
+                      id="adminPasswordConfirm"
+                      class="input pr-10"
+                      formControlName="adminPasswordConfirm"
+                      placeholder="Confirm Password"
+                      name="adminPasswordConfirm"
+                      required
+                      [type]="!showPassword[2] ? 'password' : 'text'">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           </div>

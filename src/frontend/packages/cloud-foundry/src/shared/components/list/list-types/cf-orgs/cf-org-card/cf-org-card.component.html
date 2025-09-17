@@ -29,7 +29,9 @@
       <ng-container *ngIf="memoryLimit; else noMemoryLimit">{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}</ng-container>
       <ng-template #noMemoryLimit>{{ memoryTotal | MbToHumanSize }}</ng-template>
     </app-meta-card-value>
-    <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
+    <div class="progress mt-2">
+      <div class="progress-bar" [style.width.%]="normalisedMemoryUsage"></div>
+    </div>
   </app-meta-card-item>
   <ng-template #noMemoryTotal>
     <app-meta-card-item>

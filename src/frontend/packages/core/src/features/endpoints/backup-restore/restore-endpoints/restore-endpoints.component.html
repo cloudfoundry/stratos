@@ -4,54 +4,74 @@
 
 <app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
   <app-step title="File" [valid]="service.validFileContent$ | async">
-    <div class="file-step">
-      <div class="file-step__chunk">
-        <p>Provide the backup file to restore from.</p>
-        <div class="file-step__input">
-          <input #localPathSelectFile fileread="localPathFile" type="file" class="file-step__input--input"
-            name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />Choose
-          <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>File</button>
-          <ng-container *ngIf="service.file$ | async as file">{{file.name}}</ng-container>
+    <div class="space-y-6">
+      <div>
+        <p class="text-gray-700 mb-4">Provide the backup file to restore from.</p>
+        <div class="flex items-center space-x-4">
+          <input #localPathSelectFile fileread="localPathFile" type="file" class="hidden"
+            name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" />
+          <button (click)="localPathSelectFile.click()" class="btn btn-primary">Choose File</button>
+          <span *ngIf="service.file$ | async as file" class="text-sm text-gray-600">{{file.name}}</span>
         </div>
       </div>
       <ng-container *ngIf="service.file$ | async as file">
-        <div *ngIf="!!service.unparsableFileContent || !(service.validDb$ | async)" class="file-step__error">
-          <div *ngIf="!service.unparsableFileContent && !(service.validDb$ | async)" class="file-step__chunk">
-            <p>
-              <mat-icon>warning</mat-icon> The database version of <app-product-name></app-product-name>
-              (<code>{{service.currentDbVersion$ | async}}</code>) and the backup
-              (<code>{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
-            </p>
-            <mat-checkbox (change)="onIgnoreDbChange($event)">
-              Ignore different database versions
-            </mat-checkbox>
+        <div *ngIf="!!service.unparsableFileContent || !(service.validDb$ | async)" class="space-y-4">
+          <div *ngIf="!service.unparsableFileContent && !(service.validDb$ | async)" class="alert alert-warning">
+            <div class="flex items-start space-x-3">
+              <span class="material-icons text-warning-600 mt-0.5">warning</span>
+              <div class="flex-1">
+                <p class="text-warning-800 mb-3">
+                  The database version of <app-product-name></app-product-name>
+                  (<code class="bg-warning-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion$ | async}}</code>) and the backup
+                  (<code class="bg-warning-100 px-1 py-0.5 rounded text-xs">{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
+                </p>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" (change)="onIgnoreDbChange($event)">
+                  <span class="text-sm text-warning-800">Ignore different database versions</span>
+                </label>
+              </div>
+            </div>
           </div>
-          <div *ngIf="!!service.unparsableFileContent">
-            <p>
-              <mat-icon>warning</mat-icon>Unable to parse file contents. Reason:&nbsp;
-              <code>{{service.unparsableFileContent}}</code>
-            </p>
+          <div *ngIf="!!service.unparsableFileContent" class="alert alert-danger">
+            <div class="flex items-start space-x-3">
+              <span class="material-icons text-danger-600 mt-0.5">warning</span>
+              <div class="flex-1">
+                <p class="text-danger-800">
+                  Unable to parse file contents. Reason:&nbsp;
+                  <code class="bg-danger-100 px-1 py-0.5 rounded text-xs">{{service.unparsableFileContent}}</code>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </ng-container>
     </div>
   </app-step>
   <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">
-    <div class="password-step">
-      <p>Provide the password that was given at the time the backup was created</p>
-      <form [formGroup]="passwordForm" class="stepper-form">
-        <mat-form-field>
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password" required [type]="!show ? 'password' : 'text'">
-          <span matSuffix>
-            <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
-          </span>
-          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
-            Password is required</mat-error>
-          <mat-error *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
+    <div class="space-y-4">
+      <p class="text-gray-700">Provide the password that was given at the time the backup was created</p>
+      <form [formGroup]="passwordForm" class="space-y-4">
+        <div class="form-field">
+          <label class="form-label" for="password">Password</label>
+          <div class="relative">
+            <input
+              id="password"
+              class="input pr-10"
+              formControlName="password"
+              required
+              [type]="!show ? 'password' : 'text'"
+              placeholder="Enter password">
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+              <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
+            </div>
+          </div>
+          <div class="form-error" *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.required">
+            Password is required
+          </div>
+          <div class="form-error" *ngIf="passwordForm.controls.password.errors && passwordForm.controls.password.errors.minlength">
             Password must be at least {{passwordForm.controls.password.errors.minlength.requiredLength}} characters
-          </mat-error>
-        </mat-form-field>
+          </div>
+        </div>
       </form>
     </div>
   </app-step>

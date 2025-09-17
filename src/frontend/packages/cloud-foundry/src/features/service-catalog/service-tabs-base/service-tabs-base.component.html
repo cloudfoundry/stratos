@@ -4,9 +4,9 @@
   </div>
   <div class="page-header-right">
     <ng-container *appCfUserPermission="canCreateServiceInstance">
-      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink"
+      <button class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" name="add-service-instance" [routerLink]="addServiceInstanceLink"
         [queryParams]="isServiceSpaceScoped$ | async" [disabled]="!(hasVisiblePlans$ | async)">
-        <mat-icon [matTooltip]="toolTipText$ | async">add</mat-icon>
+        <span class="material-icons" [title]="toolTipText$ | async">add</span>
       </button>
     </ng-container>
   </div>

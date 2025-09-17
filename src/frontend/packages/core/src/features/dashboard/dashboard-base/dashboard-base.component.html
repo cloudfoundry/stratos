@@ -1,52 +1,88 @@
-<div class="dashboard__outer">
-  <mat-drawer-container autosize class="dashboard">
-    <mat-drawer #sidenav *ngIf="mainNavState$ | async as navState" class="dashboard__side-nav" [mode]="navState.mode"
-      [opened]="navState.opened">
+<div class="dashboard-outer h-screen bg-app-bg text-app-text">
+  <!-- Main layout container -->
+  <div class="dashboard flex h-full">
+    <!-- Side navigation drawer -->
+    <div #sidenav *ngIf="mainNavState$ | async as navState"
+         class="dashboard-side-nav fixed inset-y-0 left-0 z-50 bg-nav-bg transform transition-transform duration-300 ease-in-out"
+         [ngClass]="{
+           'translate-x-0': navState.opened,
+           '-translate-x-full': !navState.opened,
+           'lg:translate-x-0': navState.mode === 'side',
+           'lg:relative': navState.mode === 'side'
+         }">
       <app-side-nav (changedMode)="redrawSideNav()" [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
       </app-side-nav>
-    </mat-drawer>
-    <mat-drawer-content>
-      <div class="page-content">
-        <app-show-page-header class="page-header"></app-show-page-header>
+    </div>
+
+    <!-- Main content area -->
+    <div class="dashboard-content flex-1 flex flex-col min-w-0"
+         [ngClass]="{'lg:ml-64': (mainNavState$ | async)?.mode === 'side' && !(mainNavState$ | async)?.iconMode, 'lg:ml-16': (mainNavState$ | async)?.mode === 'side' && (mainNavState$ | async)?.iconMode}">
+
+      <div class="page-content flex-1 flex flex-col">
+        <!-- Page header -->
+        <app-show-page-header class="page-header sticky top-0 z-40 bg-header-bg text-header-text border-b border-gray-200"></app-show-page-header>
+
+        <!-- Routing indicator -->
         <app-routing-indicator class="routing-indicator"></app-routing-indicator>
-        <div class="dashboard__inner">
-          <div class="dashboard__page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
-            <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs">
+
+        <div class="dashboard-inner flex-1 flex">
+          <!-- Page tabs navigation -->
+          <div class="dashboard-page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
+            <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs"
+                               class="w-64 border-r border-gray-200 bg-gray-50">
             </app-page-side-nav>
           </div>
-          <div class="dashboard__main">
+
+          <!-- Main content -->
+          <div class="dashboard-main flex-1 flex flex-col min-w-0">
+            <!-- Sub navigation breadcrumbs -->
             <div *ngIf="subNavData$ | async as data">
-              <div class="page-header-sub-nav" *ngIf="data[0] || data[1] || data[3]">
-                <div class="page-header-sub-nav__container">
-                  <div *ngIf="data[0] && !data[3]" class="page-header-sub-nav__title">
+              <div class="page-header-sub-nav bg-gray-50 border-b border-gray-200 px-6 py-3" *ngIf="data[0] || data[1] || data[3]">
+                <div class="page-header-sub-nav-container flex items-center justify-between">
+                  <div *ngIf="data[0] && !data[3]" class="page-header-sub-nav-title text-lg font-semibold text-gray-900">
                     {{ data[0] }}
                   </div>
-                  <div *ngIf="data[3] as breadcrumbs" class="page-header-sub-nav__breadcrumbs">
+
+                  <div *ngIf="data[3] as breadcrumbs" class="page-header-sub-nav-breadcrumbs flex items-center space-x-2">
                     <ng-container *ngFor="let breadcrumbDef of breadcrumbs; last as isLast">
-                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
-                        [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                      <span class="page-header-sub-nav__breadcrumb page-header-sub-nav__breadcrumb-nolink" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                      <mat-icon *ngIf="!isLast" class="page-header-sub-nav__breadcrumb-separator">chevron_right</mat-icon>
+                      <span class="page-header-sub-nav-breadcrumb text-primary hover:text-primary-600 cursor-pointer"
+                            *ngIf="breadcrumbDef.routerLink"
+                            [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <span class="page-header-sub-nav-breadcrumb text-gray-600"
+                            *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                      <span *ngIf="!isLast" class="material-icons text-gray-400 text-sm">chevron_right</span>
                     </ng-container>
                   </div>
+
                   <ng-container *ngIf="data[1] as portal" [cdkPortalOutlet]="portal"></ng-container>
                 </div>
               </div>
             </div>
-            <div #content class="dashboard__content" [ngClass]="{'dashboard__no-margin': noMargin$ | async}" cdkScrollable>
+
+            <!-- Main page content -->
+            <div #content class="dashboard-content flex-1 overflow-auto"
+                 [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}"
+                 cdkScrollable>
               <router-outlet></router-outlet>
             </div>
           </div>
         </div>
       </div>
-    </mat-drawer-content>
-  </mat-drawer-container>
-  <mat-drawer class="dashboard__side-help-outer" #sideHelp
-    [ngClass]="{'dashboard__side_preview': (sidePanelService.previewMode$ | async) >= 0}" [autoFocus]="false" mode="over"
-    position="end" [opened]="(sidePanelService.opened$ | async) > 0" (closedStart)="sideHelpClosed()">
-    <div class="dashboard__side-help"
-      [ngClass]="{'dashboard__side-narrow': (sidePanelService.previewMode$ | async) === 2}">
+    </div>
+  </div>
+
+  <!-- Side help panel -->
+  <div #sideHelp
+       class="dashboard-side-help-outer fixed inset-y-0 right-0 z-50 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
+       [ngClass]="{
+         'translate-x-0': (sidePanelService.opened$ | async) > 0,
+         'translate-x-full': (sidePanelService.opened$ | async) <= 0,
+         'dashboard-side-preview w-96': (sidePanelService.previewMode$ | async) >= 0
+       }"
+       (click)="sideHelpClosed()">
+    <div class="dashboard-side-help h-full overflow-auto"
+         [ngClass]="{'dashboard-side-narrow w-80': (sidePanelService.previewMode$ | async) === 2, 'w-96': (sidePanelService.previewMode$ | async) !== 2}">
       <template #previewPanelContainer></template>
     </div>
-  </mat-drawer>
+  </div>
 </div>

@@ -1,2 +1,10 @@
-<mat-checkbox [disabled]="(dataSource.isAdding$ | async) || (disable$ | async)" [checked]="!(disable$ | async) && dataSource.selectedRows?.has(dataSource.getRowUniqueId(row))"
-  (change)="dataSource.selectedRowToggle(row)" [matTooltip]="tooltip$ | async"></mat-checkbox>
+<div class="checkbox-container">
+  <input type="checkbox"
+         class="checkbox"
+         [disabled]="(dataSource.isAdding$ | async) || (disable$ | async)"
+         [checked]="!(disable$ | async) && dataSource.selectedRows?.has(dataSource.getRowUniqueId(row))"
+         (change)="dataSource.selectedRowToggle(row)"
+         [title]="tooltip$ | async"
+         [id]="'checkbox-' + dataSource.getRowUniqueId(row)">
+  <label class="checkbox-label" [for]="'checkbox-' + dataSource.getRowUniqueId(row)"></label>
+</div>

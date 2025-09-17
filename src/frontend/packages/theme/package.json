@@ -1,0 +1,9 @@
+{
+  "name": "@stratosui/theme",
+  "version": "1.0.0",
+  "description": "Stratos UI Theme Package",
+  "main": "theme.module.ts",
+  "stratos": {
+    "theme": true
+  }
+}

@@ -1,45 +1,41 @@
 <div class="app-table">
   <div class="app-table__loading" *ngIf="dataSource.isTableLoading$">
-    <mat-progress-bar color="primary" *ngIf="dataSource.isTableLoading$ | async" mode="indeterminate">
-    </mat-progress-bar>
+    <div *ngIf="dataSource.isTableLoading$ | async" class="progress-bar">
+      <div class="progress-bar-indeterminate bg-primary-500"></div>
+    </div>
   </div>
-  <mat-card class="app-table__card"
+  <div class="card app-table__card"
     [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}">
-    <mat-card-content class="app-table__content">
-      <mat-table class="app-table__inner" #table [hidden]="hideTable" [dataSource]="dataSource"
-        [trackBy]="dataSource.trackBy" matSort>
-        <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnId">
-          <div *ngIf="column.sort">
-            <mat-header-cell class="app-table__header-cell" *matHeaderCellDef
-              [ngClass]="[column.class || '', column.headerClass || '']" mat-sort-header [disableClear]="true"
-              [style.flex]="column.cellFlex">
-              <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
-                [dataSource]="dataSource"></app-table-cell>
-            </mat-header-cell>
-          </div>
-          <div *ngIf="!column.sort">
-            <mat-header-cell class="app-table__header-cell" *matHeaderCellDef
-              [ngClass]="[column.class || '', column.headerClass || '']" [style.flex]="column.cellFlex">
-              <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
-                [dataSource]="dataSource"></app-table-cell>
-            </mat-header-cell>
-          </div>
-          <mat-cell class="app-table__cell" *matCellDef="let row"
-            [ngClass]="[column.class || '', column.cellClass || '']" [style.flex]="column.cellFlex"
-            [style.align-self]="column.cellAlignSelf || rowAlignSelf">
-            <app-table-cell [cellDefinition]="column.cellDefinition" [component]="column.cellComponent"
-              [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
-          </mat-cell>
-        </ng-container>
-        <mat-header-row [hidden]="hideTable" class="app-table__header-row"
-          [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}"
-          *matHeaderRowDef="columnNames" [ngClass]="{'app-table__inner--has-expanded-columns': !!expandComponent}">
-        </mat-header-row>
-        <app-table-row class="app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"
-          [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
-          [rowId]="dataSource.trackBy(null, row)" [prominentErrorBar]="prominentErrorBar">
-        </app-table-row>
-      </mat-table>
-    </mat-card-content>
-  </mat-card>
+    <div class="card-content app-table__content">
+      <div class="table-container app-table__inner" #table [hidden]="hideTable">
+        <table class="table w-full">
+          <thead>
+            <tr class="app-table__header-row"
+              [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
+              [hidden]="hideTable">
+              <th *ngFor="let column of columns"
+                class="app-table__header-cell table-cell-header"
+                [ngClass]="[column.class || '', column.headerClass || '']"
+                [style.flex]="column.cellFlex">
+                <div class="flex items-center gap-1"
+                  [class.cursor-pointer]="column.sort"
+                  (click)="column.sort && handleSort(column)">
+                  <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
+                    [dataSource]="dataSource"></app-table-cell>
+                  <span *ngIf="column.sort" class="material-icons text-sm text-gray-400">sort</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <app-table-row class="app-table__row" *ngFor="let row of dataSource.connect() | async; trackBy: dataSource.trackBy"
+              [rowState]="getRowState(row)"
+              [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
+              [rowId]="dataSource.trackBy(null, row)" [prominentErrorBar]="prominentErrorBar">
+            </app-table-row>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
