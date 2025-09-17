@@ -5,6 +5,9 @@
 @import '../sass/fonts';
 @import '../sass/icons';
 
+// Import Tailwind animations for custom components
+@import './shared/styles/tailwind-animations.scss';
+
 // Base styles are handled by Tailwind in main.css
 // Override font family to match existing design
 body {
