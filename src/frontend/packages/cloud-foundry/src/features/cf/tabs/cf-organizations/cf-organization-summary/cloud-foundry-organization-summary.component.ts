@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TailwindSnackBarService } from '../../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
