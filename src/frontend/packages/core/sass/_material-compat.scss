@@ -1,47 +1,29 @@
 // Material Design compatibility layer for Tailwind CSS migration
 // This file provides SCSS functions and variables to replace Angular Material theme functions
+// Integrates with the existing Stratos theme system using CSS custom properties
 
-// Color palette replacements
-$primary: (
-  50: #e3f2fd,
-  100: #bbdefb,
-  200: #90caf9,
-  300: #64b5f6,
-  400: #42a5f5,
-  500: #2196f3,
-  600: #1e88e5,
-  700: #1976d2,
-  800: #1565c0,
-  900: #0d47a1,
-);
+// Helper function to generate Material Design color shades from a base color
+@function generate-palette($base-color) {
+  @return (
+    50: color-mix(in srgb, $base-color 10%, white),
+    100: color-mix(in srgb, $base-color 20%, white),
+    200: color-mix(in srgb, $base-color 35%, white),
+    300: color-mix(in srgb, $base-color 50%, white),
+    400: color-mix(in srgb, $base-color 70%, white),
+    500: $base-color,
+    600: color-mix(in srgb, $base-color 85%, black),
+    700: color-mix(in srgb, $base-color 70%, black),
+    800: color-mix(in srgb, $base-color 55%, black),
+    900: color-mix(in srgb, $base-color 40%, black),
+  );
+}
 
-$accent: (
-  50: #fce4ec,
-  100: #f8bbd9,
-  200: #f48fb1,
-  300: #f06292,
-  400: #ec407a,
-  500: #e91e63,
-  600: #d81b60,
-  700: #c2185b,
-  800: #ad1457,
-  900: #880e4f,
-);
+// Color palette replacements integrated with Stratos theme
+$primary: generate-palette(var(--color-primary));
+$accent: generate-palette(var(--color-accent));
+$warn: generate-palette(var(--color-danger));
 
-$warn: (
-  50: #ffebee,
-  100: #ffcdd2,
-  200: #ef9a9a,
-  300: #e57373,
-  400: #ef5350,
-  500: #f44336,
-  600: #e53935,
-  700: #d32f2f,
-  800: #c62828,
-  900: #b71c1c,
-);
-
-// Monocular app theme variables
+// Monocular app theme variables - use existing theme colors
 $monocular-app-primary: $primary;
 $monocular-app-accent: $accent;
 $monocular-app-warn: $warn;
