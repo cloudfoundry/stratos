@@ -1,4 +1,5 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit } from '@angular/core';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'mat-form-field',
@@ -93,15 +94,16 @@ export class CustomButtonDirective {
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
 }
 
-@Component({
+@Directive({
   selector: '[matInput]',
-  template: '',
   standalone: false,
   host: {
     'class': 'mat-input-element'
   }
 })
 export class MatInputDirective {
+  @Input() formControl: FormControl;
+  @Input() formControlName: string;
 }
 
 @Component({

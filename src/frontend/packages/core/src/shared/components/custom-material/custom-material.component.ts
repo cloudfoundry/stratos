@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Directive } from '@angular/core';
 
 // Custom Icon Component
 @Component({
@@ -128,4 +128,13 @@ export class CustomDatepickerToggleComponent {
       this.for.open();
     }
   }
+}
+
+// Datepicker directive for input binding
+@Directive({
+  selector: '[matDatepicker]',
+  standalone: false
+})
+export class MatDatepickerDirective {
+  @Input() matDatepicker: any;
 }

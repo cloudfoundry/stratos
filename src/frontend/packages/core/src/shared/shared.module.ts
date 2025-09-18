@@ -129,6 +129,9 @@ import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindSh
 import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
 import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
+import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
+import { MatDatepickerDirective } from './components/custom-material/custom-material.component';
 import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
 import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
 import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from './components/custom-button-toggle/custom-button-toggle.component';
@@ -242,6 +245,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
+    DisableRouterLinkDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
     CustomIconComponent,
@@ -371,6 +378,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
+    DisableRouterLinkDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
     CustomIconComponent,
