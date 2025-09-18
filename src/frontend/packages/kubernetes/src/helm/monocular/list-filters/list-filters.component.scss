@@ -20,7 +20,7 @@
       opacity: 0.5;
       &.active {
         opacity: 1;
-        color: mat-color($monocular-app-primary);
+        color: var(--color-primary);
       }
     }
   }

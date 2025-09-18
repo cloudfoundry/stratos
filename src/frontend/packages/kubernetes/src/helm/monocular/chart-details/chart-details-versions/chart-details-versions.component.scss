@@ -20,7 +20,7 @@
 .version__cell {
 
   &.creation-date {
-    color: lighten($layout-base, 20%);
+    color: #6b7280; // equivalent to lighter gray
   }
 
   &.number.selected {

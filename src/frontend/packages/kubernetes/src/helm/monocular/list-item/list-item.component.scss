@@ -6,11 +6,11 @@ $list-item-content-height: 200px;
 $list-item-content-min-height: 140px;
 
 .list-item {
-  border-radius: $border-radius;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  border: 1px solid $border-color;
+  border: 1px solid var(--color-border);
   transition: transform 0.2s ease;
-  background-color: $background-light;
+  background-color: var(--color-background-light);
 
   &:hover {
     transform: scale(1.02);
@@ -25,13 +25,13 @@ $list-item-content-min-height: 140px;
     height: $list-item-content-height;
     display: flex;
     flex-direction: column;
-    color: $layout-text;
+    color: var(--color-layout-text);
   }
 
   &-logo {
     width: 100%;
     height: $list-item-content-height/2 + 10px;
-    background-color: $background-white;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -40,7 +40,7 @@ $list-item-content-min-height: 140px;
   &-info {
     position: relative;
     flex: 1;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid var(--color-border);
     padding: 0 1em;
     display: flex;
     flex-direction: column;

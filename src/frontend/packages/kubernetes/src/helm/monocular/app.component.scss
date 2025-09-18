@@ -7,7 +7,7 @@ $menu-height: 140px;
 .App {
 
   &__Wrap {
-    background: $background-white;
+    background: white;
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -22,7 +22,7 @@ $menu-height: 140px;
 
   &__Menu {
     position: absolute;
-    background-color: $layout-base;
+    background-color: var(--color-layout-base);
     top: 0;
     height: 0;
     width: 100%;
@@ -39,10 +39,10 @@ $menu-height: 140px;
       font-weight: normal;
       margin-bottom: .5em;
       font-size: 1.2em;
-      color: mat-color($monocular-app-primary);
+      color: var(--color-primary);
       a.active {
         font-weight: bold;
-        color: $text-white;
+        color: white;
       }
     }
   }
