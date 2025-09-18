@@ -8,8 +8,9 @@ export type MatDialog = any; // Will be replaced with TailwindDialogService
 export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
 // Re-export classes directly for provider usage
 export {
-  ErrorStateMatcher,
-  TailwindShowOnDirtyErrorStateMatcher as ShowOnDirtyErrorStateMatcher
+  TailwindErrorStateMatcher as ErrorStateMatcher,
+  TailwindShowOnDirtyErrorStateMatcher as ShowOnDirtyErrorStateMatcher,
+  TailwindDefaultErrorStateMatcher as DefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
 export type MatSidenav = any; // Will be replaced with TailwindSidenav
 export type MatSidenavContainer = any; // Will be replaced with TailwindSidenavService
@@ -31,6 +32,15 @@ export type Sort = any; // Will be replaced with TailwindSort
 export type FlexLayoutModule = any;
 export type FlexModule = any;
 export type GridModule = any;
+
+// Full Material component implementations
+export {
+  TailwindSnackBarRef as SimpleSnackBar
+} from './tailwind-snackbar.service';
+
+export {
+  TailwindIconRegistry as MatIconRegistry
+} from './tailwind-icon-registry.service';
 
 // Injection tokens for backward compatibility
 export const MAT_DIALOG_DATA = new InjectionToken<any>('StratosDialogData');
@@ -66,7 +76,7 @@ export {
 } from './tailwind-sidenav.service';
 
 export {
-  TailwindSortDirective as StratosSortDirective,
+  TailwindSortDirective as MatSort,
   TailwindSortHeaderDirective as StratosSortHeaderDirective,
   TailwindSortService as StratosSortService,
   TailwindSort as StratosSort,
@@ -75,9 +85,9 @@ export {
 } from './tailwind-sort.service';
 
 export {
-  TailwindPaginator as StratosPaginator,
+  TailwindPaginator as MatPaginator,
   TailwindPaginatorService as StratosPaginatorService,
-  TailwindPageEvent as StratosPageEvent
+  TailwindPageEvent as PageEvent
 } from './tailwind-paginator.service';
 
 export {

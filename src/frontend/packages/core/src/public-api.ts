@@ -29,3 +29,4 @@ export * from './shared/services/tailwind-sidenav.service';
 export * from './shared/services/tailwind-sort.service';
 export * from './shared/services/tailwind-paginator.service';
 export * from './shared/services/tailwind-json-schema-form.service';
+export * from './shared/services/tailwind-icon-registry.service';
