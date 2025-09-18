@@ -129,6 +129,7 @@ import { TailwindIconRegistry } from './services/tailwind-icon-registry.service'
 import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
 import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
+import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 
 @NgModule({
   imports: [
@@ -234,6 +235,7 @@ import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } fr
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -332,6 +334,7 @@ import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } fr
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
   ],
   providers: [
     ListConfig,

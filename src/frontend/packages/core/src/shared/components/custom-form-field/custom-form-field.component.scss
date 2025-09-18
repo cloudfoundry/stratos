@@ -1,0 +1,251 @@
+.custom-form-field {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-field-wrapper {
+  position: relative;
+  padding-bottom: 1.34375em;
+}
+
+.form-field-flex {
+  display: inline-flex;
+  align-items: baseline;
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+}
+
+.form-field-infix {
+  display: block;
+  position: relative;
+  flex: auto;
+  min-width: 0;
+  width: 180px;
+  padding: 0.75em 0 0.75em 0;
+}
+
+.form-field-infix input,
+.form-field-infix textarea,
+.form-field-infix select {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  vertical-align: bottom;
+  text-align: inherit;
+  box-sizing: content-box;
+  outline: none;
+  font: inherit;
+  color: inherit;
+  
+  &::placeholder {
+    color: transparent;
+  }
+  
+  &:focus::placeholder {
+    color: rgba(0, 0, 0, 0.42);
+  }
+}
+
+.form-field-label {
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+              color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+              font-size 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  color: rgba(0, 0, 0, 0.54);
+  transform-origin: 0 0;
+  
+  &.floating {
+    transform: translateY(-1.34375em) scale(0.75);
+    font-size: 12px;
+  }
+}
+
+.form-field-suffix {
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.form-field-underline {
+  position: absolute;
+  bottom: 1.34375em;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.12);
+  
+  .focused & {
+    background-color: transparent;
+  }
+}
+
+.form-field-ripple {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2196f3;
+  transform: scaleX(0);
+  transform-origin: 50%;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  .focused & {
+    transform: scaleX(1);
+  }
+  
+  .color-accent & {
+    background-color: #ff4081;
+  }
+  
+  .color-warn & {
+    background-color: #f44336;
+  }
+}
+
+.form-field-subscript-wrapper {
+  position: absolute;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  top: calc(100% - 1.34375em);
+}
+
+.form-field-hint-wrapper {
+  display: flex;
+  padding-top: 0.5em;
+}
+
+.form-field-hint {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.75em;
+  line-height: 1.25;
+}
+
+/* Button Styles */
+.mat-icon-button {
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 8px;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  
+  &:focus {
+    background-color: rgba(0, 0, 0, 0.08);
+    outline: none;
+  }
+  
+  &.mat-button-disabled {
+    cursor: default;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.mat-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  text-transform: uppercase;
+  font-weight: 500;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  
+  &:focus {
+    background-color: rgba(0, 0, 0, 0.08);
+    outline: none;
+  }
+  
+  &.mat-button-disabled {
+    cursor: default;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+/* Material Icons */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Appearance Variants */
+.appearance-fill {
+  .form-field-flex {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 4px 4px 0 0;
+    padding: 0 12px;
+  }
+  
+  .form-field-underline {
+    bottom: 0;
+  }
+}
+
+.appearance-outline {
+  .form-field-flex {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 0 12px;
+  }
+  
+  .form-field-underline {
+    display: none;
+  }
+  
+  &.focused .form-field-flex {
+    border-color: #2196f3;
+    border-width: 2px;
+  }
+}
+
+.appearance-legacy {
+  .form-field-infix {
+    padding: 0.4375em 0;
+  }
+  
+  .form-field-label {
+    top: 0.4375em;
+  }
+}

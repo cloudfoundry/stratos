@@ -1,0 +1,39 @@
+<div class="custom-form-field" 
+     [class.focused]="focused"
+     [class.has-value]="hasValue"
+     [class.appearance-standard]="appearance === 'standard'"
+     [class.appearance-fill]="appearance === 'fill'"
+     [class.appearance-outline]="appearance === 'outline'"
+     [class.appearance-legacy]="appearance === 'legacy'"
+     [class.color-primary]="color === 'primary'"
+     [class.color-accent]="color === 'accent'"
+     [class.color-warn]="color === 'warn'">
+  
+  <div class="form-field-wrapper">
+    <div class="form-field-flex">
+      <div class="form-field-infix">
+        <ng-content select="input, textarea, select"></ng-content>
+        <span class="form-field-label" 
+              [class.floating]="shouldFloatLabel"
+              *ngIf="placeholder">
+          {{ placeholder }}
+        </span>
+      </div>
+      
+      <div class="form-field-suffix" *ngIf="hassuffix">
+        <ng-content select="[matSuffix], mat-icon"></ng-content>
+      </div>
+    </div>
+    
+    <div class="form-field-underline">
+      <span class="form-field-ripple"></span>
+    </div>
+    
+    <div class="form-field-subscript-wrapper">
+      <div class="form-field-hint-wrapper" *ngIf="hintLabel">
+        <div class="form-field-hint-spacer"></div>
+        <div class="form-field-hint">{{ hintLabel }}</div>
+      </div>
+    </div>
+  </div>
+</div>
