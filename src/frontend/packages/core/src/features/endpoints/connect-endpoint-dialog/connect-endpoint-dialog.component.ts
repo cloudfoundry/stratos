@@ -26,7 +26,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public helpDocument$: Observable<string>;
 
   constructor(
-    public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+    @Inject('TailwindDialogRef') public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
     endpointsService: EndpointsService,
     private sidePanelService: SidePanelService,
