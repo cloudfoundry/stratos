@@ -1,11 +1,17 @@
 import { Injectable, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export interface TailwindPageEvent {
-  pageIndex: number;
-  pageSize: number;
-  length: number;
+export class TailwindPageEvent {
+  pageIndex: number = 0;
+  pageSize: number = 50;
+  length: number = 0;
   previousPageIndex?: number;
+
+  constructor(data?: Partial<TailwindPageEvent>) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }
 
 export class TailwindPaginator {
