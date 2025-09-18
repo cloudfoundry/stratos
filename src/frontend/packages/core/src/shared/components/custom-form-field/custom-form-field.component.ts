@@ -55,7 +55,7 @@ export class CustomFormFieldComponent implements AfterContentInit {
   styleUrls: ['./custom-form-field.component.scss'],
   standalone: false
 })
-export class CustomIconComponent {
+export class CustomFormFieldIconComponent {
   @Input() fontSet = 'material-icons';
   @Input() fontIcon: string;
   @Input() svgIcon: string;

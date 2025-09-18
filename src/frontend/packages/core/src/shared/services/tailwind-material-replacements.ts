@@ -1,11 +1,11 @@
 import { InjectionToken } from '@angular/core';
 
 // Type aliases for Material Design replacements
-export type MatSnackBar = any; // Will be replaced with TailwindSnackBarService
+// MatSnackBar is exported from tailwind-snackbar.service
 export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRef<T>
-export type SimpleSnackBar = any;
-export type MatDialog = any; // Will be replaced with TailwindDialogService
-export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
+// SimpleSnackBar is exported from tailwind-snackbar.service
+// MatDialog is exported from tailwind-dialog.service
+// MatDialogRef is exported from tailwind-dialog.service
 // Re-export classes directly for provider usage
 export {
   TailwindErrorStateMatcher as ErrorStateMatcher,
@@ -14,14 +14,13 @@ export {
 } from './tailwind-error-state-matcher';
 export type MatSidenav = any; // Will be replaced with TailwindSidenav
 export type MatSidenavContainer = any; // Will be replaced with TailwindSidenavService
-export type MatSort = any; // Will be replaced with TailwindSortDirective
+// MatSort is exported from tailwind-sort.service
 export type MatSortHeader = any; // Will be replaced with TailwindSortHeaderDirective
-export type MatPaginator = any; // Will be replaced with TailwindPaginator
-export type PageEvent = any; // Will be replaced with TailwindPageEvent
+// MatPaginator is exported from tailwind-paginator.service
+// PageEvent is exported from tailwind-paginator.service
 export type MatDrawer = any; // Will be replaced with TailwindSidenav
 
 // Additional Angular Material types
-export type MatIconRegistry = any;
 export type MatChipInputEvent = any;
 export type MatRadioChange = any;
 export type MatCheckboxChange = any;
@@ -54,7 +53,7 @@ export {
 } from './tailwind-dialog.service';
 
 // Create a factory for MatDialogRef that handles generics
-export function createMatDialogRef<T = any, R = any>(componentInstance?: T): TailwindDialogRef<T, R> {
+export function createMatDialogRef<T = any, R = any>(componentInstance?: T): TailwindDialogRefImpl<T, R> {
   return new TailwindDialogRefImpl<T, R>(
     componentInstance as T,
     () => {} // empty close callback
@@ -79,9 +78,7 @@ export {
 export {
   TailwindErrorStateMatcher,
   TailwindShowOnDirtyErrorStateMatcher,
-  TailwindDefaultErrorStateMatcher,
-  ErrorStateMatcher,
-  ShowOnDirtyErrorStateMatcher
+  TailwindDefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
 
 export {

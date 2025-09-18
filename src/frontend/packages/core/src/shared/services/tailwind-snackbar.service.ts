@@ -30,12 +30,12 @@ export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
 
   dismiss(): void {
     this.removeCallback();
-    this._afterDismissed.next();
+    this._afterDismissed.next(null);
     this._afterDismissed.complete();
   }
 
   dismissWithAction(): void {
-    this._onAction.next();
+    this._onAction.next(null);
     this.dismiss();
   }
 }
