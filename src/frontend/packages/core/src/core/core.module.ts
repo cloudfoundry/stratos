@@ -6,6 +6,12 @@ import { RouterModule } from '@angular/router';
 import { PaginationMonitorFactory, EntityCatalogHelper, EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
 import { MomentModule } from 'ngx-moment';
 
+// Tailwind Material Replacements
+import { TailwindDialogService, TailwindDialogRef, TailwindDialogRefImpl } from '../shared/services/tailwind-dialog.service';
+import { TailwindSnackBarService } from '../shared/services/tailwind-snackbar.service';
+import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-state-matcher';
+import { createMatDialogRef } from '../shared/services/tailwind-material-replacements';
+
 import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
@@ -89,6 +95,14 @@ import { WindowRef } from './window-ref/window-ref.service';
             provide: APP_TITLE,
             useFactory: appTitleFactory,
             deps: [Title]
+        },
+        // Tailwind Material service providers
+        TailwindDialogService,
+        TailwindSnackBarService,
+        TailwindErrorStateMatcher,
+        {
+            provide: 'TailwindDialogRef',
+            useFactory: createMatDialogRef
         }
     ],
     declarations: [

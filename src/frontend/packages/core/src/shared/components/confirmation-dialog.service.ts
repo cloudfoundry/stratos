@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@stratosui/core';
+import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
 import { take } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from './confirmation-dialog.config';

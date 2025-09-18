@@ -16,7 +16,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent } from '@stratosui/core';
+import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {

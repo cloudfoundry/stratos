@@ -40,6 +40,17 @@ export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
   }
 }
 
+export class TailwindSimpleSnackBar {
+  constructor(
+    public snackBarRef: TailwindSnackBarRef<any>,
+    public data: any
+  ) {}
+
+  dismiss(): void {
+    this.snackBarRef.dismiss();
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })

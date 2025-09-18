@@ -12,14 +12,14 @@ export interface TailwindDialogConfig<D = any> {
   disableClose?: boolean;
 }
 
-export interface TailwindDialogRef<T, R = any> {
+export interface TailwindDialogRef<T = any, R = any> {
   afterClosed(): Observable<R | undefined>;
   afterOpened(): Observable<void>;
   close(dialogResult?: R): void;
   componentInstance: T;
 }
 
-export class TailwindDialogRefImpl<T, R = any> implements TailwindDialogRef<T, R> {
+export class TailwindDialogRefImpl<T = any, R = any> implements TailwindDialogRef<T, R> {
   private _afterClosed = new Subject<R | undefined>();
   private _afterOpened = new Subject<void>();
 

@@ -127,7 +127,7 @@
     "@angular/language-service": "20.1.7",
     "@cypress/request": "3.0.9",
     "@schematics/angular": "20.1.6",
-    "@types/jasmine": "^5.1.8",
+    "@types/jasmine": "^5.1.9",
     "@types/jasminewd2": "2.0.13",
     "@types/js-yaml": "4.0.9",
     "@types/karma": "6.3.9",

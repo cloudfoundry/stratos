@@ -3,8 +3,8 @@ import { NgModule } from '@angular/core';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MonacoEditorModule, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { CoreModule } from '@stratosui/core';
+import { SharedModule } from '@stratosui/core';
 import { TailwindJsonSchemaFormModule } from '../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 import { KubernetesModule } from '../kubernetes.module';
 import { ChartValuesEditorComponent } from './chart-values-editor/chart-values-editor.component';

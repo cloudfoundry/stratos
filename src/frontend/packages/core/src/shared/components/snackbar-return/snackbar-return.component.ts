@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
-import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '@stratosui/core';
+import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
@@ -18,7 +18,7 @@ export class SnackBarReturnComponent extends SimpleSnackBar {
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: any,
     private store: Store<AppState>,
-    private snackRef: TailwindSnackBarRef<any>,
+    @Inject('TailwindSnackBarRef') private snackRef: TailwindSnackBarRef<any>,
   ) {
     super(snackRef, data);
     this.returnLabel = data.returnLabel || 'Return';

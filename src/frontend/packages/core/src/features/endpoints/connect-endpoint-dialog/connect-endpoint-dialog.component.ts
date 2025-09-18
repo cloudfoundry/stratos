@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 

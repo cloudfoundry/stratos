@@ -1,18 +1,19 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
+import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
+import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Component({
-selector: 'app-log-out-dialog',
+  selector: 'app-log-out-dialog',
   templateUrl: './log-out-dialog.component.html',
   styleUrls: ['./log-out-dialog.component.scss'],
   standalone: false
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
-    public dialogRef: MatDialogRef<LogOutDialogComponent>,
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     private router: Router
   ) { }

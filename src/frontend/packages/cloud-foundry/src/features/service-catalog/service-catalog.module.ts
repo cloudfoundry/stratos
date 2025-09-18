@@ -1,8 +1,8 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { CoreModule } from '@stratosui/core';
+import { SharedModule } from '@stratosui/core';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import { CreateApplicationModule } from '../applications/create-application/create-application.module';
 import { ServiceBaseComponent } from './service-base/service-base.component';

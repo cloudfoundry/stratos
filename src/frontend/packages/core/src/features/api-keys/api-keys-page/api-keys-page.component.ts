@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialog } from '@stratosui/core';
+import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
