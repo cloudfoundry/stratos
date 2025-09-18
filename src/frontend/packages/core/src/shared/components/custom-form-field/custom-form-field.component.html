@@ -20,8 +20,8 @@
         </span>
       </div>
       
-      <div class="form-field-suffix" *ngIf="hassuffix">
-        <ng-content select="[matSuffix], mat-icon"></ng-content>
+      <div class="form-field-suffix">
+        <ng-content select="[matSuffix], span[matSuffix]"></ng-content>
       </div>
     </div>
     
