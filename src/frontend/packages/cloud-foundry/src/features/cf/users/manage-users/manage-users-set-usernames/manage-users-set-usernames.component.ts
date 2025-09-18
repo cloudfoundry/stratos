@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatRadioChange } from '@angular/material/radio';
+import { MatRadioChange } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
