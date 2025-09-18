@@ -1,0 +1,107 @@
+// Custom Icon Styles
+.custom-icon {
+  display: inline-block;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+
+  &.stratos-icons {
+    font-family: 'stratos-icons';
+  }
+}
+
+// Custom Progress Bar Styles
+.custom-progress-bar {
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+
+  .progress-fill {
+    height: 100%;
+    background-color: #2196f3;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  &.indeterminate {
+    .progress-fill {
+      width: 30% !important;
+      animation: indeterminate 2s infinite linear;
+    }
+  }
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+// Custom Dialog Styles
+.custom-dialog-content {
+  padding: 20px 24px;
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 1.5;
+}
+
+.custom-dialog-actions {
+  display: flex;
+  align-items: center;
+  padding: 8px 24px;
+  gap: 8px;
+
+  &.align-end {
+    justify-content: flex-end;
+  }
+}
+
+.custom-dialog-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 24px 24px 20px;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+// Custom Datepicker Styles
+.custom-datepicker,
+.custom-datepicker-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+  }
+}
+
+.custom-datepicker-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}

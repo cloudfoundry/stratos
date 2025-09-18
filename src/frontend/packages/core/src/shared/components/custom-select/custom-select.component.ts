@@ -46,6 +46,14 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() name: string;
   @Input() id: string;
 
+  @Input()
+  get value(): any {
+    return this.multiple ? this.selectedValues : this.selectedValues[0];
+  }
+  set value(val: any) {
+    this.writeValue(val);
+  }
+
   @Output() selectionChange = new EventEmitter<MatSelectChange>();
   @Output() valueChange = new EventEmitter<any>();
 

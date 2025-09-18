@@ -56,6 +56,12 @@
               "src/frontend/packages/core/src/styles.scss",
               "node_modules/xterm/css/xterm.css"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/frontend/packages/core/sass",
+                "src/frontend/packages/core/src/sass"
+              ]
+            },
             "scripts": []
           },
           "configurations": {

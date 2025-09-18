@@ -133,6 +133,11 @@ import { CustomCheckboxComponent } from './components/custom-checkbox/custom-che
 import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
 import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from './components/custom-button-toggle/custom-button-toggle.component';
+import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
+import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
+import { CustomIconComponent, CustomProgressBarComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
 
 @NgModule({
   imports: [
@@ -248,6 +253,26 @@ import { CustomSelectComponent, CustomOptionComponent } from './components/custo
     CustomSlideToggleComponent,
     CustomSelectComponent,
     CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomTooltipDirective,
+    CustomIconComponent,
+    CustomProgressBarComponent,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -356,6 +381,26 @@ import { CustomSelectComponent, CustomOptionComponent } from './components/custo
     CustomSlideToggleComponent,
     CustomSelectComponent,
     CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomTooltipDirective,
+    CustomIconComponent,
+    CustomProgressBarComponent,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
   ],
   providers: [
     ListConfig,

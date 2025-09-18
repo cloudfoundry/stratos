@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
+import { MatDialog } from './shared/services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
