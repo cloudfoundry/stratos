@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@stratosui/core';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';

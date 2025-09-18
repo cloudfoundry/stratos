@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 

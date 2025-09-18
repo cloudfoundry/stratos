@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
 import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { MatIcon } from '@angular/material/icon';
+import { MatIcon } from '@stratosui/core';
 
 describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;

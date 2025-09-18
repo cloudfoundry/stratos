@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
 
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
 import {

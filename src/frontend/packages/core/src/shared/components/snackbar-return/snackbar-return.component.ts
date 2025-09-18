@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
-import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
