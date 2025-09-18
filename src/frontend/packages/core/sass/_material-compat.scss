@@ -28,8 +28,26 @@ $monocular-app-primary: $primary;
 $monocular-app-accent: $accent;
 $monocular-app-warn: $warn;
 
-// mat-color function replacement
+// mat-color function replacement - integrates with Stratos theme
 @function mat-color($palette, $hue: 500) {
+  // Handle direct CSS custom property usage
+  @if $palette == $primary or $palette == 'primary' {
+    @if $hue == 500 {
+      @return var(--color-primary);
+    }
+  }
+  @if $palette == $accent or $palette == 'accent' {
+    @if $hue == 500 {
+      @return var(--color-accent);
+    }
+  }
+  @if $palette == $warn or $palette == 'warn' {
+    @if $hue == 500 {
+      @return var(--color-danger);
+    }
+  }
+
+  // Handle map-based palettes
   @if type-of($palette) == 'map' {
     @if map-has-key($palette, $hue) {
       @return map-get($palette, $hue);
@@ -37,6 +55,7 @@ $monocular-app-warn: $warn;
       @return map-get($palette, 500); // fallback to 500
     }
   }
+
   @return $palette; // fallback for non-map values
 }
 
@@ -49,3 +68,14 @@ $monocular-app-warn: $warn;
     @return #000000;
   }
 }
+
+// Helper function to get themed colors
+@function theme-color($color-name) {
+  @return var(--color-#{$color-name});
+}
+
+// Legacy material theme variables for compatibility
+$background-white: var(--app-bg);
+$color-primary: var(--color-primary);
+$color-accent: var(--color-accent);
+$color-warn: var(--color-danger);
