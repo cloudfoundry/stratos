@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '../../../../../core/src/shared/services/tailwind-error-state-matcher';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';

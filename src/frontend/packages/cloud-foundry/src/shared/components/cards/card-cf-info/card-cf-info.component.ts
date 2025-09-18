@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { TailwindDialogService } from '../../../../../../core/src/shared/services/tailwind-dialog.service';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -28,7 +28,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
     public userInviteConfigureService: UserInviteConfigureService,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private esf: EntityServiceFactory
   ) { }
 

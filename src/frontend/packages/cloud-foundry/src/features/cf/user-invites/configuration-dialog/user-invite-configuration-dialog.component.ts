@@ -1,7 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, InjectionToken } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindDialogRef } from '../../../../../../core/src/shared/services/tailwind-dialog.service';
+
+// Temporary injection token to replace MAT_DIALOG_DATA
+export const DIALOG_DATA = new InjectionToken<any>('DialogData');
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -42,10 +45,10 @@ export class UserInviteConfigurationDialogComponent {
 
   constructor(
     public fb: UntypedFormBuilder,
-    public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
+    public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(DIALOG_DATA) public data: {
       guid: string
     }
   ) {
