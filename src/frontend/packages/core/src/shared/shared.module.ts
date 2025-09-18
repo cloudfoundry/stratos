@@ -130,6 +130,7 @@ import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindSh
 import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
+import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 
 @NgModule({
   imports: [
@@ -236,6 +237,12 @@ import { CustomCheckboxComponent } from './components/custom-checkbox/custom-che
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
     CustomCheckboxComponent,
+    CustomFormFieldComponent,
+    CustomIconComponent,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatInputDirective,
+    MatSuffixDirective,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -335,6 +342,12 @@ import { CustomCheckboxComponent } from './components/custom-checkbox/custom-che
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
     CustomCheckboxComponent,
+    CustomFormFieldComponent,
+    CustomIconComponent,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatInputDirective,
+    MatSuffixDirective,
   ],
   providers: [
     ListConfig,
