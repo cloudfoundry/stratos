@@ -131,6 +131,7 @@ import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-f
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
+import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
 
 @NgModule({
   imports: [
@@ -243,6 +244,7 @@ import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirectiv
     CustomButtonDirective,
     MatInputDirective,
     MatSuffixDirective,
+    CustomSlideToggleComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -348,6 +350,7 @@ import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirectiv
     CustomButtonDirective,
     MatInputDirective,
     MatSuffixDirective,
+    CustomSlideToggleComponent,
   ],
   providers: [
     ListConfig,
