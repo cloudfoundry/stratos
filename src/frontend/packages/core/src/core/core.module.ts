@@ -12,9 +12,7 @@ import { TailwindSnackBarService } from '../shared/services/tailwind-snackbar.se
 import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-state-matcher';
 import { createMatDialogRef } from '../shared/services/tailwind-material-replacements';
 
-import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
-import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
 import { APIKeyAuthGuardService } from './apiKey-auth-guard.service';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
@@ -68,10 +66,8 @@ import { WindowRef } from './window-ref/window-ref.service';
         PortalModule,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        UserAvatarComponent,
         DisableRouterLinkDirective,
         StatefulIconComponent,
-        NoContentMessageComponent,
         DisableRouterLinkDirective,
         ShowHideButtonComponent
     ],
@@ -120,8 +116,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
         DisableRouterLinkDirective,
-        NoContentMessageComponent,
-        UserAvatarComponent,
         ShowHideButtonComponent
     ]
 })

@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
@@ -26,7 +26,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   constructor(
     private fb: UntypedFormBuilder,
-    public dialogRef: MatDialogRef<ApiKey>,
+    @Inject('TailwindDialogRef') public dialogRef: MatDialogRef<ApiKey>,
   ) {
     this.formGroup = this.fb.group({
       comment: ['', Validators.required],

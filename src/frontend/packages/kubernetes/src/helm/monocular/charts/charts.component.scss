@@ -1,4 +1,6 @@
 @use '../../theme.scss';
+// Import missing mixins
+@import '../mixins';
 
 $filters-width: 175px;
 

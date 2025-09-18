@@ -6,7 +6,6 @@ import { RouterModule } from '@angular/router';
 import { InternalEventMonitorFactory } from '@stratosui/store';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
-import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -137,12 +136,13 @@ import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '.
 import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
 import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
-import { CustomIconComponent, CustomProgressBarComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
+import { CustomIconComponent, CustomProgressBarComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
+import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    CoreModule,
     PageHeaderModule,
     RouterModule,
     SteppersModule,
@@ -268,12 +268,15 @@ import { CustomIconComponent, CustomProgressBarComponent, CustomDialogContentCom
     CustomTooltipDirective,
     CustomIconComponent,
     CustomProgressBarComponent,
+    CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
     CustomDialogTitleComponent,
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -397,12 +400,15 @@ import { CustomIconComponent, CustomProgressBarComponent, CustomDialogContentCom
     CustomTooltipDirective,
     CustomIconComponent,
     CustomProgressBarComponent,
+    CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
     CustomDialogTitleComponent,
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   providers: [
     ListConfig,

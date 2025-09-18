@@ -1,6 +1,8 @@
 
 @use '../../../../../../../core/sass/mixins';
 @use '../helm-release-helpers';
+// Import missing mixins
+@import '../../../../../helm/monocular/mixins';
 
 .resources {
   padding: 0 10px;

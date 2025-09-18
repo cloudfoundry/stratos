@@ -48,9 +48,10 @@ export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData')
 // Export dialog services for injection
 export {
   TailwindDialogService as MatDialog,
-  TailwindDialogRef as MatDialogRef,
-  TailwindDialogRefImpl
+  TailwindDialogRef as MatDialogRef
 } from './tailwind-dialog.service';
+
+import { TailwindDialogRefImpl } from './tailwind-dialog.service';
 
 // Create a factory for MatDialogRef that handles generics
 export function createMatDialogRef<T = any, R = any>(componentInstance?: T): TailwindDialogRefImpl<T, R> {

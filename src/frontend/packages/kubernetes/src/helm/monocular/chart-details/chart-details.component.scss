@@ -1,5 +1,7 @@
 // Import your custom theme
 @use '../../theme.scss';
+// Import missing mixins
+@import '../mixins';
 
 $header-height: 200px;
 $icon-height: 150px;

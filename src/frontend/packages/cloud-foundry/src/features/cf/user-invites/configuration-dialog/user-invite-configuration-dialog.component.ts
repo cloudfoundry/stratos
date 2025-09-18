@@ -45,7 +45,7 @@ export class UserInviteConfigurationDialogComponent {
 
   constructor(
     public fb: UntypedFormBuilder,
-    public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
     @Inject(DIALOG_DATA) public data: {

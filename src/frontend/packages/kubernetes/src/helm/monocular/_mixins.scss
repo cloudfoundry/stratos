@@ -1,0 +1,63 @@
+// Missing SASS mixins for Monocular components
+// These were likely part of an older Material or CSS framework
+
+// Media query breakpoint mixin replacement
+@mixin mappy-bp($breakpoints...) {
+  @if length($breakpoints) == 1 and nth($breakpoints, 1) == 'medium' {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+  @else if length($breakpoints) == 1 and nth($breakpoints, 1) == 'large' {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+  @else if length($breakpoints) == 2 and nth($breakpoints, 1) == 'medium' and nth($breakpoints, 2) == 'large' {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+  @else {
+    // Default fallback for any other breakpoint combinations
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+}
+
+// Placeholder text styling mixin
+@mixin placeholder {
+  &::placeholder {
+    @content;
+  }
+  &::-webkit-input-placeholder {
+    @content;
+  }
+  &::-moz-placeholder {
+    @content;
+  }
+  &:-ms-input-placeholder {
+    @content;
+  }
+}
+
+// Life update style mixin (for resource status updates)
+@mixin add-life-update-style {
+  .life-update {
+    transition: all 0.3s ease;
+    opacity: 0.7;
+
+    &.updated {
+      opacity: 1;
+      background-color: #e8f5e8;
+      border-left: 3px solid #4caf50;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+  }
+}

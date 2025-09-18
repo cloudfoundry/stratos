@@ -28,10 +28,10 @@
             </tr>
           </thead>
           <tbody>
-            <app-table-row class="app-table__row" *ngFor="let row of dataSource.connect() | async; trackBy: dataSource.trackBy"
+            <app-table-row class="app-table__row" *ngFor="let row of dataSource.connect(null) | async; let i = index; trackBy: dataSource.trackBy"
               [rowState]="getRowState(row)"
               [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
-              [rowId]="dataSource.trackBy(null, row)" [prominentErrorBar]="prominentErrorBar">
+              [rowId]="dataSource.trackBy(i, row)" [prominentErrorBar]="prominentErrorBar">
             </app-table-row>
           </tbody>
         </table>
