@@ -132,6 +132,7 @@ import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } fr
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent, CustomIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
+import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
 
 @NgModule({
   imports: [
@@ -245,6 +246,8 @@ import { CustomSlideToggleComponent } from './components/custom-slide-toggle/cus
     MatInputDirective,
     MatSuffixDirective,
     CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -351,6 +354,8 @@ import { CustomSlideToggleComponent } from './components/custom-slide-toggle/cus
     MatInputDirective,
     MatSuffixDirective,
     CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
   ],
   providers: [
     ListConfig,
