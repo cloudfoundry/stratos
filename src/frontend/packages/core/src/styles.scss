@@ -1,12 +1,12 @@
 // Import Tailwind CSS
-@import '../../theme/styles/main.scss';
+@use '../../theme/styles/main.scss';
 
 // Import fonts and icons
-@import '../sass/fonts';
-@import '../sass/icons';
+@use '../sass/fonts';
+@use '../sass/icons';
 
 // Import Tailwind animations for custom components
-@import './shared/styles/tailwind-animations.scss';
+@use './shared/styles/tailwind-animations.scss';
 
 // Base styles are handled by Tailwind in main.css
 // Override font family to match existing design

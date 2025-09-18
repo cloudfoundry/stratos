@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '../../../shared/services/tailwind-material-replacements';
+import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
 import { ListSort } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';

@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
+import { MatDialog } from '../../../../services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';

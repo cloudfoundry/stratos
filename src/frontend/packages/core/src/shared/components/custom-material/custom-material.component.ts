@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 // Custom Icon Component
 @Component({
   selector: 'mat-icon',
-  template: '<i class="custom-icon" [class]="fontSet + ' ' + name" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>',
+  template: '<i class="custom-icon" [class]="fontSet + \' \' + name" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: false
 })
