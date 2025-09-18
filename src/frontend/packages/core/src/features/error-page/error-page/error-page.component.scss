@@ -1,6 +1,6 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 .error-page {
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     margin: 0 10%;
   }
 

@@ -1,8 +1,8 @@
 // Stratos theme configuration migrated to Tailwind CSS
-@import './all-theme';
+@use './all-theme';
 
 // Import the theme - re-enable the existing Stratos theme system
-@import '~@stratosui/theme';
+@use '~@stratosui/theme';
 
 $stratos-dark-theme-supported: false !default;
 
@@ -20,7 +20,7 @@ $stratos-themes: stratos-theme();
 
 // Import any custom scss that the theme defines
 // This import defines the mixin 'apply-theme'
-@import '~@stratosui/theme/extensions';
+@use '~@stratosui/theme/extensions';
 
 // Default theme ( = light theme)
 $stratos-theme: map-get($stratos-themes, default);

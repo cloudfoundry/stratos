@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 
 .page-container {
   display: flex;
@@ -18,7 +18,7 @@
   grid-template-columns: 100%;
   margin: 0 10px;
 
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     grid-column-gap: 10%;
     grid-template-columns: repeat(2, 1fr);
     margin: 0 5%;

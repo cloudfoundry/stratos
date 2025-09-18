@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 
 $app-sub-header-height: 48px;
 $app-header-height: 56px;
@@ -17,7 +17,7 @@ $app-header-height: 56px;
   &__side-help-outer {
     z-index: 9999;
 
-    @include breakpoint(mobileonly) {
+    @include mixins.breakpoint(mobileonly) {
       left: 0;
     }
   }
@@ -59,7 +59,7 @@ $app-header-height: 56px;
     max-width: 600px;
     min-width: 600px;
 
-    @include breakpoint(mobileonly) {
+    @include mixins.breakpoint(mobileonly) {
       min-width: auto;
     }
   }
@@ -94,7 +94,7 @@ $app-header-height: 56px;
   height: $app-sub-header-height;
   margin-left: 200px;
   padding: 0;
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     margin: 0;
     padding: 0 20px;
   }
@@ -104,7 +104,7 @@ $app-header-height: 56px;
     font-weight: bold;
     line-height: $font-size;
     margin-right: 20px;
-    @include breakpoint(tablet) {
+    @include mixins.breakpoint(tablet) {
       display: flex;
     }
   }

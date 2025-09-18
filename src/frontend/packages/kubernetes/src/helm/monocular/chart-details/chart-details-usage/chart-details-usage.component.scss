@@ -1,6 +1,6 @@
 // Import your custom theme
-@import '../../../theme.scss';
-@import '../../../../../../core/sass/material-compat';
+@use '../../../theme.scss';
+@use '../../../../../../core/sass/material-compat';
 
 mat-tab-body {
   margin-top: 1em;

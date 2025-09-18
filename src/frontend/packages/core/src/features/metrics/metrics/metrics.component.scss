@@ -1,4 +1,4 @@
-@import '../../../../sass/mixins';
+@use '../../../../sass/mixins';
 
 .metrics {
   &-url {
@@ -42,7 +42,7 @@
     display: flex;
     flex-direction: column;
 
-    @include breakpoint(tablet) {
+    @include mixins.breakpoint(tablet) {
       flex-direction: row;
     }
   }

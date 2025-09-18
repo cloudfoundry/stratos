@@ -1,6 +1,6 @@
 // Stratos theme system migrated to Tailwind CSS
-@import './ansi-colors';
-@import './all-theme';
+@use './ansi-colors';
+@use './all-theme';
 
 // CSS Custom Properties for theme colors (replacing Angular Material palettes)
 :root {

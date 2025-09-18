@@ -1,4 +1,4 @@
-@import '../../sass/material-compat';
+@use '../../sass/material-compat';
 
 @mixin page-404($theme, $app-theme) {
   $primary: map-get($theme, primary);
