@@ -92,3 +92,25 @@ export class CustomButtonDirective {
   @Input() disabled = false;
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
 }
+
+@Component({
+  selector: '[matInput]',
+  template: '',
+  standalone: false,
+  host: {
+    'class': 'mat-input-element'
+  }
+})
+export class MatInputDirective {
+}
+
+@Component({
+  selector: '[matSuffix]',
+  template: '',
+  standalone: false,
+  host: {
+    'class': 'mat-form-field-suffix'
+  }
+})
+export class MatSuffixDirective {
+}
