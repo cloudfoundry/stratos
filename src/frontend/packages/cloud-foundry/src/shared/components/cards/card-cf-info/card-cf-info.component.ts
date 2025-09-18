@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { TailwindDialogService } from '../../../../../../core/src/shared/services/tailwind-dialog.service';
+import { TailwindDialogService } from '@stratosui/core';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';

@@ -1,7 +1,7 @@
 import { Component, Inject, InjectionToken } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { TailwindDialogRef } from '../../../../../../core/src/shared/services/tailwind-dialog.service';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { TailwindDialogRef } from '@stratosui/core';
 
 // Temporary injection token to replace MAT_DIALOG_DATA
 export const DIALOG_DATA = new InjectionToken<any>('DialogData');

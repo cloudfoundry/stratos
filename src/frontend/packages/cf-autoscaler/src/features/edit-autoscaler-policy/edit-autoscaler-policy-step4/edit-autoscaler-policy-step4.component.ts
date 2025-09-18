@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '../../../../../core/src/shared/services/tailwind-error-state-matcher';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import moment from 'moment-timezone';
