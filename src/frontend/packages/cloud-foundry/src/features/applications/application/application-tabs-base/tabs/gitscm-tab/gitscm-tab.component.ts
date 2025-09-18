@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';

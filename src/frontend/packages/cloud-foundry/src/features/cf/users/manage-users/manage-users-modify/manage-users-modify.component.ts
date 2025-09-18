@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';

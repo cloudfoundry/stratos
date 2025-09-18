@@ -1,3 +1,5 @@
+import { InjectionToken } from '@angular/core';
+
 // Type aliases for Material Design replacements
 export type MatSnackBar = any; // Will be replaced with TailwindSnackBarService
 export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRef<T>
@@ -12,6 +14,19 @@ export type MatSort = any; // Will be replaced with TailwindSortDirective
 export type MatSortHeader = any; // Will be replaced with TailwindSortHeaderDirective
 export type MatPaginator = any; // Will be replaced with TailwindPaginator
 export type PageEvent = any; // Will be replaced with TailwindPageEvent
+export type MatDrawer = any; // Will be replaced with TailwindSidenav
+
+// Additional Angular Material types
+export type MatIconRegistry = any;
+export type MatChipInputEvent = any;
+export type MatRadioChange = any;
+export type MatCheckboxChange = any;
+export type MatIcon = any;
+export type Sort = any; // Will be replaced with TailwindSort
+
+// Injection tokens for backward compatibility
+export const MAT_DIALOG_DATA = new InjectionToken<any>('StratosDialogData');
+export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData');
 
 // Re-export our Tailwind implementations
 export {

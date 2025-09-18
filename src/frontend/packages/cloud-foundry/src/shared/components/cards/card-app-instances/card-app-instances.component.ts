@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
