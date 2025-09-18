@@ -28,7 +28,7 @@ $icon-height: 150px;
       padding: 0 2em;
       max-width: var(--layout-max-width);
       margin: auto;
-      margin-top: -$icon-height / 2;
+      margin-top: calc(-1 * $icon-height / 2);
       display: flex;
     }
 
@@ -36,7 +36,7 @@ $icon-height: 150px;
       flex: 1;
 
       h1 {
-        min-height: $icon-height / 2;
+        min-height: calc($icon-height / 2);
         color: white;
         margin: 0;
         margin-top: -5px;

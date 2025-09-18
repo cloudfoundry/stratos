@@ -96,6 +96,13 @@ export class TailwindSnackBarService {
     return snackbarRef;
   }
 
+  dismiss(): void {
+    // Dismiss all current snackbars
+    this.snackbars.forEach(snackbar => {
+      this.removeSnackbar(snackbar);
+    });
+  }
+
   private createSnackbarElement(message: string, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
     const snackbar = document.createElement('div');
 
