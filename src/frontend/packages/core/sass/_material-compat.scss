@@ -1,0 +1,69 @@
+// Material Design compatibility layer for Tailwind CSS migration
+// This file provides SCSS functions and variables to replace Angular Material theme functions
+
+// Color palette replacements
+$primary: (
+  50: #e3f2fd,
+  100: #bbdefb,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  500: #2196f3,
+  600: #1e88e5,
+  700: #1976d2,
+  800: #1565c0,
+  900: #0d47a1,
+);
+
+$accent: (
+  50: #fce4ec,
+  100: #f8bbd9,
+  200: #f48fb1,
+  300: #f06292,
+  400: #ec407a,
+  500: #e91e63,
+  600: #d81b60,
+  700: #c2185b,
+  800: #ad1457,
+  900: #880e4f,
+);
+
+$warn: (
+  50: #ffebee,
+  100: #ffcdd2,
+  200: #ef9a9a,
+  300: #e57373,
+  400: #ef5350,
+  500: #f44336,
+  600: #e53935,
+  700: #d32f2f,
+  800: #c62828,
+  900: #b71c1c,
+);
+
+// Monocular app theme variables
+$monocular-app-primary: $primary;
+$monocular-app-accent: $accent;
+$monocular-app-warn: $warn;
+
+// mat-color function replacement
+@function mat-color($palette, $hue: 500) {
+  @if type-of($palette) == 'map' {
+    @if map-has-key($palette, $hue) {
+      @return map-get($palette, $hue);
+    } @else {
+      @return map-get($palette, 500); // fallback to 500
+    }
+  }
+  @return $palette; // fallback for non-map values
+}
+
+// Additional helper functions
+@function mat-contrast($palette, $hue: 500) {
+  // Simple contrast function - returns white for dark colors, black for light
+  @if $hue >= 500 {
+    @return #ffffff;
+  } @else {
+    @return #000000;
+  }
+}

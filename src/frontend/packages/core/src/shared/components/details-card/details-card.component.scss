@@ -1,14 +1,12 @@
 // Details card component - migrated to Tailwind CSS compatibility
-// Uses CSS custom properties for consistent spacing
-:root {
-  --summary-card-spacing: 20px;
-}
+// Uses SCSS variables for consistent spacing
+$summary-card-spacing: 20px;
 
 .details-card {
   @apply flex flex-wrap w-full relative;
-  $summary-card-spacing: var(--summary-card-spacing);
+
   mat-card {
-    padding: $summary-card-spacing * 2
+    padding: $summary-card-spacing * 2;
   }
   mat-expansion-panel {
     padding: $summary-card-spacing;

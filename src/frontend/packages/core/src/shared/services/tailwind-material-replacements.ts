@@ -6,8 +6,11 @@ export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRe
 export type SimpleSnackBar = any;
 export type MatDialog = any; // Will be replaced with TailwindDialogService
 export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
-export type ErrorStateMatcher = any; // Will be replaced with TailwindErrorStateMatcher
-export type ShowOnDirtyErrorStateMatcher = any; // Will be replaced with TailwindShowOnDirtyErrorStateMatcher
+// Re-export classes directly for provider usage
+export {
+  ErrorStateMatcher,
+  TailwindShowOnDirtyErrorStateMatcher as ShowOnDirtyErrorStateMatcher
+} from './tailwind-error-state-matcher';
 export type MatSidenav = any; // Will be replaced with TailwindSidenav
 export type MatSidenavContainer = any; // Will be replaced with TailwindSidenavService
 export type MatSort = any; // Will be replaced with TailwindSortDirective
@@ -23,6 +26,11 @@ export type MatRadioChange = any;
 export type MatCheckboxChange = any;
 export type MatIcon = any;
 export type Sort = any; // Will be replaced with TailwindSort
+
+// Angular Flex Layout types (replaced with Tailwind CSS classes)
+export type FlexLayoutModule = any;
+export type FlexModule = any;
+export type GridModule = any;
 
 // Injection tokens for backward compatibility
 export const MAT_DIALOG_DATA = new InjectionToken<any>('StratosDialogData');
@@ -44,9 +52,11 @@ export {
 } from './tailwind-dialog.service';
 
 export {
-  TailwindErrorStateMatcher as StratosErrorStateMatcher,
-  TailwindShowOnDirtyErrorStateMatcher as StratosShowOnDirtyErrorStateMatcher,
-  TailwindDefaultErrorStateMatcher as StratosDefaultErrorStateMatcher
+  TailwindErrorStateMatcher,
+  TailwindShowOnDirtyErrorStateMatcher,
+  TailwindDefaultErrorStateMatcher,
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher
 } from './tailwind-error-state-matcher';
 
 export {

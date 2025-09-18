@@ -1,17 +1,36 @@
+import { Injectable } from '@angular/core';
 import { UntypedFormControl, FormGroupDirective, NgForm } from '@angular/forms';
 
-export interface TailwindErrorStateMatcher {
+export interface ErrorStateMatcher {
   isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean;
 }
 
-export class TailwindShowOnDirtyErrorStateMatcher implements TailwindErrorStateMatcher {
+@Injectable({
+  providedIn: 'root'
+})
+export class TailwindErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    return !!(control && control.invalid && (control.dirty || control.touched || (form && form.submitted)));
+  }
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TailwindShowOnDirtyErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 }
 
-export class TailwindDefaultErrorStateMatcher implements TailwindErrorStateMatcher {
+@Injectable({
+  providedIn: 'root'
+})
+export class TailwindDefaultErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     return !!(control && control.invalid && (control.dirty || control.touched || (form && form.submitted)));
   }
 }
+
+// Export the interface under the expected name for compatibility
+export interface ShowOnDirtyErrorStateMatcher extends ErrorStateMatcher {}

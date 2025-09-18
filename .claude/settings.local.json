@@ -52,7 +52,8 @@
       "Bash(while read pkg)",
       "Bash(powershell:*)",
       "Bash(npm run build:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
