@@ -47,7 +47,7 @@
     <app-application-poll class="summary__sub-nav__poll"></app-application-poll>
   </div>
 </app-page-sub-nav>
-<div class="summary" *ngIf="applicationService.application$ | async as appSvc">
+<div class="summary" *ngIf="applicationService.application$ | async as applicationService">
   <app-tile-grid>
     <app-tile-group>
       <app-tile>
@@ -60,7 +60,7 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
-    <app-tile-group *ngIf="appSvc.app.entity.staging_failed_description as errorMsg">
+    <app-tile-group *ngIf="applicationService.app.entity.staging_failed_description as errorMsg">
       <app-tile>
         <div class="card bg-yellow-50 border-yellow-400 border-l-4 summary__staging-error">
           <span class="material-icons text-yellow-500">warning</span>
@@ -77,22 +77,22 @@
           <div class="card-body">
             <div class="app-metadata">
               <div class="app-metadata__two-cols">
-                <app-metadata-item icon="memory" label="Memory Quota">{{ appSvc.app.entity.memory | mbToHumanSize }}
+                <app-metadata-item icon="memory" label="Memory Quota">{{ applicationService.app.entity.memory | mbToHumanSize }}
                 </app-metadata-item>
-                <app-metadata-item icon="storage" label="Disk Quota">{{ appSvc.app.entity.disk_quota | mbToHumanSize}}
+                <app-metadata-item icon="storage" label="Disk Quota">{{ applicationService.app.entity.disk_quota | mbToHumanSize}}
                 </app-metadata-item>
                 <app-metadata-item icon="date_range" label="Created">
-                  {{ appSvc.app.metadata.created_at | date:'medium' }}</app-metadata-item>
+                  {{ applicationService.app.metadata.created_at | date:'medium' }}</app-metadata-item>
                 <app-metadata-item icon="access_time" label="Modified">
-                  {{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}
+                  {{ applicationService.app.entity.package_updated_at ? (applicationService.app.entity.package_updated_at | date:'medium') : '-' }}
                 </app-metadata-item>
                 <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
                   {{ sshStatus$ | async }}
                 </app-metadata-item>
               </div>
               <div class="app-metadata__two-cols">
-                <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
-                <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}
+                <app-metadata-item icon="touch_app" label="App State">{{ applicationService.app.entity.state }}</app-metadata-item>
+                <app-metadata-item icon="card_travel" label="Package State">{{ applicationService.app.entity.package_state }}
                 </app-metadata-item>
                 <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
                   {{(applicationService.appSummary$ | async)?.entity?.services?.length || '0' }}
@@ -112,22 +112,22 @@
           </div>
           <div class="card-body">
             <app-metadata-item icon="title" label="Name">
-              <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]"
-                title="CF API URL: {{ getFullApiUrl(appSvc.cf) }}">{{ appSvc.cf?.name}}</a>
+              <a [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid]"
+                title="CF API URL: {{ getFullApiUrl(applicationService.cf) }}">{{ applicationService.cf?.name}}</a>
             </app-metadata-item>
             <ng-container *ngIf="applicationService.appOrg$ | async as appOrg">
               <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
                 <a
-                  [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+                  [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
               </app-metadata-item>
               <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" iconFont="stratos-icons"
                 icon="virtual_space" label="Space">
                 <a
-                  [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+                  [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
               </app-metadata-item>
               <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
                 <a
-                  [routerLink]="['/applications/' + appSvc.cf?.guid + '/' + appSvc.app?.metadata.guid + '/cli']">View</a>
+                  [routerLink]="['/applications/' + applicationService.cf?.guid + '/' + applicationService.app?.metadata.guid + '/cli']">View</a>
               </app-metadata-item>
             </ng-container>
           </div>
@@ -144,10 +144,10 @@
           </div>
           <div class="card-body">
             <app-metadata-item icon="build" label="Buildpack">
-              <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack">
+              <app-view-buildpack [buildPack]="applicationService.app.entity.buildpack || applicationService.app.entity.detected_buildpack">
               </app-view-buildpack>
             </app-metadata-item>
-            <app-metadata-item icon="code" label="Stack">{{ appSvc.app.entity.stack?.entity.name || '-' }}
+            <app-metadata-item icon="code" label="Stack">{{ applicationService.app.entity.stack?.entity.name || '-' }}
             </app-metadata-item>
           </div>
         </div>
@@ -160,7 +160,7 @@
           <div class="card-body">
             <span [ngSwitch]="deploySource.type">
               <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                <div title="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}"
+                <div title="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}">
                   {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                 </div>
               </app-metadata-item>
@@ -227,11 +227,11 @@
             <h3 class="text-lg font-semibold">Additional Application Info</h3>
           </div>
           <div class="card-body">
-            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="appSvc.app.entity.guid">
-              {{ appSvc.app.entity.guid }}</app-metadata-item>
+            <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="applicationService.app.entity.guid">
+              {{ applicationService.app.entity.guid }}</app-metadata-item>
             <app-metadata-item icon="chevron_right" label="Command">
-              {{ appSvc.app.entity.command || appSvc.app.entity.detected_start_command || '-' }}</app-metadata-item>
-            <app-metadata-item icon="power" label="Ports">{{ appSvc.app.entity.ports || '-' }}</app-metadata-item>
+              {{ applicationService.app.entity.command || applicationService.app.entity.detected_start_command || '-' }}</app-metadata-item>
+            <app-metadata-item icon="power" label="Ports">{{ applicationService.app.entity.ports || '-' }}</app-metadata-item>
           </div>
         </div>
       </app-tile>
@@ -242,11 +242,11 @@
           </div>
           <div class="card-body">
             <app-metadata-item icon="favorite_border" label="Health Check Type">
-              {{ appSvc.app.entity.health_check_type }}</app-metadata-item>
+              {{ applicationService.app.entity.health_check_type }}</app-metadata-item>
             <app-metadata-item icon="schedule" label="Health Check Timeout">
-              {{ appSvc.app.entity.health_check_timeout | uptime }}</app-metadata-item>
-            <app-metadata-item *ngIf="appSvc.app.entity.health_check_type === 'http'" icon="http"
-              label="Health Check HTTP Endpoint">{{ appSvc.app.entity.health_check_http_endpoint }}</app-metadata-item>
+              {{ applicationService.app.entity.health_check_timeout | uptime }}</app-metadata-item>
+            <app-metadata-item *ngIf="applicationService.app.entity.health_check_type === 'http'" icon="http"
+              label="Health Check HTTP Endpoint">{{ applicationService.app.entity.health_check_http_endpoint }}</app-metadata-item>
           </div>
         </div>
       </app-tile>
