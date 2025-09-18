@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';

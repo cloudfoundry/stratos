@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
