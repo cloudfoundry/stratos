@@ -246,7 +246,7 @@ body {
 
   /* Tooltip */
   .tooltip {
-    @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip transition-opacity duration-300;
+    @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
   }
 
   .tooltip.show {
