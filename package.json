@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@angular/animations": "20.1.7",
+    "@angular/cdk": "^20.2.4",
     "@angular/common": "20.1.7",
     "@angular/core": "20.1.7",
     "@angular/forms": "20.1.7",
@@ -81,7 +82,7 @@
     "@ngrx/router-store": "20.0.0",
     "@ngrx/store": "20.0.0",
     "@ngrx/store-devtools": "20.0.0",
-    "@swimlane/ngx-charts": "23.0.0",
+    "@swimlane/ngx-charts": "^23.0.1",
     "@swimlane/ngx-graph": "10.0.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
