@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@stratosui/core';
+import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
 
 @Component({
@@ -14,7 +14,8 @@ export class EnvVarViewComponent {
     @Inject(MAT_DIALOG_DATA) public data: {
       key: string,
       value: any
-    }
+    },
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<EnvVarViewComponent>
   ) { }
 
   isObject(test: any): boolean {

@@ -5,31 +5,31 @@
   </mat-progress-bar>
 </div>
 <div class="connection-dialog">
-  <h2 mat-dialog-title>
+  <h2 class="dialog-title">
     Configure User Invite Client
   </h2>
   <p>In order to allow user invites for this Cloud Foundry, you must
     specify a Client ID and Client Secret that has <span>scim.invite</span> access.
   </p>
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
-    <mat-dialog-content class="connection-dialog__content">
-      <mat-form-field>
-        <input matInput placeholder="Client ID" formControlName="clientID">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Client Secret" type="password" formControlName="clientSecret"
+    <div class="dialog-content connection-dialog__content">
+      <div class="form-field">
+        <input class="form-input" placeholder="Client ID" formControlName="clientID">
+      </div>
+      <div class="form-field">
+        <input class="form-input" placeholder="Client Secret" formControlName="clientSecret"
           [type]="!showSecret ? 'password' : 'text'">
-        <button mat-icon-button matSuffix (click)="showSecret = !showSecret" [attr.aria-label]="'Hide Secret'"
+        <button class="btn-icon" (click)="showSecret = !showSecret" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!showSecret" type='button'>
-          <mat-icon>{{!showSecret ? 'visibility_off' : 'visibility'}}</mat-icon>
+          <i class="material-icons">{{!showSecret ? 'visibility_off' : 'visibility'}}</i>
         </button>
-      </mat-form-field>
-    </mat-dialog-content>
+      </div>
+    </div>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async">
     </app-dialog-error>
-    <mat-dialog-actions class="connection-dialog__actions">
-      <button [mat-dialog-close]="true" mat-button color="warn">Cancel</button>
-      <button type="submit" [disabled]="!endpointForm.valid" mat-button color="primary">Configure</button>
-    </mat-dialog-actions>
+    <div class="dialog-actions connection-dialog__actions">
+      <button (click)="dialogRef.close()" class="btn btn-warn">Cancel</button>
+      <button type="submit" [disabled]="!endpointForm.valid" class="btn btn-primary">Configure</button>
+    </div>
   </form>
 </div>

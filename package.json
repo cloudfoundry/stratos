@@ -68,7 +68,6 @@
     "ajv": "8.17.1"
   },
   "dependencies": {
-    "@angular/animations": "20.1.7",
     "@angular/cdk": "^20.2.4",
     "@angular/common": "20.1.7",
     "@angular/core": "20.1.7",
