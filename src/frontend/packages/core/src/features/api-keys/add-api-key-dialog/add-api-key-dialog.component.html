@@ -21,7 +21,7 @@
   <app-dialog-error message="{{hasErrored$ | async}}" [show]="(hasErrored$ | async) && !(isBusy$ | async)">
   </app-dialog-error>
   <mat-dialog-actions class="key-dialog__actions">
-    <button [mat-dialog-close]="true" mat-button color="warn" [disabled]="(isBusy$ | async)">Cancel</button>
+    <button (click)="dialogRef.close()" class="btn btn-warn" [disabled]="(isBusy$ | async)">Cancel</button>
     <button (click)="submit()" [disabled]="(isBusy$ | async) || !formGroup.valid" mat-button
       color="primary">Create</button>
   </mat-dialog-actions>

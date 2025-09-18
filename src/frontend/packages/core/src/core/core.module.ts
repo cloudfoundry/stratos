@@ -19,7 +19,6 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { APP_TITLE, appTitleFactory } from './core.types';
-import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
@@ -45,7 +44,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         RouterModule,
         MomentModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
     ],
     exports: [
         MDAppModule,
@@ -66,9 +65,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         PortalModule,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        DisableRouterLinkDirective,
         StatefulIconComponent,
-        DisableRouterLinkDirective,
         ShowHideButtonComponent
     ],
     providers: [
@@ -115,7 +112,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         PageNotFoundComponentComponent,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        DisableRouterLinkDirective,
         ShowHideButtonComponent
     ]
 })

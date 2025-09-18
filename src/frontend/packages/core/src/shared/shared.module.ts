@@ -128,7 +128,6 @@ import { TailwindIconRegistry } from './services/tailwind-icon-registry.service'
 import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
 import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
-import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
 import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
@@ -136,7 +135,7 @@ import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '.
 import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
 import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
-import { CustomIconComponent, CustomProgressBarComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
+import { CustomIconComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
@@ -243,13 +242,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
-    CustomCheckboxComponent,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
     CustomIconComponent,
     CustomIconButtonDirective,
     CustomButtonDirective,
-    MatInputDirective,
     MatSuffixDirective,
     CustomSlideToggleComponent,
     CustomSelectComponent,
@@ -267,7 +264,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardFooterComponent,
     CustomTooltipDirective,
     CustomIconComponent,
-    CustomProgressBarComponent,
     CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
@@ -375,13 +371,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
-    CustomCheckboxComponent,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
     CustomIconComponent,
     CustomIconButtonDirective,
     CustomButtonDirective,
-    MatInputDirective,
     MatSuffixDirective,
     CustomSlideToggleComponent,
     CustomSelectComponent,
@@ -399,7 +393,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardFooterComponent,
     CustomTooltipDirective,
     CustomIconComponent,
-    CustomProgressBarComponent,
     CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
