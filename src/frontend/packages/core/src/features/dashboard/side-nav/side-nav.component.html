@@ -6,7 +6,7 @@
         <div class="nav-logo flex items-center space-x-3" [class.justify-center]="iconMode">
           <img
             class="nav-logo-img h-8 w-8 flex-shrink-0 rounded-lg"
-            [src]="iconMode ? '/assets/core/nav-logo-icon.png' : '/assets/core/nav-logo.png'"
+            [src]="iconMode ? (navLogoIcon$ | async) : (navLogo$ | async)"
             [alt]="customizations.logoText || 'Logo'"
           >
           <div class="nav-logo-text text-nav-text font-bold text-lg truncate" [class.hidden]="iconMode">

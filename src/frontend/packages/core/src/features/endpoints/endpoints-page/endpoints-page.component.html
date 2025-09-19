@@ -1,14 +1,22 @@
 <app-page-header>
   <h1>Endpoints</h1>
   <div class="page-header-right">
-    <button id="stratos-add-endpoint" *appUserPermission="canRegisterEndpoint | async" mat-icon-button
-      [routerLink]="'/endpoints/new/'" matTooltip="Register Endpoint">
-      <mat-icon>add</mat-icon>
-    </button>
-    <button id="stratos-restore-backup" *ngIf="canBackupRestore$ | async" mat-icon-button
-      [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
-      <mat-icon>settings_backup_restore</mat-icon>
-    </button>
+    <div class="flex items-center space-x-2">
+      <button 
+        id="stratos-add-endpoint" 
+        *appUserPermission="canRegisterEndpoint | async" 
+        mat-icon-button
+        (click)="openRegisterModal()"
+        matTooltip="Register Endpoint"
+        class="bg-primary text-white hover:bg-opacity-90 transition-all duration-200 hover:scale-105"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+      <button id="stratos-restore-backup" *ngIf="canBackupRestore$ | async" mat-icon-button
+        [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
+        <mat-icon>settings_backup_restore</mat-icon>
+      </button>
+    </div>
   </div>
 </app-page-header>
 
@@ -18,3 +26,10 @@
     [showDirectToEndpointMessage]="false"></app-endpoints-missing>
 </ng-template>
 <ng-template #customNoEndpoints></ng-template>
+
+<!-- Register Endpoint Modal -->
+<app-endpoint-register-modal 
+  *ngIf="showRegisterModal"
+  (closeModalEvent)="closeRegisterModal()"
+  (endpointRegistered)="onEndpointRegistered()"
+></app-endpoint-register-modal>

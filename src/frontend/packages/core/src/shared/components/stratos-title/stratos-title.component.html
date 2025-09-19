@@ -1,4 +1,9 @@
-<div class="stratos-title">
-  <img class="stratos-title__logo" src="/core/assets/logo.png" />
-  <h1 class="mat-h1 stratos-title__header">{{ title || 'Stratos' }}</h1>
+<div class="stratos-title text-center">
+  <img class="stratos-title__logo mx-auto mb-4" [src]="themeLogo$ | async" />
+  <h1 class="mat-h1 stratos-title__header text-2xl font-bold text-gray-900 mb-2">
+    {{ title || (themeTitle$ | async) }}
+  </h1>
+  <p class="stratos-title__subtitle text-gray-600 text-sm" *ngIf="themeSubtitle$ | async">
+    {{ themeSubtitle$ | async }}
+  </p>
 </div>

@@ -14,8 +14,11 @@ export class StratosThemeService {
   }
 
   private async initializeTheme() {
+    console.log('[StratosThemeService] Initializing theme...');
     await this.loadThemeFromConfig();
+    console.log('[StratosThemeService] Theme loaded:', this.themeSubject.value);
     this.applyTheme(this.themeSubject.value);
+    console.log('[StratosThemeService] Theme applied to DOM');
   }
 
   setTheme(theme: Partial<StratosTheme>) {
@@ -30,9 +33,10 @@ export class StratosThemeService {
   }
 
   private applyTheme(theme: StratosTheme) {
+    console.log('[StratosThemeService] Applying theme:', theme);
     const root = document.documentElement;
 
-    // Apply color variables
+    // Apply brand colors
     root.style.setProperty('--color-primary', theme.colors.primary);
     root.style.setProperty('--color-secondary', theme.colors.secondary);
     root.style.setProperty('--color-accent', theme.colors.accent);
@@ -64,13 +68,15 @@ export class StratosThemeService {
     root.style.setProperty('--content-text', theme.layout.text);
     root.style.setProperty('--content-muted', theme.layout.textMuted || '#64748b');
 
+    // Apply branding variables
+    root.style.setProperty('--logo-bg', theme.branding.logo);
+
     // Apply login variables
     root.style.setProperty('--login-bg', theme.login.backgroundColor || theme.layout.background);
-    root.style.setProperty('--login-card-bg', theme.login.cardBackground || '#ffffff');
     root.style.setProperty('--login-bg-image', `url(${theme.login.backgroundImage || ''})`);
-
-    // Update document title and favicon
-    this.updateBranding(theme);
+    root.style.setProperty('--login-card-bg', theme.login.cardBackground || '#ffffff');
+    
+    console.log('[StratosThemeService] CSS variables set on document root');
   }
 
   private updateBranding(theme: StratosTheme) {
@@ -120,27 +126,34 @@ export class StratosThemeService {
 
   // Load theme from various sources
   private async loadThemeFromConfig() {
+    console.log('[StratosThemeService] Loading theme from config...');
     try {
       // Try to load from localStorage first
       const savedTheme = localStorage.getItem('stratos-theme');
       if (savedTheme) {
+        console.log('[StratosThemeService] Found saved theme in localStorage');
         const theme = JSON.parse(savedTheme);
         this.themeSubject.next(theme);
         return;
       }
 
       // Try to load from config file
-      const response = await fetch('/assets/theme-config.json');
+      console.log('[StratosThemeService] Fetching theme from /core/assets/theme-config.json');
+      const response = await fetch('/core/assets/theme-config.json');
       if (response.ok) {
         const themeConfig = await response.json();
+        console.log('[StratosThemeService] Loaded theme config:', themeConfig);
         this.themeSubject.next({ ...defaultTheme, ...themeConfig });
         return;
+      } else {
+        console.warn('[StratosThemeService] Failed to fetch theme config:', response.status, response.statusText);
       }
     } catch (error) {
-      console.warn('Could not load theme configuration, using default theme');
+      console.warn('[StratosThemeService] Could not load theme configuration:', error);
     }
 
     // Fallback to default theme
+    console.log('[StratosThemeService] Using default theme');
     this.themeSubject.next(defaultTheme);
   }
 

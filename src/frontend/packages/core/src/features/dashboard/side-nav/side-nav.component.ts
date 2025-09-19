@@ -3,7 +3,10 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToggleSideNav, AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { StratosThemeService } from '../../../../../theme/theme.service';
+import { StratosTheme } from '../../../../../theme/theme.config';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { environment } from '../../../environments/environment';
 import { TabNavItem } from '../../../tab-nav.types';
@@ -35,6 +38,8 @@ selector: 'app-side-nav',
 export class SideNavComponent implements OnInit {
 
   public customizations: CustomizationsMetadata;
+  public navLogo$: Observable<string>;
+  public navLogoIcon$: Observable<string>;
 
   public environment = environment;
 
@@ -43,9 +48,19 @@ export class SideNavComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private router: Router,
-    cs: CustomizationService
+    cs: CustomizationService,
+    private themeService: StratosThemeService
   ) {
     this.customizations = cs.get();
+    
+    // Get logo paths from theme service
+    this.navLogo$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.navLogo || '/core/assets/logo.png')
+    );
+    
+    this.navLogoIcon$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.navLogoIcon || '/core/assets/logo.png')
+    );
   }
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {

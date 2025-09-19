@@ -30,11 +30,11 @@
     "contentBorder": "#e2e8f0"
   },
   "branding": {
-    "logo": "/assets/logo.png",
-    "navLogo": "/assets/nav-logo.png",
-    "navLogoIcon": "/assets/nav-logo-icon.png",
-    "favicon": "/assets/favicon.ico",
-    "companyName": "Stratos",
+    "logo": "/core/assets/logo.png",
+    "navLogo": "/core/assets/logo.png",
+    "navLogoIcon": "/core/assets/logo.png",
+    "favicon": "/core/assets/favicon.ico",
+    "companyName": "My Stratos",
     "loginTitle": "Stratos Console",
     "loginSubtitle": "Multi-Cloud Management Platform"
   },

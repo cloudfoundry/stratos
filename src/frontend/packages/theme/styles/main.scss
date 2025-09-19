@@ -23,26 +23,37 @@
 
 /* CSS Custom Properties for theme customization */
 :root {
-  /* Default theme colors */
-  --color-primary: #2196f3;
-  --color-secondary: #00bcd4;
-  --color-accent: #ff9800;
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-danger: #f44336;
-  --color-info: #2196f3;
+  /* Brand colors - these will be overridden by StratosThemeService */
+  --color-primary: #1e293b;
+  --color-secondary: #60a5fa;
+  --color-accent: #60a5fa;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
 
-  /* Navigation colors */
-  --nav-bg: #2196f3;
+  /* Navigation colors - these will be overridden by StratosThemeService */
+  --nav-bg: #1e293b;
   --nav-text: #ffffff;
+  --nav-text-muted: rgba(255, 255, 255, 0.7);
   --nav-hover: rgba(255, 255, 255, 0.1);
-  --nav-active: rgba(255, 255, 255, 0.2);
+  --nav-active: rgba(255, 255, 255, 0.15);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-tooltip: #374151;
 
-  /* Layout colors */
-  --app-bg: #fafafa;
-  --app-text: rgba(0, 0, 0, 0.87);
-  --header-bg: #2196f3;
-  --header-text: #ffffff;
+  /* Layout colors - these will be overridden by StratosThemeService */
+  --app-bg: #f8fafc;
+  --body-bg: #f1f5f9;
+  --app-text: #1e293b;
+  --text-muted: #64748b;
+  --header-bg: #ffffff;
+  --header-text: #1e293b;
+  --header-border: #e2e8f0;
+  --content-bg: #ffffff;
+  --content-secondary: #f8fafc;
+  --content-border: #e2e8f0;
+  --content-text: #1e293b;
+  --content-muted: #64748b;
 
   /* Login page */
   --login-bg: #f5f5f5;
@@ -53,7 +64,7 @@
   --logo-bg: #ffffff;
 }
 
-/* Base styles */
+/* Base layout styles */
 * {
   box-sizing: border-box;
 }
@@ -166,6 +177,39 @@ body {
     background-color: var(--nav-active);
   }
 
+  /* Navigation utility classes */
+  .bg-nav-bg {
+    background-color: var(--nav-bg) !important;
+  }
+
+  .text-nav-text {
+    color: var(--nav-text) !important;
+  }
+
+  .text-nav-muted {
+    color: var(--nav-text-muted) !important;
+  }
+
+  .bg-nav-hover {
+    background-color: var(--nav-hover) !important;
+  }
+
+  .bg-nav-active {
+    background-color: var(--nav-active) !important;
+  }
+
+  .border-nav-border {
+    border-color: var(--nav-border) !important;
+  }
+
+  .bg-nav-tooltip {
+    background-color: var(--nav-tooltip) !important;
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent) !important;
+  }
+
   /* Header styles */
   .header {
     background-color: var(--header-bg);
@@ -268,8 +312,30 @@ body {
     @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
   }
 
-  .tooltip.show {
+  .tooltip:hover .tooltip-text {
     @apply visible opacity-100;
+  }
+
+  /* Modal styles */
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  /* Primary button with theme colors */
+  .bg-primary {
+    background-color: var(--color-primary) !important;
+  }
+
+  .text-primary {
+    color: var(--color-primary) !important;
+  }
+
+  .border-primary {
+    border-color: var(--color-primary) !important;
+  }
+
+  .hover\:bg-primary:hover {
+    background-color: var(--color-primary) !important;
   }
 }
 

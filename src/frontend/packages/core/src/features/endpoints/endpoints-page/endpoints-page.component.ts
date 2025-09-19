@@ -32,6 +32,7 @@ import {
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
+import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 
 @Component({
 selector: 'app-endpoints-page',
@@ -48,6 +49,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
+  public showRegisterModal = false;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   customContentComponentRef: ComponentRef<any>;
@@ -67,7 +69,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private snackBarService: SnackBarService,
     cs: CustomizationService,
     currentUserPermissionsService: CurrentUserPermissionsService,
-    public sessionService: SessionService
+    public sessionService: SessionService,
+    private endpointModalService: EndpointModalService
   ) {
     this.customizations = cs.get();
 
@@ -170,5 +173,27 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       this.customContentComponentRef.destroy();
     }
     this.showSnackBar(false);
+  }
+
+  // Modal methods
+  openRegisterModal() {
+    this.showRegisterModal = true;
+    this.endpointModalService.openModal();
+  }
+
+  closeRegisterModal() {
+    this.showRegisterModal = false;
+    this.endpointModalService.closeModal();
+  }
+
+  onEndpointRegistered() {
+    // Refresh the endpoints list
+    this.endpointsService.checkAllEndpoints();
+    
+    // Show success message
+    this.snackBarService.show('Endpoint registered successfully!', 'OK', 5000);
+    
+    // Close the modal
+    this.closeRegisterModal();
   }
 }

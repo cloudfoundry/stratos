@@ -1,5 +1,21 @@
-<app-intro-screen id="app-login-page" class="login-page min-h-screen flex items-center justify-center" [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }">
-  <div class="login-card card w-full max-w-md mx-4 p-8">
+<app-intro-screen 
+  id="app-login-page" 
+  class="login-page min-h-screen flex items-center justify-center" 
+  [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
+  [ngStyle]="{
+    'background-image': loginBackground$ | async,
+    'background-color': loginBackgroundColor$ | async,
+    'background-size': 'cover',
+    'background-position': 'center',
+    'background-repeat': 'no-repeat'
+  }"
+>
+  <div 
+    class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg"
+    [ngStyle]="{
+      'background-color': loginCardBackground$ | async
+    }"
+  >
     <app-stratos-title class="mb-8"></app-stratos-title>
 
     <div class="login-body">
