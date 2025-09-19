@@ -189,8 +189,10 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   onEndpointRegistered() {
     console.log('onEndpointRegistered called - refreshing endpoints');
     
-    // The endpoint registration should automatically trigger a system info refresh
-    // but let's explicitly trigger it to be sure
+    // Explicitly fetch the updated endpoints list
+    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
+    
+    // Also trigger system info refresh to update overall state
     this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
     
     // Also trigger health checks

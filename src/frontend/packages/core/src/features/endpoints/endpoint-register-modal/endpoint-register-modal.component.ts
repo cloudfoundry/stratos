@@ -279,6 +279,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   }
 
   private onEndpointRegistered() {
+    console.log('Modal: onEndpointRegistered called - emitting event');
     this.endpointRegistered.emit();
     // Small delay to show success before closing
     setTimeout(() => {
