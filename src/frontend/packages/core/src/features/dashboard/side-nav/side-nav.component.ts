@@ -43,8 +43,11 @@ export class SideNavComponent implements OnInit {
   public displayName$: Observable<string>;
 
   public environment = environment;
+  public showAllMenuItems = false;
 
   tooltipDelay = 0;
+
+  private readonly SHOW_ALL_MENU_ITEMS_KEY = 'stratos-show-all-menu-items';
 
   constructor(
     private store: Store<AppState>,
@@ -100,6 +103,9 @@ export class SideNavComponent implements OnInit {
       this.isIconMode = true;
       this.tooltipDelay = 2000;
     }
+
+    // Load the show all menu items setting from localStorage
+    this.loadShowAllMenuItemsSetting();
   }
 
   public isActiveRoute(route: string): boolean {
@@ -149,5 +155,29 @@ export class SideNavComponent implements OnInit {
 
   public signOut() {
     this.store.dispatch(new Logout());
+  }
+
+  public toggleShowAllMenuItems(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    this.showAllMenuItems = checkbox.checked;
+    this.saveShowAllMenuItemsSetting();
+  }
+
+  private loadShowAllMenuItemsSetting() {
+    try {
+      const saved = localStorage.getItem(this.SHOW_ALL_MENU_ITEMS_KEY);
+      this.showAllMenuItems = saved === 'true';
+    } catch (error) {
+      console.warn('Failed to load show all menu items setting:', error);
+      this.showAllMenuItems = false;
+    }
+  }
+
+  private saveShowAllMenuItemsSetting() {
+    try {
+      localStorage.setItem(this.SHOW_ALL_MENU_ITEMS_KEY, this.showAllMenuItems.toString());
+    } catch (error) {
+      console.warn('Failed to save show all menu items setting:', error);
+    }
   }
 }

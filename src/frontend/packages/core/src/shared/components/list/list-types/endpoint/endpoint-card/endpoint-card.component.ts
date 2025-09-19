@@ -113,7 +113,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       if (this.endpointListHelper) {
         try {
           const actions = this.endpointListHelper.endpointActions(true);
-          
+
           this.cardMenu = actions.map(endpointAction => {
             const separator = endpointAction.label === '-';
             return {

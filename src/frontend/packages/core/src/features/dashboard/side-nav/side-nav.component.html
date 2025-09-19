@@ -32,11 +32,24 @@
     </div>
 
 
+    <!-- Show All Menu Items Toggle (only in expanded mode) -->
+    <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="iconMode">
+      <label class="flex items-center space-x-2 text-nav-muted hover:text-nav-text cursor-pointer">
+        <input
+          type="checkbox"
+          class="form-checkbox h-4 w-4 text-accent rounded border-nav-border focus:ring-accent focus:ring-2"
+          [checked]="showAllMenuItems"
+          (change)="toggleShowAllMenuItems($event)"
+        >
+        <span class="text-sm">Show all menu items</span>
+      </label>
+    </div>
+
     <!-- Navigation Items -->
     <ul class="nav-items flex-1 py-2 space-y-1">
       <li *ngFor="let tab of tabs" class="nav-item-container">
         <a
-          *ngIf="!tab.hidden || !(tab.hidden | async)"
+          *ngIf="showAllMenuItems || !tab.hidden || !(tab.hidden | async)"
           class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
           [class.nav-item--active]="isActiveRoute(tab.link)"
           [class.bg-nav-active]="isActiveRoute(tab.link)"
@@ -46,7 +59,8 @@
           [title]="iconMode ? tab.label : ''"
         >
           <span class="nav-item-icon flex-shrink-0 h-6 w-6 flex items-center justify-center ml-4">
-            <span class="material-icons text-xl" [class]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
+            <span class="text-xl"
+                  [ngClass]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
           </span>
           <span class="nav-item-label ml-3 truncate font-medium" [class.hidden]="iconMode">
             {{ tab.label }}
