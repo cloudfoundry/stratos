@@ -42,7 +42,7 @@
   "login": {
     "showLogo": true,
     "showTitle": true,
-    "backgroundImage": "/assets/core/login-bg.jpg",
+    "backgroundImage": "/core/assets/login-bg.jpg",
     "backgroundColor": "#f1f5f9",
     "cardBackground": "#ffffff"
   }

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ToggleSideNav, AppState } from '@stratosui/store';
+import { ToggleSideNav, AppState, Logout } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -43,6 +43,7 @@ export class SideNavComponent implements OnInit {
   public displayName$: Observable<string>;
 
   public environment = environment;
+  public showProfileMenu = false;
 
   tooltipDelay = 0;
 
@@ -114,7 +115,7 @@ export class SideNavComponent implements OnInit {
 
     // Try to infer icon from label/text
     const label = (tab.label || tab.text || '').toLowerCase();
-    
+
     // Common icon mappings based on label
     const iconMap: { [key: string]: string } = {
       'home': 'home',
@@ -145,5 +146,14 @@ export class SideNavComponent implements OnInit {
 
     // Default fallback
     return 'dashboard';
+  }
+
+  public toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  public signOut() {
+    this.showProfileMenu = false;
+    this.store.dispatch(new Logout());
   }
 }
