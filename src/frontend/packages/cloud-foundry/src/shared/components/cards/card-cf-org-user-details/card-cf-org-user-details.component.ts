@@ -5,9 +5,10 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 
 @Component({
-  selector: 'app-card-cf-org-user-details',
+selector: 'app-card-cf-org-user-details',
   templateUrl: './card-cf-org-user-details.component.html',
-  styleUrls: ['./card-cf-org-user-details.component.scss']
+  styleUrls: ['./card-cf-org-user-details.component.scss'],
+  standalone: false
 })
 export class CardCfOrgUserDetailsComponent {
   constructor(

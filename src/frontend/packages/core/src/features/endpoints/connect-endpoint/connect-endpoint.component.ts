@@ -19,9 +19,10 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 
 @Component({
-  selector: 'app-connect-endpoint',
+selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',
-  styleUrls: ['./connect-endpoint.component.scss']
+  styleUrls: ['./connect-endpoint.component.scss'],
+  standalone: false
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;

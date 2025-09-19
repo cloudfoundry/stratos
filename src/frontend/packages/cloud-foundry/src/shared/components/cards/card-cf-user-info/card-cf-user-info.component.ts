@@ -3,9 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-card-cf-user-info',
+selector: 'app-card-cf-user-info',
   templateUrl: './card-cf-user-info.component.html',
-  styleUrls: ['./card-cf-user-info.component.scss']
+  styleUrls: ['./card-cf-user-info.component.scss'],
+  standalone: false
 })
 export class CardCfUserInfoComponent implements OnInit {
   constructor(public cfEndpointService: CloudFoundryEndpointService) { }

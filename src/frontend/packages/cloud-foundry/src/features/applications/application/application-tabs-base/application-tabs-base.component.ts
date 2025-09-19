@@ -36,10 +36,11 @@ import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
 @Component({
-  selector: 'app-application-tabs-base',
+selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
   styleUrls: ['./application-tabs-base.component.scss'],
-  providers: [ApplicationPollingService]
+  providers: [ApplicationPollingService],
+  standalone: false
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public appState$: Observable<ApplicationStateData>;

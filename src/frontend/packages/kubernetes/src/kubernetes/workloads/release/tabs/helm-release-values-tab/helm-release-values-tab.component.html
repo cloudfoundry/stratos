@@ -1,18 +1,26 @@
 <app-page-sub-nav>
 
-  <mat-button-toggle-group class="toolbar" [value]="viewType$ | async"
-    (change)="viewTypeChange($event.value)" name="view" aria-label="View">
-    <mat-button-toggle value="user">User</mat-button-toggle>
-    <mat-button-toggle value="chart">Chart</mat-button-toggle>
-    <mat-button-toggle value="combined">Combined</mat-button-toggle>
-  </mat-button-toggle-group>
+  <div class="flex bg-gray-100 rounded-lg p-1 toolbar" role="group" aria-label="View">
+    <button class="btn btn-toggle"
+            [class.btn-toggle-active]="(viewType$ | async) === 'user'"
+            (click)="viewTypeChange('user')"
+            name="view-user">User</button>
+    <button class="btn btn-toggle"
+            [class.btn-toggle-active]="(viewType$ | async) === 'chart'"
+            (click)="viewTypeChange('chart')"
+            name="view-chart">Chart</button>
+    <button class="btn btn-toggle"
+            [class.btn-toggle-active]="(viewType$ | async) === 'combined'"
+            (click)="viewTypeChange('combined')"
+            name="view-combined">Combined</button>
+  </div>
 
-  <button mat-button name="expand_all" (click)="viewer.expand()" matTooltip="Expand all">
-    <mat-icon>expand_more</mat-icon>
+  <button class="btn btn-secondary" name="expand_all" (click)="viewer.expand()" title="Expand all">
+    <span class="material-icons">expand_more</span>
     <span>Expand all</span>
   </button>
-  <button mat-button name="collapse_all" (click)="viewer.collapse()" matTooltip="Collapse all">
-    <mat-icon>expand_less</mat-icon>
+  <button class="btn btn-secondary" name="collapse_all" (click)="viewer.collapse()" title="Collapse all">
+    <span class="material-icons">expand_less</span>
     <span>Collapse all</span>
   </button>
 </app-page-sub-nav>

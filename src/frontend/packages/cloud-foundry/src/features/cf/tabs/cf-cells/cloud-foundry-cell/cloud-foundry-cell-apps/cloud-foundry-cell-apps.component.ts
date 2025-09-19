@@ -6,7 +6,7 @@ import {
 } from '../../../../../../shared/components/list/list-types/cf-cell-apps/cf-cell-apps-list-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-cell-apps',
+selector: 'app-cloud-foundry-cell-apps',
   templateUrl: './cloud-foundry-cell-apps.component.html',
   styleUrls: ['./cloud-foundry-cell-apps.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfCellAppsListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryCellAppsComponent { }

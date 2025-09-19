@@ -31,9 +31,10 @@ import {
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
-  selector: 'app-service-instance-card',
+selector: 'app-service-instance-card',
   templateUrl: './service-instance-card.component.html',
   styleUrls: ['./service-instance-card.component.scss'],
+  standalone: false
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
 

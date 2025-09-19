@@ -10,9 +10,10 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 
 @Component({
-  selector: 'app-favorites-meta-card',
+selector: 'app-favorites-meta-card',
   templateUrl: './favorites-meta-card.component.html',
-  styleUrls: ['./favorites-meta-card.component.scss']
+  styleUrls: ['./favorites-meta-card.component.scss'],
+  standalone: false
 })
 export class FavoritesMetaCardComponent {
 

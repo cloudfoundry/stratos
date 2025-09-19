@@ -16,9 +16,10 @@ export enum EventFilterValues {
 }
 
 @Component({
-  selector: 'app-events-page',
+selector: 'app-events-page',
   templateUrl: './events-page.component.html',
-  styleUrls: ['./events-page.component.scss']
+  styleUrls: ['./events-page.component.scss'],
+  standalone: false
 })
 export class EventsPageComponent implements OnInit {
   public unreadEvents$: Observable<IGlobalEvent[]>;

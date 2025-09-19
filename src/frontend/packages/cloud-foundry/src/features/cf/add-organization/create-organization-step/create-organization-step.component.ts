@@ -23,9 +23,10 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 
 
 @Component({
-  selector: 'app-create-organization-step',
+selector: 'app-create-organization-step',
   templateUrl: './create-organization-step.component.html',
-  styleUrls: ['./create-organization-step.component.scss']
+  styleUrls: ['./create-organization-step.component.scss'],
+  standalone: false
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 

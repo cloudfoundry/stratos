@@ -4,9 +4,10 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-service-icon',
+selector: 'app-service-icon',
   templateUrl: './service-icon.component.html',
-  styleUrls: ['./service-icon.component.scss']
+  styleUrls: ['./service-icon.component.scss'],
+  standalone: false
 })
 export class ServiceIconComponent implements OnInit {
 

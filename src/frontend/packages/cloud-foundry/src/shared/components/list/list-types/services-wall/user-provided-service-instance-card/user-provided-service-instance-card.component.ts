@@ -21,9 +21,10 @@ import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.servic
 
 
 @Component({
-  selector: 'app-user-provided-service-instance-card',
+selector: 'app-user-provided-service-instance-card',
   templateUrl: './user-provided-service-instance-card.component.html',
   styleUrls: ['./user-provided-service-instance-card.component.scss'],
+  standalone: false
 })
 export class UserProvidedServiceInstanceCardComponent extends CardCell<APIResource<IUserProvidedServiceInstance>> {
   serviceInstanceEntity: APIResource<IUserProvidedServiceInstance>;

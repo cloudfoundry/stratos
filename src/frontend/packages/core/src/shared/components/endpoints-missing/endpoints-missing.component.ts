@@ -15,9 +15,10 @@ export interface EndpointMissingMessageParts {
 }
 
 @Component({
-  selector: 'app-endpoints-missing',
+selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
-  styleUrls: ['./endpoints-missing.component.scss']
+  styleUrls: ['./endpoints-missing.component.scss'],
+  standalone: false
 })
 export class EndpointsMissingComponent implements AfterViewInit, OnInit {
 

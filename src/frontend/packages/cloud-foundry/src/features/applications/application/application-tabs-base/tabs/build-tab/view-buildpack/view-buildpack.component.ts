@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, OnChanges } from '@angular/core';
 
 @Component({
-  selector: 'app-view-buildpack',
+selector: 'app-view-buildpack',
   templateUrl: './view-buildpack.component.html',
-  styleUrls: ['./view-buildpack.component.scss']
+  styleUrls: ['./view-buildpack.component.scss'],
+  standalone: false
 })
 export class ViewBuildpackComponent implements OnInit, OnChanges {
 

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { TailwindDialogService } from '@stratosui/core';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -14,9 +14,10 @@ import {
 import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 
 @Component({
-  selector: 'app-card-cf-info',
+selector: 'app-card-cf-info',
   templateUrl: './card-cf-info.component.html',
-  styleUrls: ['./card-cf-info.component.scss']
+  styleUrls: ['./card-cf-info.component.scss'],
+  standalone: false
 })
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   public apiUrl: string;
@@ -27,7 +28,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     public cfEndpointService: CloudFoundryEndpointService,
     public userInviteService: UserInviteService,
     public userInviteConfigureService: UserInviteConfigureService,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private esf: EntityServiceFactory
   ) { }
 

@@ -6,12 +6,13 @@ import {
 } from '../../../../../../shared/components/list/list-types/cf-events/types/cf-app-events-config.service';
 
 @Component({
-  selector: 'app-events-tab',
+selector: 'app-events-tab',
   templateUrl: './events-tab.component.html',
   styleUrls: ['./events-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAppEventsConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class EventsTabComponent { }

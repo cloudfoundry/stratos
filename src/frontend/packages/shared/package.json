@@ -5,8 +5,8 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/cloudfoundry/stratos",
   "peerDependencies": {
-    "@angular/common": "^8.2.9",
-    "@angular/core": "^8.2.9"
+    "@angular/common": "20.1.7",
+    "@angular/core": "20.1.7"
   },
   "stratos": {
     "theming": "sass/_all-theme#apply-theme-stratos-shared"

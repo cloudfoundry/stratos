@@ -2,8 +2,8 @@
   "name": "@stratosui/git",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
-    "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
+    "@angular/common": "20.1.7",
+    "@angular/core": "20.1.7"
   },
   "stratos": {
     "module": "GitPackageModule",

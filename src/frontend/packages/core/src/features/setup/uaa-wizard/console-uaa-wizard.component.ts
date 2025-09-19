@@ -17,10 +17,11 @@ import { StepOnNextFunction } from '../../../shared/components/stepper/step/step
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 
 @Component({
-  selector: 'app-console-uaa-wizard',
+selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class ConsoleUaaWizardComponent implements OnInit {
 

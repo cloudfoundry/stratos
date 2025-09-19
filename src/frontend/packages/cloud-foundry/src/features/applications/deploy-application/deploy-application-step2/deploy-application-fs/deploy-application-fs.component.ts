@@ -8,7 +8,7 @@ import { FileScannerInfo } from './deploy-application-fs-scanner';
 import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 
 @Component({
-  selector: 'app-deploy-application-fs',
+selector: 'app-deploy-application-fs',
   templateUrl: './deploy-application-fs.component.html',
   styleUrls: ['./deploy-application-fs.component.scss'],
   providers: [
@@ -17,7 +17,8 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
       useExisting: forwardRef(() => DeployApplicationFsComponent),
       multi: true,
     }
-  ]
+  ],
+  standalone: false
 })
 export class DeployApplicationFsComponent implements ControlValueAccessor {
 

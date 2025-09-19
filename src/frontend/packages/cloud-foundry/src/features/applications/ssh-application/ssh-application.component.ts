@@ -13,9 +13,10 @@ import { ApplicationService } from '../application.service';
 
 
 @Component({
-  selector: 'app-ssh-application',
+selector: 'app-ssh-application',
   templateUrl: './ssh-application.component.html',
   styleUrls: ['./ssh-application.component.scss'],
+  standalone: false
 })
 export class SshApplicationComponent implements OnInit {
 

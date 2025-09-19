@@ -5,9 +5,10 @@ import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/
 import { SidePanelService } from '../../services/side-panel.service';
 
 @Component({
-  selector: 'app-sidepanel-preview',
+selector: 'app-sidepanel-preview',
   templateUrl: './sidepanel-preview.component.html',
-  styleUrls: ['./sidepanel-preview.component.scss']
+  styleUrls: ['./sidepanel-preview.component.scss'],
+  standalone: false
 })
 export class SidepanelPreviewComponent {
 

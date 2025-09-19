@@ -11,7 +11,7 @@ export function servicesServiceFactory(
 
 
 @Component({
-  selector: 'app-service-base',
+selector: 'app-service-base',
   templateUrl: './service-base.component.html',
   styleUrls: ['./service-base.component.scss'],
   providers: [
@@ -20,6 +20,7 @@ export function servicesServiceFactory(
       useFactory: servicesServiceFactory,
       deps: [ActivatedRoute]
     }
-  ]
+  ],
+  standalone: false
 })
 export class ServiceBaseComponent { }

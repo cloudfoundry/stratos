@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Pipe({
-  name: 'safeImg'
+name: 'safeImg',
+standalone: false
 })
 export class SafeImgPipe implements PipeTransform {
 

@@ -6,7 +6,7 @@ import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.se
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
 
 @Component({
-  selector: 'app-kubernetes-analysis-tab',
+selector: 'app-kubernetes-analysis-tab',
   templateUrl: './kubernetes-analysis-tab.component.html',
   styleUrls: ['./kubernetes-analysis-tab.component.scss'],
   providers: [
@@ -15,7 +15,8 @@ import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.se
       provide: ListConfig,
       useClass: AnalysisReportsListConfig,
     }
-  ]
+  ],
+  standalone: false
 })
 export class KubernetesAnalysisTabComponent {
 

@@ -7,9 +7,10 @@ import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-sel
 import { APP_TITLE } from './../../../core/core.types';
 
 @Component({
-  selector: 'app-setup-welcome',
+selector: 'app-setup-welcome',
   templateUrl: './setup-welcome.component.html',
-  styleUrls: ['./setup-welcome.component.scss']
+  styleUrls: ['./setup-welcome.component.scss'],
+  standalone: false
 })
 export class SetupWelcomeComponent {
 

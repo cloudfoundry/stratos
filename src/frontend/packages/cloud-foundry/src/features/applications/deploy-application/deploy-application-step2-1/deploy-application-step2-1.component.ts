@@ -18,9 +18,10 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({
-    selector: 'app-deploy-application-step2-1',
+selector: 'app-deploy-application-step2-1',
     templateUrl: './deploy-application-step2-1.component.html',
-    styleUrls: ['./deploy-application-step2-1.component.scss']
+    styleUrls: ['./deploy-application-step2-1.component.scss'],
+  standalone: false
 })
 export class DeployApplicationStep21Component {
 

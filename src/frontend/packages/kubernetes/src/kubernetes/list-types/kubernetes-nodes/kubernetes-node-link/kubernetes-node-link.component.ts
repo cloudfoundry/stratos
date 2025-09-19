@@ -5,9 +5,10 @@ import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-node-link',
+selector: 'app-kubernetes-node-link',
   templateUrl: './kubernetes-node-link.component.html',
-  styleUrls: ['./kubernetes-node-link.component.scss']
+  styleUrls: ['./kubernetes-node-link.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

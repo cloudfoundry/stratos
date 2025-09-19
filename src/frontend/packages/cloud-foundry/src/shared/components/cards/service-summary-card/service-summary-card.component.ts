@@ -12,9 +12,10 @@ import { IService } from '../../../../cf-api-svc.types';
 
 
 @Component({
-  selector: 'app-service-summary-card',
+selector: 'app-service-summary-card',
   templateUrl: './service-summary-card.component.html',
-  styleUrls: ['./service-summary-card.component.scss']
+  styleUrls: ['./service-summary-card.component.scss'],
+  standalone: false
 })
 export class ServiceSummaryCardComponent {
   tags: AppChip<ServiceTag>[] = [];

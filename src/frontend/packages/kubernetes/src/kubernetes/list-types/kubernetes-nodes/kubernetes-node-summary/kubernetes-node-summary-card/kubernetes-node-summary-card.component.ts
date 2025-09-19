@@ -6,9 +6,10 @@ import { CaaspNodeData, KubernetesEndpointService } from '../../../../services/k
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
-  selector: 'app-kubernetes-node-summary-card',
+selector: 'app-kubernetes-node-summary-card',
   templateUrl: './kubernetes-node-summary-card.component.html',
-  styleUrls: ['./kubernetes-node-summary-card.component.scss']
+  styleUrls: ['./kubernetes-node-summary-card.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeSummaryCardComponent {
   public caaspVersion$: Observable<string>;

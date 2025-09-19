@@ -6,7 +6,7 @@ import {
 } from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-list-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-feature-flags',
+selector: 'app-cloud-foundry-feature-flags',
   templateUrl: './cloud-foundry-feature-flags.component.html',
   styleUrls: ['./cloud-foundry-feature-flags.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfFeatureFlagsListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryFeatureFlagsComponent { }

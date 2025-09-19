@@ -72,9 +72,9 @@
   }
 
   &-toolbar-buttons {
-    display: flex;
-    mat-button-toggle {
-      margin-left: 8px;
+    @apply flex;
+    .btn-toggle {
+      @apply ml-2;
     }
   }
 
@@ -99,6 +99,7 @@
   }  
 }
 
-.mat-card.editor-card>:first-child {
-  margin: 0;
+// Material card styles converted to Tailwind
+.card.editor-card > :first-child {
+  @apply m-0;
 }

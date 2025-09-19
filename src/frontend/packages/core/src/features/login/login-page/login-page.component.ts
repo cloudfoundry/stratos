@@ -4,19 +4,63 @@ import { Store } from '@ngrx/store';
 import { InternalAppState, RouterRedirect, RouterNav, Login, VerifySession, AuthState } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
+import { StratosThemeService } from '../../../../../theme/theme.service';
+import { StratosTheme } from '../../../../../theme/theme.config';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
 
 @Component({
-  selector: 'app-login-page',
+selector: 'app-login-page',
   templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss']
+  styleUrls: ['./login-page.component.scss'],
+  standalone: false
 })
 export class LoginPageComponent implements OnInit, OnDestroy {
 
+  public loginBackground$: Observable<string>;
+  public loginBackgroundColor$: Observable<string>;
+  public loginCardBackground$: Observable<string>;
+  public themeLogo$: Observable<string>;
+  public themeTitle$: Observable<string>;
+  public themeDisplayName$: Observable<string>;
+  public themeSubtitle$: Observable<string>;
+
   constructor(
-    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>
-  ) { }
+    private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
+    private themeService: StratosThemeService
+  ) {
+    // Set up login background observables from theme
+    this.loginBackground$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => {
+        const bgImage = theme?.login?.backgroundImage;
+        return bgImage ? `url(${bgImage})` : 'none';
+      })
+    );
+    
+    this.loginBackgroundColor$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.login?.backgroundColor || '#ffffff')
+    );
+    
+    this.loginCardBackground$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.login?.cardBackground || '#ffffff')
+    );
+
+    this.themeLogo$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png')
+    );
+
+    this.themeTitle$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginTitle || 'Stratos')
+    );
+
+    this.themeDisplayName$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.displayName || '')
+    );
+
+    this.themeSubtitle$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || '')
+    );
+  }
 
   loginForm: NgForm;
 

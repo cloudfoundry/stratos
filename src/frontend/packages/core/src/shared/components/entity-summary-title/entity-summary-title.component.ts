@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-entity-summary-title',
+selector: 'app-entity-summary-title',
   templateUrl: './entity-summary-title.component.html',
-  styleUrls: ['./entity-summary-title.component.scss']
+  styleUrls: ['./entity-summary-title.component.scss'],
+  standalone: false
 })
 export class EntitySummaryTitleComponent {
   @Input() title: string;

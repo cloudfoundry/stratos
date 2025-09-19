@@ -14,9 +14,10 @@ import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permis
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
-  selector: 'app-create-application-step1',
+selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
+  standalone: false
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 

@@ -8,7 +8,8 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 @Component({
   selector: 'app-helm-release-analysis-tab',
   templateUrl: './helm-release-analysis-tab.component.html',
-  styleUrls: ['./helm-release-analysis-tab.component.scss']
+  styleUrls: ['./helm-release-analysis-tab.component.scss'],
+  standalone: false
 })
 export class HelmReleaseAnalysisTabComponent {
 

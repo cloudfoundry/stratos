@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
@@ -91,12 +92,13 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
   }
 })
 @Component({
-  selector: 'app-autoscaler-tab-extension',
+selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
   styleUrls: ['./autoscaler-tab-extension.component.scss'],
   providers: [
     ApplicationMonitorService
-  ]
+  ],
+  standalone: false
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
@@ -125,8 +127,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   private appAutoscalerPolicyErrorSub: Subscription;
   private appAutoscalerScalingHistoryErrorSub: Subscription;
-  private appAutoscalerPolicySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
-  private appAutoscalerScalingHistorySnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private appAutoscalerPolicySnackBarRef: TailwindSnackBarRef<any>;
+  private appAutoscalerScalingHistorySnackBarRef: TailwindSnackBarRef<any>;
   private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
 
   appAutoscalerAppMetrics = {};
@@ -161,8 +163,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private appAutoscalerPolicySnackBar: MatSnackBar,
-    private appAutoscalerScalingHistorySnackBar: MatSnackBar,
+    private appAutoscalerPolicySnackBar: TailwindSnackBarService,
+    private appAutoscalerScalingHistorySnackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService
   ) { }
 
@@ -403,5 +405,37 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       ]
     }));
   };
+
+  public gaugeOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
+
+  getGaugeData(metricData: any) {
+    if (!metricData || !metricData[0]) {
+      return { labels: [], datasets: [] };
+    }
+
+    const current = metricData[0].entity.latest.target[0];
+    const max = metricData[0].entity.chartMaxValue;
+    const remaining = max - current;
+
+    return {
+      labels: ['Current', 'Remaining'],
+      datasets: [{
+        data: [current, remaining],
+        backgroundColor: [
+          metricData[0].entity.latest.colorTarget[0],
+          '#E0E0E0'
+        ]
+      }]
+    };
+  }
 
 }

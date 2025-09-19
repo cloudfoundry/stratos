@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
+import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
@@ -9,10 +9,11 @@ import { ConfigService } from '../shared/services/config.service';
 import { ReposService } from '../shared/services/repos.service';
 
 @Component({
-  selector: 'app-charts',
+selector: 'app-charts',
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.scss'],
-  viewProviders: [MatIconRegistry]
+  viewProviders: [MatIconRegistry],
+  standalone: false
 })
 export class ChartsComponent implements OnInit {
   charts: Chart[] = [];

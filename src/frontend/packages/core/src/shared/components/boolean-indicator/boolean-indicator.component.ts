@@ -29,9 +29,10 @@ interface IBooleanOutput {
 export type booleanStringType = 'True' | 'False' | 'Unknown';
 
 @Component({
-  selector: 'app-boolean-indicator',
+selector: 'app-boolean-indicator',
   templateUrl: './boolean-indicator.component.html',
-  styleUrls: ['./boolean-indicator.component.scss']
+  styleUrls: ['./boolean-indicator.component.scss'],
+  standalone: false
 })
 export class BooleanIndicatorComponent {
   public booleanOutput: IBooleanOutput;

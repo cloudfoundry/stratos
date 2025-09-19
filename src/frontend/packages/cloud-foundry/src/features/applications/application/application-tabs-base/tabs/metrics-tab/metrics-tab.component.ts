@@ -15,9 +15,10 @@ import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf
 import { ApplicationService } from '../../../../application.service';
 
 @Component({
-  selector: 'app-metrics-tab',
+selector: 'app-metrics-tab',
   templateUrl: './metrics-tab.component.html',
-  styleUrls: ['./metrics-tab.component.scss']
+  styleUrls: ['./metrics-tab.component.scss'],
+  standalone: false
 })
 export class MetricsTabComponent {
   public instanceMetricConfigs: [

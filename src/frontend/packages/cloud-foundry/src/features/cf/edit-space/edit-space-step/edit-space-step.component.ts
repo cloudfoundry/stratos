@@ -15,9 +15,10 @@ import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.ser
 
 
 @Component({
-  selector: 'app-edit-space-step',
+selector: 'app-edit-space-step',
   templateUrl: './edit-space-step.component.html',
   styleUrls: ['./edit-space-step.component.scss'],
+  standalone: false
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '../services/tailwind-material-replacements';
 import { take } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from './confirmation-dialog.config';

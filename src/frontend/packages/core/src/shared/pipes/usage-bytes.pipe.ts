@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
-  name: 'usageBytes'
+name: 'usageBytes',
+standalone: false
 })
 export class UsageBytesPipe implements PipeTransform {
 

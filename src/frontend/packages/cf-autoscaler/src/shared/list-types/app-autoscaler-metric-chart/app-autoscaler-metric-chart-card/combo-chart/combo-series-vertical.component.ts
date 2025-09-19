@@ -15,7 +15,7 @@ function formatLabel(label: any): string {
 
 /* tslint:disable:component-selector  */
 @Component({
-  selector: 'g[ngx-combo-charts-series-vertical]',
+selector: 'g[ngx-combo-charts-series-vertical]',
   template: `
     <svg:g ngx-charts-bar *ngFor="let bar of bars; trackBy: trackBy"
       [@animationState]="'active'"
@@ -42,12 +42,13 @@ function formatLabel(label: any): string {
     </svg:g>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
   animations: [
     trigger('animationState', [
       transition('* => void', [
         style({
           opacity: 1,
-          transform: '*',
+          transform: '*'
         }),
         animate(500, style({ opacity: 0, transform: 'scale(0)' }))
       ])

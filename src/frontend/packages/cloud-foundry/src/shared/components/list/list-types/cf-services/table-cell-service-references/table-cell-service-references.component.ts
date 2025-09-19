@@ -5,9 +5,10 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-table-cell-service-references',
+selector: 'app-table-cell-service-references',
   templateUrl: './table-cell-service-references.component.html',
-  styleUrls: ['./table-cell-service-references.component.scss']
+  styleUrls: ['./table-cell-service-references.component.scss'],
+  standalone: false
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
 

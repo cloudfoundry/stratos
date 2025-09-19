@@ -23,10 +23,11 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
-  selector: 'app-cf-space-permission-cell',
+selector: 'app-cf-space-permission-cell',
   templateUrl: './cf-space-permission-cell.component.html',
   styleUrls: ['./cf-space-permission-cell.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 

@@ -22,6 +22,7 @@ import { ApplicationService } from '../../../../../application.service';
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
   styleUrls: ['./routes-tab.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: ListConfig,

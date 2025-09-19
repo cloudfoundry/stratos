@@ -22,9 +22,10 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Component({
-  selector: 'app-detach-service-instance',
+selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
-  styleUrls: ['./detach-service-instance.component.scss']
+  styleUrls: ['./detach-service-instance.component.scss'],
+  standalone: false
 })
 export class DetachServiceInstanceComponent {
 

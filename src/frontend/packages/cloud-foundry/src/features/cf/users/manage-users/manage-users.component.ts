@@ -16,14 +16,15 @@ import { CfRolesService } from './cf-roles.service';
 
 
 @Component({
-  selector: 'app-manage-users',
+selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CfRolesService
-  ]
+  ],
+  standalone: false
 })
 export class UsersRolesComponent implements OnDestroy {
   initialUsers$: Observable<CfUser[]>;

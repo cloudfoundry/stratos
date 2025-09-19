@@ -1,9 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-usage-gauge',
+selector: 'app-usage-gauge',
   templateUrl: './usage-gauge.component.html',
-  styleUrls: ['./usage-gauge.component.scss']
+  styleUrls: ['./usage-gauge.component.scss'],
+  standalone: false
 })
 export class UsageGaugeComponent implements OnInit {
 

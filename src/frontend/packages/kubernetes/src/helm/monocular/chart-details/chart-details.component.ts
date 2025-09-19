@@ -9,9 +9,10 @@ import { ConfigService } from '../shared/services/config.service';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../stratos-monocular.helper';
 
 @Component({
-  selector: 'app-chart-details',
+selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
-  styleUrls: ['./chart-details.component.scss']
+  styleUrls: ['./chart-details.component.scss'],
+  standalone: false
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */

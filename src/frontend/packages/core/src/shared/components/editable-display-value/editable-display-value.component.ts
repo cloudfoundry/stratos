@@ -2,9 +2,10 @@ import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
-  selector: 'app-editable-display-value',
+selector: 'app-editable-display-value',
   templateUrl: './editable-display-value.component.html',
-  styleUrls: ['./editable-display-value.component.scss']
+  styleUrls: ['./editable-display-value.component.scss'],
+  standalone: false
 })
 export class EditableDisplayValueComponent {
 

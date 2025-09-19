@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@stratosui/core';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
@@ -43,9 +43,10 @@ interface EnvVarData {
   value: string;
 }
 @Component({
-  selector: 'app-app-service-binding-card',
+selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
-  styleUrls: ['./app-service-binding-card.component.scss']
+  styleUrls: ['./app-service-binding-card.component.scss'],
+  standalone: false
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 

@@ -8,9 +8,10 @@ import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.se
 import { AnalysisReport } from '../../store/kube.types';
 
 @Component({
-  selector: 'app-analysis-report-selector',
+selector: 'app-analysis-report-selector',
   templateUrl: './analysis-report-selector.component.html',
-  styleUrls: ['./analysis-report-selector.component.scss']
+  styleUrls: ['./analysis-report-selector.component.scss'],
+  standalone: false
 })
 export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 

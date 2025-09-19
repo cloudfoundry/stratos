@@ -1,7 +1,8 @@
 import { Directive, ElementRef, Inject, Input, NgZone, OnChanges } from '@angular/core';
 
 @Directive({
-  selector: '[appBlur]'
+selector: '[appBlur]',
+standalone: false
 })
 export class BlurDirective implements OnChanges {
   @Input() appBlur: boolean;

@@ -15,6 +15,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kube-console',
   templateUrl: './kube-console.component.html',
   styleUrls: ['./kube-console.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,

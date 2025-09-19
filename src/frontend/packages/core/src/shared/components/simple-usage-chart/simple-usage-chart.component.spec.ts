@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CoreModule } from '../../../core/core.module';
 import { SimpleUsageChartComponent } from './simple-usage-chart.component';
@@ -11,7 +11,7 @@ describe('SimpleUsageChartComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [CoreModule, NgxChartsModule, NoopAnimationsModule],
+      imports: [CoreModule, BaseChartDirective, NoopAnimationsModule],
       declarations: [SimpleUsageChartComponent]
     })
       .compileComponents();

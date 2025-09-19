@@ -22,9 +22,10 @@ import { ApplicationService } from '../../application.service';
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 @Component({
-  selector: 'app-add-routes',
+selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
-  styleUrls: ['./add-routes.component.scss']
+  styleUrls: ['./add-routes.component.scss'],
+  standalone: false
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];

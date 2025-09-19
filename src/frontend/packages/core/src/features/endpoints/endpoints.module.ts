@@ -17,6 +17,7 @@ import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connec
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 import { EditEndpointStepComponent } from './edit-endpoint/edit-endpoint-step/edit-endpoint-step.component';
 import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
+import { EndpointRegisterModalComponent } from './endpoint-register-modal/endpoint-register-modal.component';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 import { EndpointsRoutingModule } from './endpoints.routing';
 
@@ -41,6 +42,7 @@ import { EndpointsRoutingModule } from './endpoints.routing';
         BackupCheckboxCellComponent,
         BackupConnectionCellComponent,
         TokenEndpointComponent,
+        EndpointRegisterModalComponent,
     ]
 })
 export class EndpointsModule { }

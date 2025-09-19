@@ -6,9 +6,10 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../cf-entity-types';
 
 @Component({
-  selector: 'app-table-cell-service-last-op',
+selector: 'app-table-cell-service-last-op',
   templateUrl: './table-cell-service-last-op.component.html',
-  styleUrls: ['./table-cell-service-last-op.component.scss']
+  styleUrls: ['./table-cell-service-last-op.component.scss'],
+  standalone: false
 })
 export class TableCellServiceLastOpComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 

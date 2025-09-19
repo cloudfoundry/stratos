@@ -1,11 +1,11 @@
 <app-page-sub-nav *ngIf="!(isBusy$ | async) || false">
-  <button mat-button name="delete" (click)="deleteRelease()" matTooltip="Delete">
-    <mat-icon>delete</mat-icon>
+  <button class="btn btn-danger" name="delete" (click)="deleteRelease()" title="Delete">
+    <span class="material-icons">delete</span>
     <span>Delete</span>
   </button>
 
-  <button *ngIf="canUpgrade$ | async" mat-button name="upgrade" [routerLink]="['../upgrade']" matTooltip="Upgrade">
-    <mat-icon>vertical_align_top</mat-icon>
+  <button *ngIf="canUpgrade$ | async" class="btn btn-primary" name="upgrade" [routerLink]="['../upgrade']" title="Upgrade">
+    <span class="material-icons">vertical_align_top</span>
     <span>Upgrade</span>
   </button>
 
@@ -61,16 +61,16 @@
       <app-tile-grid>
         <app-tile-group *ngIf="chartData$ | async as chartData">
           <app-tile>
-            <mat-card class="full-card">
+            <div class="card full-card">
               <app-ring-chart [customColors]="podChartColors" [data]="chartData.podsChartData" label="Pods">
               </app-ring-chart>
-            </mat-card>
+            </div>
           </app-tile>
           <app-tile>
-            <mat-card class="full-card">
+            <div class="card full-card">
               <app-ring-chart [customColors]="containersChartColors" [data]="chartData.containersChartData"
                 label="Containers"></app-ring-chart>
-            </mat-card>
+            </div>
           </app-tile>
         </app-tile-group>
       </app-tile-grid>
@@ -88,8 +88,9 @@
         <div class="resources__loading">
           <div class="resources__loading__content">
             Updating Resource Information
-            <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
-            </mat-progress-bar>
+            <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden">
+              <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+            </div>
           </div>
         </div>
       </ng-template>
@@ -98,8 +99,9 @@
       <div class="resources__loading">
         <div class="resources__loading__content">
           Loading resources
-          <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
-          </mat-progress-bar>
+          <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden">
+            <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+          </div>
         </div>
       </div>
     </ng-template>

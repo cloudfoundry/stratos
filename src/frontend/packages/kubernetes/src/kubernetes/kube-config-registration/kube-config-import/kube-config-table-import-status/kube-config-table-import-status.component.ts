@@ -8,9 +8,10 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
-  selector: 'app-kube-config-table-import-status',
+selector: 'app-kube-config-table-import-status',
   templateUrl: './kube-config-table-import-status.component.html',
-  styleUrls: ['./kube-config-table-import-status.component.scss']
+  styleUrls: ['./kube-config-table-import-status.component.scss'],
+  standalone: false
 })
 export class KubeConfigTableImportStatusComponent extends TableCellCustom<KubeConfigFileCluster> {
 

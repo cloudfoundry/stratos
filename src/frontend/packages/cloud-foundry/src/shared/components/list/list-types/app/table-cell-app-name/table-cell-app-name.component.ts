@@ -9,9 +9,10 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
 
 @Component({
-  selector: 'app-table-cell-app-name',
+selector: 'app-table-cell-app-name',
   templateUrl: './table-cell-app-name.component.html',
-  styleUrls: ['./table-cell-app-name.component.scss']
+  styleUrls: ['./table-cell-app-name.component.scss'],
+  standalone: false
 })
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
   public appLinkUrlParam$: Observable<any>;

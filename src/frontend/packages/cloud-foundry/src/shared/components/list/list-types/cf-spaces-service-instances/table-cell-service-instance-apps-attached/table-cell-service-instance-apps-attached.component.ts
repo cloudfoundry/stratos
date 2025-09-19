@@ -15,9 +15,10 @@ import { createEntityRelationKey } from '../../../../../../entity-relations/enti
 import { getCfServiceInstance } from '../../../../../../features/service-catalog/services-helper';
 
 @Component({
-  selector: 'app-table-cell-service-instance-apps-attached',
+selector: 'app-table-cell-service-instance-apps-attached',
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
-  styleUrls: ['./table-cell-service-instance-apps-attached.component.scss']
+  styleUrls: ['./table-cell-service-instance-apps-attached.component.scss'],
+  standalone: false
 })
 export class TableCellServiceInstanceAppsAttachedComponent
   extends TableCellCustom<APIResource<IServiceInstance>>

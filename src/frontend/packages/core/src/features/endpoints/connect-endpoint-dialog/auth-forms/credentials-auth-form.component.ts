@@ -3,9 +3,10 @@ import { UntypedFormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
 @Component({
-  selector: 'app-credentials-auth-form',
+selector: 'app-credentials-auth-form',
   templateUrl: './credentials-auth-form.component.html',
-  styleUrls: ['./credentials-auth-form.component.scss']
+  styleUrls: ['./credentials-auth-form.component.scss'],
+  standalone: false
 })
 export class CredentialsAuthFormComponent implements IAuthForm {
 

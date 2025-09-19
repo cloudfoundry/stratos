@@ -5,8 +5,9 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ListCfRoute } from '../cf-routes-data-source-base';
 
 @Component({
-  selector: 'app-table-cell-tcp-route',
+selector: 'app-table-cell-tcp-route',
   templateUrl: './table-cell-tcproute.component.html',
-  styleUrls: ['./table-cell-tcproute.component.scss']
+  styleUrls: ['./table-cell-tcproute.component.scss'],
+  standalone: false
 })
 export class TableCellTCPRouteComponent extends TableCellCustom<APIResource<ListCfRoute>> { }

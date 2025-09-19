@@ -24,13 +24,14 @@ export interface VariableTabAllEnvVarType {
 }
 
 @Component({
-  selector: 'app-variables-tab',
+selector: 'app-variables-tab',
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAppVariablesListConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class VariablesTabComponent implements OnInit {
 

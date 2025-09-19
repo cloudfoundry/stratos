@@ -7,12 +7,13 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QUOTA_ORG_GUID } from '../quota-definition/quota-definition.component';
 
 @Component({
-  selector: 'app-edit-quota',
+selector: 'app-edit-quota',
   templateUrl: './edit-quota.component.html',
   styleUrls: ['./edit-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class EditQuotaComponent {
   cfQuotasUrl: string;

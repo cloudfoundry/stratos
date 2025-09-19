@@ -1,10 +1,11 @@
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog } from '@stratosui/core';
 
 @Component({
-  selector: 'app-event-metadata',
+selector: 'app-event-metadata',
   templateUrl: './event-metadata.component.html',
-  styleUrls: ['./event-metadata.component.scss']
+  styleUrls: ['./event-metadata.component.scss'],
+  standalone: false
 })
 export class EventMetadataComponent implements OnInit {
 

@@ -6,9 +6,10 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-diagnostics-page',
+selector: 'app-diagnostics-page',
   templateUrl: './diagnostics-page.component.html',
-  styleUrls: ['./diagnostics-page.component.scss']
+  styleUrls: ['./diagnostics-page.component.scss'],
+  standalone: false
 })
 export class DiagnosticsPageComponent implements OnInit {
 

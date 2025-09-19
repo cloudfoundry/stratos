@@ -4,6 +4,5 @@
       min="0">
     <span *ngIf="suffix" matSuffix>{{suffix}}</span>
   </mat-form-field>
-  <mat-checkbox matInput [(ngModel)]="unlimited" [ngModelOptions]="{standalone: true}" value="-1" (change)="onChange()"
-    min>Unlimited</mat-checkbox>
+  <mat-checkbox [checked]="unlimited" (change)="onChange()">Unlimited</mat-checkbox>
 </div>

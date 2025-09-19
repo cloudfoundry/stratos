@@ -1,4 +1,4 @@
-import { OverlayContainer } from '@angular/cdk/overlay';
+// Removed Angular CDK overlay dependency - using custom theme system
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -41,7 +41,6 @@ export class ThemeService {
 
   constructor(
     private store: Store<DashboardOnlyAppState>,
-    private overlayContainer: OverlayContainer,
     private styleService: StyleService) {
     this.initialiseStratosThemeInfo();
   }
@@ -120,16 +119,17 @@ export class ThemeService {
   }
 
   /**
-   * Overlays require the theme specifically set, see https://material.angular.io/guide/theming#multiple-themes
-   * `Multiple themes and overlay-based components`
+   * Apply theme to document body instead of overlay container (Tailwind CSS approach)
    */
   private setOverlay(newTheme: StratosTheme) {
-    // Remove pre-existing styles
+    // Remove pre-existing styles from document body
     this.getThemes()
       .filter(theme => theme.styleName)
-      .forEach(theme => this.overlayContainer.getContainerElement().classList.remove(theme.styleName));
-    // Add new style (not from getThemes list, handles OS case)
-    this.overlayContainer.getContainerElement().classList.add(newTheme.styleName);
+      .forEach(theme => document.body.classList.remove(theme.styleName));
+    // Add new style to document body
+    if (newTheme.styleName) {
+      document.body.classList.add(newTheme.styleName);
+    }
   }
 
   /**

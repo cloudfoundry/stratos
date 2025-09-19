@@ -9,7 +9,7 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organization-spaces',
+selector: 'app-cloud-foundry-organization-spaces',
   templateUrl: './cloud-foundry-organization-spaces.component.html',
   styleUrls: ['./cloud-foundry-organization-spaces.component.scss'],
   providers: [
@@ -17,7 +17,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
       provide: ListConfig,
       useClass: CfSpacesListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryOrganizationSpacesComponent {
   public permsSpaceCreate = CfCurrentUserPermissions.SPACE_CREATE;

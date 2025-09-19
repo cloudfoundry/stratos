@@ -9,9 +9,10 @@ import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis
 import { getParentURL } from '../../../services/route.helper';
 
 @Component({
-  selector: 'app-kubernetes-analysis-report',
+selector: 'app-kubernetes-analysis-report',
   templateUrl: './kubernetes-analysis-report.component.html',
-  styleUrls: ['./kubernetes-analysis-report.component.scss']
+  styleUrls: ['./kubernetes-analysis-report.component.scss'],
+  standalone: false
 })
 export class KubernetesAnalysisReportComponent implements OnInit {
 

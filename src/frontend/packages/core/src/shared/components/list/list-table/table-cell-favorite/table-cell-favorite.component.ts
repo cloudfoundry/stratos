@@ -9,9 +9,10 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
 }
 
 @Component({
-  selector: 'app-table-cell-favorite',
+selector: 'app-table-cell-favorite',
   templateUrl: './table-cell-favorite.component.html',
-  styleUrls: ['./table-cell-favorite.component.scss']
+  styleUrls: ['./table-cell-favorite.component.scss'],
+  standalone: false
 })
 export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   TableCellCustom<T, TableCellFavoriteComponentConfig<T, Y>> {

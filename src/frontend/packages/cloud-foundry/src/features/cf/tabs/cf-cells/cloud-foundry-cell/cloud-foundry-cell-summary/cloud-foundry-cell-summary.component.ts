@@ -10,7 +10,7 @@ import {
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({
-  selector: 'app-cloud-foundry-cell-summary',
+selector: 'app-cloud-foundry-cell-summary',
   templateUrl: './cloud-foundry-cell-summary.component.html',
   styleUrls: ['./cloud-foundry-cell-summary.component.scss'],
   providers: [
@@ -18,7 +18,8 @@ import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
       provide: ListConfig,
       useClass: CfCellHealthListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryCellSummaryComponent {
 

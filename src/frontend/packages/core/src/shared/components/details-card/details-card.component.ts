@@ -1,10 +1,11 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: 'app-details-card',
+selector: 'app-details-card',
   templateUrl: './details-card.component.html',
   styleUrls: ['./details-card.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class DetailsCardComponent implements OnInit {
 

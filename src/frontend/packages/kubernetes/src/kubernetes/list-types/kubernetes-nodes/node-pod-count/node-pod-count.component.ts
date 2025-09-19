@@ -7,9 +7,10 @@ import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-node-pod-count',
+selector: 'app-node-pod-count',
   templateUrl: './node-pod-count.component.html',
-  styleUrls: ['./node-pod-count.component.scss']
+  styleUrls: ['./node-pod-count.component.scss'],
+  standalone: false
 })
 export class NodePodCountComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   podCount$: Observable<string>;

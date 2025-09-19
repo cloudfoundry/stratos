@@ -13,7 +13,7 @@ import {
 import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
-  selector: 'app-kubernetes',
+selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',
   styleUrls: ['./kubernetes.component.scss'],
   providers: [
@@ -23,7 +23,8 @@ import { KubernetesService } from '../services/kubernetes.service';
     },
     EndpointListHelper,
     KubernetesService
-  ]
+  ],
+  standalone: false
 })
 export class KubernetesComponent {
 

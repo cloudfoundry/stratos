@@ -1,4 +1,5 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChartConfiguration } from 'chart.js';
 import { Store } from '@ngrx/store';
 import {
   MetricsAction,
@@ -30,9 +31,10 @@ export interface MetricsConfig<T = any> {
 }
 
 @Component({
-  selector: 'app-metrics-chart',
+selector: 'app-metrics-chart',
   templateUrl: './metrics-chart.component.html',
-  styleUrls: ['./metrics-chart.component.scss']
+  styleUrls: ['./metrics-chart.component.scss'],
+  standalone: false
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input()
@@ -57,6 +59,32 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   private timeSelectorSub: Subscription;
 
   public results$: Observable<IMetrics<any> | ChartSeries<any>[]>;
+  public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
+  public chartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: ''
+        }
+      },
+      y: {
+        display: true,
+        title: {
+          display: true,
+          text: ''
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true
+      }
+    }
+  };
 
   public metricsMonitor: EntityMonitor<IMetrics>;
 
@@ -110,13 +138,18 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     this.results$ = baseResults$.pipe(
       map(metrics => {
         if (!metrics) {
+          this.chartJsData = { labels: [], datasets: [] };
           return metrics;
         }
         const mapMetricsData = this.mapMetricsToChartData(metrics, this.metricsConfig);
         const metricsArray = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapMetricsData) : mapMetricsData;
         if (!metricsArray.length) {
+          this.chartJsData = { labels: [], datasets: [] };
           return [];
         }
+
+        // Convert to Chart.js format
+        this.convertToChartJsData(metricsArray);
 
         const query = metrics.query;
         const { start, end, step } = query.params as { start: number, end: number, step: number };
@@ -200,5 +233,58 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     const truncated = model.slice(0, MAX_SERIES_IN_TOOLTIP);
     truncated.push({truncated: true});
     return truncated;
+  }
+
+  private convertToChartJsData(metricsArray: ChartSeries<any>[]) {
+    if (!metricsArray || !metricsArray.length) {
+      this.chartJsData = { labels: [], datasets: [] };
+      return;
+    }
+
+    // Get all unique timestamps across all series
+    const allTimestamps = new Set<number>();
+    metricsArray.forEach(series => {
+      series.series.forEach(point => {
+        const pointTime = point.name instanceof Date ? point.name.getTime() : new Date(point.name).getTime();
+        allTimestamps.add(pointTime);
+      });
+    });
+
+    const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
+    const labels = sortedTimestamps.map(timestamp => new Date(timestamp).toLocaleTimeString());
+
+    // Convert each series to Chart.js dataset
+    const datasets = metricsArray.map((series, index) => {
+      const data = sortedTimestamps.map(timestamp => {
+        const point = series.series.find(p => {
+          const pointTime = p.name instanceof Date ? p.name.getTime() : new Date(p.name).getTime();
+          return pointTime === timestamp;
+        });
+        return point ? point.value : null;
+      });
+
+      const colors = ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD'];
+
+      return {
+        label: series.name,
+        data: data,
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '20',
+        fill: false,
+        tension: 0.1
+      };
+    });
+
+    this.chartJsData = { labels, datasets };
+
+    // Update chart options with axis labels
+    if (this.chartConfig && this.chartOptions?.scales) {
+      if (this.chartOptions.scales.x && 'title' in this.chartOptions.scales.x && this.chartOptions.scales.x.title) {
+        this.chartOptions.scales.x.title.text = this.chartConfig.xAxisLabel || '';
+      }
+      if (this.chartOptions.scales.y && 'title' in this.chartOptions.scales.y && this.chartOptions.scales.y.title) {
+        this.chartOptions.scales.y.title.text = this.chartConfig.yAxisLabel || '';
+      }
+    }
   }
 }

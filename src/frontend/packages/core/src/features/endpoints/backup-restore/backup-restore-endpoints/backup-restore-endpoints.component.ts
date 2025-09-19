@@ -9,9 +9,10 @@ interface IAppTileData extends ITileData {
 }
 
 @Component({
-  selector: 'app-backup-restore-endpoints',
+selector: 'app-backup-restore-endpoints',
   templateUrl: './backup-restore-endpoints.component.html',
   styleUrls: ['./backup-restore-endpoints.component.scss'],
+  standalone: false
 })
 export class BackupRestoreEndpointsComponent {
 

@@ -6,12 +6,13 @@ import { MetricsRangeSelectorManagerService } from '../../services/metrics-range
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 
 @Component({
-  selector: 'app-metrics-parent-range-selector',
+selector: 'app-metrics-parent-range-selector',
   templateUrl: './metrics-parent-range-selector.component.html',
   styleUrls: ['./metrics-parent-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
-  ]
+  ],
+  standalone: false
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;

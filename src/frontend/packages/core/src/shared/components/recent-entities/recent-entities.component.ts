@@ -42,9 +42,10 @@ class RenderableRecent {
 }
 
 @Component({
-  selector: 'app-recent-entities',
+selector: 'app-recent-entities',
   templateUrl: './recent-entities.component.html',
-  styleUrls: ['./recent-entities.component.scss']
+  styleUrls: ['./recent-entities.component.scss'],
+  standalone: false
 })
 export class RecentEntitiesComponent {
   @Input()

@@ -5,9 +5,10 @@ import { IFeatureFlag } from '../../../../../../cf-api.types';
 import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
 
 @Component({
-  selector: 'app-table-cell-feature-flag-description',
+selector: 'app-table-cell-feature-flag-description',
   templateUrl: './table-cell-feature-flag-description.component.html',
-  styleUrls: ['./table-cell-feature-flag-description.component.scss']
+  styleUrls: ['./table-cell-feature-flag-description.component.scss'],
+  standalone: false
 })
 export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IFeatureFlag> {
 

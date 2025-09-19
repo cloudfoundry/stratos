@@ -8,9 +8,10 @@ import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cloud-foundry-summary-tab',
+selector: 'app-cloud-foundry-summary-tab',
   templateUrl: './cloud-foundry-summary-tab.component.html',
-  styleUrls: ['./cloud-foundry-summary-tab.component.scss']
+  styleUrls: ['./cloud-foundry-summary-tab.component.scss'],
+  standalone: false
 })
 export class CloudFoundrySummaryTabComponent {
   appLink: () => void;

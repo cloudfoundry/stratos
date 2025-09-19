@@ -1,11 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
+import { CoreModule } from '@stratosui/core';
 import { MDAppModule } from '../../../../core/src/public-api';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { SharedModule } from '@stratosui/core';
 import { CloudFoundrySharedModule } from '../../shared/cf-shared.module';
 import {
   CFEndpointsListConfigService,
@@ -138,7 +138,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
         MDAppModule,
         CloudFoundrySectionRoutingModule,
         RouterModule,
-        NgxChartsModule,
+        BaseChartDirective,
         CloudFoundrySharedModule,
         CFHomeCardModule,
     ],

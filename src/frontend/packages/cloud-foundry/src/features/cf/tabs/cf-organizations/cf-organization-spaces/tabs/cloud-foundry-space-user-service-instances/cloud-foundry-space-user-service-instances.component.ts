@@ -6,7 +6,7 @@ import {
 } from '../../../../../../../shared/components/list/list-types/cf-services/cf-user-service-instances-list-config';
 
 @Component({
-  selector: 'app-cloud-foundry-space-user-service-instances',
+selector: 'app-cloud-foundry-space-user-service-instances',
   templateUrl: './cloud-foundry-space-user-service-instances.component.html',
   styleUrls: ['./cloud-foundry-space-user-service-instances.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfUserServiceInstancesListConfigBase
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundrySpaceUserServiceInstancesComponent { }

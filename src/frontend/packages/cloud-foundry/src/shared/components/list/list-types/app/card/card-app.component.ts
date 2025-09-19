@@ -18,9 +18,10 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({
-  selector: 'app-card-app',
+selector: 'app-card-app',
   templateUrl: './card-app.component.html',
-  styleUrls: ['./card-app.component.scss']
+  styleUrls: ['./card-app.component.scss'],
+  standalone: false
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
 

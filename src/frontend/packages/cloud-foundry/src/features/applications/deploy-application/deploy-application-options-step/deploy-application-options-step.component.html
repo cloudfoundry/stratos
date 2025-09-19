@@ -4,89 +4,111 @@
     <div class="deploy-options__form-sections__form-section">
       <!--- Section -->
       <div class="deploy-options__title"><b>General</b></div>
-      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-        <input matInput placeholder="Application Name" formControlName="name">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput name="instanceCount" placeholder="Number of Instances" formControlName="instances"
+      <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
+        <input class="input" placeholder="Application Name" formControlName="name">
+      </div>
+      <div class="form-field">
+        <input class="input" name="instanceCount" placeholder="Number of Instances" formControlName="instances"
           type="number">
-      </mat-form-field>
+      </div>
       <!--- End Section -->
       <!--- Section -->
       <div class="deploy-options__title"><b>Quota</b></div>
-      <mat-form-field>
-        <input matInput name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
-        <span matSuffix>MB</span>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput name="memoryQuota" placeholder="Memory Quota" formControlName="memory" type="number">
-        <span matSuffix>MB</span>
-      </mat-form-field>
+      <div class="form-field">
+        <div class="relative">
+          <input class="input pr-10" name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
+          <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">MB</span>
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="relative">
+          <input class="input pr-10" name="memoryQuota" placeholder="Memory Quota" formControlName="memory" type="number">
+          <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">MB</span>
+        </div>
+      </div>
       <!--- End Section -->
       <!--- Section -->
       <div class="deploy-options__title"><b>Route</b></div>
-      <mat-checkbox matInput name="no_route" formControlName="no_route">Do not create a route</mat-checkbox>
-      <mat-checkbox matInput name="random_route" formControlName="random_route">Create a random route</mat-checkbox>
-      <mat-form-field>
-        <input name="host" matInput placeholder="Host" formControlName="host">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-select name="domain" placeholder="Domain" formControlName="domain">
-          <mat-option *ngFor="let domain of domains$ | async" [value]="domain.entity.name">
+      <div class="flex flex-col space-y-2">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="no_route" formControlName="no_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="text-sm">Do not create a route</span>
+        </label>
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="random_route" formControlName="random_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="text-sm">Create a random route</span>
+        </label>
+      </div>
+      <div class="form-field">
+        <input class="input" name="host" placeholder="Host" formControlName="host">
+      </div>
+      <div class="form-field">
+        <select class="input" name="domain" formControlName="domain">
+          <option value="" disabled>Domain</option>
+          <option *ngFor="let domain of domains$ | async" [value]="domain.entity.name">
             {{ domain.entity.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput name="path" placeholder="Path" formControlName="path">
-        <span matPrefix>/&nbsp;</span>
-      </mat-form-field>
+          </option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">/&nbsp;</span>
+          <input class="input pl-8" name="path" placeholder="Path" formControlName="path">
+        </div>
+      </div>
       <!--- End Section -->
     </div>
     <div class="deploy-options__form-sections__form-section">
       <!--- Section -->
       <div class="deploy-options__title"><b>Build</b></div>
-      <mat-checkbox matInput name="no_start" formControlName="no_start">Do not start the application</mat-checkbox>
-      <mat-form-field>
-        <mat-select name="stack" placeholder="Stack" formControlName="stack">
-          <mat-option></mat-option>
-          <mat-option *ngFor="let stack of stacks$ | async" [value]="stack.entity.name">
+      <div class="form-field">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" name="no_start" formControlName="no_start" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <span class="text-sm">Do not start the application</span>
+        </label>
+      </div>
+      <div class="form-field">
+        <select class="input" name="stack" formControlName="stack">
+          <option value="">Stack</option>
+          <option *ngFor="let stack of stacks$ | async" [value]="stack.entity.name">
             {{ stack.entity.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
-        <mat-hint>Custom buildpack by name or Git URL</mat-hint>
-      </mat-form-field>
-      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-        <input matInput placeholder="Docker Image" formControlName="dockerImage">
-      </mat-form-field>
-      <mat-form-field [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-        <input matInput placeholder="Docker Username" formControlName="dockerUsername">
-        <mat-hint>Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</mat-hint>
-      </mat-form-field>
+          </option>
+        </select>
+      </div>
+      <div class="form-field">
+        <input class="input" name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
+        <p class="mt-1 text-sm text-gray-500">Custom buildpack by name or Git URL</p>
+      </div>
+      <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
+        <input class="input" placeholder="Docker Image" formControlName="dockerImage">
+      </div>
+      <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
+        <input class="input" placeholder="Docker Username" formControlName="dockerUsername">
+        <p class="mt-1 text-sm text-gray-500">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
+      </div>
       <!--- End Section -->
     </div>
     <div class="deploy-options__form-sections__form-section">
       <!--- Section -->
       <div class="deploy-options__title"><b>Run</b></div>
-      <mat-form-field>
-        <input matInput name="startCommand" placeholder="Start Command" formControlName="startCmd">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-select name="healthCheckType" placeholder="Health Check Type" formControlName="healthCheckType">
-          <mat-option></mat-option>
-          <mat-option *ngFor="let check of healthCheckTypes" [value]="check">
+      <div class="form-field">
+        <input class="input" name="startCommand" placeholder="Start Command" formControlName="startCmd">
+      </div>
+      <div class="form-field">
+        <select class="input" name="healthCheckType" formControlName="healthCheckType">
+          <option value="">Health Check Type</option>
+          <option *ngFor="let check of healthCheckTypes" [value]="check">
             {{ check }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
-          type="number">
-        <span matSuffix>seconds</span>
-      </mat-form-field>
+          </option>
+        </select>
+      </div>
+      <div class="form-field">
+        <div class="relative">
+          <input class="input pr-20" name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
+            type="number">
+          <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">seconds</span>
+        </div>
+      </div>
       <!--- End Section -->
     </div>
   </div>

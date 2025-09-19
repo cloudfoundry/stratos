@@ -5,9 +5,10 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
 
 
 @Component({
-  selector: 'app-kubernetes-certs-auth-form',
+selector: 'app-kubernetes-certs-auth-form',
   templateUrl: './kubernetes-certs-auth-form.component.html',
-  styleUrls: ['./kubernetes-certs-auth-form.component.scss']
+  styleUrls: ['./kubernetes-certs-auth-form.component.scss'],
+  standalone: false
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: UntypedFormGroup;

@@ -11,9 +11,10 @@ import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-inf
 import { ApplicationService } from '../application.service';
 
 @Component({
-  selector: 'app-cli-info-application',
+selector: 'app-cli-info-application',
   templateUrl: './cli-info-application.component.html',
   styleUrls: ['./cli-info-application.component.scss'],
+  standalone: false
 })
 export class CliInfoApplicationComponent implements OnInit {
 

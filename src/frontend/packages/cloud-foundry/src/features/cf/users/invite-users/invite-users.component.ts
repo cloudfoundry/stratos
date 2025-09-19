@@ -8,7 +8,7 @@ import { UserInviteConfigureService, UserInviteService } from '../../user-invite
 import { CfRolesService } from '../manage-users/cf-roles.service';
 
 @Component({
-  selector: 'app-invite-users',
+selector: 'app-invite-users',
   templateUrl: './invite-users.component.html',
   styleUrls: ['./invite-users.component.scss'],
   providers: [
@@ -18,7 +18,8 @@ import { CfRolesService } from '../manage-users/cf-roles.service';
     CfUserService,
     CfRolesService,
     CloudFoundryEndpointService
-  ]
+  ],
+  standalone: false
 })
 export class InviteUsersComponent {
 

@@ -8,9 +8,10 @@ export interface TableCellIconComponentConfig<T> {
 }
 
 @Component({
-  selector: 'app-table-cell-icon',
+selector: 'app-table-cell-icon',
   templateUrl: './table-cell-icon.component.html',
-  styleUrls: ['./table-cell-icon.component.scss']
+  styleUrls: ['./table-cell-icon.component.scss'],
+  standalone: false
 })
 export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
 

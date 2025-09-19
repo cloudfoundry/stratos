@@ -52,13 +52,14 @@ import { ApplicationService } from '../application.service';
 
 
 @Component({
-  selector: 'app-application-delete',
+selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
   styleUrls: ['./application-delete.component.scss'],
   providers: [
     CfAppRoutesListConfigService,
     AppServiceBindingListConfigService
-  ]
+  ],
+  standalone: false
 })
 export class ApplicationDeleteComponent<T> {
   relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;

@@ -5,9 +5,10 @@ import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
-  selector: 'app-kube-config-table-select',
+selector: 'app-kube-config-table-select',
   templateUrl: './kube-config-table-select.component.html',
-  styleUrls: ['./kube-config-table-select.component.scss']
+  styleUrls: ['./kube-config-table-select.component.scss'],
+  standalone: false
 })
 export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFileCluster> {
 

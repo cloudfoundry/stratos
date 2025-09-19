@@ -9,9 +9,10 @@ import {
 } from '../../tabs/kubernetes-analysis-tab/kubernetes-analysis-info/kubernetes-analysis-info.component';
 
 @Component({
-  selector: 'app-analysis-report-runner',
+selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
-  styleUrls: ['./analysis-report-runner.component.scss']
+  styleUrls: ['./analysis-report-runner.component.scss'],
+  standalone: false
 })
 export class AnalysisReportRunnerComponent implements OnInit {
 

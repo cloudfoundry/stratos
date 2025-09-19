@@ -7,9 +7,10 @@ import { EventWatcherService } from '../../../core/event-watcher/event-watcher.s
 
 // Import Xterm and Xterm Fit Addon
 @Component({
-  selector: 'app-ssh-viewer',
+selector: 'app-ssh-viewer',
   templateUrl: './ssh-viewer.component.html',
-  styleUrls: ['./ssh-viewer.component.scss']
+  styleUrls: ['./ssh-viewer.component.scss'],
+  standalone: false
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
 

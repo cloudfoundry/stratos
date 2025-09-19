@@ -9,13 +9,14 @@ import {
 } from '../../shared/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
 
 @Component({
-  selector: 'app-autoscaler-scale-history-page',
+selector: 'app-autoscaler-scale-history-page',
   templateUrl: './autoscaler-scale-history-page.component.html',
   styleUrls: ['./autoscaler-scale-history-page.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAppAutoscalerEventsConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
 

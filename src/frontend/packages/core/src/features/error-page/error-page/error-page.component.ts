@@ -19,9 +19,10 @@ import { first, map, withLatestFrom } from 'rxjs/operators';
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 
 @Component({
-  selector: 'app-error-page',
+selector: 'app-error-page',
   templateUrl: './error-page.component.html',
-  styleUrls: ['./error-page.component.scss']
+  styleUrls: ['./error-page.component.scss'],
+  standalone: false
 })
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;

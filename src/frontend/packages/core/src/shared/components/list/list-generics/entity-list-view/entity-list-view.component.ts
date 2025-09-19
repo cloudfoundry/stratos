@@ -6,9 +6,10 @@ import { ListConfigProvider } from '../list-config-provider.types';
 import { EntityConfigListConfigProvider } from '../list-providers/entity-config-list-config-provider';
 
 @Component({
-  selector: 'app-entity-list-view',
+selector: 'app-entity-list-view',
   templateUrl: './entity-list-view.component.html',
-  styleUrls: ['./entity-list-view.component.scss']
+  styleUrls: ['./entity-list-view.component.scss'],
+  standalone: false
 })
 export class EntityListViewComponent implements OnInit {
   @Input()

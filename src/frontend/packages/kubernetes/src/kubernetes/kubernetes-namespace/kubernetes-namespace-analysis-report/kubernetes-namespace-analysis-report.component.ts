@@ -8,7 +8,7 @@ import { KubernetesService } from '../../services/kubernetes.service';
 import { AnalysisReport } from '../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-namespace-analysis-report-tab',
+selector: 'app-kubernetes-namespace-analysis-report-tab',
   templateUrl: './kubernetes-namespace-analysis-report.component.html',
   styleUrls: ['./kubernetes-namespace-analysis-report.component.scss'],
   providers: [
@@ -16,7 +16,8 @@ import { AnalysisReport } from '../../store/kube.types';
     KubernetesEndpointService,
     KubernetesNamespaceService,
     KubernetesAnalysisService,
-  ]
+  ],
+  standalone: false
 })
 export class KubernetesNamespaceAnalysisReportComponent {
 

@@ -11,9 +11,10 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
 
 
 @Component({
-  selector: 'app-deploy-application-step-source-upload',
+selector: 'app-deploy-application-step-source-upload',
   templateUrl: './deploy-application-step-source-upload.component.html',
-  styleUrls: ['./deploy-application-step-source-upload.component.scss']
+  styleUrls: ['./deploy-application-step-source-upload.component.scss'],
+  standalone: false
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 

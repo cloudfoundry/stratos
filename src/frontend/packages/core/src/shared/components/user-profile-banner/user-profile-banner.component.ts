@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { UserProfileInfo } from '@stratosui/store';
 
 @Component({
-  selector: 'app-user-profile-banner',
+selector: 'app-user-profile-banner',
   templateUrl: './user-profile-banner.component.html',
-  styleUrls: ['./user-profile-banner.component.scss']
+  styleUrls: ['./user-profile-banner.component.scss'],
+  standalone: false
 })
 export class UserProfileBannerComponent {
 

@@ -1,7 +1,16 @@
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
-import { JsonPointer } from '@ajsf/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+// Simple JsonPointer replacement
+class JsonPointer {
+  static parse(path: any): string[] {
+    if (!path) return [];
+    const pathStr = path.toString();
+    if (pathStr === '') return [];
+    if (pathStr === '/') return [''];
+    return pathStr.split('/').slice(1);
+  }
+}
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
@@ -19,12 +28,13 @@ export class SchemaFormConfig {
 }
 
 @Component({
-  selector: 'app-schema-form',
+selector: 'app-schema-form',
   templateUrl: './schema-form.component.html',
   styleUrls: ['./schema-form.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+  ],
+  standalone: false
 })
 export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
 

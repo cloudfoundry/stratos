@@ -10,9 +10,10 @@ import {
 } from '../../../core/extension/extension-service';
 
 @Component({
-  selector: 'app-extension-buttons',
+selector: 'app-extension-buttons',
   templateUrl: './extension-buttons.component.html',
-  styleUrls: ['./extension-buttons.component.scss']
+  styleUrls: ['./extension-buttons.component.scss'],
+  standalone: false
 })
 export class ExtensionButtonsComponent implements OnInit {
 

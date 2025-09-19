@@ -5,9 +5,10 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-loading-page',
+selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss'],
+  standalone: false,
   animations: [
     trigger(
       'leaveLoaderAnimation', [

@@ -1,5 +1,7 @@
 // Import your custom theme
-@import '../../theme.scss';
+@use '../../theme.scss';
+// Import missing mixins
+@import '../mixins';
 
 $header-height: 200px;
 $icon-height: 150px;
@@ -21,14 +23,14 @@ $icon-height: 150px;
 
     &__background {
       height: $header-height;
-      background: $header-backgound-gradient;
+      background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
     }
 
     &__content {
       padding: 0 2em;
-      max-width: $layout-max-width;
+      max-width: var(--layout-max-width);
       margin: auto;
-      margin-top: -$icon-height / 2;
+      margin-top: calc(-1 * $icon-height / 2);
       display: flex;
     }
 
@@ -36,8 +38,8 @@ $icon-height: 150px;
       flex: 1;
 
       h1 {
-        min-height: $icon-height / 2;
-        color: $text-white;
+        min-height: calc($icon-height / 2);
+        color: white;
         margin: 0;
         margin-top: -5px;
         display: flex;
@@ -49,10 +51,10 @@ $icon-height: 150px;
       }
 
       &__repo {
-        color: mat-color($monocular-app-accent, 500);
+        color: var(--color-accent-500);
 
         &.repo-incubator {
-          color: mat-color($monocular-app-warn, 600);
+          color: var(--color-warning-500);
         }
 
         a {
@@ -64,10 +66,10 @@ $icon-height: 150px;
     &__icon {
       width: $icon-height;
       height: $icon-height;
-      background: $background-white;
-      border: 2px solid $layout-base;
+      background: white;
+      border: 2px solid var(--color-layout-base);
       margin-right: 1em;
-      border-radius: $border-radius;
+      border-radius: var(--border-radius);
       display: flex;
       align-items: center;
       justify-content: center;

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatRadioChange } from '@angular/material/radio';
+import { MatRadioChange } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -40,9 +40,10 @@ export class ManageUsersSetUsernamesHelper {
 }
 
 @Component({
-  selector: 'app-manage-users-set-usernames',
+selector: 'app-manage-users-set-usernames',
   templateUrl: './manage-users-set-usernames.component.html',
-  styleUrls: ['./manage-users-set-usernames.component.scss']
+  styleUrls: ['./manage-users-set-usernames.component.scss'],
+  standalone: false
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
 

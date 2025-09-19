@@ -1,32 +1,108 @@
-<nav class="side-nav side-nav__icon-mode" [ngClass]="{'side-nav__icon-mode': iconMode}">
-  <div class="side-nav__inner">
-    <div class="side-nav__top" *ngIf="!environment.fixedSideNav">
-      <div class="side-nav__top-inner">
-        <div class="side-nav__logo">
-          <div class="side-nav__logo-img"></div>
-          <div class="side-nav__logo-text">{{ customizations.logoText || '' }}
+<nav class="nav h-full flex flex-col bg-nav-bg text-nav-text shadow-lg">
+  <div class="nav-inner flex-1 flex flex-col">
+    <!-- Navigation Header -->
+    <div class="nav-top p-4 border-b border-nav-border" *ngIf="!environment.fixedSideNav">
+      <div class="nav-top-inner flex items-center justify-between">
+        <button
+          class="nav-logo flex items-center space-x-3"
+          [class.justify-center]="iconMode"
+          (click)="toggleSidenavMode()"
+          [title]="iconMode ? 'Expand sidebar' : ''"
+        >
+          <img
+            class="nav-logo-img h-8 w-8 flex-shrink-0 rounded-lg"
+            [src]="iconMode ? (navLogoIcon$ | async) : (navLogo$ | async)"
+            [alt]="displayName$ | async"
+          >
+          <div class="nav-logo-text text-nav-text font-bold text-lg truncate" [class.hidden]="iconMode">
+            {{ displayName$ | async }}
           </div>
-          <button class="side-nav__nav-toggle" mat-icon-button (click)="toggleSidenav()">
-            <mat-icon class="side-nav__nav-toggle-icon">menu</mat-icon>
-          </button>
-        </div>
+        </button>
+        <button
+          class="nav-toggle p-2 text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
+          (click)="toggleSidenavMode()"
+          [class.hidden]="iconMode"
+          title="Collapse sidebar"
+        >
+          <span class="material-icons text-lg">
+            keyboard_arrow_left
+          </span>
+        </button>
       </div>
     </div>
-    <ul class="side-nav__items">
-      <li *ngFor="let tab of tabs">
-        <a *ngIf="!tab.hidden || !(tab.hidden | async)" [matTooltip]="tab.label" matTooltipPosition="right"
-          [matTooltipShowDelay]="500"
-          [matTooltipDisabled]="!iconMode" class="side-nav__item" [routerLink]="[tab.link]"
-          [matTooltipShowDelay]="tooltipDelay"
-          [routerLinkActive]="['side-nav__item--active']">
-          <mat-icon class="side-nav__item-icon" [fontSet]="tab.matIconFont">{{ tab.matIcon }}</mat-icon> <span
-            class="side-nav__item-label">{{ tab.label }}</span>
+
+
+    <!-- Show All Menu Items Toggle (only in expanded mode) -->
+    <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="iconMode">
+      <label class="flex items-center space-x-2 text-nav-muted hover:text-nav-text cursor-pointer">
+        <input
+          type="checkbox"
+          class="form-checkbox h-4 w-4 text-accent rounded border-nav-border focus:ring-accent focus:ring-2"
+          [checked]="showAllMenuItems"
+          (change)="toggleShowAllMenuItems($event)"
+        >
+        <span class="text-sm">Show all menu items</span>
+      </label>
+    </div>
+
+    <!-- Navigation Items -->
+    <ul class="nav-items flex-1 py-2 space-y-1">
+      <li *ngFor="let tab of tabs" class="nav-item-container">
+        <a
+          *ngIf="showAllMenuItems || !tab.hidden || !(tab.hidden | async)"
+          class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
+          [class.nav-item--active]="isActiveRoute(tab.link)"
+          [class.bg-nav-active]="isActiveRoute(tab.link)"
+          [class.text-nav-text]="isActiveRoute(tab.link)"
+          [routerLink]="[tab.link]"
+          [routerLinkActive]="['router-link-active']"
+          [title]="iconMode ? tab.label : ''"
+        >
+          <span class="nav-item-icon flex-shrink-0 h-6 w-6 flex items-center justify-center ml-4">
+            <span class="text-xl"
+                  [ngClass]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
+          </span>
+          <span class="nav-item-label ml-3 truncate font-medium" [class.hidden]="iconMode">
+            {{ tab.label }}
+          </span>
+          <!-- Active indicator - now touches the left edge -->
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent rounded-r-full transform transition-all duration-200"
+               [class.scale-y-100]="isActiveRoute(tab.link)"
+               [class.scale-y-0]="!isActiveRoute(tab.link)">
+          </div>
+          <!-- Hover effect for icon mode -->
+          <div class="absolute left-full ml-2 px-2 py-1 bg-nav-tooltip text-nav-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap"
+               [class.hidden]="!iconMode"
+               style="z-index: 9999;">
+            {{ tab.label }}
+          </div>
         </a>
       </li>
     </ul>
-    <div *ngIf="!!customizations.copyright" class="side-nav__bottom">
-      <div class="side-nav__copyright-icon">&copy;</div>
-      <div class="side-nav__copyright" [innerHTML]="customizations.copyright"></div>
+
+    <!-- Logout Button -->
+    <div class="nav-logout border-t border-nav-border p-3">
+      <button
+        class="logout-button w-full flex items-center p-2 text-nav-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
+        [class.justify-center]="iconMode"
+        (click)="signOut()"
+        [title]="iconMode ? 'Sign Out' : ''"
+      >
+        <span class="material-icons text-xl flex-shrink-0">
+          exit_to_app
+        </span>
+        <span class="logout-text ml-3 text-sm font-medium" [class.hidden]="iconMode">
+          Sign Out
+        </span>
+      </button>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="nav-bottom p-4 border-t border-nav-border" *ngIf="!!customizations.copyright">
+      <div class="nav-copyright text-nav-muted text-xs text-center" [class.hidden]="iconMode">
+        <div class="nav-copyright-icon inline">&copy;</div>
+        <div class="nav-copyright-text inline ml-1" [innerHTML]="customizations.copyright"></div>
+      </div>
     </div>
   </div>
 </nav>

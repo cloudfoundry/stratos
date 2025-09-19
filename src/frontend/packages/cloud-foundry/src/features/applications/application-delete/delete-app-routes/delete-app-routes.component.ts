@@ -7,7 +7,7 @@ import { IServiceBinding } from '../../../../cf-api-svc.types';
 import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-config.service';
 
 @Component({
-  selector: 'app-delete-app-routes',
+selector: 'app-delete-app-routes',
   templateUrl: './delete-app-routes.component.html',
   styleUrls: ['./delete-app-routes.component.scss'],
   providers: [
@@ -15,7 +15,8 @@ import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-confi
       provide: ListConfig,
       useClass: AppDeleteRoutesListConfigService
     },
-  ]
+  ],
+  standalone: false
 })
 export class DeleteAppRoutesComponent implements OnDestroy {
 

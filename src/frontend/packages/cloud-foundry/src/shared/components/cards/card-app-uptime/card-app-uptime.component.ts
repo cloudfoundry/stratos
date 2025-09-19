@@ -8,9 +8,10 @@ import {
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
 
 @Component({
-  selector: 'app-card-app-uptime',
+selector: 'app-card-app-uptime',
   templateUrl: './card-app-uptime.component.html',
-  styleUrls: ['./card-app-uptime.component.scss']
+  styleUrls: ['./card-app-uptime.component.scss'],
+  standalone: false
 })
 export class CardAppUptimeComponent implements OnInit {
 

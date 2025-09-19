@@ -4,9 +4,10 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-service-instance-last-op',
+selector: 'app-service-instance-last-op',
   templateUrl: './service-instance-last-op.component.html',
-  styleUrls: ['./service-instance-last-op.component.scss']
+  styleUrls: ['./service-instance-last-op.component.scss'],
+  standalone: false
 })
 export class ServiceInstanceLastOpComponent {
   @Input() serviceInstance: APIResource<IServiceInstance>;

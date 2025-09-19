@@ -29,7 +29,7 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
 
 
 @Component({
-  selector: 'app-cfhome-card',
+selector: 'app-cfhome-card',
   templateUrl: './cfhome-card.component.html',
   styleUrls: ['./cfhome-card.component.scss'],
   providers: [
@@ -38,7 +38,8 @@ import { ITileConfig } from './../../../../../core/src/shared/components/tile/ti
       useValue: null,
     },
     CloudFoundryEndpointService
-  ]
+  ],
+  standalone: false
 })
 export class CFHomeCardComponent implements HomePageEndpointCard {
 

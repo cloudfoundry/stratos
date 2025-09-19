@@ -18,9 +18,10 @@ import { getEventFiles } from '../../../core/browser-helper';
 import { safeUnsubscribe } from '../../../core/utils.service';
 
 @Component({
-  selector: 'app-file-input',
+selector: 'app-file-input',
   templateUrl: './file-input.component.html',
-  styleUrls: ['./file-input.component.scss']
+  styleUrls: ['./file-input.component.scss'],
+  standalone: false
 })
 export class FileInputComponent implements OnInit, OnDestroy {
 

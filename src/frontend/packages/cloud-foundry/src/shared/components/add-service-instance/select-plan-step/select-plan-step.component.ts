@@ -48,13 +48,14 @@ import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
 @Component({
-  selector: 'app-select-plan-step',
+selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
   providers: [
     TitleCasePipe
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;

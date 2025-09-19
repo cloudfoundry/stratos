@@ -13,9 +13,10 @@ import { IApp } from '../../../../cf-api.types';
 import { SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 @Component({
-  selector: 'app-bind-apps-step',
+selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
-  styleUrls: ['./bind-apps-step.component.scss']
+  styleUrls: ['./bind-apps-step.component.scss'],
+  standalone: false
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 

@@ -10,7 +10,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cloud-foundry-quotas',
+selector: 'app-cloud-foundry-quotas',
   templateUrl: './cloud-foundry-quotas.component.html',
   styleUrls: ['./cloud-foundry-quotas.component.scss'],
   providers: [
@@ -18,7 +18,8 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
       provide: ListConfig,
       useClass: CfQuotasListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryQuotasComponent {
   public canAddQuota$: Observable<boolean>;

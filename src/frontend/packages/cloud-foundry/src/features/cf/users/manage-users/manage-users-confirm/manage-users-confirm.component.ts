@@ -31,9 +31,10 @@ import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/type
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
 @Component({
-  selector: 'app-manage-users-confirm',
+selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
-  styleUrls: ['./manage-users-confirm.component.scss']
+  styleUrls: ['./manage-users-confirm.component.scss'],
+  standalone: false
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 

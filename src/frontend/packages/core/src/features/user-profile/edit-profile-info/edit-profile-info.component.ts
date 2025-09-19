@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 import { delay, first, map, take, tap } from 'rxjs/operators';
@@ -11,12 +11,13 @@ import { UserProfileService } from '../../../core/user-profile.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
-  selector: 'app-edit-profile-info',
+selector: 'app-edit-profile-info',
   templateUrl: './edit-profile-info.component.html',
   styleUrls: ['./edit-profile-info.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+  ],
+  standalone: false
 })
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
 

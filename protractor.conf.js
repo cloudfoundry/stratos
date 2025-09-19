@@ -37,7 +37,7 @@ if (!fs.existsSync(secretsPath)) {
 
 let secrets = {};
 try {
-  secrets = yaml.safeLoad(fs.readFileSync(secretsPath, 'utf8'));
+  secrets = yaml.load(fs.readFileSync(secretsPath, 'utf8'));
 } catch (e) {
   console.log('Invalid e2e secrets.yaml configuration file');
   console.log(e);

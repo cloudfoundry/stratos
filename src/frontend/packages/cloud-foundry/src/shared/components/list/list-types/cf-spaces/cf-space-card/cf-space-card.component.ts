@@ -37,9 +37,10 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 
 @Component({
-  selector: 'app-cf-space-card',
+selector: 'app-cf-space-card',
   templateUrl: './cf-space-card.component.html',
-  styleUrls: ['./cf-space-card.component.scss']
+  styleUrls: ['./cf-space-card.component.scss'],
+  standalone: false
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
   cardMenu: MenuItem[];

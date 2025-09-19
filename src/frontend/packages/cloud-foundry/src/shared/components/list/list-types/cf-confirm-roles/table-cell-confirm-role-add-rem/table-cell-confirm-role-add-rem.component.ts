@@ -4,8 +4,9 @@ import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 
 @Component({
-  selector: 'app-table-cell-confirm-role-add-rem',
+selector: 'app-table-cell-confirm-role-add-rem',
   templateUrl: './table-cell-confirm-role-add-rem.component.html',
-  styleUrls: ['./table-cell-confirm-role-add-rem.component.scss']
+  styleUrls: ['./table-cell-confirm-role-add-rem.component.scss'],
+  standalone: false
 })
 export class TableCellConfirmRoleAddRemComponent extends TableCellCustom<CfRoleChangeWithNames> { }

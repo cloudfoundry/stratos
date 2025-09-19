@@ -9,9 +9,10 @@ import { IMetricCell } from '../../../../../../../../store/src/types/metric.type
 import { ListAppInstance } from '../app-instance-types';
 
 @Component({
-  selector: 'app-table-cell-cf-cell-usage',
+selector: 'app-table-cell-cf-cell-usage',
   templateUrl: './table-cell-cf-cell.component.html',
-  styleUrls: ['./table-cell-cf-cell.component.scss']
+  styleUrls: ['./table-cell-cf-cell.component.scss'],
+  standalone: false
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
 

@@ -11,9 +11,10 @@ export interface RowWithEndpointId {
 }
 
 @Component({
-  selector: 'app-table-cell-endpoint-name',
+selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
-  styleUrls: ['./table-cell-endpoint-name.component.scss']
+  styleUrls: ['./table-cell-endpoint-name.component.scss'],
+  standalone: false
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 

@@ -7,9 +7,10 @@ import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint
 import { KubernetesNamespace } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kube-namespace-pod-count',
+selector: 'app-kube-namespace-pod-count',
   templateUrl: './kube-namespace-pod-count.component.html',
-  styleUrls: ['./kube-namespace-pod-count.component.scss']
+  styleUrls: ['./kube-namespace-pod-count.component.scss'],
+  standalone: false
 })
 export class KubeNamespacePodCountComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   podCount$: Observable<number>;

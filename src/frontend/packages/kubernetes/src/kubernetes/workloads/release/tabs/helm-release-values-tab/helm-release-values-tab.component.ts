@@ -7,7 +7,8 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 @Component({
   selector: 'app-helm-release-values-tab',
   templateUrl: './helm-release-values-tab.component.html',
-  styleUrls: ['./helm-release-values-tab.component.scss']
+  styleUrls: ['./helm-release-values-tab.component.scss'],
+  standalone: false
 })
 export class HelmReleaseValuesTabComponent {
 

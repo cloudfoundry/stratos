@@ -5,9 +5,10 @@ import { TabNavService } from '../../../tab-nav.service';
 import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
 
 @Component({
-  selector: 'app-page-sub-nav',
+selector: 'app-page-sub-nav',
   templateUrl: './page-sub-nav.component.html',
-  styleUrls: ['./page-sub-nav.component.scss']
+  styleUrls: ['./page-sub-nav.component.scss'],
+  standalone: false
 })
 export class PageSubNavComponent implements AfterViewInit, OnDestroy {
 

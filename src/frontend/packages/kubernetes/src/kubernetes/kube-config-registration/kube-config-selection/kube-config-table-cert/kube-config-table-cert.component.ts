@@ -15,9 +15,10 @@ type CertResponse = {
 };
 
 @Component({
-  selector: 'app-kube-config-table-cert',
+selector: 'app-kube-config-table-cert',
   templateUrl: './kube-config-table-cert.component.html',
-  styleUrls: ['./kube-config-table-cert.component.scss']
+  styleUrls: ['./kube-config-table-cert.component.scss'],
+  standalone: false
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {
 

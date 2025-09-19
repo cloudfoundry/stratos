@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -9,13 +9,14 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
 
 @Component({
-  selector: 'app-api-keys-page',
+selector: 'app-api-keys-page',
   templateUrl: './api-keys-page.component.html',
   styleUrls: ['./api-keys-page.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: ApiKeyListConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class ApiKeysPageComponent {
 
@@ -43,7 +44,7 @@ export class ApiKeysPageComponent {
   }
 
   clearKeyDetails() {
-    this.keyDetails.next();
+    this.keyDetails.next(null);
   }
 
   private showDialog(): Observable<string> {

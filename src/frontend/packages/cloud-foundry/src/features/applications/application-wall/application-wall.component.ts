@@ -17,6 +17,7 @@ import { goToAppWall } from '../../cf/cf.helpers';
   selector: 'app-application-wall',
   templateUrl: './application-wall.component.html',
   styleUrls: ['./application-wall.component.scss'],
+  standalone: false,
   animations: [
     trigger(
       'cardEnter', [

@@ -1,7 +1,8 @@
 import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2 } from '@angular/core';
 
 @Directive({
-  selector: '[appTableCellStatus]'
+selector: '[appTableCellStatus]',
+standalone: false
 })
 export class TableCellStatusDirective implements OnChanges {
 

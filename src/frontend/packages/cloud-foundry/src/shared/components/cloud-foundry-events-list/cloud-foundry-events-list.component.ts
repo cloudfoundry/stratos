@@ -9,9 +9,10 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-events-list',
+selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
-  styleUrls: ['./cloud-foundry-events-list.component.scss']
+  styleUrls: ['./cloud-foundry-events-list.component.scss'],
+  standalone: false
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 

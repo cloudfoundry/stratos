@@ -15,9 +15,10 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organizations',
+selector: 'app-cloud-foundry-organizations',
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
+  standalone: false
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;

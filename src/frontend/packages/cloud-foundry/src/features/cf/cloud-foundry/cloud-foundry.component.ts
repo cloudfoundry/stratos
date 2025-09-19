@@ -12,7 +12,7 @@ import {
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({
-  selector: 'app-cloud-foundry',
+selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
   styleUrls: ['./cloud-foundry.component.scss'],
   providers: [
@@ -21,7 +21,8 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
       useClass: CFEndpointsListConfigService,
     },
     CloudFoundryService
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryComponent {
   connectedEndpoints$: Observable<number>;

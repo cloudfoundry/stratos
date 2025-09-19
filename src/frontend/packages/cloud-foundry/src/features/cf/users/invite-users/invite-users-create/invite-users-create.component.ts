@@ -24,9 +24,10 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';
 
 @Component({
-  selector: 'app-invite-users-create',
+selector: 'app-invite-users-create',
   templateUrl: './invite-users-create.component.html',
-  styleUrls: ['./invite-users-create.component.scss']
+  styleUrls: ['./invite-users-create.component.scss'],
+  standalone: false
 })
 export class InviteUsersCreateComponent implements OnInit {
 

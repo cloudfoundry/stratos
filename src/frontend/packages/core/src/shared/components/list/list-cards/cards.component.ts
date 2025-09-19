@@ -6,9 +6,10 @@ import { CardCell } from '../list.types';
 import { CardTypes } from './card/card.component';
 
 @Component({
-  selector: 'app-cards',
+selector: 'app-cards',
   templateUrl: './cards.component.html',
-  styleUrls: ['./cards.component.scss']
+  styleUrls: ['./cards.component.scss'],
+  standalone: false
 })
 export class CardsComponent<T> {
   public columns = CardCell.columns;

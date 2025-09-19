@@ -5,13 +5,13 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 
 @Component({
-  selector: 'app-add-space',
+selector: 'app-add-space',
   templateUrl: './add-space.component.html',
   styleUrls: ['./add-space.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
-
+  ],
+  standalone: false
 })
 export class AddSpaceComponent {
 

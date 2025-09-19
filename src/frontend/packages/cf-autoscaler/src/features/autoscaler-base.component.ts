@@ -6,7 +6,7 @@ import { getGuids } from '../../../cloud-foundry/src/features/applications/appli
 import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
 
 @Component({
-  selector: 'app-autoscaler-base',
+selector: 'app-autoscaler-base',
   templateUrl: './autoscaler-base.component.html',
   styleUrls: ['./autoscaler-base.component.scss'],
   providers: [
@@ -21,7 +21,8 @@ import { APP_GUID, CF_GUID } from '../../../core/src/shared/entity.tokens';
       useFactory: getGuids(),
       deps: [ActivatedRoute]
     },
-  ]
+  ],
+  standalone: false
 })
 export class AutoscalerBaseComponent {
 }

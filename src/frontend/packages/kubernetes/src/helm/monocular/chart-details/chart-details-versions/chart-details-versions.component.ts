@@ -6,9 +6,10 @@ import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
-  selector: 'app-chart-details-versions',
+selector: 'app-chart-details-versions',
   templateUrl: './chart-details-versions.component.html',
-  styleUrls: ['./chart-details-versions.component.scss']
+  styleUrls: ['./chart-details-versions.component.scss'],
+  standalone: false
 })
 export class ChartDetailsVersionsComponent {
   @Input() versions: ChartVersion[];

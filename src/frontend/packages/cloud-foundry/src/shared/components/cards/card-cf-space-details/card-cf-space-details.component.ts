@@ -11,9 +11,10 @@ import { AppState } from '../../../../../../store/src/app-state';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
-  selector: 'app-card-cf-space-details',
+selector: 'app-card-cf-space-details',
   templateUrl: './card-cf-space-details.component.html',
-  styleUrls: ['./card-cf-space-details.component.scss']
+  styleUrls: ['./card-cf-space-details.component.scss'],
+  standalone: false
 })
 export class CardCfSpaceDetailsComponent implements OnDestroy {
   allowSshStatus$: Observable<string>;

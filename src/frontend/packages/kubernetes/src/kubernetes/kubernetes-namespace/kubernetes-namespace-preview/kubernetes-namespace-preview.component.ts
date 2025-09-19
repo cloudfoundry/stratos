@@ -15,6 +15,7 @@ import { KubernetesService } from '../../services/kubernetes.service';
   selector: 'app-kubernetes-namespace-preview',
   templateUrl: './kubernetes-namespace-preview.component.html',
   styleUrls: ['./kubernetes-namespace-preview.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,

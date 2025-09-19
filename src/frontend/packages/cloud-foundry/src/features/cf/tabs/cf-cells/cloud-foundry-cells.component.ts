@@ -14,7 +14,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 
 
 @Component({
-  selector: 'app-cloud-foundry-cells',
+selector: 'app-cloud-foundry-cells',
   templateUrl: './cloud-foundry-cells.component.html',
   styleUrls: ['./cloud-foundry-cells.component.scss'],
   providers: [
@@ -23,7 +23,8 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
       useClass: CfCellsListConfigService
     },
     getActiveRouteCfCellProvider,
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;

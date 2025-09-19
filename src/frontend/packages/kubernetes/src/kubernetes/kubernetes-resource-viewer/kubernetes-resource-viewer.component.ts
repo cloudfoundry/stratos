@@ -55,9 +55,10 @@ interface KubernetesResourceViewerResource {
 }
 
 @Component({
-  selector: 'app-kubernetes-resource-viewer',
+selector: 'app-kubernetes-resource-viewer',
   templateUrl: './kubernetes-resource-viewer.component.html',
-  styleUrls: ['./kubernetes-resource-viewer.component.scss']
+  styleUrls: ['./kubernetes-resource-viewer.component.scss'],
+  standalone: false
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
 

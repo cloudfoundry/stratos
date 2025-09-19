@@ -123,7 +123,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload', relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(appRoutes, { onSameUrlNavigation: 'reload' }),
     CustomRoutingImportModule,
   ]
 })

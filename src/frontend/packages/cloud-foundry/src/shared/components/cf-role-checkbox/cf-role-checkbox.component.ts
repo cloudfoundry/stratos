@@ -38,9 +38,10 @@ enum CfRoleCheckboxMode {
  * @export
  */
 @Component({
-  selector: 'app-cf-role-checkbox',
+selector: 'app-cf-role-checkbox',
   templateUrl: './cf-role-checkbox.component.html',
   styleUrls: ['./cf-role-checkbox.component.scss'],
+  standalone: false
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 

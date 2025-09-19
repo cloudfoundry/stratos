@@ -51,7 +51,7 @@ import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 
 @Component({
-  selector: 'app-add-service-instance',
+selector: 'app-add-service-instance',
   templateUrl: './add-service-instance.component.html',
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
@@ -61,7 +61,8 @@ import { CsiModeService } from '../csi-mode.service';
     CsiGuidsService,
     CsiModeService,
     CfOrgSpaceDataService
-  ]
+  ],
+  standalone: false
 })
 export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
   initialisedService$: Observable<boolean>;

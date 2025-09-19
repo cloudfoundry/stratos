@@ -27,7 +27,7 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organization-base',
+selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
@@ -36,7 +36,8 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryOrganizationBaseComponent {
 

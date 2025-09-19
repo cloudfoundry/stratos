@@ -4,8 +4,9 @@ import { CardCell } from 'frontend/packages/core/src/shared/components/list/list
 import { KubeService } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kube-service-card',
+selector: 'app-kube-service-card',
   templateUrl: './kubernetes-service-card.component.html',
-  styleUrls: ['./kubernetes-service-card.component.scss']
+  styleUrls: ['./kubernetes-service-card.component.scss'],
+  standalone: false
 })
 export class KubeServiceCardComponent extends CardCell<KubeService> { }

@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 
@@ -10,9 +10,10 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
 @Component({
-  selector: 'app-connect-endpoint-dialog',
+selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',
   styleUrls: ['./connect-endpoint-dialog.component.scss'],
+  standalone: false
 })
 export class ConnectEndpointDialogComponent implements OnDestroy {
 
@@ -25,7 +26,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public helpDocument$: Observable<string>;
 
   constructor(
-    public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+    @Inject('TailwindDialogRef') public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
     endpointsService: EndpointsService,
     private sidePanelService: SidePanelService,

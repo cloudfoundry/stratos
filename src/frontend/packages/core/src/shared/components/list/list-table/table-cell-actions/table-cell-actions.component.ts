@@ -9,9 +9,10 @@ import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 
 @Component({
-  selector: 'app-table-cell-actions',
+selector: 'app-table-cell-actions',
   templateUrl: './table-cell-actions.component.html',
-  styleUrls: ['./table-cell-actions.component.scss']
+  styleUrls: ['./table-cell-actions.component.scss'],
+  standalone: false
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 

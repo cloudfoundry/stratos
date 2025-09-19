@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 
 @Component({
-  selector: 'app-kubernetes-node-simple-metric',
+selector: 'app-kubernetes-node-simple-metric',
   templateUrl: './kubernetes-node-simple-metric.component.html',
-  styleUrls: ['./kubernetes-node-simple-metric.component.scss']
+  styleUrls: ['./kubernetes-node-simple-metric.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeSimpleMetricComponent {
 

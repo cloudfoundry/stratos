@@ -5,9 +5,10 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-compact-service-instance-card',
+selector: 'app-compact-service-instance-card',
   templateUrl: './compact-service-instance-card.component.html',
-  styleUrls: ['./compact-service-instance-card.component.scss']
+  styleUrls: ['./compact-service-instance-card.component.scss'],
+  standalone: false
 })
 export class CompactServiceInstanceCardComponent implements OnInit {
   serviceInstanceTags: AppChip[];

@@ -16,8 +16,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { SortDirection } from '@angular/material/sort';
+import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
   SetClientFilterKey,
@@ -84,9 +84,10 @@ import {
 } from './list.component.types';
 
 @Component({
-  selector: 'app-list',
+selector: 'app-list',
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
+  standalone: false,
   animations: [
     trigger('list', [
       transition('* => in', [

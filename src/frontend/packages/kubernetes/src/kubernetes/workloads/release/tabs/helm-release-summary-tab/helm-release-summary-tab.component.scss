@@ -1,6 +1,8 @@
 
-@import '../../../../../../../core/sass/mixins';
-@import '../helm-release-helpers';
+@use '../../../../../../../core/sass/mixins';
+@use '../helm-release-helpers';
+// Import missing mixins
+@import '../../../../../helm/monocular/mixins';
 
 .resources {
   padding: 0 10px;
@@ -60,14 +62,14 @@
   min-height: 0;
   min-width: 0;
 
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     // 900px
     grid-column-gap: $bottom-space;
     grid-row-gap: $bottom-space;
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @include breakpoint(laptop) {
+  @include mixins.breakpoint(laptop) {
     // 1200px
     grid-template-columns: repeat(3, 1fr);
   }
@@ -77,7 +79,7 @@
     grid-template-columns: repeat(4, 1fr);
   }
 
-  @include breakpoint(desktop) {
+  @include mixins.breakpoint(desktop) {
     // 1800px
     grid-template-columns: repeat(5, 1fr);
   }

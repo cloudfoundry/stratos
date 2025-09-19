@@ -10,7 +10,7 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf/cf.helpers';
 
 @Component({
-  selector: 'app-service-catalog-page',
+selector: 'app-service-catalog-page',
   templateUrl: './service-catalog-page.component.html',
   styleUrls: ['./service-catalog-page.component.scss'],
   providers: [
@@ -19,7 +19,8 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf/cf.helpers';
       provide: ListConfig,
       useClass: CfServicesListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class ServiceCatalogPageComponent {
 

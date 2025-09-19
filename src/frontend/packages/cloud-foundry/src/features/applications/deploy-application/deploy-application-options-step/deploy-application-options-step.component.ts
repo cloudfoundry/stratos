@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -24,12 +24,13 @@ import {
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 @Component({
-  selector: 'app-deploy-application-options-step',
+selector: 'app-deploy-application-options-step',
   templateUrl: './deploy-application-options-step.component.html',
   styleUrls: ['./deploy-application-options-step.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+  ],
+  standalone: false
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
 

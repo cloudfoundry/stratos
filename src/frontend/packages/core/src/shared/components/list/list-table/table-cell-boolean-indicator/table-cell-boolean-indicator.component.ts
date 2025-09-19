@@ -10,9 +10,10 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 }
 
 @Component({
-  selector: 'app-table-cell-boolean-indicator',
+selector: 'app-table-cell-boolean-indicator',
   templateUrl: './table-cell-boolean-indicator.component.html',
-  styleUrls: ['./table-cell-boolean-indicator.component.scss']
+  styleUrls: ['./table-cell-boolean-indicator.component.scss'],
+  standalone: false
 })
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 

@@ -30,14 +30,15 @@ const enum OrgStatus {
   SUSPENDED = 'suspended'
 }
 @Component({
-  selector: 'app-edit-organization-step',
+selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
   styleUrls: ['./edit-organization-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ]
+  ],
+  standalone: false
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 

@@ -1,4 +1,5 @@
-import { SortDirection } from '@angular/material/sort';
+// Replaced Angular Material sort with custom type
+export type SortDirection = 'asc' | 'desc' | '';
 import { Action } from '@ngrx/store';
 
 import { ListsState } from '../reducers/list.reducer';

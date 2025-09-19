@@ -16,9 +16,10 @@ interface MetricsDetailsInfo {
 }
 
 @Component({
-  selector: 'app-metrics-endpoint-details',
+selector: 'app-metrics-endpoint-details',
   templateUrl: './metrics-endpoint-details.component.html',
-  styleUrls: ['./metrics-endpoint-details.component.scss']
+  styleUrls: ['./metrics-endpoint-details.component.scss'],
+  standalone: false
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {
 

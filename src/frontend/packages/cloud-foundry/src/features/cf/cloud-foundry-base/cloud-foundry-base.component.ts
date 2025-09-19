@@ -6,7 +6,7 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
 import { UserInviteConfigureService, UserInviteService } from '../user-invites/user-invite.service';
 
 @Component({
-  selector: 'app-cloud-foundry-base',
+selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
   styleUrls: ['./cloud-foundry-base.component.scss'],
   providers: [
@@ -15,6 +15,7 @@ import { UserInviteConfigureService, UserInviteService } from '../user-invites/u
     UserInviteConfigureService,
     CfUserService,
     CloudFoundryEndpointService,
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryBaseComponent { }

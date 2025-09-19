@@ -8,12 +8,13 @@ import { ITimeRange } from '../../services/metrics-range-selector.types';
 import moment from 'moment';
 
 @Component({
-  selector: 'app-metrics-range-selector',
+selector: 'app-metrics-range-selector',
   templateUrl: './metrics-range-selector.component.html',
   styleUrls: ['./metrics-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
-  ]
+  ],
+  standalone: false
 })
 export class MetricsRangeSelectorComponent implements OnDestroy {
   private rangeSelectorSub: Subscription;

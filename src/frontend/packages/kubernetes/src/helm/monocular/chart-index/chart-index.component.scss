@@ -1,9 +1,9 @@
 
-@import '../../theme.scss';
+@use '../../theme.scss';
 
 .chart-list {
   width: 100%;
-  max-width: $layout-max-width;
+  max-width: var(--layout-max-width);
   margin: auto;
   display: flex;
   align-items: center;

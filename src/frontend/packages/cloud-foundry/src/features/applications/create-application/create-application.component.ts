@@ -10,10 +10,11 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
 import { selectCfPaginationState } from '../../../store/selectors/pagination.selectors';
 
 @Component({
-  selector: 'app-create-application',
+selector: 'app-create-application',
   templateUrl: './create-application.component.html',
   styleUrls: ['./create-application.component.scss'],
-  providers: [CfOrgSpaceDataService]
+  providers: [CfOrgSpaceDataService],
+  standalone: false
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 

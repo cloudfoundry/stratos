@@ -1,12 +1,18 @@
 <app-intro-screen>
-  <mat-card class="upgrade__card">
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    <app-stratos-title></app-stratos-title>
-    <div class="upgrade__message">
-      A <app-product-name></app-product-name> install or upgrade is currently in progress
+  <div class="card max-w-md mx-auto">
+    <div class="w-full bg-primary-200 rounded-t-lg">
+      <div class="h-1 bg-primary-600 rounded-full animate-pulse"></div>
     </div>
-    <div class="upgrade__detail">
-      Please try again later
+    <div class="card-body text-center">
+      <app-stratos-title></app-stratos-title>
+      <div class="mt-6 space-y-4">
+        <div class="text-lg font-semibold text-gray-800">
+          A <app-product-name></app-product-name> install or upgrade is currently in progress
+        </div>
+        <div class="text-gray-600">
+          Please try again later
+        </div>
+      </div>
     </div>
-  </mat-card>
+  </div>
 </app-intro-screen>

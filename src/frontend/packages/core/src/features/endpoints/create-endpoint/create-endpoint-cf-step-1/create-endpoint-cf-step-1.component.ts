@@ -21,9 +21,10 @@ import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 
 @Component({
-  selector: 'app-create-endpoint-cf-step-1',
+selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
-  styleUrls: ['./create-endpoint-cf-step-1.component.scss']
+  styleUrls: ['./create-endpoint-cf-step-1.component.scss'],
+  standalone: false
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 

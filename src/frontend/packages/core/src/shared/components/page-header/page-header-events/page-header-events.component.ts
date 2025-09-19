@@ -9,9 +9,10 @@ import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 
 @Component({
-  selector: 'app-page-header-events',
+selector: 'app-page-header-events',
   templateUrl: './page-header-events.component.html',
   styleUrls: ['./page-header-events.component.scss'],
+  standalone: false,
   animations: [
     trigger(
       'eventEnter', [

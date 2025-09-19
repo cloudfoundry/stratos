@@ -5,6 +5,7 @@ import { CustomizationService } from '../../core/customizations.types';
 @Component({
   selector: 'app-product-name',
   template: '{{ name }}',
+  standalone: false,
 })
 export class ProductNameComponent {
 

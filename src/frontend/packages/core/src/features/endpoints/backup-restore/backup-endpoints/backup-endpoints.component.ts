@@ -17,12 +17,13 @@ import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
 @Component({
-  selector: 'app-backup-endpoints',
+selector: 'app-backup-endpoints',
   templateUrl: './backup-endpoints.component.html',
   styleUrls: ['./backup-endpoints.component.scss'],
   providers: [
     BackupEndpointsService
-  ]
+  ],
+  standalone: false
 })
 export class BackupEndpointsComponent implements OnDestroy {
 

@@ -1,12 +1,11 @@
-import { CdkTableModule } from '@angular/cdk/table';
+// Removed CDK table dependency
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InternalEventMonitorFactory } from '@stratosui/store';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
-import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
@@ -120,16 +119,36 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TailwindSortDirective, TailwindSortHeaderDirective, TailwindSortService } from './services/tailwind-sort.service';
+import { TailwindSidenavService } from './services/tailwind-sidenav.service';
+import { TailwindPaginatorService } from './services/tailwind-paginator.service';
+import { TailwindSnackBarService } from './services/tailwind-snackbar.service';
+import { TailwindDialogService } from './services/tailwind-dialog.service';
+import { TailwindIconRegistry } from './services/tailwind-icon-registry.service';
+import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
+import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
+import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
+import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
+import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
+import { MatDatepickerDirective } from './components/custom-material/custom-material.component';
+import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
+import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from './components/custom-button-toggle/custom-button-toggle.component';
+import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
+import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
+import { CustomIconComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
+import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    CoreModule,
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CdkTableModule,
-    NgxChartsModule,
+    BaseChartDirective,
   ],
   declarations: [
     LoadingPageComponent,
@@ -222,6 +241,45 @@ import { UserPermissionDirective } from './user-permission.directive';
     MaxListMessageComponent,
     ProfileSettingsComponent,
     ProductNameComponent,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    CustomExpansionPanelComponent,
+    CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
+    DisableRouterLinkDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
+    CustomFormFieldComponent,
+    CustomFormFieldIconComponent,
+    CustomIconComponent,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatSuffixDirective,
+    CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomTooltipDirective,
+    CustomIconComponent,
+    CustomProgressBarSelectorComponent,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -316,6 +374,45 @@ import { UserPermissionDirective } from './user-permission.directive';
     ...listTableCells,
     ProfileSettingsComponent,
     ProductNameComponent,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    CustomExpansionPanelComponent,
+    CustomExpansionPanelHeaderComponent,
+    CustomCheckboxComponent,
+    DisableRouterLinkDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
+    CustomFormFieldComponent,
+    CustomFormFieldIconComponent,
+    CustomIconComponent,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatSuffixDirective,
+    CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomTooltipDirective,
+    CustomIconComponent,
+    CustomProgressBarSelectorComponent,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
+    NoContentMessageComponent,
+    UserAvatarComponent,
   ],
   providers: [
     ListConfig,
@@ -326,7 +423,17 @@ import { UserPermissionDirective } from './user-permission.directive';
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
-    SessionService
+    SessionService,
+    TailwindSortService,
+    TailwindSidenavService,
+    TailwindPaginatorService,
+    TailwindSnackBarService,
+    TailwindDialogService,
+    TailwindIconRegistry,
+    TailwindErrorStateMatcher,
+    TailwindDefaultErrorStateMatcher,
+    TailwindShowOnDirtyErrorStateMatcher,
+    TailwindJsonSchemaFormService
   ]
 })
 export class SharedModule { }

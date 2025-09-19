@@ -35,7 +35,7 @@ export function getGuids(type?: string) {
 }
 
 @Component({
-  selector: 'app-application-base',
+selector: 'app-application-base',
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
   providers: [
@@ -61,7 +61,8 @@ export function getGuids(type?: string) {
         ApplicationEnvVarsHelper,
       ]
     }
-  ]
+  ],
+  standalone: false
 })
 export class ApplicationBaseComponent {
 }

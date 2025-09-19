@@ -10,9 +10,10 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
 
 @Component({
-  selector: 'app-cf-admin-add-user-warning',
+selector: 'app-cf-admin-add-user-warning',
   templateUrl: './cf-admin-add-user-warning.component.html',
-  styleUrls: ['./cf-admin-add-user-warning.component.scss']
+  styleUrls: ['./cf-admin-add-user-warning.component.scss'],
+  standalone: false
 })
 export class CfAdminAddUserWarningComponent {
 

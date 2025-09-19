@@ -6,7 +6,7 @@ import {
 } from '../../../../../../../shared/components/list/list-types/cf-space-apps/cf-space-apps-list-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-space-apps',
+selector: 'app-cloud-foundry-space-apps',
   templateUrl: './cloud-foundry-space-apps.component.html',
   styleUrls: ['./cloud-foundry-space-apps.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfSpaceAppsListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundrySpaceAppsComponent { }

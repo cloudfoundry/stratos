@@ -9,9 +9,10 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
 @Component({
-  selector: 'app-table-cell-app-status',
+selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
+  standalone: false
 })
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
 

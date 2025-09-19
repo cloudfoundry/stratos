@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
 import { ListSort } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -38,12 +38,13 @@ const tableColumnAction: ITableColumn<any> = {
 };
 
 @Component({
-  selector: 'app-table',
+selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   providers: [
     TableRowExpandedService
-  ]
+  ],
+  standalone: false
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
 

@@ -17,12 +17,13 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 
 
 @Component({
-  selector: 'app-edit-space-quota-step',
+selector: 'app-edit-space-quota-step',
   templateUrl: './edit-space-quota-step.component.html',
   styleUrls: ['./edit-space-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
 

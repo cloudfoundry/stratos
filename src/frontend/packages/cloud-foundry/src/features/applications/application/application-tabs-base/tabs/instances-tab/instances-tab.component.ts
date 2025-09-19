@@ -10,9 +10,10 @@ import { CloudFoundryEndpointService } from '../../../../../cf/services/cloud-fo
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 
 @Component({
-  selector: 'app-instances-tab',
+selector: 'app-instances-tab',
   templateUrl: './instances-tab.component.html',
   styleUrls: ['./instances-tab.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: ActiveRouteCfOrgSpace,

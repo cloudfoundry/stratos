@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
@@ -20,9 +20,10 @@ import { CloudFoundryOrganizationService } from '../../../../../services/cloud-f
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 
 @Component({
-  selector: 'app-cloud-foundry-space-summary',
+selector: 'app-cloud-foundry-space-summary',
   templateUrl: './cloud-foundry-space-summary.component.html',
-  styleUrls: ['./cloud-foundry-space-summary.component.scss']
+  styleUrls: ['./cloud-foundry-space-summary.component.scss'],
+  standalone: false
 })
 export class CloudFoundrySpaceSummaryComponent {
   detailsLoading$: Observable<boolean>;
@@ -36,7 +37,7 @@ export class CloudFoundrySpaceSummaryComponent {
     public cfSpaceService: CloudFoundrySpaceService,
     private confirmDialog: ConfirmationDialogService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
   ) {
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now

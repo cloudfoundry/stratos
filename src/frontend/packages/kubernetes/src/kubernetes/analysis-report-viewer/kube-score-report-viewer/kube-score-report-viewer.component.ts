@@ -3,9 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
-  selector: 'app-kube-score-report-viewer',
+selector: 'app-kube-score-report-viewer',
   templateUrl: './kube-score-report-viewer.component.html',
-  styleUrls: ['./kube-score-report-viewer.component.scss']
+  styleUrls: ['./kube-score-report-viewer.component.scss'],
+  standalone: false
 })
 export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
 

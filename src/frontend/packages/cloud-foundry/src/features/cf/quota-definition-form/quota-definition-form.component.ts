@@ -26,12 +26,13 @@ export interface QuotaFormValues {
 }
 
 @Component({
-  selector: 'app-quota-definition-form',
+selector: 'app-quota-definition-form',
   templateUrl: './quota-definition-form.component.html',
   styleUrls: ['./quota-definition-form.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;

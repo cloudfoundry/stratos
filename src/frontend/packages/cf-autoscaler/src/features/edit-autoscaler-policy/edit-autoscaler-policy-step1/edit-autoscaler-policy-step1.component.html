@@ -1,27 +1,35 @@
-<div *ngIf="appAutoscalerPolicy$ | async as policy">
-  Use minimum and maximum instance counts to provide default values for your policy.
+<div *ngIf="appAutoscalerPolicy$ | async as policy" class="p-6">
+  <p class="text-gray-700 mb-6">Use minimum and maximum instance counts to provide default values for your policy.</p>
   <!-- Instance counts are used to define the default minimal and maximal instance number of your application. -->
-  <form [formGroup]="editLimitForm" validate class="stepper-form">
-    <mat-form-field>
-      <input matInput placeholder="Minimum Instance Count" name="instance_min_count"
-        formControlName="instance_min_count" type="number" required>
-      <mat-error *ngIf="editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')">
+  <form [formGroup]="editLimitForm" validate class="space-y-4">
+    <div class="form-group">
+      <label for="instance_min_count" class="label">Minimum Instance Count</label>
+      <input id="instance_min_count" name="instance_min_count"
+        formControlName="instance_min_count" type="number" required class="input"
+        placeholder="Minimum Instance Count">
+      <div *ngIf="editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')"
+        class="text-red-600 text-sm mt-1">
         {{policyAlert.alertInvalidPolicyMinimumRange}}
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field class="autoscaler-policy-edit-limit-max">
-      <input matInput placeholder="Maximum Instance Count" name="instance_max_count"
-        formControlName="instance_max_count" type="number" required>
-      <mat-error *ngIf="editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="instance_max_count" class="label">Maximum Instance Count</label>
+      <input id="instance_max_count" name="instance_max_count"
+        formControlName="instance_max_count" type="number" required class="input"
+        placeholder="Maximum Instance Count">
+      <div *ngIf="editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')"
+        class="text-red-600 text-sm mt-1">
         {{policyAlert.alertInvalidPolicyMaximumRange}}
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-select class="reset-margin" placeholder="Timezone" name="timezone" formControlName="timezone" required>
-        <mat-option *ngFor="let timezone of timezoneOptions" [value]="timezone">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="timezone" class="label">Timezone</label>
+      <select id="timezone" name="timezone" formControlName="timezone" required class="select">
+        <option value="" disabled>Select timezone</option>
+        <option *ngFor="let timezone of timezoneOptions" [value]="timezone">
           {{ timezone }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+        </option>
+      </select>
+    </div>
   </form>
 </div>

@@ -4,7 +4,7 @@ import { AbstractControl, ControlContainer, FormGroupDirective, Validators } fro
 const UNLIMITED = -1;
 
 @Component({
-  selector: 'app-unlimited-input',
+selector: 'app-unlimited-input',
   templateUrl: './unlimited-input.component.html',
   styleUrls: ['./unlimited-input.component.scss'],
   viewProviders: [
@@ -12,7 +12,8 @@ const UNLIMITED = -1;
       provide: ControlContainer,
       useExisting: FormGroupDirective
     }
-  ]
+  ],
+  standalone: false
 })
 export class UnlimitedInputComponent implements OnInit {
 

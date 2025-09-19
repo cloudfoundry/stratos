@@ -28,12 +28,13 @@ export interface KubeConfigTableListDataSource extends ITableListDataSource<Kube
 }
 
 @Component({
-  selector: 'app-kube-config-selection',
+selector: 'app-kube-config-selection',
   templateUrl: './kube-config-selection.component.html',
   styleUrls: ['./kube-config-selection.component.scss'],
   providers: [
     KubeConfigHelper
   ],
+  standalone: false
 })
 export class KubeConfigSelectionComponent {
 

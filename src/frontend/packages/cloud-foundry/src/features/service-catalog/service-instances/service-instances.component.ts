@@ -6,7 +6,7 @@ import {
 } from '../../../shared/components/list/list-types/service-instances/service-instances-list-config.service';
 
 @Component({
-  selector: 'app-service-instances',
+selector: 'app-service-instances',
   templateUrl: './service-instances.component.html',
   styleUrls: ['./service-instances.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: ServiceInstancesListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class ServiceInstancesComponent { }

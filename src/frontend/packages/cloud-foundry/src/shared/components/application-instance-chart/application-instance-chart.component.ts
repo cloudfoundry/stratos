@@ -9,9 +9,10 @@ import { IMetricApplication, MetricQueryType } from '../../../../../store/src/ty
 import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
 
 @Component({
-  selector: 'app-application-instance-chart',
+selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',
-  styleUrls: ['./application-instance-chart.component.scss']
+  styleUrls: ['./application-instance-chart.component.scss'],
+  standalone: false
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 

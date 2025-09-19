@@ -14,9 +14,10 @@ import { entityCatalog } from '@stratosui/store';
 import { getIdFromRoute } from '../../../core/utils.service';
 
 @Component({
-  selector: 'app-create-endpoint',
+selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',
-  styleUrls: ['./create-endpoint.component.scss']
+  styleUrls: ['./create-endpoint.component.scss'],
+  standalone: false
 })
 export class CreateEndpointComponent implements OnInit, OnDestroy {
 

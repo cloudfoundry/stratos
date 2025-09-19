@@ -23,10 +23,11 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
-  selector: 'app-org-user-permission-cell',
+selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
   styleUrls: ['./cf-org-permission-cell.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
 

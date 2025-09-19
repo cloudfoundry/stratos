@@ -31,9 +31,10 @@ interface IEndpointDetails {
 }
 
 @Component({
-  selector: 'app-kubernetes-summary',
+selector: 'app-kubernetes-summary',
   templateUrl: './kubernetes-summary.component.html',
-  styleUrls: ['./kubernetes-summary.component.scss']
+  styleUrls: ['./kubernetes-summary.component.scss'],
+  standalone: false
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public podCount$: Observable<number>;

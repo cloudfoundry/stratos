@@ -6,12 +6,13 @@ import {
 } from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-space-events',
+selector: 'app-cloud-foundry-space-events',
   templateUrl: './cloud-foundry-space-events.component.html',
   styleUrls: ['./cloud-foundry-space-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfSpaceEventsConfigService
-  }]
+  }],
+  standalone: false
 })
 export class CloudFoundrySpaceEventsComponent { }

@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { JsonSchemaFormComponent } from '@ajsf/core';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
+import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
 import { ThemeService } from '../../../../../store/src/theme.service';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
@@ -37,7 +37,8 @@ enum EditorMode {
 @Component({
   selector: 'app-chart-values-editor',
   templateUrl: './chart-values-editor.component.html',
-  styleUrls: ['./chart-values-editor.component.scss']
+  styleUrls: ['./chart-values-editor.component.scss'],
+  standalone: false
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -59,6 +60,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // Editor mode - either 'editor' for the Monaco Code Editor or 'form' for the JSON Schema Form editor
   public mode: EditorMode = EditorMode.CodeEditor;
+
+  // Menu state
+  public menuOpen = false;
 
   // Content shown in the code editor
   public code = '';
@@ -112,7 +116,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Reference to the editor, so we can adjust its size to fit
   @ViewChild('monacoEditor', { read: ElementRef }) monacoEditor: ElementRef;
 
-  @ViewChild('schemaForm') schemaForm: JsonSchemaFormComponent;
+  @ViewChild('schemaForm') schemaForm: TailwindJsonSchemaFormComponent;
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(
@@ -169,7 +173,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         this.schema = schema;
         if (values !== null) {
           this.chartValuesYaml = values;
-          this.chartValues = yaml.safeLoad(values, { json: true });
+          this.chartValues = yaml.load(values, { json: true });
           // Set the form to the chart values initially, so if the user does nothing, they get the defaults
           this.initialFormData = this.chartValues;
         }
@@ -185,7 +189,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
           // Inherit the previous values if available (upgrade)
           if (this.releaseValues) {
-            this.code = yaml.safeDump(this.releaseValues);
+            this.code = yaml.dump(this.releaseValues);
           }
         }
         this.updateModel();
@@ -236,7 +240,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       // Form -> Editor
       // Only copy if there is not an error - otherwise keep the invalid yaml from the editor that needs fixing
       if (!this.yamlError) {
-        const codeYaml = yaml.safeLoad(this.code || '{}', { json: true });
+        const codeYaml = yaml.load(this.code || '{}', { json: true });
         const data = mergeObjects(codeYaml, this.formData);
         this.code = this.getDiff(data);
         this.codeOnEnter = this.code;
@@ -254,7 +258,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         }
 
         // Parse as json
-        const json = yaml.safeLoad(this.code || '{}', { json: true });
+        const json = yaml.load(this.code || '{}', { json: true });
         // Must be an object, otherwise it was not valid
         if (typeof (json) !== 'object') {
           throw new Error('Invalid YAML');
@@ -364,7 +368,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   public getValues(): object {
     // Always diff the form with the Chart Values to get only the changes that the user has made
-    return (this.mode === EditorMode.JSonSchemaForm) ? diffObjects(this.formData, this.chartValues) : yaml.safeLoad(this.code);
+    return (this.mode === EditorMode.JSonSchemaForm) ? diffObjects(this.formData, this.chartValues) : yaml.load(this.code) as object;
   }
 
   public copyValues() {
@@ -404,7 +408,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     if (this.mode === EditorMode.JSonSchemaForm) {
       this.initialFormData = this.releaseValues;
     } else {
-      this.code = yaml.safeDump(this.releaseValues);
+      this.code = yaml.dump(this.releaseValues);
     }
   }
 
@@ -420,16 +424,26 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Update the code editor to only show the YAML that contains the differences with the values.yaml
   diff() {
     this.confirmDialog.open(this.overwriteDiffValuesConfirmation, () => {
-      const userValues = yaml.safeLoad(this.code, { json: true });
+      const userValues = yaml.load(this.code, { json: true });
       this.code = this.getDiff(userValues);
     });
   }
 
   getDiff(userValues: any): string {
-    let code = yaml.safeDump(diffObjects(userValues, this.chartValues));
+    let code = yaml.dump(diffObjects(userValues, this.chartValues));
     if (code.trim() === '{}') {
       code = '';
     }
     return code;
+  }
+
+  // Toggle menu open/closed
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  // Close menu
+  closeMenu() {
+    this.menuOpen = false;
   }
 }

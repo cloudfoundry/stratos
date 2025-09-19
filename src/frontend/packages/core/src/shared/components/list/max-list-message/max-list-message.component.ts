@@ -9,9 +9,10 @@ import { NoContentMessageLine } from '../../no-content-message/no-content-messag
 import { ITableTextMaxed } from '../list-table/table.types';
 
 @Component({
-  selector: 'app-max-list-message',
+selector: 'app-max-list-message',
   templateUrl: './max-list-message.component.html',
-  styleUrls: ['./max-list-message.component.scss']
+  styleUrls: ['./max-list-message.component.scss'],
+  standalone: false
 })
 export class MaxListMessageComponent implements OnDestroy {
 

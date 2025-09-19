@@ -25,9 +25,10 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
 }
 
 @Component({
-  selector: 'app-meta-card',
+selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
-  styleUrls: ['./meta-card.component.scss']
+  styleUrls: ['./meta-card.component.scss'],
+  standalone: false
 })
 export class MetaCardComponent implements OnDestroy {
 

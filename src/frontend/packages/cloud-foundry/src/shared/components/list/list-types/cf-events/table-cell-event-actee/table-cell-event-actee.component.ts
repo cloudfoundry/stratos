@@ -8,9 +8,10 @@ interface CellEVentActeeConfig {
 }
 
 @Component({
-  selector: 'app-table-cell-event-actee',
+selector: 'app-table-cell-event-actee',
   templateUrl: './table-cell-event-actee.component.html',
-  styleUrls: ['./table-cell-event-actee.component.scss']
+  styleUrls: ['./table-cell-event-actee.component.scss'],
+  standalone: false
 })
 export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
 

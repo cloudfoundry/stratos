@@ -5,9 +5,10 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { CfEvent } from '../../../../../../cf-api.types';
 
 @Component({
-  selector: 'app-table-cell-event-detail',
+selector: 'app-table-cell-event-detail',
   templateUrl: './table-cell-event-detail.component.html',
-  styleUrls: ['./table-cell-event-detail.component.scss']
+  styleUrls: ['./table-cell-event-detail.component.scss'],
+  standalone: false
 })
 export class TableCellEventDetailComponent extends TableCellCustom<APIResource<CfEvent>> {
 }

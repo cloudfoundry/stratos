@@ -8,9 +8,10 @@ import { map } from 'rxjs/operators';
 import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Component({
-  selector: 'app-monocular-tab-base',
+selector: 'app-monocular-tab-base',
   templateUrl: './monocular-tab-base.component.html',
-  styleUrls: ['./monocular-tab-base.component.scss']
+  styleUrls: ['./monocular-tab-base.component.scss'],
+  standalone: false
 })
 export class MonocularTabBaseComponent implements OnInit {
 

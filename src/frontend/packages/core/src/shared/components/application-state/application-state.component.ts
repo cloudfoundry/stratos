@@ -4,9 +4,10 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-application-state',
+selector: 'app-application-state',
   templateUrl: './application-state.component.html',
-  styleUrls: ['./application-state.component.scss']
+  styleUrls: ['./application-state.component.scss'],
+  standalone: false
 })
 export class ApplicationStateComponent implements OnInit {
 

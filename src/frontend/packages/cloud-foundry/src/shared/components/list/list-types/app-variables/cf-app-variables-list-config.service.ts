@@ -101,7 +101,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
           this.envVarsDataSource.transformedEntities,
           newValues
         );
-        trigger$.next();
+        trigger$.next(void 0);
       }
     );
     return trigger$.pipe(

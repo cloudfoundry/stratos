@@ -6,16 +6,19 @@ import { RouterModule } from '@angular/router';
 import { PaginationMonitorFactory, EntityCatalogHelper, EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
 import { MomentModule } from 'ngx-moment';
 
-import { NoContentMessageComponent } from '../shared/components/no-content-message/no-content-message.component';
+// Tailwind Material Replacements
+import { TailwindDialogService, TailwindDialogRef, TailwindDialogRefImpl } from '../shared/services/tailwind-dialog.service';
+import { TailwindSnackBarService } from '../shared/services/tailwind-snackbar.service';
+import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-state-matcher';
+import { createMatDialogRef } from '../shared/services/tailwind-material-replacements';
+
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
-import { UserAvatarComponent } from './../shared/components/user-avatar/user-avatar.component';
 import { APIKeyAuthGuardService } from './apiKey-auth-guard.service';
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
 import { APP_TITLE, appTitleFactory } from './core.types';
-import { DisableRouterLinkDirective } from './disable-router-link.directive';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityFavoriteStarComponent } from './entity-favorite-star/entity-favorite-star.component';
@@ -39,7 +42,9 @@ import { WindowRef } from './window-ref/window-ref.service';
     imports: [
         MDAppModule,
         RouterModule,
-        MomentModule
+        MomentModule,
+        FormsModule,
+        ReactiveFormsModule,
     ],
     exports: [
         MDAppModule,
@@ -60,11 +65,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         PortalModule,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        UserAvatarComponent,
-        DisableRouterLinkDirective,
         StatefulIconComponent,
-        NoContentMessageComponent,
-        DisableRouterLinkDirective,
         ShowHideButtonComponent
     ],
     providers: [
@@ -87,6 +88,14 @@ import { WindowRef } from './window-ref/window-ref.service';
             provide: APP_TITLE,
             useFactory: appTitleFactory,
             deps: [Title]
+        },
+        // Tailwind Material service providers
+        TailwindDialogService,
+        TailwindSnackBarService,
+        TailwindErrorStateMatcher,
+        {
+            provide: 'TailwindDialogRef',
+            useFactory: createMatDialogRef
         }
     ],
     declarations: [
@@ -103,9 +112,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         PageNotFoundComponentComponent,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        DisableRouterLinkDirective,
-        NoContentMessageComponent,
-        UserAvatarComponent,
         ShowHideButtonComponent
     ]
 })

@@ -1,13 +1,15 @@
 <div class="details-card">
-  <div [class.show]="busy" class="details-card__loading">
-    <mat-progress-bar color="primary" mode="indeterminate"></mat-progress-bar>
+  <div [class.block]="busy" [class.hidden]="!busy" class="details-card__loading">
+    <div class="progress-bar">
+      <div class="progress-bar-indeterminate bg-primary-500"></div>
+    </div>
   </div>
-  <mat-expansion-panel [expanded]="true">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <h2>{{ title }}</h2>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <ng-content></ng-content>
-  </mat-expansion-panel>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="text-lg font-semibold text-gray-900">{{ title }}</h2>
+    </div>
+    <div class="card-content">
+      <ng-content></ng-content>
+    </div>
+  </div>
 </div>

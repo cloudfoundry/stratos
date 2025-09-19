@@ -12,9 +12,10 @@ import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
 const RECENT_ITEMS_COUNT = 10;
 
 @Component({
-  selector: 'app-card-cf-recent-apps',
+selector: 'app-card-cf-recent-apps',
   templateUrl: './card-cf-recent-apps.component.html',
   styleUrls: ['./card-cf-recent-apps.component.scss'],
+  standalone: false
 })
 export class CardCfRecentAppsComponent implements OnInit {
 

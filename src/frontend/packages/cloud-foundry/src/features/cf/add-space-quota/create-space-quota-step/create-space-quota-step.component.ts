@@ -14,12 +14,13 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 
 
 @Component({
-  selector: 'app-create-space-quota-step',
+selector: 'app-create-space-quota-step',
   templateUrl: './create-space-quota-step.component.html',
   styleUrls: ['./create-space-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class CreateSpaceQuotaStepComponent {
 

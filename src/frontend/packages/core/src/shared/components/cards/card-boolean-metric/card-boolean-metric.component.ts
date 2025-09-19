@@ -3,9 +3,10 @@ import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
 @Component({
-  selector: 'app-card-boolean-metric',
+selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
-  styleUrls: ['./card-boolean-metric.component.scss']
+  styleUrls: ['./card-boolean-metric.component.scss'],
+  standalone: false
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 

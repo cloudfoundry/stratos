@@ -21,9 +21,10 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 
 @Component({
-  selector: 'app-deploy-application-step3',
+selector: 'app-deploy-application-step3',
   templateUrl: './deploy-application-step3.component.html',
-  styleUrls: ['./deploy-application-step3.component.scss']
+  styleUrls: ['./deploy-application-step3.component.scss'],
+  standalone: false
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 

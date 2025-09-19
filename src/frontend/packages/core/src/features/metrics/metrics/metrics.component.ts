@@ -34,9 +34,10 @@ interface PrometheusJobs {
 }
 
 @Component({
-  selector: 'app-metrics',
+selector: 'app-metrics',
   templateUrl: './metrics.component.html',
-  styleUrls: ['./metrics.component.scss']
+  styleUrls: ['./metrics.component.scss'],
+  standalone: false
 })
 export class MetricsComponent {
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;

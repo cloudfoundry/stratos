@@ -10,7 +10,7 @@ import { CfUserService } from '../../../../shared/data-services/cf-user.service'
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 @Component({
-  selector: 'app-cloud-foundry-users',
+selector: 'app-cloud-foundry-users',
   templateUrl: './cloud-foundry-users.component.html',
   styleUrls: ['./cloud-foundry-users.component.scss'],
   providers: [{
@@ -23,6 +23,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
       userPerms: CurrentUserPermissionsService,
     ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
     deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
-  }]
+  }],
+  standalone: false
 })
 export class CloudFoundryUsersComponent { }

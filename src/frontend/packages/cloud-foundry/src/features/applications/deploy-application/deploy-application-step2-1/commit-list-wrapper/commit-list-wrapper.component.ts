@@ -15,6 +15,7 @@ import {
   selector: 'app-commit-list-wrapper',
   templateUrl: './commit-list-wrapper.component.html',
   styleUrls: ['./commit-list-wrapper.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: ListConfig,

@@ -20,9 +20,10 @@ export interface LogItem {
   timestamp: number;
 }
 @Component({
-  selector: 'app-log-stream-tab',
+selector: 'app-log-stream-tab',
   templateUrl: './log-stream-tab.component.html',
-  styleUrls: ['./log-stream-tab.component.scss']
+  styleUrls: ['./log-stream-tab.component.scss'],
+  standalone: false
 })
 export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;

@@ -4,8 +4,9 @@ import { CardCell } from '../../../../../../../../core/src/shared/components/lis
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
-  selector: 'app-cf-stacks-card',
+selector: 'app-cf-stacks-card',
   templateUrl: './cf-stacks-card.component.html',
-  styleUrls: ['./cf-stacks-card.component.scss']
+  styleUrls: ['./cf-stacks-card.component.scss'],
+  standalone: false
 })
 export class CfStacksCardComponent extends CardCell<APIResource> { }

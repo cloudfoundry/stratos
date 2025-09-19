@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CreateReleaseComponent } from './create-release/create-release.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
@@ -64,7 +64,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    NgxChartsModule,
+    BaseChartDirective,
     RouterModule.forChild(routes)
   ]
 })

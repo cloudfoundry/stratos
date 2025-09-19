@@ -7,9 +7,10 @@ import { TableCellCustom } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 @Component({
-  selector: 'app-table-cell-endpoint-address',
+selector: 'app-table-cell-endpoint-address',
   templateUrl: './table-cell-endpoint-address.component.html',
-  styleUrls: ['./table-cell-endpoint-address.component.scss']
+  styleUrls: ['./table-cell-endpoint-address.component.scss'],
+  standalone: false
 })
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'bytesToHumanSize'
+name: 'bytesToHumanSize',
+standalone: false
 })
 export class BytesToHumanSize implements PipeTransform {
   transform(value: string): string {
@@ -39,7 +40,8 @@ function precisionIfUseful(size, precision = 1) {
 }
 
 @Pipe({
-  name: 'MbToHumanSize'
+name: 'MbToHumanSize',
+standalone: false
 })
 export class MegaBytesToHumanSize implements PipeTransform {
   transform(value: string): string {

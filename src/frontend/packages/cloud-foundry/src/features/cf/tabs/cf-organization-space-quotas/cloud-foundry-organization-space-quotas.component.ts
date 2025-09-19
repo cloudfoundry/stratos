@@ -11,7 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organization-space-quotas',
+selector: 'app-cloud-foundry-organization-space-quotas',
   templateUrl: './cloud-foundry-organization-space-quotas.component.html',
   styleUrls: ['./cloud-foundry-organization-space-quotas.component.scss'],
   providers: [
@@ -19,7 +19,8 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
       provide: ListConfig,
       useClass: CfSpaceQuotasListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryOrganizationSpaceQuotasComponent {
   public canAddQuota$: Observable<boolean>;

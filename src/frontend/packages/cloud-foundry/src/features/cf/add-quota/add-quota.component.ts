@@ -4,12 +4,13 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 @Component({
-  selector: 'app-add-quota',
+selector: 'app-add-quota',
   templateUrl: './add-quota.component.html',
   styleUrls: ['./add-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class AddQuotaComponent {
   cfQuotasUrl: string;

@@ -13,9 +13,10 @@ import { KubeNodeMetric, KubernetesNodeService } from '../../services/kubernetes
 import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 
 @Component({
-  selector: 'app-kubernetes-node-metrics',
+selector: 'app-kubernetes-node-metrics',
   templateUrl: './kubernetes-node-metrics.component.html',
-  styleUrls: ['./kubernetes-node-metrics.component.scss']
+  styleUrls: ['./kubernetes-node-metrics.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeMetricsComponent implements OnInit {
   memoryMetric: KubeNodeMetric;

@@ -21,6 +21,7 @@ import { CfRolesService } from '../cf-roles.service';
   selector: 'app-manage-users-select',
   templateUrl: './manage-users-select.component.html',
   styleUrls: ['./manage-users-select.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: ListConfig,

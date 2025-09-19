@@ -4,9 +4,10 @@ import { CardCell } from '../../../../../core/src/shared/components/list/list.ty
 import { KubeService } from '../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-service-ports',
+selector: 'app-kubernetes-service-ports',
   templateUrl: './kubernetes-service-ports.component.html',
-  styleUrls: ['./kubernetes-service-ports.component.scss']
+  styleUrls: ['./kubernetes-service-ports.component.scss'],
+  standalone: false
 })
 export class KubernetesServicePortsComponent extends CardCell<KubeService> {
   @Input()

@@ -41,14 +41,12 @@
             <div class="app-metadata">
               <div class="app-metadata__two-cols" *ngFor="let metric of appAutoscalerAppMetricNames$ | async">
                 <app-metadata-item label={{metric.name}}>
-                  <ngx-charts-gauge *ngIf="appAutoscalerAppMetrics[metric.name] | async as metricData" [view]="[80, 80]"
-                    [margin]="[5, 5, 0, 5]" [customColors]="[metricData[0].entity.latest.colorTarget[0]]"
-                    [results]="[metricData[0].entity.latest.target[0]]" [animations]="true" [scheme]="'cool'" [min]="0"
-                    [max]="metricData[0].entity.chartMaxValue"
-                    [units]="metricData[0].entity.unit || metric.unit || '__'" [angleSpan]="240" [startAngle]="-120"
-                    [showAxis]="false" [bigSegments]="10" [smallSegments]="5" [tooltipDisabled]="false"
-                    (select)="select($event)">
-                  </ngx-charts-gauge>
+                  <canvas baseChart [type]="'doughnut'"
+                    [data]="getGaugeData(metricData)"
+                    [options]="gaugeOptions"
+                    *ngIf="appAutoscalerAppMetrics[metric.name] | async as metricData"
+                    width="80" height="80">
+                  </canvas>
                 </app-metadata-item>
               </div>
             </div>

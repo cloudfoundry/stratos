@@ -14,12 +14,13 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 
 @Component({
-  selector: 'app-space-quota-definition-form',
+selector: 'app-space-quota-definition-form',
   templateUrl: './space-quota-definition-form.component.html',
   styleUrls: ['./space-quota-definition-form.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;

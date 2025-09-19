@@ -10,9 +10,10 @@ import { pathGet } from '../../../../../../core/src/core/utils.service';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 
 @Component({
-  selector: 'app-card-app-usage',
+selector: 'app-card-app-usage',
   templateUrl: './card-app-usage.component.html',
-  styleUrls: ['./card-app-usage.component.scss']
+  styleUrls: ['./card-app-usage.component.scss'],
+  standalone: false
 })
 export class CardAppUsageComponent implements OnInit {
 

@@ -5,9 +5,11 @@
   </div>
   <div class="simple-graph" [ngStyle]="{height: height}">
     <div class="simple-graph__inner">
-      <ngx-charts-pie-chart [scheme]="chartData.colors" [animations]="false" [doughnut]="true"
-        [results]="chartData.results" [gradient]="false">
-      </ngx-charts-pie-chart>
+      <canvas baseChart
+        [data]="chartData.chartJsData"
+        [type]="'doughnut'"
+        [options]="chartOptions">
+      </canvas>
       <div class="simple-graph__counts" *ngIf="chartData.total; else noTotal">
         <div class="simple-graph__counts-count">{{ chartData.used }}</div>
         <span class="simple-graph__counts-divider">/</span>

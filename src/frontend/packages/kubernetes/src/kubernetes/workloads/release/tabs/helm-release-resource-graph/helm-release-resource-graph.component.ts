@@ -54,7 +54,8 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
 @Component({
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
-  styleUrls: ['./helm-release-resource-graph.component.scss']
+  styleUrls: ['./helm-release-resource-graph.component.scss'],
+  standalone: false
 })
 export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 

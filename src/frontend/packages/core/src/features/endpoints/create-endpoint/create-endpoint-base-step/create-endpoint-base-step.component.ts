@@ -14,9 +14,10 @@ import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoi
 
 
 @Component({
-  selector: 'app-create-endpoint-base-step',
+selector: 'app-create-endpoint-base-step',
   templateUrl: './create-endpoint-base-step.component.html',
-  styleUrls: ['./create-endpoint-base-step.component.scss']
+  styleUrls: ['./create-endpoint-base-step.component.scss'],
+  standalone: false
 })
 export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 

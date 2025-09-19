@@ -20,9 +20,10 @@ import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../..
 
 
 @Component({
-  selector: 'app-app-autoscaler-metric-chart-card',
+selector: 'app-app-autoscaler-metric-chart-card',
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
-  styleUrls: ['./app-autoscaler-metric-chart-card.component.scss']
+  styleUrls: ['./app-autoscaler-metric-chart-card.component.scss'],
+  standalone: false
 })
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {

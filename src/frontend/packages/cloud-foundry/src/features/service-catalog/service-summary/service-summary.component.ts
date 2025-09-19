@@ -10,9 +10,10 @@ import { IServiceInstance, IServicePlan } from '../../../cf-api-svc.types';
 import { ServicesService } from '../services.service';
 
 @Component({
-  selector: 'app-service-summary',
+selector: 'app-service-summary',
   templateUrl: './service-summary.component.html',
-  styleUrls: ['./service-summary.component.scss']
+  styleUrls: ['./service-summary.component.scss'],
+  standalone: false
 })
 export class ServiceSummaryComponent {
 

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIcon } from '@angular/material/icon';
+import { MatIcon } from '@stratosui/core';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import { TableCellAutoscalerEventStatusIconPipe } from './table-cell-autoscaler-event-status-icon.pipe';

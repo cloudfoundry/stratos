@@ -29,9 +29,10 @@ import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
-  selector: 'app-page-header',
+selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss']
+  styleUrls: ['./page-header.component.scss'],
+  standalone: false
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public canAPIKeys$: Observable<boolean>;

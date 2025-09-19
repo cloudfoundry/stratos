@@ -9,9 +9,10 @@ import { IServiceInstance } from '../../../../cf-api-svc.types';
 const RECENT_ITEMS_COUNT = 10;
 
 @Component({
-  selector: 'app-service-recent-instances-card',
+selector: 'app-service-recent-instances-card',
   templateUrl: './service-recent-instances-card.component.html',
-  styleUrls: ['./service-recent-instances-card.component.scss']
+  styleUrls: ['./service-recent-instances-card.component.scss'],
+  standalone: false
 })
 export class ServiceRecentInstancesCardComponent implements OnInit {
 

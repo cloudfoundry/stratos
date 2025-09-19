@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-metadata-item',
+selector: 'app-metadata-item',
   templateUrl: './metadata-item.component.html',
-  styleUrls: ['./metadata-item.component.scss']
+  styleUrls: ['./metadata-item.component.scss'],
+  standalone: false
 })
 export class MetadataItemComponent {
 

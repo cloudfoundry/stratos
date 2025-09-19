@@ -3,9 +3,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ITileConfig } from '../tile/tile-selector.types';
 
 @Component({
-  selector: 'app-tile-selector',
+selector: 'app-tile-selector',
   templateUrl: './tile-selector.component.html',
-  styleUrls: ['./tile-selector.component.scss']
+  styleUrls: ['./tile-selector.component.scss'],
+  standalone: false
 })
 export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];

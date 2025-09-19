@@ -1,0 +1,2389 @@
+
+> stratos@4.8.1 build
+> node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng build stratos --configuration production
+
+- Generating browser application bundles (phase: setup)...
+[1m[33m    TypeScript compiler options "target" and "useDefineForClassFields" are set to "ES2022" and "false" respectively by the Angular CLI. To control ECMA version and features use the Browserslist configuration. For more information, see https://angular.dev/tools/cli/build#configuring-browser-compatibility
+    NOTE: You can set the "target" to "ES2022" in the project's tsconfig to remove this warning.[39m[22m
+Using default configuration
+Read git metadata file
+Found themed package: @stratosui/cf-autoscaler (sass/_all-theme#apply-theme-stratos-autoscaler)
+Found themed package: @stratosui/cloud-foundry (sass/_all-theme#apply-theme-stratos-cloud-foundry)
+Found themed package: @stratosui/git (sass/_all-theme#apply-theme-git)
+Found themed package: @stratosui/kubernetes (sass/_all-theme#apply-theme-kubernetes)
+Found themed package: @stratosui/shared (sass/_all-theme#apply-theme-stratos-shared)
+Packages:
+ + @stratosui/cf-autoscaler
+ + @stratosui/cloud-foundry
+ + @stratosui/core
+ + @stratosui/git
+ + @stratosui/kubernetes
+ + @stratosui/shared
+ + @stratosui/theme
+Using theme @stratosui/theme
+Building with these extensions:
+ + @stratosui/cf-autoscaler
+ + @stratosui/cloud-foundry
+ + @stratosui/git
+ + @stratosui/kubernetes
+SASS loader configured with modern Angular Material v20 support
+SASS loader configured with modern Angular Material v20 support
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.
+[1m[33m
+./src/frontend/packages/core/src/styles.scss - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 4, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/styles.scss:4:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+4 | @import '../sass/fonts';
+
+
+src\frontend\packages\core\src\styles.scss 5:9  root stylesheet
+
+
+./src/frontend/packages/core/src/styles.scss - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 5, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/styles.scss:5:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+5 | @import '../sass/icons';
+
+
+src\frontend\packages\core\src\styles.scss 6:9  root stylesheet
+
+
+./src/frontend/packages/core/src/styles.scss - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 8, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/styles.scss:8:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+8 | @import './shared/styles/tailwind-animations.scss';
+
+
+src\frontend\packages\core\src\styles.scss 9:9  root stylesheet
+
+
+./src/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application-options-step/deploy-application-options-step.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application-options-step/deploy-application-options-step.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../../../core/sass/mixins';
+
+
+src\frontend\packages\cloud-foundry\src\features\applications\deploy-application\deploy-application-options-step\deploy-application-options-step.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/cloud-foundry/src/shared/components/schema-form/schema-form.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/cloud-foundry/src/shared/components/schema-form/schema-form.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../../core/sass/mixins';
+
+
+src\frontend\packages\cloud-foundry\src\shared\components\schema-form\schema-form.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/core/page-not-found-component/page-not-found-component.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/core/page-not-found-component/page-not-found-component.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../sass/mixins';
+
+
+src\frontend\packages\core\src\core\page-not-found-component\page-not-found-component.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/dashboard/dashboard-base/dashboard-base.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/dashboard/dashboard-base/dashboard-base.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\dashboard\dashboard-base\dashboard-base.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/dashboard/page-side-nav/page-side-nav.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\dashboard\page-side-nav\page-side-nav.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/error-page/error-page/error-page.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/error-page/error-page/error-page.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\error-page\error-page\error-page.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/event-page/events-page/events-page.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/event-page/events-page/events-page.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\event-page\events-page\events-page.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/metrics/metrics/metrics.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/metrics/metrics/metrics.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\metrics\metrics\metrics.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/features/setup/setup-welcome/setup-welcome.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/features/setup/setup-welcome/setup-welcome.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\features\setup\setup-welcome\setup-welcome.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/shared/components/metrics-chart/metrics-chart.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/metrics-chart/metrics-chart.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\shared\components\metrics-chart\metrics-chart.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/shared/components/metrics-range-selector/metrics-range-selector.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/metrics-range-selector/metrics-range-selector.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\shared\components\metrics-range-selector\metrics-range-selector.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/core/src/shared/components/simple-usage-chart/simple-usage-chart.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 25, column 19 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/simple-usage-chart/simple-usage-chart.component.scss:25:19:
+Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div($line-height, 2) or calc($line-height / 2)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+25 |     margin-top: -#{$line-height / 2};
+
+
+src\frontend\packages\core\src\shared\components\simple-usage-chart\simple-usage-chart.component.scss 26:20  root stylesheet
+
+
+./src/frontend/packages/core/src/shared/components/tile-selector-tile/tile-selector-tile.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 2, column 13 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/tile-selector-tile/tile-selector-tile.component.scss:2:13:
+Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div($tile-height, 2) or calc($tile-height / 2)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+2 |   $img-size: $tile-height / 2;
+
+
+src\frontend\packages\core\src\shared\components\tile-selector-tile\tile-selector-tile.component.scss 3:14  create()
+src\frontend\packages\core\src\shared\components\tile-selector-tile\tile-selector-tile.component.scss 77:3  root stylesheet
+
+
+./src/frontend/packages/core/src/shared/components/tile-selector/tile-selector.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/tile-selector/tile-selector.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../../sass/mixins';
+
+
+src\frontend\packages\core\src\shared\components\tile-selector\tile-selector.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details-usage\chart-details-usage.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details-versions\chart-details-versions.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-index\chart-index.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-item\chart-item.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-list/chart-list.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-list/chart-list.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\chart-list\chart-list.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-list/chart-list.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 53, column 6 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/theme.scss:53:6:
+Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use list.length instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+53 |   @if length($breakpoints) > 0 {
+
+
+src\frontend\packages\kubernetes\src\helm\theme.scss 54:7                                      mappy-bp()
+src\frontend\packages\kubernetes\src\helm\monocular\chart-list\chart-list.component.scss 19:5  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-list/chart-list.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 54, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/theme.scss:54:8:
+Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use list.nth instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+54 |     @if nth($breakpoints, 1) == "max-width" and nth($breakpoints, 2) == "small" {
+
+
+src\frontend\packages\kubernetes\src\helm\theme.scss 55:9                                      mappy-bp()
+src\frontend\packages\kubernetes\src\helm\monocular\chart-list\chart-list.component.scss 19:5  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-list/chart-list.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 58, column 15 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/theme.scss:58:15:
+Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+Use list.length instead.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+58 |     } @else if length($breakpoints) == 2 and nth($breakpoints, 1) == "medium" and nth($breakpoints, 2) == "large" {
+
+
+src\frontend\packages\kubernetes\src\helm\theme.scss 59:16                                     mappy-bp()
+src\frontend\packages\kubernetes\src\helm\monocular\chart-list\chart-list.component.scss 19:5  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\charts\charts.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\list-filters\list-filters.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\list-item\list-item.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../../theme.scss';
+
+
+src\frontend\packages\kubernetes\src\helm\monocular\panel\panel.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-resource-graph/helm-release-resource-graph.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-resource-graph/helm-release-resource-graph.component.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '../helm-release-helpers';
+
+
+src\frontend\packages\kubernetes\src\kubernetes\workloads\release\tabs\helm-release-resource-graph\helm-release-resource-graph.component.scss 1:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 1, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import '../../../../../../../core/sass/mixins';
+
+
+src\frontend\packages\kubernetes\src\kubernetes\workloads\release\tabs\helm-release-summary-tab\helm-release-summary-tab.component.scss 2:9  root stylesheet
+
+
+./src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.scss?ngResource - Warning: Module Warning (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 2, column 8 of file:///C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/kubernetes/workloads/release/tabs/helm-release-summary-tab/helm-release-summary-tab.component.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import '../helm-release-helpers';
+
+
+src\frontend\packages\kubernetes\src\kubernetes\workloads\release\tabs\helm-release-summary-tab\helm-release-summary-tab.component.scss 3:9  root stylesheet
+
+
+Warning: C:\Users\redst\OneDrive\Documents\GitHub\stratos\node_modules\ngrx-store-localstorage\fesm2022\ngrx-store-localstorage.mjs depends on 'deepmerge'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+Warning: C:\Users\redst\OneDrive\Documents\GitHub\stratos\node_modules\ngx-moment\fesm2020\ngx-moment.mjs depends on 'moment'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+Warning: C:\Users\redst\OneDrive\Documents\GitHub\stratos\src\frontend\packages\core\src\shared\components\ssh-viewer\ssh-viewer.component.ts depends on 'xterm'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+Warning: C:\Users\redst\OneDrive\Documents\GitHub\stratos\src\frontend\packages\core\src\shared\components\ssh-viewer\ssh-viewer.component.ts depends on 'xterm-addon-fit'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:2:18:
+      2 │ /******/ (() => { // webpackBootstrap
+        ╵                   ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:15:10:
+      15 │ /******/  // startup
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:16:10:
+      16 │ /******/  // Load entry module and return exports
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:17:10:
+      17 │ /******/  // This entry module doesn't tell about it's top-level d...
+         ╵           ~~
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unexpected ";" [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:1:12:
+      1 │ var resource;
+        ╵             ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+Warning: ▲ [WARNING] Unterminated string token [css-syntax-error]
+
+    C:/Users/redst/OneDrive/Documents/GitHub/stratos/src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss:17:100:
+      17 │ ...n't tell about it's top-level declarations so it can't be inlined
+         ╵                                                                     ^
+
+
+
+[39m[22m
+[1m[31m
+./src/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/generic-resource.module.ts:4:0-50 - Error: Module not found: Error: Can't resolve '@angular/flex-layout' in 'C:\Users\redst\OneDrive\Documents\GitHub\stratos\src\frontend\packages\kubernetes\src\kubernetes\kubernetes-resource'
+
+./src/frontend/packages/core/src/styles.scss - Error: Module build failed (from ./node_modules/css-loader/dist/cjs.js):
+Error: Can't resolve '../../../theme/styles/main.css' in 'C:\Users\redst\OneDrive\Documents\GitHub\stratos\src\frontend\packages\core\src'
+
+./src/frontend/packages/core/src/shared/components/details-card/details-card.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined operation "var(--summary-card-spacing) * 2".
+   ╷
+11 │     padding: $summary-card-spacing * 2
+   │              ^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\core\src\shared\components\details-card\details-card.component.scss 11:14  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+55 │     fill: mat-color($monocular-app-primary);
+   │                     ^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details-usage\chart-details-usage.component.scss 55:21  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-versions/chart-details-versions.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+23 │     color: lighten($layout-base, 20%);
+   │                    ^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details-versions\chart-details-versions.component.scss 23:20  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+24 │       background: $header-backgound-gradient;
+   │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\chart-details\chart-details.component.scss 24:19  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-index/chart-index.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+  ╷
+6 │   max-width: $layout-max-width;
+  │              ^^^^^^^^^^^^^^^^^
+  ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\chart-index\chart-index.component.scss 6:14  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/chart-item/chart-item.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+40 │       color: mat-color($monocular-app-accent, 500);
+   │                        ^^^^^^^^^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\chart-item\chart-item.component.scss 40:24  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+  ╷
+6 │   max-width: $layout-max-width;
+  │              ^^^^^^^^^^^^^^^^^
+  ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\charts\charts.component.scss 6:14  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/list-filters/list-filters.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+22 │         color: mat-color($monocular-app-primary);
+   │                          ^^^^^^^^^^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\list-filters\list-filters.component.scss 22:26  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/list-item/list-item.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+  ╷
+9 │   border-radius: $border-radius;
+  │                  ^^^^^^^^^^^^^^
+  ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\list-item\list-item.component.scss 9:18  root stylesheet
+
+./src/frontend/packages/kubernetes/src/helm/monocular/panel/panel.component.scss?ngResource - Error: Module build failed (from ./node_modules/@angular-devkit/build-angular/node_modules/sass-loader/dist/cjs.js):
+Undefined variable.
+   ╷
+13 │     background-color: $layout-light;
+   │                       ^^^^^^^^^^^^^
+   ╵
+  src\frontend\packages\kubernetes\src\helm\monocular\panel\panel.component.scss 13:23  root stylesheet
+
+./src/frontend/packages/core/src/styles.scss?ngGlobalStyle - Error: Module build failed (from ./node_modules/mini-css-extract-plugin/dist/loader.js):
+HookWebpackError: Module build failed (from ./node_modules/css-loader/dist/cjs.js):
+Error: Can't resolve '../../../theme/styles/main.css' in 'C:\Users\redst\OneDrive\Documents\GitHub\stratos\src\frontend\packages\core\src'
+
+./node_modules/@swimlane/ngx-charts/fesm2022/swimlane-ngx-charts.mjs:1306:4-21 - Error: export 'ɵɵariaProperty' (imported as 'i0') was not found in '@angular/core' (possible exports: ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR, Inject, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterEveryRender, afterNextRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, enableProfiling, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideNgReflectAttributes, providePlatformInitializer, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, twoWayBinding, untracked, viewChild, viewChildren, ɵALLOW_MULTIPLE_PLATFORMS, ɵAcxChangeDetectionStrategy, ɵAcxViewEncapsulation, ɵAfterRenderManager, ɵCLIENT_RENDER_MODE_FLAG, ɵCONTAINER_HEADER_OFFSET, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵDEFER_BLOCK_CONFIG, ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, ɵDEHYDRATED_BLOCK_REGISTRY, ɵDeferBlockBehavior, ɵDeferBlockState, ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, ɵEffectScheduler, ɵFramework, ɵHydrationStatus, ɵIMAGE_CONFIG, ɵIMAGE_CONFIG_DEFAULTS, ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵIS_HYDRATION_DOM_REUSE_ENABLED, ɵIS_INCREMENTAL_HYDRATION_ENABLED, ɵJSACTION_BLOCK_ELEMENT_MAP, ɵJSACTION_EVENT_CONTRACT, ɵLContext, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵPERFORMANCE_MARK_PREFIX, ɵPROVIDED_NG_ZONE, ɵPendingTasksInternal, ɵR3Injector, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵResourceImpl, ɵRuntimeError, ɵSIGNAL, ɵSSR_CONTENT_INTEGRITY_MARKER, ɵTESTABILITY, ɵTESTABILITY_GETTER, ɵTimerScheduler, ɵTracingAction, ɵTracingService, ɵViewRef, ɵXSS_SECURITY_URL, ɵZONELESS_ENABLED, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵannotateForHydration, ɵassertType, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵclearResolutionOfComponentResourcesQueue, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory, ɵcompilePipe, ɵconvertToBitFlags, ɵcreateInjector, ɵcreateOrReusePlatformInjector, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdepsTracker, ɵdevModeEqual, ɵdisableProfiling, ɵenableProfiling, ɵencapsulateResourceError, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵformatRuntimeError, ɵgenerateStandaloneInDeclarationsError, ɵgetAsyncClassMetadataFn, ɵgetClosestComponentName, ɵgetComponentDef, ɵgetDebugNode, ɵgetDeferBlocks, ɵgetDirectives, ɵgetDocument, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetOutputDestroyRef, ɵgetSanitizationBypassType, ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵglobal, ɵinjectChangeDetectorRef, ɵinternalCreateApplication, ɵinternalProvideZoneChangeDetection, ɵisBoundToModule, ɵisComponentDefPendingResolution, ɵisEnvironmentProviders, ɵisInjectable, ɵisNgModule, ɵisPromise, ɵisSubscribable, ɵisViewDirty, ɵmarkForRefresh, ɵnoSideEffects, ɵpatchComponentDefWithScope, ɵperformanceMarkFeature, ɵpublishExternalGlobalUtil, ɵreadHydrationInfo, ɵregisterLocaleData, ɵrenderDeferBlockState, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵrestoreComponentResolutionQueue, ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, ɵsetClassMetadata, ɵsetClassMetadataAsync, ɵsetCurrentInjector, ɵsetDocument, ɵsetInjectorProfilerContext, ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵstartMeasuring, ɵstopMeasuring, ɵstore, ɵstringify, ɵtransitiveScopesFor, ɵtriggerResourceLoading, ɵtruncateMiddle, ɵunregisterLocaleData, ɵunwrapSafeValue, ɵunwrapWritableSignal, ɵwithDomHydration, ɵwithEventReplay, ɵwithI18nSupport, ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal)
+
+./node_modules/@swimlane/ngx-charts/fesm2022/swimlane-ngx-charts.mjs:1770:4-21 - Error: export 'ɵɵariaProperty' (imported as 'i0') was not found in '@angular/core' (possible exports: ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR, Inject, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterEveryRender, afterNextRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, enableProfiling, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideNgReflectAttributes, providePlatformInitializer, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, twoWayBinding, untracked, viewChild, viewChildren, ɵALLOW_MULTIPLE_PLATFORMS, ɵAcxChangeDetectionStrategy, ɵAcxViewEncapsulation, ɵAfterRenderManager, ɵCLIENT_RENDER_MODE_FLAG, ɵCONTAINER_HEADER_OFFSET, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵDEFER_BLOCK_CONFIG, ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, ɵDEHYDRATED_BLOCK_REGISTRY, ɵDeferBlockBehavior, ɵDeferBlockState, ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, ɵEffectScheduler, ɵFramework, ɵHydrationStatus, ɵIMAGE_CONFIG, ɵIMAGE_CONFIG_DEFAULTS, ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵIS_HYDRATION_DOM_REUSE_ENABLED, ɵIS_INCREMENTAL_HYDRATION_ENABLED, ɵJSACTION_BLOCK_ELEMENT_MAP, ɵJSACTION_EVENT_CONTRACT, ɵLContext, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵPERFORMANCE_MARK_PREFIX, ɵPROVIDED_NG_ZONE, ɵPendingTasksInternal, ɵR3Injector, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵResourceImpl, ɵRuntimeError, ɵSIGNAL, ɵSSR_CONTENT_INTEGRITY_MARKER, ɵTESTABILITY, ɵTESTABILITY_GETTER, ɵTimerScheduler, ɵTracingAction, ɵTracingService, ɵViewRef, ɵXSS_SECURITY_URL, ɵZONELESS_ENABLED, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵannotateForHydration, ɵassertType, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵclearResolutionOfComponentResourcesQueue, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory, ɵcompilePipe, ɵconvertToBitFlags, ɵcreateInjector, ɵcreateOrReusePlatformInjector, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdepsTracker, ɵdevModeEqual, ɵdisableProfiling, ɵenableProfiling, ɵencapsulateResourceError, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵformatRuntimeError, ɵgenerateStandaloneInDeclarationsError, ɵgetAsyncClassMetadataFn, ɵgetClosestComponentName, ɵgetComponentDef, ɵgetDebugNode, ɵgetDeferBlocks, ɵgetDirectives, ɵgetDocument, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetOutputDestroyRef, ɵgetSanitizationBypassType, ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵglobal, ɵinjectChangeDetectorRef, ɵinternalCreateApplication, ɵinternalProvideZoneChangeDetection, ɵisBoundToModule, ɵisComponentDefPendingResolution, ɵisEnvironmentProviders, ɵisInjectable, ɵisNgModule, ɵisPromise, ɵisSubscribable, ɵisViewDirty, ɵmarkForRefresh, ɵnoSideEffects, ɵpatchComponentDefWithScope, ɵperformanceMarkFeature, ɵpublishExternalGlobalUtil, ɵreadHydrationInfo, ɵregisterLocaleData, ɵrenderDeferBlockState, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵrestoreComponentResolutionQueue, ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, ɵsetClassMetadata, ɵsetClassMetadataAsync, ɵsetCurrentInjector, ɵsetDocument, ɵsetInjectorProfilerContext, ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵstartMeasuring, ɵstopMeasuring, ɵstore, ɵstringify, ɵtransitiveScopesFor, ɵtriggerResourceLoading, ɵtruncateMiddle, ɵunregisterLocaleData, ɵunwrapSafeValue, ɵunwrapWritableSignal, ɵwithDomHydration, ɵwithEventReplay, ɵwithI18nSupport, ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal)
+
+./node_modules/@swimlane/ngx-charts/fesm2022/swimlane-ngx-charts.mjs:1811:4-21 - Error: export 'ɵɵariaProperty' (imported as 'i0') was not found in '@angular/core' (possible exports: ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR, Inject, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterEveryRender, afterNextRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, enableProfiling, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideNgReflectAttributes, providePlatformInitializer, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, twoWayBinding, untracked, viewChild, viewChildren, ɵALLOW_MULTIPLE_PLATFORMS, ɵAcxChangeDetectionStrategy, ɵAcxViewEncapsulation, ɵAfterRenderManager, ɵCLIENT_RENDER_MODE_FLAG, ɵCONTAINER_HEADER_OFFSET, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵDEFER_BLOCK_CONFIG, ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, ɵDEHYDRATED_BLOCK_REGISTRY, ɵDeferBlockBehavior, ɵDeferBlockState, ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, ɵEffectScheduler, ɵFramework, ɵHydrationStatus, ɵIMAGE_CONFIG, ɵIMAGE_CONFIG_DEFAULTS, ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵIS_HYDRATION_DOM_REUSE_ENABLED, ɵIS_INCREMENTAL_HYDRATION_ENABLED, ɵJSACTION_BLOCK_ELEMENT_MAP, ɵJSACTION_EVENT_CONTRACT, ɵLContext, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵPERFORMANCE_MARK_PREFIX, ɵPROVIDED_NG_ZONE, ɵPendingTasksInternal, ɵR3Injector, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵResourceImpl, ɵRuntimeError, ɵSIGNAL, ɵSSR_CONTENT_INTEGRITY_MARKER, ɵTESTABILITY, ɵTESTABILITY_GETTER, ɵTimerScheduler, ɵTracingAction, ɵTracingService, ɵViewRef, ɵXSS_SECURITY_URL, ɵZONELESS_ENABLED, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵannotateForHydration, ɵassertType, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵclearResolutionOfComponentResourcesQueue, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory, ɵcompilePipe, ɵconvertToBitFlags, ɵcreateInjector, ɵcreateOrReusePlatformInjector, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdepsTracker, ɵdevModeEqual, ɵdisableProfiling, ɵenableProfiling, ɵencapsulateResourceError, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵformatRuntimeError, ɵgenerateStandaloneInDeclarationsError, ɵgetAsyncClassMetadataFn, ɵgetClosestComponentName, ɵgetComponentDef, ɵgetDebugNode, ɵgetDeferBlocks, ɵgetDirectives, ɵgetDocument, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetOutputDestroyRef, ɵgetSanitizationBypassType, ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵglobal, ɵinjectChangeDetectorRef, ɵinternalCreateApplication, ɵinternalProvideZoneChangeDetection, ɵisBoundToModule, ɵisComponentDefPendingResolution, ɵisEnvironmentProviders, ɵisInjectable, ɵisNgModule, ɵisPromise, ɵisSubscribable, ɵisViewDirty, ɵmarkForRefresh, ɵnoSideEffects, ɵpatchComponentDefWithScope, ɵperformanceMarkFeature, ɵpublishExternalGlobalUtil, ɵreadHydrationInfo, ɵregisterLocaleData, ɵrenderDeferBlockState, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵrestoreComponentResolutionQueue, ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, ɵsetClassMetadata, ɵsetClassMetadataAsync, ɵsetCurrentInjector, ɵsetDocument, ɵsetInjectorProfilerContext, ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵstartMeasuring, ɵstopMeasuring, ɵstore, ɵstringify, ɵtransitiveScopesFor, ɵtriggerResourceLoading, ɵtruncateMiddle, ɵunregisterLocaleData, ɵunwrapSafeValue, ɵunwrapWritableSignal, ɵwithDomHydration, ɵwithEventReplay, ɵwithI18nSupport, ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal)
+
+./node_modules/@swimlane/ngx-charts/fesm2022/swimlane-ngx-charts.mjs:13058:12-29 - Error: export 'ɵɵariaProperty' (imported as 'i0') was not found in '@angular/core' (possible exports: ANIMATION_MODULE_TYPE, APP_BOOTSTRAP_LISTENER, APP_ID, APP_INITIALIZER, ApplicationInitStatus, ApplicationModule, ApplicationRef, Attribute, COMPILER_OPTIONS, CSP_NONCE, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef, Compiler, CompilerFactory, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ContentChild, ContentChildren, DEFAULT_CURRENCY_CODE, DOCUMENT, DebugElement, DebugEventListener, DebugNode, DefaultIterableDiffer, DestroyRef, Directive, ENVIRONMENT_INITIALIZER, ElementRef, EmbeddedViewRef, EnvironmentInjector, ErrorHandler, EventEmitter, HOST_TAG_NAME, Host, HostAttributeToken, HostBinding, HostListener, INJECTOR, Inject, Injectable, InjectionToken, Injector, Input, IterableDiffers, KeyValueDiffers, LOCALE_ID, MissingTranslationStrategy, ModuleWithComponentFactories, NO_ERRORS_SCHEMA, NgModule, NgModuleFactory, NgModuleRef, NgProbeToken, NgZone, Optional, Output, OutputEmitterRef, PACKAGE_ROOT_URL, PLATFORM_ID, PLATFORM_INITIALIZER, PendingTasks, Pipe, PlatformRef, Query, QueryList, REQUEST, REQUEST_CONTEXT, RESPONSE_INIT, Renderer2, RendererFactory2, RendererStyleFlags2, Sanitizer, SecurityContext, Self, SimpleChange, SkipSelf, TRANSLATIONS, TRANSLATIONS_FORMAT, TemplateRef, Testability, TestabilityRegistry, TransferState, Type, VERSION, Version, ViewChild, ViewChildren, ViewContainerRef, ViewEncapsulation, ViewRef, afterEveryRender, afterNextRender, afterRenderEffect, asNativeElements, assertInInjectionContext, assertNotInReactiveContext, assertPlatform, booleanAttribute, computed, contentChild, contentChildren, createComponent, createEnvironmentInjector, createNgModule, createNgModuleRef, createPlatform, createPlatformFactory, defineInjectable, destroyPlatform, effect, enableProdMode, enableProfiling, forwardRef, getDebugNode, getModuleFactory, getNgModuleById, getPlatform, importProvidersFrom, inject, input, inputBinding, isDevMode, isSignal, isStandalone, linkedSignal, makeEnvironmentProviders, makeStateKey, mergeApplicationConfig, model, numberAttribute, output, outputBinding, platformCore, provideAppInitializer, provideBrowserGlobalErrorListeners, provideCheckNoChangesConfig, provideEnvironmentInitializer, provideNgReflectAttributes, providePlatformInitializer, provideZoneChangeDetection, provideZonelessChangeDetection, reflectComponentType, resolveForwardRef, resource, runInInjectionContext, setTestabilityGetter, signal, twoWayBinding, untracked, viewChild, viewChildren, ɵALLOW_MULTIPLE_PLATFORMS, ɵAcxChangeDetectionStrategy, ɵAcxViewEncapsulation, ɵAfterRenderManager, ɵCLIENT_RENDER_MODE_FLAG, ɵCONTAINER_HEADER_OFFSET, ɵChangeDetectionScheduler, ɵChangeDetectionSchedulerImpl, ɵComponentFactory, ɵConsole, ɵDEFAULT_LOCALE_ID, ɵDEFER_BLOCK_CONFIG, ɵDEFER_BLOCK_DEPENDENCY_INTERCEPTOR, ɵDEHYDRATED_BLOCK_REGISTRY, ɵDeferBlockBehavior, ɵDeferBlockState, ɵENABLE_ROOT_COMPONENT_BOOTSTRAP, ɵEffectScheduler, ɵFramework, ɵHydrationStatus, ɵIMAGE_CONFIG, ɵIMAGE_CONFIG_DEFAULTS, ɵINJECTOR_SCOPE, ɵINPUT_SIGNAL_BRAND_WRITE_TYPE, ɵINTERNAL_APPLICATION_ERROR_HANDLER, ɵIS_HYDRATION_DOM_REUSE_ENABLED, ɵIS_INCREMENTAL_HYDRATION_ENABLED, ɵJSACTION_BLOCK_ELEMENT_MAP, ɵJSACTION_EVENT_CONTRACT, ɵLContext, ɵLocaleDataIndex, ɵNG_COMP_DEF, ɵNG_DIR_DEF, ɵNG_ELEMENT_ID, ɵNG_INJ_DEF, ɵNG_MOD_DEF, ɵNG_PIPE_DEF, ɵNG_PROV_DEF, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR, ɵNO_CHANGE, ɵNgModuleFactory, ɵNoopNgZone, ɵPERFORMANCE_MARK_PREFIX, ɵPROVIDED_NG_ZONE, ɵPendingTasksInternal, ɵR3Injector, ɵReflectionCapabilities, ɵRender3ComponentFactory, ɵRender3ComponentRef, ɵRender3NgModuleRef, ɵResourceImpl, ɵRuntimeError, ɵSIGNAL, ɵSSR_CONTENT_INTEGRITY_MARKER, ɵTESTABILITY, ɵTESTABILITY_GETTER, ɵTimerScheduler, ɵTracingAction, ɵTracingService, ɵViewRef, ɵXSS_SECURITY_URL, ɵZONELESS_ENABLED, ɵ_sanitizeHtml, ɵ_sanitizeUrl, ɵallowSanitizationBypassAndThrow, ɵannotateForHydration, ɵassertType, ɵbypassSanitizationTrustHtml, ɵbypassSanitizationTrustResourceUrl, ɵbypassSanitizationTrustScript, ɵbypassSanitizationTrustStyle, ɵbypassSanitizationTrustUrl, ɵclearResolutionOfComponentResourcesQueue, ɵcompileComponent, ɵcompileDirective, ɵcompileNgModule, ɵcompileNgModuleDefs, ɵcompileNgModuleFactory, ɵcompilePipe, ɵconvertToBitFlags, ɵcreateInjector, ɵcreateOrReusePlatformInjector, ɵdefaultIterableDiffers, ɵdefaultKeyValueDiffers, ɵdepsTracker, ɵdevModeEqual, ɵdisableProfiling, ɵenableProfiling, ɵencapsulateResourceError, ɵfindLocaleData, ɵflushModuleScopingQueueAsMuchAsPossible, ɵformatRuntimeError, ɵgenerateStandaloneInDeclarationsError, ɵgetAsyncClassMetadataFn, ɵgetClosestComponentName, ɵgetComponentDef, ɵgetDebugNode, ɵgetDeferBlocks, ɵgetDirectives, ɵgetDocument, ɵgetHostElement, ɵgetInjectableDef, ɵgetLContext, ɵgetLocaleCurrencyCode, ɵgetLocalePluralCase, ɵgetOutputDestroyRef, ɵgetSanitizationBypassType, ɵgetTransferState, ɵgetUnknownElementStrictMode, ɵgetUnknownPropertyStrictMode, ɵglobal, ɵinjectChangeDetectorRef, ɵinternalCreateApplication, ɵinternalProvideZoneChangeDetection, ɵisBoundToModule, ɵisComponentDefPendingResolution, ɵisEnvironmentProviders, ɵisInjectable, ɵisNgModule, ɵisPromise, ɵisSubscribable, ɵisViewDirty, ɵmarkForRefresh, ɵnoSideEffects, ɵpatchComponentDefWithScope, ɵperformanceMarkFeature, ɵpublishExternalGlobalUtil, ɵreadHydrationInfo, ɵregisterLocaleData, ɵrenderDeferBlockState, ɵresetCompiledComponents, ɵresetJitOptions, ɵresolveComponentResources, ɵrestoreComponentResolutionQueue, ɵsetAllowDuplicateNgModuleIdsForTest, ɵsetAlternateWeakRefImpl, ɵsetClassDebugInfo, ɵsetClassMetadata, ɵsetClassMetadataAsync, ɵsetCurrentInjector, ɵsetDocument, ɵsetInjectorProfilerContext, ɵsetLocaleId, ɵsetUnknownElementStrictMode, ɵsetUnknownPropertyStrictMode, ɵstartMeasuring, ɵstopMeasuring, ɵstore, ɵstringify, ɵtransitiveScopesFor, ɵtriggerResourceLoading, ɵtruncateMiddle, ɵunregisterLocaleData, ɵunwrapSafeValue, ɵunwrapWritableSignal, ɵwithDomHydration, ɵwithEventReplay, ɵwithI18nSupport, ɵwithIncrementalHydration, ɵɵCopyDefinitionFeature, ɵɵExternalStylesFeature, ɵɵFactoryTarget, ɵɵHostDirectivesFeature, ɵɵInheritDefinitionFeature, ɵɵNgOnChangesFeature, ɵɵProvidersFeature, ɵɵadvance, ɵɵattachSourceLocations, ɵɵattribute, ɵɵclassMap, ɵɵclassProp, ɵɵcomponentInstance, ɵɵconditional, ɵɵconditionalBranchCreate, ɵɵconditionalCreate, ɵɵcontentQuery, ɵɵcontentQuerySignal, ɵɵdeclareLet, ɵɵdefer, ɵɵdeferEnableTimerScheduling, ɵɵdeferHydrateNever, ɵɵdeferHydrateOnHover, ɵɵdeferHydrateOnIdle, ɵɵdeferHydrateOnImmediate, ɵɵdeferHydrateOnInteraction, ɵɵdeferHydrateOnTimer, ɵɵdeferHydrateOnViewport, ɵɵdeferHydrateWhen, ɵɵdeferOnHover, ɵɵdeferOnIdle, ɵɵdeferOnImmediate, ɵɵdeferOnInteraction, ɵɵdeferOnTimer, ɵɵdeferOnViewport, ɵɵdeferPrefetchOnHover, ɵɵdeferPrefetchOnIdle, ɵɵdeferPrefetchOnImmediate, ɵɵdeferPrefetchOnInteraction, ɵɵdeferPrefetchOnTimer, ɵɵdeferPrefetchOnViewport, ɵɵdeferPrefetchWhen, ɵɵdeferWhen, ɵɵdefineComponent, ɵɵdefineDirective, ɵɵdefineInjectable, ɵɵdefineInjector, ɵɵdefineNgModule, ɵɵdefinePipe, ɵɵdirectiveInject, ɵɵdisableBindings, ɵɵdomElement, ɵɵdomElementContainer, ɵɵdomElementContainerEnd, ɵɵdomElementContainerStart, ɵɵdomElementEnd, ɵɵdomElementStart, ɵɵdomListener, ɵɵdomProperty, ɵɵdomTemplate, ɵɵelement, ɵɵelementContainer, ɵɵelementContainerEnd, ɵɵelementContainerStart, ɵɵelementEnd, ɵɵelementStart, ɵɵenableBindings, ɵɵgetComponentDepsFactory, ɵɵgetCurrentView, ɵɵgetInheritedFactory, ɵɵgetReplaceMetadataURL, ɵɵi18n, ɵɵi18nApply, ɵɵi18nAttributes, ɵɵi18nEnd, ɵɵi18nExp, ɵɵi18nPostprocess, ɵɵi18nStart, ɵɵinject, ɵɵinjectAttribute, ɵɵinterpolate, ɵɵinterpolate1, ɵɵinterpolate2, ɵɵinterpolate3, ɵɵinterpolate4, ɵɵinterpolate5, ɵɵinterpolate6, ɵɵinterpolate7, ɵɵinterpolate8, ɵɵinterpolateV, ɵɵinvalidFactory, ɵɵinvalidFactoryDep, ɵɵlistener, ɵɵloadQuery, ɵɵnamespaceHTML, ɵɵnamespaceMathML, ɵɵnamespaceSVG, ɵɵnextContext, ɵɵngDeclareClassMetadata, ɵɵngDeclareClassMetadataAsync, ɵɵngDeclareComponent, ɵɵngDeclareDirective, ɵɵngDeclareFactory, ɵɵngDeclareInjectable, ɵɵngDeclareInjector, ɵɵngDeclareNgModule, ɵɵngDeclarePipe, ɵɵpipe, ɵɵpipeBind1, ɵɵpipeBind2, ɵɵpipeBind3, ɵɵpipeBind4, ɵɵpipeBindV, ɵɵprojection, ɵɵprojectionDef, ɵɵproperty, ɵɵpureFunction0, ɵɵpureFunction1, ɵɵpureFunction2, ɵɵpureFunction3, ɵɵpureFunction4, ɵɵpureFunction5, ɵɵpureFunction6, ɵɵpureFunction7, ɵɵpureFunction8, ɵɵpureFunctionV, ɵɵqueryAdvance, ɵɵqueryRefresh, ɵɵreadContextLet, ɵɵreference, ɵɵregisterNgModuleType, ɵɵrepeater, ɵɵrepeaterCreate, ɵɵrepeaterTrackByIdentity, ɵɵrepeaterTrackByIndex, ɵɵreplaceMetadata, ɵɵresetView, ɵɵresolveBody, ɵɵresolveDocument, ɵɵresolveWindow, ɵɵrestoreView, ɵɵsanitizeHtml, ɵɵsanitizeResourceUrl, ɵɵsanitizeScript, ɵɵsanitizeStyle, ɵɵsanitizeUrl, ɵɵsanitizeUrlOrResourceUrl, ɵɵsetComponentScope, ɵɵsetNgModuleScope, ɵɵstoreLet, ɵɵstyleMap, ɵɵstyleProp, ɵɵsyntheticHostListener, ɵɵsyntheticHostProperty, ɵɵtemplate, ɵɵtemplateRefExtractor, ɵɵtext, ɵɵtextInterpolate, ɵɵtextInterpolate1, ɵɵtextInterpolate2, ɵɵtextInterpolate3, ɵɵtextInterpolate4, ɵɵtextInterpolate5, ɵɵtextInterpolate6, ɵɵtextInterpolate7, ɵɵtextInterpolate8, ɵɵtextInterpolateV, ɵɵtrustConstantHtml, ɵɵtrustConstantResourceUrl, ɵɵtwoWayBindingSet, ɵɵtwoWayListener, ɵɵtwoWayProperty, ɵɵvalidateIframeAttribute, ɵɵviewQuery, ɵɵviewQuerySignal)
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/cf-autoscaler.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/cf-autoscaler.module.ts[0m:[93m18[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m18[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/cf-autoscaler.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     CloudFoundrySharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/core/autoscaler.module.ts[0m:[93m59[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m59[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/core/autoscaler.module.ts[0m:[93m60[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m60[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/core/autoscaler.module.ts[0m:[93m63[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m63[0m     CloudFoundrySharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/features/edit-autoscaler-policy/edit-autoscaler-policy.component.ts[0m:[93m15[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m15[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cf-autoscaler/src/features/edit-autoscaler-policy/edit-autoscaler-policy.component.ts[0m:[93m15[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m15[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/cloud-foundry-package.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/cloud-foundry-package.module.ts[0m:[93m22[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m22[0m     CloudFoundryStoreModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m46[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m46[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m47[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m47[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m48[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m48[0m     ApplicationsRoutingModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m49[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m49[0m     CloudFoundrySharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m51[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m51[0m     CfAutoscalerModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.module.ts[0m:[93m52[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m52[0m     GitSharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.routing.ts[0m:[93m159[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m159[0m     CreateApplicationModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/applications.routing.ts[0m:[93m160[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m160[0m     DeployApplicationModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application-step2/create-application-step2.component.ts[0m:[93m18[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m18[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application-step2/create-application-step2.component.ts[0m:[93m18[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m18[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application-step3/create-application-step3.component.ts[0m:[93m31[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m31[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application-step3/create-application-step3.component.ts[0m:[93m31[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m31[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application.module.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/create-application/create-application.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     CloudFoundrySharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application-options-step/deploy-application-options-step.component.ts[0m:[93m31[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m31[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application-options-step/deploy-application-options-step.component.ts[0m:[93m31[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m31[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.component.ts[0m:[93m34[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m34[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.component.ts[0m:[93m34[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m34[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.module.ts[0m:[93m26[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m26[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.module.ts[0m:[93m27[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m27[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.module.ts[0m:[93m29[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m29[0m     CreateApplicationModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/deploy-application/deploy-application.module.ts[0m:[93m30[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m30[0m     CloudFoundrySharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/edit-application/edit-application.component.ts[0m:[93m25[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m25[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/applications/edit-application/edit-application.component.ts[0m:[93m25[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m25[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/cloud-foundry-section.module.ts[0m:[93m136[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m136[0m         CoreModule,
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/cloud-foundry-section.module.ts[0m:[93m137[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m137[0m         SharedModule,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/cloud-foundry-section.module.ts[0m:[93m142[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m142[0m         CloudFoundrySharedModule,
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/cloud-foundry-section.module.ts[0m:[93m143[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m143[0m         CFHomeCardModule,
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/cloud-foundry-section.module.ts[0m:[93m200[0m:[93m9[0m - [91merror[0m[90m NG6001: [0mThe class 'UserInviteConfigurationDialogComponent' is listed in the declarations of the NgModule 'CloudFoundrySectionModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m200[0m         UserInviteConfigurationDialogComponent,
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component.ts[0m:[93m21[0m:[93m14[0m
+    [7m21[0m export class UserInviteConfigurationDialogComponent {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'UserInviteConfigurationDialogComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component.ts[0m:[93m48[0m:[93m12[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialogRef' of class 'UserInviteConfigurationDialogComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m48[0m     public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component.ts[0m:[93m48[0m:[93m23[0m
+    [7m48[0m     public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-dialog.service.ts[0m:[93m15[0m:[93m1[0m
+    [7m 15[0m export interface TailwindDialogRef<T, R = any> {
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 16[0m   afterClosed(): Observable<R | undefined>;
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m   componentInstance: T;
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m }
+    [7m   [0m [96m~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/home/cfhome-card/cfhome-card.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/home/cfhome-card/cfhome-card.module.ts[0m:[93m19[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m19[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/home/cfhome-card/cfhome-card.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     HomeModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/service-catalog/service-catalog.module.ts[0m:[93m19[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m19[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/service-catalog/service-catalog.module.ts[0m:[93m21[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m21[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/service-catalog/service-catalog.module.ts[0m:[93m22[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m22[0m     CreateApplicationModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/service-catalog/service-catalog.module.ts[0m:[93m23[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m23[0m     CloudFoundrySharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/services/services.module.ts[0m:[93m19[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m19[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/services/services.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/services/services.module.ts[0m:[93m22[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m22[0m     ServiceCatalogModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/services/services.module.ts[0m:[93m23[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m23[0m     CreateApplicationModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/features/services/services.module.ts[0m:[93m24[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m24[0m     CloudFoundrySharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/cf-shared.module.ts[0m:[93m266[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m266[0m         CoreModule,
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/cf-shared.module.ts[0m:[93m267[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m267[0m         SharedModule,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/cf-shared.module.ts[0m:[93m271[0m:[93m19[0m - [91merror[0m[90m NG6001: [0mThe class 'AppServiceBindingCardComponent' is listed in the declarations of the NgModule 'CloudFoundrySharedModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m271[0m     declarations: [
+[7m   [0m [91m                  ~[0m
+[7m272[0m         ServiceIconComponent,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m314[0m         CfUserPermissionDirective
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m315[0m     ],
+[7m   [0m [91m~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component.ts[0m:[93m51[0m:[93m14[0m
+    [7m51[0m export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'AppServiceBindingCardComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/cf-shared.module.ts[0m:[93m271[0m:[93m19[0m - [91merror[0m[90m NG6001: [0mThe class 'TableCellEditVariableComponent' is listed in the declarations of the NgModule 'CloudFoundrySharedModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m271[0m     declarations: [
+[7m   [0m [91m                  ~[0m
+[7m272[0m         ServiceIconComponent,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m314[0m         CfUserPermissionDirective
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m315[0m     ],
+[7m   [0m [91m~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component.ts[0m:[93m14[0m:[93m14[0m
+    [7m14[0m export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'TableCellEditVariableComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/cf-shared.module.ts[0m:[93m306[0m:[93m9[0m - [91merror[0m[90m NG6001: [0mThe class 'EventMetadataComponent' is listed in the declarations of the NgModule 'CloudFoundrySharedModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m306[0m         EventMetadataComponent,
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/cf-events/event-metadata/event-metadata.component.ts[0m:[93m10[0m:[93m14[0m
+    [7m10[0m export class EventMetadataComponent implements OnInit {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~[0m
+    'EventMetadataComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component.ts[0m:[93m78[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialog' of class 'AppServiceBindingCardComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m78[0m     private dialog: MatDialog,
+[7m  [0m [91m            ~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component.ts[0m:[93m78[0m:[93m21[0m
+    [7m78[0m     private dialog: MatDialog,
+    [7m  [0m [96m                    ~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m7[0m:[93m1[0m
+    [7m7[0m export type MatDialog = any; // Will be replaced with TailwindDialogService
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component.ts[0m:[93m17[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialog' of class 'TableCellEditVariableComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m17[0m     private dialog: MatDialog,
+[7m  [0m [91m            ~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/app-variables/table-cell-edit-variable/table-cell-edit-variable.component.ts[0m:[93m17[0m:[93m21[0m
+    [7m17[0m     private dialog: MatDialog,
+    [7m  [0m [96m                    ~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m7[0m:[93m1[0m
+    [7m7[0m export type MatDialog = any; // Will be replaced with TailwindDialogService
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/cf-events/event-metadata/event-metadata.component.ts[0m:[93m21[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialog' of class 'EventMetadataComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m21[0m     private dialog: MatDialog,
+[7m  [0m [91m            ~~~~~~[0m
+
+  [96msrc/frontend/packages/cloud-foundry/src/shared/components/list/list-types/cf-events/event-metadata/event-metadata.component.ts[0m:[93m21[0m:[93m21[0m
+    [7m21[0m     private dialog: MatDialog,
+    [7m  [0m [96m                    ~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m7[0m:[93m1[0m
+    [7m7[0m export type MatDialog = any; // Will be replaced with TailwindDialogService
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/components/schema-form/schema-form.component.ts[0m:[93m35[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m35[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/shared/components/schema-form/schema-form.component.ts[0m:[93m35[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m35[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/cloud-foundry/src/store/cloud-foundry.store.module.ts[0m:[93m34[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m34[0m     GitPackageModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/_custom-import.module.ts[0m:[93m13[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m13[0m     CloudFoundryPackageModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/_custom-import.module.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m     GitPackageModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/_custom-import.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     KubePackageModule
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m105[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m105[0m     RouteModule,
+[7m   [0m [91m    ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m109[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m109[0m     SharedModule,
+[7m   [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m111[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m111[0m     CoreModule,
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m112[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m112[0m     SetupModule,
+[7m   [0m [91m    ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m113[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m113[0m     LoginModule,
+[7m   [0m [91m    ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m114[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m114[0m     HomeModule,
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m115[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m115[0m     DashboardModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.module.ts[0m:[93m117[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m117[0m     AboutModule,
+[7m   [0m [91m    ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.routing.ts[0m:[93m124[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m124[0m     CoreModule,
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/app.routing.ts[0m:[93m125[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m125[0m     SharedModule,
+[7m   [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/core/core.module.ts[0m:[93m52[0m:[93m9[0m - [91merror[0m[90m NG6003: [0m'LogOutDialogComponent' does not appear to be an NgModule, Component, Directive, or Pipe class.
+
+[7m52[0m         LogOutDialogComponent,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/core/log-out-dialog/log-out-dialog.component.ts[0m:[93m13[0m:[93m14[0m
+    [7m13[0m export class LogOutDialogComponent implements OnInit, OnDestroy {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~[0m
+    Is it missing an Angular annotation?
+
+
+Error: [96msrc/frontend/packages/core/src/core/core.module.ts[0m:[93m96[0m:[93m9[0m - [91merror[0m[90m NG6001: [0mThe class 'LogOutDialogComponent' is listed in the declarations of the NgModule 'CoreModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m96[0m         LogOutDialogComponent,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/core/log-out-dialog/log-out-dialog.component.ts[0m:[93m13[0m:[93m14[0m
+    [7m13[0m export class LogOutDialogComponent implements OnInit, OnDestroy {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~[0m
+    'LogOutDialogComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/core/log-out-dialog/log-out-dialog.component.ts[0m:[93m15[0m:[93m12[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialogRef' of class 'LogOutDialogComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m15[0m     public dialogRef: MatDialogRef<LogOutDialogComponent>,
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/core/log-out-dialog/log-out-dialog.component.ts[0m:[93m15[0m:[93m23[0m
+    [7m15[0m     public dialogRef: MatDialogRef<LogOutDialogComponent>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m8[0m:[93m1[0m
+    [7m8[0m export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/about/about.module.ts[0m:[93m12[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/about/about.module.ts[0m:[93m13[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m13[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/add-api-key-dialog/add-api-key-dialog.component.ts[0m:[93m29[0m:[93m12[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialogRef' of class 'AddApiKeyDialogComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m29[0m     public dialogRef: MatDialogRef<ApiKey>,
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/api-keys/add-api-key-dialog/add-api-key-dialog.component.ts[0m:[93m29[0m:[93m23[0m
+    [7m29[0m     public dialogRef: MatDialogRef<ApiKey>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m8[0m:[93m1[0m
+    [7m8[0m export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys-page/api-keys-page.component.ts[0m:[93m32[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialog' of class 'ApiKeysPageComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m32[0m     private dialog: MatDialog,
+[7m  [0m [91m            ~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/api-keys/api-keys-page/api-keys-page.component.ts[0m:[93m32[0m:[93m21[0m
+    [7m32[0m     private dialog: MatDialog,
+    [7m  [0m [96m                    ~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m7[0m:[93m1[0m
+    [7m7[0m export type MatDialog = any; // Will be replaced with TailwindDialogService
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys-page/api-keys-page.component.ts[0m:[93m55[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'guid' does not exist on type 'unknown'.
+
+[7m55[0m         if (newApiKey && newApiKey.guid) {
+[7m  [0m [91m                                   ~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys.module.ts[0m:[93m12[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys.module.ts[0m:[93m13[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m13[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys.module.ts[0m:[93m17[0m:[93m5[0m - [91merror[0m[90m NG6001: [0mThe class 'ApiKeysPageComponent' is listed in the declarations of the NgModule 'ApiKeysModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m17[0m     ApiKeysPageComponent,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/api-keys/api-keys-page/api-keys-page.component.ts[0m:[93m21[0m:[93m14[0m
+    [7m21[0m export class ApiKeysPageComponent {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~[0m
+    'ApiKeysPageComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/api-keys/api-keys.module.ts[0m:[93m18[0m:[93m5[0m - [91merror[0m[90m NG6001: [0mThe class 'AddApiKeyDialogComponent' is listed in the declarations of the NgModule 'ApiKeysModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m18[0m     AddApiKeyDialogComponent
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/api-keys/add-api-key-dialog/add-api-key-dialog.component.ts[0m:[93m16[0m:[93m14[0m
+    [7m16[0m export class AddApiKeyDialogComponent implements OnDestroy {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'AddApiKeyDialogComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/dashboard/dashboard.module.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/dashboard/dashboard.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/dashboard/dashboard.module.ts[0m:[93m17[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m17[0m     MetricsModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/backup-restore/restore-endpoints/restore-endpoints.component.ts[0m:[93m3[0m:[93m35[0m - [91merror[0m[90m TS2307: [0mCannot find module '@angular/material/checkbox' or its corresponding type declarations.
+
+[7m3[0m import { MatCheckboxChange } from '@angular/material/checkbox';
+[7m [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.ts[0m:[93m29[0m:[93m12[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialogRef' of class 'ConnectEndpointDialogComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m29[0m     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.ts[0m:[93m29[0m:[93m23[0m
+    [7m29[0m     public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m8[0m:[93m1[0m
+    [7m8[0m export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     SharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/endpoints.module.ts[0m:[93m25[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m25[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/endpoints.module.ts[0m:[93m26[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m26[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/endpoints.module.ts[0m:[93m28[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m28[0m         CreateEndpointModule,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/endpoints/endpoints.module.ts[0m:[93m32[0m:[93m9[0m - [91merror[0m[90m NG6001: [0mThe class 'ConnectEndpointDialogComponent' is listed in the declarations of the NgModule 'EndpointsModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m32[0m         ConnectEndpointDialogComponent,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component.ts[0m:[93m18[0m:[93m14[0m
+    [7m18[0m export class ConnectEndpointDialogComponent implements OnDestroy {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'ConnectEndpointDialogComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/features/error-page/error-page.module.ts[0m:[93m11[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/error-page/error-page.module.ts[0m:[93m12[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/event-page/event-page.module.ts[0m:[93m11[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/event-page/event-page.module.ts[0m:[93m12[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/home/home.module.ts[0m:[93m17[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m17[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/home/home.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/login/login.module.ts[0m:[93m10[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m10[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/login/login.module.ts[0m:[93m11[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m     SharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/metrics/metrics.module.ts[0m:[93m15[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/metrics/metrics.module.ts[0m:[93m17[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m17[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/setup/setup.module.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/setup/setup.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     SharedModule
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/user-profile/edit-profile-info/edit-profile-info.component.ts[0m:[93m18[0m:[93m16[0m - [91merror[0m[90m TS2693: [0m'ErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m18[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/user-profile/edit-profile-info/edit-profile-info.component.ts[0m:[93m18[0m:[93m45[0m - [91merror[0m[90m TS2693: [0m'ShowOnDirtyErrorStateMatcher' only refers to a type, but is being used as a value here.
+
+[7m18[0m     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
+[7m  [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/user-profile/user-profile.module.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/features/user-profile/user-profile.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/public-api.ts[0m:[93m27[0m:[93m1[0m - [91merror[0m[90m TS2308: [0mModule './shared/services/tailwind-material-replacements' has already exported a member named 'ErrorStateMatcher'. Consider explicitly re-exporting to resolve the ambiguity.
+
+[7m27[0m export * from './shared/services/tailwind-error-state-matcher';
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/public-api.ts[0m:[93m27[0m:[93m1[0m - [91merror[0m[90m TS2308: [0mModule './shared/services/tailwind-material-replacements' has already exported a member named 'ShowOnDirtyErrorStateMatcher'. Consider explicitly re-exporting to resolve the ambiguity.
+
+[7m27[0m export * from './shared/services/tailwind-error-state-matcher';
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.ts[0m:[93m17[0m:[93m12[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'dialogRef' of class 'DialogConfirmComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m17[0m     public dialogRef: MatDialogRef<DialogConfirmComponent>,
+[7m  [0m [91m           ~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.ts[0m:[93m17[0m:[93m23[0m
+    [7m17[0m     public dialogRef: MatDialogRef<DialogConfirmComponent>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m8[0m:[93m1[0m
+    [7m8[0m export type MatDialogRef<T, R = any> = any; // Will be replaced with TailwindDialogRef<T, R>
+    [7m [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/list/list-table/table.component.ts[0m:[93m53[0m:[93m14[0m - [91merror[0m[90m TS2693: [0m'MatSort' only refers to a type, but is being used as a value here.
+
+[7m53[0m   @ViewChild(MatSort, { static: true }) sort: MatSort;
+[7m  [0m [91m             ~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/list/list.component.ts[0m:[93m129[0m:[93m14[0m - [91merror[0m[90m TS2693: [0m'MatPaginator' only refers to a type, but is being used as a value here.
+
+[7m129[0m   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
+[7m   [0m [91m             ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/list/list.component.ts[0m:[93m394[0m:[93m35[0m - [91merror[0m[90m TS2693: [0m'PageEvent' only refers to a type, but is being used as a value here.
+
+[7m394[0m       this.initialPageEvent = new PageEvent();
+[7m   [0m [91m                                  ~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/page-header/page-header.module.ts[0m:[93m11[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m13[0m:[93m46[0m - [91merror[0m[90m TS2693: [0m'SimpleSnackBar' only refers to a type, but is being used as a value here.
+
+[7m13[0m export class SnackBarReturnComponent extends SimpleSnackBar {
+[7m  [0m [91m                                             ~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m21[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'snackRef' of class 'SnackBarReturnComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m21[0m     private snackRef: TailwindSnackBarRef<any>,
+[7m  [0m [91m            ~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m21[0m:[93m23[0m
+    [7m21[0m     private snackRef: TailwindSnackBarRef<any>,
+    [7m  [0m [96m                      ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-snackbar.service.ts[0m:[93m10[0m:[93m1[0m
+    [7m 10[0m export interface TailwindSnackBarRef<T> {
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 11[0m   afterDismissed(): Observable<any>;
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 14[0m   dismissWithAction(): void;
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 15[0m }
+    [7m   [0m [96m~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m37[0m:[93m10[0m - [91merror[0m[90m TS2551: [0mProperty 'snackBarRef' does not exist on type 'SnackBarReturnComponent'. Did you mean 'snackRef'?
+
+[7m37[0m     this.snackBarRef.dismiss();
+[7m  [0m [91m         ~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m21[0m:[93m5[0m
+    [7m21[0m     private snackRef: TailwindSnackBarRef<any>,
+    [7m  [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'snackRef' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/stepper/steppers.module.ts[0m:[93m12[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m         CoreModule
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/stepper/steppers/steppers.component.ts[0m:[93m86[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'dismiss' does not exist on type 'TailwindSnackBarService'.
+
+[7m86[0m       this.snackBar.dismiss();
+[7m  [0m [91m                    ~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/components/stepper/steppers/steppers.component.ts[0m:[93m109[0m:[93m21[0m - [91merror[0m[90m TS2339: [0mProperty 'dismiss' does not exist on type 'TailwindSnackBarService'.
+
+[7m109[0m       this.snackBar.dismiss();
+[7m   [0m [91m                    ~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m50[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ErrorStateMatcher'.
+
+[7m50[0m   ErrorStateMatcher,
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m51[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ShowOnDirtyErrorStateMatcher'.
+
+[7m51[0m   ShowOnDirtyErrorStateMatcher
+[7m  [0m [91m  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/services/tailwind-snackbar.service.ts[0m:[93m33[0m:[93m26[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 0.
+
+[7m33[0m     this._afterDismissed.next();
+[7m  [0m [91m                         ~~~~[0m
+
+  [96mnode_modules/rxjs/dist/types/internal/Subject.d.ts[0m:[93m31[0m:[93m10[0m
+    [7m31[0m     next(value: T): void;
+    [7m  [0m [96m         ~~~~~~~~[0m
+    An argument for 'value' was not provided.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/services/tailwind-snackbar.service.ts[0m:[93m38[0m:[93m20[0m - [91merror[0m[90m TS2554: [0mExpected 1 arguments, but got 0.
+
+[7m38[0m     this._onAction.next();
+[7m  [0m [91m                   ~~~~[0m
+
+  [96mnode_modules/rxjs/dist/types/internal/Subject.d.ts[0m:[93m31[0m:[93m10[0m
+    [7m31[0m     next(value: T): void;
+    [7m  [0m [96m         ~~~~~~~~[0m
+    An argument for 'value' was not provided.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m127[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m127[0m     CoreModule,
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m128[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m128[0m     PageHeaderModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m130[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m130[0m     SteppersModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m161[0m:[93m5[0m - [91merror[0m[90m NG6001: [0mThe class 'DialogConfirmComponent' is listed in the declarations of the NgModule 'SharedModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m161[0m     DialogConfirmComponent,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.ts[0m:[93m13[0m:[93m14[0m
+    [7m13[0m export class DialogConfirmComponent {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~[0m
+    'DialogConfirmComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m208[0m:[93m5[0m - [91merror[0m[90m NG6001: [0mThe class 'SnackBarReturnComponent' is listed in the declarations of the NgModule 'SharedModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m208[0m     SnackBarReturnComponent,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/snackbar-return/snackbar-return.component.ts[0m:[93m13[0m:[93m14[0m
+    [7m13[0m export class SnackBarReturnComponent extends SimpleSnackBar {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'SnackBarReturnComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m233[0m:[93m5[0m - [91merror[0m[90m NG6003: [0mThis export contains errors, which may affect components that depend on this NgModule.
+
+[7m233[0m     PageHeaderModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m237[0m:[93m5[0m - [91merror[0m[90m NG6003: [0mThis export contains errors, which may affect components that depend on this NgModule.
+
+[7m237[0m     SteppersModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m243[0m:[93m5[0m - [91merror[0m[90m NG6003: [0mThis export contains errors, which may affect components that depend on this NgModule.
+
+[7m243[0m     SteppersModule,
+[7m   [0m [91m    ~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/core/src/shared/shared.module.ts[0m:[93m258[0m:[93m5[0m - [91merror[0m[90m NG6003: [0m'DialogConfirmComponent' does not appear to be an NgModule, Component, Directive, or Pipe class.
+
+[7m258[0m     DialogConfirmComponent,
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.ts[0m:[93m13[0m:[93m14[0m
+    [7m13[0m export class DialogConfirmComponent {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~[0m
+    Is it missing an Angular annotation?
+
+
+Error: [96msrc/frontend/packages/git/src/git-package.module.ts[0m:[93m11[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m     GitSharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/git/src/shared/git-shared.module.ts[0m:[93m16[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/git/src/shared/git-shared.module.ts[0m:[93m18[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m18[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/git/src/shared/git-shared.module.ts[0m:[93m22[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m22[0m         CreateEndpointModule
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/helm.module.ts[0m:[93m15[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/helm.module.ts[0m:[93m17[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m17[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/helm.module.ts[0m:[93m19[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m19[0m         MonocularModule
+[7m  [0m [91m        ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/helm.setup.module.ts[0m:[93m20[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m20[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/helm.setup.module.ts[0m:[93m22[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m22[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.ts[0m:[93m15[0m:[93m19[0m - [91merror[0m[90m TS2693: [0m'MatIconRegistry' only refers to a type, but is being used as a value here.
+
+[7m15[0m   viewProviders: [MatIconRegistry],
+[7m  [0m [91m                  ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.ts[0m:[93m25[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'mdIconRegistry' of class 'ChartDetailsUsageComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m25[0m     private mdIconRegistry: MatIconRegistry,
+[7m  [0m [91m            ~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.ts[0m:[93m25[0m:[93m29[0m
+    [7m25[0m     private mdIconRegistry: MatIconRegistry,
+    [7m  [0m [96m                            ~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m20[0m:[93m1[0m
+    [7m20[0m export type MatIconRegistry = any;
+    [7m  [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.ts[0m:[93m15[0m:[93m19[0m - [91merror[0m[90m TS2693: [0m'MatIconRegistry' only refers to a type, but is being used as a value here.
+
+[7m15[0m   viewProviders: [MatIconRegistry],
+[7m  [0m [91m                  ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.ts[0m:[93m55[0m:[93m13[0m - [91merror[0m[90m NG2003: [0mNo suitable injection token for parameter 'mdIconRegistry' of class 'ChartsComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+[7m55[0m     private mdIconRegistry: MatIconRegistry,
+[7m  [0m [91m            ~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.ts[0m:[93m55[0m:[93m29[0m
+    [7m55[0m     private mdIconRegistry: MatIconRegistry,
+    [7m  [0m [96m                            ~~~~~~~~~~~~~~~[0m
+    This type does not have a value, so it cannot be used as injection token.
+  [96msrc/frontend/packages/core/src/shared/services/tailwind-material-replacements.ts[0m:[93m20[0m:[93m1[0m
+    [7m20[0m export type MatIconRegistry = any;
+    [7m  [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    The type is declared here.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m38[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m38[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m40[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m40[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m42[0m:[93m17[0m - [91merror[0m[90m NG6001: [0mThe class 'ChartDetailsUsageComponent' is listed in the declarations of the NgModule 'MonocularModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m42[0m   declarations: [
+[7m  [0m [91m                ~[0m
+[7m43[0m     ...components,
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~[0m
+[7m44[0m   ],
+[7m  [0m [91m~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.ts[0m:[93m19[0m:[93m14[0m
+    [7m19[0m export class ChartDetailsUsageComponent implements OnInit {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'ChartDetailsUsageComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m42[0m:[93m17[0m - [91merror[0m[90m NG6001: [0mThe class 'ChartsComponent' is listed in the declarations of the NgModule 'MonocularModule', but is not a directive, a component, or a pipe. Either remove it from the NgModule's declarations, or add an appropriate Angular decorator.
+
+[7m42[0m   declarations: [
+[7m  [0m [91m                ~[0m
+[7m43[0m     ...components,
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~[0m
+[7m44[0m   ],
+[7m  [0m [91m~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.ts[0m:[93m18[0m:[93m14[0m
+    [7m18[0m export class ChartsComponent implements OnInit {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~[0m
+    'ChartsComponent' is declared here.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m49[0m:[93m12[0m - [91merror[0m[90m NG6003: [0m'ChartDetailsUsageComponent' does not appear to be an NgModule, Component, Directive, or Pipe class.
+
+[7m49[0m   exports: [
+[7m  [0m [91m           ~[0m
+[7m50[0m     ...components
+[7m  [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m51[0m   ]
+[7m  [0m [91m~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/chart-details/chart-details-usage/chart-details-usage.component.ts[0m:[93m19[0m:[93m14[0m
+    [7m19[0m export class ChartDetailsUsageComponent implements OnInit {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    Is it missing an Angular annotation?
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/helm/monocular/monocular.module.ts[0m:[93m49[0m:[93m12[0m - [91merror[0m[90m NG6003: [0m'ChartsComponent' does not appear to be an NgModule, Component, Directive, or Pipe class.
+
+[7m49[0m   exports: [
+[7m  [0m [91m           ~[0m
+[7m50[0m     ...components
+[7m  [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m51[0m   ]
+[7m  [0m [91m~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/helm/monocular/charts/charts.component.ts[0m:[93m18[0m:[93m14[0m
+    [7m18[0m export class ChartsComponent implements OnInit {
+    [7m  [0m [96m             ~~~~~~~~~~~~~~~[0m
+    Is it missing an Angular annotation?
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kube-package.module.ts[0m:[93m10[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m10[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kube-package.module.ts[0m:[93m11[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m11[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kube-package.module.ts[0m:[93m13[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m13[0m         KubernetesSetupModule,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kube-package.module.ts[0m:[93m14[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m14[0m         HelmSetupModule,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/home/kubernetes-home-card.module.ts[0m:[93m12[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m12[0m     CoreModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/home/kubernetes-home-card.module.ts[0m:[93m15[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m15[0m     SharedModule,
+[7m  [0m [91m    ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/home/kubernetes-home-card.module.ts[0m:[93m16[0m:[93m5[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m16[0m     HomeModule,
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/generic-resource.module.ts[0m:[93m3[0m:[93m28[0m - [91merror[0m[90m TS2307: [0mCannot find module '@angular/flex-layout' or its corresponding type declarations.
+
+[7m3[0m import { CoreModule } from '@angular/flex-layout';
+[7m [0m [91m                           ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/generic-resource.module.ts[0m:[93m14[0m:[93m12[0m - [91merror[0m[90m NG1010: [0mValue
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.html[0m:[93m1[0m:[93m1[0m - [91merror[0m[90m NG8001: [0m'app-page-sub-nav' is not a known element:
+1. If 'app-page-sub-nav' is an Angular component, then verify that it is part of this module.
+2. If 'app-page-sub-nav' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+[7m1[0m <app-page-sub-nav>
+[7m [0m [91m~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.ts[0m:[93m42[0m:[93m16[0m
+    [7m42[0m   templateUrl: './kubernetes-resource-list.component.html',
+    [7m  [0m [96m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    Error occurs in the template of component KubernetesResourceListComponent.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.html[0m:[93m16[0m:[93m1[0m - [91merror[0m[90m NG8001: [0m'app-list-view' is not a known element:
+1. If 'app-list-view' is an Angular component, then verify that it is part of this module.
+2. If 'app-list-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+
+[7m16[0m <app-list-view [config]="provider"></app-list-view>
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.ts[0m:[93m42[0m:[93m16[0m
+    [7m42[0m   templateUrl: './kubernetes-resource-list.component.html',
+    [7m  [0m [96m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    Error occurs in the template of component KubernetesResourceListComponent.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.html[0m:[93m16[0m:[93m16[0m - [91merror[0m[90m NG8002: [0mCan't bind to 'config' since it isn't a known property of 'app-list-view'.
+1. If 'app-list-view' is an Angular component and it has 'config' input, then verify that it is part of this module.
+2. If 'app-list-view' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+3. To allow any property add 'NO_ERRORS_SCHEMA' to the '@NgModule.schemas' of this component.
+
+[7m16[0m <app-list-view [config]="provider"></app-list-view>
+[7m  [0m [91m               ~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes-resource/kubernetes-resource-list/kubernetes-resource-list.component.ts[0m:[93m42[0m:[93m16[0m
+    [7m42[0m   templateUrl: './kubernetes-resource-list.component.html',
+    [7m  [0m [96m               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    Error occurs in the template of component KubernetesResourceListComponent.
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes.module.ts[0m:[93m131[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m131[0m         CoreModule,
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes.module.ts[0m:[93m133[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m133[0m         SharedModule,
+[7m   [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes.setup.module.ts[0m:[93m54[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m54[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/kubernetes.setup.module.ts[0m:[93m56[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m56[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/workloads/workloads.module.ts[0m:[93m38[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m38[0m         CoreModule,
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/workloads/workloads.module.ts[0m:[93m40[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m40[0m         SharedModule,
+[7m  [0m [91m        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/frontend/packages/kubernetes/src/kubernetes/workloads/workloads.module.ts[0m:[93m44[0m:[93m9[0m - [91merror[0m[90m NG6002: [0mThis import contains errors, which may affect components that depend on this NgModule.
+
+[7m44[0m         KubernetesModule,
+[7m  [0m [91m        ~~~~~~~~~~~~~~~~[0m
+
+
+[39m[22m

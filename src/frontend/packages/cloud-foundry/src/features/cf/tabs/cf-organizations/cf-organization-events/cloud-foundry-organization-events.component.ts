@@ -6,12 +6,13 @@ import {
 } from '../../../../../shared/components/list/list-types/cf-events/types/cf-org-events-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organization-events',
+selector: 'app-cloud-foundry-organization-events',
   templateUrl: './cloud-foundry-organization-events.component.html',
   styleUrls: ['./cloud-foundry-organization-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfOrganizationEventsConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class CloudFoundryOrganizationEventsComponent { }

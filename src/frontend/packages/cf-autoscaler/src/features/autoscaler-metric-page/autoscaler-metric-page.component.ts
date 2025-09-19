@@ -9,7 +9,7 @@ import {
 } from '../../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-list-config.service';
 
 @Component({
-  selector: 'app-autoscaler-metric-page',
+selector: 'app-autoscaler-metric-page',
   templateUrl: './autoscaler-metric-page.component.html',
   styleUrls: ['./autoscaler-metric-page.component.scss'],
   providers: [
@@ -17,7 +17,8 @@ import {
       provide: ListConfig,
       useClass: AppAutoscalerMetricChartListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class AutoscalerMetricPageComponent implements OnInit {
 

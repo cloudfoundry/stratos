@@ -3,9 +3,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import moment from 'moment';
 
 @Component({
-  selector: 'app-start-end-date',
+selector: 'app-start-end-date',
   templateUrl: './start-end-date.component.html',
-  styleUrls: ['./start-end-date.component.scss']
+  styleUrls: ['./start-end-date.component.scss'],
+  standalone: false
 })
 export class StartEndDateComponent {
 

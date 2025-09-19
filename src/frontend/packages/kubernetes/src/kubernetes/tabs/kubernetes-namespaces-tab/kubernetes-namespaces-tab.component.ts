@@ -7,13 +7,14 @@ import {
 } from '../../list-types/kubernetes-namespaces/kubernetes-namespaces-list-config.service';
 
 @Component({
-  selector: 'app-kubernetes-namespaces-tab',
+selector: 'app-kubernetes-namespaces-tab',
   templateUrl: './kubernetes-namespaces-tab.component.html',
   styleUrls: ['./kubernetes-namespaces-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: KubernetesNamespacesListConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class KubernetesNamespacesTabComponent {
 

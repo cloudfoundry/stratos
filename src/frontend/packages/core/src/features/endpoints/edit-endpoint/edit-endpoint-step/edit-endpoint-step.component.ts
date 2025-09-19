@@ -23,10 +23,11 @@ interface EndpointModelMap {
 }
 
 @Component({
-  selector: 'app-edit-endpoint-step',
+selector: 'app-edit-endpoint-step',
   templateUrl: './edit-endpoint-step.component.html',
   styleUrls: ['./edit-endpoint-step.component.scss'],
-  providers: []
+  providers: [],
+  standalone: false
 })
 export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 

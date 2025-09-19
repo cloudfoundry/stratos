@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { PreviewableComponent } from 'frontend/packages/core/src/shared/previewable-component';
 
 @Component({
-  selector: 'app-resource-alert-preview',
+selector: 'app-resource-alert-preview',
   templateUrl: './resource-alert-preview.component.html',
-  styleUrls: ['./resource-alert-preview.component.scss']
+  styleUrls: ['./resource-alert-preview.component.scss'],
+  standalone: false
 })
 export class ResourceAlertPreviewComponent implements PreviewableComponent {
 

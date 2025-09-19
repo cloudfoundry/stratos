@@ -2,7 +2,8 @@ import { Directive, Input, Optional } from '@angular/core';
 import { RouterLink, RouterLinkWithHref } from '@angular/router';
 
 @Directive({
-  selector: '[routerLink][appDisableRouterLink]'
+selector: '[routerLink][appDisableRouterLink]',
+standalone: false
 })
 export class DisableRouterLinkDirective {
 

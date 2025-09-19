@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import {
   ApplicationEnvVarsHelper,
@@ -41,7 +41,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         CfAutoscalerTestingModule,
         createEmptyStoreModule(),
         CoreModule,
-        NgxChartsModule,
+        BaseChartDirective,
         AppTestModule
       ],
       providers: [

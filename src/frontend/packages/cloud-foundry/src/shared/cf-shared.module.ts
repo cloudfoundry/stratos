@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ApplicationModule, NgModule, Type } from '@angular/core';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
-import { CoreModule } from '../../../core/src/core/core.module';
+import { CoreModule } from '@stratosui/core';
 import { CardCell, TableCellCustom } from '../../../core/src/shared/components/list/list.types';
-import { SharedModule } from '../../../core/src/shared/shared.module';
+import { TailwindJsonSchemaFormModule } from '../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
+import { SharedModule } from '@stratosui/core';
 import {
   AddServiceInstanceBaseStepComponent,
 } from './components/add-service-instance/add-service-instance-base-step/add-service-instance-base-step.component';
@@ -266,7 +266,7 @@ const cfListCards: Type<CardCell<any>>[] = [
         CoreModule,
         SharedModule,
         ApplicationModule,
-        MaterialDesignFrameworkModule,
+        TailwindJsonSchemaFormModule,
     ],
     declarations: [
         ServiceIconComponent,

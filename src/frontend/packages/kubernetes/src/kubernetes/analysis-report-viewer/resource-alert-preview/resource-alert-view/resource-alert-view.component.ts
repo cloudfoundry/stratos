@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-resource-alert-view',
+selector: 'app-resource-alert-view',
   templateUrl: './resource-alert-view.component.html',
-  styleUrls: ['./resource-alert-view.component.scss']
+  styleUrls: ['./resource-alert-view.component.scss'],
+  standalone: false
 })
 export class ResourceAlertViewComponent {
 

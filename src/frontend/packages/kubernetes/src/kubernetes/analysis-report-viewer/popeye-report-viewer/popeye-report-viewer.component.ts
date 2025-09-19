@@ -3,9 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
-  selector: 'app-popeye-report-viewer',
+selector: 'app-popeye-report-viewer',
   templateUrl: './popeye-report-viewer.component.html',
-  styleUrls: ['./popeye-report-viewer.component.scss']
+  styleUrls: ['./popeye-report-viewer.component.scss'],
+  standalone: false
 })
 export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
 

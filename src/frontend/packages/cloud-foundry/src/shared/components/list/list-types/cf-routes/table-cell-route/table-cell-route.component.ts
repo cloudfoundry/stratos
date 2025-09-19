@@ -6,9 +6,10 @@ import { getRoute, isTCPRoute } from '../../../../../../features/applications/ro
 import { ListCfRoute } from '../cf-routes-data-source-base';
 
 @Component({
-  selector: 'app-table-cell-route',
+selector: 'app-table-cell-route',
   templateUrl: './table-cell-route.component.html',
-  styleUrls: ['./table-cell-route.component.scss']
+  styleUrls: ['./table-cell-route.component.scss'],
+  standalone: false
 })
 export class TableCellRouteComponent extends TableCellCustom<APIResource<ListCfRoute>> implements OnInit {
   routeUrl: string;

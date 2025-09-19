@@ -1,19 +1,39 @@
-<span *ngIf="!chips || !chips.length">None</span>
-<mat-chip-list class="app-chips" [ngClass]="{'mat-chip-list__stacked': stacked, 'mat-chip-list__rtl': orientation==='rtl'}" *ngIf="chips && chips.length">
-  <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit" [ngClass]="chip.color ? chip.color : ''">
-    <div class="app-chip__container">
-      <a *ngIf="!!chip.url; else notALink" [routerLink]="[chip.url.link]" [queryParams]="chip.url.params">{{chip[displayProperty]}}</a>
+<span *ngIf="!chips || !chips.length" class="text-gray-500">None</span>
+<div class="app-chips flex flex-wrap gap-2"
+     [ngClass]="{'flex-col': stacked, 'flex-row-reverse': orientation==='rtl'}"
+     *ngIf="chips && chips.length">
+  <div class="chip app-chip inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full border"
+       *ngFor="let chip of chips | slice:0:limit"
+       [ngClass]="getChipClasses(chip.color)">
+    <div class="app-chip__container flex items-center gap-1">
+      <a *ngIf="!!chip.url; else notALink"
+         class="app-chip__link hover:underline"
+         [routerLink]="[chip.url.link]"
+         [queryParams]="chip.url.params">
+        {{chip[displayProperty]}}
+      </a>
       <ng-template #notALink>
         <div class="app-chip__label">{{chip[displayProperty]}}</div>
       </ng-template>
       <ng-container *ngIf="chip.clearAction && !(chip.hideClearButton$ | async)">
-        <mat-icon *ngIf="!chip.busy || !(chip.busy | async)" (click)="chip.clearAction(chip)" class="app-chip__close">close</mat-icon>
-        <mat-spinner *ngIf="chip.busy && (chip.busy | async)" diameter="15" class="app-chip__busy-spinner"></mat-spinner>
+        <span *ngIf="!chip.busy || !(chip.busy | async)"
+              (click)="chip.clearAction(chip)"
+              class="material-icons text-sm app-chip__close cursor-pointer hover:text-red-600">
+          close
+        </span>
+        <div *ngIf="chip.busy && (chip.busy | async)"
+             class="app-chip__busy-spinner">
+          <div class="spinner w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+        </div>
       </ng-container>
-      </div>
-  </mat-chip>
-  <button mat-button color="primary" class="app-chips__limit" [ngClass]="{'app-chips__show-more': atLowerLimit, 'app-chips__show-less': !atLowerLimit}" *ngIf="chips.length > lowerLimit" (click)="toggleLimit()" appClickStopPropagation>
+    </div>
+  </div>
+  <button class="btn btn-sm btn-primary app-chips__limit"
+          [ngClass]="{'app-chips__show-more': atLowerLimit, 'app-chips__show-less': !atLowerLimit}"
+          *ngIf="chips.length > lowerLimit"
+          (click)="toggleLimit()"
+          appClickStopPropagation>
     <span *ngIf="atLowerLimit">+{{ chips.length - limit }}</span>
     <span *ngIf="!atLowerLimit">Show less</span>
   </button>
-</mat-chip-list>
+</div>

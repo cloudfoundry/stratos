@@ -5,13 +5,16 @@ import { AuthOnlyAppState, ThemeService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
+import { StratosThemeService } from '../../theme/theme.service';
+
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
 @Component({
-  selector: 'app-root',
+selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  standalone: false
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
@@ -23,6 +26,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     private loggedInService: LoggedInService,
     store: Store<AuthOnlyAppState>,
     public themeService: ThemeService,
+    private stratosThemeService: StratosThemeService,
     @Inject(DOCUMENT) private document: Document,
   ) {
     // We use the username to key the session storage. We could replace this with the users id?

@@ -117,9 +117,10 @@ export class ActionMonitorComponentState {
 }
 
 @Component({
-  selector: 'app-action-monitor-icon',
+selector: 'app-action-monitor-icon',
   templateUrl: './app-action-monitor-icon.component.html',
-  styleUrls: ['./app-action-monitor-icon.component.scss']
+  styleUrls: ['./app-action-monitor-icon.component.scss'],
+  standalone: false
 })
 export class AppActionMonitorIconComponent implements OnInit {
 

@@ -21,12 +21,13 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 
 
 @Component({
-  selector: 'app-select-service',
+selector: 'app-select-service',
   templateUrl: './select-service.component.html',
   styleUrls: ['./select-service.component.scss'],
   providers: [
     ServicesWallService
-  ]
+  ],
+  standalone: false
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   cfGuid: string;

@@ -16,9 +16,10 @@ import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
-  selector: 'app-local-account-wizard',
+selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
-  styleUrls: ['./local-account-wizard.component.scss']
+  styleUrls: ['./local-account-wizard.component.scss'],
+  standalone: false
 })
 export class LocalAccountWizardComponent implements OnInit {
 

@@ -14,6 +14,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kubernetes-node',
   templateUrl: './kubernetes-node.component.html',
   styleUrls: ['./kubernetes-node.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,

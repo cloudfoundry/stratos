@@ -19,12 +19,13 @@ import { CardCell } from '../../list.types';
 import { TableRowExpandedService } from './table-row-expanded-service';
 
 @Component({
-  selector: 'app-table-row',
+selector: 'app-table-row',
   templateUrl: './table-row.component.html',
   styleUrls: ['./table-row.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  preserveWhitespaces: false
+  preserveWhitespaces: false,
+  standalone: false
 })
 export class TableRowComponent<T = any> extends CdkRow implements OnInit {
 
@@ -38,6 +39,7 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
   @Input() inExpandedRow: boolean;
   @Input() rowId: string;
   @Input() prominentErrorBar: boolean;
+  @Input() togglePosition: 'before' | 'after' = 'before';
 
   public inErrorState$: Observable<boolean>;
   public inWarningState$: Observable<boolean>;

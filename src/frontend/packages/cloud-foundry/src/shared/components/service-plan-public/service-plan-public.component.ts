@@ -12,9 +12,10 @@ import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
-  selector: 'app-service-plan-public',
+selector: 'app-service-plan-public',
   templateUrl: './service-plan-public.component.html',
-  styleUrls: ['./service-plan-public.component.scss']
+  styleUrls: ['./service-plan-public.component.scss'],
+  standalone: false
 })
 export class ServicePlanPublicComponent {
   planAccessibility$: Observable<StratosStatus>;

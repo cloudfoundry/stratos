@@ -6,9 +6,10 @@ import { IServicePlan } from '../../../../../../cf-api-svc.types';
 import { canShowServicePlanCosts } from '../../../../../../features/service-catalog/services-helper';
 
 @Component({
-  selector: 'app-table-cell-service-plan-price',
+selector: 'app-table-cell-service-plan-price',
   templateUrl: './table-cell-service-plan-price.component.html',
   styleUrls: ['./table-cell-service-plan-price.component.scss'],
+  standalone: false
 })
 export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIResource<IServicePlan>> {
   isFree: boolean;

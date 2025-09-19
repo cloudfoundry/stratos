@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
@@ -15,9 +15,10 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
 
 @Component({
-  selector: 'app-card-app-instances',
+selector: 'app-card-app-instances',
   templateUrl: './card-app-instances.component.html',
-  styleUrls: ['./card-app-instances.component.scss']
+  styleUrls: ['./card-app-instances.component.scss'],
+  standalone: false
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
@@ -36,7 +37,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     public appService: ApplicationService,
     private renderer: Renderer2,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
     cups: CurrentUserPermissionsService
   ) {
     this.status$ = this.appService.applicationState$.pipe(
@@ -65,7 +66,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   public runningInstances$: Observable<number>;
 
   private app: any;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {

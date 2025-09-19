@@ -11,7 +11,7 @@ import { HelmReleasesListConfig } from '../list-types/helm-releases-list-config.
 import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces-filter-config.service';
 
 @Component({
-  selector: 'app-releases-tab',
+selector: 'app-releases-tab',
   templateUrl: './releases-tab.component.html',
   styleUrls: ['./releases-tab.component.scss'],
   providers: [
@@ -20,7 +20,8 @@ import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces
       useClass: HelmReleasesListConfig,
     },
     KubernetesNamespacesFilterService,
-  ]
+  ],
+  standalone: false
 })
 export class HelmReleasesTabComponent implements OnInit {
   public helmIds$: Observable<string[]>;

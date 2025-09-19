@@ -18,9 +18,10 @@ export interface IReportViewer {
 }
 
 @Component({
-  selector: 'app-analysis-report-viewer',
+selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
-  styleUrls: ['./analysis-report-viewer.component.scss']
+  styleUrls: ['./analysis-report-viewer.component.scss'],
+  standalone: false
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
 

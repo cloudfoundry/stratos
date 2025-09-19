@@ -4,9 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
 
 @Component({
-  selector: 'app-breadcrumbs',
+selector: 'app-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
-  styleUrls: ['./breadcrumbs.component.scss']
+  styleUrls: ['./breadcrumbs.component.scss'],
+  standalone: false
 })
 export class BreadcrumbsComponent {
   public breadcrumbDefinitions: IBreadcrumbLink[] = null;

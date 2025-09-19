@@ -1,9 +1,10 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-code-block',
+selector: 'app-code-block',
   templateUrl: './code-block.component.html',
-  styleUrls: ['./code-block.component.scss']
+  styleUrls: ['./code-block.component.scss'],
+  standalone: false
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 

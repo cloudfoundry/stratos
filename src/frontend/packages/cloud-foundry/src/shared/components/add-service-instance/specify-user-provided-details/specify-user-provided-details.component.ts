@@ -2,7 +2,7 @@ import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChipInputEvent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -32,9 +32,10 @@ import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({
-  selector: 'app-specify-user-provided-details',
+selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
-  styleUrls: ['./specify-user-provided-details.component.scss']
+  styleUrls: ['./specify-user-provided-details.component.scss'],
+  standalone: false
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 

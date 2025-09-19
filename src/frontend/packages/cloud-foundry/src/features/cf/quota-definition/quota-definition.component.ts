@@ -19,12 +19,13 @@ import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-def
 export const QUOTA_ORG_GUID = 'org';
 
 @Component({
-  selector: 'app-quota-definition',
+selector: 'app-quota-definition',
   templateUrl: './quota-definition.component.html',
   styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './quota-definition.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

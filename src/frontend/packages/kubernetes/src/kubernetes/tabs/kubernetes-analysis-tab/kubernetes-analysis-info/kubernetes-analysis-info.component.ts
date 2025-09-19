@@ -6,12 +6,13 @@ import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis
 
 
 @Component({
-  selector: 'app-kubernetes-analysis-info',
+selector: 'app-kubernetes-analysis-info',
   templateUrl: './kubernetes-analysis-info.component.html',
   styleUrls: ['./kubernetes-analysis-info.component.scss'],
   providers: [
     KubernetesAnalysisService
-  ]
+  ],
+  standalone: false
 })
 export class KubernetesAnalysisInfoComponent implements PreviewableComponent {
 

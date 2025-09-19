@@ -10,9 +10,10 @@ export interface CFAppCLIInfoContext {
 }
 
 @Component({
-  selector: 'app-cli-info',
+selector: 'app-cli-info',
   templateUrl: './cli-info.component.html',
-  styleUrls: ['./cli-info.component.scss']
+  styleUrls: ['./cli-info.component.scss'],
+  standalone: false
 })
 export class CliInfoComponent {
   @Input() context: CFAppCLIInfoContext;

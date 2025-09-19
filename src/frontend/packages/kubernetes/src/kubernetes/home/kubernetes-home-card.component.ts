@@ -11,9 +11,10 @@ import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 
 @Component({
-  selector: 'app-k8s-home-card',
+selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss']
+  styleUrls: ['./kubernetes-home-card.component.scss'],
+  standalone: false
 })
 export class KubernetesHomeCardComponent implements OnInit {
 

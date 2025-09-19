@@ -1,4 +1,6 @@
-@import '../helm-release-helpers';
+@use '../helm-release-helpers';
+// Import missing mixins
+@import '../../../../../helm/monocular/mixins';
 
 :host {
   display: flex;

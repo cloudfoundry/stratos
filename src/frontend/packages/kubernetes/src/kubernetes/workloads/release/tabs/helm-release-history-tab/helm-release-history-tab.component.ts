@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import moment from 'moment';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import {
@@ -9,10 +9,32 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { HelmReleaseHelperService } from './../helm-release-helper.service';
 
+class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
+  constructor(
+    private data$: Observable<any[]>,
+    public isTableLoading$: Observable<boolean>
+  ) {}
+
+  connect(): Observable<any[]> {
+    return this.data$;
+  }
+
+  disconnect(): void {}
+
+  trackBy(index: number, item: any): any {
+    return item.revision;
+  }
+
+  getRowState(row: any): Observable<any> {
+    return of({});
+  }
+}
+
 @Component({
   selector: 'app-helm-release-history-tab',
   templateUrl: './helm-release-history-tab.component.html',
-  styleUrls: ['./helm-release-history-tab.component.scss']
+  styleUrls: ['./helm-release-history-tab.component.scss'],
+  standalone: false
 })
 export class HelmReleaseHistoryTabComponent {
 
@@ -77,18 +99,13 @@ export class HelmReleaseHistoryTabComponent {
     const data$ = this.helmReleaseHelper.fetchReleaseHistory().pipe(
       map(history => [...history].sort((a, b) => b.revision - a.revision))
     );
-    this.dataSource = {
-      connect: () => data$,
-      disconnect: () => { },
-      trackBy: (index, item) => item.revision,
-      isTableLoading$: data$.pipe(
-        map(revisions => !revisions),
-        startWith(true),
-      ),
-      getRowState: (row) => {
-        return of({});
-      }
-    };
+
+    const isTableLoading$ = data$.pipe(
+      map(revisions => !revisions),
+      startWith(true),
+    );
+
+    this.dataSource = new HelmReleaseHistoryDataSource(data$, isTableLoading$);
   }
 
 }

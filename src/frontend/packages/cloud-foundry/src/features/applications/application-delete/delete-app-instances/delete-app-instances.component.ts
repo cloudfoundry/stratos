@@ -7,7 +7,7 @@ import { IServiceInstance } from '../../../../cf-api-svc.types';
 import { AppDeleteServiceInstancesListConfigService } from './app-delete-instances-routes-list-config.service';
 
 @Component({
-  selector: 'app-delete-app-instances',
+selector: 'app-delete-app-instances',
   templateUrl: './delete-app-instances.component.html',
   styleUrls: ['./delete-app-instances.component.scss'],
   providers: [
@@ -15,7 +15,8 @@ import { AppDeleteServiceInstancesListConfigService } from './app-delete-instanc
       provide: ListConfig,
       useClass: AppDeleteServiceInstancesListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class DeleteAppServiceInstancesComponent implements OnDestroy {
 

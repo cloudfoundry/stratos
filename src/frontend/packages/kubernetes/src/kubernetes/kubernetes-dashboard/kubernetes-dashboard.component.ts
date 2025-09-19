@@ -16,6 +16,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kubernetes-dashboard',
   templateUrl: './kubernetes-dashboard.component.html',
   styleUrls: ['./kubernetes-dashboard.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,

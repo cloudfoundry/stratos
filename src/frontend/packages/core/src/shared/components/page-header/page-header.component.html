@@ -1,94 +1,136 @@
 <ng-template #pageHeaderTmpl>
-  <div class="page-header__outer">
-    <div class="page-header__inner">
+  <div class="page-header-outer bg-header-bg text-header-text">
+    <div class="page-header-inner">
       <div class="page-header">
-        <div>
-          <mat-toolbar class="page-header__toolbar">
-            <div *ngIf="isMobile$ | async" class="page-header__nav-toggle-wrapper">
-              <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
-                <mat-icon class="page-header__nav-toggle">menu</mat-icon>
-              </button>
+        <div class="page-header-toolbar flex items-center justify-between px-6 py-4">
+          <!-- Mobile menu toggle -->
+          <div *ngIf="isMobile$ | async" class="page-header-nav-toggle-wrapper">
+            <button *ngIf="!hideSideNavButton"
+                    class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                    (click)="toggleSidenav()">
+              <span class="material-icons">menu</span>
+            </button>
+          </div>
+
+          <!-- Left content -->
+          <div class="page-header-left flex items-center space-x-4">
+            <!-- Breadcrumbs -->
+            <div class="page-header-breadcrumbs flex items-center space-x-2" *ngIf="breadcrumbDefinitions">
+              <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
+                <span class="page-header-breadcrumb text-white/90 hover:text-white cursor-pointer"
+                      *ngIf="breadcrumbDef.routerLink"
+                      [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                <span class="page-header-breadcrumb text-white/70"
+                      *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+                <span class="material-icons text-white/50 text-sm">chevron_right</span>
+              </ng-container>
             </div>
-            <div class="page-header__left">
-              <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
-                <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-                  <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink"
-                    [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  <span class="page-header__breadcrumb"
-                    *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
-                </ng-container>
-              </div>
-              <ng-content></ng-content>
-              <app-entity-favorite-star class="page-header__favorite" *ngIf="pFavorite" [favorite]="pFavorite">
-              </app-entity-favorite-star>
+
+            <!-- Page content -->
+            <ng-content></ng-content>
+
+            <!-- Favorite star -->
+            <app-entity-favorite-star class="page-header-favorite"
+                                      *ngIf="pFavorite"
+                                      [favorite]="pFavorite">
+            </app-entity-favorite-star>
+          </div>
+
+          <!-- Right content -->
+          <div class="page-header-right flex items-center space-x-2">
+            <!-- Extension buttons -->
+            <div #extensionRef>
+              <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
             </div>
-            <div class="page-header__filler"></div>
-            <div class="page-header__right">
-              <div #extensionRef>
-                <app-extension-buttons *ngIf="actionsKey" [type]="actionsKey"></app-extension-buttons>
-              </div>
-              <div #ref>
-                <ng-content select=".page-header-right"></ng-content>
-              </div>
-              <span class="page-header__divider" *ngIf="
-            (extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
-            (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)
-          ">
-                |
-              </span>
-              <button *ngIf="showHistory" class="page-header__menu-button" mat-icon-button
-                [matMenuTriggerFor]="history">
-                <mat-icon class="page-header__nav-toggle">schedule</mat-icon>
+
+            <!-- Custom content -->
+            <div #ref>
+              <ng-content select=".page-header-right"></ng-content>
+            </div>
+
+            <!-- Divider -->
+            <span class="page-header-divider text-white/30 mx-2"
+                  *ngIf="(extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
+                         (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)">
+              |
+            </span>
+
+            <!-- History button -->
+            <div class="relative" *ngIf="showHistory">
+              <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                      [matMenuTriggerFor]="history">
+                <span class="material-icons">schedule</span>
               </button>
-              <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header__menu">
-                <div class="page-header__history">
-                  <h3 class="page-header__history-title">Recent Activity</h3>
-                  <app-recent-entities mode="menu" class="page-header__history-list" history="true">
+              <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header-menu">
+                <div class="page-header-history p-4 w-80">
+                  <h3 class="page-header-history-title text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                  <app-recent-entities mode="menu" class="page-header-history-list" history="true">
                   </app-recent-entities>
                 </div>
               </mat-menu>
-              <button *ngIf="(events$ | async).length > 0" routerLink="/events" mat-icon-button
-                class="page-header__notification-button">
-                <mat-icon matBadgeColor="warn" [matBadge]="(unreadEventCount$ | async) || ''"
-                  class="page-header__notifications-button">
-                  notifications
-                </mat-icon>
-              </button>
-            <button id="userMenu" *ngIf="!hideMenu && !environment.hideUserMenu" class="page-header__menu-button page-header__usermenu"
-                mat-icon-button [matMenuTriggerFor]="menu">
+            </div>
+
+            <!-- Notifications button -->
+            <button *ngIf="(events$ | async).length > 0"
+                    routerLink="/events"
+                    class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
+              <span class="material-icons">notifications</span>
+              <span *ngIf="(unreadEventCount$ | async) as count"
+                    class="absolute -top-1 -right-1 bg-danger-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
+                {{ count }}
+              </span>
+            </button>
+
+            <!-- User menu -->
+            <div class="relative" *ngIf="!hideMenu && !environment.hideUserMenu">
+              <button id="userMenu"
+                      class="page-header-menu-button page-header-usermenu p-1 hover:bg-white/10 rounded-md transition-colors"
+                      [matMenuTriggerFor]="menu">
                 <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                 </app-user-avatar>
               </button>
-              <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
-                <div class="page-header__menu-inner">
-                  <div class="page-header__username">
+              <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header-menu">
+                <div class="page-header-menu-inner p-4 w-64">
+                  <!-- User info -->
+                  <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-gray-200 mb-4">
                     <app-user-avatar [allowGravatar]="allowGravatar$ | async" [user]="user$ | async"></app-user-avatar>
-                    <div class="page-header__username-text">
-                      <div>{{ username$ | async }}</div>
+                    <div class="page-header-username-text">
+                      <div class="font-medium text-gray-900">{{ username$ | async }}</div>
                     </div>
                   </div>
-                  <div *ngIf="!logoutOnly">
-                    <button mat-menu-item routerLink="/about">
+
+                  <!-- Menu items -->
+                  <div class="space-y-1" *ngIf="!logoutOnly">
+                    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            routerLink="/about">
                       <span>About</span>
                     </button>
-                    <button mat-menu-item routerLink="/user-profile">
+                    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            routerLink="/user-profile">
                       <span>Profile</span>
                     </button>
-                    <button mat-menu-item routerLink="/api-keys" *ngIf="canAPIKeys$ | async">
+                    <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                            routerLink="/api-keys"
+                            *ngIf="canAPIKeys$ | async">
                       <span>API Keys</span>
                     </button>
-                    <div class="page-header__menu-separator" *ngIf="canLogout$ | async"></div>
+                    <div class="page-header-menu-separator border-t border-gray-200 my-2" *ngIf="canLogout$ | async"></div>
                   </div>
-                  <button mat-menu-item (click)="logout()" *ngIf="canLogout$ | async">
+                  <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                          (click)="logout()"
+                          *ngIf="canLogout$ | async">
                     <span>Logout</span>
                   </button>
                 </div>
               </mat-menu>
             </div>
-          </mat-toolbar>
+          </div>
         </div>
-        <app-page-header-events *ngIf="!hideEndpointErrors" class="header-events" [endpointIds$]="endpointIds$">
+
+        <!-- Header events -->
+        <app-page-header-events *ngIf="!hideEndpointErrors"
+                                class="header-events"
+                                [endpointIds$]="endpointIds$">
         </app-page-header-events>
       </div>
     </div>

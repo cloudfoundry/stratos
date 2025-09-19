@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
-import { CoreModule } from '../../../core/src/core/core.module';
-import { SharedModule } from '../../../core/src/shared/shared.module';
+import { CoreModule } from '@stratosui/core';
+import { SharedModule } from '@stratosui/core';
 import {
   AnalysisReportRunnerComponent,
 } from './analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -131,7 +131,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
         CoreModule,
         CommonModule,
         SharedModule,
-        NgxChartsModule,
+        BaseChartDirective,
         KubernetesRoutingModule,
     ],
     declarations: [

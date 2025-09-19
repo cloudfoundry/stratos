@@ -44,9 +44,10 @@ enum Status {
 }
 
 @Component({
-  selector: 'app-home-page-endpoint-card',
+selector: 'app-home-page-endpoint-card',
   templateUrl: './home-page-endpoint-card.component.html',
-  styleUrls: ['./home-page-endpoint-card.component.scss']
+  styleUrls: ['./home-page-endpoint-card.component.scss'],
+  standalone: false
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
@@ -231,10 +232,10 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
       // Timeout after 15 seconds
       this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
-        this.loaded.next();
+        this.loaded.next(void 0);
         setTimeout(() => this.status.next(Status.OK), 0);
       }, () => {
-        this.loaded.next();
+        this.loaded.next(void 0);
         this.status.next(Status.Error);
         this.sub.unsubscribe();
       });

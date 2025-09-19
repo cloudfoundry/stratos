@@ -6,9 +6,10 @@ import { AppChip } from '../../../../../../../core/src/shared/components/chips/c
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
-  selector: 'app-kubernetes-node-tags-card',
+selector: 'app-kubernetes-node-tags-card',
   templateUrl: './kubernetes-node-tags-card.component.html',
-  styleUrls: ['./kubernetes-node-tags-card.component.scss']
+  styleUrls: ['./kubernetes-node-tags-card.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeTagsCardComponent implements OnInit {
 

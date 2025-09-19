@@ -11,13 +11,14 @@ import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({
-  selector: 'app-cloud-foundry-cell-base',
+selector: 'app-cloud-foundry-cell-base',
   templateUrl: './cloud-foundry-cell-base.component.html',
   styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryCellBaseComponent {
 

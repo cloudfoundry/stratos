@@ -4,9 +4,10 @@ import { interval, Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-routing-indicator',
+selector: 'app-routing-indicator',
   templateUrl: './routing-indicator.component.html',
-  styleUrls: ['./routing-indicator.component.scss']
+  styleUrls: ['./routing-indicator.component.scss'],
+  standalone: false
 })
 export class RoutingIndicatorComponent {
   public value$: Observable<number>;

@@ -1,17 +1,23 @@
-<mat-card class="editor-card">
+<div class="card editor-card">
   <div *ngIf="initing || (loading$ | async)" class="editor-loading">
     <div>
       <div class="editor-loading__msg">Loading ...</div>
-      <mat-progress-bar class="editor-loading__progress-bar" [color]="'primary'" mode="indeterminate">
-      </mat-progress-bar>
+      <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden editor-loading__progress-bar">
+        <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+      </div>
     </div>
   </div>
-  <mat-toolbar class="editor-toolbar">
-    <mat-button-toggle-group [value]="mode" name="editMode" aria-label="Edit Mode" (change)="editModeChanged($event)"
-      *ngIf="schema; else editorOnly">
-      <mat-button-toggle value="form">Form</mat-button-toggle>
-      <mat-button-toggle value="editor">YAML</mat-button-toggle>
-    </mat-button-toggle-group>
+  <div class="toolbar editor-toolbar">
+    <div class="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="Edit Mode" *ngIf="schema; else editorOnly">
+      <button class="btn btn-toggle"
+              [class.btn-toggle-active]="mode === 'form'"
+              (click)="editModeChanged({value: 'form'})"
+              name="edit-mode-form">Form</button>
+      <button class="btn btn-toggle"
+              [class.btn-toggle-active]="mode === 'editor'"
+              (click)="editModeChanged({value: 'editor'})"
+              name="edit-mode-editor">YAML</button>
+    </div>
 
     <ng-template #editorOnly>
       <div class="editor-title">YAML Editor</div>
@@ -20,35 +26,44 @@
     <div class="editor-spacer"></div>
 
     <div class="editor-toolbar-buttons">
-      <mat-menu #appMenu="matMenu">
-        <button mat-menu-item (click)="copyValues()">Copy from chart values</button>
-        <button *ngIf="releaseValues" mat-menu-item (click)="copyReleaseValues()">Copy from release values</button>
-        <mat-divider *ngIf="mode === 'editor'" class="editor-menu-divider"></mat-divider>
-        <button *ngIf="mode === 'editor'" mat-menu-item (click)="diff()">Diff with chart values</button>
-        <mat-divider class="editor-menu-divider"></mat-divider>
-        <button mat-menu-item (click)="clearFormValues()">Clear</button>
-      </mat-menu>
-      <button mat-button [matMenuTriggerFor]="appMenu">
-        <span>Values</span>
-        <mat-icon>arrow_drop_down</mat-icon>
-      </button>
+      <div class="relative" #menuContainer>
+        <button class="btn btn-secondary" (click)="toggleMenu()" #menuTrigger>
+          <span>Values</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-48"
+             *ngIf="menuOpen" #appMenu>
+          <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyValues(); closeMenu()">Copy from chart values</button>
+          <button *ngIf="releaseValues" class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
+          <div *ngIf="mode === 'editor'" class="border-t border-gray-200 my-1"></div>
+          <button *ngIf="mode === 'editor'" class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="diff(); closeMenu()">Diff with chart values</button>
+          <div class="border-t border-gray-200 my-1"></div>
+          <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="clearFormValues(); closeMenu()">Clear</button>
+        </div>
+      </div>
     </div>
 
     <div class="editor-toolbar-buttons">
-      <mat-button-toggle (click)="toggleLineNumbers()" checked="lineNumbers" *ngIf="mode === 'editor'">
-        <mat-icon>format_list_numbered</mat-icon>
-      </mat-button-toggle>
-      <mat-button-toggle (click)="toggleMinimap()" checked="minimap" *ngIf="mode === 'editor'">
-        <mat-icon>map</mat-icon>
-      </mat-button-toggle>
+      <button class="btn btn-toggle"
+              [class.btn-toggle-active]="lineNumbers"
+              (click)="toggleLineNumbers()"
+              *ngIf="mode === 'editor'">
+        <span class="material-icons">format_list_numbered</span>
+      </button>
+      <button class="btn btn-toggle"
+              [class.btn-toggle-active]="minimap"
+              (click)="toggleMinimap()"
+              *ngIf="mode === 'editor'">
+        <span class="material-icons">map</span>
+      </button>
     </div>
 
-  </mat-toolbar>
+  </div>
   <div [ngClass]="{'editor-hidden': mode !== 'form'}" class="editor-form">
     <div class="editor-yaml-error" *ngIf="yamlError">
       <div class="editor-yaml-error__msg">
         <div>
-          <mat-icon class="editor-yaml-error__icon text-warning">warning</mat-icon>
+          <span class="material-icons editor-yaml-error__icon text-warning-600">warning</span>
         </div>
         <div class="editor-yaml-error__text">
           <div>Error - YAML is not valid</div>
@@ -57,7 +72,7 @@
       </div>
     </div>
     <json-schema-form *ngIf="hasSchema" (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
-      [options]="{ addSubmit: false }" [schema]="schema" framework="material-design" [data]="initialFormData">
+      [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
     </json-schema-form>
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
@@ -65,4 +80,4 @@
       [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
   </div>
 
-</mat-card>
+</div>

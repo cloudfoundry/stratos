@@ -6,7 +6,7 @@ import {
 } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-stacks',
+selector: 'app-cloud-foundry-stacks',
   templateUrl: './cloud-foundry-stacks.component.html',
   styleUrls: ['./cloud-foundry-stacks.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfStacksListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryStacksComponent { }

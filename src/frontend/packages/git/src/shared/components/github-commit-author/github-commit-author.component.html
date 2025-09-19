@@ -1,5 +1,7 @@
-<div *ngIf="commit.author" class="github-commit-author__core-author">
-  <a *ngIf="commit.author.html_url" href="{{commit.author.html_url}}" target="_blank">{{commit.commit.author.name}}</a>
-  <span *ngIf="!commit.author.html_url">{{commit.commit.author.name}}</span>
-  <img *ngIf="showAvatar && commit.author.avatar_url" src="{{commit.author.avatar_url}}">
+<div *ngIf="commit.author" class="flex items-center space-x-2">
+  <a *ngIf="commit.author.html_url" href="{{commit.author.html_url}}" target="_blank"
+    class="text-primary-600 hover:text-primary-800 font-medium">{{commit.commit.author.name}}</a>
+  <span *ngIf="!commit.author.html_url" class="text-gray-900 font-medium">{{commit.commit.author.name}}</span>
+  <img *ngIf="showAvatar && commit.author.avatar_url" src="{{commit.author.avatar_url}}"
+    class="w-6 h-6 rounded-full flex-shrink-0">
 </div>

@@ -6,9 +6,10 @@ import { ListHostDirective } from '../helpers/list-host.directive';
 import { ListConfigProvider } from '../list-config-provider.types';
 
 @Component({
-    selector: 'app-list-view',
+selector: 'app-list-view',
     templateUrl: './list-view.component.html',
-    styleUrls: ['./list-view.component.scss']
+    styleUrls: ['./list-view.component.scss'],
+  standalone: false
 })
 export class ListViewComponent<T> implements OnDestroy {
 

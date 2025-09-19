@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
-  name: 'mbToHumanSize'
+name: 'mbToHumanSize',
+standalone: false
 })
 export class MbToHumanSizePipe implements PipeTransform {
   constructor(private utilsService: UtilsService) {

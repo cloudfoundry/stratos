@@ -4,9 +4,10 @@ import { UserProfileInfo } from '@stratosui/store';
 import { MD5 } from './md5';
 
 @Component({
-  selector: 'app-user-avatar',
+selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
-  styleUrls: ['./user-avatar.component.scss']
+  styleUrls: ['./user-avatar.component.scss'],
+  standalone: false
 })
 export class UserAvatarComponent {
 

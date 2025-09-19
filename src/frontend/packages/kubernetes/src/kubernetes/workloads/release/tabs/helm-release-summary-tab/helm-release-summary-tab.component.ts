@@ -26,6 +26,7 @@ import { ResourceAlert } from './../../../../services/analysis-report.types';
   selector: 'app-helm-release-summary-tab',
   templateUrl: './helm-release-summary-tab.component.html',
   styleUrls: ['./helm-release-summary-tab.component.scss'],
+  standalone: false
 })
 export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Confirmation dialogs

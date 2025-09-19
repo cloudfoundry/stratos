@@ -16,9 +16,10 @@ import { filter, map } from 'rxjs/operators';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 
 @Component({
-  selector: 'app-about-page',
+selector: 'app-about-page',
   templateUrl: './about-page.component.html',
-  styleUrls: ['./about-page.component.scss']
+  styleUrls: ['./about-page.component.scss'],
+  standalone: false
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
 

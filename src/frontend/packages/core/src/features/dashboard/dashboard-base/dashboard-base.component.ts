@@ -1,7 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal } from '@angular/cdk/portal';
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
+import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -28,9 +28,10 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { SideNavItem } from './../side-nav/side-nav.component';
 
 @Component({
-  selector: 'app-dashboard-base',
+selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
-  styleUrls: ['./dashboard-base.component.scss']
+  styleUrls: ['./dashboard-base.component.scss'],
+  standalone: false
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -106,7 +107,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
-    if (!this.closeSub) {
+    if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
       this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
         if (state.isMobile) {
@@ -119,9 +120,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.drawer._modeChanged.next(), 250);
-    });
+    if (this.drawer && this.drawer._modeChanged) {
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => this.drawer._modeChanged.next(), 250);
+      });
+    }
   }
 
   dispatchRelations() {

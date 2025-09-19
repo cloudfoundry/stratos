@@ -10,9 +10,10 @@ export interface TableCellExpanderConfig {
 }
 
 @Component({
-  selector: 'app-table-cell-expander',
+selector: 'app-table-cell-expander',
   templateUrl: './table-cell-expander.component.html',
   styleUrls: ['./table-cell-expander.component.scss'],
+  standalone: false,
   animations: [
     trigger('indicatorRotate', [
       state('collapsed, void', style({ transform: 'rotate(0deg)' })),

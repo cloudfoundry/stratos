@@ -19,9 +19,10 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cloud-foundry-tabs-base',
+selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss']
+  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
+  standalone: false
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
   static firehose = 'firehose';

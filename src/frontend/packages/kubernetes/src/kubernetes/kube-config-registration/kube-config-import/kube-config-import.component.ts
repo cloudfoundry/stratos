@@ -34,9 +34,10 @@ const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
 
 @Component({
-  selector: 'app-kube-config-import',
+selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
-  styleUrls: ['./kube-config-import.component.scss']
+  styleUrls: ['./kube-config-import.component.scss'],
+  standalone: false
 })
 export class KubeConfigImportComponent implements OnDestroy {
 

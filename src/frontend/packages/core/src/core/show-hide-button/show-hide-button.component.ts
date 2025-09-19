@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-show-hide-button',
+selector: 'app-show-hide-button',
   templateUrl: './show-hide-button.component.html',
-  styleUrls: ['./show-hide-button.component.scss']
+  styleUrls: ['./show-hide-button.component.scss'],
+  standalone: false
 })
 export class ShowHideButtonComponent {
 

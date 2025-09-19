@@ -15,6 +15,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
   selector: 'app-space-roles-list-wrapper',
   templateUrl: './space-roles-list-wrapper.component.html',
   styleUrls: ['./space-roles-list-wrapper.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: ListConfig,

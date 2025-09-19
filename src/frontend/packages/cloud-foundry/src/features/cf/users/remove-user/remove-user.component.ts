@@ -23,14 +23,15 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from '../manage-users/cf-roles.service';
 
 @Component({
-  selector: 'app-remove-user',
+selector: 'app-remove-user',
   templateUrl: './remove-user.component.html',
   styleUrls: ['./remove-user.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CfRolesService
-  ]
+  ],
+  standalone: false
 })
 export class RemoveUserComponent implements OnDestroy {
   initialUsers$: Observable<CfUser[]>;

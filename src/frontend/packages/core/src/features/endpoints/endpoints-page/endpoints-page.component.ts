@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData } from '@stratosui/store';
+import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, first, map, switchMap, tap } from 'rxjs/operators';
 
@@ -30,25 +30,31 @@ import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { ListComponent } from '../../../shared/components/list/list.component';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
+import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 
 @Component({
-  selector: 'app-endpoints-page',
+selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
   styleUrls: ['./endpoints-page.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: EndpointsListConfigService,
-  }, EndpointListHelper]
+  }, EndpointListHelper],
+  standalone: false
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
   private healthCheckTimeout: number;
 
   public canBackupRestore$: Observable<boolean>;
+  public showRegisterModal = false;
+  public isInitialised$: Observable<boolean>;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
+  @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
   customContentComponentRef: ComponentRef<any>;
 
   private snackBarText = {
@@ -66,7 +72,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     private snackBarService: SnackBarService,
     cs: CustomizationService,
     currentUserPermissionsService: CurrentUserPermissionsService,
-    public sessionService: SessionService
+    public sessionService: SessionService,
+    private endpointModalService: EndpointModalService
   ) {
     this.customizations = cs.get();
 
@@ -102,6 +109,12 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       map(sessionData => sessionData?.plugins.backup),
       switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
+
+    // Create an observable to track when endpoints are loaded and ready
+    this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
+      map(endpointState => !endpointState.loading),
+      delay(500) // Increased delay to ensure proper loading sequence
+    );
   }
 
   subs: Subscription[] = [];
@@ -130,8 +143,20 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     }
   }
 
-  ngOnInit() {
+    ngOnInit() {
+    // Fetch endpoints list on page load
+    console.log('Endpoints page loaded - fetching endpoints list');
+    
+    // Dispatch the GET_ENDPOINTS action which triggers system info fetch
+    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
+    console.log('Dispatched GET_ENDPOINTS action');
+    
+    // Also explicitly trigger system info
+    this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
+    console.log('Dispatched system info action');
+
     this.subs.push(this.endpointsService.haveRegistered$.subscribe(haveRegistered => {
+      console.log('haveRegistered changed:', haveRegistered);
       // Use custom component if specified
       this.customNoEndpointsContainer.clear();
       if (!haveRegistered && this.customizations.noEndpointsComponent) {
@@ -139,6 +164,49 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
         this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
       }
     }));
+
+    // Debug: Also subscribe to the actual endpoints data to see what's there
+    this.subs.push(this.endpointsService.endpoints$.subscribe(endpoints => {
+      console.log('Endpoints in store:', endpoints);
+      console.log('Number of endpoints:', Object.keys(endpoints).length);
+    }));
+
+    // Debug: Check what the list data source is doing
+    // We need to get access to the list component somehow to debug its data source
+    setTimeout(() => {
+      console.log('Checking if we can access list component data source...');
+      if (this.listComponent) {
+        console.log('List component found:', this.listComponent);
+        console.log('Data source:', this.listComponent.dataSource);
+        if (this.listComponent.dataSource) {
+          this.listComponent.dataSource.page$.subscribe(page => {
+            console.log('Data source page$:', page);
+          });
+          this.listComponent.dataSource.pagination$.subscribe(pagination => {
+            console.log('Data source pagination$:', pagination);
+          });
+          
+          // Debug the specific observables that control hasRows$
+          this.listComponent.dataSource.maxedResults$.subscribe(maxedResults => {
+            console.log('Data source maxedResults$:', maxedResults);
+          });
+          
+          // Debug hasRows$ directly from the list component
+          this.listComponent.hasRows$.subscribe(hasRows => {
+            console.log('List component hasRows$:', hasRows);
+          });
+          
+          // Debug the view type and card component
+          this.listComponent.view$.subscribe(view => {
+            console.log('List component view$:', view);
+          });
+          
+          console.log('List config cardComponent:', this.listComponent.config.cardComponent);
+        }
+      } else {
+        console.log('List component not found');
+      }
+    }, 2000);
 
     this.endpointsService.checkAllEndpoints();
     this.store.select(selectDashboardState).pipe(
@@ -151,12 +219,15 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   ngAfterViewInit() {
+    console.log('ngAfterViewInit - checking if list component is rendered');
+    
     this.subs.push(combineLatest(
       this.endpointsService.haveRegistered$,
       this.endpointsService.haveConnected$,
     ).pipe(
       delay(1),
       tap(([hasRegistered, hasConnected]) => {
+        console.log('hasRegistered:', hasRegistered, 'hasConnected:', hasConnected);
         this.showSnackBar(hasRegistered && !hasConnected);
       }),
     ).subscribe());
@@ -169,5 +240,37 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       this.customContentComponentRef.destroy();
     }
     this.showSnackBar(false);
+  }
+
+  // Modal methods
+  openRegisterModal() {
+    this.showRegisterModal = true;
+    this.endpointModalService.openModal();
+  }
+
+  closeRegisterModal() {
+    this.showRegisterModal = false;
+    this.endpointModalService.closeModal();
+  }
+
+  onEndpointRegistered() {
+    console.log('onEndpointRegistered called - refreshing endpoints');
+    
+    // Dispatch the GET_ENDPOINTS action to refresh the list
+    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
+    console.log('Dispatched GET_ENDPOINTS action after registration');
+    
+    // Also trigger system info refresh to update overall state
+    this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
+    console.log('Dispatched system info action after registration');
+    
+    // Also trigger health checks
+    this.endpointsService.checkAllEndpoints();
+    
+    // Show success message
+    this.snackBarService.show('Endpoint registered successfully!', 'OK', 5000);
+    
+    // Close the modal
+    this.closeRegisterModal();
   }
 }

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'applicationStateIcon'
+name: 'applicationStateIcon',
+standalone: false
 })
 export class ApplicationStateIconPipe implements PipeTransform {
 

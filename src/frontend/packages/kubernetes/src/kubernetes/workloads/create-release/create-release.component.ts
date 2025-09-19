@@ -22,6 +22,7 @@ import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
+  standalone: false,
   providers: [
     ...createMonocularProviders()
   ]

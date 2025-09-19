@@ -23,9 +23,10 @@ export class AppChip<T = string> implements IAppChip<T> {
 }
 
 @Component({
-  selector: 'app-chips',
+selector: 'app-chips',
   templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss']
+  styleUrls: ['./chips.component.scss'],
+  standalone: false
 })
 export class AppChipsComponent implements OnInit {
 

@@ -7,9 +7,10 @@ import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 
 
 @Component({
-  selector: 'app-service-plan-price',
+selector: 'app-service-plan-price',
   templateUrl: './service-plan-price.component.html',
-  styleUrls: ['./service-plan-price.component.scss']
+  styleUrls: ['./service-plan-price.component.scss'],
+  standalone: false
 })
 export class ServicePlanPriceComponent {
 

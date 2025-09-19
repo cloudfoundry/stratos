@@ -17,9 +17,10 @@ enum AlertLevel {
 }
 
 @Component({
-  selector: 'app-card-number-metric',
+selector: 'app-card-number-metric',
   templateUrl: './card-number-metric.component.html',
-  styleUrls: ['./card-number-metric.component.scss']
+  styleUrls: ['./card-number-metric.component.scss'],
+  standalone: false
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 

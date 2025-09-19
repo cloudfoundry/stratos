@@ -16,9 +16,10 @@ interface ICreateServiceTilesData extends ITileData {
 }
 
 @Component({
-  selector: 'app-add-service-instance-base-step',
+selector: 'app-add-service-instance-base-step',
   templateUrl: './add-service-instance-base-step.component.html',
-  styleUrls: ['./add-service-instance-base-step.component.scss']
+  styleUrls: ['./add-service-instance-base-step.component.scss'],
+  standalone: false
 })
 export class AddServiceInstanceBaseStepComponent {
   private tileManager = new TileConfigManager();

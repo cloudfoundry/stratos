@@ -12,9 +12,10 @@ import { getServiceName } from '../services-helper';
 import { ServicesService } from '../services.service';
 
 @Component({
-  selector: 'app-service-tabs-base',
+selector: 'app-service-tabs-base',
   templateUrl: './service-tabs-base.component.html',
   styleUrls: ['./service-tabs-base.component.scss'],
+  standalone: false
 })
 export class ServiceTabsBaseComponent {
   canCreateServiceInstance: CfCurrentUserPermissions;

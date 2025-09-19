@@ -5,8 +5,9 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService } from '../../../../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-table-cell-service-bindable',
+selector: 'app-table-cell-service-bindable',
   templateUrl: './table-cell-service-bindable.component.html',
-  styleUrls: ['./table-cell-service-bindable.component.scss']
+  styleUrls: ['./table-cell-service-bindable.component.scss'],
+  standalone: false
 })
 export class TableCellServiceBindableComponent extends TableCellCustom<APIResource<IService>>  { }

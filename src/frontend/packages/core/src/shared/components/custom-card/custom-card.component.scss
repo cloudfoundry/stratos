@@ -1,0 +1,81 @@
+.custom-card {
+  display: block;
+  padding: 16px;
+  margin: 8px 0;
+  border-radius: 4px;
+  background-color: white;
+  color: inherit;
+  font-family: inherit;
+  transition: box-shadow 0.3s ease;
+
+  &.raised {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  &.outlined {
+    border: 1px solid #e0e0e0;
+    box-shadow: none;
+  }
+}
+
+:host ::ng-deep .custom-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+:host ::ng-deep .custom-card-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+:host ::ng-deep .custom-card-subtitle {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 4px;
+}
+
+:host ::ng-deep .custom-card-content {
+  padding: 0;
+
+  &:not(:last-child) {
+    margin-bottom: 16px;
+  }
+}
+
+:host ::ng-deep .custom-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 0 0 0;
+  margin: 16px 0 0 0;
+
+  &[align="end"] {
+    justify-content: flex-end;
+  }
+
+  &[align="start"] {
+    justify-content: flex-start;
+  }
+
+  .custom-card:last-child & {
+    margin-bottom: 0;
+  }
+}
+
+:host ::ng-deep .custom-card-footer {
+  padding: 16px 0 0 0;
+  margin-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  color: rgba(0, 0, 0, 0.6);
+}

@@ -51,9 +51,10 @@ enum GitTypeKeys {
 }
 
 @Component({
-  selector: 'app-git-registration',
+selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
+  standalone: false
 })
 export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
 

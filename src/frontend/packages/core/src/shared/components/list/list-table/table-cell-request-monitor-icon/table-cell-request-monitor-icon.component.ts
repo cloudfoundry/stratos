@@ -17,9 +17,10 @@ interface Config<T> {
 }
 
 @Component({
-  selector: 'app-table-cell-request-monitor-icon',
+selector: 'app-table-cell-request-monitor-icon',
   templateUrl: './table-cell-request-monitor-icon.component.html',
-  styleUrls: ['./table-cell-request-monitor-icon.component.scss']
+  styleUrls: ['./table-cell-request-monitor-icon.component.scss'],
+  standalone: false
 })
 export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;

@@ -19,9 +19,10 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 }
 
 @Component({
-  selector: 'app-page-side-nav',
+selector: 'app-page-side-nav',
   templateUrl: './page-side-nav.component.html',
-  styleUrls: ['./page-side-nav.component.scss']
+  styleUrls: ['./page-side-nav.component.scss'],
+  standalone: false
 })
 export class PageSideNavComponent implements OnInit {
 

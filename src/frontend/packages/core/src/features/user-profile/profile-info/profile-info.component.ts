@@ -12,9 +12,10 @@ import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
 
 @Component({
-  selector: 'app-profile-info',
+selector: 'app-profile-info',
   templateUrl: './profile-info.component.html',
-  styleUrls: ['./profile-info.component.scss']
+  styleUrls: ['./profile-info.component.scss'],
+  standalone: false
 })
 export class ProfileInfoComponent {
 

@@ -6,7 +6,7 @@ import {
 } from '../../../shared/components/list/list-types/service-plans/service-plans-list-config.service';
 
 @Component({
-  selector: 'app-service-plans',
+selector: 'app-service-plans',
   templateUrl: './service-plans.component.html',
   styleUrls: ['./service-plans.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: ServicePlansListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class ServicePlansComponent { }

@@ -19,12 +19,13 @@ import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-def
 export const QUOTA_SPACE_GUID = 'space';
 
 @Component({
-  selector: 'app-space-quota-definition',
+selector: 'app-space-quota-definition',
   styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './space-quota-definition.component.scss'],
   templateUrl: './space-quota-definition.component.html',
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

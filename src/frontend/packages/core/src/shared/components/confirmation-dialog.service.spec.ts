@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { ConfirmationDialogService } from './confirmation-dialog.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@stratosui/core';
 import { CoreModule } from '../../core/core.module';
 
 describe('ConfirmationDialogService', () => {

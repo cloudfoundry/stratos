@@ -5,9 +5,10 @@ import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kuberne
 import { MetricStatistic } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-node-metric-stats-card',
+selector: 'app-kubernetes-node-metric-stats-card',
   templateUrl: './kubernetes-node-metric-stats-card.component.html',
-  styleUrls: ['./kubernetes-node-metric-stats-card.component.scss']
+  styleUrls: ['./kubernetes-node-metric-stats-card.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeMetricStatsCardComponent implements OnInit, OnDestroy {
 

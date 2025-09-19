@@ -7,7 +7,8 @@ import { HelmRelease } from '../../workload.types';
 @Component({
   selector: 'app-helm-release-card',
   templateUrl: './helm-release-card.component.html',
-  styleUrls: ['./helm-release-card.component.scss']
+  styleUrls: ['./helm-release-card.component.scss'],
+  standalone: false
 })
 export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
 

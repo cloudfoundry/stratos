@@ -6,7 +6,7 @@ import {
 } from '../../../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 
 @Component({
-  selector: 'app-services-tab',
+selector: 'app-services-tab',
   templateUrl: './services-tab.component.html',
   styleUrls: ['./services-tab.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: AppServiceBindingListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class ServicesTabComponent { }

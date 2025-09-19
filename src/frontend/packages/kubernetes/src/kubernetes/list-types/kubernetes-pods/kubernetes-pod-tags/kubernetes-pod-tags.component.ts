@@ -5,9 +5,10 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 import { KubeAPIResource, PodLabel } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-pod-tags',
+selector: 'app-kubernetes-pod-tags',
   templateUrl: './kubernetes-pod-tags.component.html',
-  styleUrls: ['./kubernetes-pod-tags.component.scss']
+  styleUrls: ['./kubernetes-pod-tags.component.scss'],
+  standalone: false
 })
 export class KubernetesPodTagsComponent<T> extends TableCellCustom<KubeAPIResource> implements OnInit {
 

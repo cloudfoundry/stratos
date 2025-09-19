@@ -1,8 +1,8 @@
 <div>
   <div class="dialog-error">
     <div class="dialog-error__content-outer">
-      <div *ngIf="show" class="dialog-error__content">
-        <mat-icon>warning</mat-icon>
+      <div *ngIf="show" class="dialog-error__content flex items-center gap-2 p-4 bg-error-50 text-error-700 rounded-md border border-error-200">
+        <span class="material-icons text-error-500">warning</span>
         <span>{{message}}</span>
       </div>
     </div>

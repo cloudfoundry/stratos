@@ -4,13 +4,14 @@ import { ListConfig } from '../../../../../core/src/shared/components/list/list.
 import { KubernetesNodesListConfigService } from '../../list-types/kubernetes-nodes/kubernetes-nodes-list-config.service';
 
 @Component({
-  selector: 'app-kubernetes-nodes-tab',
+selector: 'app-kubernetes-nodes-tab',
   templateUrl: './kubernetes-nodes-tab.component.html',
   styleUrls: ['./kubernetes-nodes-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: KubernetesNodesListConfigService,
-  }]
+  }],
+  standalone: false
 })
 export class KubernetesNodesTabComponent {
 

@@ -16,12 +16,13 @@ export interface ContainerForTable {
 }
 
 @Component({
-  selector: 'app-kubernetes-pod-containers',
+selector: 'app-kubernetes-pod-containers',
   templateUrl: './kubernetes-pod-containers.component.html',
   styleUrls: ['./kubernetes-pod-containers.component.scss'],
   providers: [
     TitleCasePipe
-  ]
+  ],
+  standalone: false
 })
 export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
 

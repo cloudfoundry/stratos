@@ -1,19 +1,17 @@
-<div class="kubernetes-node-metric-stats-card">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Summary of {{title}} Usage for Last {{period}} </mat-card-title>
-    </mat-card-header>
-    <mat-card-content *ngIf="metric==='container_memory_usage_bytes'">
-      <div class="app-metadata kubernetes-node-metric-stats-card__metadata">
-        <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
-        <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
-      </div>
-    </mat-card-content>
-    <mat-card-content *ngIf="metric==='container_cpu_usage_seconds_total'">
-      <div class="app-metadata kubernetes-node-metric-stats-card__metadata">
-        <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
-        <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
-      </div>
-    </mat-card-content>
-  </mat-card>
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Summary of {{title}} Usage for Last {{period}}</h3>
+  </div>
+  <div class="card-content p-4" *ngIf="metric==='container_memory_usage_bytes'">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
+      <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
+    </div>
+  </div>
+  <div class="card-content p-4" *ngIf="metric==='container_cpu_usage_seconds_total'">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
+      <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
+    </div>
+  </div>
 </div>

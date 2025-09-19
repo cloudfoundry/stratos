@@ -15,16 +15,17 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
 
 
 @Component({
-  selector: 'app-helm-release-tab-base',
+selector: 'app-helm-release-tab-base',
   templateUrl: './helm-release-tab-base.component.html',
   styleUrls: ['./helm-release-tab-base.component.scss'],
+  standalone: false,
   providers: [
     HelmReleaseHelperService,
     KubernetesAnalysisService,
     {
       provide: HelmReleaseGuid,
       useFactory: (activatedRoute: ActivatedRoute) => ({
-        guid: activatedRoute.snapshot.params.guid
+        guid: activatedRoute.snapshot.params.guid,
       }),
       deps: [
         ActivatedRoute

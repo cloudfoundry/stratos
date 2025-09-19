@@ -6,9 +6,10 @@ import { ApplicationService } from '../../../../../../cloud-foundry/src/features
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 
 @Component({
-  selector: 'app-card-app-status',
+selector: 'app-card-app-status',
   templateUrl: './card-app-status.component.html',
-  styleUrls: ['./card-app-status.component.scss']
+  styleUrls: ['./card-app-status.component.scss'],
+  standalone: false
 })
 export class CardAppStatusComponent implements OnInit {
   status$: Observable<StratosStatus>;

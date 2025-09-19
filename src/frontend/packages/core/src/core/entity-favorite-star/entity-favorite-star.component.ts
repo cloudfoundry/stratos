@@ -8,9 +8,10 @@ import { ConfirmationDialogService } from '../../shared/components/confirmation-
 import { EndpointsService } from '../endpoints.service';
 
 @Component({
-  selector: 'app-entity-favorite-star',
+selector: 'app-entity-favorite-star',
   templateUrl: './entity-favorite-star.component.html',
-  styleUrls: ['./entity-favorite-star.component.scss']
+  styleUrls: ['./entity-favorite-star.component.scss'],
+  standalone: false
 })
 export class EntityFavoriteStarComponent {
 

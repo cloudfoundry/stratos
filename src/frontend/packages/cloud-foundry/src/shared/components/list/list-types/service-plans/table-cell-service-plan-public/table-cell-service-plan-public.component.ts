@@ -5,8 +5,9 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-table-cell-service-plan-public',
+selector: 'app-table-cell-service-plan-public',
   templateUrl: './table-cell-service-plan-public.component.html',
   styleUrls: ['./table-cell-service-plan-public.component.scss'],
+  standalone: false
 })
 export class TableCellAServicePlanPublicComponent extends TableCellCustom<APIResource<IServicePlan>> { }

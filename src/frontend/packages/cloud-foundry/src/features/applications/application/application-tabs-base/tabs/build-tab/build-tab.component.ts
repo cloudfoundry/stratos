@@ -56,12 +56,13 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 }
 
 @Component({
-  selector: 'app-build-tab',
+selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
   styleUrls: ['./build-tab.component.scss'],
   providers: [
     ApplicationMonitorService,
-  ]
+  ],
+  standalone: false
 })
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean, }>;
@@ -195,11 +196,11 @@ export class BuildTabComponent implements OnInit {
         }
         return deploySource;
       }),
-      startWith({ type: 'loading' })
+      startWith({ type: 'loading', timestamp: null, endpointGuid: null })
     );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
-      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of({ type: 'not-available', timestamp: null, endpointGuid: null })),
     );
   }
 

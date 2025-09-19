@@ -16,9 +16,10 @@ import {
 import { ITableColumn } from '../list/list-table/table.types';
 
 @Component({
-  selector: 'app-action-monitor',
+selector: 'app-action-monitor',
   templateUrl: './app-action-monitor.component.html',
-  styleUrls: ['./app-action-monitor.component.scss']
+  styleUrls: ['./app-action-monitor.component.scss'],
+  standalone: false
 })
 export class AppActionMonitorComponent<T> implements OnInit {
 

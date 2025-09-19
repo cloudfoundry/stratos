@@ -1,6 +1,6 @@
 
 @mixin create($tile-height: 200px, $icon-size: 80px) {
-  $img-size: $tile-height / 2;
+  $img-size: calc($tile-height / 2);
 
   .tile-selector {
     border-radius: 3px;

@@ -4,8 +4,9 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { IFeatureFlag } from '../../../../../../cf-api.types';
 
 @Component({
-  selector: 'app-table-cell-feature-flag-state',
+selector: 'app-table-cell-feature-flag-state',
   templateUrl: './table-cell-feature-flag-state.component.html',
-  styleUrls: ['./table-cell-feature-flag-state.component.scss']
+  styleUrls: ['./table-cell-feature-flag-state.component.scss'],
+  standalone: false
 })
 export class TableCellFeatureFlagStateComponent extends TableCellCustom<IFeatureFlag> { }

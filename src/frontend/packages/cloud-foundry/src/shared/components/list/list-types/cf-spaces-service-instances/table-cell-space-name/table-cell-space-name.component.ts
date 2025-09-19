@@ -6,9 +6,10 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 
 @Component({
-  selector: 'app-table-cell-space-name',
+selector: 'app-table-cell-space-name',
   templateUrl: './table-cell-space-name.component.html',
-  styleUrls: ['./table-cell-space-name.component.scss']
+  styleUrls: ['./table-cell-space-name.component.scss'],
+  standalone: false
 })
 export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 

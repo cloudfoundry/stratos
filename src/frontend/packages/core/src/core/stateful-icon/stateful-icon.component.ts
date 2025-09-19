@@ -14,9 +14,10 @@ interface IconTemplateDefinition {
 type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 
 @Component({
-  selector: 'app-stateful-icon',
+selector: 'app-stateful-icon',
   templateUrl: './stateful-icon.component.html',
-  styleUrls: ['./stateful-icon.component.scss']
+  styleUrls: ['./stateful-icon.component.scss'],
+  standalone: false
 })
 
 export class StatefulIconComponent {

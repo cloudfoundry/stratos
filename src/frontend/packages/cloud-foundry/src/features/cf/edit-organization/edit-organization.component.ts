@@ -4,10 +4,11 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 @Component({
-  selector: 'app-edit-organization',
+selector: 'app-edit-organization',
   templateUrl: './edit-organization.component.html',
   styleUrls: ['./edit-organization.component.scss'],
-  providers: [getActiveRouteCfOrgSpaceProvider]
+  providers: [getActiveRouteCfOrgSpaceProvider],
+  standalone: false
 })
 export class EditOrganizationComponent {
 

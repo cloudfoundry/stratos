@@ -8,9 +8,10 @@ import {
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 
 @Component({
-  selector: 'app-cf-endpoints-missing',
+selector: 'app-cf-endpoints-missing',
   templateUrl: './cf-endpoints-missing.component.html',
-  styleUrls: ['./cf-endpoints-missing.component.scss']
+  styleUrls: ['./cf-endpoints-missing.component.scss'],
+  standalone: false
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 

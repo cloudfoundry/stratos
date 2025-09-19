@@ -7,9 +7,10 @@ import { IRule, IRuleType, ISpace } from '../../../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
-  selector: 'app-cf-security-groups-card',
+selector: 'app-cf-security-groups-card',
   templateUrl: './cf-security-groups-card.component.html',
-  styleUrls: ['./cf-security-groups-card.component.scss']
+  styleUrls: ['./cf-security-groups-card.component.scss'],
+  standalone: false
 })
 export class CfSecurityGroupsCardComponent extends CardCell<APIResource> implements OnInit {
 

@@ -7,9 +7,10 @@ import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
-  selector: 'app-chart-details-readme',
+selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
-  styleUrls: ['./chart-details-readme.component.scss']
+  styleUrls: ['./chart-details-readme.component.scss'],
+  standalone: false
 })
 export class ChartDetailsReadmeComponent {
 
@@ -25,8 +26,8 @@ export class ChartDetailsReadmeComponent {
   private loadingDelay: any;
 
   constructor(private chartsService: ChartsService) {
-    this.renderer.link = (href, title, text) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
-    this.renderer.code = (text: string) => `<code>${text}</code>`;
+    this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
+    this.renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
     this.loadingDelay = setTimeout(() => this.loading = true, 100);
   }
 
@@ -36,9 +37,10 @@ export class ChartDetailsReadmeComponent {
       map(resp => {
         clearTimeout(this.loadingDelay);
         this.loading = false;
-        return marked(resp, {
+        const result = marked(resp, {
           renderer: this.renderer
         });
+        return typeof result === 'string' ? result : '';
       }),
       catchError((error) => {
         this.loading = false;

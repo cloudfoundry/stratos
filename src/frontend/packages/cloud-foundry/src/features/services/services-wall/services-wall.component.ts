@@ -14,7 +14,7 @@ import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Component({
-  selector: 'app-services-wall',
+selector: 'app-services-wall',
   templateUrl: './services-wall.component.html',
   styleUrls: ['./services-wall.component.scss'],
   providers: [
@@ -23,7 +23,8 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
       useClass: ServiceInstancesWallListConfigService
     },
     CfOrgSpaceDataService
-  ]
+  ],
+  standalone: false
 })
 export class ServicesWallComponent {
 

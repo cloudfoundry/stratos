@@ -1,4 +1,4 @@
-@import '../../../sass/mixins';
+@use '../../../sass/mixins';
 .page-not-found {
   $width: 200px;
   $width-small: 150px;
@@ -29,7 +29,7 @@
   &__404-outer {
     display: flex;
   }
-  @include breakpoint(tablet) {
+  @include mixins.breakpoint(tablet) {
     &__4,
     &__0 {
       font-size: $width;

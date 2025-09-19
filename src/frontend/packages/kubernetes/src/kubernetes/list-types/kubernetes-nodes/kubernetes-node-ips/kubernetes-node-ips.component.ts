@@ -4,9 +4,10 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
 
 @Component({
-  selector: 'app-kubernetes-node-ips',
+selector: 'app-kubernetes-node-ips',
   templateUrl: './kubernetes-node-ips.component.html',
-  styleUrls: ['./kubernetes-node-ips.component.scss']
+  styleUrls: ['./kubernetes-node-ips.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

@@ -10,7 +10,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -60,9 +60,10 @@ interface CfUserWithWarning extends CfUser {
 }
 
 @Component({
-    selector: 'app-manage-users-modify',
+selector: 'app-manage-users-modify',
     templateUrl: './manage-users-modify.component.html',
-    styleUrls: ['./manage-users-modify.component.scss']
+    styleUrls: ['./manage-users-modify.component.scss'],
+  standalone: false
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
@@ -118,7 +119,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  private snackBarRef: TailwindSnackBarRef<any>;
 
   usersNames$: Observable<string[]>;
   blocked = new BehaviorSubject<boolean>(true);
@@ -137,7 +138,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService,
     private cd: ChangeDetectorRef,
-    private snackBar: MatSnackBar,
+    private snackBar: TailwindSnackBarService,
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }

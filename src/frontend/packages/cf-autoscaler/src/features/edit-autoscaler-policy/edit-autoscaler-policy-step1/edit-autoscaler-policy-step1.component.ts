@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
@@ -15,12 +15,13 @@ import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-st
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 @Component({
-  selector: 'app-edit-autoscaler-policy-step1',
+selector: 'app-edit-autoscaler-policy-step1',
   templateUrl: './edit-autoscaler-policy-step1.component.html',
   styleUrls: ['./edit-autoscaler-policy-step1.component.scss'],
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
+  ],
+  standalone: false
 })
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
 

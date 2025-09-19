@@ -5,9 +5,10 @@ import { AppChip } from '../../../../../../../../core/src/shared/components/chip
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 
 @Component({
-  selector: 'app-table-cell-confirm-org-space',
+selector: 'app-table-cell-confirm-org-space',
   templateUrl: './table-cell-confirm-org-space.component.html',
-  styleUrls: ['./table-cell-confirm-org-space.component.scss']
+  styleUrls: ['./table-cell-confirm-org-space.component.scss'],
+  standalone: false
 })
 export class TableCellConfirmOrgSpaceComponent extends TableCellCustom<CfRoleChangeWithNames> {
   chipsConfig: AppChip<CfRoleChangeWithNames>[];

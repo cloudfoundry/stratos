@@ -7,9 +7,10 @@ import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catal
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Component({
-  selector: 'app-helm-hub-registration',
+selector: 'app-helm-hub-registration',
   templateUrl: './helm-hub-registration.component.html',
-  styleUrls: ['./helm-hub-registration.component.scss']
+  styleUrls: ['./helm-hub-registration.component.scss'],
+  standalone: false
 })
 export class HelmHubRegistrationComponent {
 

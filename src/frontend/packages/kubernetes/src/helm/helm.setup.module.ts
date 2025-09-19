@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { EndpointsService } from '../../../core/src/core/endpoints.service';
 import { CoreModule } from '../../../core/src/public-api';
-import { SharedModule } from '../../../core/src/shared/shared.module';
+import { SharedModule } from '@stratosui/core';
 import { GetSystemInfo } from '../../../store/src/actions/system.actions';
 import { EntityCatalogModule } from '../../../store/src/entity-catalog.module';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';

@@ -5,8 +5,9 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../../cf-api.types';
 
 @Component({
-  selector: 'app-table-cell-org-space-role',
+selector: 'app-table-cell-org-space-role',
   templateUrl: './table-cell-org-space-role.component.html',
-  styleUrls: ['./table-cell-org-space-role.component.scss']
+  styleUrls: ['./table-cell-org-space-role.component.scss'],
+  standalone: false
 })
 export class TableCellRoleOrgSpaceComponent extends TableCellCustom<APIResource<ISpace>> { }

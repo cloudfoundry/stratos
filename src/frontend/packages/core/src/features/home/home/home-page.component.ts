@@ -43,9 +43,10 @@ const noFavoritesMsg = {
 };
 
 @Component({
-  selector: 'app-home-page',
+selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrls: ['./home-page.component.scss']
+  styleUrls: ['./home-page.component.scss'],
+  standalone: false
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public allEndpointIds$: Observable<string[]>;

@@ -1,0 +1,81 @@
+// Material Design compatibility layer for Tailwind CSS migration
+// This file provides SCSS functions and variables to replace Angular Material theme functions
+// Integrates with the existing Stratos theme system using CSS custom properties
+
+// Helper function to generate Material Design color shades from a base color
+@function generate-palette($base-color) {
+  @return (
+    50: color-mix(in srgb, $base-color 10%, white),
+    100: color-mix(in srgb, $base-color 20%, white),
+    200: color-mix(in srgb, $base-color 35%, white),
+    300: color-mix(in srgb, $base-color 50%, white),
+    400: color-mix(in srgb, $base-color 70%, white),
+    500: $base-color,
+    600: color-mix(in srgb, $base-color 85%, black),
+    700: color-mix(in srgb, $base-color 70%, black),
+    800: color-mix(in srgb, $base-color 55%, black),
+    900: color-mix(in srgb, $base-color 40%, black),
+  );
+}
+
+// Color palette replacements integrated with Stratos theme
+$primary: generate-palette(var(--color-primary));
+$accent: generate-palette(var(--color-accent));
+$warn: generate-palette(var(--color-danger));
+
+// Monocular app theme variables - use existing theme colors
+$monocular-app-primary: $primary;
+$monocular-app-accent: $accent;
+$monocular-app-warn: $warn;
+
+// mat-color function replacement - integrates with Stratos theme
+@function mat-color($palette, $hue: 500) {
+  // Handle direct CSS custom property usage
+  @if $palette == $primary or $palette == 'primary' {
+    @if $hue == 500 {
+      @return var(--color-primary);
+    }
+  }
+  @if $palette == $accent or $palette == 'accent' {
+    @if $hue == 500 {
+      @return var(--color-accent);
+    }
+  }
+  @if $palette == $warn or $palette == 'warn' {
+    @if $hue == 500 {
+      @return var(--color-danger);
+    }
+  }
+
+  // Handle map-based palettes
+  @if type-of($palette) == 'map' {
+    @if map-has-key($palette, $hue) {
+      @return map-get($palette, $hue);
+    } @else {
+      @return map-get($palette, 500); // fallback to 500
+    }
+  }
+
+  @return $palette; // fallback for non-map values
+}
+
+// Additional helper functions
+@function mat-contrast($palette, $hue: 500) {
+  // Simple contrast function - returns white for dark colors, black for light
+  @if $hue >= 500 {
+    @return #ffffff;
+  } @else {
+    @return #000000;
+  }
+}
+
+// Helper function to get themed colors
+@function theme-color($color-name) {
+  @return var(--color-#{$color-name});
+}
+
+// Legacy material theme variables for compatibility
+$background-white: var(--app-bg);
+$color-primary: var(--color-primary);
+$color-accent: var(--color-accent);
+$color-warn: var(--color-danger);

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,12 +11,13 @@ import { StepOnNextFunction } from '../../../../../../core/src/shared/components
 import { AppNameUniqueChecking } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
 @Component({
-  selector: 'app-create-application-step2',
+selector: 'app-create-application-step2',
   templateUrl: './create-application-step2.component.html',
   styleUrls: ['./create-application-step2.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+  ],
+  standalone: false
 })
 export class CreateApplicationStep2Component implements OnInit {
 

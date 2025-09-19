@@ -20,10 +20,11 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
 }
 
 @Component({
-  selector: 'app-card-status',
+selector: 'app-card-status',
   templateUrl: './card-status.component.html',
   styleUrls: ['./card-status.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class CardStatusComponent {
   @Input() status$: Observable<StratosStatus>;

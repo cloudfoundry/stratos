@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
@@ -18,10 +18,10 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
-  selector: 'app-cloud-foundry-organization-summary',
+selector: 'app-cloud-foundry-organization-summary',
   templateUrl: './cloud-foundry-organization-summary.component.html',
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
-
+  standalone: false
 })
 export class CloudFoundryOrganizationSummaryComponent {
   appLink: () => void;
@@ -34,7 +34,7 @@ export class CloudFoundryOrganizationSummaryComponent {
     public cfEndpointService: CloudFoundryEndpointService,
     public cfOrgService: CloudFoundryOrganizationService,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar
+    private snackBar: TailwindSnackBarService
   ) {
     this.appLink = () => {
       goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);

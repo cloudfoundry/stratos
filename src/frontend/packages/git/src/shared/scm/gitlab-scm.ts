@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { Md5 } from 'ts-md5/dist/md5';
+import { Md5 } from 'ts-md5';
 
 import { GitBranch, GitCommit, GitRepo, GitSuggestedRepo } from '../../store/git.public-types';
 import { GitSCM, SCMIcon } from './scm';

@@ -7,12 +7,13 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QUOTA_SPACE_GUID } from '../space-quota-definition/space-quota-definition.component';
 
 @Component({
-  selector: 'app-edit-space-quota',
+selector: 'app-edit-space-quota',
   templateUrl: './edit-space-quota.component.html',
   styleUrls: ['./edit-space-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
-  ]
+  ],
+  standalone: false
 })
 export class EditSpaceQuotaComponent {
   cfSpaceQuotaUrl: string;

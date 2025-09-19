@@ -8,9 +8,10 @@ import { Maintainer } from '../../shared/models/maintainer';
 import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
-  selector: 'app-chart-details-info',
+selector: 'app-chart-details-info',
   templateUrl: './chart-details-info.component.html',
-  styleUrls: ['./chart-details-info.component.scss']
+  styleUrls: ['./chart-details-info.component.scss'],
+  standalone: false
 })
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;

@@ -8,9 +8,10 @@ import { IService } from '../../../../../../cf-api-svc.types';
 import { ServiceTag } from '../cf-service-card/cf-service-card.component';
 
 @Component({
-  selector: 'app-table-cell-service-tags',
+selector: 'app-table-cell-service-tags',
   templateUrl: './table-cell-service-tags.component.html',
-  styleUrls: ['./table-cell-service-tags.component.scss']
+  styleUrls: ['./table-cell-service-tags.component.scss'],
+  standalone: false
 })
 export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<IService>> {
 

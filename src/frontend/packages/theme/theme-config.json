@@ -1,0 +1,48 @@
+{
+  "colors": {
+    "primary": "#1e293b",
+    "secondary": "#60a5fa",
+    "accent": "#60a5fa",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "info": "#3b82f6"
+  },
+  "navigation": {
+    "background": "#1e293b",
+    "text": "#ffffff",
+    "textMuted": "rgba(255, 255, 255, 0.7)",
+    "hover": "rgba(255, 255, 255, 0.1)",
+    "active": "rgba(255, 255, 255, 0.15)",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "tooltip": "#374151"
+  },
+  "layout": {
+    "background": "#f8fafc",
+    "bodyBackground": "#f1f5f9",
+    "text": "#1e293b",
+    "textMuted": "#64748b",
+    "headerBackground": "#ffffff",
+    "headerText": "#1e293b",
+    "headerBorder": "#e2e8f0",
+    "contentBackground": "#ffffff",
+    "contentSecondary": "#f8fafc",
+    "contentBorder": "#e2e8f0"
+  },
+  "branding": {
+    "logo": "/core/assets/logo.png",
+    "navLogo": "/core/assets/logo.png",
+    "navLogoIcon": "/core/assets/logo.png",
+    "favicon": "/core/assets/favicon.ico",
+    "companyName": "My Stratos",
+    "loginTitle": "Stratos Console",
+    "loginSubtitle": "Multi-Cloud Management Platform"
+  },
+  "login": {
+    "showLogo": true,
+    "showTitle": true,
+    "backgroundImage": "/assets/core/login-bg.jpg",
+    "backgroundColor": "#f1f5f9",
+    "cardBackground": "#ffffff"
+  }
+}

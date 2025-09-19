@@ -6,9 +6,10 @@ import { IAuthForm } from '../../../../../store/src/extension-types';
 
 
 @Component({
-  selector: 'app-kubernetes-aws-auth-form',
+selector: 'app-kubernetes-aws-auth-form',
   templateUrl: './kubernetes-aws-auth-form.component.html',
-  styleUrls: ['./kubernetes-aws-auth-form.component.scss']
+  styleUrls: ['./kubernetes-aws-auth-form.component.scss'],
+  standalone: false
 })
 export class KubernetesAWSAuthFormComponent implements IAuthForm {
   showPassword = false;

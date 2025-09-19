@@ -5,9 +5,10 @@ import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
 
 @Component({
-  selector: 'app-chart-index',
+selector: 'app-chart-index',
   templateUrl: './chart-index.component.html',
-  styleUrls: ['./chart-index.component.scss']
+  styleUrls: ['./chart-index.component.scss'],
+  standalone: false
 })
 export class ChartIndexComponent implements OnInit {
   charts: Chart[];

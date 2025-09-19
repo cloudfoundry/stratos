@@ -26,9 +26,10 @@ export enum ProfileSettingsTypes {
   STORAGE
 }
 @Component({
-  selector: 'app-profile-settings',
+selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
-  styleUrls: ['./profile-settings.component.scss']
+  styleUrls: ['./profile-settings.component.scss'],
+  standalone: false
 })
 export class ProfileSettingsComponent {
 

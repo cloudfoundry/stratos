@@ -6,9 +6,10 @@ import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 import moment from 'moment';
 
 @Component({
-  selector: 'app-date-time',
+selector: 'app-date-time',
   templateUrl: './date-time.component.html',
-  styleUrls: ['./date-time.component.scss']
+  styleUrls: ['./date-time.component.scss'],
+  standalone: false
 })
 export class DateTimeComponent implements OnDestroy {
 

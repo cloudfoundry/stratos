@@ -1,6 +1,6 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, Inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
@@ -8,9 +8,10 @@ import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 import { safeUnsubscribe } from '../../../core/utils.service';
 
 @Component({
-  selector: 'app-add-api-key-dialog',
+selector: 'app-add-api-key-dialog',
   templateUrl: './add-api-key-dialog.component.html',
-  styleUrls: ['./add-api-key-dialog.component.scss']
+  styleUrls: ['./add-api-key-dialog.component.scss'],
+  standalone: false
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
 
@@ -25,7 +26,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   constructor(
     private fb: UntypedFormBuilder,
-    public dialogRef: MatDialogRef<ApiKey>,
+    @Inject('TailwindDialogRef') public dialogRef: MatDialogRef<ApiKey>,
   ) {
     this.formGroup = this.fb.group({
       comment: ['', Validators.required],

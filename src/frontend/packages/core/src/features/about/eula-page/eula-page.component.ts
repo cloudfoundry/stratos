@@ -2,9 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-eula-page',
+selector: 'app-eula-page',
   templateUrl: './eula-page.component.html',
-  styleUrls: ['./eula-page.component.scss']
+  styleUrls: ['./eula-page.component.scss'],
+  standalone: false
 })
 export class EulaPageComponent {
 

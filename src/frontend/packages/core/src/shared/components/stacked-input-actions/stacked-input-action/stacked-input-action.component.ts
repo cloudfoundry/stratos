@@ -41,9 +41,10 @@ export interface StackedInputActionUpdate {
  * Individual text input field meant to be stacked amongst others of same type in a . Used in conjunction with StackedInputActionsComponent
  */
 @Component({
-  selector: 'app-stacked-input-action',
+selector: 'app-stacked-input-action',
   templateUrl: './stacked-input-action.component.html',
-  styleUrls: ['./stacked-input-action.component.scss']
+  styleUrls: ['./stacked-input-action.component.scss'],
+  standalone: false
 })
 export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 

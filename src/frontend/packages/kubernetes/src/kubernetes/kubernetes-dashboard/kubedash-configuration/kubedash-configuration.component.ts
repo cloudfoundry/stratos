@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
@@ -19,6 +18,7 @@ type MessageUpdater = (msg: string) => void;
   selector: 'app-kubedash-configuration',
   templateUrl: './kubedash-configuration.component.html',
   styleUrls: ['./kubedash-configuration.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,
@@ -67,7 +67,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public kubeDashboardStatus$: Observable<KubeDashboardStatus>;
 
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  // Removed Angular Material snackbar dependency
 
   public serviceAccountBusy$ = new BehaviorSubject<boolean>(false);
   public serviceAccountMsg = '';
@@ -91,7 +91,6 @@ export class KubedashConfigurationComponent implements OnDestroy {
     public kubeEndpointService: KubernetesEndpointService,
     private httpClient: HttpClient,
     private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar,
   ) {
     this.kubeDashboardStatus$ = kubeEndpointService.kubeDashboardStatus$;
     // Clear the updating status when we get back new dashboard status
@@ -117,9 +116,6 @@ export class KubedashConfigurationComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
-    }
     if (this.sub) {
       this.sub.unsubscribe();
     }
@@ -211,7 +207,8 @@ export class KubedashConfigurationComponent implements OnDestroy {
     }
 
     obs.subscribe(() => {
-      this.snackBar.open(okMsg, 'Dismiss', { duration: 3000 });
+      console.log(okMsg); // Replace with proper notification system if needed
+      msgUpdater(okMsg);
       busy.next(false);
       this.refresh();
     }, (e) => {
@@ -219,7 +216,8 @@ export class KubedashConfigurationComponent implements OnDestroy {
       if (e && e.error && e.error.error) {
         msg = e.error.error;
       }
-      this.snackBarRef = this.snackBar.open(msg, 'Dismiss');
+      console.error(msg); // Replace with proper notification system if needed
+      msgUpdater(msg);
       busy.next(false);
       this.refresh();
     });

@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
 import { Subscription } from 'rxjs';
-import { tag } from 'rxjs-spy/operators/tag';
+import { tag } from 'rxjs-spy/operators';
 import { debounceTime, delay, distinctUntilChanged, map, withLatestFrom } from 'rxjs/operators';
 
 import { GetAllApplications } from '../../../../../../../cloud-foundry/src/actions/application.actions';

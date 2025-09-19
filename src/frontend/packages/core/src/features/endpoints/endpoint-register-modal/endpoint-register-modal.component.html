@@ -1,0 +1,131 @@
+<!-- Modal backdrop with backdrop blur -->
+<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+  
+  <!-- Modal container -->
+  <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
+    
+    <!-- Modal content -->
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
+      
+      <!-- Modal header -->
+      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
+        <div class="relative flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+              <span class="material-icons text-white text-xl">
+                {{ selectedEndpointInfo ? 'arrow_back' : 'add_circle_outline' }}
+              </span>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">
+                {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.label + ' Endpoint' : 'Register Endpoint' }}
+              </h2>
+              <p class="text-white text-opacity-90 text-sm">
+                {{ selectedEndpointInfo ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button 
+              *ngIf="selectedEndpointInfo"
+              (click)="goBackToSelection()"
+              class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+            >
+              <span class="material-icons text-white text-lg">arrow_back</span>
+            </button>
+            <button 
+              (click)="closeModal()"
+              class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+            >
+              <span class="material-icons text-white text-lg">close</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal body -->
+      <div class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        
+        <!-- Endpoint type selection -->
+        <div *ngIf="!selectedEndpointInfo">
+          <app-tile-selector 
+            [options]="tileSelectorConfig$ | async" 
+            [dynamicSmallerTiles]="6"
+            (selection)="onTileSelected($event)"
+            class="endpoint-tile-selector">
+          </app-tile-selector>
+        </div>
+
+        <!-- Endpoint registration form -->
+        <div *ngIf="selectedEndpointInfo" class="space-y-6">
+          <!-- Dynamic component container for the endpoint registration -->
+          <div #endpointFormContainer class="">
+            <!-- The endpoint-specific registration component will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            <span *ngIf="!selectedEndpointInfo">Select an endpoint type to continue with registration</span>
+            <span *ngIf="selectedEndpointInfo">Configure your {{ selectedEndpointInfo.label }} endpoint</span>
+          </div>
+          <div class="flex space-x-3">
+            <button 
+              (click)="closeModal()"
+              class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom styles for the tile selector in modal context */
+  .endpoint-tile-selector ::ng-deep .tile-selector {
+    grid-gap: 1rem;
+  }
+  
+  .endpoint-tile-selector ::ng-deep .tile {
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+  
+  .endpoint-tile-selector ::ng-deep .tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+  }
+  
+  .endpoint-tile-selector ::ng-deep .tile.selected {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  }
+
+  /* Custom scrollbar for the modal content */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+</style>

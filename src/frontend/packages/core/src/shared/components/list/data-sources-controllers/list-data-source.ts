@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
-import { SortDirection } from '@angular/material/sort';
+export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,

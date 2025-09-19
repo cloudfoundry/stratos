@@ -54,9 +54,10 @@ import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-t
 
 
 @Component({
-  selector: 'app-deploy-application-step2',
+selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
-  styleUrls: ['./deploy-application-step2.component.scss']
+  styleUrls: ['./deploy-application-step2.component.scss'],
+  standalone: false
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {

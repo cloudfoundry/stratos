@@ -11,9 +11,10 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 
 @Component({
-  selector: 'app-card-autoscaler-default',
+selector: 'app-card-autoscaler-default',
   templateUrl: './card-autoscaler-default.component.html',
-  styleUrls: ['./card-autoscaler-default.component.scss']
+  styleUrls: ['./card-autoscaler-default.component.scss'],
+  standalone: false
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 

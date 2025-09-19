@@ -14,9 +14,10 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 
 @Component({
-  selector: 'app-create-space-step',
+selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
   styleUrls: ['./create-space-step.component.scss'],
+  standalone: false
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 

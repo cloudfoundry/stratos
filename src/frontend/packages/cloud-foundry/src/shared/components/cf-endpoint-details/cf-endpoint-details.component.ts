@@ -6,8 +6,9 @@ import {
 
 
 @Component({
-  selector: 'lib-cf-endpoint-details',
+selector: 'lib-cf-endpoint-details',
   templateUrl: './cf-endpoint-details.component.html',
-  styleUrls: ['./cf-endpoint-details.component.scss']
+  styleUrls: ['./cf-endpoint-details.component.scss'],
+  standalone: false
 })
 export class CfEndpointDetailsComponent extends EndpointListDetailsComponent { }

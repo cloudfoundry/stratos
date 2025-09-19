@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIconRegistry } from '@stratosui/core';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
@@ -9,11 +9,12 @@ import { Chart } from '../../shared/models/chart';
 import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 
 @Component({
-  selector: 'app-chart-details-usage',
+selector: 'app-chart-details-usage',
   templateUrl: './chart-details-usage.component.html',
   styleUrls: ['./chart-details-usage.component.scss'],
   viewProviders: [MatIconRegistry],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart: Chart;
@@ -23,7 +24,7 @@ export class ChartDetailsUsageComponent implements OnInit {
   constructor(
     private mdIconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
-    public snackBar: MatSnackBar,
+    public snackBar: TailwindSnackBarService,
     public endpointsService: EndpointsService,
     private route: ActivatedRoute,
   ) { }

@@ -6,9 +6,10 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
 
 
 @Component({
-  selector: 'app-kubernetes-gke-auth-form',
+selector: 'app-kubernetes-gke-auth-form',
   templateUrl: './kubernetes-gke-auth-form.component.html',
-  styleUrls: ['./kubernetes-gke-auth-form.component.scss']
+  styleUrls: ['./kubernetes-gke-auth-form.component.scss'],
+  standalone: false
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: UntypedFormGroup;

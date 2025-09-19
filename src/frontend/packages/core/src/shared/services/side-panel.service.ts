@@ -46,7 +46,7 @@ export class SidePanelService {
     this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
 
-    this.previewModeSubject = new BehaviorSubject<SidePanelMode>(-1);
+    this.previewModeSubject = new BehaviorSubject<SidePanelMode>(SidePanelMode.Normal);
     this.previewMode$ = this.observeSubject(this.previewModeSubject);
 
     this.setupRouterListener();

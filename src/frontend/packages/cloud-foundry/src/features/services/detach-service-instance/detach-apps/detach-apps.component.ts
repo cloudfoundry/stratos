@@ -10,7 +10,7 @@ import {
 } from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
 
 @Component({
-  selector: 'app-detach-apps',
+selector: 'app-detach-apps',
   templateUrl: './detach-apps.component.html',
   styleUrls: ['./detach-apps.component.scss'],
   providers: [
@@ -18,7 +18,8 @@ import {
       provide: ListConfig,
       useClass: DetachAppsListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class DetachAppsComponent implements OnDestroy {
 

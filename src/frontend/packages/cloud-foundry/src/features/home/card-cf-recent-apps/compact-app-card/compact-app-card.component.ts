@@ -12,9 +12,10 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 
 
 @Component({
-  selector: 'app-compact-app-card',
+selector: 'app-compact-app-card',
   templateUrl: './compact-app-card.component.html',
-  styleUrls: ['./compact-app-card.component.scss']
+  styleUrls: ['./compact-app-card.component.scss'],
+  standalone: false
 })
 export class CompactAppCardComponent implements OnInit {
 

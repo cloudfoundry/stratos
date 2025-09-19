@@ -6,9 +6,10 @@ export interface NoContentMessageLine {
   text: string;
 }
 @Component({
-  selector: 'app-no-content-message',
+selector: 'app-no-content-message',
   templateUrl: './no-content-message.component.html',
-  styleUrls: ['./no-content-message.component.scss']
+  styleUrls: ['./no-content-message.component.scss'],
+  standalone: false
 })
 export class NoContentMessageComponent implements AfterViewInit {
 

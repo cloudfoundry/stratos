@@ -8,9 +8,10 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
-  selector: 'app-table-cell-route-apps-attached',
+selector: 'app-table-cell-route-apps-attached',
   templateUrl: './table-cell-route-apps-attached.component.html',
-  styleUrls: ['./table-cell-route-apps-attached.component.scss']
+  styleUrls: ['./table-cell-route-apps-attached.component.scss'],
+  standalone: false
 })
 export class TableCellRouteAppsAttachedComponent extends TableCellCustom<any> implements OnInit {
   boundApps$: Observable<AppChip[]>;

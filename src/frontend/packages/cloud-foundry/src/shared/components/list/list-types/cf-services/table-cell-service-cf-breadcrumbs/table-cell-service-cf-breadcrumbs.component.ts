@@ -8,9 +8,10 @@ import { CFAppState } from '../../../../../../cf-app-state';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 
 @Component({
-  selector: 'app-table-cell-service-cf-breadcrumbs',
+selector: 'app-table-cell-service-cf-breadcrumbs',
   templateUrl: './table-cell-service-cf-breadcrumbs.component.html',
-  styleUrls: ['./table-cell-service-cf-breadcrumbs.component.scss']
+  styleUrls: ['./table-cell-service-cf-breadcrumbs.component.scss'],
+  standalone: false
 })
 export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIResource<IService>> {
 

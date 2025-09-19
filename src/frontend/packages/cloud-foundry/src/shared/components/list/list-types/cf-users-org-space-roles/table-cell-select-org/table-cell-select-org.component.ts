@@ -13,9 +13,10 @@ import { CfRolesService } from '../../../../../../features/cf/users/manage-users
 import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
 
 @Component({
-  selector: 'app-table-cell-select-org',
+selector: 'app-table-cell-select-org',
   templateUrl: './table-cell-select-org.component.html',
-  styleUrls: ['./table-cell-select-org.component.scss']
+  styleUrls: ['./table-cell-select-org.component.scss'],
+  standalone: false
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
 

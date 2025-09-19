@@ -6,9 +6,10 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 import { TableCellCustom } from '../../list.types';
 
 @Component({
-  selector: 'app-table-cell-select',
+selector: 'app-table-cell-select',
   templateUrl: './table-cell-select.component.html',
-  styleUrls: ['./table-cell-select.component.scss']
+  styleUrls: ['./table-cell-select.component.scss'],
+  standalone: false
 })
 export class TableCellSelectComponent<T> extends TableCellCustom<T> implements OnInit {
 

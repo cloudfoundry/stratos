@@ -6,7 +6,7 @@ import {
 } from '../../../../shared/components/list/list-types/cf-buildpacks/cf-buildpacks-list-config.service';
 
 @Component({
-  selector: 'app-cloud-foundry-build-packs',
+selector: 'app-cloud-foundry-build-packs',
   templateUrl: './cloud-foundry-build-packs.component.html',
   styleUrls: ['./cloud-foundry-build-packs.component.scss'],
   providers: [
@@ -14,6 +14,7 @@ import {
       provide: ListConfig,
       useClass: CfBuildpacksListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryBuildPacksComponent { }

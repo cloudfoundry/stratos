@@ -32,7 +32,7 @@ import { CloudFoundryOrganizationService } from '../../../../services/cloud-foun
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 
 @Component({
-  selector: 'app-cloud-foundry-space-base',
+selector: 'app-cloud-foundry-space-base',
   templateUrl: './cloud-foundry-space-base.component.html',
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
   providers: [
@@ -41,7 +41,8 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 

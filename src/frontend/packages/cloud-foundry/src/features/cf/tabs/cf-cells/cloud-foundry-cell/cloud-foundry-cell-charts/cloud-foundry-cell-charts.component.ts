@@ -9,9 +9,10 @@ import { IMetricCell, MetricQueryType } from '../../../../../../../../store/src/
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({
-  selector: 'app-cloud-foundry-cell-charts',
+selector: 'app-cloud-foundry-cell-charts',
   templateUrl: './cloud-foundry-cell-charts.component.html',
   styleUrls: ['./cloud-foundry-cell-charts.component.scss'],
+  standalone: false
 })
 export class CloudFoundryCellChartsComponent {
 

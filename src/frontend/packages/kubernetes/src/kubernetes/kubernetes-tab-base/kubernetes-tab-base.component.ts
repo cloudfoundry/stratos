@@ -16,6 +16,7 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
   selector: 'app-kubernetes-tab-base',
   templateUrl: './kubernetes-tab-base.component.html',
   styleUrls: ['./kubernetes-tab-base.component.scss'],
+  standalone: false,
   providers: [
     {
       provide: BaseKubeGuid,

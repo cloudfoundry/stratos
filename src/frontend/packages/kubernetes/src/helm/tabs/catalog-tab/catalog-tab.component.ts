@@ -15,14 +15,14 @@ import { MonocularChartsListConfig } from '../../list-types/monocular-charts-lis
 const REPO_FILTER_NAME = 'repository';
 
 @Component({
-  selector: 'app-catalog-tab',
+selector: 'app-catalog-tab',
   templateUrl: './catalog-tab.component.html',
   styleUrls: ['./catalog-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: MonocularChartsListConfig,
-  }]
-
+  }],
+  standalone: false
 })
 export class CatalogTabComponent implements OnDestroy {
 

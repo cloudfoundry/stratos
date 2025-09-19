@@ -16,9 +16,10 @@ import {
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
-  selector: 'app-table-cell-service',
+selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',
-  styleUrls: ['./table-cell-service.component.scss']
+  styleUrls: ['./table-cell-service.component.scss'],
+  standalone: false
 })
 export class TableCellServiceComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 

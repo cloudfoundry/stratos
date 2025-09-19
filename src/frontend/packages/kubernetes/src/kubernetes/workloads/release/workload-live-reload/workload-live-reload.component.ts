@@ -5,7 +5,8 @@ import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-
 @Component({
   selector: 'app-workload-live-reload',
   templateUrl: './workload-live-reload.component.html',
-  styleUrls: ['./workload-live-reload.component.scss']
+  styleUrls: ['./workload-live-reload.component.scss'],
+  standalone: false
 })
 export class WorkloadLiveReloadComponent implements OnInit {
   public checked = false;

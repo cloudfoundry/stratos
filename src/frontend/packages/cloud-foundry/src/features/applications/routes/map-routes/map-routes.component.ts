@@ -11,7 +11,7 @@ import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-t
 import { ApplicationService } from '../../application.service';
 
 @Component({
-  selector: 'app-map-routes',
+selector: 'app-map-routes',
   templateUrl: './map-routes.component.html',
   styleUrls: ['./map-routes.component.scss'],
   providers: [
@@ -19,7 +19,8 @@ import { ApplicationService } from '../../application.service';
       provide: ListConfig,
       useClass: CfAppMapRoutesListConfigService
     }
-  ]
+  ],
+  standalone: false
 })
 export class MapRoutesComponent implements OnInit, OnDestroy {
   paginationSubscription: any;

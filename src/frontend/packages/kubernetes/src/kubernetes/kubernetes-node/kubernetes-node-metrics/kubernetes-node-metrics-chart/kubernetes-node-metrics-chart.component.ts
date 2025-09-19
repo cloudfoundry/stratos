@@ -8,9 +8,10 @@ import { IMetricApplication } from '../../../../../../store/src/types/metric.typ
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
 
 @Component({
-  selector: 'app-kubernetes-node-metrics-chart',
+selector: 'app-kubernetes-node-metrics-chart',
   templateUrl: './kubernetes-node-metrics-chart.component.html',
-  styleUrls: ['./kubernetes-node-metrics-chart.component.scss']
+  styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],
+  standalone: false
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 

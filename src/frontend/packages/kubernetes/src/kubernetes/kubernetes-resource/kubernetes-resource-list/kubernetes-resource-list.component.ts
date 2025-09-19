@@ -38,9 +38,10 @@ import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
 const namespaceColumnId = 'namespace';
 
 @Component({
-  selector: 'app-kubernetes-resource-list',
+selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
   styleUrls: ['./kubernetes-resource-list.component.scss'],
+  standalone: false
 })
 export class KubernetesResourceListComponent implements OnDestroy {
 

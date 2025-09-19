@@ -9,9 +9,10 @@ import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 
 @Component({
-  selector: 'app-service-broker-card',
+selector: 'app-service-broker-card',
   templateUrl: './service-broker-card.component.html',
-  styleUrls: ['./service-broker-card.component.scss']
+  styleUrls: ['./service-broker-card.component.scss'],
+  standalone: false
 })
 export class ServiceBrokerCardComponent implements OnDestroy {
 

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -18,12 +18,13 @@ import { ApplicationService } from '../application.service';
 
 
 @Component({
-  selector: 'app-edit-application',
+selector: 'app-edit-application',
   templateUrl: './edit-application.component.html',
   styleUrls: ['./edit-application.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+  ],
+  standalone: false
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 

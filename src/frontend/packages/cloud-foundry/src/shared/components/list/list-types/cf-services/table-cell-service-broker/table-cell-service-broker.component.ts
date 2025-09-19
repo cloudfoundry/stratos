@@ -19,9 +19,10 @@ export interface TableCellServiceBrokerComponentConfig {
 }
 
 @Component({
-  selector: 'app-table-cell-service-broker',
+selector: 'app-table-cell-service-broker',
   templateUrl: './table-cell-service-broker.component.html',
-  styleUrls: ['./table-cell-service-broker.component.scss']
+  styleUrls: ['./table-cell-service-broker.component.scss'],
+  standalone: false
 })
 export class TableCellServiceBrokerComponent extends
   TableCellCustom<APIResource<IService>,

@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-card-progress-overlay',
+selector: 'app-card-progress-overlay',
   templateUrl: './card-progress-overlay.component.html',
-  styleUrls: ['./card-progress-overlay.component.scss']
+  styleUrls: ['./card-progress-overlay.component.scss'],
+  standalone: false
 })
 export class CardProgressOverlayComponent {
 

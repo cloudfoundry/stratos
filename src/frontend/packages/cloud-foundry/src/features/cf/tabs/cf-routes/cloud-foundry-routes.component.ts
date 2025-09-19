@@ -7,7 +7,7 @@ import {
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
-  selector: 'app-cloud-foundry-routes',
+selector: 'app-cloud-foundry-routes',
   templateUrl: './cloud-foundry-routes.component.html',
   styleUrls: ['./cloud-foundry-routes.component.scss'],
   providers: [
@@ -16,6 +16,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
       useClass: CfRoutesListConfigService
     },
     CfOrgSpaceDataService
-  ]
+  ],
+  standalone: false
 })
 export class CloudFoundryRoutesComponent { }

@@ -62,10 +62,11 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
 ];
 
 @Component({
-    selector: 'app-table-cell',
+selector: 'app-table-cell',
     templateUrl: './table-cell.component.html',
     styleUrls: ['./table-cell.component.scss'],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef, static: true })

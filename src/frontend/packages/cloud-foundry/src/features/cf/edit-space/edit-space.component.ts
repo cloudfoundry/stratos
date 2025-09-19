@@ -12,7 +12,7 @@ import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organ
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
 
 @Component({
-  selector: 'app-edit-space',
+selector: 'app-edit-space',
   templateUrl: './edit-space.component.html',
   styleUrls: ['./edit-space.component.scss'],
   providers: [
@@ -22,7 +22,8 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ]
+  ],
+  standalone: false
 })
 export class EditSpaceComponent {
 

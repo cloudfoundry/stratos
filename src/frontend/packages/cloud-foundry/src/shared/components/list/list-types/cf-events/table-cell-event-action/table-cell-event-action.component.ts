@@ -4,8 +4,9 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
 @Component({
-  selector: 'app-table-cell-event-action',
+selector: 'app-table-cell-event-action',
   templateUrl: './table-cell-event-action.component.html',
-  styleUrls: ['./table-cell-event-action.component.scss']
+  styleUrls: ['./table-cell-event-action.component.scss'],
+  standalone: false
 })
 export class TableCellEventActionComponent extends TableCellCustom<APIResource> { }

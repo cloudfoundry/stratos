@@ -17,13 +17,14 @@ import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../../../cf.helpers';
 
 @Component({
-  selector: 'app-cloud-foundry-space-users',
+selector: 'app-cloud-foundry-space-users',
   templateUrl: './cloud-foundry-space-users.component.html',
   styleUrls: ['./cloud-foundry-space-users.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfSpaceUsersListConfigService
-  }]
+  }],
+  standalone: false
 })
 export class CloudFoundrySpaceUsersComponent {
   public addRolesByUsernameLink$: Observable<{

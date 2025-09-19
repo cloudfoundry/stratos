@@ -35,9 +35,10 @@ import { CF_ENDPOINT_TYPE } from './../../../../../../cf-types';
 
 
 @Component({
-  selector: 'app-cf-org-card',
+selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
-  styleUrls: ['./cf-org-card.component.scss']
+  styleUrls: ['./cf-org-card.component.scss'],
+  standalone: false
 })
 export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {
   cardMenu: MenuItem[];

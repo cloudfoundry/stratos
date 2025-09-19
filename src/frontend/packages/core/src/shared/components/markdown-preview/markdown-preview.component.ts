@@ -7,9 +7,10 @@ import { PreviewableComponent } from '../../previewable-component';
 import { marked } from 'marked';
 
 @Component({
-  selector: 'app-markdown-preview',
+selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
-  styleUrls: ['./markdown-preview.component.scss']
+  styleUrls: ['./markdown-preview.component.scss'],
+  standalone: false
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 
@@ -33,6 +34,15 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     private domSanitizer: DomSanitizer
   ) { }
 
+  private parseInline(tokens: any[]): string {
+    return tokens.map(token => {
+      if (token.type === 'text') {
+        return token.raw;
+      }
+      return token.raw || '';
+    }).join('');
+  }
+
   setProps(props: { [key: string]: any, }) {
     this.setDocumentUrl = props.documentUrl;
   }
@@ -41,18 +51,15 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
       (markText) => {
         if (markText && markText.length > 0) {
-          // Basic sanitization
-          marked.setOptions({
-            sanitize: true,
-            sanitizer: dirty => this.domSanitizer.sanitize(SecurityContext.HTML, dirty),
-          });
+          // Basic sanitization - Note: marked no longer supports sanitize option
           const renderer = new marked.Renderer();
           // Ensure links in the readme open in a new tab
-          renderer.link = (href, title, text) => {
-            const link = marked.Renderer.prototype.link.call(renderer, href, title, text);
-            return link.replace('<a', '<a target="_blank" ');
+          renderer.link = ({ href, title, tokens }) => {
+            const text = this.parseInline(tokens);
+            return `<a target="_blank" href="${href}" ${title ? `title="${title}"` : ''}>${text}</a>`;
           };
-          this.markdownHtml = marked(markText, { renderer });
+          const result = marked(markText, { renderer });
+          this.markdownHtml = typeof result === 'string' ? result : '';
         }
       },
       (error) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));

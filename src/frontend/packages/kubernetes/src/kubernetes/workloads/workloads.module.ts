@@ -1,11 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MonacoEditorModule, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 
-import { CoreModule } from '../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../core/src/shared/shared.module';
+import { CoreModule } from '@stratosui/core';
+import { SharedModule } from '@stratosui/core';
+import { TailwindJsonSchemaFormModule } from '../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 import { KubernetesModule } from '../kubernetes.module';
 import { ChartValuesEditorComponent } from './chart-values-editor/chart-values-editor.component';
 import { CreateReleaseComponent } from './create-release/create-release.component';
@@ -42,7 +42,7 @@ const monacoConfig: NgxMonacoEditorConfig = {
         WorkloadsRouting,
         NgxGraphModule,
         KubernetesModule,
-        MaterialDesignFrameworkModule,
+        TailwindJsonSchemaFormModule,
         MonacoEditorModule.forRoot(monacoConfig),
     ],
     declarations: [

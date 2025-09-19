@@ -5,9 +5,10 @@ import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 
 @Component({
-  selector: 'app-backup-checkbox-cell',
+selector: 'app-backup-checkbox-cell',
   templateUrl: './backup-checkbox-cell.component.html',
-  styleUrls: ['./backup-checkbox-cell.component.scss']
+  styleUrls: ['./backup-checkbox-cell.component.scss'],
+  standalone: false
 })
 export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel> {
 

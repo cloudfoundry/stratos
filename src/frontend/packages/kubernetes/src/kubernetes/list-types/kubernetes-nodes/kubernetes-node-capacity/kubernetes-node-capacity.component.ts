@@ -4,10 +4,11 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 
 
 @Component({
-  selector: 'app-kubernetes-node-capacity',
+selector: 'app-kubernetes-node-capacity',
   templateUrl: './kubernetes-node-capacity.component.html',
   styleUrls: ['./kubernetes-node-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
 

@@ -7,9 +7,10 @@ import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
 @Component({
-  selector: 'app-table-cell-app-cforgspace',
+selector: 'app-table-cell-app-cforgspace',
   templateUrl: './table-cell-app-cforgspace.component.html',
   styleUrls: ['./table-cell-app-cforgspace.component.scss'],
+  standalone: false
 })
 export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase {
 

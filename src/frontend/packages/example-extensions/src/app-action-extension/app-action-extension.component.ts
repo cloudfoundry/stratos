@@ -8,9 +8,10 @@ import { StratosAction, StratosActionType } from '@stratosui/core';
   icon: 'extension'
 })
 @Component({
-  selector: 'app-app-action-extension',
+selector: 'app-app-action-extension',
   templateUrl: './app-action-extension.component.html',
-  styleUrls: ['./app-action-extension.component.scss']
+  styleUrls: ['./app-action-extension.component.scss'],
+  standalone: false
 })
 export class AppActionExtensionComponent implements OnInit {
 

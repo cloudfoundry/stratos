@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-enumerate',
+selector: 'app-enumerate',
   templateUrl: './enumerate.component.html',
-  styleUrls: ['./enumerate.component.scss']
+  styleUrls: ['./enumerate.component.scss'],
+  standalone: false
 })
 export class EnumerateComponent {
   @Input() collection: Observable<any[]>;

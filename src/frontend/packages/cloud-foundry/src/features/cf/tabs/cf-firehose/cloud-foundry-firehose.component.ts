@@ -9,9 +9,10 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 
 @Component({
-  selector: 'app-cloud-foundry-firehose',
+selector: 'app-cloud-foundry-firehose',
   templateUrl: './cloud-foundry-firehose.component.html',
-  styleUrls: ['./cloud-foundry-firehose.component.scss']
+  styleUrls: ['./cloud-foundry-firehose.component.scss'],
+  standalone: false
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;

@@ -1,7 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, InjectionToken } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { TailwindDialogRef } from '@stratosui/core';
+
+// Temporary injection token to replace MAT_DIALOG_DATA
+export const DIALOG_DATA = new InjectionToken<any>('DialogData');
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -10,9 +13,10 @@ import { UserInviteConfigureService } from '../user-invite.service';
 
 
 @Component({
-  selector: 'app-user-invite-configuration-dialog',
+selector: 'app-user-invite-configuration-dialog',
   templateUrl: './user-invite-configuration-dialog.component.html',
-  styleUrls: ['./user-invite-configuration-dialog.component.scss']
+  styleUrls: ['./user-invite-configuration-dialog.component.scss'],
+  standalone: false
 })
 export class UserInviteConfigurationDialogComponent {
   connecting$: Observable<boolean>;
@@ -41,10 +45,10 @@ export class UserInviteConfigurationDialogComponent {
 
   constructor(
     public fb: UntypedFormBuilder,
-    public dialogRef: MatDialogRef<UserInviteConfigurationDialogComponent>,
-    public snackBar: MatSnackBar,
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
+    public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(DIALOG_DATA) public data: {
       guid: string
     }
   ) {

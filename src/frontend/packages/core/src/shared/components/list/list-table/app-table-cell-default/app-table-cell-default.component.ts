@@ -7,9 +7,10 @@ import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
 
 @Component({
-  selector: 'app-table-cell-default',
+selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
-  styleUrls: ['app-table-cell-default.component.scss']
+  styleUrls: ['app-table-cell-default.component.scss'],
+  standalone: false
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
 

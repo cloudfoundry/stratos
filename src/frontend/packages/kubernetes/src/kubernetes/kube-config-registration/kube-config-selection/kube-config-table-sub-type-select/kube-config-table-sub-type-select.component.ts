@@ -6,9 +6,10 @@ import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
-  selector: 'app-kube-config-table-sub-type-select',
+selector: 'app-kube-config-table-sub-type-select',
   templateUrl: './kube-config-table-sub-type-select.component.html',
-  styleUrls: ['./kube-config-table-sub-type-select.component.scss']
+  styleUrls: ['./kube-config-table-sub-type-select.component.scss'],
+  standalone: false
 })
 export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 

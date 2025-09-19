@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-polling-indicator',
+selector: 'app-polling-indicator',
   templateUrl: './polling-indicator.component.html',
-  styleUrls: ['./polling-indicator.component.scss']
+  styleUrls: ['./polling-indicator.component.scss'],
+  standalone: false
 })
 export class PollingIndicatorComponent {
 
