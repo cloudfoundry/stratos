@@ -406,4 +406,36 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }));
   };
 
+  public gaugeOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
+
+  getGaugeData(metricData: any) {
+    if (!metricData || !metricData[0]) {
+      return { labels: [], datasets: [] };
+    }
+
+    const current = metricData[0].entity.latest.target[0];
+    const max = metricData[0].entity.chartMaxValue;
+    const remaining = max - current;
+
+    return {
+      labels: ['Current', 'Remaining'],
+      datasets: [{
+        data: [current, remaining],
+        backgroundColor: [
+          metricData[0].entity.latest.colorTarget[0],
+          '#E0E0E0'
+        ]
+      }]
+    };
+  }
+
 }

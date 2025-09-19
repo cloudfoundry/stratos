@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CoreModule } from '@stratosui/core';
 import { MDAppModule } from '../../../../core/src/public-api';
@@ -138,7 +138,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
         MDAppModule,
         CloudFoundrySectionRoutingModule,
         RouterModule,
-        NgxChartsModule,
+        BaseChartDirective,
         CloudFoundrySharedModule,
         CFHomeCardModule,
     ],

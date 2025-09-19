@@ -1,18 +1,24 @@
 <div class="app-ring-chart">
   <div class="pie">
-    <ngx-charts-pie-chart [customColors]="customColors" [view]="[120,120]" [animations]="true" [doughnut]="true"
-      [results]="data" [gradient]="false">
-    </ngx-charts-pie-chart>
+    <canvas baseChart
+      [data]="chartJsData"
+      [type]="'doughnut'"
+      [options]="chartOptions"
+      width="120"
+      height="120">
+    </canvas>
   </div>
   <div class="legend">
     <div class="advanced-pie-legend">
-      <div class="total-value" ngx-charts-count-up [countTo]="getTotal()"></div>
+      <div class="total-value">{{ getTotal() }}</div>
       <div class="total-label">{{ label }}</div>
     </div>
-    <ngx-charts-advanced-legend [data]="data" [label]="label" [colors]="colors" [animations]="true"
-      [valueFormatting]="valueFormatting" [labelFormatting]="nameFormatting"
-      [percentageFormatting]="percentageFormatting" (select)="onClick($event)" (activate)="onActivate($event)"
-      (deactivate)="onDeactivate($event)">
-    </ngx-charts-advanced-legend>
+    <div class="custom-legend">
+      <div *ngFor="let item of data; let i = index" class="legend-item" (click)="onClick(item)">
+        <div class="legend-color" [style.background-color]="getItemColor(i)"></div>
+        <span class="legend-label">{{ nameFormatting ? nameFormatting(item.name) : item.name }}</span>
+        <span class="legend-value">{{ valueFormatting ? valueFormatting(item.value) : item.value }}</span>
+      </div>
+    </div>
   </div>
 </div>

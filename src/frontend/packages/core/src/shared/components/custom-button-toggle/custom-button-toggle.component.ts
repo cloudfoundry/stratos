@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, forwardRef, ContentChildren, Qu
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MatButtonToggleChange {
-  source: CustomButtonToggleComponent;
+  source: CustomButtonToggleComponent | CustomButtonToggleGroupComponent;
   value: any;
 }
 

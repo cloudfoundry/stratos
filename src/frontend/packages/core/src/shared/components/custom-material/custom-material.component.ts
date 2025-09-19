@@ -97,7 +97,7 @@ export class CustomDatepickerComponent {
 // Custom Datepicker Input Component
 @Component({
   selector: 'mat-datepicker-input',
-  template: '<input class="custom-datepicker-input" [matDatepicker]="datepicker" [value]="value" (input)="onInput($event)">',
+  template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker" [value]="value" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: false
 })

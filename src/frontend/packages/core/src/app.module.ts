@@ -1,4 +1,5 @@
 import { Injectable, NgModule } from '@angular/core';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
@@ -28,6 +29,7 @@ import {
   UserFavorite,
   UserFavoriteManager
 } from '@stratosui/store';
+import { StratosThemeModule } from '../../theme/theme.module';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { AppComponent } from './app.component';
@@ -109,6 +111,7 @@ class AppStoreDebugModule { }
     SharedModule,
     BrowserAnimationsModule,
     CoreModule,
+    StratosThemeModule,
     SetupModule,
     LoginModule,
     HomeModule,
@@ -128,7 +131,8 @@ class AppStoreDebugModule { }
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    CurrentUserPermissionsService
+    CurrentUserPermissionsService,
+    provideCharts(withDefaultRegisterables())
   ],
   bootstrap: [AppComponent]
 })

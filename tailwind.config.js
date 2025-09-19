@@ -92,17 +92,40 @@ module.exports = {
         'nav': {
           bg: 'var(--nav-bg)',
           text: 'var(--nav-text)',
+          'text-muted': 'var(--nav-text-muted)',
           hover: 'var(--nav-hover)',
           active: 'var(--nav-active)',
+          border: 'var(--nav-border)',
+          tooltip: 'var(--nav-tooltip)',
         },
-        // Background colors
+        // Layout colors
         'app': {
           bg: 'var(--app-bg)',
           text: 'var(--app-text)',
         },
+        'body': {
+          bg: 'var(--body-bg)',
+        },
+        'header': {
+          bg: 'var(--header-bg)',
+          text: 'var(--header-text)',
+          border: 'var(--header-border)',
+        },
+        'content': {
+          bg: 'var(--content-bg)',
+          secondary: 'var(--content-secondary)',
+          border: 'var(--content-border)',
+          text: 'var(--content-text)',
+          muted: 'var(--content-muted)',
+        },
         // Theme customizable colors
         'primary': 'var(--color-primary)',
         'secondary': 'var(--color-secondary)',
+        'accent': 'var(--color-accent)',
+        'success': 'var(--color-success)',
+        'warning': 'var(--color-warning)',
+        'danger': 'var(--color-danger)',
+        'info': 'var(--color-info)',
         'logo-bg': 'var(--logo-bg)',
         'login-bg': 'var(--login-bg)',
       },

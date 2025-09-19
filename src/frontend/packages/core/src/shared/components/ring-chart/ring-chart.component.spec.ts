@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RingChartComponent } from './ring-chart.component';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('RingChartComponent', () => {
@@ -13,7 +13,7 @@ describe('RingChartComponent', () => {
       declarations: [RingChartComponent],
       imports: [
         NoopAnimationsModule,
-        NgxChartsModule,
+        BaseChartDirective,
       ]
     })
       .compileComponents();

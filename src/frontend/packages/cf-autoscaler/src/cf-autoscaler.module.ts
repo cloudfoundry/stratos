@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CloudFoundrySharedModule } from '../../cloud-foundry/src/shared/cf-shared.module';
 import { CoreModule } from '@stratosui/core';
@@ -18,7 +18,7 @@ import { CardAutoscalerDefaultComponent } from './shared/card-autoscaler-default
     SharedModule,
     MDAppModule,
     CloudFoundrySharedModule,
-    NgxChartsModule,
+    BaseChartDirective,
     ExtensionService.declare([
       AutoscalerTabExtensionComponent,
     ])

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../cloud-foundry/src/features/applications/application.service';
 import {
@@ -59,7 +59,7 @@ import { AutoscalerRoutingModule } from './autoscaler.routing';
     CoreModule,
     SharedModule,
     AutoscalerRoutingModule,
-    NgxChartsModule,
+    BaseChartDirective,
     CloudFoundrySharedModule,
   ],
   declarations: [

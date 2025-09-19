@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { CoreModule } from '@stratosui/core';
 import { SharedModule } from '@stratosui/core';
@@ -131,7 +131,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
         CoreModule,
         CommonModule,
         SharedModule,
-        NgxChartsModule,
+        BaseChartDirective,
         KubernetesRoutingModule,
     ],
     declarations: [

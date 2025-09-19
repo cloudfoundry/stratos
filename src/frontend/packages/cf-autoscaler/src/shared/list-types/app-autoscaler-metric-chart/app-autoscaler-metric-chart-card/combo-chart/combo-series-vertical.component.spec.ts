@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../../../cloud-foundry/test-framework/application-service-helper';
@@ -25,7 +25,7 @@ describe('AppAutoscalerComboSeriesVerticalComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        NgxChartsModule,
+        BaseChartDirective,
       ],
       providers: [
         DatePipe,

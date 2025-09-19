@@ -14,16 +14,25 @@ export interface StratosTheme {
   navigation: {
     background: string;
     text: string;
+    textMuted?: string;
     hover: string;
     active: string;
+    border?: string;
+    tooltip?: string;
   };
 
   // Layout
   layout: {
     background: string;
+    bodyBackground?: string;
     text: string;
+    textMuted?: string;
     headerBackground: string;
     headerText: string;
+    headerBorder?: string;
+    contentBackground?: string;
+    contentSecondary?: string;
+    contentBorder?: string;
   };
 
   // Branding
@@ -63,14 +72,23 @@ export const defaultTheme: StratosTheme = {
   navigation: {
     background: '#2196f3',
     text: '#ffffff',
+    textMuted: 'rgba(255, 255, 255, 0.7)',
     hover: 'rgba(255, 255, 255, 0.1)',
     active: 'rgba(255, 255, 255, 0.2)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    tooltip: '#374151',
   },
   layout: {
     background: '#fafafa',
+    bodyBackground: '#fafafa',
     text: 'rgba(0, 0, 0, 0.87)',
+    textMuted: '#64748b',
     headerBackground: '#2196f3',
     headerText: '#ffffff',
+    headerBorder: '#e2e8f0',
+    contentBackground: '#ffffff',
+    contentSecondary: '#f8fafc',
+    contentBorder: '#e2e8f0',
   },
   branding: {
     logo: '/assets/core/logo.png',

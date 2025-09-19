@@ -44,14 +44,25 @@ export class StratosThemeService {
     // Apply navigation variables
     root.style.setProperty('--nav-bg', theme.navigation.background);
     root.style.setProperty('--nav-text', theme.navigation.text);
+    root.style.setProperty('--nav-text-muted', theme.navigation.textMuted || 'rgba(255, 255, 255, 0.7)');
     root.style.setProperty('--nav-hover', theme.navigation.hover);
     root.style.setProperty('--nav-active', theme.navigation.active);
+    root.style.setProperty('--nav-border', theme.navigation.border || 'rgba(255, 255, 255, 0.1)');
+    root.style.setProperty('--nav-tooltip', theme.navigation.tooltip || '#374151');
 
     // Apply layout variables
     root.style.setProperty('--app-bg', theme.layout.background);
+    root.style.setProperty('--body-bg', theme.layout.bodyBackground || theme.layout.background);
     root.style.setProperty('--app-text', theme.layout.text);
+    root.style.setProperty('--text-muted', theme.layout.textMuted || '#64748b');
     root.style.setProperty('--header-bg', theme.layout.headerBackground);
     root.style.setProperty('--header-text', theme.layout.headerText);
+    root.style.setProperty('--header-border', theme.layout.headerBorder || '#e2e8f0');
+    root.style.setProperty('--content-bg', theme.layout.contentBackground || '#ffffff');
+    root.style.setProperty('--content-secondary', theme.layout.contentSecondary || '#f8fafc');
+    root.style.setProperty('--content-border', theme.layout.contentBorder || '#e2e8f0');
+    root.style.setProperty('--content-text', theme.layout.text);
+    root.style.setProperty('--content-muted', theme.layout.textMuted || '#64748b');
 
     // Apply login variables
     root.style.setProperty('--login-bg', theme.login.backgroundColor || theme.layout.background);

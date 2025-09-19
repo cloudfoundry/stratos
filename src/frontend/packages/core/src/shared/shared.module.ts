@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InternalEventMonitorFactory } from '@stratosui/store';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
@@ -148,7 +148,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    NgxChartsModule,
+    BaseChartDirective,
   ],
   declarations: [
     LoadingPageComponent,
