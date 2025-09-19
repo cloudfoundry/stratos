@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData } from '@stratosui/store';
+import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, first, map, switchMap, tap } from 'rxjs/operators';
 
@@ -187,7 +187,13 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   onEndpointRegistered() {
-    // Refresh the endpoints list
+    console.log('onEndpointRegistered called - refreshing endpoints');
+    
+    // The endpoint registration should automatically trigger a system info refresh
+    // but let's explicitly trigger it to be sure
+    this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
+    
+    // Also trigger health checks
     this.endpointsService.checkAllEndpoints();
     
     // Show success message

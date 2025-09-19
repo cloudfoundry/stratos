@@ -19,7 +19,7 @@
             </div>
             <div>
               <h2 class="text-xl font-bold">
-                {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.data.label + ' Endpoint' : 'Register Endpoint' }}
+                {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.label + ' Endpoint' : 'Register Endpoint' }}
               </h2>
               <p class="text-white text-opacity-90 text-sm">
                 {{ selectedEndpointInfo ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
@@ -71,7 +71,7 @@
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-500">
             <span *ngIf="!selectedEndpointInfo">Select an endpoint type to continue with registration</span>
-            <span *ngIf="selectedEndpointInfo">Configure your {{ selectedEndpointInfo.data.label }} endpoint</span>
+            <span *ngIf="selectedEndpointInfo">Configure your {{ selectedEndpointInfo.label }} endpoint</span>
           </div>
           <div class="flex space-x-3">
             <button 
