@@ -71,8 +71,9 @@
                [class.scale-y-0]="!isActiveRoute(tab.link)">
           </div>
           <!-- Hover effect for icon mode -->
-          <div class="absolute left-full ml-2 px-2 py-1 bg-nav-tooltip text-nav-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50"
-               [class.hidden]="!iconMode">
+          <div class="absolute left-full ml-2 px-2 py-1 bg-nav-tooltip text-nav-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap"
+               [class.hidden]="!iconMode"
+               style="z-index: 9999;">
             {{ tab.label }}
           </div>
         </a>

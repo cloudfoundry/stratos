@@ -7,6 +7,7 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -96,15 +97,21 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return super.row;
   }
 
+  private _dataSource: BaseEndpointsDataSource;
+
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
     super.dataSource = ds;
-    console.log('Setting dataSource:', ds);
-    
+    this._dataSource = ds;
+
     // Try to create the card menu now that we have a dataSource
     this.createCardMenuIfReady();
 
     this.updateCardStatus();
+  }
+
+  get dataSource(): BaseEndpointsDataSource {
+    return this._dataSource;
   }
 
   private createCardMenuIfReady() {
@@ -124,15 +131,25 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
             };
           });
 
-          // Add a copy address to clipboard
+          // Add a copy address to clipboard - this should always be visible
           this.cardMenu.push(createMetaCardMenuItemSeparator());
           this.cardMenu.push({
             label: 'Copy address to Clipboard',
             action: () => this.copyToClipboard.copyToClipboard(),
-            can: of(true)
+            can: of(true),
+            separator: false
           });
+
+          // Force at least one action to be visible so the menu shows
+          if (this.cardMenu.length > 0) {
+            // Ensure the last item (copy to clipboard) is always visible
+            const lastItem = this.cardMenu[this.cardMenu.length - 1];
+            if (lastItem && !lastItem.separator) {
+              lastItem.can = of(true);
+            }
+          }
         } catch (error) {
-          console.error('Error creating card menu:', error);
+          console.error('❌ Error creating card menu:', error);
         }
       }
     }
@@ -145,6 +162,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     private userFavoriteManager: UserFavoriteManager,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private sessionService: SessionService,
+    private cdr: ChangeDetectorRef,
   ) {
     super();
     this.endpointIds$ = this.endpointIds.asObservable();
