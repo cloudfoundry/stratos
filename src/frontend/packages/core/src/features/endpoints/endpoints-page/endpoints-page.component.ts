@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, first, map, switchMap, tap } from 'rxjs/operators';
 
@@ -51,6 +51,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
   public canBackupRestore$: Observable<boolean>;
   public showRegisterModal = false;
+  public isInitialised$: Observable<boolean>;
 
   @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
   @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
@@ -107,6 +108,12 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       first(),
       map(sessionData => sessionData?.plugins.backup),
       switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
+    );
+
+    // Create an observable to track when endpoints are loaded and ready
+    this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
+      map(endpointState => !endpointState.loading),
+      delay(100) // Small delay to ensure data is properly loaded
     );
   }
 

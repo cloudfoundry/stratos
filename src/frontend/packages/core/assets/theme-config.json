@@ -35,6 +35,7 @@
     "navLogoIcon": "/core/assets/logo.png",
     "favicon": "/core/assets/favicon.ico",
     "companyName": "My Stratos",
+    "displayName": "DevOps Command Center",
     "loginTitle": "Stratos Console",
     "loginSubtitle": "Multi-Cloud Management Platform"
   },

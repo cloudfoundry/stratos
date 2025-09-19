@@ -1,7 +1,34 @@
 .cards {
-  display: flex;
-  flex-flow: wrap;
-  justify-content: space-between;
+  display: grid;
+  gap: 1.5rem;
+  padding: 1rem;
+  
+  &__columns-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  &__columns-2 {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  &__columns-3 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  &__columns-4 {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  
+  &__columns-5 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
   .mat-card {
     &::after {
       bottom: 0;
