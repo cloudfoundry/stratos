@@ -107,7 +107,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
     this.drawer = drawer;
-    if (!this.closeSub) {
+    if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
       this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
         if (state.isMobile) {
@@ -120,9 +120,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.drawer._modeChanged.next(), 250);
-    });
+    if (this.drawer && this.drawer._modeChanged) {
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => this.drawer._modeChanged.next(), 250);
+      });
+    }
   }
 
   dispatchRelations() {

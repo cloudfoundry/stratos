@@ -1,8 +1,10 @@
 <div class="list-component"
   [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  <div *ngIf="!(initialised$ | async) || (showProgressBar$ | async)" class="progress-bar">
-    <div class="progress-bar-indeterminate bg-primary-500"></div>
-  </div>
+  
+    <div *ngIf="dataSource && config?.cardComponent;">
+        <app-cards [dataSource]="dataSource" [component]="config.cardComponent"></app-cards>
+    </div>
+
   <ng-container *ngIf="initialised$ | async">
     <div class="list-component__header"
       [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
@@ -182,9 +184,11 @@
       </app-polling-indicator>
     </div>
     <div class="list-component__body">
-      <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
+      <div class="list-component__body-inner" [@list]="(pageState$ | async)">
+        <!-- DEBUG: Temporarily force visible to see what's happening -->
+        
         <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource"
-          [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
+          [component]="config.cardComponent"></app-cards>
         <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
           [addSelect]="config.allowSelection || (haveMultiActions | async)"
           [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"

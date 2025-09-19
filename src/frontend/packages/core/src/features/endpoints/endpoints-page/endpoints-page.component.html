@@ -20,6 +20,13 @@
   </div>
 </app-page-header>
 
+<!-- Debug: Always show this text to verify the template is working -->
+<div style="margin: 20px; padding: 20px; background: #f0f0f0; border: 1px solid #ccc;">
+  <h3>Debug Info:</h3>
+  <p>Have registered: {{ (endpointsService.haveRegistered$ | async) }}</p>
+  <p>Should show list: {{ (endpointsService.haveRegistered$ | async) ? 'YES' : 'NO' }}</p>
+</div>
+
 <app-list *ngIf="(endpointsService.haveRegistered$ | async); else noEndpointsContainer"></app-list>
 <ng-template #noEndpointsContainer>
   <app-endpoints-missing *ngIf="!customizations.noEndpointsComponent; else customNoEndpoints"
