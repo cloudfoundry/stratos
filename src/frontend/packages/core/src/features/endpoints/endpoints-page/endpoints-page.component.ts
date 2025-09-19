@@ -113,7 +113,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // Create an observable to track when endpoints are loaded and ready
     this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
       map(endpointState => !endpointState.loading),
-      delay(100) // Small delay to ensure data is properly loaded
+      delay(500) // Increased delay to ensure proper loading sequence
     );
   }
 

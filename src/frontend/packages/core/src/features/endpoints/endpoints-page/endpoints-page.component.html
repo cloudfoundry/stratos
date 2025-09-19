@@ -20,19 +20,22 @@
   </div>
 </app-page-header>
 
-<ng-container *ngIf="isInitialised$ | async; else loadingContainer">
+<!-- Show loading while initializing -->
+<div *ngIf="!(isInitialised$ | async)" class="flex items-center justify-center p-8">
+  <div class="flex items-center space-x-3 text-gray-500">
+    <div class="spinner spinner-primary"></div>
+    <span>Loading endpoints...</span>
+  </div>
+</div>
+
+<!-- Show content once loaded -->
+<ng-container *ngIf="isInitialised$ | async">
   <app-list *ngIf="(endpointsService.haveRegistered$ | async); else noEndpointsContainer"></app-list>
   <ng-template #noEndpointsContainer>
     <app-endpoints-missing *ngIf="!customizations.noEndpointsComponent; else customNoEndpoints"
       [showDirectToEndpointMessage]="false"></app-endpoints-missing>
   </ng-template>
 </ng-container>
-
-<ng-template #loadingContainer>
-  <div class="flex items-center justify-center p-8">
-    <div class="text-gray-500">Loading endpoints...</div>
-  </div>
-</ng-template>
 <ng-template #customNoEndpoints></ng-template>
 
 <!-- Register Endpoint Modal -->

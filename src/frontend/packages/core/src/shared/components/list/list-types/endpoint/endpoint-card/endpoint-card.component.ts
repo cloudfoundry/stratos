@@ -74,9 +74,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   set row(row: EndpointModel) {
     super.row = row;
     if (!row) {
+      console.log('Row set to null/undefined');
       return;
     }
 
+    console.log('Setting row for endpoint:', row.name, 'ID:', row.guid);
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
@@ -86,7 +88,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
-
+    
+    // Try to create the card menu now that we have a row
+    this.createCardMenuIfReady();
   }
   get row(): EndpointModel {
     return super.row;
@@ -95,29 +99,43 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {
     super.dataSource = ds;
-
-    // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
-    if (ds && !ds.dsEndpointType && !this.cardMenu) {
-      this.cardMenu = this.endpointListHelper.endpointActions(true).map(endpointAction => {
-        const separator = endpointAction.label === '-';
-        return {
-          label: endpointAction.label,
-          action: () => endpointAction.action(this.row),
-          can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : null,
-          separator
-        };
-      });
-
-      // Add a copy address to clipboard
-      this.cardMenu.push(createMetaCardMenuItemSeparator());
-      this.cardMenu.push({
-        label: 'Copy address to Clipboard',
-        action: () => this.copyToClipboard.copyToClipboard(),
-        can: of(true)
-      });
-    }
+    console.log('Setting dataSource:', ds);
+    
+    // Try to create the card menu now that we have a dataSource
+    this.createCardMenuIfReady();
 
     this.updateCardStatus();
+  }
+
+  private createCardMenuIfReady() {
+    // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
+    if (this.dataSource && !this.dataSource.dsEndpointType && !this.cardMenu && this.row) {
+      if (this.endpointListHelper) {
+        try {
+          const actions = this.endpointListHelper.endpointActions(true);
+          
+          this.cardMenu = actions.map(endpointAction => {
+            const separator = endpointAction.label === '-';
+            return {
+              label: endpointAction.label,
+              action: () => endpointAction.action(this.row),
+              can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : of(true),
+              separator
+            };
+          });
+
+          // Add a copy address to clipboard
+          this.cardMenu.push(createMetaCardMenuItemSeparator());
+          this.cardMenu.push({
+            label: 'Copy address to Clipboard',
+            action: () => this.copyToClipboard.copyToClipboard(),
+            can: of(true)
+          });
+        } catch (error) {
+          console.error('Error creating card menu:', error);
+        }
+      }
+    }
   }
 
   constructor(
