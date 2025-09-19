@@ -261,6 +261,12 @@ export class AppModule {
     );
 
     customizationService.setAppNameFromTitle();
+    
+    // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
+    customizationService.set({
+      ...customizationService.get(),
+      alwaysShowNavForEndpointTypes: (epType) => false
+    });
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
