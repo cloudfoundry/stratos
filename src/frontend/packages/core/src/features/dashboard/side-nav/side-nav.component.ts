@@ -40,6 +40,7 @@ export class SideNavComponent implements OnInit {
   public customizations: CustomizationsMetadata;
   public navLogo$: Observable<string>;
   public navLogoIcon$: Observable<string>;
+  public displayName$: Observable<string>;
 
   public environment = environment;
 
@@ -60,6 +61,14 @@ export class SideNavComponent implements OnInit {
     
     this.navLogoIcon$ = this.themeService.theme$.pipe(
       map((theme: StratosTheme) => theme?.branding?.navLogoIcon || '/core/assets/logo.png')
+    );
+
+    this.displayName$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) =>
+        theme?.branding?.displayName ||
+        theme?.branding?.companyName ||
+        'Stratos'
+      )
     );
   }
   @Input() set iconMode(isIconMode: boolean) {

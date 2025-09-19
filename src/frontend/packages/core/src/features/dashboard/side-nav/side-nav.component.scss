@@ -23,6 +23,20 @@ $icon-nav-width: 50px;
   -webkit-font-smoothing: antialiased;
 }
 
+// Minimal adjustments for logo button
+.nav-logo {
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.2);
+    outline-offset: 2px;
+  }
+}
+
 .side-nav {
   height: 100%;
   &__nav-toggle {

@@ -3,43 +3,34 @@
     <!-- Navigation Header -->
     <div class="nav-top p-4 border-b border-nav-border" *ngIf="!environment.fixedSideNav">
       <div class="nav-top-inner flex items-center justify-between">
-        <div class="nav-logo flex items-center space-x-3" [class.justify-center]="iconMode">
+        <button
+          class="nav-logo flex items-center space-x-3"
+          [class.justify-center]="iconMode"
+          (click)="toggleSidenavMode()"
+          [title]="iconMode ? 'Expand sidebar' : ''"
+        >
           <img
             class="nav-logo-img h-8 w-8 flex-shrink-0 rounded-lg"
             [src]="iconMode ? (navLogoIcon$ | async) : (navLogo$ | async)"
-            [alt]="customizations.logoText || 'Logo'"
+            [alt]="displayName$ | async"
           >
           <div class="nav-logo-text text-nav-text font-bold text-lg truncate" [class.hidden]="iconMode">
-            {{ customizations.logoText || 'Stratos' }}
+            {{ displayName$ | async }}
           </div>
-        </div>
+        </button>
         <button
           class="nav-toggle p-2 text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
-          (click)="toggleSidenav()"
+          (click)="toggleSidenavMode()"
           [class.hidden]="iconMode"
+          title="Collapse sidebar"
         >
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <span class="material-icons text-lg">
+            chevron_left
+          </span>
         </button>
       </div>
     </div>
 
-    <!-- Sidebar Toggle Button (always visible) -->
-    <div class="nav-toggle-section p-3 border-b border-nav-border">
-      <button
-        class="nav-expand-toggle w-full flex items-center justify-center p-2 text-nav-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
-        (click)="toggleSidenavMode()"
-        [title]="iconMode ? 'Expand sidebar' : 'Collapse sidebar'"
-      >
-        <span class="material-icons text-lg">
-          {{ iconMode ? 'chevron_right' : 'chevron_left' }}
-        </span>
-        <span class="ml-2 text-sm font-medium" [class.hidden]="iconMode">
-          Collapse
-        </span>
-      </button>
-    </div>
 
     <!-- Navigation Items -->
     <ul class="nav-items flex-1 py-2 space-y-1">

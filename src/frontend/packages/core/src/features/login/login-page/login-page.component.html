@@ -1,22 +1,42 @@
-<app-intro-screen 
-  id="app-login-page" 
-  class="login-page min-h-screen flex items-center justify-center" 
+<app-intro-screen
+  id="app-login-page"
+  class="login-page min-h-screen flex items-center justify-center relative"
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
-  [ngStyle]="{
-    'background-image': loginBackground$ | async,
-    'background-color': loginBackgroundColor$ | async,
-    'background-size': 'cover',
-    'background-position': 'center',
-    'background-repeat': 'no-repeat'
-  }"
 >
-  <div 
-    class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg"
+  <!-- Full-screen background -->
+  <div
+    class="absolute inset-0 z-0"
+    [ngStyle]="{
+      'background-image': loginBackground$ | async,
+      'background-color': loginBackgroundColor$ | async,
+      'background-size': 'cover',
+      'background-position': 'center',
+      'background-repeat': 'no-repeat'
+    }"
+  ></div>
+  <!-- Login Form Card -->
+  <div
+    class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
     [ngStyle]="{
       'background-color': loginCardBackground$ | async
     }"
   >
-    <app-stratos-title class="mb-8"></app-stratos-title>
+    <!-- Logo and Display Name Header -->
+    <div class="login-header flex items-center space-x-4 mb-6">
+      <img
+        class="login-logo h-12 w-12 flex-shrink-0"
+        [src]="themeLogo$ | async"
+        [alt]="(themeDisplayName$ | async) || 'Logo'"
+      />
+      <div class="login-title-section flex-1">
+        <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
+          {{ (themeDisplayName$ | async) || (themeTitle$ | async) || 'Stratos' }}
+        </h1>
+        <p class="login-subtitle text-sm text-gray-600" *ngIf="themeSubtitle$ | async">
+          {{ themeSubtitle$ | async }}
+        </p>
+      </div>
+    </div>
 
     <div class="login-body">
       <div class="login-form-outer" [ngClass]="{'login-sso': ssoLogin}">

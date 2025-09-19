@@ -20,6 +20,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   public loginBackground$: Observable<string>;
   public loginBackgroundColor$: Observable<string>;
   public loginCardBackground$: Observable<string>;
+  public themeLogo$: Observable<string>;
+  public themeTitle$: Observable<string>;
+  public themeDisplayName$: Observable<string>;
+  public themeSubtitle$: Observable<string>;
 
   constructor(
     private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
@@ -39,6 +43,22 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     
     this.loginCardBackground$ = this.themeService.theme$.pipe(
       map((theme: StratosTheme) => theme?.login?.cardBackground || '#ffffff')
+    );
+
+    this.themeLogo$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png')
+    );
+
+    this.themeTitle$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginTitle || 'Stratos')
+    );
+
+    this.themeDisplayName$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.displayName || '')
+    );
+
+    this.themeSubtitle$ = this.themeService.theme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || '')
     );
   }
 

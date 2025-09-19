@@ -42,6 +42,7 @@ export interface StratosTheme {
     navLogoIcon: string;
     favicon: string;
     companyName: string;
+    displayName?: string;
     loginTitle: string;
     loginSubtitle?: string;
     loginBackground?: string;
