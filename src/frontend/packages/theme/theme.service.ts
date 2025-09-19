@@ -18,6 +18,7 @@ export class StratosThemeService {
     await this.loadThemeFromConfig();
     console.log('[StratosThemeService] Theme loaded:', this.themeSubject.value);
     this.applyTheme(this.themeSubject.value);
+    this.updateBranding(this.themeSubject.value);
     console.log('[StratosThemeService] Theme applied to DOM');
   }
 
@@ -25,6 +26,7 @@ export class StratosThemeService {
     const newTheme = { ...this.themeSubject.value, ...theme };
     this.themeSubject.next(newTheme);
     this.applyTheme(newTheme);
+    this.updateBranding(newTheme);
     this.saveThemeToStorage(newTheme);
   }
 
@@ -81,17 +83,18 @@ export class StratosThemeService {
 
   private updateBranding(theme: StratosTheme) {
     // Update page title
-    document.title = theme.branding.companyName;
+    document.title = theme.branding.displayName || theme.branding.companyName;
 
-    // Update favicon
+    // Update favicon - use logo if no specific favicon is provided
+    const faviconUrl = theme.branding.favicon || theme.branding.logo;
     const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
     if (favicon) {
-      favicon.href = theme.branding.favicon;
+      favicon.href = faviconUrl;
     } else {
       // Create favicon link if it doesn't exist
       const newFavicon = document.createElement('link');
       newFavicon.rel = 'icon';
-      newFavicon.href = theme.branding.favicon;
+      newFavicon.href = faviconUrl;
       document.head.appendChild(newFavicon);
     }
   }

@@ -25,7 +25,7 @@
           title="Collapse sidebar"
         >
           <span class="material-icons text-lg">
-            chevron_left
+            keyboard_arrow_left
           </span>
         </button>
       </div>
@@ -46,7 +46,7 @@
           [title]="iconMode ? tab.label : ''"
         >
           <span class="nav-item-icon flex-shrink-0 h-6 w-6 flex items-center justify-center ml-4">
-            <span class="material-icons text-xl">{{ getIconName(tab) }}</span>
+            <span class="material-icons text-xl" [class]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
           </span>
           <span class="nav-item-label ml-3 truncate font-medium" [class.hidden]="iconMode">
             {{ tab.label }}
@@ -65,50 +65,21 @@
       </li>
     </ul>
 
-    <!-- User Profile Section -->
-    <div class="nav-profile border-t border-nav-border p-3 relative">
+    <!-- Logout Button -->
+    <div class="nav-logout border-t border-nav-border p-3">
       <button
-        class="profile-button w-full flex items-center p-2 text-nav-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200 relative"
+        class="logout-button w-full flex items-center p-2 text-nav-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
         [class.justify-center]="iconMode"
-        (click)="toggleProfileMenu()"
-        [title]="iconMode ? 'Profile menu' : ''"
+        (click)="signOut()"
+        [title]="iconMode ? 'Sign Out' : ''"
       >
         <span class="material-icons text-xl flex-shrink-0">
-          account_circle
+          exit_to_app
         </span>
-        <div class="profile-info ml-3 flex-1 text-left" [class.hidden]="iconMode">
-          <div class="profile-name text-sm font-medium text-nav-text truncate">
-            User Profile
-          </div>
-          <div class="profile-role text-xs text-nav-muted truncate">
-            Click to sign out
-          </div>
-        </div>
-        <span class="material-icons text-sm ml-2" [class.hidden]="iconMode">
-          {{ showProfileMenu ? 'expand_less' : 'expand_more' }}
+        <span class="logout-text ml-3 text-sm font-medium" [class.hidden]="iconMode">
+          Sign Out
         </span>
       </button>
-
-      <!-- Profile Context Menu -->
-      <div
-        class="profile-menu absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50"
-        [class.hidden]="!showProfileMenu"
-        [class.opacity-0]="!showProfileMenu"
-        [class.opacity-100]="showProfileMenu"
-        style="transition: opacity 0.2s ease"
-      >
-        <div class="py-2">
-          <button
-            class="profile-menu-item w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-            (click)="signOut()"
-          >
-            <span class="material-icons text-lg mr-3">
-              logout
-            </span>
-            Sign Out
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Navigation Footer -->

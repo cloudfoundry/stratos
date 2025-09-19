@@ -43,7 +43,6 @@ export class SideNavComponent implements OnInit {
   public displayName$: Observable<string>;
 
   public environment = environment;
-  public showProfileMenu = false;
 
   tooltipDelay = 0;
 
@@ -126,10 +125,10 @@ export class SideNavComponent implements OnInit {
       'service': 'cloud',
       'cloud foundry': 'cloud',
       'cloud': 'cloud',
-      'endpoint': 'settings_ethernet',
-      'kubernetes': 'account_tree',
-      'metric': 'assessment',
-      'user': 'people',
+      'endpoint': 'settings',
+      'kubernetes': 'settings',
+      'metric': 'analytics',
+      'user': 'person',
       'organization': 'business',
       'space': 'folder',
       'domain': 'domain',
@@ -148,12 +147,7 @@ export class SideNavComponent implements OnInit {
     return 'dashboard';
   }
 
-  public toggleProfileMenu() {
-    this.showProfileMenu = !this.showProfileMenu;
-  }
-
   public signOut() {
-    this.showProfileMenu = false;
     this.store.dispatch(new Logout());
   }
 }

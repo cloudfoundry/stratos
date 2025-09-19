@@ -37,9 +37,9 @@ $icon-nav-width: 50px;
   }
 }
 
-// Profile section styling
-.nav-profile {
-  .profile-button {
+// Logout button styling
+.nav-logout {
+  .logout-button {
     border: none;
     background: none;
     color: inherit;
@@ -50,33 +50,6 @@ $icon-nav-width: 50px;
       outline: 2px solid rgba(255, 255, 255, 0.2);
       outline-offset: 2px;
     }
-  }
-
-  .profile-menu {
-    animation: fadeIn 0.2s ease;
-  }
-
-  .profile-menu-item {
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:focus {
-      outline: none;
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
