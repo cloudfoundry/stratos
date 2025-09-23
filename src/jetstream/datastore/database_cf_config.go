@@ -198,7 +198,7 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func findDatabaseConfigurationFromURI(uri string, defaultPort int) (string, string, string, int, string, map[string]string, error) {
-	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>[^?]+)(?:\?(?P<queryparams>.*))`)
+	re := regexp.MustCompile(`(?P<provider>.+)://(?P<username>[^:]+)(?::(?P<password>.+))?@(?P<host>[^:]+)(?::(?P<port>.+))?\/(?P<dbname>[^?]+)(?:\?(?P<queryparams>.*))*`)
 	n1 := re.SubexpNames()
 	matches := re.FindAllStringSubmatch(uri, -1)
 	if len(matches) < 1 {
