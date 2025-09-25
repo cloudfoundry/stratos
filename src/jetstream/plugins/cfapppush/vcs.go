@@ -4,6 +4,8 @@ package cfapppush
 
 import (
 	"bytes"
+	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -15,20 +17,36 @@ import (
 var vcsGit = &vcsCmd{
 	name:             "Git",
 	cmd:              "git",
+	accessToken:      "",
 	createCmd:        []string{"clone -c http.sslVerify={sslVerify} -b {branch} {repo} {dir} "},
 	resetToCommitCmd: []string{"reset --hard {commit}"},
 	checkoutCmd:      []string{"checkout refs/remotes/origin/{branch}"},
 	headCmd:          []string{"rev-parse HEAD"},
 }
 
+type vcsOptions func(*vcsCmd)
+
 // Currently only git is supported
-func GetVCS() *vcsCmd {
+func GetVCS(opts ...vcsOptions) *vcsCmd {
+	vcsGit := &(*vcsGit)
+
+	for _, opt := range opts {
+		opt(vcsGit)
+	}
+
 	return vcsGit
 }
 
+func withAccessToken(accessToken string) vcsOptions {
+	return func(vc *vcsCmd) {
+		vc.accessToken = accessToken
+	}
+}
+
 type vcsCmd struct {
-	name string
-	cmd  string // name of binary to invoke command
+	name        string
+	cmd         string // name of binary to invoke command
+	accessToken string // optional, if empty do not use it
 
 	createCmd        []string // commands to download a fresh copy of a repository
 	checkoutCmd      []string // commands to checkout a branch
@@ -37,8 +55,18 @@ type vcsCmd struct {
 }
 
 func (vcs *vcsCmd) Create(skipSSL bool, dir string, repo string, branch string) error {
+	repoUrl, err := url.Parse(repo)
+
+	if err != nil {
+		return fmt.Errorf("could not execute vcs create: %w", err)
+	}
+
+	if len(vcs.accessToken) > 0 {
+		repoUrl.User = url.UserPassword("x-access-token", vcs.accessToken)
+	}
+
 	for _, cmd := range vcs.createCmd {
-		if err := vcs.run(".", cmd, "sslVerify", strconv.FormatBool(!skipSSL), "dir", dir, "repo", repo, "branch", branch); err != nil {
+		if err := vcs.run(".", cmd, "sslVerify", strconv.FormatBool(!skipSSL), "dir", dir, "repo", repoUrl.String(), "branch", branch); err != nil {
 			return err
 		}
 	}

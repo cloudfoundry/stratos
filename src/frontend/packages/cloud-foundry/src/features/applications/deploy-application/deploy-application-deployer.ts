@@ -45,6 +45,7 @@ interface GitSCMSourceInfo extends DeploySource {
   commit: string;
   scm: string;
   endpointGuid: string;
+  accessToken?: string;
 }
 
 // Structure used to provide metadata about the Git Url source
@@ -253,7 +254,8 @@ export class DeployApplicationDeployer {
       commit: appSource.gitDetails.commit,
       url: appSource.gitDetails.url,
       scm: appSource.type.id,
-      endpointGuid: appSource.gitDetails.endpointGuid
+      endpointGuid: appSource.gitDetails.endpointGuid,
+      accessToken: appSource.gitDetails.accessToken
     };
 
     const msg = {
