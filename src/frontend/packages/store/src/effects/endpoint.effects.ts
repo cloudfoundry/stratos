@@ -188,6 +188,7 @@ export class EndpointsEffect {
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
       const paramsObj = {
+        endpoint_type: action.endpointsType,
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
         skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
@@ -202,7 +203,7 @@ export class EndpointsEffect {
         /* tslint:disable-next-line:no-string-literal  */
         paramsObj['sub_type'] = action.endpointSubType;
       }
-      // Encode auth values in the body, not the query string
+      // Encode all values in the form body
       const body: any = new FormData();
       Object.keys(paramsObj).forEach(key => {
         body.set(key, paramsObj[key]);
@@ -211,11 +212,7 @@ export class EndpointsEffect {
       return this.doEndpointAction(
         action,
         '/api/v1/endpoints',
-        new HttpParams({
-          fromObject: {
-            endpoint_type: action.endpointsType
-          }
-        }),
+        new HttpParams(),
         'create',
         action.endpointsType,
         body,
