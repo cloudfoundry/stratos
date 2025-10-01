@@ -112,40 +112,31 @@ export class EndpointsEffect {
         return [];
       }
 
-      let fromObject: any;
-      let body = action.body as any;
+      // All parameters should be sent in the form body
+      const body = new FormData();
+      body.set('cnsi_guid', action.guid);
+      body.set('connect_type', action.authType);
+      body.set('system_shared', String(action.systemShared));
 
-      if (action.body) {
-        fromObject = {
-          ...action.authValues,
-          cnsi_guid: action.guid,
-          connect_type: action.authType,
-          system_shared: action.systemShared
-        };
-      } else {
-        // If no body, then we will put the auth values in the body, not in the URL
-        fromObject = {
-          cnsi_guid: action.guid,
-          connect_type: action.authType,
-          system_shared: action.systemShared
-        };
-
-        // Encode auth values in the body
-        body = new FormData();
-        Object.keys(action.authValues).forEach(key => {
-          body.set(key, action.authValues[key]);
-        });
-      }
-
-      const params: HttpParams = new HttpParams({
-        fromObject,
-        encoder: new BrowserStandardEncoder()
+      // Add auth values to the body
+      Object.keys(action.authValues).forEach(key => {
+        body.set(key, action.authValues[key]);
       });
+
+      // If there's a custom body provided, merge it
+      if (action.body) {
+        const customBody = action.body as any;
+        if (customBody instanceof FormData) {
+          customBody.forEach((value: any, key: string) => {
+            body.set(key, value);
+          });
+        }
+      }
 
       return this.doEndpointAction(
         action,
         '/api/v1/tokens',
-        params,
+        new HttpParams(),
         null,
         action.endpointsType,
         body,
@@ -188,6 +179,7 @@ export class EndpointsEffect {
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
     mergeMap(action => {
       const paramsObj = {
+        endpoint_type: action.endpointsType,
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
         skip_ssl_validation: action.skipSslValidation ? 'true' : 'false',
@@ -202,7 +194,7 @@ export class EndpointsEffect {
         /* tslint:disable-next-line:no-string-literal  */
         paramsObj['sub_type'] = action.endpointSubType;
       }
-      // Encode auth values in the body, not the query string
+      // Encode all values in the form body
       const body: any = new FormData();
       Object.keys(paramsObj).forEach(key => {
         body.set(key, paramsObj[key]);
@@ -211,11 +203,7 @@ export class EndpointsEffect {
       return this.doEndpointAction(
         action,
         '/api/v1/endpoints',
-        new HttpParams({
-          fromObject: {
-            endpoint_type: action.endpointsType
-          }
-        }),
+        new HttpParams(),
         'create',
         action.endpointsType,
         body,
@@ -280,7 +268,7 @@ export class EndpointsEffect {
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
     endpointType: EndpointType,
-    body?: string,
+    body?: any,
     errorMessageHandler?: (e: any) => string,
     method: string = 'POST',
   ) {
