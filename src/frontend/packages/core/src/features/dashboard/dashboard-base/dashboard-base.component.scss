@@ -4,15 +4,23 @@ $app-sub-header-height: 48px;
 $app-header-height: 56px;
 
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   z-index: 1;
+
   &__outer {
     height: 100%;
     max-width: 100vw;
     overflow: hidden;
     position: relative;
+  }
+
+  // Responsive: Stack on mobile
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
   }
   &__side-help-outer {
     z-index: 9999;

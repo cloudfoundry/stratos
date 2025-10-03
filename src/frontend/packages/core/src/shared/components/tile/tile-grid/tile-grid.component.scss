@@ -1,14 +1,26 @@
 app-tile-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-auto-rows: min-content;
+  gap: 1.5rem;
   overflow-y: auto;
+  width: 100%;
+  padding: 1rem;
+
   &.app-tile-grid-fit {
+    height: 100%;
     width: 100%;
+
     > app-tile-group {
       &:last-child {
-        flex: 1 1;
         margin-bottom: 0;
       }
     }
+  }
+
+  // Responsive: single column on mobile, auto on larger screens
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem;
   }
 }

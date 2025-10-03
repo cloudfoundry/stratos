@@ -1,16 +1,52 @@
 app-tile {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // Prevent grid blowout
 
   .mat-card {
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-}
 
-// Large screens
-@media (min-width: 48em) {
-  app-tile-group > app-tile {
+  // Grid column span utilities
+  &.app-tile-span-2 {
+    grid-column: span 2;
+  }
+
+  &.app-tile-span-3 {
+    grid-column: span 3;
+  }
+
+  &.app-tile-span-4 {
+    grid-column: span 4;
+  }
+
+  // Responsive span utilities
+  @media (min-width: 768px) {
+    &.app-tile-md-span-2 {
+      grid-column: span 2;
+    }
+
+    &.app-tile-md-span-3 {
+      grid-column: span 3;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    &.app-tile-lg-span-2 {
+      grid-column: span 2;
+    }
+
+    &.app-tile-lg-span-3 {
+      grid-column: span 3;
+    }
+  }
+
+  // Legacy support
+  @media (min-width: 768px) {
     &.app-tile-1-3 {
-      flex: 0 0 33.33333333%;
+      grid-column: span 1;
     }
   }
 }

@@ -1,70 +1,78 @@
-$tile-grid-gutter: 1em;
+$tile-grid-gap: 1.5rem;
 
 app-tile-group {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: wrap;
+  display: grid;
+  gap: $tile-grid-gap;
+  width: 100%;
 
-  &.tile-group-1-cols > app-tile {
-    flex: 0 0 100%;
+  // Default: 1 column (mobile-first)
+  grid-template-columns: 1fr;
+
+  // Modern responsive grid classes
+  &.tile-group-1-cols {
+    grid-template-columns: 1fr;
   }
 
-  // Mobile layout
-  &.tile-group-2-cols > app-tile {
-    flex: 0 0 100%;
+  &.tile-group-2-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  &.tile-group-3-cols > app-tile {
-    flex: 0 0 100%;
+  &.tile-group-3-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
-  &.tile-group-4-cols > app-tile {
-    flex: 0 0 100%;
+  &.tile-group-4-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
-  &.tile-group-6-cols > app-tile {
-    flex: 0 0 100%;
+  &.tile-group-6-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 1280px) {
+      grid-template-columns: repeat(6, 1fr);
+    }
   }
 
+  // Auto-fit grid (responsive without breakpoints)
+  &.tile-group-auto {
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  }
+
+  // Compact gap variant
+  &.tile-group-compact {
+    gap: 1rem;
+  }
+
+  // Legacy gutter support (converted to gap)
   &.tile-group-gutters {
-    margin-left: -$tile-grid-gutter;
-
-    app-tile {
-      // $top-bottom: $tile-grid-gutter / 2;
-      padding: 0 0 $tile-grid-gutter $tile-grid-gutter;
-    }
-  }
-}
-
-// Tablet (medium) screens
-@media (min-width: 30em) {
-  app-tile-group {
-    &.tile-group-4-cols > app-tile {
-      flex: 0 0 calc(50% - #{$tile-grid-gutter});
-    }
-    &.tile-group-6-cols > app-tile {
-      flex: 0 0 calc(33% - #{$tile-grid-gutter});
-    }
-  }
-}
-
-// Large screens
-@media (min-width: 48em) {
-  app-tile-group {
-    &.tile-group-2-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-3-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-4-cols > app-tile {
-      flex: 1;
-    }
-
-    &.tile-group-6-cols > app-tile {
-      flex: 1;
-    }
+    gap: $tile-grid-gap;
   }
 }
