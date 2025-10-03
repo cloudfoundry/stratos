@@ -29,7 +29,7 @@ export class ServicePlanPublicComponent {
 
   set servicePlan(servicePlan: APIResource<IServicePlan>) {
     this.pServicePlan = servicePlan;
-    if (!servicePlan) {
+    if (!servicePlan || !servicePlan.entity) {
       return;
     }
     this.planAccessibility$ = getServicePlanAccessibilityCardStatus(
@@ -54,10 +54,18 @@ export class ServicePlanPublicComponent {
   }
 
   private getServiceBroker(serviceGuid: string, cfGuid: string): Observable<APIResource<IServiceBroker>> {
+    if (!serviceGuid || !cfGuid) {
+      return null;
+    }
     return cfEntityCatalog.service.store.getEntityService(serviceGuid, cfGuid, {}).waitForEntity$.pipe(
-      map(service => cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {})),
-      switchMap(serviceService => serviceService.waitForEntity$),
-      map(entity => entity.entity)
+      map(service => {
+        if (!service || !service.entity || !service.entity.entity || !service.entity.entity.service_broker_guid) {
+          return null;
+        }
+        return cfEntityCatalog.serviceBroker.store.getEntityService(service.entity.entity.service_broker_guid, cfGuid, {});
+      }),
+      switchMap(serviceService => serviceService ? serviceService.waitForEntity$ : null),
+      map(entity => entity ? entity.entity : null)
     );
   }
 }

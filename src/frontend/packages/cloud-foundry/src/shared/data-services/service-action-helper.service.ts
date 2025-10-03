@@ -35,11 +35,20 @@ export class ServiceActionHelperService {
     noConfirm = false,
     userProvided = false
   ) => {
+    if (!serviceBindings || serviceBindings.length === 0) {
+      console.warn('No service bindings to detach');
+      return;
+    }
 
     if (serviceBindings.length > 1) {
       this.store.dispatch(new RouterNav({
         path: ['/services/', this.getRouteKey(userProvided), endpointGuid, serviceInstanceGuid, 'detach']
       }));
+      return;
+    }
+
+    if (!serviceBindings[0] || !serviceBindings[0].metadata || !serviceBindings[0].metadata.guid) {
+      console.error('Invalid service binding data');
       return;
     }
 

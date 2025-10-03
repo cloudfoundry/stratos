@@ -59,7 +59,7 @@ export class ServicesService {
 
     this.initServicesObservables();
 
-    if (this.serviceGuid) {
+    if (this.serviceGuid && this.cfGuid) {
       this.initServiceObservables();
     }
   }

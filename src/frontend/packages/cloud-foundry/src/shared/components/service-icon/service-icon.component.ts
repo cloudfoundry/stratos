@@ -20,7 +20,7 @@ export class ServiceIconComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    if (this.service) {
+    if (this.service && this.service.entity) {
       this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
       if (this.extraInfo && this.extraInfo.imageUrl) {
         this.image = this.extraInfo.imageUrl;

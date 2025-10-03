@@ -26,7 +26,7 @@ export class ServiceBrokerCardComponent implements OnDestroy {
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
     this.subs.push(this.serviceBroker$.pipe(
-      filter(o => !!o),
+      filter(o => !!o && !!o.entity),
       map(o => o.entity.space_guid),
       take(1),
       filter(o => !!o),
@@ -34,6 +34,7 @@ export class ServiceBrokerCardComponent implements OnDestroy {
       switchMap(spaceGuid => {
         return cfEntityCatalog.space.store.getEntityService(spaceGuid, this.servicesService.cfGuid).waitForEntity$;
       }),
+      filter(space => !!space && !!space.entity && !!space.entity.entity && !!space.entity.metadata),
       tap(space => {
         this.spaceLink = ['/cloud-foundry',
           servicesService.cfGuid,
