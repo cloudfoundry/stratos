@@ -22,6 +22,15 @@
 }"></app-no-content-message>
 </ng-template>
 
+<!-- Show loading indicator -->
+<div *ngIf="!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)"
+     class="flex items-center justify-center p-8">
+  <div class="flex items-center space-x-3 text-gray-500">
+    <div class="spinner spinner-primary"></div>
+    <span>Loading applications...</span>
+  </div>
+</div>
+
 <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
   (initialised)="cfOrgSpaceService.enableAutoSelectors()"
   *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
