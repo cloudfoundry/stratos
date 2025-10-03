@@ -485,145 +485,144 @@ body {
   @apply opacity-50 cursor-not-allowed shadow-none;
 }
 
-  .border-nav-border {
-    border-color: var(--nav-border) !important;
-  }
+.border-nav-border {
+  border-color: var(--nav-border) !important;
+}
 
-  .bg-nav-tooltip {
-    background-color: var(--nav-tooltip) !important;
-  }
+.bg-nav-tooltip {
+  background-color: var(--nav-tooltip) !important;
+}
 
-  .bg-accent {
-    background-color: var(--color-accent) !important;
-  }
+.bg-accent {
+  background-color: var(--color-accent) !important;
+}
 
-  /* Header styles */
-  .header {
-    background-color: var(--header-bg);
-    color: var(--header-text);
-  }
+/* Header styles */
+.header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
 
-  /* Login page styles */
-  .login-page {
-    background-color: var(--login-bg);
-    background-image: var(--login-bg-image);
-    @apply bg-cover bg-center min-h-screen;
-  }
+/* Login page styles */
+.login-page {
+  background-color: var(--login-bg);
+  background-image: var(--login-bg-image);
+  @apply bg-cover bg-center min-h-screen;
+}
 
-  .login-card {
-    background-color: var(--login-card-bg);
-  }
+.login-card {
+  background-color: var(--login-card-bg);
+}
 
-  /* Loading spinner */
-  .spinner {
-    @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 border-r-transparent rounded-full animate-spin;
-  }
+/* Loading spinner */
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 border-r-transparent rounded-full animate-spin;
+}
 
-  .spinner-primary {
-    border-color: var(--color-primary);
-    border-right-color: transparent;
-  }
+.spinner-primary {
+  border-color: var(--color-primary);
+  border-right-color: transparent;
+}
 
-  /* Table styles */
-  .table {
-    @apply min-w-full divide-y divide-gray-200;
-  }
+/* Table styles */
+.table {
+  @apply min-w-full divide-y divide-gray-200;
+}
 
-  .table th {
-    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
-  }
+.table th {
+  @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
 
-  .table td {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
-  }
+.table td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
 
-  .table tbody tr {
-    @apply even:bg-gray-50;
-  }
+.table tbody tr {
+  @apply even:bg-gray-50;
+}
 
-  /* List styles */
-  .list-item {
-    @apply border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-150;
-  }
+/* List styles */
+.list-item {
+  @apply border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-150;
+}
 
-  /* Progress bar */
-  .progress {
-    @apply w-full bg-gray-200 rounded-full h-2;
-  }
+/* Progress bar */
+.progress {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
 
-  .progress-bar {
-    @apply h-2 rounded-full transition-all duration-300;
-    background-color: var(--color-primary);
-  }
+.progress-bar {
+  @apply h-2 rounded-full transition-all duration-300;
+  background-color: var(--color-primary);
+}
 
-  /* Alert styles */
-  .alert {
-    @apply p-4 rounded-md border-l-4;
-  }
+/* Alert styles */
+.alert {
+  @apply p-4 rounded-md border-l-4;
+}
 
-  .alert-success {
-    @apply bg-green-50 border-green-400 text-green-800;
-  }
+.alert-success {
+  @apply bg-green-50 border-green-400 text-green-800;
+}
 
-  .alert-warning {
-    @apply bg-yellow-50 border-yellow-400 text-yellow-800;
-  }
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-400 text-yellow-800;
+}
 
-  .alert-danger {
-    @apply bg-red-50 border-red-400 text-red-800;
-  }
+.alert-danger {
+  @apply bg-red-50 border-red-400 text-red-800;
+}
 
-  .alert-info {
-    @apply bg-blue-50 border-blue-400 text-blue-800;
-  }
+.alert-info {
+  @apply bg-blue-50 border-blue-400 text-blue-800;
+}
 
-  /* Modal styles */
-  .modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 z-50;
-  }
+/* Modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+}
 
-  .modal {
-    @apply fixed inset-0 z-50 overflow-y-auto;
-  }
+.modal {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
 
-  .modal-container {
-    @apply flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
-  }
+.modal-container {
+  @apply flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+}
 
-  .modal-panel {
-    @apply transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg;
-  }
+.modal-panel {
+  @apply transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg;
+}
 
-  /* Tooltip */
-  .tooltip {
-    @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
-  }
+/* Tooltip */
+.tooltip {
+  @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
+}
 
-  .tooltip:hover .tooltip-text {
-    @apply visible opacity-100;
-  }
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
 
-  /* Modal styles */
-  body.modal-open {
-    overflow: hidden;
-  }
+/* Modal styles */
+body.modal-open {
+  overflow: hidden;
+}
 
-  /* Primary button with theme colors */
-  .bg-primary {
-    background-color: var(--color-primary) !important;
-  }
+/* Primary button with theme colors */
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
 
-  .text-primary {
-    color: var(--color-primary) !important;
-  }
+.text-primary {
+  color: var(--color-primary) !important;
+}
 
-  .border-primary {
-    border-color: var(--color-primary) !important;
-  }
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
 
-  .hover\:bg-primary:hover {
-    background-color: var(--color-primary) !important;
-  }
+.hover\:bg-primary:hover {
+  background-color: var(--color-primary) !important;
 }
 
 /* Utility classes */
