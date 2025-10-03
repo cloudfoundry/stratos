@@ -41,13 +41,13 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   @Input('row')
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
-    if (row) {
+    if (row && row.entity && row.metadata) {
       this.serviceInstanceEntity = row;
       const schema = cfEntityFactory(serviceInstancesEntityType);
       this.entityConfig = new ComponentEntityMonitorConfig(row.metadata.guid, schema);
-      this.serviceInstanceTags = row.entity.tags.map(t => ({
+      this.serviceInstanceTags = row.entity.tags ? row.entity.tags.map(t => ({
         value: t
-      }));
+      })) : [];
       this.cfGuid = row.entity.cfGuid;
       this.hasMultipleBindings.next(!(row.entity.service_bindings && row.entity.service_bindings.length > 0));
       this.cardMenu = [
@@ -63,7 +63,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         {
           label: 'Unbind',
           action: this.detach,
-          disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
+          disabled: observableOf(!this.serviceInstanceEntity.entity.service_bindings || this.serviceInstanceEntity.entity.service_bindings.length === 0),
           can: this.currentUserPermissionsService.can(
             CfCurrentUserPermissions.SERVICE_INSTANCE_EDIT,
             this.serviceInstanceEntity.entity.cfGuid,
@@ -80,7 +80,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           )
         }
       ];
-      if (!this.cfOrgSpace) {
+      if (!this.cfOrgSpace && row.entity.space && row.entity.space.entity) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(
           this.store,
           this.cfGuid,
@@ -88,7 +88,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
           row.entity.space_guid);
       }
 
-      if (!this.service$) {
+      if (!this.service$ && this.serviceInstanceEntity.entity.service_guid) {
         this.service$ = cfEntityCatalog.service.store.getEntityService(
           this.serviceInstanceEntity.entity.service_guid,
           this.serviceInstanceEntity.entity.cfGuid,
@@ -101,21 +101,23 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         );
       }
 
-      if (!this.serviceName$) {
+      if (!this.serviceName$ && this.service$) {
         // See note for this.serviceBrokerName$
         this.serviceName$ = this.service$.pipe(
           map(getServiceName)
         );
       }
 
-      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan ?
+      this.servicePlanName = this.serviceInstanceEntity.entity.service_plan && this.serviceInstanceEntity.entity.service_plan.entity ?
         getServicePlanName(this.serviceInstanceEntity.entity.service_plan.entity)
         : null;
 
-      this.serviceUrl = getServiceSummaryUrl(
-        this.serviceInstanceEntity.entity.cfGuid,
-        this.serviceInstanceEntity.entity.service_guid
-      );
+      if (this.serviceInstanceEntity.entity.cfGuid && this.serviceInstanceEntity.entity.service_guid) {
+        this.serviceUrl = getServiceSummaryUrl(
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.service_guid
+        );
+      }
     }
   }
 

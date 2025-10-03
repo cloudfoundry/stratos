@@ -4,33 +4,33 @@
       <ng-container
         *appCfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
         <app-page-sub-nav-section>
-          <button class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" name="edit" *ngIf="(applicationService.applicationState$ | async)"
+          <button class="btn btn-secondary btn-icon" name="edit" *ngIf="(applicationService.applicationState$ | async)"
             routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
             title="Edit">
             <span class="material-icons">edit</span>
           </button>
-          <button class="btn btn-danger flex items-center justify-center w-10 h-10 rounded-full p-0" name="delete" (click)="redirectToDeletePage()" title="Delete">
+          <button class="btn btn-danger btn-icon" name="delete" (click)="redirectToDeletePage()" title="Delete">
             <span class="material-icons">delete</span>
           </button>
         </app-page-sub-nav-section>
         <div *ngIf="applicationService.applicationState$ | async as appState" class="app-page-header__actions">
           <app-page-sub-nav-section>
-            <button class="btn btn-secondary flex items-center justify-center w-10 h-10 rounded-full p-0" name="restart" [disabled]="busy.updating || !appState.actions.restart"
+            <button class="btn btn-secondary btn-icon" name="restart" [disabled]="busy.updating || !appState.actions.restart"
               (click)="restartApplication()" title="Restart">
-              <span class="material-icons">settings_backup_restore</span>
+              <span class="material-icons">refresh</span>
             </button>
-            <button class="btn btn-secondary flex items-center justify-center w-10 h-10 rounded-full p-0" name="stop" [disabled]="busy.updating"
+            <button class="btn btn-secondary btn-icon" name="stop" [disabled]="busy.updating"
               *ngIf="appState.actions.stop;else startButton" (click)="stopApplication()" title="Stop">
               <span class="material-icons">stop</span>
             </button>
             <ng-template #startButton>
-              <button class="btn btn-secondary flex items-center justify-center w-10 h-10 rounded-full p-0" name="start"
+              <button class="btn btn-success btn-icon" name="start"
                 [disabled]="busy.updating || !appState.actions.start && !appState.actions.stop"
                 (click)="startApplication()" title="Start">
                 <span class="material-icons">play_arrow</span>
               </button>
             </ng-template>
-            <button class="btn btn-secondary flex items-center justify-center w-10 h-10 rounded-full p-0" name="restage" [disabled]="busy.updating || !appState.actions.restage"
+            <button class="btn btn-secondary btn-icon" name="restage" [disabled]="busy.updating || !appState.actions.restage"
               (click)="restageApplication()" title="Restage">
               <span class="material-icons">redo</span>
             </button>
@@ -38,7 +38,7 @@
         </div>
       </ng-container>
     </div>
-    <a class="summary__anchor btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0"
+    <a class="summary__anchor btn btn-info btn-icon"
       [class.pointer-events-none]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
       [class.opacity-50]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
       href="{{applicationService.applicationUrl$ | async}}" target="_blank" title="Visit">

@@ -27,10 +27,14 @@ export class ServiceSummaryCardComponent {
 
     this.service$.pipe(
       tap(service => {
-        this.tags = service.entity.tags.map(t => ({
-          value: t,
-          hideClearButton$: observableOf(true)
-        }));
+        if (service && service.entity && service.entity.tags) {
+          this.tags = service.entity.tags.map(t => ({
+            value: t,
+            hideClearButton$: observableOf(true)
+          }));
+        } else {
+          this.tags = [];
+        }
       })
     ).subscribe();
   }

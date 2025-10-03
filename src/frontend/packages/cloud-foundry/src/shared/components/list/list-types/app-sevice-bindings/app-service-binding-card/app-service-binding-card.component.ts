@@ -105,6 +105,11 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   ngOnInit() {
+    if (!this.row || !this.row.entity || !this.row.entity.service_instance || !this.row.entity.service_instance.entity || !this.row.metadata) {
+      console.warn('Invalid service binding data');
+      return;
+    }
+
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(serviceBindingEntityType));
 
     this.isUserProvidedServiceInstance = !!isUserProvidedServiceInstance(this.row.entity.service_instance.entity);
@@ -115,8 +120,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     }
 
     this.tags$ = this.serviceInstance$.pipe(
-      filter(o => !!o.entity.entity.tags),
-      map(o => o.entity.entity.tags.map(t => ({ value: t })))
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.tags),
+      map(o => o.entity.entity.tags.filter(t => t != null).map(t => ({ value: t })))
     );
 
     this.setupEnvVars();
@@ -128,30 +133,39 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     ).waitForEntity$;
     this.serviceInstance$ = serviceInstance$;
     this.service$ = serviceInstance$.pipe(
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_guid),
       switchMap(o => cfEntityCatalog.service.store.getEntityService(o.entity.entity.service_guid, this.appService.cfGuid, {})
         .waitForEntity$),
-      filter(service => !!service),
+      filter(service => !!service && !!service.entity),
       map(e => e.entity)
     );
     this.listData = [{
       label: 'Service Plan',
       data$: this.serviceInstance$.pipe(
+        filter(si => !!si && !!si.entity && !!si.entity.entity),
         map(si => {
           if (this.isUserProvidedServiceInstance) {
             return null;
           }
           const serviceInstance: IServiceInstance = si.entity.entity as IServiceInstance;
-          return getServicePlanName(serviceInstance.service_plan.entity);
+          return serviceInstance && serviceInstance.service_plan && serviceInstance.service_plan.entity
+            ? getServicePlanName(serviceInstance.service_plan.entity)
+            : null;
         })
       )
     }];
-    this.envVarServicesSection$ = this.service$.pipe(map(s => s.entity.label));
+    this.envVarServicesSection$ = this.service$.pipe(
+      filter(s => !!s && !!s.entity),
+      map(s => s.entity.label)
+    );
 
     this.serviceDescription$ = this.service$.pipe(
+      filter(service => !!service && !!service.entity),
       map(service => service.entity.description)
     );
 
     this.serviceUrl$ = this.service$.pipe(
+      filter(service => !!service && !!service.entity && !!service.metadata),
       map(service => getServiceSummaryUrl(service.entity.cfGuid, service.metadata.guid))
     );
 

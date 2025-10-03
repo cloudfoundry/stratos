@@ -17,17 +17,17 @@
     </div>
 
     <!-- Main content area -->
-    <div class="dashboard-content flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-app-bg" 
-         style="flex: 1 !important; min-width: 0 !important; display: flex !important; flex-direction: column !important;">
-      
-      <div class="page-content flex-1 flex flex-col">
+    <div class="dashboard-content flex-1 flex flex-col min-w-0 h-full bg-app-bg"
+         style="flex: 1 !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; overflow-y: auto !important;">
+
+      <div class="page-content flex-1 flex flex-col" style="overflow: visible !important;">
         <!-- Page header -->
         <app-show-page-header class="page-header sticky top-0 z-40 bg-header-bg text-header-text border-b border-header-border shadow-sm"></app-show-page-header>
 
         <!-- Routing indicator -->
         <app-routing-indicator class="routing-indicator"></app-routing-indicator>
 
-        <div class="dashboard-inner flex-1 flex bg-content-bg">
+        <div class="dashboard-inner flex-1 flex bg-content-bg" style="overflow: visible !important;">
           <!-- Page tabs navigation -->
           <div class="dashboard-page-tabs" *ngIf="tabNavService.tabNavs$ | async as tabs">
             <app-page-side-nav [header]="tabNavService.tabHeader$ | async" [tabs]="tabs"
@@ -36,7 +36,7 @@
           </div>
 
           <!-- Main content -->
-          <div class="dashboard-main flex-1 flex flex-col min-w-0 bg-content-bg">
+          <div class="dashboard-main flex-1 flex flex-col min-w-0 bg-content-bg" style="overflow: visible !important;">
             <!-- Sub navigation breadcrumbs -->
             <div *ngIf="subNavData$ | async as data">
               <div class="page-header-sub-nav bg-content-secondary border-b border-content-border px-6 py-4" *ngIf="data[0] || data[1] || data[3]">
@@ -62,8 +62,9 @@
             </div>
 
             <!-- Main page content -->
-            <div #content class="dashboard-content flex-1 overflow-auto bg-content-bg text-content-text"
+            <div #content class="dashboard-content flex-1 bg-content-bg text-content-text"
                  [ngClass]="{'p-6': !(noMargin$ | async), 'p-0': noMargin$ | async}"
+                 style="overflow-y: auto !important; overflow-x: hidden !important;"
                  cdkScrollable>
               <router-outlet></router-outlet>
             </div>

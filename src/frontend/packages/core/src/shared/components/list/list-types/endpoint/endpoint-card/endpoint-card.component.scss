@@ -8,59 +8,94 @@
   cursor: pointer;
   display: block;
   height: 100%;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not(&--no-link) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
   &--disconnected {
-    opacity: .6;
-    transition: opacity .25s;
+    opacity: 0.65;
+    transition: opacity 0.25s ease-in-out;
+
     &:hover {
       opacity: 1;
     }
   }
+
   &--checking {
-    opacity: .6;
+    opacity: 0.65;
   }
+
   &--no-link {
     cursor: default;
   }
+
   &:focus {
-    outline: 0;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 
   &__image {
     height: 100%;
     width: auto;
+    object-fit: contain;
 
     &-wrapper {
       height: 48px;
-      margin-right: 10px;
+      width: 48px;
+      margin-right: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: 6px;
+      padding: 4px;
     }
   }
 
   &__title {
     align-items: center;
     display: flex;
-    // margin-top: 16px;
+    gap: 0;
+
     &-subtext {
-      font-size: 14px;
+      font-size: 13px;
       margin-top: 4px;
-      opacity: .6;
+      color: var(--text-muted, #64748b);
+      font-weight: 400;
     }
+
     &-text {
       display: flex;
       flex-direction: column;
       font-size: 16px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    &-link {
+      font-weight: 500;
+      color: var(--content-text, #1e293b);
     }
   }
 
   &__address {
     display: flex;
-    height: 24px;
+    min-height: 24px;
+
     &__value {
       align-items: center;
       display: flex;
       overflow: hidden;
-      text-align: end;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--content-muted, #64748b);
     }
   }
 
@@ -69,5 +104,25 @@
     opacity: 0;
     pointer-events: none;
     width: 0;
+    position: absolute;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .endpoint-card {
+    &__image-wrapper {
+      height: 40px;
+      width: 40px;
+      margin-right: 8px;
+    }
+
+    &__title-text {
+      font-size: 14px;
+    }
+
+    &__title-subtext {
+      font-size: 12px;
+    }
   }
 }

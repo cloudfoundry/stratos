@@ -104,7 +104,11 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         columnId: 'name',
         headerCell: () => 'Name',
         cellDefinition: {
-          getValue: (row) => row.entity.service_instance.entity.name
+          getValue: (row) => {
+            return row && row.entity && row.entity.service_instance && row.entity.service_instance.entity
+              ? row.entity.service_instance.entity.name
+              : '';
+          }
         },
         cellFlex: '2'
       },
@@ -113,8 +117,13 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         headerCell: () => 'Service',
         cellDefinition: {
           getValue: (row) => {
+            if (!row || !row.entity || !row.entity.service_instance || !row.entity.service_instance.entity) {
+              return '';
+            }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service_plan.entity.service.entity.label : 'User Service';
+            return si && si.service_plan && si.service_plan.entity && si.service_plan.entity.service && si.service_plan.entity.service.entity
+              ? si.service_plan.entity.service.entity.label
+              : 'User Service';
           },
         },
         cellFlex: '1'
@@ -124,8 +133,11 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         headerCell: () => 'Plan',
         cellDefinition: {
           getValue: (row: APIResource<IServiceBinding>) => {
+            if (!row || !row.entity || !row.entity.service_instance || !row.entity.service_instance.entity) {
+              return null;
+            }
             const si = isServiceInstance(row.entity.service_instance.entity);
-            return si ? si.service_plan.entity.name : null;
+            return si && si.service_plan && si.service_plan.entity ? si.service_plan.entity.name : null;
           }
         },
         cellFlex: '1'

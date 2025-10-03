@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  flex: 1;
+  overflow-y: auto;
 
   mat-progress-bar {
     position: absolute;
@@ -41,6 +43,9 @@
 
   &__body-inner {
     position: relative;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   $title-left-padding: 25px;
@@ -52,8 +57,15 @@
     }
 
     &-card {
+      display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
+      gap: 1rem;
+
+      @media (max-width: 767px) {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
     }
 
     &__left,
@@ -61,49 +73,66 @@
       align-items: center;
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.75rem;
 
       > div {
-        &:not(:last-of-type) {
-          padding-right: $title-content-padding;
-        }
-
         &:not([hidden]) {
           align-items: center;
           display: flex;
         }
       }
+
+      @media (max-width: 767px) {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
     }
 
     &__right {
       justify-content: flex-end;
+
+      @media (max-width: 767px) {
+        justify-content: stretch;
+      }
     }
 
     &__left {
       flex: 1;
+      min-width: 0;
 
       &--text {
-        padding: 10px 10px 10px 0;
+        padding: 0;
+        font-weight: 500;
       }
 
       &--multi-actions {
-        button {
-          &:first-of-type {
-            margin-left: -10px;
-          }
-        }
+        display: flex;
+        gap: 0.5rem;
       }
 
       &--multi-filters {
-        mat-form-field {
-          padding-right: $title-content-padding;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+
+        @media (max-width: 767px) {
+          width: 100%;
         }
       }
     }
 
     > mat-card {
       min-height: 74px;
-      padding: 0 24px;
+      padding: 1rem 1.5rem;
       width: 100%;
+
+      @media (max-width: 767px) {
+        padding: 0.75rem 1rem;
+        min-height: auto;
+      }
     }
   }
 

@@ -2,7 +2,7 @@
   <h1>Applications</h1>
   <div *ngIf="haveConnectedCf$ | async" class="page-header-right">
     <ng-container *appCfUserPermission="canCreateApplication">
-      <button id="appwall-create-application" class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" [routerLink]="'/applications/new/'">
+      <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
         <span class="material-icons">add</span>
       </button>
     </ng-container>
@@ -21,6 +21,15 @@
   text: ''
 }"></app-no-content-message>
 </ng-template>
+
+<!-- Show loading indicator -->
+<div *ngIf="!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)"
+     class="flex items-center justify-center p-8">
+  <div class="flex items-center space-x-3 text-gray-500">
+    <div class="spinner spinner-primary"></div>
+    <span>Loading applications...</span>
+  </div>
+</div>
 
 <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
   (initialised)="cfOrgSpaceService.enableAutoSelectors()"
