@@ -3,7 +3,7 @@
   <div class="page-header-right">
     <ng-container *ngIf="(haveConnectedCf$ | async)">
       <ng-container *appCfUserPermission="canCreateServiceInstance">
-        <button class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" [routerLink]="'/services/new/'" [queryParams]="location">
+        <button class="btn btn-primary btn-icon" [routerLink]="'/services/new/'" [queryParams]="location">
           <span class="material-icons">add</span>
         </button>
       </ng-container>

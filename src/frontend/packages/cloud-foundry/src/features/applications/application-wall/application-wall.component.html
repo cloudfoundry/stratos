@@ -2,7 +2,7 @@
   <h1>Applications</h1>
   <div *ngIf="haveConnectedCf$ | async" class="page-header-right">
     <ng-container *appCfUserPermission="canCreateApplication">
-      <button id="appwall-create-application" class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" [routerLink]="'/applications/new/'">
+      <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
         <span class="material-icons">add</span>
       </button>
     </ng-container>

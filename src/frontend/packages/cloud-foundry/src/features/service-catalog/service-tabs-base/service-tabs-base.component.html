@@ -4,9 +4,10 @@
   </div>
   <div class="page-header-right">
     <ng-container *appCfUserPermission="canCreateServiceInstance">
-      <button class="btn btn-primary flex items-center justify-center w-10 h-10 rounded-full p-0" name="add-service-instance" [routerLink]="addServiceInstanceLink"
-        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="!(hasVisiblePlans$ | async)">
-        <span class="material-icons" [title]="toolTipText$ | async">add</span>
+      <button class="btn btn-primary btn-icon" name="add-service-instance" [routerLink]="addServiceInstanceLink"
+        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="!(hasVisiblePlans$ | async)"
+        [title]="toolTipText$ | async">
+        <span class="material-icons">add</span>
       </button>
     </ng-container>
   </div>
