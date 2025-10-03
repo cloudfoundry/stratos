@@ -4,14 +4,69 @@
   width: 100%;
 }
 
+/* Modern responsive home grid */
+.home-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-auto-rows: min-content;
+  width: 100%;
+
+  /* Mobile-first: 1 column */
+  grid-template-columns: 1fr;
+
+  /* Responsive breakpoints */
+  &.columns-1 {
+    grid-template-columns: 1fr;
+  }
+
+  &.columns-2 {
+    /* Mobile: 1 column */
+    grid-template-columns: 1fr;
+
+    /* Tablet+: 2 columns */
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &.columns-3 {
+    /* Mobile: 1 column */
+    grid-template-columns: 1fr;
+
+    /* Small tablet: 2 columns */
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Large tablet+: 3 columns */
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Compact gap on mobile */
+  @media (max-width: 639px) {
+    gap: 1rem;
+  }
+}
+
+.home-grid-item {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Legacy support */
 .home-page {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
+
   &__header {
     margin-top: 0;
   }
+
   &__list-header {
     display: flex;
     line-height: 40px;
@@ -20,25 +75,40 @@
       margin-bottom: 12px;
     }
   }
+
   &__card {
     height: 100%;
     &:last-child {
       margin-bottom: 20px;
     }
   }
-  // Grid layout
+
+  // Legacy grid layout (deprecated - use .home-grid instead)
   &__list {
     display: grid;
     flex: 1;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
+    gap: 1.5rem;
     grid-auto-rows: min-content;
   }
+
   &__list-2 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
+
   &__list-3 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 }
 

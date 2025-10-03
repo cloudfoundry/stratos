@@ -35,12 +35,12 @@
   </div>
 </app-page-header>
 <div class="p-6" *ngIf="haveThingsToShow$ | async ; else noEndpoints">
-  <div class="grid gap-6"
-    [class.grid-cols-1]="columns === 1"
-    [class.grid-cols-2]="columns === 2"
-    [class.grid-cols-3]="columns === 3"
+  <div class="home-grid"
+    [class.columns-1]="columns === 1"
+    [class.columns-2]="columns === 2"
+    [class.columns-3]="columns === 3"
     #endpointsPanel>
-    <div *ngFor="let ep of endpoints$ | async" #endpointCard>
+    <div *ngFor="let ep of endpoints$ | async" #endpointCard class="home-grid-item">
       <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
       </app-home-page-endpoint-card>
     </div>
