@@ -33,16 +33,15 @@
     "logo": "/core/assets/logo.png",
     "navLogo": "/core/assets/logo.png",
     "navLogoIcon": "/core/assets/logo.png",
-    "companyName": "My Stratos",
+    "companyName": "FiveTwenty",
     "displayName": "FiveTwenty",
-    "loginTitle": "Stratos Console",
-    "loginSubtitle": "The FiveTwenty Stratos Console"
+    "loginSubtitle": "The FiveTwenty Console"
   },
   "login": {
     "showLogo": true,
     "showTitle": true,
     "backgroundImage": "/core/assets/login-bg.jpg",
-    "backgroundColor": "#f1f5f9",
-    "cardBackground": "#ffffff"
+    "backgroundColor": "#222222",
+    "cardBackground": "#ffffff88"
   }
 }
