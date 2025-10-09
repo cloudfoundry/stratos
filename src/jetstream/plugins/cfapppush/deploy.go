@@ -211,6 +211,15 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig.OutputWriter = socketWriter
 	pushConfig.DialTimeout = dialTimeout
 
+	if manifest.Applications[0].EnvironmentVariables["CF_DOCKER_PASSWORD"] != "" {
+		// Add CF_DOCKER_PASSWORD if it was supplied as an override
+		dockerPasswordEnv := cfAppPush.portalProxy.Env().String("CF_DOCKER_PASSWORD", manifest.Applications[0].EnvironmentVariables["CF_DOCKER_PASSWORD"])
+		log.Debugf("Found docker password , len: %i", len(dockerPasswordEnv))
+		pushConfig.DockerPassword = dockerPasswordEnv
+		// and remove from the manifest env vars
+		delete(manifest.Applications[0].EnvironmentVariables, "CF_DOCKER_PASSWORD")
+	}
+
 	// Initialise Push Command
 	cfPush := Constructor(pushConfig, cfAppPush.portalProxy)
 

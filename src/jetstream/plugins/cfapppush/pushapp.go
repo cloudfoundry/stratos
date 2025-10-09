@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 
@@ -59,6 +60,7 @@ type CFPushAppConfig struct {
 	SpaceName              string
 	OutputWriter           io.Writer
 	DialTimeout            string
+	DockerPassword         string
 	EndpointID             string
 	UserID                 string
 }
@@ -221,6 +223,15 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 	// Docker username
 	if len(overrides.DockerUsername) > 0 {
 		c.pushCommand.DockerUsername = overrides.DockerUsername
+		log.Infof("Found docker username: %s", overrides.DockerUsername)
+		if len(c.config.DockerPassword) > 0 {
+			// If we have a password from the config, use that
+			log.Infof("Found docker password in config, len: %i", len(c.config.DockerPassword))
+			c.pushCommand.dockerPassword = c.config.DockerPassword
+		} else {
+			// We do not have a password
+			log.Info("No docker password found in config")
+		}
 	}
 
 	// Manifest path
