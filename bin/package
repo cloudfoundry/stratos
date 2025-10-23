@@ -102,7 +102,7 @@ cd stratos-ui
 if [[ -n "${stratos_version:-""}" ]]; then
   sed -i package.json -e 's/"version": ".*",$/"version": "'"$stratos_version"'",/'
 fi
-npm install
+npm install --legacy-peer-deps
 npm run prebuild-ui
 rm -Rf ./dist
 
