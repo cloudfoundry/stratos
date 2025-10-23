@@ -43,8 +43,8 @@ if [ "${ACTION}" == "build" ]; then
   df -h
 
   echo "Building version: ${VERSION}"
-  GOOS=linux GOARCH=amd64 go build -ldflags -X=main.appVersion=${VERSION}
-  if [[ "$(uname)" == "Darwin" ]]; then
+  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags -X=main.appVersion=${VERSION}
+  if [[ "$(uname)" == "Darwin" ]]; then # When building on macOS, also built a macOS version for testing
     go build -ldflags -X=main.appVersion=${VERSION} -o jetstream.darwin
   fi
   echo "Build complete ..."

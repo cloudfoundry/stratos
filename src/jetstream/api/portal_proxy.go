@@ -83,4 +83,7 @@ type PortalProxy interface {
 	// Store
 	GetStoreFactory() StoreFactory
 	SetStoreFactory(factory StoreFactory) StoreFactory
+
+	// v2 emulation processes
+	HandleCFv2Request(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 }
