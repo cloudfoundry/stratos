@@ -45,6 +45,8 @@ import { WindowRef } from './window-ref/window-ref.service';
         MomentModule,
         FormsModule,
         ReactiveFormsModule,
+        // Standalone directives
+        ClickStopPropagationDirective,
     ],
     exports: [
         MDAppModule,
@@ -106,7 +108,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         BytesToHumanSize,
         MegaBytesToHumanSize,
         SafeImgPipe,
-        ClickStopPropagationDirective,
+        // ClickStopPropagationDirective, // Now standalone - moved to imports
         DotContentComponent,
         ButtonBlurOnClickDirective,
         PageNotFoundComponentComponent,

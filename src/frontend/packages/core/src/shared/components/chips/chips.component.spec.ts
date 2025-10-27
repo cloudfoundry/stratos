@@ -17,8 +17,8 @@ describe('AppChipsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [AppChipsComponent],
       imports: [
+        AppChipsComponent, // Now standalone
         CoreModule
       ]
     })

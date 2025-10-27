@@ -156,6 +156,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CardProgressOverlayComponent,
     UsageGaugeComponent,
     CodeBlockComponent,
+    AppChipsComponent,
     // Standalone pipes
     PercentagePipe,
   ],
@@ -199,7 +200,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetaCardValueComponent,
     NestedTabsComponent,
     BooleanIndicatorComponent,
-    AppChipsComponent,
+    // AppChipsComponent, // Now standalone - moved to imports
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
     RingChartComponent,
