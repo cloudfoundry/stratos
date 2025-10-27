@@ -35,7 +35,7 @@ describe('EntityFavoriteStarComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EntityFavoriteStarComponent);
-    userFavoriteManager = TestBed.get(UserFavoriteManager);
+    userFavoriteManager = TestBed.inject(UserFavoriteManager);
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;

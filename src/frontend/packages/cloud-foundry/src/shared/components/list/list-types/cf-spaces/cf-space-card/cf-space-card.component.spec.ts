@@ -45,7 +45,7 @@ describe('CfSpaceCardComponent', () => {
     })
       .compileComponents();
 
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new VerifiedSession(testSessionData));
   }));
 

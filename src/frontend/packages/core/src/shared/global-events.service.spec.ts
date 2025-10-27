@@ -18,7 +18,7 @@ describe('GlobalEventsService', () => {
   }));
 
   it('should be created', () => {
-    const service: GlobalEventService = TestBed.get(GlobalEventService);
+    const service: GlobalEventService = TestBed.inject(GlobalEventService);
     expect(service).toBeTruthy();
   });
 });

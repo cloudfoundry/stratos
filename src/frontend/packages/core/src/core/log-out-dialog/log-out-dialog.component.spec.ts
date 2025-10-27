@@ -46,7 +46,7 @@ describe('LogOutDialogComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LogOutDialogComponent);
-    router = TestBed.get(Router);
+    router = TestBed.inject(Router);
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;

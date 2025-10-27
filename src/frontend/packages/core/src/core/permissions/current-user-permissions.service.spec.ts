@@ -482,7 +482,7 @@ describe('CurrentUserPermissionsService', () => {
       ],
 
     });
-    service = TestBed.get(CurrentUserPermissionsService);
+    service = TestBed.inject(CurrentUserPermissionsService);
   });
 
   it('should be created', () => {

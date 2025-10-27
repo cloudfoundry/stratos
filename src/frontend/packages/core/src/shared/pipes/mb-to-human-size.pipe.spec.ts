@@ -16,7 +16,7 @@ describe('MbToHumanSizePipe', () => {
   }));
 
   beforeEach(inject([MbToHumanSizePipe], (p: MbToHumanSizePipe) => {
-    utilsService = TestBed.get(UtilsService);
+    utilsService = TestBed.inject(UtilsService);
     pipe = p;
   }));
 

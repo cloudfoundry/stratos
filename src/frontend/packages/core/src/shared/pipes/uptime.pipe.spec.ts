@@ -16,7 +16,7 @@ describe('UptimePipe', () => {
   }));
 
   beforeEach(inject([UptimePipe], (p: UptimePipe) => {
-    utilsService = TestBed.get(UtilsService);
+    utilsService = TestBed.inject(UtilsService);
     pipe = p;
   }));
 

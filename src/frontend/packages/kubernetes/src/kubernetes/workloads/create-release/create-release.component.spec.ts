@@ -40,7 +40,7 @@ describe('CreateReleaseComponent', () => {
     })
       .compileComponents();
 
-    httpMock = TestBed.get(HttpTestingController);
+    httpMock = TestBed.inject(HttpTestingController);
 
   }));
 

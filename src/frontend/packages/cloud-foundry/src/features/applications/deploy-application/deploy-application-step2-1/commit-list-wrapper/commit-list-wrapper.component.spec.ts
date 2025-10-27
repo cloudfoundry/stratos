@@ -38,7 +38,7 @@ describe('CommitListWrapperComponent', () => {
       ]
     })
       .compileComponents();
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new SetAppSourceDetails({
       id: 'id',
       name: 'name'

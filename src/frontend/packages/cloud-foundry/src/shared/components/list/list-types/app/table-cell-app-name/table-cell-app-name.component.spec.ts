@@ -22,7 +22,7 @@ describe('TableCellAppNameComponent', () => {
     })
       .compileComponents();
 
-    TestBed.get(Store).dispatch({
+    TestBed.inject(Store).dispatch({
       type: ROUTER_NAVIGATION,
       payload: {
         event: {

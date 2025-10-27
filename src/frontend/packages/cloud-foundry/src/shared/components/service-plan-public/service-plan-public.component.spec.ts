@@ -36,7 +36,7 @@ describe('ServicePlanPublicComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPublicComponent);
-    servicesService = TestBed.get(ServicesService);
+    servicesService = TestBed.inject(ServicesService);
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;

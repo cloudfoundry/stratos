@@ -947,7 +947,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
       ],
 
     });
-    service = TestBed.get(CurrentUserPermissionsService);
+    service = TestBed.inject(CurrentUserPermissionsService);
   });
 
   it('should be created', () => {

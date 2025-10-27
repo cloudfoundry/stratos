@@ -64,7 +64,7 @@ describe('EventsTabComponent', () => {
       ...eventsConfig,
       paginationKey: 'app-events:mockCfGuidmockAppGuid'
     };
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, pagAction, 'fetch'));
   }));
 

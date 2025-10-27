@@ -16,7 +16,7 @@ describe('UsageBytesPipe', () => {
   }));
 
   beforeEach(inject([UsageBytesPipe], (p: UsageBytesPipe) => {
-    utilsService = TestBed.get(UtilsService);
+    utilsService = TestBed.inject(UtilsService);
     pipe = p;
   }));
 

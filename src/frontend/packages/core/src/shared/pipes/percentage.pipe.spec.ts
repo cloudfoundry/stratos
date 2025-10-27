@@ -16,7 +16,7 @@ describe('PercentagePipe', () => {
   }));
 
   beforeEach(inject([PercentagePipe], (p: PercentagePipe) => {
-    utilsService = TestBed.get(UtilsService);
+    utilsService = TestBed.inject(UtilsService);
     pipe = p;
   }));
 

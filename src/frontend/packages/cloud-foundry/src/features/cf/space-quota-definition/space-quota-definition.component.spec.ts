@@ -82,7 +82,7 @@ describe('SpaceQuotaDefinitionComponent', () => {
       },
       result: [testSCFEndpoint.guid]
     } as NormalizedResponse;
-    const store = TestBed.get(Store);
+    const store = TestBed.inject(Store);
     store.dispatch(new WrapperRequestActionSuccess(mappedData, {
       type: 'POPULATE_TEST_DATA',
       ...stratosEndpointEntityConfig

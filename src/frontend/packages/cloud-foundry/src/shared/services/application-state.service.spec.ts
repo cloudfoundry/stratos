@@ -15,7 +15,7 @@ describe('ApplicationStateService', () => {
   });
 
   beforeEach(() => {
-    cfAppStateService = TestBed.get(ApplicationStateService);
+    cfAppStateService = TestBed.inject(ApplicationStateService);
   });
 
   it('should be created', () => {
