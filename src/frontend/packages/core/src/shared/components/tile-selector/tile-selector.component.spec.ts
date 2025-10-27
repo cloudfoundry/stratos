@@ -11,9 +11,9 @@ describe('TileSelectorComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        TileSelectorComponent, // Now standalone (includes TileSelectorTileComponent)
         MDAppModule
-      ],
-      declarations: [TileSelectorComponent, TileSelectorTileComponent]
+      ]
     })
       .compileComponents();
   }));

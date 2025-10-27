@@ -157,6 +157,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     UsageGaugeComponent,
     CodeBlockComponent,
     AppChipsComponent,
+    TileSelectorComponent,
+    TileSelectorTileComponent,
     // Standalone pipes
     PercentagePipe,
   ],
@@ -224,7 +226,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     StackedInputActionsComponent,
     StackedInputActionComponent,
     MultilineTitleComponent,
-    TileSelectorComponent,
+    // TileSelectorComponent, // Now standalone - moved to imports
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     EndpointCardComponent,
@@ -244,7 +246,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     EntityListViewComponent,
     // CopyToClipboardComponent, // Now standalone - moved to imports
     SidepanelPreviewComponent,
-    TileSelectorTileComponent,
+    // TileSelectorTileComponent, // Now standalone - moved to imports
     SidepanelPreviewComponent,
     TableCellSidePanelComponent,
     // CardProgressOverlayComponent, // Now standalone - moved to imports
@@ -376,7 +378,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
-    TileSelectorTileComponent,
+    // TileSelectorTileComponent, // Now standalone - moved to imports
     SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,

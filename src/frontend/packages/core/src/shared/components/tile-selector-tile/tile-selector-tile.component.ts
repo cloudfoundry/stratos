@@ -1,12 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 import { ITileConfig, ITileData, ITileGraphic } from '../tile/tile-selector.types';
 
 @Component({
-selector: 'app-tile-selector-tile',
+  selector: 'app-tile-selector-tile',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule
+  ],
   templateUrl: './tile-selector-tile.component.html',
-  styleUrls: ['./tile-selector-tile.component.scss'],
-  standalone: false
+  styleUrls: ['./tile-selector-tile.component.scss']
 })
 export class TileSelectorTileComponent<Y = ITileGraphic> {
 

@@ -1,12 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { ITileConfig } from '../tile/tile-selector.types';
+import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
 
 @Component({
-selector: 'app-tile-selector',
+  selector: 'app-tile-selector',
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileSelectorTileComponent
+  ],
   templateUrl: './tile-selector.component.html',
-  styleUrls: ['./tile-selector.component.scss'],
-  standalone: false
+  styleUrls: ['./tile-selector.component.scss']
 })
 export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];
