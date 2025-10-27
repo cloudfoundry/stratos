@@ -1,10 +1,12 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'mat-card',
   templateUrl: './custom-card.component.html',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule]
 })
 export class CustomCardComponent {
   @Input() appearance: 'raised' | 'outlined' = 'raised';
@@ -14,7 +16,7 @@ export class CustomCardComponent {
   selector: 'mat-card-header',
   template: '<div class="custom-card-header"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardHeaderComponent {
 }
@@ -23,7 +25,7 @@ export class CustomCardHeaderComponent {
   selector: 'mat-card-title',
   template: '<div class="custom-card-title"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardTitleComponent {
 }
@@ -32,7 +34,7 @@ export class CustomCardTitleComponent {
   selector: 'mat-card-subtitle',
   template: '<div class="custom-card-subtitle"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardSubtitleComponent {
 }
@@ -41,7 +43,7 @@ export class CustomCardSubtitleComponent {
   selector: 'mat-card-content',
   template: '<div class="custom-card-content"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardContentComponent {
 }
@@ -50,7 +52,7 @@ export class CustomCardContentComponent {
   selector: 'mat-card-actions',
   template: '<div class="custom-card-actions"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardActionsComponent {
   @Input() align: 'start' | 'end' = 'start';
@@ -60,7 +62,7 @@ export class CustomCardActionsComponent {
   selector: 'mat-card-footer',
   template: '<div class="custom-card-footer"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomCardFooterComponent {
 }

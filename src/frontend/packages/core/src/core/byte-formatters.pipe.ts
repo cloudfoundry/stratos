@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-name: 'bytesToHumanSize',
-standalone: false
+  name: 'bytesToHumanSize',
+  standalone: true
 })
 export class BytesToHumanSize implements PipeTransform {
   transform(value: string): string {

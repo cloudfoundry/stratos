@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -9,10 +10,13 @@ import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 
 @Component({
-selector: 'app-table-cell-actions',
+  selector: 'app-table-cell-actions',
   templateUrl: './table-cell-actions.component.html',
   styleUrls: ['./table-cell-actions.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 
@@ -30,6 +34,7 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   public busy$: Observable<boolean>;
   public show$: Observable<boolean>;
+  public menuOpen = false;
 
   actions: IListAction<T>[];
   obs: {
@@ -77,5 +82,9 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
         subject.next(row);
       });
     }
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
   }
 }

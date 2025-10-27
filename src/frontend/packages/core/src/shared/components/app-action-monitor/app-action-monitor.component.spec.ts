@@ -9,7 +9,10 @@ describe('AppActionMonitorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: BaseTestModules
+      imports: [
+        ...BaseTestModules,
+        AppActionMonitorComponent
+      ]
     })
       .compileComponents();
   }));

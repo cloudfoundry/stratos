@@ -1,6 +1,8 @@
 import { TemplatePortal } from '@angular/cdk/portal';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { MatMenuModule } from '@angular/material/menu';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
@@ -27,12 +29,27 @@ import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
+import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
+import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 
 @Component({
 selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatMenuModule,
+    EntityFavoriteStarComponent,
+    ExtensionButtonsComponent,
+    RecentEntitiesComponent,
+    UserAvatarComponent,
+    PageHeaderEventsComponent
+  ]
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public canAPIKeys$: Observable<boolean>;

@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ComponentFactoryResolver,
@@ -47,7 +48,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   TableCellSelectComponent,
   TableCellEditComponent,
   TableCellActionsComponent,
-  TableCellEndpointStatusComponent,
+  // TableCellEndpointStatusComponent, // Now standalone - should not be in declarations array
   TableCellEndpointNameComponent,
   TableCellBooleanIndicatorComponent,
   TableCellRadioComponent,
@@ -62,11 +63,14 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
 ];
 
 @Component({
-selector: 'app-table-cell',
-    templateUrl: './table-cell.component.html',
-    styleUrls: ['./table-cell.component.scss'],
-    encapsulation: ViewEncapsulation.None,
-  standalone: false
+  selector: 'app-table-cell',
+  templateUrl: './table-cell.component.html',
+  styleUrls: ['./table-cell.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef, static: true })

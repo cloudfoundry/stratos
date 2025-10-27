@@ -23,11 +23,11 @@ export interface StepOnNextResult {
 export type StepOnNextFunction = (index: number, step: StepComponent) => Observable<StepOnNextResult>;
 
 @Component({
-selector: 'app-step',
+  selector: 'app-step',
   templateUrl: './step.component.html',
   styleUrls: ['./step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true
 })
 export class StepComponent {
 

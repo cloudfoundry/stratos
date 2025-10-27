@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 export interface MatSelectChange {
   source: CustomSelectComponent;
@@ -10,7 +11,7 @@ export interface MatSelectChange {
   selector: 'mat-option',
   template: '<div class="custom-option-content" [class.selected]="selected" [class.disabled]="disabled" (click)="select()"><ng-content></ng-content></div>',
   styleUrls: ['./custom-select.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomOptionComponent {
   @Input() value: any;
@@ -29,7 +30,8 @@ export class CustomOptionComponent {
   selector: 'mat-select',
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

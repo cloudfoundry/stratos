@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ComponentFactoryResolver,
@@ -9,6 +10,8 @@ import {
   ViewContainerRef,
   ChangeDetectorRef,
 } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   getFullEndpointApiUrl,
@@ -36,12 +39,42 @@ import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-t
 import { SessionService } from '../../../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
+import { MultilineTitleComponent } from '../../../../multiline-title/multiline-title.component';
+import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
+import { MatCardModule } from '@angular/material/card';
+
+// Import non-standalone dependencies directly
+import { PageHeaderEventsComponent } from '../../../../page-header/page-header-events/page-header-events.component';
+import { MetaCardComponent } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardItemComponent } from '../../../list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { TableCellEndpointStatusComponent } from '../table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { DisableRouterLinkDirective } from '../../../../../../core/disable-router-link.directive';
 
 @Component({
-selector: 'app-endpoint-card',
-    templateUrl: './endpoint-card.component.html',
-    styleUrls: ['./endpoint-card.component.scss'],
-  standalone: false
+  selector: 'app-endpoint-card',
+  templateUrl: './endpoint-card.component.html',
+  styleUrls: ['./endpoint-card.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatTooltipModule,
+    MatCardModule,
+    PageHeaderEventsComponent,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    TableCellEndpointStatusComponent,
+    DisableRouterLinkDirective,
+    MultilineTitleComponent,
+    CopyToClipboardComponent,
+    BooleanIndicatorComponent,
+  ]
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
 

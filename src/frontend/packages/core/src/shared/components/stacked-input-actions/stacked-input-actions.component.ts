@@ -11,6 +11,8 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -34,10 +36,15 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
  * Host for a collection of StackedInputActionComponent components
  */
 @Component({
-selector: 'app-stacked-input-actions',
-    templateUrl: './stacked-input-actions.component.html',
-    styleUrls: ['./stacked-input-actions.component.scss'],
-  standalone: false
+  selector: 'app-stacked-input-actions',
+  templateUrl: './stacked-input-actions.component.html',
+  styleUrls: ['./stacked-input-actions.component.scss'],
+  standalone: true,
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    StackedInputActionComponent
+  ]
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 

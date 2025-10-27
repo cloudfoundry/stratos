@@ -12,14 +12,12 @@ describe('MaxListMessageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        MaxListMessageComponent,
-        NoContentMessageComponent
-      ],
       imports: [
         MatIconModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        MaxListMessageComponent,
+        NoContentMessageComponent
       ],
     })
       .compileComponents();

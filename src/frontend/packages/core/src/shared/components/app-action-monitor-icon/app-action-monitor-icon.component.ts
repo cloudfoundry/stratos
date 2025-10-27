@@ -1,4 +1,7 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   EntityMonitor,
   EntityMonitorFactory,
@@ -117,10 +120,15 @@ export class ActionMonitorComponentState {
 }
 
 @Component({
-selector: 'app-action-monitor-icon',
+  selector: 'app-action-monitor-icon',
   templateUrl: './app-action-monitor-icon.component.html',
   styleUrls: ['./app-action-monitor-icon.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class AppActionMonitorIconComponent implements OnInit {
 

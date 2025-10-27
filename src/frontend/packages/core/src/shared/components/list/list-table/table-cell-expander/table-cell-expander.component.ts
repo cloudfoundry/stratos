@@ -1,4 +1,5 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
@@ -10,10 +11,13 @@ export interface TableCellExpanderConfig {
 }
 
 @Component({
-selector: 'app-table-cell-expander',
+  selector: 'app-table-cell-expander',
   templateUrl: './table-cell-expander.component.html',
   styleUrls: ['./table-cell-expander.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   animations: [
     trigger('indicatorRotate', [
       state('collapsed, void', style({ transform: 'rotate(0deg)' })),

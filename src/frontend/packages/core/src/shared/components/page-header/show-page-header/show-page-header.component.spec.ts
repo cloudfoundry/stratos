@@ -11,15 +11,14 @@ describe('ShowPageHeaderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ShowPageHeaderComponent],
-      providers: [
-        TabNavService
-      ],
       imports: [
+        ShowPageHeaderComponent,
         CoreModule,
         RouterTestingModule
+      ],
+      providers: [
+        TabNavService
       ]
-
     })
       .compileComponents();
   }));

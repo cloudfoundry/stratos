@@ -1,4 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -12,6 +19,10 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { UserFavoriteManager } from '@stratosui/store';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
+import { ApplicationStateIconComponent } from '../../../../application-state/application-state-icon/application-state-icon.component';
+import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/click-stop-propagation.directive';
+import { EntityFavoriteStarComponent } from '../../../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
@@ -25,10 +36,23 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
 }
 
 @Component({
-selector: 'app-meta-card',
+  selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
   styleUrls: ['./meta-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatMenuModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    ApplicationStateIconComponent,
+    CardStatusComponent,
+    ClickStopPropagationDirective,
+    EntityFavoriteStarComponent,
+  ]
 })
 export class MetaCardComponent implements OnDestroy {
 

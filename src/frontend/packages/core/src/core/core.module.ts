@@ -48,6 +48,8 @@ import { WindowRef } from './window-ref/window-ref.service';
         // Standalone directives and components
         ClickStopPropagationDirective,
         EntityFavoriteStarComponent,
+        // Standalone pipes
+        BytesToHumanSize,
     ],
     exports: [
         MDAppModule,
@@ -106,7 +108,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         LogOutDialogComponent,
         TruncatePipe,
         InfinityPipe,
-        BytesToHumanSize,
+        // BytesToHumanSize, // Now standalone - moved to imports
         MegaBytesToHumanSize,
         SafeImgPipe,
         // ClickStopPropagationDirective, // Now standalone - moved to imports

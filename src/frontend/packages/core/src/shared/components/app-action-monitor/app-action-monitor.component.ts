@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { rootUpdatingKey, EntitySchema, EntityMonitorFactory } from '@stratosui/store';
 import { schema } from 'normalizr';
@@ -14,12 +15,17 @@ import {
   TableCellRequestMonitorIconComponent,
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../list/list-table/table.types';
+import { SharedModule } from '../../shared.module';
 
 @Component({
-selector: 'app-action-monitor',
+  selector: 'app-action-monitor',
   templateUrl: './app-action-monitor.component.html',
   styleUrls: ['./app-action-monitor.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    SharedModule
+  ]
 })
 export class AppActionMonitorComponent<T> implements OnInit {
 

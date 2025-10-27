@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   Component,
@@ -9,10 +10,15 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { UntypedFormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
+import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionsState } from '../stacked-input-actions.component';
 
 export enum StackedInputActionResult {
@@ -41,10 +47,19 @@ export interface StackedInputActionUpdate {
  * Individual text input field meant to be stacked amongst others of same type in a . Used in conjunction with StackedInputActionsComponent
  */
 @Component({
-selector: 'app-stacked-input-action',
+  selector: 'app-stacked-input-action',
   templateUrl: './stacked-input-action.component.html',
   styleUrls: ['./stacked-input-action.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatTooltipModule,
+    BooleanIndicatorComponent
+  ]
 })
 export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 

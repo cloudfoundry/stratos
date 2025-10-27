@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 export interface MatSlideToggleChange {
   source: CustomSlideToggleComponent;
@@ -10,7 +11,11 @@ export interface MatSlideToggleChange {
   selector: 'mat-slide-toggle',
   templateUrl: './custom-slide-toggle.component.html',
   styleUrls: ['./custom-slide-toggle.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

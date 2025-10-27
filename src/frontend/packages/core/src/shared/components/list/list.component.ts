@@ -1,4 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -15,7 +16,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { NgForm, NgModel } from '@angular/forms';
+import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
@@ -82,12 +83,26 @@ import {
   ListViewTypes,
   MultiFilterManager,
 } from './list.component.types';
+import { CardsComponent } from './list-cards/cards.component';
+import { TableComponent } from './list-table/table.component';
+import { PollingIndicatorComponent } from '../polling-indicator/polling-indicator.component';
+import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
+import { MaxListMessageComponent } from './max-list-message/max-list-message.component';
 
 @Component({
 selector: 'app-list',
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CardsComponent,
+    TableComponent,
+    PollingIndicatorComponent,
+    MetricsRangeSelectorComponent,
+    MaxListMessageComponent,
+  ],
   animations: [
     trigger('list', [
       transition('* => in', [

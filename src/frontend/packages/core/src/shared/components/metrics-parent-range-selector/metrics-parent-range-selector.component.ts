@@ -1,18 +1,34 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';
+import { MomentModule } from 'ngx-moment';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
+import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 
 @Component({
-selector: 'app-metrics-parent-range-selector',
+  selector: 'app-metrics-parent-range-selector',
   templateUrl: './metrics-parent-range-selector.component.html',
   styleUrls: ['./metrics-parent-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MomentDatePipe,
+    StartEndDateComponent
+  ]
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;

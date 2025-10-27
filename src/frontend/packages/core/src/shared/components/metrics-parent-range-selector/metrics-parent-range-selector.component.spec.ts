@@ -16,8 +16,8 @@ describe('MetricsParentRangeSelectorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MetricsParentRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
       imports: [
+        MetricsParentRangeSelectorComponent,
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),

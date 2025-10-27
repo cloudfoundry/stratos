@@ -36,7 +36,7 @@ export class CustomSpinnerComponent {
   selector: 'mat-progress-bar',
   template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomProgressBarComponent {
   @Input() value = 0;
@@ -62,7 +62,7 @@ export class CustomProgressBarSelectorComponent {
   selector: 'mat-dialog-content',
   template: '<div class="custom-dialog-content"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomDialogContentComponent {
 }
@@ -72,7 +72,7 @@ export class CustomDialogContentComponent {
   selector: 'mat-dialog-actions',
   template: '<div class="custom-dialog-actions" [class.align-end]="align === \'end\'"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomDialogActionsComponent {
   @Input() align: 'start' | 'center' | 'end' = 'start';
@@ -83,7 +83,7 @@ export class CustomDialogActionsComponent {
   selector: 'mat-dialog-title',
   template: '<div class="custom-dialog-title"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomDialogTitleComponent {
 }
@@ -93,7 +93,7 @@ export class CustomDialogTitleComponent {
   selector: 'mat-datepicker',
   template: '<input type="date" class="custom-datepicker" [value]="selected" (change)="onDateChange($event)">',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomDatepickerComponent {
   @Input() selected: Date;
@@ -111,12 +111,20 @@ export class CustomDatepickerComponent {
   selector: 'mat-datepicker-input',
   template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker" [value]="value" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomDatepickerInputComponent {
   @Input() matDatepicker: any;
-  @Input() value: Date;
   @Output() valueChange = new EventEmitter<Date>();
+  private _value: Date;
+
+  @Input()
+  get value(): Date {
+    return this._value;
+  }
+  set value(val: Date) {
+    this._value = val;
+  }
 
   onInput(event: any) {
     const date = new Date(event.target.value);
@@ -130,7 +138,8 @@ export class CustomDatepickerInputComponent {
   selector: 'mat-datepicker-toggle',
   template: '<button class="custom-datepicker-toggle" (click)="toggle()"><mat-icon>calendar_today</mat-icon></button>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CustomIconComponent]
 })
 export class CustomDatepickerToggleComponent {
   @Input() for: any;
@@ -145,7 +154,7 @@ export class CustomDatepickerToggleComponent {
 // Datepicker directive for input binding
 @Directive({
   selector: '[matDatepicker]',
-  standalone: false
+  standalone: true
 })
 export class MatDatepickerDirective {
   @Input() matDatepicker: any;

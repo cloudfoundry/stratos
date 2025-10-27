@@ -63,9 +63,10 @@ import { EndpointsListConfigService } from './components/list/list-types/endpoin
 import {
   TableCellEndpointNameComponent,
 } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointStatusComponent } from './components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
-import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
+import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component'; // Now standalone
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -92,7 +93,7 @@ import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-r
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component'; // Now standalone
 import {
   StackedInputActionComponent,
-} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
+} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component'; // Now standalone
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -207,6 +208,25 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MarkdownContentObserverDirective, // Now standalone - moved to imports
     JsonViewerComponent, // Now standalone - moved to imports
     SimpleUsageChartComponent, // Now standalone - moved to imports
+    MaxListMessageComponent, // Now standalone - moved to imports
+    MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
+    AppActionMonitorIconComponent, // Now standalone - moved to imports
+    AppActionMonitorComponent, // Now standalone - moved to imports
+    MetricsRangeSelectorComponent, // Now standalone - moved to imports
+    ProfileSettingsComponent, // Now standalone - moved to imports
+    StackedInputActionsComponent, // Now standalone - moved to imports
+    StackedInputActionComponent, // Now standalone - moved to imports
+    EndpointCardComponent, // Now standalone - moved to imports
+    ProductNameComponent, // Now standalone - moved to imports
+    // Wave 11 dependency chain - now standalone
+    MetaCardComponent, // Now standalone - moved to imports
+    MetaCardTitleComponent, // Now standalone - moved to imports
+    MetaCardItemComponent, // Now standalone - moved to imports
+    MetaCardKeyComponent, // Now standalone - moved to imports
+    MetaCardValueComponent, // Now standalone - moved to imports
+    TableComponent, // Now standalone - moved to imports
+    DisableRouterLinkDirective, // Now standalone - moved to imports
+    TableCellEndpointStatusComponent, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -244,11 +264,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     ...listCardComponents,
     ...listTableComponents,
     // FileInputComponent, // Now standalone - moved to imports
-    MetaCardComponent,
-    MetaCardTitleComponent,
-    MetaCardItemComponent,
-    MetaCardKeyComponent,
-    MetaCardValueComponent,
+    // MetaCardComponent, // Now standalone - moved to imports
+    // MetaCardTitleComponent, // Now standalone - moved to imports
+    // MetaCardItemComponent, // Now standalone - moved to imports
+    // MetaCardKeyComponent, // Now standalone - moved to imports
+    // MetaCardValueComponent, // Now standalone - moved to imports
     // NestedTabsComponent, // Now standalone - moved to imports
     // BooleanIndicatorComponent, // Now standalone - moved to imports
     // AppChipsComponent, // Now standalone - moved to imports
@@ -259,10 +279,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // StratosTitleComponent, // Now standalone - moved to imports
     // IntroScreenComponent, // Now standalone - moved to imports
     // EnumerateComponent, // Now standalone - moved to imports
-    // UploadProgressIndicatorComponent, // Now standalone - moved to imports
+    //     // UploadProgressIndicatorComponent, // Now standalone - moved to imports
     // UserProfileBannerComponent, // Now standalone - moved to imports
-    AppActionMonitorComponent,
-    AppActionMonitorIconComponent,
+    //     AppActionMonitorComponent,
+    // AppActionMonitorIconComponent, // Now standalone - moved to imports
     // UserProfileBannerComponent, // Now standalone - moved to imports
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
@@ -270,15 +290,15 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // RoutingIndicatorComponent, // Now standalone - moved to imports
     // DateTimeComponent, // Now standalone - moved to imports
     // StartEndDateComponent, // Now standalone - moved to imports
-    MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent,
-    StackedInputActionsComponent,
-    StackedInputActionComponent,
+    // MetricsRangeSelectorComponent, // Now standalone - moved to imports
+    // ProfileSettingsComponent, // Now standalone - moved to imports
+    // MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
+    // StackedInputActionComponent, // Now standalone - moved to imports
     // MultilineTitleComponent, // Now standalone - moved to imports
     // TileSelectorComponent, // Now standalone - moved to imports
     // MarkdownPreviewComponent, // Now standalone - moved to imports
     // MarkdownContentObserverDirective, // Now standalone - moved to imports
-    EndpointCardComponent,
+    // EndpointCardComponent, // Now standalone - moved to imports
     // SimpleUsageChartComponent, // Now standalone - moved to imports
     // PageSubNavComponent, // Now standalone - moved to imports
     // BreadcrumbsComponent, // Now standalone - moved to imports
@@ -297,18 +317,18 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // CopyToClipboardComponent, // Now standalone - moved to imports
     // SidepanelPreviewComponent, // Now standalone - moved to imports
     // TileSelectorTileComponent, // Now standalone - moved to imports
-    // SidepanelPreviewComponent, // Now standalone - moved to imports (duplicate removed)
+    // ProfileSettingsComponent, // Now standalone - moved to imports
     TableCellSidePanelComponent,
     // CardProgressOverlayComponent, // Now standalone - moved to imports
-    MaxListMessageComponent,
-    ProfileSettingsComponent,
-    ProductNameComponent,
-    TailwindSortDirective,
+    // MaxListMessageComponent, // Now standalone - moved to imports
+    // ProfileSettingsComponent, // Now standalone - moved to imports
+    // ProductNameComponent, // Now standalone - moved to imports
+    // ProfileSettingsComponent, // Now standalone - moved to imports (duplicate removed)
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
     // CustomCheckboxComponent, // Now standalone - moved to imports
-    DisableRouterLinkDirective,
+    // DisableRouterLinkDirective, // Now standalone - moved to imports
     MatInputDirective,
     MatDatepickerDirective,
     CustomFormFieldComponent,
@@ -407,11 +427,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     RoutingIndicatorComponent, // Now standalone - kept in exports for backward compatibility
     DateTimeComponent,
     StartEndDateComponent, // Now standalone - kept in exports for backward compatibility
-    MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent,
-    StackedInputActionsComponent,
-    StackedInputActionComponent,
-    MultilineTitleComponent, // Now standalone - kept in exports for backward compatibility
+    MetricsRangeSelectorComponent, // Now standalone - kept in exports for backward compatibility
+    StackedInputActionComponent, // Now standalone - kept in exports for backward compatibility
+    MetricsParentRangeSelectorComponent, // Now standalone - kept in exports for backward compatibility
+    StackedInputActionsComponent, // Now standalone - kept in exports for backward compatibility
     PageSubNavComponent,
     BreadcrumbsComponent,
     PageSubNavSectionComponent,
@@ -434,11 +453,12 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // TileSelectorTileComponent, // Now standalone - moved to imports
     // SidepanelPreviewComponent, // duplicate removed
     TableCellEndpointNameComponent,
+    EndpointCardComponent, // Now standalone - kept in exports for backward compatibility
     CardProgressOverlayComponent,
-    MaxListMessageComponent,
+    MaxListMessageComponent, // Now standalone - kept in exports for backward compatibility
     ...listTableCells,
     ProfileSettingsComponent,
-    ProductNameComponent,
+    ProductNameComponent, // Now standalone - kept in exports for backward compatibility
     TailwindSortDirective,
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,

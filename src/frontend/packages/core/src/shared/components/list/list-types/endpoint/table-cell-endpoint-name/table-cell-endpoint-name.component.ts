@@ -1,4 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -11,10 +15,16 @@ export interface RowWithEndpointId {
 }
 
 @Component({
-selector: 'app-table-cell-endpoint-name',
+  selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
   styleUrls: ['./table-cell-endpoint-name.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MatTooltipModule
+  ]
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 

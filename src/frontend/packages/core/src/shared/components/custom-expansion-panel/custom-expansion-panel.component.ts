@@ -1,10 +1,12 @@
 import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'mat-expansion-panel',
   templateUrl: './custom-expansion-panel.component.html',
   styleUrls: ['./custom-expansion-panel.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule]
 })
 export class CustomExpansionPanelComponent {
   @Input() disabled = false;
@@ -33,7 +35,7 @@ export class CustomExpansionPanelComponent {
   selector: 'mat-expansion-panel-header',
   template: '<ng-content></ng-content>',
   styleUrls: ['./custom-expansion-panel.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomExpansionPanelHeaderComponent {
   @Input() collapsedHeight = 'auto';

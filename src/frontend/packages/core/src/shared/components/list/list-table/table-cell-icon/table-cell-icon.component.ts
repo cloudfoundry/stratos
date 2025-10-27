@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
 
@@ -8,10 +9,13 @@ export interface TableCellIconComponentConfig<T> {
 }
 
 @Component({
-selector: 'app-table-cell-icon',
+  selector: 'app-table-cell-icon',
   templateUrl: './table-cell-icon.component.html',
   styleUrls: ['./table-cell-icon.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCellIconComponentConfig<T>> {
 

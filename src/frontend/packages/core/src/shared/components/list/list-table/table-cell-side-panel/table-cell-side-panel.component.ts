@@ -11,10 +11,10 @@ export interface TableCellSidePanelConfig<T> {
 }
 
 @Component({
-selector: 'app-table-cell-side-panel',
+  selector: 'app-table-cell-side-panel',
   templateUrl: './table-cell-side-panel.component.html',
   styleUrls: ['./table-cell-side-panel.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 

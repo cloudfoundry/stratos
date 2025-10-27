@@ -1,18 +1,25 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngrx/store';
 import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
-import { NoContentMessageLine } from '../../no-content-message/no-content-message.component';
+import { NoContentMessageComponent, NoContentMessageLine } from '../../no-content-message/no-content-message.component';
 import { ITableTextMaxed } from '../list-table/table.types';
 
 @Component({
-selector: 'app-max-list-message',
+  selector: 'app-max-list-message',
   templateUrl: './max-list-message.component.html',
   styleUrls: ['./max-list-message.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    NoContentMessageComponent
+  ]
 })
 export class MaxListMessageComponent implements OnDestroy {
 

@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
@@ -7,10 +10,15 @@ import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
 
 @Component({
-selector: 'app-table-cell-default',
+  selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule
+  ]
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
 

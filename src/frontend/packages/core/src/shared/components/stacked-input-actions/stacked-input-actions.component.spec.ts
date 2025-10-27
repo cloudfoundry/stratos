@@ -12,8 +12,12 @@ describe('StackedInputActionsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [StackedInputActionsComponent, BooleanIndicatorComponent, StackedInputActionComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: [
+        ...BaseTestModulesNoShared,
+        StackedInputActionsComponent,
+        BooleanIndicatorComponent,
+        StackedInputActionComponent
+      ],
     })
       .compileComponents();
   }));

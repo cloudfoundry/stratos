@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../list.types';
 
 export interface TableCellBooleanIndicatorComponentConfig<T> {
@@ -13,7 +14,10 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 selector: 'app-table-cell-boolean-indicator',
   templateUrl: './table-cell-boolean-indicator.component.html',
   styleUrls: ['./table-cell-boolean-indicator.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    BooleanIndicatorComponent
+  ]
 })
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 

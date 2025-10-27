@@ -14,10 +14,11 @@ import { TableCellCustom } from '../../../list.types';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 
 @Component({
-selector: 'app-table-cell-endpoint-details',
+  selector: 'app-table-cell-endpoint-details',
   templateUrl: './table-cell-endpoint-details.component.html',
   styleUrls: ['./table-cell-endpoint-details.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: []
 })
 export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
 

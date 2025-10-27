@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, UntypedFormControl } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 export interface TailwindJsonSchemaFormConfig {
   addSubmit?: boolean;
@@ -9,7 +10,11 @@ export interface TailwindJsonSchemaFormConfig {
   selector: 'json-schema-form',
   templateUrl: './tailwind-json-schema-form.component.html',
   styleUrls: ['./tailwind-json-schema-form.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
+  ]
 })
 export class TailwindJsonSchemaFormComponent implements OnInit {
   @Input() schema: any;

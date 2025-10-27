@@ -1,12 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../list.types';
 
 @Component({
-selector: 'app-table-cell-radio',
+  selector: 'app-table-cell-radio',
   templateUrl: './table-cell-radio.component.html',
   styleUrls: ['./table-cell-radio.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
   disable: boolean;

@@ -16,8 +16,8 @@ describe('MetricsRangeSelectorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MetricsRangeSelectorComponent, StartEndDateComponent, DateTimeComponent],
       imports: [
+        MetricsRangeSelectorComponent,
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),

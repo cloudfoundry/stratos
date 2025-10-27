@@ -1,11 +1,13 @@
 import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'mat-form-field',
   templateUrl: './custom-form-field.component.html',
   styleUrls: ['./custom-form-field.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule]
 })
 export class CustomFormFieldComponent implements AfterContentInit {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
@@ -54,7 +56,7 @@ export class CustomFormFieldComponent implements AfterContentInit {
   selector: 'mat-icon',
   template: '<i class="material-icons"><ng-content></ng-content></i>',
   styleUrls: ['./custom-form-field.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomFormFieldIconComponent {
   @Input() fontSet = 'material-icons';
@@ -66,7 +68,7 @@ export class CustomFormFieldIconComponent {
   selector: '[mat-icon-button]',
   template: '<ng-content></ng-content>',
   styleUrls: ['./custom-form-field.component.scss'],
-  standalone: false,
+  standalone: true,
   host: {
     'class': 'mat-icon-button',
     '[class.mat-button-disabled]': 'disabled',
@@ -82,7 +84,7 @@ export class CustomIconButtonDirective {
   selector: '[mat-button]',
   template: '<ng-content></ng-content>',
   styleUrls: ['./custom-form-field.component.scss'],
-  standalone: false,
+  standalone: true,
   host: {
     'class': 'mat-button',
     '[class.mat-button-disabled]': 'disabled',
@@ -96,7 +98,7 @@ export class CustomButtonDirective {
 
 @Directive({
   selector: '[matInput]',
-  standalone: false,
+  standalone: true,
   host: {
     'class': 'mat-input-element'
   }
@@ -109,7 +111,7 @@ export class MatInputDirective {
 @Component({
   selector: '[matSuffix]',
   template: '',
-  standalone: false,
+  standalone: true,
   host: {
     'class': 'mat-form-field-suffix'
   }

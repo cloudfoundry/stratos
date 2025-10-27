@@ -11,7 +11,8 @@ describe('AppActionMonitorIconComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules
+        ...BaseTestModules,
+        AppActionMonitorIconComponent
       ]
     })
       .compileComponents();

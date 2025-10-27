@@ -1,14 +1,20 @@
 import { ChangeDetectionStrategy, Component, ContentChild, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
 
 @Component({
-selector: 'app-meta-card-item',
+  selector: 'app-meta-card-item',
   templateUrl: './meta-card-item.component.html',
   styleUrls: ['./meta-card-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetaCardKeyComponent,
+    MetaCardValueComponent
+  ]
 })
 export class MetaCardItemComponent implements OnInit {
 

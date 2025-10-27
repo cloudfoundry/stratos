@@ -18,7 +18,8 @@ describe('EndpointCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MetricsEndpointDetailsComponent],
       imports: [
-        ...BaseTestModules
+        ...BaseTestModules,
+        EndpointCardComponent
       ],
       providers: [
         EndpointListHelper,

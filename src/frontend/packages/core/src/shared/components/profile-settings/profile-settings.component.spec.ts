@@ -9,8 +9,10 @@ describe('ProfileSettingsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: BaseTestModules,
-      declarations: [ ProfileSettingsComponent ]
+      imports: [
+        BaseTestModules,
+        ProfileSettingsComponent
+      ]
     })
     .compileComponents();
   }));

@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
+import { MatSortModule } from '@angular/material/sort';
 import { ListSort } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -11,6 +13,8 @@ import { TableCellActionsComponent } from './table-cell-actions/table-cell-actio
 import { TableCellExpanderComponent, TableCellExpanderConfig } from './table-cell-expander/table-cell-expander.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { TableCellComponent } from './table-cell/table-cell.component';
+import { TableRowComponent } from './table-row/table-row.component';
 import { TableRowExpandedService } from './table-row/table-row-expanded-service';
 import { ITableColumn } from './table.types';
 
@@ -38,13 +42,19 @@ const tableColumnAction: ITableColumn<any> = {
 };
 
 @Component({
-selector: 'app-table',
+  selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   providers: [
     TableRowExpandedService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatSortModule,
+    TableCellComponent,
+    TableRowComponent
+  ]
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
 

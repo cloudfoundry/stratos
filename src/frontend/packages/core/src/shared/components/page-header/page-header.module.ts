@@ -9,17 +9,18 @@ import { ShowPageHeaderComponent } from './show-page-header/show-page-header.com
 @NgModule({
   imports: [
     CoreModule,
+    PageHeaderEventsComponent, // Now standalone - moved to imports
   ],
   declarations: [
     ExtensionButtonsComponent,
     PageHeaderComponent,
-    PageHeaderEventsComponent,
+    // PageHeaderEventsComponent, // Now standalone - moved to imports
     ShowPageHeaderComponent
   ],
   exports: [
     ExtensionButtonsComponent,
     PageHeaderComponent,
-    PageHeaderEventsComponent,
+    PageHeaderEventsComponent, // Now standalone - kept in exports for backward compatibility
     ShowPageHeaderComponent
   ]
 })

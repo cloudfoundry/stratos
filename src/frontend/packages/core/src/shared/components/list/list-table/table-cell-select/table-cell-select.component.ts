@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -6,10 +7,13 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 import { TableCellCustom } from '../../list.types';
 
 @Component({
-selector: 'app-table-cell-select',
+  selector: 'app-table-cell-select',
   templateUrl: './table-cell-select.component.html',
   styleUrls: ['./table-cell-select.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class TableCellSelectComponent<T> extends TableCellCustom<T> implements OnInit {
 

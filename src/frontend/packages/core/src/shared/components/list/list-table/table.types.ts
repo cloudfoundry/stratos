@@ -72,7 +72,7 @@ export interface ITableText {
 }
 
 export const listTableComponents = [
-  TableComponent,
+  // TableComponent, // Now standalone - should not be in declarations array
   TableCellComponent,
   TableRowComponent,
   ...listTableCells,

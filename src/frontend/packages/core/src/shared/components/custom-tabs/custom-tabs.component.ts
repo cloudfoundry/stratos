@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, ViewChild, TemplateRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export interface MatTabChangeEvent {
   index: number;
@@ -8,7 +9,7 @@ export interface MatTabChangeEvent {
 @Component({
   selector: 'mat-tab',
   template: '<ng-template><ng-content></ng-content></ng-template>',
-  standalone: false
+  standalone: true
 })
 export class CustomTabComponent {
   @Input() label = '';
@@ -24,7 +25,11 @@ export class CustomTabComponent {
   selector: 'mat-tab-group',
   templateUrl: './custom-tabs.component.html',
   styleUrls: ['./custom-tabs.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomTabComponent
+  ]
 })
 export class CustomTabGroupComponent implements AfterContentInit {
   @Input() selectedIndex = 0;

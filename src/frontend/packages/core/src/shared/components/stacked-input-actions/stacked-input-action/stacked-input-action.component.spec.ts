@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { of as observableOf } from 'rxjs';
 
 import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
-import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionComponent, StackedInputActionResult } from './stacked-input-action.component';
 
 describe('StackedInputActionComponent', () => {
@@ -11,8 +10,10 @@ describe('StackedInputActionComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [StackedInputActionComponent, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: [
+        StackedInputActionComponent,
+        ...BaseTestModulesNoShared
+      ],
     })
       .compileComponents();
   }));

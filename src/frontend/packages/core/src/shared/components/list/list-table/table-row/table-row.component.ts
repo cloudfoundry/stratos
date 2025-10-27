@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { CdkTableModule } from '@angular/cdk/table';
 import { CdkRow } from '@angular/cdk/table';
 import {
   ChangeDetectionStrategy,
@@ -10,6 +12,9 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -25,7 +30,14 @@ selector: 'app-table-row',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   preserveWhitespaces: false,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    CdkTableModule,
+    MatExpansionModule,
+    MatIconModule,
+    MatProgressBarModule
+  ]
 })
 export class TableRowComponent<T = any> extends CdkRow implements OnInit {
 

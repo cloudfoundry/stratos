@@ -1,20 +1,36 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MomentModule } from 'ngx-moment';
 import { EntityMonitorFactory, MetricQueryType, IMetrics, MetricsAction, EntityMonitor } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
+import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 
 import moment from 'moment';
 
 @Component({
-selector: 'app-metrics-range-selector',
+  selector: 'app-metrics-range-selector',
   templateUrl: './metrics-range-selector.component.html',
   styleUrls: ['./metrics-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MomentModule,
+    StartEndDateComponent
+  ]
 })
 export class MetricsRangeSelectorComponent implements OnDestroy {
   private rangeSelectorSub: Subscription;

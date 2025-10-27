@@ -8,6 +8,8 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -18,14 +20,20 @@ import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { BASE_REDIRECT_QUERY } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
+import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
 
 @Component({
-selector: 'app-steppers',
+  selector: 'app-steppers',
   templateUrl: './steppers.component.html',
   styleUrls: ['./steppers.component.scss'],
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    DotContentComponent
+  ]
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 

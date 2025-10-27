@@ -1,16 +1,22 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { EndpointModel, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { CopyToClipboardComponent } from '../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { TableCellCustom } from '../../../list.types';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 @Component({
-selector: 'app-table-cell-endpoint-address',
+  selector: 'app-table-cell-endpoint-address',
   templateUrl: './table-cell-endpoint-address.component.html',
   styleUrls: ['./table-cell-endpoint-address.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    CopyToClipboardComponent
+  ]
 })
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;

@@ -1,4 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -13,6 +20,7 @@ import { LocalStorageService } from '../../../../../store/src/helpers/local-stor
 import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
 import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
 import { ThemeService } from '../../../../../store/src/theme.service';
+import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -26,10 +34,20 @@ export enum ProfileSettingsTypes {
   STORAGE
 }
 @Component({
-selector: 'app-profile-settings',
+  selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatSlideToggleModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatCardModule,
+    MatButtonToggleModule,
+    MatButtonModule,
+    BytesToHumanSize
+  ]
 })
 export class ProfileSettingsComponent {
 

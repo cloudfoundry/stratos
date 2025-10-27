@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { getRowMetadata, EntitySchema, APIResource } from '@stratosui/store';
 
-import { AppMonitorComponentTypes } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppMonitorComponentTypes, AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 import { TableCellCustom } from '../../list.types';
 
 export interface ITableCellRequestMonitorIconConfig {
@@ -20,7 +21,11 @@ interface Config<T> {
 selector: 'app-table-cell-request-monitor-icon',
   templateUrl: './table-cell-request-monitor-icon.component.html',
   styleUrls: ['./table-cell-request-monitor-icon.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppActionMonitorIconComponent
+  ]
 })
 export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit {
   public configObj: ITableCellRequestMonitorIconConfig;

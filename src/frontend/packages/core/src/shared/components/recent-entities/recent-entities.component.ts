@@ -1,4 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import {
   AppState,
@@ -13,6 +17,8 @@ import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import moment from 'moment';
+
+import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
   public mostRecentHit: moment.Moment;
@@ -42,10 +48,17 @@ class RenderableRecent {
 }
 
 @Component({
-selector: 'app-recent-entities',
+  selector: 'app-recent-entities',
   templateUrl: './recent-entities.component.html',
   styleUrls: ['./recent-entities.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MatIconModule,
+    NoContentMessageComponent
+  ]
 })
 export class RecentEntitiesComponent {
   @Input()
