@@ -1,4 +1,4 @@
-$checkbox-margin: 30px;
+$checkbox-margin: 20px;
 
 :host {
   height: 100%;
@@ -11,25 +11,58 @@ mat-checkbox {
 
 form.stepper-form {
   max-width: unset;
-  mat-form-field,
-  mat-checkbox {
+
+  mat-form-field {
     max-width: 450px;
   }
+
   P {
     max-width: unset;
   }
 }
 
+.create-endpoint__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.create-endpoint__info-column,
+.create-endpoint__options-column {
+  display: flex;
+  flex-direction: column;
+
+  mat-checkbox {
+    padding-top: $checkbox-margin;
+    max-width: unset;
+  }
+}
+
+.create-endpoint__options-column {
+  mat-checkbox {
+    // Reduce top padding for option checkboxes after the title
+    &:not(:first-of-type) {
+      padding-top: 15px;
+    }
+  }
+}
+
 .create-endpoint {
   &__section {
-    margin-top: $checkbox-margin;
+    margin-top: 15px;
 
     &-title {
       font-size: 16px;
     }
   }
   &__sso {
-    margin-top: $checkbox-margin;
+    margin-top: 15px;
   }
   &__advanced {
     display: flex;

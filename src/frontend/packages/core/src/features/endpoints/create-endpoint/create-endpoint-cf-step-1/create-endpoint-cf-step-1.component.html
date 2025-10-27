@@ -1,31 +1,45 @@
 <form [formGroup]="registerForm" class="stepper-form">
-  <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
-  <mat-form-field>
-    <input matInput id="name" name="name" formControlName="nameField" placeholder="Name"
-      [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
-    <mat-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</mat-error>
-    <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
-  </mat-form-field>
-  <mat-form-field novalidate>
-    <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-      pattern="{{urlValidation}}" 
-      [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
-    <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
-  </mat-form-field>
-  <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="createSystemEndpoint" 
-    formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
-    [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
-  </mat-checkbox>
-  <mat-checkbox [disabled]="showCACertField" matInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</mat-checkbox>
-  <mat-checkbox matInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</mat-checkbox>
+  <div class="create-endpoint__grid">
+    <!-- Left column: Cloud Foundry Information -->
+    <div class="create-endpoint__info-column">
+      <h1 class="create-endpoint__section-title">{{endpoint.definition.label}} Information</h1>
+      <mat-form-field>
+        <input matInput id="name" name="name" formControlName="nameField" placeholder="Name"
+          [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
+        <mat-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</mat-error>
+        <mat-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</mat-error>
+      </mat-form-field>
+      <mat-form-field novalidate>
+        <input matInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
+          pattern="{{urlValidation}}"
+          [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
+        <mat-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</mat-error>
+        <mat-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</mat-error>
+        <mat-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</mat-error>
+      </mat-form-field>
+      <mat-checkbox matInput *ngIf="userEndpointsAndIsAdmin | async" name="createSystemEndpoint"
+        formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
+        [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
+      </mat-checkbox>
+    </div>
+
+    <!-- Right column: Checkbox options -->
+    <div class="create-endpoint__options-column">
+      <h1 class="create-endpoint__section-title">Options</h1>
+      <mat-checkbox [disabled]="showCACertField" matInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</mat-checkbox>
+      <mat-checkbox matInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</mat-checkbox>
+      <mat-checkbox matInput *ngIf="showAdvancedFields" (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
+      <mat-checkbox matInput *ngIf="endpointTypeSupportsSSO" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</mat-checkbox>
+    </div>
+  </div>
+
+  <!-- Full-width sections below grid -->
   <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
     <span class="create-endpoint__cacert-title">Specify CA Certificate:</span>
     <textarea rows="10" class="create-endpoint__cacert" matInput formControlName="caCertField" name="caCert"></textarea>
   </div>
+
   <div [ngClass]="{'hide': !showAdvancedFields, 'show': showAdvancedFields}" class="create-endpoint__section">
-    <mat-checkbox matInput (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
     <div [ngClass]="{'create-endpoint__shown': showAdvancedOptions}" class="create-endpoint__advanced">
       <h1>Advanced Options</h1>
       <p>Client ID and Client Secret do not normally need to be specified.</p>
@@ -44,9 +58,8 @@
       </mat-form-field>
     </div>
   </div>
+
   <div [ngClass]="{'hide': !endpointTypeSupportsSSO, 'show': endpointTypeSupportsSSO}" class="create-endpoint__sso">
-    <mat-checkbox matInput name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint
-    </mat-checkbox>
     <div *ngIf="!!registerForm.controls.ssoAllowedField.value">
       <p>
         Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.

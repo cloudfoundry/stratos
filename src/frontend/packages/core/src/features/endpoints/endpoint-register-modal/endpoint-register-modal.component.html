@@ -5,10 +5,10 @@
   <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
     
     <!-- Modal content -->
-    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
-      
+    <div class="bg-white rounded-2xl shadow-2xl transform transition-all duration-300" style="overflow: visible;">
+
       <!-- Modal header -->
-      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-hidden">
+      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-visible rounded-t-2xl">
         <div class="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
         <div class="relative flex items-center justify-between">
           <div class="flex items-center space-x-3">
@@ -45,7 +45,7 @@
       </div>
 
       <!-- Modal body -->
-      <div class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+      <div class="p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
         
         <!-- Endpoint type selection -->
         <div *ngIf="!selectedEndpointInfo">
@@ -67,7 +67,7 @@
       </div>
 
       <!-- Modal footer -->
-      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl">
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-500">
             <span *ngIf="!selectedEndpointInfo">Select an endpoint type to continue with registration</span>
