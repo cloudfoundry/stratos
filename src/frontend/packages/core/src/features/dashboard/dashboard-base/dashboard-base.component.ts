@@ -53,9 +53,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
 
-  @ViewChild('content') public content;
+  @ViewChild('content', { static: false }) public content;
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;

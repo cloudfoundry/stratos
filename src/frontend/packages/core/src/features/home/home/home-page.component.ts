@@ -79,7 +79,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   noneAvailableMsg = noFavoritesMsg;
 
-  @ViewChild('endpointsPanel') endpointsPanel;
+  @ViewChild('endpointsPanel', { static: false }) endpointsPanel;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
   @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
 

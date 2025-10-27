@@ -51,7 +51,7 @@ selector: 'app-home-page-endpoint-card',
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('customCard', {read: ViewContainerRef}) customCard: ViewContainerRef;
+  @ViewChild('customCard', {read: ViewContainerRef, static: false}) customCard: ViewContainerRef;
 
   @Input() endpoint: EndpointModel;
 

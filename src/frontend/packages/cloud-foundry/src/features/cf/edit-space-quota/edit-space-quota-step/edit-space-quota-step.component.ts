@@ -34,7 +34,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   spaceQuotaDefinition$: Observable<APIResource<ISpaceQuotaDefinition>>;
   quota: ISpaceQuotaDefinition;
 
-  @ViewChild('form')
+  @ViewChild('form', { static: false })
   form: SpaceQuotaDefinitionFormComponent;
 
   constructor(

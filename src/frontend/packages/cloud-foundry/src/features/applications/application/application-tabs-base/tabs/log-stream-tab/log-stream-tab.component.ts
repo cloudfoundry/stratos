@@ -30,7 +30,7 @@ export class LogStreamTabComponent implements OnInit {
   private connectionStatusSubject = new Subject<number>();
   public connectionStatus: Observable<number>;
 
-  @ViewChild('searchFilter') searchFilter: NgModel;
+  @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
   filter;
 

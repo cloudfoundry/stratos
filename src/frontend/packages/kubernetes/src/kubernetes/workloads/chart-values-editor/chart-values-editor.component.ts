@@ -114,9 +114,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private codeOnEnter: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', { read: ElementRef }) monacoEditor: ElementRef;
+  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor: ElementRef;
 
-  @ViewChild('schemaForm') schemaForm: TailwindJsonSchemaFormComponent;
+  @ViewChild('schemaForm', { static: false }) schemaForm: TailwindJsonSchemaFormComponent;
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(

@@ -18,7 +18,7 @@ selector: 'app-card-autoscaler-default',
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
-  @ViewChild('instanceField') instanceField: ElementRef;
+  @ViewChild('instanceField', { static: false }) instanceField: ElementRef;
 
   constructor(
     public appService: ApplicationService,
