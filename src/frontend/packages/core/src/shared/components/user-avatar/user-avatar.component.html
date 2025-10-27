@@ -1,5 +1,5 @@
 <div class="user-avatar" [ngClass]="{'user-avatar__large': size === 'large'}">
-  <mat-icon *ngIf="!initials && !gravatar" class="user-avatar__placeholder">account_circle</mat-icon>
+  <span *ngIf="!initials && !gravatar" class="material-icons user-avatar__placeholder">account_circle</span>
   <div *ngIf="initials" [ngClass]="{'user-avatar__header': color == 'header'}" class="user-avatar__initials">{{ initials }}</div>
   <img class="user-avatar__gravatar" *ngIf="gravatar" [src]="gravatar">
 </div>

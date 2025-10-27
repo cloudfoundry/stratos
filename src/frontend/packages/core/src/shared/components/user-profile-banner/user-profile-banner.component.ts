@@ -1,11 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { UserProfileInfo } from '@stratosui/store';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @Component({
-selector: 'app-user-profile-banner',
+  selector: 'app-user-profile-banner',
   templateUrl: './user-profile-banner.component.html',
   styleUrls: ['./user-profile-banner.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    UserAvatarComponent
+  ]
 })
 export class UserProfileBannerComponent {
 

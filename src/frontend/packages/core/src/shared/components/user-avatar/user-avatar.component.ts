@@ -1,13 +1,17 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { UserProfileInfo } from '@stratosui/store';
 
 import { MD5 } from './md5';
 
 @Component({
-selector: 'app-user-avatar',
+  selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
   styleUrls: ['./user-avatar.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class UserAvatarComponent {
 

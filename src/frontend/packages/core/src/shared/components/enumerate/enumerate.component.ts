@@ -1,11 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Component({
-selector: 'app-enumerate',
+  selector: 'app-enumerate',
   templateUrl: './enumerate.component.html',
   styleUrls: ['./enumerate.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+  ]
 })
 export class EnumerateComponent {
   @Input() collection: Observable<any[]>;

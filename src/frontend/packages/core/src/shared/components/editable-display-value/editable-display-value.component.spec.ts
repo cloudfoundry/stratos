@@ -1,8 +1,5 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { CoreModule } from '../../../core/core.module';
-import { DisplayValueComponent } from '../display-value/display-value.component';
 import { EditableDisplayValueComponent } from './editable-display-value.component';
 
 describe('EditableDisplayValueComponent', () => {
@@ -11,13 +8,8 @@ describe('EditableDisplayValueComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        EditableDisplayValueComponent
-      ],
       imports: [
-        CommonModule,
-        CoreModule,
-        DisplayValueComponent
+        EditableDisplayValueComponent
       ]
     })
       .compileComponents();

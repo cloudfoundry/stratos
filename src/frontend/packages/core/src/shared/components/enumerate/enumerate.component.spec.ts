@@ -8,7 +8,7 @@ describe('EnumerateComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ EnumerateComponent ]
+      imports: [ EnumerateComponent ]
     })
     .compileComponents();
   }));

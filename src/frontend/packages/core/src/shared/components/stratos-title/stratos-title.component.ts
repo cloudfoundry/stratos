@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -5,10 +6,13 @@ import { StratosThemeService } from '../../../../../theme/theme.service';
 import { StratosTheme } from '../../../../../theme/theme.config';
 
 @Component({
-selector: 'app-stratos-title',
+  selector: 'app-stratos-title',
   templateUrl: './stratos-title.component.html',
   styleUrls: ['./stratos-title.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class StratosTitleComponent implements OnInit {
 

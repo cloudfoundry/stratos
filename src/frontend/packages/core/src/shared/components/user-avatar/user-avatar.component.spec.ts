@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { UserAvatarComponent } from './user-avatar.component';
-import { MDAppModule } from '../../../core/md.module';
 
 describe('UserAvatarComponent', () => {
   let component: UserAvatarComponent;
@@ -9,9 +8,8 @@ describe('UserAvatarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ UserAvatarComponent ],
       imports: [
-        MDAppModule,
+        UserAvatarComponent
       ]
     })
     .compileComponents();

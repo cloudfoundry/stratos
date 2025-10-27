@@ -19,7 +19,7 @@ import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.compo
 import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
-import { CardStatusComponent } from './components/cards/card-status/card-status.component';
+import { CardStatusComponent } from './components/cards/card-status/card-status.component'; // Now standalone
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -29,7 +29,7 @@ import { DetailsCardComponent } from './components/details-card/details-card.com
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
-import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
+import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component'; // Now standalone
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
@@ -96,7 +96,7 @@ import {
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
-import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component'; // Now standalone
 import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
@@ -166,13 +166,19 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BooleanIndicatorComponent,
     LoadingPageComponent,
     MetadataItemComponent,
+    CardStatusComponent,
+    StratosTitleComponent,
+    EditableDisplayValueComponent,
+    EnumerateComponent,
+    UserProfileBannerComponent,
+    UserAvatarComponent,
     // Standalone pipes
     PercentagePipe,
   ],
   declarations: [
     // LoadingPageComponent, // Now standalone - moved to imports
     // DisplayValueComponent, // Now standalone - moved to imports
-    EditableDisplayValueComponent,
+    // EditableDisplayValueComponent, // Now standalone - moved to imports
     MbToHumanSizePipe,
     // PercentagePipe, // Now standalone - moved to imports
     UptimePipe,
@@ -196,7 +202,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TileGridComponent,
     // MetadataItemComponent, // Now standalone - moved to imports
     // UsageGaugeComponent, // Now standalone - moved to imports
-    CardStatusComponent,
+    // CardStatusComponent, // Now standalone - moved to imports
     DialogConfirmComponent,
     ListComponent,
     ...listCardComponents,
@@ -214,14 +220,14 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CardNumberMetricComponent,
     RingChartComponent,
     MetricsChartComponent,
-    StratosTitleComponent,
+    // StratosTitleComponent, // Now standalone - moved to imports
     // IntroScreenComponent, // Now standalone - moved to imports
-    EnumerateComponent,
+    // EnumerateComponent, // Now standalone - moved to imports
     UploadProgressIndicatorComponent,
-    UserProfileBannerComponent,
+    // UserProfileBannerComponent, // Now standalone - moved to imports
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
-    UserProfileBannerComponent,
+    // UserProfileBannerComponent, // Now standalone - moved to imports
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
     CapitalizeFirstPipe,
@@ -298,7 +304,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
     NoContentMessageComponent,
-    UserAvatarComponent,
+    // UserAvatarComponent, // Now standalone - moved to imports
   ],
   exports: [
     ApplicationStateIconPipe,
@@ -311,6 +317,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     PageHeaderModule,
     DisplayValueComponent,
     EditableDisplayValueComponent,
+    EnumerateComponent,
+    UserProfileBannerComponent,
     DetailsCardComponent,
     SteppersModule,
     MbToHumanSizePipe,
