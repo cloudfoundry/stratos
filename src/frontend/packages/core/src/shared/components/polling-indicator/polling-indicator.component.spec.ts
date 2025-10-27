@@ -10,8 +10,10 @@ describe('PollingIndicatorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [PollingIndicatorComponent],
-      imports: [CoreModule]
+      imports: [
+        PollingIndicatorComponent,
+        CoreModule
+      ]
     })
       .compileComponents();
   }));

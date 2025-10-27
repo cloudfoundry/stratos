@@ -1,12 +1,18 @@
 import { Component, Input, OnChanges, OnInit, ViewEncapsulation } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
-selector: 'app-ring-chart',
+  selector: 'app-ring-chart',
   templateUrl: './ring-chart.component.html',
   styleUrls: ['./ring-chart.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    BaseChartDirective
+  ]
 })
 export class RingChartComponent implements OnInit, OnChanges {
 

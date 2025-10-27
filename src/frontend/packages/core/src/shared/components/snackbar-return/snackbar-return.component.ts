@@ -1,14 +1,20 @@
 import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
 import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
 @Component({
-selector: 'app-snackbar-return',
+  selector: 'app-snackbar-return',
   templateUrl: './snackbar-return.component.html',
   styleUrls: ['./snackbar-return.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule
+  ]
 })
 export class SnackBarReturnComponent extends SimpleSnackBar {
   returnLabel: string;

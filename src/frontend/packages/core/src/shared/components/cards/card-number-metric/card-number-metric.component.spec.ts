@@ -10,8 +10,11 @@ describe('CardNumberMetricComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CardNumberMetricComponent, CardStatusComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: [
+        ...BaseTestModulesNoShared,
+        CardNumberMetricComponent,
+        CardStatusComponent
+      ],
     })
       .compileComponents();
   }));

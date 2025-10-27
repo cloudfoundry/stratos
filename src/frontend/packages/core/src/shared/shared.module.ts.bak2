@@ -71,7 +71,7 @@ import { LogViewerComponent } from './components/log-viewer/log-viewer.component
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
-import { MetricsChartComponent} from './components/metrics-chart/metrics-chart.component'; // Now standalone
+import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import {
   MetricsParentRangeSelectorComponent,
 } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
@@ -194,7 +194,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CardNumberMetricComponent, // Now standalone - moved to imports
     SnackBarReturnComponent, // Now standalone - moved to imports
     RingChartComponent,
-    MetricsChartComponent, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -223,11 +222,12 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // ApplicationStateComponent, // Now standalone - moved to imports
     // TileComponent, // Now standalone - moved to imports
     // TileGroupComponent, // Now standalone - moved to imports
-    // TileGridComponent, // Now standalone - moved to imports
+    TileGridComponent,
     // MetadataItemComponent, // Now standalone - moved to imports
     // UsageGaugeComponent, // Now standalone - moved to imports
     // CardStatusComponent, // Now standalone - moved to imports
     // DialogConfirmComponent, // Now standalone - moved to imports
+    SnackBarReturnComponent,
     ListComponent,
     ...listCardComponents,
     ...listTableComponents,
@@ -240,10 +240,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // NestedTabsComponent, // Now standalone - moved to imports
     // BooleanIndicatorComponent, // Now standalone - moved to imports
     // AppChipsComponent, // Now standalone - moved to imports
-    // CardBooleanMetricComponent, // Now standalone - moved to imports // Now standalone - kept in exports for backward compatibility
-    // CardNumberMetricComponent, // Now standalone - moved to imports
+    // CardBooleanMetricComponent, // Now standalone - moved to imports
+    CardNumberMetricComponent,
     // RingChartComponent, // Now standalone - moved to imports
-    // MetricsChartComponent, // Now standalone - moved to imports
+    MetricsChartComponent,
     // StratosTitleComponent, // Now standalone - moved to imports
     // IntroScreenComponent, // Now standalone - moved to imports
     // EnumerateComponent, // Now standalone - moved to imports
@@ -377,7 +377,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // NestedTabsComponent, // Now standalone - moved to imports
     RingChartComponent,
     AppChipsComponent,
-    CardBooleanMetricComponent, // Now standalone - kept in exports for backward compatibility
+    // CardBooleanMetricComponent, // Now standalone - moved to imports
     CardNumberMetricComponent,
     MetricsChartComponent,
     StratosTitleComponent,

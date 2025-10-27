@@ -19,6 +19,18 @@ export class CustomIconComponent {
   }
 }
 
+// Custom Spinner Component
+@Component({
+  selector: 'mat-spinner',
+  template: '<div class="custom-spinner" [style.width.px]="diameter" [style.height.px]="diameter"><div class="spinner-circle"></div></div>',
+  styleUrls: ['./custom-material.component.scss'],
+  standalone: true
+})
+export class CustomSpinnerComponent {
+  @Input() diameter = 40;
+  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+}
+
 // Custom Progress Bar Component
 @Component({
   selector: 'mat-progress-bar',

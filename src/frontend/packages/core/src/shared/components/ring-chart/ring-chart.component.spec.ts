@@ -10,10 +10,10 @@ describe('RingChartComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [RingChartComponent],
       imports: [
         NoopAnimationsModule,
         BaseChartDirective,
+        RingChartComponent,
       ]
     })
       .compileComponents();

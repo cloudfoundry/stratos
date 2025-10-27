@@ -9,8 +9,10 @@ describe('CardBooleanMetricComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CardBooleanMetricComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: [
+        CardBooleanMetricComponent,
+        ...BaseTestModulesNoShared
+      ],
     })
       .compileComponents();
   }));

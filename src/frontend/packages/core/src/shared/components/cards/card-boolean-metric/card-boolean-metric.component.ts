@@ -1,12 +1,16 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
 
 @Component({
-selector: 'app-card-boolean-metric',
+  selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
   styleUrls: ['./card-boolean-metric.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 

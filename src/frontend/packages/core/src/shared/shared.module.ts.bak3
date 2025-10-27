@@ -194,7 +194,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CardNumberMetricComponent, // Now standalone - moved to imports
     SnackBarReturnComponent, // Now standalone - moved to imports
     RingChartComponent,
-    MetricsChartComponent, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -240,7 +239,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // NestedTabsComponent, // Now standalone - moved to imports
     // BooleanIndicatorComponent, // Now standalone - moved to imports
     // AppChipsComponent, // Now standalone - moved to imports
-    // CardBooleanMetricComponent, // Now standalone - moved to imports // Now standalone - kept in exports for backward compatibility
+    // CardBooleanMetricComponent, // Now standalone - moved to imports
     // CardNumberMetricComponent, // Now standalone - moved to imports
     // RingChartComponent, // Now standalone - moved to imports
     // MetricsChartComponent, // Now standalone - moved to imports

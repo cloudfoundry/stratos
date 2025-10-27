@@ -9,8 +9,10 @@ describe('NestedTabsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [NestedTabsComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: [
+        ...BaseTestModulesNoShared,
+        NestedTabsComponent,
+      ]
     })
       .compileComponents();
   }));

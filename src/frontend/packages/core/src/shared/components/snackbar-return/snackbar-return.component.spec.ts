@@ -11,8 +11,10 @@ describe('SnackBarReturnComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [SnackBarReturnComponent],
-      imports: [...BaseTestModulesNoShared],
+      imports: [
+        SnackBarReturnComponent,
+        ...BaseTestModulesNoShared
+      ],
       providers: [{
         provide: TailwindSnackBarRefImpl,
         useValue: {}

@@ -8,7 +8,7 @@ describe('MultilineTitleComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ MultilineTitleComponent ]
+      imports: [ MultilineTitleComponent ]
     })
     .compileComponents();
   }));

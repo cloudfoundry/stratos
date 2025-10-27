@@ -1,4 +1,5 @@
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
 import { Store } from '@ngrx/store';
 import {
@@ -13,7 +14,10 @@ import {
 } from '@stratosui/store';
 import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { BaseChartDirective } from 'ng2-charts';
 
+import { SharedModule } from '../../shared.module';
+import { CustomProgressBarSelectorComponent, CustomSpinnerComponent } from '../custom-material/custom-material.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
@@ -31,10 +35,17 @@ export interface MetricsConfig<T = any> {
 }
 
 @Component({
-selector: 'app-metrics-chart',
+  selector: 'app-metrics-chart',
   templateUrl: './metrics-chart.component.html',
   styleUrls: ['./metrics-chart.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    BaseChartDirective,
+    SharedModule,
+    CustomSpinnerComponent,
+    CustomProgressBarSelectorComponent,
+  ]
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input()

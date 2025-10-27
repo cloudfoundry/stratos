@@ -11,8 +11,8 @@ describe('UploadProgressIndicatorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ UploadProgressIndicatorComponent ],
       imports: [
+        UploadProgressIndicatorComponent,
         MDAppModule,
         CommonModule,
         CoreModule,

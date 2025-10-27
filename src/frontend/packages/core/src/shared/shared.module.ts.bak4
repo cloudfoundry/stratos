@@ -194,7 +194,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CardNumberMetricComponent, // Now standalone - moved to imports
     SnackBarReturnComponent, // Now standalone - moved to imports
     RingChartComponent,
-    MetricsChartComponent, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -243,7 +242,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // CardBooleanMetricComponent, // Now standalone - moved to imports // Now standalone - kept in exports for backward compatibility
     // CardNumberMetricComponent, // Now standalone - moved to imports
     // RingChartComponent, // Now standalone - moved to imports
-    // MetricsChartComponent, // Now standalone - moved to imports
+    MetricsChartComponent,
     // StratosTitleComponent, // Now standalone - moved to imports
     // IntroScreenComponent, // Now standalone - moved to imports
     // EnumerateComponent, // Now standalone - moved to imports
@@ -361,7 +360,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     SshViewerComponent,
     TileComponent,
     TileGroupComponent,
-    TileGridComponent,
+    // TileGridComponent, // Now standalone - moved to imports
     CardStatusComponent,
     MetadataItemComponent,
     UsageGaugeComponent,
