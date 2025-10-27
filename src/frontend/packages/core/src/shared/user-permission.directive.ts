@@ -7,7 +7,7 @@ import { CurrentUserPermissionsService } from '../core/permissions/current-user-
 
 @Directive({
 selector: '[appUserPermission]',
-standalone: false
+standalone: true
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
   @Input()

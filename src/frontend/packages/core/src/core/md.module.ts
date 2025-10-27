@@ -9,9 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     CommonModule,
     ScrollingModule,
     FormsModule,
-    ReactiveFormsModule
-  ],
-  declarations: [
+    ReactiveFormsModule,
     CustomProgressBarComponent,
   ],
   exports: [

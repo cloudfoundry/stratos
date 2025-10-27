@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
   RouterNav,
@@ -11,13 +12,24 @@ import { map } from 'rxjs/operators';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { TileSelectorComponent } from '../../../../shared/components/tile-selector/tile-selector.component';
 
 
 @Component({
-selector: 'app-create-endpoint-base-step',
+  selector: 'app-create-endpoint-base-step',
   templateUrl: './create-endpoint-base-step.component.html',
   styleUrls: ['./create-endpoint-base-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ]
 })
 export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 

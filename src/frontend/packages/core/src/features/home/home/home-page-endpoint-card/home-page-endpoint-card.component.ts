@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Compiler,
@@ -13,6 +14,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, timeout } from 'rxjs/operators';
 
@@ -22,8 +24,12 @@ import {
 } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
+import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { MultilineTitle } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
+import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
+import { HomeShortcutsComponent } from '../home-shortcuts/home-shortcuts.component';
 import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-favorites.types';
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
@@ -44,10 +50,18 @@ enum Status {
 }
 
 @Component({
-selector: 'app-home-page-endpoint-card',
+  selector: 'app-home-page-endpoint-card',
   templateUrl: './home-page-endpoint-card.component.html',
   styleUrls: ['./home-page-endpoint-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MultilineTitle,
+    EntityFavoriteStarComponent,
+    HomeShortcutsComponent,
+    FavoritesMetaCardComponent,
+  ]
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 

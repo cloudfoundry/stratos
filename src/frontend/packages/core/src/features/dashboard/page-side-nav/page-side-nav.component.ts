@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -19,10 +21,15 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 }
 
 @Component({
-selector: 'app-page-side-nav',
+  selector: 'app-page-side-nav',
   templateUrl: './page-side-nav.component.html',
   styleUrls: ['./page-side-nav.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule
+  ]
 })
 export class PageSideNavComponent implements OnInit {
 

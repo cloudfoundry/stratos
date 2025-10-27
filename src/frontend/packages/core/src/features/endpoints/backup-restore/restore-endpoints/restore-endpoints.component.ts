@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
@@ -11,15 +12,29 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
+import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
 @Component({
-selector: 'app-restore-endpoints',
+  selector: 'app-restore-endpoints',
   templateUrl: './restore-endpoints.component.html',
   styleUrls: ['./restore-endpoints.component.scss'],
   providers: [
     RestoreEndpointsService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ShowHideButtonComponent,
+    ProductNameComponent
+  ]
 })
 export class RestoreEndpointsComponent {
 

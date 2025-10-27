@@ -1,11 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Store } from '@ngrx/store';
 import { AppState, getPreviousRoutingState } from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
 
 export const eventReturnUrlParam = 'returnFromEvents';
 
@@ -16,10 +25,22 @@ export enum EventFilterValues {
 }
 
 @Component({
-selector: 'app-events-page',
+  selector: 'app-events-page',
   templateUrl: './events-page.component.html',
   styleUrls: ['./events-page.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatCardModule,
+    MatIconModule,
+    MatListModule,
+    MatTooltipModule,
+    PageHeaderComponent,
+    StatefulIconComponent
+  ]
 })
 export class EventsPageComponent implements OnInit {
   public unreadEvents$: Observable<IGlobalEvent[]>;

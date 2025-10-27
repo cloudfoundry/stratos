@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
-import { EntityFavoriteStarComponent } from '../../../../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { EntityFavoriteStarComponent } from '../../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { TableCellCustom } from '../../list.types';
 import { ITableColumn } from '../table.types';
 

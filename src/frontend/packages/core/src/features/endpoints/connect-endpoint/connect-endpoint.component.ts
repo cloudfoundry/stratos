@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ComponentFactoryResolver,
@@ -10,7 +11,11 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
@@ -19,10 +24,18 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 
 @Component({
-selector: 'app-connect-endpoint',
+  selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',
   styleUrls: ['./connect-endpoint.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatInputModule
+  ]
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;

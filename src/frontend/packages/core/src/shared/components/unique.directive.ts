@@ -2,9 +2,9 @@ import { Directive, Input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
 
 @Directive({
-selector: '[appUnique]',
+  selector: '[appUnique]',
   providers: [{ provide: NG_VALIDATORS, useExisting: UniqueDirective, multi: true }],
-standalone: false
+  standalone: true
 })
 export class UniqueDirective implements Validator {
   constructor() { }

@@ -1,5 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
 import { Subscription } from 'rxjs';
@@ -8,7 +14,10 @@ import { delay, first, map, take, tap } from 'rxjs/operators';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StepComponent, StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 
 @Component({
 selector: 'app-edit-profile-info',
@@ -17,7 +26,20 @@ selector: 'app-edit-profile-info',
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ShowHideButtonComponent
+  ]
 })
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
 

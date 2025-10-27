@@ -2,7 +2,7 @@ import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener } from
 
 @Directive({
   selector: '[matTooltip]',
-  standalone: false
+  standalone: true
 })
 export class CustomTooltipDirective implements OnDestroy {
   @Input('matTooltip') tooltipText: string = '';

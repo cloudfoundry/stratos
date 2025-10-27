@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
 import {
   AfterViewInit,
@@ -27,6 +28,9 @@ import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rx
 import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
+import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
 
@@ -43,10 +47,17 @@ const noFavoritesMsg = {
 };
 
 @Component({
-selector: 'app-home-page',
+  selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    NoContentMessageComponent,
+    EndpointsMissingComponent,
+    HomePageEndpointCardComponent
+  ]
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public allEndpointIds$: Observable<string[]>;

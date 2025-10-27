@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -6,7 +7,11 @@ import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../core/utils.service';
+import { CardStatusComponent } from '../../../shared/components/cards/card-status/card-status.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { EndpointIcon } from '../../endpoints/endpoint-helpers';
 import { mapMetricsData, MetricsEndpointInfo } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
@@ -34,10 +39,17 @@ interface PrometheusJobs {
 }
 
 @Component({
-selector: 'app-metrics',
+  selector: 'app-metrics',
   templateUrl: './metrics.component.html',
   styleUrls: ['./metrics.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    CardStatusComponent,
+    MetadataItemComponent,
+    ProductNameComponent
+  ]
 })
 export class MetricsComponent {
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;

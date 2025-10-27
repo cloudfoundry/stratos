@@ -4,7 +4,7 @@ import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
 name: 'uptime',
-standalone: false
+standalone: true
 })
 export class UptimePipe implements PipeTransform {
 

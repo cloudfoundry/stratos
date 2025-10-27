@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   VerifySession,
@@ -15,13 +16,32 @@ import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
+import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
 @Component({
 selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    PageHeaderComponent,
+    ShowPageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ProductNameComponent,
+    ShowHideButtonComponent,
+    LoadingPageComponent
+  ]
 })
 export class ConsoleUaaWizardComponent implements OnInit {
 

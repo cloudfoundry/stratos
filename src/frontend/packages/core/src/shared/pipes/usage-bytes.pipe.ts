@@ -4,7 +4,7 @@ import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
 name: 'usageBytes',
-standalone: false
+standalone: true
 })
 export class UsageBytesPipe implements PipeTransform {
 

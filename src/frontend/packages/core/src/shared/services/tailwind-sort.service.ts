@@ -17,7 +17,7 @@ export interface TailwindSortable {
 @Directive({
   selector: '[tailwindSort]',
   exportAs: 'tailwindSort',
-  standalone: false
+  standalone: true
 })
 export class TailwindSortDirective {
   @Input('tailwindSort') sortables: { [key: string]: TailwindSortable } = {};
@@ -59,7 +59,7 @@ export class TailwindSortDirective {
 @Directive({
   selector: '[tailwindSortHeader]',
   exportAs: 'tailwindSortHeader',
-  standalone: false
+  standalone: true
 })
 export class TailwindSortHeaderDirective {
   @Input('tailwindSortHeader') id!: string;

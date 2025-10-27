@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
@@ -7,6 +12,10 @@ import { first, map, startWith } from 'rxjs/operators';
 import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ListComponent } from '../../../shared/components/list/list.component';
+import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 
 @Component({
 selector: 'app-api-keys-page',
@@ -16,7 +25,18 @@ selector: 'app-api-keys-page',
     provide: ListConfig,
     useClass: ApiKeyListConfigService,
   }],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageHeaderComponent,
+    ListComponent,
+    NoContentMessageComponent,
+    ProductNameComponent
+  ]
 })
 export class ApiKeysPageComponent {
 

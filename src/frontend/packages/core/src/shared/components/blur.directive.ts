@@ -2,7 +2,7 @@ import { Directive, ElementRef, Inject, Input, NgZone, OnChanges } from '@angula
 
 @Directive({
 selector: '[appBlur]',
-standalone: false
+standalone: true
 })
 export class BlurDirective implements OnChanges {
   @Input() appBlur: boolean;

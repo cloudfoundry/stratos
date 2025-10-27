@@ -1,17 +1,32 @@
 import { Component, OnDestroy, Inject } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
+import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
 
 @Component({
-selector: 'app-add-api-key-dialog',
+  selector: 'app-add-api-key-dialog',
   templateUrl: './add-api-key-dialog.component.html',
   styleUrls: ['./add-api-key-dialog.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressBarModule,
+    DialogErrorComponent
+  ]
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
 

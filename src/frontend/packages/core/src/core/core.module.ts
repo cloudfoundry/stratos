@@ -48,6 +48,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         // Standalone directives and components
         ClickStopPropagationDirective,
         EntityFavoriteStarComponent,
+        RecentEntitiesComponent,
         // Standalone pipes
         BytesToHumanSize,
     ],
@@ -116,7 +117,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         ButtonBlurOnClickDirective,
         PageNotFoundComponentComponent,
         // EntityFavoriteStarComponent, // Now standalone - moved to imports
-        RecentEntitiesComponent,
+        // RecentEntitiesComponent, // Now standalone - moved to imports
         ShowHideButtonComponent
     ]
 })

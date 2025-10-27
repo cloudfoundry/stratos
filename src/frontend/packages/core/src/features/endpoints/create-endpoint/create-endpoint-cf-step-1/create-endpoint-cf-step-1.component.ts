@@ -1,5 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import {
   ActionState,
@@ -19,12 +25,25 @@ import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
+import { UniqueDirective } from '../../../../shared/components/unique.directive';
+import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
 @Component({
-selector: 'app-create-endpoint-cf-step-1',
+  selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
   styleUrls: ['./create-endpoint-cf-step-1.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    UniqueDirective,
+    ProductNameComponent
+  ]
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 

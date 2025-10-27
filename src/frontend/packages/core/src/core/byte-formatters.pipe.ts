@@ -40,8 +40,8 @@ function precisionIfUseful(size, precision = 1) {
 }
 
 @Pipe({
-name: 'MbToHumanSize',
-standalone: false
+  name: 'MbToHumanSize',
+  standalone: true
 })
 export class MegaBytesToHumanSize implements PipeTransform {
   transform(value: string): string {

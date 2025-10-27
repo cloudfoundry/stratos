@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ComponentFactory,
@@ -8,18 +9,31 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
 selector: 'app-about-page',
   templateUrl: './about-page.component.html',
   styleUrls: ['./about-page.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    StratosTitleComponent,
+    ProductNameComponent,
+    MetadataItemComponent
+  ]
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
 

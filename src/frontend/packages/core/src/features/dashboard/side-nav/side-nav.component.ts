@@ -1,5 +1,6 @@
 import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToggleSideNav, AppState, Logout } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -29,10 +30,14 @@ export interface SideNavItem extends TabNavItem {
 }
 
 @Component({
-selector: 'app-side-nav',
+  selector: 'app-side-nav',
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ]
 })
 
 export class SideNavComponent implements OnInit {

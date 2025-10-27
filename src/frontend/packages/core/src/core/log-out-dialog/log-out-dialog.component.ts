@@ -4,12 +4,16 @@ import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-log-out-dialog',
   templateUrl: './log-out-dialog.component.html',
   styleUrls: ['./log-out-dialog.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatProgressBarModule
+  ]
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(

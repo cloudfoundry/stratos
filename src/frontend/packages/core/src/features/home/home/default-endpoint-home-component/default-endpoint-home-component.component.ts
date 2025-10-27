@@ -1,15 +1,21 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
 
 import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../../../store/src/public-api';
 import { HomePageCardLayout, HomePageEndpointCard } from '../../home.types';
+import { MetadataItemComponent } from '../../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-default-endpoint-home-component',
+  selector: 'app-default-endpoint-home-component',
   templateUrl: './default-endpoint-home-component.component.html',
   styleUrls: ['./default-endpoint-home-component.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetadataItemComponent
+  ]
 })
 export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
 

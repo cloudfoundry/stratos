@@ -1,8 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Portal } from '@angular/cdk/portal';
+import { Portal, PortalModule } from '@angular/cdk/portal';
 import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
 import {
   GetCurrentUsersRelations,
@@ -23,15 +25,27 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
 import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
+import { PageSideNavComponent, IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { SideNavItem } from './../side-nav/side-nav.component';
+import { SideNavComponent, SideNavItem } from './../side-nav/side-nav.component';
+import { RoutingIndicatorComponent } from '../../../shared/components/routing-indicator/routing-indicator.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 
 @Component({
-selector: 'app-dashboard-base',
+  selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
   styleUrls: ['./dashboard-base.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PortalModule,
+    ScrollingModule,
+    SideNavComponent,
+    PageSideNavComponent,
+    ShowPageHeaderComponent,
+    RoutingIndicatorComponent
+  ]
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {

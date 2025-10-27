@@ -3,8 +3,8 @@ import { Directive, ElementRef, HostListener, Renderer2 } from '@angular/core';
 /* tslint:disable:directive-selector */
 
 @Directive({
-selector: 'button [mat-icon-button]',
-standalone: false
+  selector: 'button [mat-icon-button]',
+  standalone: true
 })
 export class ButtonBlurOnClickDirective {
 

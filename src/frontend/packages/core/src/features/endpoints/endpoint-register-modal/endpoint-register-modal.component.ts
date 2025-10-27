@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ComponentFactory,
@@ -23,12 +24,17 @@ import { map } from 'rxjs/operators';
 
 import { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
+import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
 
 @Component({
   selector: 'app-endpoint-register-modal',
   templateUrl: './endpoint-register-modal.component.html',
   styleUrls: ['./endpoint-register-modal.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileSelectorComponent
+  ]
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
   @Output() closeModalEvent = new EventEmitter<void>();

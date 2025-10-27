@@ -1,5 +1,6 @@
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterContentInit, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AuthOnlyAppState, ThemeService } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -11,10 +12,14 @@ import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
 @Component({
-selector: 'app-root',
+  selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ]
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 

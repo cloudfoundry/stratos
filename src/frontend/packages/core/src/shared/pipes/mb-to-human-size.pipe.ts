@@ -4,7 +4,7 @@ import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
 name: 'mbToHumanSize',
-standalone: false
+standalone: true
 })
 export class MbToHumanSizePipe implements PipeTransform {
   constructor(private utilsService: UtilsService) {

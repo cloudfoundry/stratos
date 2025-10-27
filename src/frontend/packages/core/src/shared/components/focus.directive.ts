@@ -2,7 +2,7 @@ import { Directive, ElementRef, Inject, Input, NgZone, OnChanges } from '@angula
 
 @Directive({
 selector: '[appFocus]',
-standalone: false
+standalone: true
 })
 export class FocusDirective implements OnChanges {
   @Input() appFocus: boolean;

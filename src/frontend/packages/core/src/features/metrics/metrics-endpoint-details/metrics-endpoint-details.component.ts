@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -16,10 +18,14 @@ interface MetricsDetailsInfo {
 }
 
 @Component({
-selector: 'app-metrics-endpoint-details',
+  selector: 'app-metrics-endpoint-details',
   templateUrl: './metrics-endpoint-details.component.html',
   styleUrls: ['./metrics-endpoint-details.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule
+  ]
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {
 

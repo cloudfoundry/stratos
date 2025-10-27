@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { NgForm, FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { InternalAppState, RouterRedirect, RouterNav, Login, VerifySession, AuthState } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
@@ -8,12 +9,20 @@ import { StratosThemeService } from '../../../../../theme/theme.service';
 import { StratosTheme } from '../../../../../theme/theme.config';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
+import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
 @Component({
 selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    IntroScreenComponent,
+    ShowHideButtonComponent
+  ]
 })
 export class LoginPageComponent implements OnInit, OnDestroy {
 

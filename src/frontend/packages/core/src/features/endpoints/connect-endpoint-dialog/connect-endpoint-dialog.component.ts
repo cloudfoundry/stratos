@@ -1,19 +1,33 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { BlurDirective } from '../../../shared/components/blur.directive';
+import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
 import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
 @Component({
-selector: 'app-connect-endpoint-dialog',
+  selector: 'app-connect-endpoint-dialog',
   templateUrl: './connect-endpoint-dialog.component.html',
   styleUrls: ['./connect-endpoint-dialog.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatProgressBarModule,
+    MatButtonModule,
+    BlurDirective,
+    ConnectEndpointComponent,
+    DialogErrorComponent
+  ]
 })
 export class ConnectEndpointDialogComponent implements OnDestroy {
 

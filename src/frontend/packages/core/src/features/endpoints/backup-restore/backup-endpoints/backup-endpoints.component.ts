@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import moment from 'moment';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
@@ -10,7 +12,12 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import { TableComponent } from '../../../../shared/components/list/list-table/table.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
 import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
+import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 import { BackupCheckboxCellComponent } from '../backup-checkbox-cell/backup-checkbox-cell.component';
 import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-connection-cell.component';
 import { BackupEndpointsService } from '../backup-endpoints.service';
@@ -23,7 +30,19 @@ selector: 'app-backup-endpoints',
   providers: [
     BackupEndpointsService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TableComponent,
+    ShowHideButtonComponent,
+    BackupCheckboxCellComponent,
+    BackupConnectionCellComponent
+  ]
 })
 export class BackupEndpointsComponent implements OnDestroy {
 

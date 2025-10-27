@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-name: 'infinityPipe',
-standalone: false
+  name: 'infinityPipe',
+  standalone: true
 })
 export class InfinityPipe implements PipeTransform {
   transform(value: string): string {

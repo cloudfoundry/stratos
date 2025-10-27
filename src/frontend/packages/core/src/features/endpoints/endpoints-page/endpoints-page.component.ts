@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -10,6 +11,10 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -31,19 +36,35 @@ import {
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { ListComponent } from '../../../shared/components/list/list.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
+import { UserPermissionDirective } from '../../../shared/user-permission.directive';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
+import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
 
 @Component({
-selector: 'app-endpoints-page',
+  selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
   styleUrls: ['./endpoints-page.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: EndpointsListConfigService,
   }, EndpointListHelper],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageHeaderComponent,
+    ListComponent,
+    EndpointsMissingComponent,
+    UserPermissionDirective,
+    EndpointRegisterModalComponent
+  ]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;

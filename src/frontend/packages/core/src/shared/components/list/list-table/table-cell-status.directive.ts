@@ -2,7 +2,7 @@ import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2 } fro
 
 @Directive({
 selector: '[appTableCellStatus]',
-standalone: false
+standalone: true
 })
 export class TableCellStatusDirective implements OnChanges {
 

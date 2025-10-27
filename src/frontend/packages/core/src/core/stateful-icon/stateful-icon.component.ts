@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, TemplateRef } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { StratosStatus } from '@stratosui/store';
 
@@ -14,10 +17,15 @@ interface IconTemplateDefinition {
 type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 
 @Component({
-selector: 'app-stateful-icon',
+  selector: 'app-stateful-icon',
   templateUrl: './stateful-icon.component.html',
   styleUrls: ['./stateful-icon.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ]
 })
 
 export class StatefulIconComponent {

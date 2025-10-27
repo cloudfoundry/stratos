@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventMonitorFactory,
@@ -17,12 +18,22 @@ import { Observable, of } from 'rxjs';
 import { first, map, withLatestFrom } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
+import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-error-page',
+  selector: 'app-error-page',
   templateUrl: './error-page.component.html',
   styleUrls: ['./error-page.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    StatefulIconComponent,
+    MetadataItemComponent
+  ]
 })
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;

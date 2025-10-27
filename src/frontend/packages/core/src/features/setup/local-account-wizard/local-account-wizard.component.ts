@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   InternalAppState,
@@ -14,12 +15,30 @@ import { delay, filter, map, take, tap } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
+import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
 @Component({
 selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
   styleUrls: ['./local-account-wizard.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    ShowPageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    LoadingPageComponent,
+    ProductNameComponent,
+    ShowHideButtonComponent
+  ]
 })
 export class LocalAccountWizardComponent implements OnInit {
 

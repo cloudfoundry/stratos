@@ -1,6 +1,12 @@
 import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import {
   EndpointModel,
   getFullEndpointApiUrl,
@@ -17,17 +23,30 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
+import { UniqueDirective } from '../../../../shared/components/unique.directive';
+import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
 interface EndpointModelMap {
   [id: string]: EndpointModel;
 }
 
 @Component({
-selector: 'app-edit-endpoint-step',
+  selector: 'app-edit-endpoint-step',
   templateUrl: './edit-endpoint-step.component.html',
   styleUrls: ['./edit-endpoint-step.component.scss'],
   providers: [],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    UniqueDirective,
+    ProductNameComponent
+  ]
 })
 export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
