@@ -94,7 +94,7 @@ describe('MetaCardComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);
-    entityMonitorFactory = TestBed.inject(EntityMonitorFactory);
+    entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
     component = fixture.componentInstance.metaCard;
     fixture.detectChanges();
     element = fixture.debugElement.nativeElement;

@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatIconModule } from '@angular/material/icon';
 
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
 import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { MatIcon } from '@stratosui/core';
 
 describe('PageNotFoundComponentComponent', () => {
   let component: PageNotFoundComponentComponent;
@@ -11,7 +11,8 @@ describe('PageNotFoundComponentComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageNotFoundComponentComponent, MatIcon ]
+      declarations: [ PageNotFoundComponentComponent ],
+      imports: [ MatIconModule ]
     })
     .compileComponents();
   }));

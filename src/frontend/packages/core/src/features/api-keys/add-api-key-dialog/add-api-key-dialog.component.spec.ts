@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogRef } from '@stratosui/core';
+import { MatDialogRef } from '@angular/material/dialog';
 
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AddApiKeyDialogComponent } from './add-api-key-dialog.component';

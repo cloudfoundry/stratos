@@ -46,7 +46,7 @@ describe('LoadingPageComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LoadingPageComponent);
-    entityFactory = TestBed.inject(EntityMonitorFactory);
+    entityFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
     component = fixture.componentInstance;
     fixture.detectChanges();
     element = fixture.nativeElement;

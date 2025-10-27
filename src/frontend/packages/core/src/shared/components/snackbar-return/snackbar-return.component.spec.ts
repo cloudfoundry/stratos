@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_SNACK_BAR_DATA } from '@stratosui/core';
-import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
+import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import { TailwindSnackBarRefImpl } from '../../services/tailwind-snackbar.service';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
 import { SnackBarReturnComponent } from './snackbar-return.component';
@@ -14,7 +14,7 @@ describe('SnackBarReturnComponent', () => {
       declarations: [SnackBarReturnComponent],
       imports: [...BaseTestModulesNoShared],
       providers: [{
-        provide: TailwindSnackBarRef,
+        provide: TailwindSnackBarRefImpl,
         useValue: {}
       }, {
         provide: MAT_SNACK_BAR_DATA,
