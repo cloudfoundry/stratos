@@ -45,8 +45,9 @@ import { WindowRef } from './window-ref/window-ref.service';
         MomentModule,
         FormsModule,
         ReactiveFormsModule,
-        // Standalone directives
+        // Standalone directives and components
         ClickStopPropagationDirective,
+        EntityFavoriteStarComponent,
     ],
     exports: [
         MDAppModule,
@@ -112,7 +113,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         DotContentComponent,
         ButtonBlurOnClickDirective,
         PageNotFoundComponentComponent,
-        EntityFavoriteStarComponent,
+        // EntityFavoriteStarComponent, // Now standalone - moved to imports
         RecentEntitiesComponent,
         ShowHideButtonComponent
     ]

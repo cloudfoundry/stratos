@@ -1,12 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import moment from 'moment';
+import { DateTimeComponent } from '../date-time/date-time.component';
 
 @Component({
 selector: 'app-start-end-date',
   templateUrl: './start-end-date.component.html',
   styleUrls: ['./start-end-date.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    DateTimeComponent
+  ]
 })
 export class StartEndDateComponent {
 

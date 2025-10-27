@@ -11,10 +11,8 @@ describe('RoutingIndicatorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        RoutingIndicatorComponent
-      ],
       imports: [
+        RoutingIndicatorComponent,
         RouterTestingModule,
         CoreModule,
         MatProgressBarModule

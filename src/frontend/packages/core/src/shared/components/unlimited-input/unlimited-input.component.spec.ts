@@ -35,11 +35,11 @@ describe('UnlimitedInputComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [UnlimitedInputComponent],
       imports: [
         BrowserAnimationsModule,
         CoreModule,
-        WrapperComponent
+        WrapperComponent,
+        UnlimitedInputComponent
       ],
     })
       .compileComponents();

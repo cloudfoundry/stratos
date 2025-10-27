@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export interface Segment {
   key: string;
@@ -9,10 +10,14 @@ export interface Segment {
 }
 
 @Component({
-selector: 'app-json-viewer',
+  selector: 'app-json-viewer',
   templateUrl: './json-viewer.component.html',
   styleUrls: ['./json-viewer.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    JsonViewerComponent // Self-import for recursive rendering
+  ]
 })
 export class JsonViewerComponent implements OnChanges {
 

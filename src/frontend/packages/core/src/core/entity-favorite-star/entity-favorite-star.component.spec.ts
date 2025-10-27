@@ -23,11 +23,10 @@ describe('EntityFavoriteStarComponent', () => {
         PaginationMonitorFactory,
         SessionService
       ],
-      declarations: [
-        DialogConfirmComponent
-      ],
       imports: [
-        ...BaseTestModulesNoShared
+        ...BaseTestModulesNoShared,
+        EntityFavoriteStarComponent,
+        DialogConfirmComponent
       ],
     })
       .compileComponents();

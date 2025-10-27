@@ -1,10 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, ControlContainer, FormGroupDirective, Validators } from '@angular/forms';
+import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 const UNLIMITED = -1;
 
 @Component({
-selector: 'app-unlimited-input',
+  selector: 'app-unlimited-input',
   templateUrl: './unlimited-input.component.html',
   styleUrls: ['./unlimited-input.component.scss'],
   viewProviders: [
@@ -13,7 +17,14 @@ selector: 'app-unlimited-input',
       useExisting: FormGroupDirective
     }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule
+  ]
 })
 export class UnlimitedInputComponent implements OnInit {
 

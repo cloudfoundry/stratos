@@ -8,7 +8,7 @@ describe('JsonViewerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ JsonViewerComponent ]
+      imports: [ JsonViewerComponent ]
     })
     .compileComponents();
   }));

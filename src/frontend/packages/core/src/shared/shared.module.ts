@@ -166,6 +166,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BooleanIndicatorComponent,
     LoadingPageComponent,
     MetadataItemComponent,
+    JsonViewerComponent, // Now standalone - moved to imports
     CardStatusComponent,
     StratosTitleComponent,
     EditableDisplayValueComponent,
@@ -195,6 +196,17 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     SnackBarReturnComponent, // Now standalone - moved to imports
     RingChartComponent,
     MetricsChartComponent, // Now standalone - moved to imports
+    PageSubNavComponent, // Now standalone - moved to imports
+    StartEndDateComponent, // Now standalone - moved to imports
+    BreadcrumbsComponent, // Now standalone - moved to imports
+    RoutingIndicatorComponent, // Now standalone - moved to imports
+    UnlimitedInputComponent, // Now standalone - moved to imports
+    PageSubNavSectionComponent, // Now standalone - moved to imports
+    SidepanelPreviewComponent, // Now standalone - moved to imports
+    MarkdownPreviewComponent, // Now standalone - moved to imports
+    MarkdownContentObserverDirective, // Now standalone - moved to imports
+    JsonViewerComponent, // Now standalone - moved to imports
+    SimpleUsageChartComponent, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -255,36 +267,37 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
     CapitalizeFirstPipe,
-    RoutingIndicatorComponent,
+    // RoutingIndicatorComponent, // Now standalone - moved to imports
     // DateTimeComponent, // Now standalone - moved to imports
-    StartEndDateComponent,
+    // StartEndDateComponent, // Now standalone - moved to imports
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
     StackedInputActionComponent,
     // MultilineTitleComponent, // Now standalone - moved to imports
     // TileSelectorComponent, // Now standalone - moved to imports
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
+    // MarkdownPreviewComponent, // Now standalone - moved to imports
+    // MarkdownContentObserverDirective, // Now standalone - moved to imports
     EndpointCardComponent,
-    SimpleUsageChartComponent,
-    PageSubNavComponent,
-    BreadcrumbsComponent,
-    PageSubNavSectionComponent,
+    // SimpleUsageChartComponent, // Now standalone - moved to imports
+    // PageSubNavComponent, // Now standalone - moved to imports
+    // BreadcrumbsComponent, // Now standalone - moved to imports
+    // PageSubNavSectionComponent, // Now standalone - moved to imports
+    // SidepanelPreviewComponent, // Now standalone - moved to imports
     // EntitySummaryTitleComponent, // Now standalone - moved to imports
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
+    // MarkdownPreviewComponent, // Now standalone - moved to imports (duplicate removed)
+    // MarkdownContentObserverDirective, // Now standalone - moved to imports (duplicate removed)
     // SnackBarReturnComponent, // Now standalone - moved to imports
     // PollingIndicatorComponent, // Now standalone - moved to imports
-    UnlimitedInputComponent,
-    JsonViewerComponent,
+    // UnlimitedInputComponent, // Now standalone - moved to imports
+    // JsonViewerComponent, // Now standalone - moved to imports
     ListHostDirective,
     ListViewComponent,
     EntityListViewComponent,
     // CopyToClipboardComponent, // Now standalone - moved to imports
-    SidepanelPreviewComponent,
+    // SidepanelPreviewComponent, // Now standalone - moved to imports
     // TileSelectorTileComponent, // Now standalone - moved to imports
-    SidepanelPreviewComponent,
+    // SidepanelPreviewComponent, // Now standalone - moved to imports (duplicate removed)
     TableCellSidePanelComponent,
     // CardProgressOverlayComponent, // Now standalone - moved to imports
     MaxListMessageComponent,
@@ -391,9 +404,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BooleanIndicatorComponent,
     TableComponent,
     CapitalizeFirstPipe,
-    RoutingIndicatorComponent,
+    RoutingIndicatorComponent, // Now standalone - kept in exports for backward compatibility
     DateTimeComponent,
-    StartEndDateComponent,
+    StartEndDateComponent, // Now standalone - kept in exports for backward compatibility
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
     StackedInputActionsComponent,
@@ -403,23 +416,23 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BreadcrumbsComponent,
     PageSubNavSectionComponent,
     TileSelectorComponent,
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
+    MarkdownPreviewComponent, // Now standalone - kept in exports for backward compatibility
+    MarkdownContentObserverDirective, // Now standalone - kept in exports for backward compatibility
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
+    // MarkdownPreviewComponent, // Duplicate removed
+    // MarkdownContentObserverDirective, // Duplicate removed
     PollingIndicatorComponent,
     UnlimitedInputComponent,
     ListHostDirective,
     ListViewComponent,
     EntityListViewComponent,
-    JsonViewerComponent,
+    JsonViewerComponent, // Now standalone - kept in exports for backward compatibility
     ListHostDirective,
     CopyToClipboardComponent,
-    SidepanelPreviewComponent,
+    SidepanelPreviewComponent, // Now standalone - kept in exports for backward compatibility
     // TileSelectorTileComponent, // Now standalone - moved to imports
-    SidepanelPreviewComponent,
+    // SidepanelPreviewComponent, // duplicate removed
     TableCellEndpointNameComponent,
     CardProgressOverlayComponent,
     MaxListMessageComponent,

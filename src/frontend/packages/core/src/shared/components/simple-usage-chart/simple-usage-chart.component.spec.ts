@@ -11,8 +11,11 @@ describe('SimpleUsageChartComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [CoreModule, BaseChartDirective, NoopAnimationsModule],
-      declarations: [SimpleUsageChartComponent]
+      imports: [
+        CoreModule,
+        NoopAnimationsModule,
+        SimpleUsageChartComponent
+      ]
     })
       .compileComponents();
   }));

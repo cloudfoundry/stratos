@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -5,12 +6,19 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { PreviewableComponent } from '../../previewable-component';
 
 import { marked } from 'marked';
+import { SidepanelPreviewComponent } from '../sidepanel-preview/sidepanel-preview.component';
+import { MarkdownContentObserverDirective } from './markdown-content-observer.directive';
 
 @Component({
-selector: 'app-markdown-preview',
+  selector: 'app-markdown-preview',
   templateUrl: './markdown-preview.component.html',
   styleUrls: ['./markdown-preview.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    SidepanelPreviewComponent,
+    MarkdownContentObserverDirective
+  ]
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 

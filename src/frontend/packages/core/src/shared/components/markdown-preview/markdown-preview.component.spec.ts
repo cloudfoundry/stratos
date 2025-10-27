@@ -16,9 +16,10 @@ describe('MarkdownPreviewComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MarkdownPreviewComponent, SidepanelPreviewComponent],
       providers: [HttpClient, HttpHandler, SidePanelService],
       imports: [
+        MarkdownPreviewComponent,
+        SidepanelPreviewComponent,
         MDAppModule,
         RouterTestingModule,
         HttpClientModule,

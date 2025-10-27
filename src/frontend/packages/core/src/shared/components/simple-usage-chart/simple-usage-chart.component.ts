@@ -1,13 +1,23 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChartConfiguration } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
 
 @Component({
-selector: 'app-simple-usage-chart',
+  selector: 'app-simple-usage-chart',
   templateUrl: './simple-usage-chart.component.html',
   styleUrls: ['./simple-usage-chart.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    BaseChartDirective
+  ]
 })
 export class SimpleUsageChartComponent {
   static BASE_COLOR_SELECTOR = 'simple-usage-graph-color';

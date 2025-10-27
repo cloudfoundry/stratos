@@ -10,8 +10,10 @@ describe('PageSubNavComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      declarations: [PageSubNavComponent],
+      imports: [
+        RouterTestingModule,
+        PageSubNavComponent
+      ],
       providers: [TabNavService]
     })
       .compileComponents();

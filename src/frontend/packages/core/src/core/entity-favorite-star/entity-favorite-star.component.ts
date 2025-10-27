@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
@@ -8,10 +11,15 @@ import { ConfirmationDialogService } from '../../shared/components/confirmation-
 import { EndpointsService } from '../endpoints.service';
 
 @Component({
-selector: 'app-entity-favorite-star',
+  selector: 'app-entity-favorite-star',
   templateUrl: './entity-favorite-star.component.html',
   styleUrls: ['./entity-favorite-star.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule
+  ]
 })
 export class EntityFavoriteStarComponent {
 

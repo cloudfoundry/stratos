@@ -8,7 +8,7 @@ describe('PageSubNavSectionComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageSubNavSectionComponent ]
+      imports: [ PageSubNavSectionComponent ]
     })
     .compileComponents();
   }));

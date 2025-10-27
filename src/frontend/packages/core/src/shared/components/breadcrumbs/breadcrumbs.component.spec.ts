@@ -14,8 +14,11 @@ describe('BreadcrumbsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [CoreModule, RouterTestingModule.withRoutes([])],
-      declarations: [BreadcrumbsComponent],
+      imports: [
+        CoreModule,
+        RouterTestingModule.withRoutes([]),
+        BreadcrumbsComponent
+      ],
       providers: [{
         provide: ActivatedRoute,
         useValue: {

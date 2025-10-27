@@ -1,8 +1,8 @@
 import { Directive, ElementRef, EventEmitter, Output, OnDestroy, NgZone } from '@angular/core';
 
 @Directive({
-selector: '[appMarkdownContentObserver]',
-standalone: false
+  selector: '[appMarkdownContentObserver]',
+  standalone: true
 })
 export class MarkdownContentObserverDirective implements OnDestroy {
   private observer: MutationObserver;

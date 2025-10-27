@@ -1,13 +1,20 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
 
 @Component({
-selector: 'app-breadcrumbs',
+  selector: 'app-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
   styleUrls: ['./breadcrumbs.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule
+  ]
 })
 export class BreadcrumbsComponent {
   public breadcrumbDefinitions: IBreadcrumbLink[] = null;
