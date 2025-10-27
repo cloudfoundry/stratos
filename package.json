@@ -97,7 +97,7 @@
     "@types/moment-timezone": "^0.5.13",
     "angular2-virtual-scroll": "^0.4.16",
     "core-js": "^3.6.5",
-    "immer": "^10.0.3",
+    "immer": "^10.2.0",
     "intersect": "^1.0.1",
     "lodash": "^4.17.20",
     "lodash-es": "^4.17.14",
