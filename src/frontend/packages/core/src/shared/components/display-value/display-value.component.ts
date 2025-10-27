@@ -1,10 +1,14 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-selector: 'app-display-value',
+  selector: 'app-display-value',
   templateUrl: './display-value.component.html',
   styleUrls: ['./display-value.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class DisplayValueComponent {
 

@@ -1,4 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -8,7 +9,10 @@ import { filter, first, map, startWith } from 'rxjs/operators';
 selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+  ],
   animations: [
     trigger(
       'leaveLoaderAnimation', [

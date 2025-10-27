@@ -35,7 +35,8 @@ describe('LoadingPageComponent', () => {
         CoreTestingModule,
         BrowserAnimationsModule,
         NoopAnimationsModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        LoadingPageComponent
       ],
       providers: [
         { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock }

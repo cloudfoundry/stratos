@@ -8,7 +8,7 @@ describe('IntroScreenComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [IntroScreenComponent]
+      imports: [IntroScreenComponent]
     })
       .compileComponents();
   }));

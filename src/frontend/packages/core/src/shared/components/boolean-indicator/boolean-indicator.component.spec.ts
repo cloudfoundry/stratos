@@ -11,8 +11,7 @@ describe('BooleanIndicatorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [BooleanIndicatorComponent],
-      imports: [CoreModule, NoopAnimationsModule]
+      imports: [BooleanIndicatorComponent, CoreModule, NoopAnimationsModule]
     })
       .compileComponents();
   }));

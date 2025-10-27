@@ -8,7 +8,7 @@ describe('DisplayValueComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DisplayValueComponent ]
+      imports: [ DisplayValueComponent ]
     })
     .compileComponents();
   }));

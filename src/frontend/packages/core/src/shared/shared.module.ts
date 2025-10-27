@@ -161,19 +161,24 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TileSelectorTileComponent,
     DetailsCardComponent,
     CustomCheckboxComponent,
+    IntroScreenComponent,
+    DisplayValueComponent,
+    BooleanIndicatorComponent,
+    LoadingPageComponent,
+    MetadataItemComponent,
     // Standalone pipes
     PercentagePipe,
   ],
   declarations: [
-    LoadingPageComponent,
-    DisplayValueComponent,
+    // LoadingPageComponent, // Now standalone - moved to imports
+    // DisplayValueComponent, // Now standalone - moved to imports
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
     // PercentagePipe, // Now standalone - moved to imports
     UptimePipe,
     UsageBytesPipe,
     ValuesPipe,
-    LoadingPageComponent,
+    // LoadingPageComponent, // Now standalone - moved to imports (duplicate removed)
     // DetailsCardComponent, // Now standalone - moved to imports
     FocusDirective,
     BlurDirective,
@@ -189,7 +194,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
-    MetadataItemComponent,
+    // MetadataItemComponent, // Now standalone - moved to imports
     // UsageGaugeComponent, // Now standalone - moved to imports
     CardStatusComponent,
     DialogConfirmComponent,
@@ -203,14 +208,14 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetaCardKeyComponent,
     MetaCardValueComponent,
     NestedTabsComponent,
-    BooleanIndicatorComponent,
+    // BooleanIndicatorComponent, // Now standalone - moved to imports
     // AppChipsComponent, // Now standalone - moved to imports
     CardBooleanMetricComponent,
     CardNumberMetricComponent,
     RingChartComponent,
     MetricsChartComponent,
     StratosTitleComponent,
-    IntroScreenComponent,
+    // IntroScreenComponent, // Now standalone - moved to imports
     EnumerateComponent,
     UploadProgressIndicatorComponent,
     UserProfileBannerComponent,

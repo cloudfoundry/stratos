@@ -10,12 +10,10 @@ describe('MetadataItemComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
+      imports: [
+        CoreModule,
         MetadataItemComponent,
         CopyToClipboardComponent
-      ],
-      imports: [
-        CoreModule
       ],
     })
     .compileComponents();

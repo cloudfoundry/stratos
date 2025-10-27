@@ -12,12 +12,12 @@ describe('EditableDisplayValueComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
-        EditableDisplayValueComponent,
-        DisplayValueComponent
+        EditableDisplayValueComponent
       ],
       imports: [
         CommonModule,
         CoreModule,
+        DisplayValueComponent
       ]
     })
       .compileComponents();

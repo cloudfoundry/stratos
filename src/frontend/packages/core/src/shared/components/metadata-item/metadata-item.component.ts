@@ -1,10 +1,21 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
 @Component({
-selector: 'app-metadata-item',
+  selector: 'app-metadata-item',
   templateUrl: './metadata-item.component.html',
   styleUrls: ['./metadata-item.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    CopyToClipboardComponent
+  ]
 })
 export class MetadataItemComponent {
 
