@@ -1,16 +1,22 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
 import { EventWatcherService } from '../../../core/event-watcher/event-watcher.service';
+import { SharedModule } from '../../shared.module';
 
 // Import Xterm and Xterm Fit Addon
 @Component({
-selector: 'app-ssh-viewer',
+  selector: 'app-ssh-viewer',
   templateUrl: './ssh-viewer.component.html',
   styleUrls: ['./ssh-viewer.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    SharedModule, // Provides mat-progress-bar via CustomProgressBarComponent
+  ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
 

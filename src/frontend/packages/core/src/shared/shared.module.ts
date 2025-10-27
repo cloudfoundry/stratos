@@ -30,10 +30,10 @@ import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confi
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component'; // Now standalone
-import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component'; // Now standalone
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { FileInputComponent } from './components/file-input/file-input.component';
+import { FileInputComponent } from './components/file-input/file-input.component'; // Now standalone
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
@@ -89,7 +89,7 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
 import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
-import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component'; // Now standalone
 import {
   StackedInputActionComponent,
 } from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
@@ -138,7 +138,7 @@ import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '.
 import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
 import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
-import { CustomIconComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component';
+import { CustomIconComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component'; // CustomProgressBarSelectorComponent now standalone
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
@@ -172,6 +172,13 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     EnumerateComponent,
     UserProfileBannerComponent,
     UserAvatarComponent,
+    NoContentMessageComponent,
+    SshViewerComponent,
+    DialogConfirmComponent,
+    LogViewerComponent,
+    EndpointsMissingComponent,
+    FileInputComponent,
+    CustomProgressBarSelectorComponent,
     // Standalone pipes
     PercentagePipe,
   ],
@@ -190,10 +197,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BlurDirective,
     UniqueDirective,
     // CodeBlockComponent, // Now standalone - moved to imports
-    LogViewerComponent,
-    EndpointsMissingComponent,
+    // LogViewerComponent, // Now standalone - moved to imports
+    // EndpointsMissingComponent, // Now standalone - moved to imports
     DialogErrorComponent,
-    SshViewerComponent,
+    // SshViewerComponent, // Now standalone - moved to imports
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
@@ -203,11 +210,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // MetadataItemComponent, // Now standalone - moved to imports
     // UsageGaugeComponent, // Now standalone - moved to imports
     // CardStatusComponent, // Now standalone - moved to imports
-    DialogConfirmComponent,
+    // DialogConfirmComponent, // Now standalone - moved to imports
     ListComponent,
     ...listCardComponents,
     ...listTableComponents,
-    FileInputComponent,
+    // FileInputComponent, // Now standalone - moved to imports
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -296,14 +303,14 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardFooterComponent,
     CustomTooltipDirective,
     CustomIconComponent,
-    CustomProgressBarSelectorComponent,
+    // CustomProgressBarSelectorComponent, // Now standalone - moved to imports
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
     CustomDialogTitleComponent,
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
-    NoContentMessageComponent,
+    // NoContentMessageComponent, // Now standalone - moved to imports
     // UserAvatarComponent, // Now standalone - moved to imports
   ],
   exports: [

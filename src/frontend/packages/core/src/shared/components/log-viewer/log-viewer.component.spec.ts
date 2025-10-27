@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -11,9 +10,10 @@ import { LogViewerComponent } from './log-viewer.component';
 
 describe('LogViewerComponent', () => {
   @Component({
-    standalone: false,
+    standalone: true,
     selector: `app-host-component`,
-    template: `<app-log-viewer></app-log-viewer>`
+    template: `<app-log-viewer></app-log-viewer>`,
+    imports: [LogViewerComponent]
   })
   class TestHostComponent {
     @ViewChild(LogViewerComponent, { static: true })
@@ -27,14 +27,11 @@ describe('LogViewerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        LogViewerComponent,
-        TestHostComponent
-      ],
       imports: [
+        LogViewerComponent,
+        TestHostComponent,
         MDAppModule,
         RouterTestingModule,
-        CommonModule,
         CoreModule
       ]
     })

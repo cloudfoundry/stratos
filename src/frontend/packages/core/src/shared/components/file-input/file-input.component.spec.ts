@@ -9,8 +9,10 @@ describe('FileInputComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [FileInputComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: [
+        ...BaseTestModulesNoShared,
+        FileInputComponent
+      ]
     })
       .compileComponents();
   }));

@@ -1,6 +1,4 @@
-import { CoreModule } from '../../../core/core.module';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { NoContentMessageComponent } from './no-content-message.component';
 
 describe('NoContentMessageComponent', () => {
@@ -9,9 +7,8 @@ describe('NoContentMessageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [],
       imports: [
-        CoreModule
+        NoContentMessageComponent
       ]
     })
       .compileComponents();

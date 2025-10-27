@@ -9,8 +9,8 @@ describe('SshViewerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ SshViewerComponent ],
       imports: [
+        SshViewerComponent,
         CoreModule,
       ]
     })

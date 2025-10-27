@@ -14,6 +14,7 @@ describe('EndpointsMissingComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        EndpointsMissingComponent,
         CoreModule,
         SharedModule,
         CoreTestingModule,

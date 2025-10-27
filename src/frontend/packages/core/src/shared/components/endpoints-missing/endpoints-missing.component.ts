@@ -3,6 +3,8 @@ import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { CommonModule } from '@angular/common';
+import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 export interface EndpointMissingMessageParts {
   firstLine: string;
@@ -15,10 +17,14 @@ export interface EndpointMissingMessageParts {
 }
 
 @Component({
-selector: 'app-endpoints-missing',
+  selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    NoContentMessageComponent
+  ]
 })
 export class EndpointsMissingComponent implements AfterViewInit, OnInit {
 

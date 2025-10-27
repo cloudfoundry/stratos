@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -31,11 +33,15 @@ interface LogStreamMessage {
 }
 
 @Component({
-selector: 'app-log-viewer',
+  selector: 'app-log-viewer',
   templateUrl: './log-viewer.component.html',
   styleUrls: ['./log-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+  ]
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 

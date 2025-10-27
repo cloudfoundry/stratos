@@ -1,4 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 
 export interface NoContentMessageLine {
   link?: string;
@@ -6,10 +9,15 @@ export interface NoContentMessageLine {
   text: string;
 }
 @Component({
-selector: 'app-no-content-message',
+  selector: 'app-no-content-message',
   templateUrl: './no-content-message.component.html',
   styleUrls: ['./no-content-message.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    RouterModule
+  ]
 })
 export class NoContentMessageComponent implements AfterViewInit {
 

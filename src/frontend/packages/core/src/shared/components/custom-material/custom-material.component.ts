@@ -37,7 +37,7 @@ export class CustomProgressBarComponent {
   selector: 'custom-progress-bar',
   template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomProgressBarSelectorComponent {
   @Input() value = 0;

@@ -1,10 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { CoreModule } from '../../../core/core.module';
 import { DialogConfirmComponent } from './dialog-confirm.component';
 
 describe('DialogConfirmComponent', () => {
@@ -31,15 +29,13 @@ describe('DialogConfirmComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DialogConfirmComponent],
+      imports: [
+        DialogConfirmComponent,
+        NoopAnimationsModule,
+      ],
       providers: [
         { provide: MatDialogRef, useClass: MatDialogRefMock },
         { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
-      ],
-      imports: [
-        CommonModule,
-        CoreModule,
-        NoopAnimationsModule,
       ]
     })
       .compileComponents();
