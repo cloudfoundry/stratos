@@ -13,6 +13,10 @@
           "options": {
             "allowedCommonJsDependencies": [
               "moment-timezone",
+              "moment",
+              "deepmerge",
+              "xterm",
+              "xterm-addon-fit",
               "js-yaml",
               "webcola",
               "dagre",
@@ -21,7 +25,8 @@
               "lodash/filter",
               "lodash/map",
               "lodash/uniqueId",
-              "lodash/cloneDeep"
+              "lodash/cloneDeep",
+              "intersect"
             ],
             "customWebpackConfig": {
               "path": "./dist-devkit/build/main.js"

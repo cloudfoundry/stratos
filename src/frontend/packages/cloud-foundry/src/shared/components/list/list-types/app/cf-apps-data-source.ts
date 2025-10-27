@@ -41,7 +41,7 @@ export class CfAppsDataSource extends CFListDataSource<APIResource> {
     createEntityRelationKey(applicationEntityType, routeEntityType),
   ];
   private subs: Subscription[];
-  public action: GetAllApplications;
+  public declare action: GetAllApplications;
 
   constructor(
     store: Store<AppState>,

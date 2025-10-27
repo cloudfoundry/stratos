@@ -43,7 +43,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   editTriggerForm: UntypedFormGroup;
   // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
-  public currentPolicy: AppAutoscalerPolicyLocal;
+  public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
   private editIndex = -1;
   private editMetricType = '';

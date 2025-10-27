@@ -13,7 +13,7 @@ import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-ent
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 
 export class CFEndpointsDataSource extends BaseEndpointsDataSource {
-  store: Store<CFAppState>;
+  declare store: Store<CFAppState>;
 
   constructor(
     store: Store<CFAppState>,

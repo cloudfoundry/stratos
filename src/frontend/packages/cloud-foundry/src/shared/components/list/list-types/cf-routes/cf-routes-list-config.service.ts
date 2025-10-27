@@ -27,7 +27,7 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
   private dataSource: CfRoutesDataSource;
 
   getDataSource: () => CfRoutesDataSource;
-  getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  declare getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   getInitialised: () => Observable<boolean>;
 
   constructor(

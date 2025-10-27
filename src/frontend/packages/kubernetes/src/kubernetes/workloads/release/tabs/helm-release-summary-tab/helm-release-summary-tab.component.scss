@@ -2,7 +2,7 @@
 @use '../../../../../../../core/sass/mixins';
 @use '../helm-release-helpers';
 // Import missing mixins
-@import '../../../../../helm/monocular/mixins';
+@use '../../../../../helm/monocular/mixins' as monocular-mixins;
 
 .resources {
   padding: 0 10px;
@@ -85,4 +85,4 @@
   }
 }
 
-@include add-life-update-style
+@include monocular-mixins.add-life-update-style

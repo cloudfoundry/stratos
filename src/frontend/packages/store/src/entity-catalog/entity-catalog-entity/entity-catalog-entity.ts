@@ -282,7 +282,7 @@ export class StratosCatalogEntity<
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
   ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
   > extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
-  public definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
+  public declare definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,
     config?: EntityCatalogBuilders<T, Y, AB>
@@ -327,7 +327,7 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     getGuid: metadata => metadata.guid,
   };
   // This is needed here for typing
-  public definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
+  public declare definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
   constructor(
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string

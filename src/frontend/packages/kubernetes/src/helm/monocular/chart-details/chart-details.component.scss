@@ -1,7 +1,7 @@
 // Import your custom theme
 @use '../../theme.scss';
 // Import missing mixins
-@import '../mixins';
+@use '../mixins' as mixins;
 
 $header-height: 200px;
 $icon-height: 150px;
@@ -89,7 +89,7 @@ $icon-height: 150px;
     word-break: break-word;
   }
 
-  @include mappy-bp(medium) {
+  @include mixins.mappy-bp(medium) {
     display: block;
     &__content {
       flex-direction: row;
@@ -110,7 +110,7 @@ $icon-height: 150px;
     }
   }
 
-  @include mappy-bp(max-width small) {
+  @include mixins.mappy-bp(max-width small) {
 
     &__header {
 

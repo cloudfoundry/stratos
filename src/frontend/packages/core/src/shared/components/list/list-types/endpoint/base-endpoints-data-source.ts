@@ -39,7 +39,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
 
   public static typeFilterKey = 'endpointType';
 
-  store: Store<AppState>;
+  declare store: Store<AppState>;
   /**
    * Used to distinguish between data sources providing all endpoints or those that only provide endpoints matching this value.
    * Value should match those of an endpoint's `cnsi_type`.

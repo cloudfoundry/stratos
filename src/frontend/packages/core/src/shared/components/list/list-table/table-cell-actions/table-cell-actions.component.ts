@@ -17,7 +17,7 @@ selector: 'app-table-cell-actions',
 export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
 
   @Input()
-  rowState: Observable<RowState>;
+  declare rowState: Observable<RowState>;
 
   @Input('row')
   get row() { return super.row; }

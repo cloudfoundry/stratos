@@ -17,7 +17,7 @@ export class TableCellSelectComponent<T> extends TableCellCustom<T> implements O
   tooltip$: Observable<string>;
 
   @Input()
-  rowState: Observable<RowState>;
+  declare rowState: Observable<RowState>;
 
   ngOnInit() {
     this.disable$ = this.rowState.pipe(

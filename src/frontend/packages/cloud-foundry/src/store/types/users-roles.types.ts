@@ -28,8 +28,8 @@ export class CfRoleChange {
 
 export class CfRoleChangeWithNames extends CfRoleChange {
   username: string; // Why are all these names set out flat? So we can easily sort in future
-  orgName: string;
-  spaceName?: string;
+  declare orgName: string;
+  declare spaceName?: string;
   roleName: string;
 }
 

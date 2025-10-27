@@ -1,7 +1,7 @@
 // Import your custom theme
 @use '../../theme.scss';
 // Import missing mixins
-@import '../mixins';
+@use '../mixins' as mixins;
 
 .chart-list {
   flex: 1;
@@ -18,7 +18,7 @@
     padding-bottom: 1.5em;
     width: 100%;
 
-    @include mappy-bp(medium large) {
+    @include mixins.mappy-bp(medium large) {
       width: 50%;
       padding-right: 1.5em;
       &:nth-child(2n) {
@@ -26,7 +26,7 @@
       }
     }
 
-    @include mappy-bp(large xlarge) {
+    @include mixins.mappy-bp(large xlarge) {
       width: 33.3%;
       padding-right: 1.5em;
       &:nth-child(3n) {
@@ -34,7 +34,7 @@
       }
     }
 
-    @include mappy-bp(xlarge) {
+    @include mixins.mappy-bp(xlarge) {
       width: 25%;
       padding-right: 1.5em;
       &:nth-child(4n) {

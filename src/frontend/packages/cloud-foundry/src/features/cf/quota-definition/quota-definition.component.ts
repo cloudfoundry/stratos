@@ -28,18 +28,18 @@ selector: 'app-quota-definition',
   standalone: false
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
-  org$: Observable<APIResource<IOrganization>>;
-  space$: Observable<APIResource<ISpace>>;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
-  quotaGuid: string;
+  declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  declare quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
+  declare org$: Observable<APIResource<IOrganization>>;
+  declare space$: Observable<APIResource<ISpace>>;
+  declare cfGuid: string;
+  declare orgGuid: string;
+  declare spaceGuid: string;
+  declare quotaGuid: string;
   editLink$: Observable<string[]>;
   editParams: object;
-  detailsLoading$: Observable<boolean>;
-  orgSubscriber: Subscription;
+  declare detailsLoading$: Observable<boolean>;
+  declare orgSubscriber: Subscription;
   public canEditQuota$: Observable<boolean>;
   public isCf = false;
 

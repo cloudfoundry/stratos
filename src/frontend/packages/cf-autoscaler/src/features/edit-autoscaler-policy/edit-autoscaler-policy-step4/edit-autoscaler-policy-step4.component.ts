@@ -43,7 +43,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   editSpecificDateForm: UntypedFormGroup;
 
   private updateAppAutoscalerPolicyService: EntityService;
-  public currentPolicy: AppAutoscalerPolicyLocal;
+  public declare currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
   private editMutualValidation = {
     limit: true,

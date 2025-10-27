@@ -36,7 +36,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
   editRecurringScheduleForm: UntypedFormGroup;
 
-  public currentPolicy: AppAutoscalerPolicyLocal;
+  public declare currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
   private editEffectiveType = 'always';
   private editRepeatType = 'week';
