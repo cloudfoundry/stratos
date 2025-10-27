@@ -11,8 +11,8 @@ describe('DetailsCardComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DetailsCardComponent],
       imports: [
+        DetailsCardComponent, // Now standalone
         CommonModule,
         CoreModule,
         NoopAnimationsModule

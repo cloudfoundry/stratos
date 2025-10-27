@@ -1,11 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
-selector: 'app-details-card',
+  selector: 'app-details-card',
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   templateUrl: './details-card.component.html',
   styleUrls: ['./details-card.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  standalone: false
+  encapsulation: ViewEncapsulation.None
 })
 export class DetailsCardComponent implements OnInit {
 

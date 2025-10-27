@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -8,9 +9,12 @@ export interface MatCheckboxChange {
 
 @Component({
   selector: 'mat-checkbox',
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   templateUrl: './custom-checkbox.component.html',
   styleUrls: ['./custom-checkbox.component.scss'],
-  standalone: false,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

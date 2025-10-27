@@ -159,6 +159,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     AppChipsComponent,
     TileSelectorComponent,
     TileSelectorTileComponent,
+    DetailsCardComponent,
+    CustomCheckboxComponent,
     // Standalone pipes
     PercentagePipe,
   ],
@@ -172,7 +174,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     UsageBytesPipe,
     ValuesPipe,
     LoadingPageComponent,
-    DetailsCardComponent,
+    // DetailsCardComponent, // Now standalone - moved to imports
     FocusDirective,
     BlurDirective,
     UniqueDirective,
@@ -257,7 +259,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortHeaderDirective,
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
-    CustomCheckboxComponent,
+    // CustomCheckboxComponent, // Now standalone - moved to imports
     DisableRouterLinkDirective,
     MatInputDirective,
     MatDatepickerDirective,
