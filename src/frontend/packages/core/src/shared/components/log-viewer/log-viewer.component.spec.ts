@@ -11,6 +11,7 @@ import { LogViewerComponent } from './log-viewer.component';
 
 describe('LogViewerComponent', () => {
   @Component({
+    standalone: false,
     selector: `app-host-component`,
     template: `<app-log-viewer></app-log-viewer>`
   })
@@ -27,8 +28,8 @@ describe('LogViewerComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
-        TestHostComponent,
-        LogViewerComponent
+        LogViewerComponent,
+        TestHostComponent
       ],
       imports: [
         MDAppModule,

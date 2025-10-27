@@ -15,6 +15,7 @@ import { SharedModule } from '../../../../../shared.module';
 import { MetaCardComponent } from './meta-card.component';
 
 @Component({
+  standalone: false,
   template: `
     <app-meta-card>
       <app-meta-card-title>Title</app-meta-card-title>

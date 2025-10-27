@@ -33,6 +33,7 @@ describe('TableComponent', () => {
     }
   ];
   @Component({
+  standalone: false,
     selector: `app-host-component`,
     template: `
     <app-table

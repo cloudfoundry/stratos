@@ -5,6 +5,7 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 
 
 @Component({
+  standalone: false,
   template: `<button mat-icon-button></button>`
 })
 class TestButtonComponent {

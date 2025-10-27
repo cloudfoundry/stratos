@@ -5,6 +5,7 @@ import { BaseTestModules } from '../../../../../core/test-framework/core-test.he
 
 
 @Component({
+  standalone: false,
   template: `<input type="text" appCfUserPermission>`
 })
 class TestUserPermissionComponent {
@@ -18,12 +19,12 @@ describe('CfUserPermissionDirective', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...BaseTestModules
+        ...BaseTestModules,
+        TestUserPermissionComponent
       ],
       providers: [
         { provide: TemplateRef, useClass: MockTemplateRef },
-      ],
-      declarations: [TestUserPermissionComponent]
+      ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);
     component = fixture.componentInstance;

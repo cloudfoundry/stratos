@@ -7,6 +7,7 @@ import { CoreModule } from '../../../core/core.module';
 import { UnlimitedInputComponent } from './unlimited-input.component';
 
 @Component({
+  standalone: false,
   template: `
     <form [formGroup]="formGroup">
       <app-unlimited-input name="inputName"
@@ -34,10 +35,11 @@ describe('UnlimitedInputComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [WrapperComponent, UnlimitedInputComponent],
+      declarations: [UnlimitedInputComponent],
       imports: [
         BrowserAnimationsModule,
         CoreModule,
+        WrapperComponent
       ],
     })
       .compileComponents();

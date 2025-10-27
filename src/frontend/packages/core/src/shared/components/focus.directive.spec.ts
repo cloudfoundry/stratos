@@ -7,6 +7,7 @@ import { SharedModule } from '../shared.module';
 import { CommonModule } from '@angular/common';
 
 @Component({
+  standalone: false,
   template: `<input type="text" autoFocus/>`
 })
 class TestAutoFocusComponent {
@@ -29,14 +30,12 @@ describe('FocusDirective', () => {
         { provide: ElementRef, useClass: MockElementRef },
         { provide: Renderer2, useClass: MockRenderer }
       ],
-      declarations: [
-        TestAutoFocusComponent,
-      ],
       imports: [
         CoreModule,
         BrowserModule,
         CommonModule,
         SharedModule,
+        TestAutoFocusComponent
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(TestAutoFocusComponent);

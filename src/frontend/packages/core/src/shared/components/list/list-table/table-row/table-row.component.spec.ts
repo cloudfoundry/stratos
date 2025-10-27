@@ -12,6 +12,7 @@ import { TableRowComponent } from './table-row.component';
 describe('TableRowComponent', () => {
 
   @Component({
+    standalone: false,
     selector: `app-host-component`,
     template: `
     <app-table-row [rowState]="rowState1"></app-table-row>
@@ -46,7 +47,7 @@ describe('TableRowComponent', () => {
       imports: [
         CoreModule,
         CdkTableModule,
-        NoopAnimationsModule,
+        NoopAnimationsModule
       ],
       providers: [
         TableRowExpandedService
