@@ -313,8 +313,16 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
+		// Replace positional parameters ($1, $2, etc.) with ?
 		sqlParamReplace := regexp.MustCompile(`\$[0-9]+`)
-		return sqlParamReplace.ReplaceAllString(sql, "?")
+		sql = sqlParamReplace.ReplaceAllString(sql, "?")
+
+		// Convert PostgreSQL type cast syntax (::type) to ANSI SQL CAST function
+		// This handles cases like "id::varchar" -> "CAST(id AS varchar)"
+		typeCastReplace := regexp.MustCompile(`(\w+)::(\w+)`)
+		sql = typeCastReplace.ReplaceAllString(sql, "CAST($1 AS $2)")
+
+		return sql
 	}
 
 	// Default is to return the SQL provided directly
