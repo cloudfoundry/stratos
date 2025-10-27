@@ -11,8 +11,8 @@ describe('DateTimeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DateTimeComponent],
       imports: [
+        DateTimeComponent, // Now standalone
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,

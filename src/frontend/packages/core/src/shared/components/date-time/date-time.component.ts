@@ -1,15 +1,22 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 
 import moment from 'moment';
 
 @Component({
-selector: 'app-date-time',
+  selector: 'app-date-time',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatInputModule
+  ],
   templateUrl: './date-time.component.html',
-  styleUrls: ['./date-time.component.scss'],
-  standalone: false
+  styleUrls: ['./date-time.component.scss']
 })
 export class DateTimeComponent implements OnDestroy {
 

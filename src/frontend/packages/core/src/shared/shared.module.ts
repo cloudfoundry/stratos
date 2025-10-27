@@ -151,6 +151,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BaseChartDirective,
     // Standalone components
     CopyToClipboardComponent,
+    EntitySummaryTitleComponent,
+    DateTimeComponent,
   ],
   declarations: [
     LoadingPageComponent,
@@ -209,7 +211,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     UserPermissionDirective,
     CapitalizeFirstPipe,
     RoutingIndicatorComponent,
-    DateTimeComponent,
+    // DateTimeComponent, // Now standalone - moved to imports
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
@@ -224,7 +226,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     PageSubNavComponent,
     BreadcrumbsComponent,
     PageSubNavSectionComponent,
-    EntitySummaryTitleComponent,
+    // EntitySummaryTitleComponent, // Now standalone - moved to imports
     MarkdownPreviewComponent,
     MarkdownContentObserverDirective,
     SnackBarReturnComponent,

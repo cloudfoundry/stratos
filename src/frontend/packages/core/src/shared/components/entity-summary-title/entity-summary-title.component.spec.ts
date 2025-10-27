@@ -10,9 +10,9 @@ describe('EntitySummaryTitleComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        EntitySummaryTitleComponent, // Now standalone
         CoreModule,
-      ],
-      declarations: [EntitySummaryTitleComponent]
+      ]
     })
       .compileComponents();
   }));

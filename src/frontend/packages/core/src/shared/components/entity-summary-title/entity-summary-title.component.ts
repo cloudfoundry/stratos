@@ -1,10 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
-selector: 'app-entity-summary-title',
+  selector: 'app-entity-summary-title',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule
+  ],
   templateUrl: './entity-summary-title.component.html',
-  styleUrls: ['./entity-summary-title.component.scss'],
-  standalone: false
+  styleUrls: ['./entity-summary-title.component.scss']
 })
 export class EntitySummaryTitleComponent {
   @Input() title: string;
