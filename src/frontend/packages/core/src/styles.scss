@@ -14,6 +14,12 @@ body {
   font-family: 'Inter', 'Lato', sans-serif;
 }
 
+// Angular 20 breaking change: [hidden] attribute support removed
+// Restore default browser behavior for [hidden] attribute
+[hidden] {
+  display: none !important;
+}
+
 // Utility classes for legacy compatibility
 .inline-icon {
   @apply inline-block;
