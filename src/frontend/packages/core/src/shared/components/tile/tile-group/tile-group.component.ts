@@ -11,11 +11,12 @@ import {
 import { TileComponent } from '../tile/tile.component';
 
 @Component({
-selector: 'app-tile-group',
+  selector: 'app-tile-group',
   templateUrl: './tile-group.component.html',
   styleUrls: ['./tile-group.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: false
+  standalone: true,
+  imports: []
 })
 export class TileGroupComponent implements OnInit, AfterContentInit {
 

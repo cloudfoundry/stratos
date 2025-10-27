@@ -8,7 +8,7 @@ describe('TileGroupComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TileGroupComponent ]
+      imports: [ TileGroupComponent ]
     })
     .compileComponents();
   }));

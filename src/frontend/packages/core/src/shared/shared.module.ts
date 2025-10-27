@@ -175,12 +175,19 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     NoContentMessageComponent,
     SshViewerComponent,
     DialogConfirmComponent,
+    DialogErrorComponent,
     LogViewerComponent,
     EndpointsMissingComponent,
     FileInputComponent,
     CustomProgressBarSelectorComponent,
+    CustomIconComponent,
+    TileComponent,
+    TileGroupComponent,
+    ApplicationStateComponent,
+    ApplicationStateIconComponent,
     // Standalone pipes
     PercentagePipe,
+    ApplicationStateIconPipe,
   ],
   declarations: [
     // LoadingPageComponent, // Now standalone - moved to imports
@@ -199,13 +206,13 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // CodeBlockComponent, // Now standalone - moved to imports
     // LogViewerComponent, // Now standalone - moved to imports
     // EndpointsMissingComponent, // Now standalone - moved to imports
-    DialogErrorComponent,
+    // DialogErrorComponent, // Now standalone - moved to imports
     // SshViewerComponent, // Now standalone - moved to imports
-    ApplicationStateIconPipe,
-    ApplicationStateIconComponent,
-    ApplicationStateComponent,
-    TileComponent,
-    TileGroupComponent,
+    // ApplicationStateIconPipe, // Now standalone - moved to imports
+    // ApplicationStateIconComponent, // Now standalone - moved to imports
+    // ApplicationStateComponent, // Now standalone - moved to imports
+    // TileComponent, // Now standalone - moved to imports
+    // TileGroupComponent, // Now standalone - moved to imports
     TileGridComponent,
     // MetadataItemComponent, // Now standalone - moved to imports
     // UsageGaugeComponent, // Now standalone - moved to imports
@@ -283,7 +290,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
-    CustomIconComponent,
+    // CustomIconComponent, // Now standalone - moved to imports
     CustomIconButtonDirective,
     CustomButtonDirective,
     MatSuffixDirective,
@@ -302,7 +309,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardActionsComponent,
     CustomCardFooterComponent,
     CustomTooltipDirective,
-    CustomIconComponent,
+    // CustomIconComponent, // Now standalone - moved to imports (duplicate removed)
     // CustomProgressBarSelectorComponent, // Now standalone - moved to imports
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
@@ -418,7 +425,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
-    CustomIconComponent,
+    // CustomIconComponent, // Now standalone - moved to imports
     CustomIconButtonDirective,
     CustomButtonDirective,
     MatSuffixDirective,
@@ -437,7 +444,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardActionsComponent,
     CustomCardFooterComponent,
     CustomTooltipDirective,
-    CustomIconComponent,
+    // CustomIconComponent, // Now standalone - moved to imports (duplicate removed)
     CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,

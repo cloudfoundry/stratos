@@ -5,7 +5,7 @@ import { Component, Input, Output, EventEmitter, Directive } from '@angular/core
   selector: 'mat-icon',
   template: '<i class="custom-icon" [class]="fontSet + \' \' + name" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CustomIconComponent {
   @Input() fontSet = 'material-icons';

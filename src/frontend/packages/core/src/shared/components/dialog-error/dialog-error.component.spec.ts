@@ -1,7 +1,3 @@
-import { CommonModule } from '@angular/common';
-import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../shared.module';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { DialogErrorComponent } from './dialog-error.component';
@@ -13,11 +9,8 @@ describe('DialogErrorComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        CommonModule,
-        CoreModule,
-        NoopAnimationsModule
-      ],
-      declarations: [DialogErrorComponent]
+        DialogErrorComponent
+      ]
     })
       .compileComponents();
   }));

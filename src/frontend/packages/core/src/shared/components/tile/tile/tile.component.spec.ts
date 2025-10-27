@@ -8,7 +8,7 @@ describe('TileComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TileComponent ]
+      imports: [ TileComponent ]
     })
     .compileComponents();
   }));
