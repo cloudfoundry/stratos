@@ -24,10 +24,6 @@ describe('EndpointCardComponent', () => {
         EndpointListHelper,
         MetricsService
       ],
-    }).overrideModule(BrowserDynamicTestingModule, {
-      set: {
-        entryComponents: [MetricsEndpointDetailsComponent],
-      }
     })
       .compileComponents();
   }));

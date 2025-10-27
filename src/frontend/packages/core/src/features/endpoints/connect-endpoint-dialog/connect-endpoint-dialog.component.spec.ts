@@ -53,10 +53,6 @@ describe('ConnectEndpointDialogComponent', () => {
         createBasicStoreModule(),
         MetricsModule,
       ]
-    }).overrideModule(BrowserDynamicTestingModule, {
-      set: {
-        entryComponents: [CredentialsAuthFormComponent],
-      }
     });
     testingModule.compileComponents();
   }));
