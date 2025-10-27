@@ -153,13 +153,17 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CopyToClipboardComponent,
     EntitySummaryTitleComponent,
     DateTimeComponent,
+    CardProgressOverlayComponent,
+    UsageGaugeComponent,
+    // Standalone pipes
+    PercentagePipe,
   ],
   declarations: [
     LoadingPageComponent,
     DisplayValueComponent,
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
-    PercentagePipe,
+    // PercentagePipe, // Now standalone - moved to imports
     UptimePipe,
     UsageBytesPipe,
     ValuesPipe,
@@ -180,7 +184,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TileGroupComponent,
     TileGridComponent,
     MetadataItemComponent,
-    UsageGaugeComponent,
+    // UsageGaugeComponent, // Now standalone - moved to imports
     CardStatusComponent,
     DialogConfirmComponent,
     ListComponent,
@@ -241,7 +245,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TileSelectorTileComponent,
     SidepanelPreviewComponent,
     TableCellSidePanelComponent,
-    CardProgressOverlayComponent,
+    // CardProgressOverlayComponent, // Now standalone - moved to imports
     MaxListMessageComponent,
     ProfileSettingsComponent,
     ProductNameComponent,

@@ -10,9 +10,9 @@ describe('CardProgressOverlayComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        CardProgressOverlayComponent, // Now standalone
         CoreModule,
-      ],
-      declarations: [ CardProgressOverlayComponent ]
+      ]
     })
     .compileComponents();
   }));

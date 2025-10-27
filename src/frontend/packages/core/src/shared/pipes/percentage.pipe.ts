@@ -3,8 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UtilsService } from '../../core/utils.service';
 
 @Pipe({
-name: 'percentage',
-standalone: false
+  name: 'percentage',
+  standalone: true
 })
 export class PercentagePipe implements PipeTransform {
 

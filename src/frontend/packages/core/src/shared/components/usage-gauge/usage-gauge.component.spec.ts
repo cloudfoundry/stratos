@@ -11,11 +11,8 @@ describe('UsageGaugeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        UsageGaugeComponent,
-        PercentagePipe,
-      ],
       imports: [
+        UsageGaugeComponent, // Now standalone (includes PercentagePipe)
         CoreModule,
       ],
       providers: [

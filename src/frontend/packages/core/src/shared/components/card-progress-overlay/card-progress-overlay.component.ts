@@ -1,11 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
 
 @Component({
-selector: 'app-card-progress-overlay',
+  selector: 'app-card-progress-overlay',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatProgressBarModule
+  ],
   templateUrl: './card-progress-overlay.component.html',
-  styleUrls: ['./card-progress-overlay.component.scss'],
-  standalone: false
+  styleUrls: ['./card-progress-overlay.component.scss']
 })
 export class CardProgressOverlayComponent {
 

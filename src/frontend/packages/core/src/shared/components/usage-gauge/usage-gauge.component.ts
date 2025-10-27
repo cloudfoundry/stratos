@@ -1,10 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, Input } from '@angular/core';
 
+import { PercentagePipe } from '../../pipes/percentage.pipe';
+
 @Component({
-selector: 'app-usage-gauge',
+  selector: 'app-usage-gauge',
+  standalone: true,
+  imports: [
+    CommonModule,
+    PercentagePipe
+  ],
   templateUrl: './usage-gauge.component.html',
-  styleUrls: ['./usage-gauge.component.scss'],
-  standalone: false
+  styleUrls: ['./usage-gauge.component.scss']
 })
 export class UsageGaugeComponent implements OnInit {
 
