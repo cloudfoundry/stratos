@@ -25,7 +25,7 @@
       "karma"
     ],
     "typeRoots": [
-      "node_modules/@types"
+      "../node_modules/@types"
     ],
     "lib": [
       "es2018",
