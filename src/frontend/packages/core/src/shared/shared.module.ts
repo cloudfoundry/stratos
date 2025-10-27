@@ -155,6 +155,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     DateTimeComponent,
     CardProgressOverlayComponent,
     UsageGaugeComponent,
+    CodeBlockComponent,
     // Standalone pipes
     PercentagePipe,
   ],
@@ -172,7 +173,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     FocusDirective,
     BlurDirective,
     UniqueDirective,
-    CodeBlockComponent,
+    // CodeBlockComponent, // Now standalone - moved to imports
     LogViewerComponent,
     EndpointsMissingComponent,
     DialogErrorComponent,

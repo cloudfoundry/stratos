@@ -12,11 +12,8 @@ describe('CodeBlockComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CodeBlockComponent,
-        CopyToClipboardComponent
-      ],
       imports: [
+        CodeBlockComponent, // Now standalone
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),

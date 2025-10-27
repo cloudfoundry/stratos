@@ -1,10 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
+
 @Component({
-selector: 'app-code-block',
+  selector: 'app-code-block',
+  standalone: true,
+  imports: [
+    CommonModule,
+    CopyToClipboardComponent
+  ],
   templateUrl: './code-block.component.html',
-  styleUrls: ['./code-block.component.scss'],
-  standalone: false
+  styleUrls: ['./code-block.component.scss']
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
