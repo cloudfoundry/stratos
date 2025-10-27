@@ -5,7 +5,9 @@ import { AuthOnlyAppState, AuthState } from '@stratosui/store';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserService {
 
   isAdmin$: Observable<boolean>;

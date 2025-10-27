@@ -7,7 +7,9 @@ import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { BaseKubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesNodePodsDataSource } from './kubernetes-node-pods-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNodePodsListConfigService extends BaseKubernetesPodsListConfigService {
 
   private podsDataSource: KubernetesNodePodsDataSource;

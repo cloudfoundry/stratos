@@ -16,7 +16,9 @@ import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { IMetricsResponse } from '../types/base-metric.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MetricsEffect {
 
   constructor(

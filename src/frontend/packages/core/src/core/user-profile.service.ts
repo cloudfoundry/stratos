@@ -16,7 +16,9 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserProfileService {
 
   isError$: Observable<boolean>;

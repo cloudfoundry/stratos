@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LongRunningOperationsService {
 
   constructor(protected store: Store<AppState>) { }

@@ -28,7 +28,9 @@ import {
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
 
   constructor(

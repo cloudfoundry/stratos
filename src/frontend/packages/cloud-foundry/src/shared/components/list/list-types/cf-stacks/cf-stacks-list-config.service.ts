@@ -9,7 +9,9 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfStacksCardComponent } from './cf-stacks-card/cf-stacks-card.component';
 import { CfStacksDataSource } from './cf-stacks-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfStacksListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: CfStacksDataSource;
   cardComponent = CfStacksCardComponent;

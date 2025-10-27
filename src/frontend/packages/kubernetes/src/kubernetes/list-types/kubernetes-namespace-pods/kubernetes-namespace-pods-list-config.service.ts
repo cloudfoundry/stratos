@@ -7,7 +7,9 @@ import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.
 import { BaseKubernetesPodsListConfigService } from '../kubernetes-pods/kubernetes-pods-list-config.service';
 import { KubernetesNamespacePodsDataSource } from './kubernetes-namespace-pods-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNamespacePodsListConfigService extends BaseKubernetesPodsListConfigService {
 
   showNamespaceLink = false;

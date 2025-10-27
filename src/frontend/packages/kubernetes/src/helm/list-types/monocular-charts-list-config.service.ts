@@ -16,7 +16,9 @@ import { MonocularChart } from '../store/helm.types';
 import { MonocularChartCardComponent } from './monocular-chart-card/monocular-chart-card.component';
 import { MonocularChartsDataSource } from './monocular-charts-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
   dataSource: MonocularChartsDataSource;
   isLocal = true;

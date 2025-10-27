@@ -18,7 +18,9 @@ import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagi
 import { AppState, EndpointModel } from '../../../../../store/src/public-api';
 import { KubernetesEndpointsDataSource } from './kubernetes-endpoints-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;

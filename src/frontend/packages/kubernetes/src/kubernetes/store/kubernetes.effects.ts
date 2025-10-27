@@ -98,7 +98,9 @@ export interface KubeDashboardStatus {
   serviceAccount: any;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 

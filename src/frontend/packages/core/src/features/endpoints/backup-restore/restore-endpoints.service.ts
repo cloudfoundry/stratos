@@ -16,7 +16,9 @@ interface RestoreEndpointsData {
   ignoreDbVersion: boolean;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RestoreEndpointsService {
 
   // Step 1

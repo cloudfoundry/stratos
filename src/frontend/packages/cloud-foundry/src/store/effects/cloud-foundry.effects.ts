@@ -15,7 +15,9 @@ import {
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
   constructor(

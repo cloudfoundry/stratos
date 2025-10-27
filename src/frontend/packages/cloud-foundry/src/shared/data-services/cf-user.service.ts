@@ -47,7 +47,9 @@ import {
   UserRoleInSpace,
 } from '../../store/types/cf-user.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 

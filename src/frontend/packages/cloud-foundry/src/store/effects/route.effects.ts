@@ -8,7 +8,9 @@ import { CFAppState } from '../../cf-app-state';
 import { ClearPaginationOfEntity } from '../../../../store/src/actions/pagination.actions';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RouteEffect {
 
   constructor(

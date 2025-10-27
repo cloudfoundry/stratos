@@ -3,7 +3,9 @@ import { Subject } from 'rxjs';
 
 import { StepComponent } from './step/step.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SteppersService {
 
   constructor() { }

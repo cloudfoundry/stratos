@@ -11,7 +11,9 @@ import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { DetachAppsDataSource } from './detach-apps-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DetachAppsListConfigService implements IListConfig<APIResource> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: DetachAppsDataSource;

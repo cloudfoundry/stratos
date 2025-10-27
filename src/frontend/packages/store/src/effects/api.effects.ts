@@ -13,7 +13,9 @@ import { ICFAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { ApiActionTypes, RequestTypes } from './../actions/request.actions';
 import { InternalAppState } from './../app-state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class APIEffect {
   constructor(
     private actions$: Actions,

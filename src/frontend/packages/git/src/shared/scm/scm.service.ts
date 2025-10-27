@@ -9,7 +9,9 @@ import { GitSCM } from './scm';
 export type GitSCMType = 'github' | 'gitlab';
 
 // Abstracts differences in Git-based SCM services such as GitHub and GitLab
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GitSCMService {
 
   constructor(

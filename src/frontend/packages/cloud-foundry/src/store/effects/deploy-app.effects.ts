@@ -17,7 +17,9 @@ import { CFAppState } from '../../cf-app-state';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DeployAppEffects {
   constructor(
     private actions$: Actions,

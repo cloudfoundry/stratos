@@ -23,7 +23,9 @@ import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   isLocal = false;
   viewType = ListViewTypes.TABLE_ONLY;

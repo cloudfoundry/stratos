@@ -5,7 +5,9 @@ import { take } from 'rxjs/operators';
 import { ConfirmationDialogConfig } from './confirmation-dialog.config';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ConfirmationDialogService {
 
   constructor(private dialog: MatDialog) { }

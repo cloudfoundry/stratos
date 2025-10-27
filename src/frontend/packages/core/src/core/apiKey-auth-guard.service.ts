@@ -8,7 +8,9 @@ import { map } from 'rxjs/operators';
 import { CurrentUserPermissionsService } from './permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './permissions/stratos-user-permissions.checker';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class APIKeyAuthGuardService implements CanActivate {
 
   constructor(

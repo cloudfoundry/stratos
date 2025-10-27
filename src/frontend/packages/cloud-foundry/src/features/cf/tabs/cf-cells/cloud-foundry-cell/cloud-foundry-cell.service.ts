@@ -41,7 +41,9 @@ export const enum CellMetrics {
 /**
  * Designed to be used once drilled down to a cell (see ActiveRouteCfCell)
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryCellService {
 
   cfGuid: string;

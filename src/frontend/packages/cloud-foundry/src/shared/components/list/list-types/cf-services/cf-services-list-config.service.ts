@@ -34,7 +34,9 @@ import {
 } from './table-cell-service-references/table-cell-service-references.component';
 import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-cell-service-tags.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfServicesListConfigService implements IListConfig<APIResource> {
 
   constructor(

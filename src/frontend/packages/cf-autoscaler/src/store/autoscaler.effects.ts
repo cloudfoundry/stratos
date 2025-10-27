@@ -81,7 +81,9 @@ function createAutoscalerErrorMessage(requestType: string, error) {
   return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AutoscalerEffects {
   constructor(
     private http: HttpClient,

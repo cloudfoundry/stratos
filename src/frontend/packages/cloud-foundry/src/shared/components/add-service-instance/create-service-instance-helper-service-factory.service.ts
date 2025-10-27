@@ -5,7 +5,9 @@ import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CreateServiceInstanceHelperServiceFactory {
 
   private serviceInstanceCache: {

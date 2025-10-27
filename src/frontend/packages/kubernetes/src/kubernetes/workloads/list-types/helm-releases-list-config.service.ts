@@ -21,7 +21,9 @@ import { HelmReleaseCardComponent } from './helm-release-card/helm-release-card.
 import { HelmReleasesDataSource } from './helm-releases-list-source';
 import { KubernetesNamespacesFilterItem, KubernetesNamespacesFilterService } from './kube-namespaces-filter-config.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
 
   isLocal = true;

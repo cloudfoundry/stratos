@@ -21,7 +21,9 @@ import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
   constructor(

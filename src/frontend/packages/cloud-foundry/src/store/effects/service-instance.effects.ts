@@ -8,7 +8,9 @@ import { LongRunningCfOperationsService } from '../../shared/data-services/long-
 
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServiceInstanceEffects {
 
   constructor(

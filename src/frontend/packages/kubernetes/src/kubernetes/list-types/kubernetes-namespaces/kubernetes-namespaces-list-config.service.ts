@@ -19,7 +19,9 @@ import { KubernetesNamespaceLinkComponent } from './kubernetes-namespace-link/ku
 import { KubernetesNamespacesDataSource } from './kubernetes-namespaces-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNamespacesListConfigService implements IListConfig<KubernetesNamespace> {
   podsDataSource: KubernetesNamespacesDataSource;
 

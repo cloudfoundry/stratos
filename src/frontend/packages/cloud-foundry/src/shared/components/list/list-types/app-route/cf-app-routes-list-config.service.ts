@@ -17,7 +17,9 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { CfAppRoutesListConfigServiceBase } from './cf-app-routes-list-config-base';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
 
   constructor(

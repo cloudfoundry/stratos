@@ -16,7 +16,9 @@ import { CfRoutesListConfigBase } from '../cf-routes/cf-routes-list-config-base'
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {
   private dataSource: CfSpaceRoutesDataSource;
 

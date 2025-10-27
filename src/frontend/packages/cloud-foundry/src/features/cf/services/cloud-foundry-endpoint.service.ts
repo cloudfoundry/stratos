@@ -49,7 +49,9 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 }
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryEndpointService {
 
   hasSSHAccess$: Observable<boolean>;

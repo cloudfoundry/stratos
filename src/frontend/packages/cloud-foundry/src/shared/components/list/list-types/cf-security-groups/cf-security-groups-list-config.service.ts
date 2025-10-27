@@ -9,7 +9,9 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfSecurityGroupsCardComponent } from './cf-security-groups-card/cf-security-groups-card.component';
 import { CfSecurityGroupsDataSource } from './cf-security-groups-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: CfSecurityGroupsDataSource;
   cardComponent = CfSecurityGroupsCardComponent;

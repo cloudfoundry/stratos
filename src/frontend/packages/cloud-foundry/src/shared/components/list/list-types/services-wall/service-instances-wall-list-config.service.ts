@@ -38,7 +38,9 @@ import {
  * @export
  * @extends {CfServiceInstancesListConfigBase}
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServiceInstancesWallListConfigService extends CfServiceInstancesListConfigBase {
   endpointType = 'cf';
   text: ITableText = {

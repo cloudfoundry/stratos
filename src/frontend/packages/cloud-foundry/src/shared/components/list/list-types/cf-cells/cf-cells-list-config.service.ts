@@ -26,7 +26,9 @@ import { CfCellsDataSource } from './cf-cells-data-source';
 
 // tslint:enable:max-line-length
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
 
   dataSource: CfCellsDataSource;

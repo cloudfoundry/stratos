@@ -32,7 +32,9 @@ import { TableCellAppInstancesComponent } from './table-cell-app-instances/table
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppConfigService extends ListConfig<APIResource> implements IListConfig<APIResource> {
 
   multiFilterConfigs: IListMultiFilterConfig[];

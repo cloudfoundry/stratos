@@ -26,7 +26,9 @@ import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
   envVarsDataSource: CfAppVariablesDataSource;
 

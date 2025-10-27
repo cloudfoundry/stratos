@@ -31,7 +31,9 @@ export interface KubernetesNamespacesFilterItem<T = any> {
 /**
  * This service relies on OnDestroy, so must be `provided` by a component
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNamespacesFilterService implements OnDestroy {
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;

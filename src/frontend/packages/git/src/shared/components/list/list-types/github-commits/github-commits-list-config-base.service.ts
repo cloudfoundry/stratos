@@ -11,7 +11,9 @@ import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export abstract class GithubCommitsListConfigServiceBase implements IListConfig<GitCommit> {
   protected dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;

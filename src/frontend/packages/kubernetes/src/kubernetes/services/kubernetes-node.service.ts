@@ -21,7 +21,9 @@ export enum KubeNodeMetric {
   MEMORY = 'container_memory_usage_bytes'
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNodeService {
   public nodeName: string;
   public kubeGuid: string;

@@ -54,7 +54,9 @@ const defaultViewDetail = {
   showSpecifyDetails: true
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CsiModeService {
 
   private mode: string;

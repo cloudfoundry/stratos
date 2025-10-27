@@ -8,7 +8,9 @@ import { EntityService } from './entity-service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { EntityRequestAction } from './types/request.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EntityServiceFactory {
   private isConfig(config: string | EntityActionBuilderEntityConfig) {
     if (config) {

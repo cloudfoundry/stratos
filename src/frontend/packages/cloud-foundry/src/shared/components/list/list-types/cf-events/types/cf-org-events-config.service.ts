@@ -8,7 +8,9 @@ import { CloudFoundryOrganizationService } from '../../../../../../features/cf/s
 import { CfEventsConfigService } from '../cf-events-config.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfOrganizationEventsConfigService extends CfEventsConfigService implements IListConfig<APIResource> {
 
   constructor(store: Store<CFAppState>, orgService: CloudFoundryOrganizationService) {

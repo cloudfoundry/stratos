@@ -15,7 +15,9 @@ import {
 } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config-base';
 import { ApplicationService } from '../../application.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServiceBase implements IListConfig<APIResource> {
   constructor(
     store: Store<CFAppState>,

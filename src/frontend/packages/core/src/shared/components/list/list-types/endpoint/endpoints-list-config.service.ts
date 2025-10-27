@@ -37,7 +37,9 @@ import { TableCellEndpointDetailsComponent } from './table-cell-endpoint-details
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   cardComponent = EndpointCardComponent;
 

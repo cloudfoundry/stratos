@@ -27,7 +27,9 @@ import {
 // FIXME: This should be removed in favour of entity action builder config.
 // See github commit action builder for an example,
 // https://github.com/cloudfoundry-incubator/stratos/issues/3770
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GitEffects {
   constructor(
     private actions$: Actions,

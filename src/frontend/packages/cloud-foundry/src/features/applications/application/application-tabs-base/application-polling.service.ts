@@ -9,7 +9,9 @@ import { selectDashboardState } from '../../../../../../store/src/selectors/dash
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationPollingService {
 
   private pollingSub: Subscription;

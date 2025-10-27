@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ConfigService {
   // Configurable options
   // They can be overriden using assets/js/overrides.js

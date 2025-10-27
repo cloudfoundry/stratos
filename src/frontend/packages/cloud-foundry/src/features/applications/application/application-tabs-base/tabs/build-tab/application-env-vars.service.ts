@@ -26,7 +26,9 @@ export interface EnvVarStratosProjectSource {
   dockerUsername?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationEnvVarsHelper {
 
   createEnvVarsObs(appGuid: string, cfGuid: string): PaginationObservables<APIResource> {

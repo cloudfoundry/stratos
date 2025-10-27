@@ -8,7 +8,9 @@ import { ITimeRange } from './metrics-range-selector.types';
 
 import moment from 'moment';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MetricsRangeSelectorManagerService {
 
   public timeWindow$ = new Subject<ITimeRange>();

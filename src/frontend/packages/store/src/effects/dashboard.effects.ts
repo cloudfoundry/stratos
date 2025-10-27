@@ -6,7 +6,9 @@ import { HYDRATE_DASHBOARD_STATE, HydrateDashboardStateAction } from '../actions
 import { ThemeService } from '../theme.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class DashboardEffect {
 
   constructor(

@@ -7,7 +7,9 @@ import { RepoAttributes } from '../models/repo';
 import { ConfigService } from './config.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ReposService {
 
   hostname: string;

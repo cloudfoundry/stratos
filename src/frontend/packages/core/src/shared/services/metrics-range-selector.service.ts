@@ -5,7 +5,9 @@ import { ITimeRange, StoreMetricTimeRange } from './metrics-range-selector.types
 
 import moment from 'moment';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MetricsRangeSelectorService {
 
   constructor() { }

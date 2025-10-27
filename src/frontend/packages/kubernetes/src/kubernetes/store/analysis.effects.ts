@@ -24,7 +24,9 @@ import {
 } from './analysis.actions';
 import { AnalysisReport } from './kube.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AnalysisEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 

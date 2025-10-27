@@ -37,7 +37,9 @@ import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfRolesService {
 
   existingRoles$: Observable<CfUserRolesSelected>;

@@ -7,7 +7,9 @@ import { RouterActions, RouterNav } from '../actions/router.actions';
 
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class RouterEffect {
 
   constructor(

@@ -22,7 +22,9 @@ import {
 import { AppAutoscalerMetricChartDataSource } from './app-autoscaler-metric-chart-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<APIResource<AppScalingTrigger>> {
   autoscalerMetricSource: AppAutoscalerMetricChartDataSource;
   cardComponent = AppAutoscalerMetricChartCardComponent;

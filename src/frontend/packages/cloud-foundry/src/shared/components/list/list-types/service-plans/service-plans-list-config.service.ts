@@ -32,7 +32,9 @@ import {
 /**
  * @export
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicePlansListConfigService implements IListConfig<APIResource<IServicePlan>> {
 
   viewType = ListViewTypes.TABLE_ONLY;

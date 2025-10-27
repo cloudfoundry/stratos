@@ -13,7 +13,9 @@ import {
   createAppInstancesMetricAction,
 } from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppEffects {
 
   constructor(

@@ -14,7 +14,9 @@ import {
 } from '../actions/pagination.actions';
 import { AppState } from '../app-state';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class PaginationEffects {
 
   constructor(

@@ -19,7 +19,9 @@ export function queryParamMap(): { [key: string]: string } {
   return paramMap;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthGuardService implements CanActivate {
 
   constructor(

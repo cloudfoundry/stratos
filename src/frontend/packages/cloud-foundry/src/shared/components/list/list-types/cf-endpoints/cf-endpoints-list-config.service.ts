@@ -17,7 +17,9 @@ import { EndpointModel } from '../../../../../../../store/src/types/endpoint.typ
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;

@@ -61,7 +61,9 @@ export interface ApplicationData {
   cf: any;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationService {
 
   public entityService: EntityService<APIResource<IApp>>;

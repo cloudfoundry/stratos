@@ -8,7 +8,9 @@ import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catal
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesService {
   kubeEndpoints$: Observable<EndpointModel[]>;
   kubeEndpointsMonitor: PaginationMonitor<EndpointModel>;

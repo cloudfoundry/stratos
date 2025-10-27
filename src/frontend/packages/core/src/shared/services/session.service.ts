@@ -5,7 +5,9 @@ import { UserEndpointsEnabled } from 'frontend/packages/store/src/types/auth.typ
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SessionService {
 
   constructor(private store: Store<GeneralEntityAppState>) { }

@@ -12,7 +12,9 @@ import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfOrgUsersListConfigService extends CfUserListConfigService {
 
   constructor(

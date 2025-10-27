@@ -14,7 +14,9 @@ import {
 } from './table-cell-feature-flag-description/table-cell-feature-flag-description.component';
 import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFlag> {
 
   constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {

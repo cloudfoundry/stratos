@@ -62,7 +62,9 @@ export class AppMonitorState {
   }
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationMonitorService {
 
   appMonitor$: Observable<AppMonitorState>;

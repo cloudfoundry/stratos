@@ -8,7 +8,9 @@ export interface ApplicationStateData extends StratosStatusMetadata {
     [key: string]: boolean
   };
 }
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApplicationStateService {
 
   /**

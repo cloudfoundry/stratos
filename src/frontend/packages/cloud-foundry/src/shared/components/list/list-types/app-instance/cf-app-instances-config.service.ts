@@ -44,7 +44,9 @@ export function createAppInstancesMetricAction(appGuid: string, cfGuid: string):
   );
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
 
   instancesSource: CfAppInstancesDataSource;

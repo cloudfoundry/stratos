@@ -33,7 +33,9 @@ import {
   UpgradeHelmRelease,
 } from './workloads.actions';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WorkloadsEffects {
 
   constructor(

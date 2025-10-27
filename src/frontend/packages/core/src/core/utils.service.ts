@@ -48,7 +48,9 @@ export const urlValidationExpression =
   '$'
   ;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UtilsService {
 
   private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];

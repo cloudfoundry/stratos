@@ -10,7 +10,9 @@ import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import { InternalEventSeverity } from '../types/internal-events.types';
 import { WrapperRequestActionFailed } from '../types/request.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EndpointApiError {
 
   constructor(

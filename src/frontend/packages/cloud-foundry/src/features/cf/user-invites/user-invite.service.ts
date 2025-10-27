@@ -53,7 +53,9 @@ interface UserInviteSend {
   emails: string[];
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteConfigureService {
 
   constructor(
@@ -123,7 +125,9 @@ export class UserInviteConfigureService {
   }
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteService {
 
   configured$: Observable<boolean>;

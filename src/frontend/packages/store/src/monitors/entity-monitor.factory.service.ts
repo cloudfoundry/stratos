@@ -6,7 +6,9 @@ import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { EntityMonitor } from './entity-monitor';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EntityMonitorFactory {
 
   constructor(

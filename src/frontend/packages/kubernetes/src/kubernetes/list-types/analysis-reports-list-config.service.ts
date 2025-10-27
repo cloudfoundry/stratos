@@ -19,7 +19,9 @@ import { AnalysisReport } from '../store/kube.types';
 import { AnalysisReportsDataSource } from './analysis-reports-list-source';
 import { AnalysisStatusCellComponent } from './analysis-status-cell/analysis-status-cell.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
   AppsDataSource: AnalysisReportsDataSource;
   isLocal = true;

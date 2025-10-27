@@ -11,7 +11,9 @@ import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
 
   dataSource: CfCellAppsDataSource;

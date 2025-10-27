@@ -9,7 +9,9 @@ import { IService } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicesWallService {
   services$: Observable<APIResource<IService>[]>;
 

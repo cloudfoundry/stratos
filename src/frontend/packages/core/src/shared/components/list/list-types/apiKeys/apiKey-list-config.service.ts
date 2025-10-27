@@ -11,7 +11,9 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { ApiKeyDataSource } from './apiKey-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiKeyListConfigService implements IListConfig<ApiKey> {
 
   private static comment = 'comment';

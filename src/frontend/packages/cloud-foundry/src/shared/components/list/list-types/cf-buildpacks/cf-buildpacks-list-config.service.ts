@@ -10,7 +10,9 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfBuildpackCardComponent } from './cf-buildpack-card/cf-buildpack-card.component';
 import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {
   cardComponent = CfBuildpackCardComponent;
   dataSource: CfBuildpacksDataSource;

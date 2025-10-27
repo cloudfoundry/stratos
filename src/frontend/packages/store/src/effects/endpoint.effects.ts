@@ -42,7 +42,9 @@ import { UPDATE_ENDPOINT, UpdateEndpoint } from './../actions/endpoint.actions';
 import { PaginatedAction } from './../types/pagination.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EndpointsEffect {
 
   constructor(

@@ -22,7 +22,9 @@ import { QUOTA_FROM_LIST } from '../cf-quotas/cf-quotas-list-config.service';
 import { TableCellQuotaComponent } from '../cf-quotas/table-cell-quota/table-cell-quota.component';
 import { CfOrgSpaceQuotasDataSourceService } from './cf-space-quotas-data-source.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
   dataSource: CfOrgSpaceQuotasDataSourceService;
   deleteSubscription: Subscription;

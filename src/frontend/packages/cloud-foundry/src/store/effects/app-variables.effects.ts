@@ -7,7 +7,9 @@ import { AppVariables, AppVariablesUpdate } from '../../actions/app-variables.ac
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppVariablesEffect {
 
   constructor(

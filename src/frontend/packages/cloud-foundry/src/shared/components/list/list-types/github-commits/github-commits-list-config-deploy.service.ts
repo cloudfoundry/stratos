@@ -12,7 +12,9 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-radio/table-cell-radio.component';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfigServiceBase {
   constructor(
     store: Store<CFAppState>,

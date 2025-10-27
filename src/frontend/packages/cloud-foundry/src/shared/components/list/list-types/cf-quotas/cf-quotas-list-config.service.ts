@@ -25,7 +25,9 @@ import { TableCellQuotaComponent } from './table-cell-quota/table-cell-quota.com
 
 export const QUOTA_FROM_LIST = 'list';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
   dataSource: CfQuotasDataSourceService;
   deleteSubscription: Subscription;

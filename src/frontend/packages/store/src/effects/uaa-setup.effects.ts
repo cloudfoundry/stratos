@@ -15,7 +15,9 @@ import {
 import { LocalAdminSetupData, UaaSetupData } from './../types/uaa-setup.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UAASetupEffect {
 
   constructor(

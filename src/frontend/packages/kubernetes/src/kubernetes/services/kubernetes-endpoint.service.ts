@@ -44,7 +44,9 @@ export interface CaaspNodeData {
 }
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesEndpointService {
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;

@@ -29,7 +29,9 @@ export enum KubernetesNodesListFilterKeys {
   LABELS = 'labels'
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNodesListConfigService implements IListConfig<KubernetesNode> {
   dataSource: KubernetesNodesDataSource;
 

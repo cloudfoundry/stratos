@@ -20,7 +20,9 @@ import {
   TableCellAutoscalerEventStatusComponent,
 } from './table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppAutoscalerEventsConfigService
   extends ListConfig<APIResource<AppAutoscalerEvent>>
   implements IListConfig<APIResource<AppAutoscalerEvent>> {

@@ -22,7 +22,9 @@ export interface KubernetesAnalysisType {
   descriptionUrl?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesAnalysisService {
   kubeGuid: string;
 

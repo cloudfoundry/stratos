@@ -99,7 +99,9 @@ const addMonocularId = (endpointId: string, response: MonocularChartsResponse): 
   };
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class HelmEffects {
 
   constructor(

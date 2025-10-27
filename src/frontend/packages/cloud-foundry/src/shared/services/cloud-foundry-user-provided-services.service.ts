@@ -21,7 +21,9 @@ import { fetchTotalResults } from '../../features/cf/cf.helpers';
 import { QParam, QParamJoiners } from '../q-param';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryUserProvidedServicesService {
 
   constructor(

@@ -10,7 +10,9 @@ import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.typ
 import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
 import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class PipelineHttpClient {
 
   static readonly EndpointHeader = 'x-cap-cnsi-list';

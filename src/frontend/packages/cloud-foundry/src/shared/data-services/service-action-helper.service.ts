@@ -20,7 +20,9 @@ import {
 } from '../components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServiceActionHelperService {
 
   constructor(

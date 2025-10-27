@@ -28,7 +28,9 @@ export enum SidePanelMode {
  *  - with show(...) - Brings in side panel below the top nav
  *  - with showModal(...) - Brings in side panel overlaying the top nav
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SidePanelService {
   private openedSubject: BehaviorSubject<boolean>;
   public opened$: Observable<boolean>;

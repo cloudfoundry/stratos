@@ -61,7 +61,9 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
   organization_guid: orgGuid
 });
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;

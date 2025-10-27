@@ -27,7 +27,9 @@ import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UsersRolesEffects {
 
   constructor(

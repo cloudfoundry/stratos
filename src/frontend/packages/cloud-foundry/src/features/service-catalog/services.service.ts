@@ -34,7 +34,9 @@ export interface SpaceScopedService {
   orgGuid?: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ServicesService {
   isSpaceScoped$: Observable<SpaceScopedService>;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;

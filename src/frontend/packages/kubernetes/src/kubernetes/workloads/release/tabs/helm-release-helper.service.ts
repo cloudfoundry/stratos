@@ -90,7 +90,9 @@ type InternalHelmUpgrade = {
   monocularEndpointId: string;
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class HelmReleaseHelperService {
 
   public isFetching$: Observable<boolean>;

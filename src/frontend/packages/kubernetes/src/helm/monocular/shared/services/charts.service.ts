@@ -13,7 +13,9 @@ import { ConfigService } from './config.service';
 
 
 /* Most of this code should be in an effect and we should store the data in the app store */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ChartsService {
   hostname: string;
   cacheCharts: any;

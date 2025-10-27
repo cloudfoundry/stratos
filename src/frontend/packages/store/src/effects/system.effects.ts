@@ -10,7 +10,9 @@ import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuc
 import { SystemInfo } from '../types/system.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SystemEffects {
   constructor(
     private httpClient: HttpClient,

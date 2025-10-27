@@ -18,7 +18,9 @@ interface BackupRequest {
   password: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class BackupEndpointsService {
 
   hasChanges = new BehaviorSubject(false);

@@ -24,7 +24,9 @@ import { ServiceActionHelperService } from '../../../../shared/data-services/ser
 import { fetchTotalResults } from '../../../cf/cf.helpers';
 import { ApplicationService } from '../../application.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
   hideRefresh: boolean;
   allowSelection: boolean;

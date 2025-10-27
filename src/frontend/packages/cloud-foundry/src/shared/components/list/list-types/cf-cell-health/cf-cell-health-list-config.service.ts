@@ -27,7 +27,9 @@ import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './
 
 // tslint:enable:max-line-length
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
 
   dataSource: CfCellHealthDataSource;

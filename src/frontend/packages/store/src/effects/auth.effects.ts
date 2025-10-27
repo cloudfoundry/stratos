@@ -35,7 +35,9 @@ const UPGRADE_HEADER = 'retry-after';
 const DOMAIN_HEADER = 'x-stratos-domain';
 const SSO_HEADER = 'x-stratos-sso-login';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthEffect {
 
   constructor(

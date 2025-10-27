@@ -11,7 +11,9 @@ import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class LoggedInService {
   constructor(
     @Inject(DOCUMENT) private document: Document,

@@ -9,7 +9,9 @@ import { KubeService } from '../../store/kube.types';
 import { BaseKubernetesServicesListConfig } from '../kubernetes-services/kubernetes-service-list-config.service';
 import { KubernetesNamespaceServicesDataSource } from './kubernetes-namespace-services-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class KubernetesNamespaceServicesListConfig extends BaseKubernetesServicesListConfig implements IListConfig<KubeService> {
   dataSource: KubernetesNamespaceServicesDataSource;
 

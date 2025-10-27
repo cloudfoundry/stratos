@@ -20,7 +20,9 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
  * Now purely looks after ad-hoc validation of an entity or list of entities
  * Does not link in to the API request chain (see new location in success-entity-request.handler)
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfValidateEffects {
   constructor(
     private actions$: Actions,

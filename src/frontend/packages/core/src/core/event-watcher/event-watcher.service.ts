@@ -10,7 +10,9 @@ export class ResizeEventData {
   innerWidth: number;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EventWatcherService {
   constructor(private windowRef: WindowRef) { }
 

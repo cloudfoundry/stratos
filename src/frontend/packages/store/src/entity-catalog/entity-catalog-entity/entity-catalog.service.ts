@@ -6,7 +6,9 @@ import { EntityServiceFactory } from '../../entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../reducers/pagination-reducer/pagination-reducer.helper';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EntityCatalogHelper {
 
   // Remove cyclic dependency by accessing this here instead of in entity catalog entity

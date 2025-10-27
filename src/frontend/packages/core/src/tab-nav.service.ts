@@ -7,7 +7,9 @@ import { filter, map, observeOn, publishReplay, refCount, startWith } from 'rxjs
 import { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-header.types';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TabNavService {
 
   static TabsNoLinkValue = null;

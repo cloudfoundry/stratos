@@ -136,7 +136,9 @@ interface InitialValues { cf: string; org: string; space: string; }
 /**
  * This service relies on OnDestroy, so must be `provided` by a component
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfOrgSpaceDataService implements OnDestroy {
 
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';

@@ -8,7 +8,9 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { CfEventsConfigService } from '../cf-events-config.service';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CfAppEventsConfigService extends CfEventsConfigService implements IListConfig<APIResource> {
 
   constructor(store: Store<CFAppState>, appService: ApplicationService) {

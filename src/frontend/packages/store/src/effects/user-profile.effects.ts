@@ -19,7 +19,9 @@ import { DispatchOnlyAppState } from './../app-state';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserProfileEffect {
 
   constructor(

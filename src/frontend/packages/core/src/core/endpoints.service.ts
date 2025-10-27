@@ -24,7 +24,9 @@ import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { UserService } from './user.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class EndpointsService implements CanActivate {
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;

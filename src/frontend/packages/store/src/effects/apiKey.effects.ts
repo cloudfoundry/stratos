@@ -22,7 +22,9 @@ import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuc
 
 const apiKeyUrlPath = `/pp/${proxyAPIVersion}/api_keys`;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiKeyEffect {
 
   constructor(

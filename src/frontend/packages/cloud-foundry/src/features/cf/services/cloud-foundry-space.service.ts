@@ -29,7 +29,9 @@ import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CloudFoundrySpaceService {
 
   cfGuid: string;

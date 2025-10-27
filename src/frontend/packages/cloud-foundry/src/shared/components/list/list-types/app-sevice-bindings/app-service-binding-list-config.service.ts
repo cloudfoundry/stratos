@@ -32,7 +32,9 @@ import {
 import { AppServiceBindingCardComponent } from './app-service-binding-card/app-service-binding-card.component';
 import { AppServiceBindingDataSource } from './app-service-binding-data-source';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource<IServiceBinding>> {
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;

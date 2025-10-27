@@ -10,7 +10,9 @@ import { environment } from '../environments/environment';
 
 const { proxyAPIVersion } = environment;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class NotSetupGuardService implements CanActivate {
 
   constructor(
