@@ -149,6 +149,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     RouterModule,
     SteppersModule,
     BaseChartDirective,
+    // Standalone components
+    CopyToClipboardComponent,
   ],
   declarations: [
     LoadingPageComponent,
@@ -232,7 +234,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     ListHostDirective,
     ListViewComponent,
     EntityListViewComponent,
-    CopyToClipboardComponent,
+    // CopyToClipboardComponent, // Now standalone - moved to imports
     SidepanelPreviewComponent,
     TileSelectorTileComponent,
     SidepanelPreviewComponent,

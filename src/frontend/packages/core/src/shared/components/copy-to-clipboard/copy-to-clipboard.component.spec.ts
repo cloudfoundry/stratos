@@ -11,8 +11,8 @@ describe('CopyToClipboardComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CopyToClipboardComponent],
       imports: [
+        CopyToClipboardComponent, // Now standalone
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),

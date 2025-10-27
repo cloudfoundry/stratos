@@ -1,11 +1,12 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, CommonModule } from '@angular/common';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 
 @Component({
-selector: 'app-copy-to-clipboard',
+  selector: 'app-copy-to-clipboard',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './copy-to-clipboard.component.html',
-  styleUrls: ['./copy-to-clipboard.component.scss'],
-  standalone: false
+  styleUrls: ['./copy-to-clipboard.component.scss']
 })
 export class CopyToClipboardComponent implements OnInit {
   copySuccessful = false;
