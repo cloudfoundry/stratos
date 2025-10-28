@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { BaseChartDirective } from 'ng2-charts';
 
 import {
   ApplicationEnvVarsHelper,
@@ -23,7 +22,6 @@ import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entit
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { CfAutoscalerTestingModule } from '../../../../cf-autoscaler-testing.module';
 import { AppAutoscalerMetricChartCardComponent } from './app-autoscaler-metric-chart-card.component';
-import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 import { AppAutoscalerComboSeriesVerticalComponent } from './combo-chart/combo-series-vertical.component';
 
 
@@ -33,16 +31,14 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppAutoscalerMetricChartCardComponent,
         AppAutoscalerComboSeriesVerticalComponent
       ],
       imports: [
         CfAutoscalerTestingModule,
         createEmptyStoreModule(),
         CoreModule,
-        BaseChartDirective,
         AppTestModule,
-        AppAutoscalerComboChartComponent,
+        AppAutoscalerMetricChartCardComponent,
       ],
       providers: [
         EntityMonitorFactory,

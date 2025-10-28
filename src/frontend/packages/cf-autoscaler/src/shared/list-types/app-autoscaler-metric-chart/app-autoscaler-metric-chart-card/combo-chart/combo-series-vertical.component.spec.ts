@@ -18,8 +18,8 @@ describe('AppAutoscalerComboSeriesVerticalComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [AppAutoscalerComboSeriesVerticalComponent],
       imports: [
+        AppAutoscalerComboSeriesVerticalComponent,
         NoopAnimationsModule,
         createEmptyStoreModule(),
         CoreModule,

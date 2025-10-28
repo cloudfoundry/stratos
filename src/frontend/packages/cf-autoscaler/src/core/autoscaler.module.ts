@@ -31,9 +31,6 @@ import {
 import {
   AppAutoscalerComboChartComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-chart.component';
-import {
-  AppAutoscalerComboSeriesVerticalComponent,
-} from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/combo-chart/combo-series-vertical.component';
 import { AutoscalerRoutingModule } from './autoscaler.routing';
 import {
   EditAutoscalerPolicyStep3Component,
@@ -53,7 +50,6 @@ import {
   ],
   declarations: [
     EditAutoscalerPolicyComponent,
-    AppAutoscalerComboSeriesVerticalComponent,
     TableCellAutoscalerEventChangeComponent,
     TableCellAutoscalerEventStatusComponent,
     TableCellAutoscalerEventStatusIconPipe,
