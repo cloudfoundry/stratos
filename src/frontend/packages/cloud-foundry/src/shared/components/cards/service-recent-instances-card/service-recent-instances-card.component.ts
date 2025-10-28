@@ -1,18 +1,28 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { StatefulIconComponent } from '../../../../../../core/src/shared/components/stateful-icon/stateful-icon.component';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
+import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
 
 const RECENT_ITEMS_COUNT = 10;
 
 @Component({
-selector: 'app-service-recent-instances-card',
+  selector: 'app-service-recent-instances-card',
   templateUrl: './service-recent-instances-card.component.html',
   styleUrls: ['./service-recent-instances-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    StatefulIconComponent,
+    CompactServiceInstanceCardComponent
+  ]
 })
 export class ServiceRecentInstancesCardComponent implements OnInit {
 

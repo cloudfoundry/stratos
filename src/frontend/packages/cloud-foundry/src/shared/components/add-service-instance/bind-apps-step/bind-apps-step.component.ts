@@ -1,5 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
@@ -10,13 +13,20 @@ import { StepOnNextResult } from '../../../../../../core/src/shared/components/s
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
-import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 
 @Component({
-selector: 'app-bind-apps-step',
+  selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
   styleUrls: ['./bind-apps-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    SchemaFormComponent
+  ]
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 

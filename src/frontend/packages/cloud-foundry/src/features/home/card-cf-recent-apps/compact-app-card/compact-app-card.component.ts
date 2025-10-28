@@ -1,9 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { BREADCRUMB_URL_PARAM } from '../../../../../../core/src/shared/components/breadcrumbs/breadcrumbs.types';
+import { ApplicationStateIconComponent } from '../../../../../../core/src/shared/components/application-state/application-state-icon/application-state-icon.component';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
@@ -12,10 +15,15 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 
 
 @Component({
-selector: 'app-compact-app-card',
+  selector: 'app-compact-app-card',
   templateUrl: './compact-app-card.component.html',
   styleUrls: ['./compact-app-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ApplicationStateIconComponent
+  ]
 })
 export class CompactAppCardComponent implements OnInit {
 

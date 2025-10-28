@@ -1,20 +1,31 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
-selector: 'app-card-cf-space-details',
+  selector: 'app-card-cf-space-details',
   templateUrl: './card-cf-space-details.component.html',
   styleUrls: ['./card-cf-space-details.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MetadataItemComponent,
+    BooleanIndicatorComponent
+  ]
 })
 export class CardCfSpaceDetailsComponent implements OnDestroy {
   allowSshStatus$: Observable<string>;

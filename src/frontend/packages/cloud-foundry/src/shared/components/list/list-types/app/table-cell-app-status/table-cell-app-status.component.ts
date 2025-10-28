@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatLineModule } from '@angular/material/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
+import { ApplicationStateComponent } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../../cf-api.types';
@@ -9,10 +11,14 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
 @Component({
-selector: 'app-table-cell-app-status',
+  selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatLineModule,
+    ApplicationStateComponent
+  ]
 })
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
 

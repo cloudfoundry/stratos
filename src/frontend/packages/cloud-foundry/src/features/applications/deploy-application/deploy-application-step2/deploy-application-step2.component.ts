@@ -1,6 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitBranch, GitCommit, gitEntityCatalog, GitRepo, GitSCM, GitSCMService, GitSCMType } from '@stratosui/git';
@@ -45,11 +46,14 @@ import {
   selectProjectExists,
   selectSourceType,
 } from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
+import { GithubProjectExistsDirective } from '../github-project-exists.directive';
+import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
 
 
 
@@ -57,7 +61,14 @@ import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-t
 selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
   styleUrls: ['./deploy-application-step2.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    TruncatePipe,
+    GithubProjectExistsDirective,
+    DeployApplicationFsComponent
+  ]
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {

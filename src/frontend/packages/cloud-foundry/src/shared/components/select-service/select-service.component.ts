@@ -1,5 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -17,17 +20,25 @@ import {
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../store/selectors/create-service-instance.selectors';
+import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 
 
 @Component({
-selector: 'app-select-service',
+  selector: 'app-select-service',
   templateUrl: './select-service.component.html',
   styleUrls: ['./select-service.component.scss'],
   providers: [
     ServicesWallService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    CfServiceCardComponent
+  ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   cfGuid: string;

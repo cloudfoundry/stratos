@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -8,8 +11,25 @@ import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundr
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
+import { AppChip, ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import {
+  MetaCardComponent
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import {
+  MetaCardItemComponent
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import {
+  MetaCardKeyComponent
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import {
+  MetaCardTitleComponent
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import {
+  MetaCardValueComponent
+} from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
@@ -25,16 +45,35 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
+import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
-selector: 'app-service-instance-card',
+  selector: 'app-service-instance-card',
   templateUrl: './service-instance-card.component.html',
   styleUrls: ['./service-instance-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    CfOrgSpaceLinksComponent,
+    TableCellServiceBrokerComponent,
+    ServiceInstanceLastOpComponent,
+    ChipsComponent,
+    ClickStopPropagationDirective,
+  ]
 })
 export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
 

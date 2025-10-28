@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -9,12 +10,14 @@ import {
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/services-wall/service-instances-wall-list-config.service';
 import { CfOrgSpaceDataService } from '../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../../../cloud-foundry/src/shared/data-services/cloud-foundry.service';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Component({
-selector: 'app-services-wall',
+  selector: 'app-services-wall',
   templateUrl: './services-wall.component.html',
   styleUrls: ['./services-wall.component.scss'],
   providers: [
@@ -24,7 +27,12 @@ selector: 'app-services-wall',
     },
     CfOrgSpaceDataService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    ListComponent
+  ]
 })
 export class ServicesWallComponent {
 

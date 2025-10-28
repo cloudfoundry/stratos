@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
@@ -10,7 +11,7 @@ import { arrayHelper } from '../../../../../../../../core/src/core/helper-classe
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -23,11 +24,15 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
-selector: 'app-org-user-permission-cell',
+  selector: 'app-org-user-permission-cell',
   templateUrl: './cf-org-permission-cell.component.html',
   styleUrls: ['./cf-org-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppChipsComponent
+  ]
 })
 export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgUserRoleNames> {
 

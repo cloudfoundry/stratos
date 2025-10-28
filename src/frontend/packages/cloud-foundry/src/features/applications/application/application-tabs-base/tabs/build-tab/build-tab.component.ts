@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
@@ -13,6 +14,14 @@ import {
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
+import { UptimePipe } from '../../../../../../../../core/src/shared/pipes/uptime.pipe';
+import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { PageSubNavComponent } from '../../../../../../../../core/src/shared/components/page-subheader/page-sub-nav/page-sub-nav.component';
+import { PageSubNavSectionComponent } from '../../../../../../../../core/src/shared/components/page-subheader/page-sub-nav-section/page-sub-nav-section.component';
+import { TileComponent } from '../../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
 import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
 import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
@@ -20,9 +29,15 @@ import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { IAppSummary } from '../../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
+import { CfUserPermissionDirective } from '../../../../../../user-permissions/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
+import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
+import { CardAppStatusComponent } from '../../../card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from '../../../card-app-instances/card-app-instances.component';
+import { CardAppUptimeComponent } from '../../../card-app-uptime/card-app-uptime.component';
+import { ViewBuildpackComponent } from '../../../view-buildpack/view-buildpack.component';
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
@@ -56,13 +71,31 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 }
 
 @Component({
-selector: 'app-build-tab',
+  selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
   styleUrls: ['./build-tab.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageSubNavComponent,
+    PageSubNavSectionComponent,
+    CfUserPermissionDirective,
+    ApplicationPollComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
+    CardAppUptimeComponent,
+    MetadataItemComponent,
+    ViewBuildpackComponent,
+    MbToHumanSizePipe,
+    UptimePipe,
+  ],
   providers: [
     ApplicationMonitorService,
-  ],
-  standalone: false
+  ]
 })
 export class BuildTabComponent implements OnInit {
   public isBusyUpdating$: Observable<{ updating: boolean, }>;

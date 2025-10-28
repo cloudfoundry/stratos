@@ -16,12 +16,18 @@ import { CfUserService } from '../../../../../shared/data-services/cf-user.servi
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
+import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
+import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-manage-users-select',
   templateUrl: './manage-users-select.component.html',
   styleUrls: ['./manage-users-select.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    EnumerateComponent,
+    ListComponent,
+  ],
   providers: [
     {
       provide: ListConfig,

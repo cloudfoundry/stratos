@@ -1,7 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { metricEntityType } from '../../../../../../../../store/src/helpers/stratos-entity-factory';
@@ -11,14 +15,20 @@ import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 
 @Component({
-selector: 'app-cloud-foundry-cell-base',
+  selector: 'app-cloud-foundry-cell-base',
   templateUrl: './cloud-foundry-cell-base.component.html',
   styleUrls: ['./cloud-foundry-cell-base.component.scss'],
   providers: [
     getActiveRouteCfCellProvider,
     CloudFoundryCellService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
+  ]
 })
 export class CloudFoundryCellBaseComponent {
 

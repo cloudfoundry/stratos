@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatRadioModule } from '@angular/material/radio';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,6 +10,7 @@ import {
   StackedInputActionResult,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
 import {
+  StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
@@ -24,10 +28,16 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invites/user-invite.service';
 
 @Component({
-selector: 'app-invite-users-create',
+  selector: 'app-invite-users-create',
   templateUrl: './invite-users-create.component.html',
   styleUrls: ['./invite-users-create.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatRadioModule,
+    StackedInputActionsComponent
+  ]
 })
 export class InviteUsersCreateComponent implements OnInit {
 

@@ -1,14 +1,24 @@
 import { Component } from '@angular/core';
 
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../core/src/shared/components/stepper/step/step.component';
+import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 @Component({
-selector: 'app-edit-organization',
+  selector: 'app-edit-organization',
   templateUrl: './edit-organization.component.html',
   styleUrls: ['./edit-organization.component.scss'],
   providers: [getActiveRouteCfOrgSpaceProvider],
-  standalone: false
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    EditOrganizationStepComponent
+  ]
 })
 export class EditOrganizationComponent {
 

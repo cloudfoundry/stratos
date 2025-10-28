@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
@@ -7,12 +10,31 @@ import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { MetaCardComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { ClickStopPropagationDirective } from '../../../../../../core/src/shared/directives/click-stop-propagation.directive';
 
 @Component({
-selector: 'app-service-broker-card',
+  selector: 'app-service-broker-card',
   templateUrl: './service-broker-card.component.html',
   styleUrls: ['./service-broker-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    BooleanIndicatorComponent,
+    ClickStopPropagationDirective
+  ]
 })
 export class ServiceBrokerCardComponent implements OnDestroy {
 

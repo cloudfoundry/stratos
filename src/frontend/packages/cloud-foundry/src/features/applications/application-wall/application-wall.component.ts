@@ -1,15 +1,21 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
 
@@ -17,7 +23,16 @@ import { goToAppWall } from '../../cf/cf.helpers';
   selector: 'app-application-wall',
   templateUrl: './application-wall.component.html',
   styleUrls: ['./application-wall.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    ListComponent,
+    CfEndpointsMissingComponent,
+    NoContentMessageComponent,
+    CfUserPermissionDirective
+  ],
   animations: [
     trigger(
       'cardEnter', [

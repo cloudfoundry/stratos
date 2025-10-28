@@ -1,11 +1,23 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-subheader/page-sub-nav/page-sub-nav.component';
+import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
@@ -19,13 +31,28 @@ import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-def
 export const QUOTA_ORG_GUID = 'org';
 
 @Component({
-selector: 'app-quota-definition',
+  selector: 'app-quota-definition',
   templateUrl: './quota-definition.component.html',
   styleUrls: ['../quota-definition-base/quota-definition-base.component.scss', './quota-definition.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageHeaderComponent,
+    PageSubNavComponent,
+    BooleanIndicatorComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent
+  ]
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;

@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-name: 'eventTabActorIcon',
-standalone: false
+  name: 'eventTabActorIcon',
+  standalone: true
 })
 export class EventTabActorIconPipe implements PipeTransform {
 

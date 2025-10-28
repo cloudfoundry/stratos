@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -14,13 +15,17 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 
 
 @Component({
-selector: 'app-create-space-quota-step',
+  selector: 'app-create-space-quota-step',
   templateUrl: './create-space-quota-step.component.html',
   styleUrls: ['./create-space-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    SpaceQuotaDefinitionFormComponent
+  ]
 })
 export class CreateSpaceQuotaStepComponent {
 

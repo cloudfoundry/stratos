@@ -4,15 +4,19 @@ import { ListConfig } from '../../../../../../core/src/shared/components/list/li
 import {
   CfAllEventsConfigService,
 } from '../../../../shared/components/list/list-types/cf-events/types/cf-all-events-config.service';
+import { CloudFoundryEventsListComponent } from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 
 @Component({
-selector: 'app-cloud-foundry-events',
+  selector: 'app-cloud-foundry-events',
   templateUrl: './cloud-foundry-events.component.html',
   styleUrls: ['./cloud-foundry-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAllEventsConfigService,
   }],
-  standalone: false
+  standalone: true,
+  imports: [
+    CloudFoundryEventsListComponent
+  ]
 })
 export class CloudFoundryEventsComponent { }

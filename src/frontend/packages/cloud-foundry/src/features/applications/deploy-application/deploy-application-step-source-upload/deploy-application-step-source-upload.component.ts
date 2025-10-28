@@ -1,20 +1,28 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
+import { BytesToHumanSizePipe } from '../../../../../../core/src/core/bytes-to-human-size/bytes-to-human-size.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { UploadProgressIndicatorComponent } from '../../../../../../core/src/shared/components/upload-progress-indicator/upload-progress-indicator.component';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 
 
 @Component({
-selector: 'app-deploy-application-step-source-upload',
+  selector: 'app-deploy-application-step-source-upload',
   templateUrl: './deploy-application-step-source-upload.component.html',
   styleUrls: ['./deploy-application-step-source-upload.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    UploadProgressIndicatorComponent,
+    BytesToHumanSizePipe
+  ]
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 

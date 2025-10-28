@@ -1,13 +1,17 @@
 import { Component } from '@angular/core';
 
+import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService } from '../../../../../../cf-api-svc.types';
 
 @Component({
-selector: 'app-table-cell-service-bindable',
+  selector: 'app-table-cell-service-bindable',
   templateUrl: './table-cell-service-bindable.component.html',
   styleUrls: ['./table-cell-service-bindable.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    BooleanIndicatorComponent
+  ]
 })
 export class TableCellServiceBindableComponent extends TableCellCustom<APIResource<IService>>  { }

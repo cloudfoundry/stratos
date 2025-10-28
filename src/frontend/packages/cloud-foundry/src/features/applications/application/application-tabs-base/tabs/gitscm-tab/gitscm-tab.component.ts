@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -26,12 +26,33 @@ import {
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
+import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
+import { NoContentMessageComponent } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { GithubCommitAuthorComponent } from '../../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
+import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
 
 @Component({
   selector: 'app-gitscm-tab',
   templateUrl: './gitscm-tab.component.html',
   styleUrls: ['./gitscm-tab.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    LoadingPageComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    MetadataItemComponent,
+    ListComponent,
+    NoContentMessageComponent,
+    GithubCommitAuthorComponent,
+    TruncatePipe
+  ],
   providers: [
     {
       provide: ListConfig,

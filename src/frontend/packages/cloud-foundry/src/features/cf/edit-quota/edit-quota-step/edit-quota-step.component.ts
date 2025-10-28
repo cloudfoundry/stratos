@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -17,13 +18,17 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 
 
 @Component({
-selector: 'app-edit-quota-step',
+  selector: 'app-edit-quota-step',
   templateUrl: './edit-quota-step.component.html',
   styleUrls: ['./edit-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    QuotaDefinitionFormComponent
+  ]
 })
 export class EditQuotaStepComponent implements OnDestroy {
 

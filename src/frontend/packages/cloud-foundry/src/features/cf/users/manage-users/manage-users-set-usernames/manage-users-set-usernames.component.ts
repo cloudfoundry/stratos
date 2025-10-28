@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { MatRadioChange } from '@stratosui/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatRadioChange, MatRadioModule } from '@angular/material/radio';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -12,6 +16,7 @@ import {
   StackedInputActionConfig,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
 import {
+  StackedInputActionsComponent,
   StackedInputActionsState,
   StackedInputActionsUpdate,
 } from '../../../../../../../core/src/shared/components/stacked-input-actions/stacked-input-actions.component';
@@ -40,10 +45,18 @@ export class ManageUsersSetUsernamesHelper {
 }
 
 @Component({
-selector: 'app-manage-users-set-usernames',
+  selector: 'app-manage-users-set-usernames',
   templateUrl: './manage-users-set-usernames.component.html',
   styleUrls: ['./manage-users-set-usernames.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule,
+    StackedInputActionsComponent
+  ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
 

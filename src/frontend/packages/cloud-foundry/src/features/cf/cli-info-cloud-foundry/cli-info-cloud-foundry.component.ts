@@ -1,8 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, Optional } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
@@ -11,7 +16,9 @@ import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { IOrganization, ISpace } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
-import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
+import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
@@ -24,17 +31,27 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 
 
 @Component({
-selector: 'app-cli-info-cloud-foundry',
+  selector: 'app-cli-info-cloud-foundry',
   templateUrl: './cli-info-cloud-foundry.component.html',
   styleUrls: ['./cli-info-cloud-foundry.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageHeaderComponent,
+    CliInfoComponent,
+    CliCommandComponent,
+    CfUserPermissionDirective
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
     CloudFoundrySpaceService,
     CloudFoundryUserProvidedServicesService
-  ],
-  standalone: false
+  ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
 

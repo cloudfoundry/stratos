@@ -1,10 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { ActionState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { CFAppState } from '../../../../cf-app-state';
@@ -15,10 +22,21 @@ import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.ser
 
 
 @Component({
-selector: 'app-edit-space-step',
+  selector: 'app-edit-space-step',
   templateUrl: './edit-space-step.component.html',
   styleUrls: ['./edit-space-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    FocusDirective
+  ]
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
 

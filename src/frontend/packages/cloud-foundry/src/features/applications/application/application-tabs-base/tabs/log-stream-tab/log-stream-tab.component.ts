@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import moment from 'moment';
@@ -8,6 +9,7 @@ import { catchError, debounceTime, first, map, share, startWith, switchMap } fro
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { AnsiColorizer } from '../../../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
+import { LogViewerComponent } from '../../../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
 import { ApplicationService } from '../../../../application.service';
 
 
@@ -20,10 +22,14 @@ export interface LogItem {
   timestamp: number;
 }
 @Component({
-selector: 'app-log-stream-tab',
+  selector: 'app-log-stream-tab',
   templateUrl: './log-stream-tab.component.html',
   styleUrls: ['./log-stream-tab.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    LogViewerComponent
+  ]
 })
 export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;

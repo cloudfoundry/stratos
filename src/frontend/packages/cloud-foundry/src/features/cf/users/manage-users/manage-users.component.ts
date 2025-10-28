@@ -1,10 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -13,18 +17,30 @@ import { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
+import { ManageUsersConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
+import { ManageUsersModifyComponent } from './manage-users-modify/manage-users-modify.component';
+import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 
 
 @Component({
-selector: 'app-manage-users',
+  selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ManageUsersSetUsernamesComponent,
+    ManageUsersModifyComponent,
+    ManageUsersConfirmComponent
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CfRolesService
-  ],
-  standalone: false
+  ]
 })
 export class UsersRolesComponent implements OnDestroy {
   initialUsers$: Observable<CfUser[]>;

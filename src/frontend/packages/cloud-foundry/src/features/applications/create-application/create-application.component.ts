@@ -1,20 +1,36 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { filter, first, tap } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '@stratosui/core';
+import { StepComponent } from '@stratosui/core';
+import { SteppersComponent } from '@stratosui/core';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { selectCfPaginationState } from '../../../store/selectors/pagination.selectors';
+import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
+import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 
 @Component({
-selector: 'app-create-application',
+  selector: 'app-create-application',
   templateUrl: './create-application.component.html',
   styleUrls: ['./create-application.component.scss'],
   providers: [CfOrgSpaceDataService],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    CreateApplicationStep1Component,
+    CreateApplicationStep2Component,
+    CreateApplicationStep3Component
+  ]
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 

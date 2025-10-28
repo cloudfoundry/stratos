@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -26,10 +27,16 @@ import { goToAppWall } from '../../cf/cf.helpers';
 import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
 import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
+import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from '../card-cf-recent-apps/card-cf-recent-apps.component';
+import { TileSelectorComponent } from '../../../../../core/src/shared/components/tile-selector/tile-selector.component';
 
 
 @Component({
-selector: 'app-cfhome-card',
+  selector: 'app-cfhome-card',
   templateUrl: './cfhome-card.component.html',
   styleUrls: ['./cfhome-card.component.scss'],
   providers: [
@@ -39,7 +46,16 @@ selector: 'app-cfhome-card',
     },
     CloudFoundryEndpointService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    TileSelectorComponent
+  ]
 })
 export class CFHomeCardComponent implements HomePageEndpointCard {
 

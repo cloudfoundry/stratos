@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -5,7 +6,10 @@ import { combineLatest as obsCombineLatest, Observable, of as observableOf } fro
 import { combineLatest, filter, first, map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
   UsersRolesClear,
@@ -21,6 +25,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from '../manage-users/cf-roles.service';
+import { UsersRolesConfirmComponent } from '../manage-users/manage-users-confirm/manage-users-confirm.component';
 
 @Component({
 selector: 'app-remove-user',
@@ -31,7 +36,14 @@ selector: 'app-remove-user',
     CfUserService,
     CfRolesService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    UsersRolesConfirmComponent
+  ]
 })
 export class RemoveUserComponent implements OnDestroy {
   initialUsers$: Observable<CfUser[]>;

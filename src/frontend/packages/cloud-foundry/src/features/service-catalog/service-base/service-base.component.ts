@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 
 import { ServicesService } from '../services.service';
 
@@ -11,7 +11,7 @@ export function servicesServiceFactory(
 
 
 @Component({
-selector: 'app-service-base',
+  selector: 'app-service-base',
   templateUrl: './service-base.component.html',
   styleUrls: ['./service-base.component.scss'],
   providers: [
@@ -21,6 +21,9 @@ selector: 'app-service-base',
       deps: [ActivatedRoute]
     }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    RouterOutlet
+  ]
 })
 export class ServiceBaseComponent { }

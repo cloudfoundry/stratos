@@ -109,15 +109,11 @@ import { WindowRef } from './window-ref/window-ref.service';
         LogOutDialogComponent,
         TruncatePipe,
         InfinityPipe,
-        // BytesToHumanSize, // Now standalone - moved to imports
         MegaBytesToHumanSize,
         SafeImgPipe,
-        // ClickStopPropagationDirective, // Now standalone - moved to imports
         DotContentComponent,
         ButtonBlurOnClickDirective,
         PageNotFoundComponentComponent,
-        // EntityFavoriteStarComponent, // Now standalone - moved to imports
-        // RecentEntitiesComponent, // Now standalone - moved to imports
         ShowHideButtonComponent
     ]
 })

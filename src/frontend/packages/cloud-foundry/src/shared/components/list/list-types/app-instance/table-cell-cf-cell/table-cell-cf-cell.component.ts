@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
@@ -9,10 +12,15 @@ import { IMetricCell } from '../../../../../../../../store/src/types/metric.type
 import { ListAppInstance } from '../app-instance-types';
 
 @Component({
-selector: 'app-table-cell-cf-cell-usage',
+  selector: 'app-table-cell-cf-cell-usage',
   templateUrl: './table-cell-cf-cell.component.html',
   styleUrls: ['./table-cell-cf-cell.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
 

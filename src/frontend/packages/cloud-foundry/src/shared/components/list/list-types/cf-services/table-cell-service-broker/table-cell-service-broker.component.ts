@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
@@ -19,10 +21,14 @@ export interface TableCellServiceBrokerComponentConfig {
 }
 
 @Component({
-selector: 'app-table-cell-service-broker',
+  selector: 'app-table-cell-service-broker',
   templateUrl: './table-cell-service-broker.component.html',
   styleUrls: ['./table-cell-service-broker.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ]
 })
 export class TableCellServiceBrokerComponent extends
   TableCellCustom<APIResource<IService>,

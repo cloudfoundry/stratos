@@ -1,7 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -10,9 +13,10 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
+import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
 
 @Component({
-selector: 'app-edit-space',
+  selector: 'app-edit-space',
   templateUrl: './edit-space.component.html',
   styleUrls: ['./edit-space.component.scss'],
   providers: [
@@ -23,7 +27,13 @@ selector: 'app-edit-space',
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    EditSpaceStepComponent
+  ]
 })
 export class EditSpaceComponent {
 

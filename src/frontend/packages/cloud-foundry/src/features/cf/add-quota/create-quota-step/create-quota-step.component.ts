@@ -12,13 +12,16 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 
 
 @Component({
-selector: 'app-create-quota-step',
+  selector: 'app-create-quota-step',
   templateUrl: './create-quota-step.component.html',
   styleUrls: ['./create-quota-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    QuotaDefinitionFormComponent
+  ]
 })
 export class CreateQuotaStepComponent {
 

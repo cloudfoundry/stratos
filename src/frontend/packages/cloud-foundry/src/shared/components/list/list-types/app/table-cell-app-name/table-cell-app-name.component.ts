@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,10 +11,14 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../store/src/types/routing.type';
 
 @Component({
-selector: 'app-table-cell-app-name',
+  selector: 'app-table-cell-app-name',
   templateUrl: './table-cell-app-name.component.html',
   styleUrls: ['./table-cell-app-name.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ]
 })
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
   public appLinkUrlParam$: Observable<any>;

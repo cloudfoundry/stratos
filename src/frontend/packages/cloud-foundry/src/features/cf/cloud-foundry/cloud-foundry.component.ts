@@ -1,8 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../cf-app-state';
@@ -10,19 +13,26 @@ import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfSharedModule } from '../../../shared/cf-shared.module';
 
 @Component({
-selector: 'app-cloud-foundry',
+  selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
   styleUrls: ['./cloud-foundry.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    ListComponent,
+    CfSharedModule
+  ],
   providers: [
     {
       provide: ListConfig,
       useClass: CFEndpointsListConfigService,
     },
     CloudFoundryService
-  ],
-  standalone: false
+  ]
 })
 export class CloudFoundryComponent {
   connectedEndpoints$: Observable<number>;

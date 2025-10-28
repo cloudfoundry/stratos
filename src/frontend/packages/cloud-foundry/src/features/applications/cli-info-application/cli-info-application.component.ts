@@ -1,20 +1,29 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { EntityService } from '../../../../../store/src/entity-service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
+import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
+import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 import { ApplicationService } from '../application.service';
 
 @Component({
-selector: 'app-cli-info-application',
+  selector: 'app-cli-info-application',
   templateUrl: './cli-info-application.component.html',
   styleUrls: ['./cli-info-application.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    CliInfoComponent,
+    CliCommandComponent
+  ]
 })
 export class CliInfoApplicationComponent implements OnInit {
 

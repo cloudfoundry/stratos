@@ -1,10 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
 import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
@@ -23,10 +28,18 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 
 
 @Component({
-selector: 'app-create-organization-step',
+  selector: 'app-create-organization-step',
   templateUrl: './create-organization-step.component.html',
   styleUrls: ['./create-organization-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    FocusDirective
+  ]
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 

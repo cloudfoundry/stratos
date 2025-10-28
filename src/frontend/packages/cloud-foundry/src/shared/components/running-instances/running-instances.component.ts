@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -5,10 +6,13 @@ import { map } from 'rxjs/operators';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
-selector: 'app-running-instances',
+  selector: 'app-running-instances',
   templateUrl: './running-instances.component.html',
   styleUrls: ['./running-instances.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class RunningInstancesComponent implements OnInit {
   @Input() instances: number;

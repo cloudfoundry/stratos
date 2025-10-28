@@ -1,18 +1,35 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
 
 @Component({
-selector: 'app-cloud-foundry-events-list',
+  selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
   styleUrls: ['./cloud-foundry-events-list.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    ListComponent
+  ]
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 

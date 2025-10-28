@@ -1,4 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -13,10 +17,16 @@ import { CfRolesService } from '../../../../../../features/cf/users/manage-users
 import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
 
 @Component({
-selector: 'app-table-cell-select-org',
+  selector: 'app-table-cell-select-org',
   templateUrl: './table-cell-select-org.component.html',
   styleUrls: ['./table-cell-select-org.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+  ]
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
 

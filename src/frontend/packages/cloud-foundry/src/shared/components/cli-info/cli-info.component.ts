@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+
+import { CodeBlockComponent } from '../../../../../../core/src/shared/components/code-block/code-block.component';
 
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {
@@ -10,10 +13,14 @@ export interface CFAppCLIInfoContext {
 }
 
 @Component({
-selector: 'app-cli-info',
+  selector: 'app-cli-info',
   templateUrl: './cli-info.component.html',
   styleUrls: ['./cli-info.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    CodeBlockComponent
+  ]
 })
 export class CliInfoComponent {
   @Input() context: CFAppCLIInfoContext;

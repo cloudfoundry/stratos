@@ -1,7 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatChipInputEvent } from '@stratosui/core';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -45,7 +52,7 @@ import {
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
-import { SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -53,10 +60,22 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
 
 @Component({
-selector: 'app-specify-details-step',
+  selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatChipsModule,
+    MatIconModule,
+    MatSelectModule,
+    SchemaFormComponent
+  ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 

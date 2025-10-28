@@ -1,10 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -30,7 +35,7 @@ const enum OrgStatus {
   SUSPENDED = 'suspended'
 }
 @Component({
-selector: 'app-edit-organization-step',
+  selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
   styleUrls: ['./edit-organization-step.component.scss'],
   providers: [
@@ -38,7 +43,15 @@ selector: 'app-edit-organization-step',
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    FocusDirective
+  ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 

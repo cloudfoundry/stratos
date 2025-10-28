@@ -1,6 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
@@ -9,7 +16,12 @@ import { filter, map, take } from 'rxjs/operators';
 import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
+import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import {
   AppNameUniqueChecking,
   AppNameUniqueDirective,
@@ -18,13 +30,29 @@ import { ApplicationService } from '../application.service';
 
 
 @Component({
-selector: 'app-edit-application',
+  selector: 'app-edit-application',
   templateUrl: './edit-application.component.html',
   styleUrls: ['./edit-application.component.scss'],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSlideToggleModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    StatefulIconComponent,
+    FocusDirective,
+    AppNameUniqueDirective
+  ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 

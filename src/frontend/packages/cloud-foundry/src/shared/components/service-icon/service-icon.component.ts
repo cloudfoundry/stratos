@@ -1,13 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
 @Component({
-selector: 'app-service-icon',
+  selector: 'app-service-icon',
   templateUrl: './service-icon.component.html',
   styleUrls: ['./service-icon.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule
+  ]
 })
 export class ServiceIconComponent implements OnInit {
 

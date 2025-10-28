@@ -14,6 +14,9 @@ import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { GeneralEntityAppState } from '../../../../../store/src/app-state';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
@@ -52,14 +55,19 @@ import { ApplicationService } from '../application.service';
 
 
 @Component({
-selector: 'app-application-delete',
+  selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
   styleUrls: ['./application-delete.component.scss'],
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent
+  ],
   providers: [
     CfAppRoutesListConfigService,
     AppServiceBindingListConfigService
-  ],
-  standalone: false
+  ]
 })
 export class ApplicationDeleteComponent<T> {
   relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[]; }>;

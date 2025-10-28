@@ -1,7 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
+import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -14,9 +16,14 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 
 
 @Component({
-selector: 'app-cloud-foundry-cells',
+  selector: 'app-cloud-foundry-cells',
   templateUrl: './cloud-foundry-cells.component.html',
   styleUrls: ['./cloud-foundry-cells.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ListComponent,
+  ],
   providers: [
     {
       provide: ListConfig,
@@ -24,7 +31,6 @@ selector: 'app-cloud-foundry-cells',
     },
     getActiveRouteCfCellProvider,
   ],
-  standalone: false
 })
 export class CloudFoundryCellsComponent {
   hasCellMetrics$: Observable<boolean>;

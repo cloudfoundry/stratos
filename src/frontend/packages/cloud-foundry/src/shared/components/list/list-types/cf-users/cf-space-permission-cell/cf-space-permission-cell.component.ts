@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -12,6 +13,7 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization, ISpace } from '../../../../../../cf-api.types';
@@ -23,11 +25,15 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission-cell';
 
 @Component({
-selector: 'app-cf-space-permission-cell',
+  selector: 'app-cf-space-permission-cell',
   templateUrl: './cf-space-permission-cell.component.html',
   styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppChipsComponent
+  ]
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 

@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 
+import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import {
   MetricsLineChartConfig,
@@ -8,6 +10,7 @@ import {
   ChartDataTypes,
   getMetricsChartConfigBuilder,
 } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import { MetricsParentRangeSelectorComponent } from '../../../../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { MetricQueryConfig } from '../../../../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../../../../store/src/types/metric.types';
@@ -15,10 +18,15 @@ import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf
 import { ApplicationService } from '../../../../application.service';
 
 @Component({
-selector: 'app-metrics-tab',
+  selector: 'app-metrics-tab',
   templateUrl: './metrics-tab.component.html',
   styleUrls: ['./metrics-tab.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetricsChartComponent,
+    MetricsParentRangeSelectorComponent,
+  ]
 })
 export class MetricsTabComponent {
   public instanceMetricConfigs: [

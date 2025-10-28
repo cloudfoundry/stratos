@@ -1,8 +1,14 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
+import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
+import { UnlimitedInputComponent } from '../../../../../core/src/shared/components/unlimited-input/unlimited-input.component';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { endpointEntityType } from '../../../../../store/src/helpers/stratos-entity-factory';
 import { IQuotaDefinition } from '../../../cf-api.types';
@@ -26,13 +32,22 @@ export interface QuotaFormValues {
 }
 
 @Component({
-selector: 'app-quota-definition-form',
+  selector: 'app-quota-definition-form',
   templateUrl: './quota-definition-form.component.html',
   styleUrls: ['./quota-definition-form.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    FocusDirective,
+    UnlimitedInputComponent
+  ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;

@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -35,9 +36,14 @@ export function getGuids(type?: string) {
 }
 
 @Component({
-selector: 'app-application-base',
+  selector: 'app-application-base',
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule
+  ],
   providers: [
     ApplicationService,
     {
@@ -61,8 +67,7 @@ selector: 'app-application-base',
         ApplicationEnvVarsHelper,
       ]
     }
-  ],
-  standalone: false
+  ]
 })
 export class ApplicationBaseComponent {
 }

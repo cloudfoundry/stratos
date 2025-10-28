@@ -1,4 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
@@ -13,7 +15,9 @@ import {
 import { environment } from '../../../../../../../../core/src/environments/environment.prod';
 import { IPageSideNavTab } from '../../../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { PageHeaderComponent } from '../../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/components/page-header/page-header.types';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
@@ -32,17 +36,23 @@ import { CloudFoundryOrganizationService } from '../../../../services/cloud-foun
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 
 @Component({
-selector: 'app-cloud-foundry-space-base',
+  selector: 'app-cloud-foundry-space-base',
   templateUrl: './cloud-foundry-space-base.component.html',
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService
-  ],
-  standalone: false
+  ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 

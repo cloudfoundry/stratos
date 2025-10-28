@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -53,6 +54,8 @@ import { CfUser, OrgUserRoleNames } from '../../../../../store/types/cf-user.typ
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
+import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
+import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table.component';
 
 interface Org { metadata: { guid: string, }; }
 interface CfUserWithWarning extends CfUser {
@@ -60,10 +63,18 @@ interface CfUserWithWarning extends CfUser {
 }
 
 @Component({
-selector: 'app-manage-users-modify',
-    templateUrl: './manage-users-modify.component.html',
-    styleUrls: ['./manage-users-modify.component.scss'],
-  standalone: false
+  selector: 'app-manage-users-modify',
+  templateUrl: './manage-users-modify.component.html',
+  styleUrls: ['./manage-users-modify.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    EnumerateComponent,
+    TableComponent,
+    SpaceRolesListWrapperComponent,
+    TableCellSelectOrgComponent,
+    TableCellRoleOrgSpaceComponent
+  ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 

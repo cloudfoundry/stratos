@@ -4,15 +4,19 @@ import { ListConfig } from '../../../../../../../core/src/shared/components/list
 import {
   CfOrganizationEventsConfigService,
 } from '../../../../../shared/components/list/list-types/cf-events/types/cf-org-events-config.service';
+import { CloudFoundryEventsListComponent } from '../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 
 @Component({
-selector: 'app-cloud-foundry-organization-events',
+  selector: 'app-cloud-foundry-organization-events',
   templateUrl: './cloud-foundry-organization-events.component.html',
   styleUrls: ['./cloud-foundry-organization-events.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfOrganizationEventsConfigService,
   }],
-  standalone: false
+  standalone: true,
+  imports: [
+    CloudFoundryEventsListComponent
+  ]
 })
 export class CloudFoundryOrganizationEventsComponent { }

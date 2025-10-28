@@ -14,6 +14,9 @@ import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../store/src/entity-catalog/entity-catalog';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -22,10 +25,15 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
 
 @Component({
-selector: 'app-detach-service-instance',
+  selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
   styleUrls: ['./detach-service-instance.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent
+  ]
 })
 export class DetachServiceInstanceComponent {
 

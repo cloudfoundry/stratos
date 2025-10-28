@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -12,10 +13,13 @@ import { IServiceBroker, IServicePlan } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 
 @Component({
-selector: 'app-service-plan-public',
+  selector: 'app-service-plan-public',
   templateUrl: './service-plan-public.component.html',
   styleUrls: ['./service-plan-public.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class ServicePlanPublicComponent {
   planAccessibility$: Observable<StratosStatus>;

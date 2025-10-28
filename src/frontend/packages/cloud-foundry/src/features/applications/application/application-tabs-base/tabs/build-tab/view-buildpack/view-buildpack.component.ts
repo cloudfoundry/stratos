@@ -1,10 +1,14 @@
 import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-selector: 'app-view-buildpack',
+  selector: 'app-view-buildpack',
   templateUrl: './view-buildpack.component.html',
   styleUrls: ['./view-buildpack.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class ViewBuildpackComponent implements OnInit, OnChanges {
 

@@ -1,18 +1,24 @@
 import { Component, Input, OnInit } from '@angular/core';
 
+import { MetricsChartComponent } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import { MetricsRangeSelectorComponent } from '../../../../../core/src/shared/components/metrics-range-selector/metrics-range-selector.component';
 import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
 
 @Component({
-selector: 'app-application-instance-chart',
+  selector: 'app-application-instance-chart',
   templateUrl: './application-instance-chart.component.html',
   styleUrls: ['./application-instance-chart.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MetricsChartComponent,
+    MetricsRangeSelectorComponent
+  ]
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 

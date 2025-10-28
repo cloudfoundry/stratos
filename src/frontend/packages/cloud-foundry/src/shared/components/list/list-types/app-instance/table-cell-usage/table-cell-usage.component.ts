@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
 
 @Component({
-selector: 'app-table-cell-usage',
+  selector: 'app-table-cell-usage',
   templateUrl: './table-cell-usage.component.html',
   styleUrls: ['./table-cell-usage.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    UsageGaugeComponent
+  ]
 })
 export class TableCellUsageComponent<T> extends TableCellCustom<T> implements OnInit {
 

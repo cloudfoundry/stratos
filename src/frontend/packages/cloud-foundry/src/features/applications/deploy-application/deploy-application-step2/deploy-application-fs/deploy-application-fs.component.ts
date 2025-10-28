@@ -1,14 +1,19 @@
+import { CommonModule } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
+import { ByteFormatPipe } from '../../../../../../../core/src/core/byte-formatters.pipe';
 import { getEventFiles } from '../../../../../../../core/src/core/browser-helper';
+import { MetadataItemComponent } from '../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { FileScannerInfo } from './deploy-application-fs-scanner';
 import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 
 @Component({
-selector: 'app-deploy-application-fs',
+  selector: 'app-deploy-application-fs',
   templateUrl: './deploy-application-fs.component.html',
   styleUrls: ['./deploy-application-fs.component.scss'],
   providers: [
@@ -18,7 +23,14 @@ selector: 'app-deploy-application-fs',
       multi: true,
     }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    ByteFormatPipe,
+    MetadataItemComponent
+  ]
 })
 export class DeployApplicationFsComponent implements ControlValueAccessor {
 

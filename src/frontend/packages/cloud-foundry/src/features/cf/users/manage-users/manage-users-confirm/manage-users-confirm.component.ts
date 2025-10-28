@@ -1,8 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { AppActionMonitorComponent } from '../../../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
 import {
   AppMonitorComponentTypes,
 } from '../../../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -31,10 +33,14 @@ import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/type
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
 @Component({
-selector: 'app-manage-users-confirm',
+  selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
   styleUrls: ['./manage-users-confirm.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppActionMonitorComponent
+  ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 

@@ -9,18 +9,26 @@ import {
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ApplicationService } from '../../application.service';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 
 @Component({
-selector: 'app-map-routes',
+  selector: 'app-map-routes',
   templateUrl: './map-routes.component.html',
   styleUrls: ['./map-routes.component.scss'],
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent
+  ],
   providers: [
     {
       provide: ListConfig,
       useClass: CfAppMapRoutesListConfigService
     }
-  ],
-  standalone: false
+  ]
 })
 export class MapRoutesComponent implements OnInit, OnDestroy {
   paginationSubscription: any;

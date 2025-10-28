@@ -1,17 +1,27 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 
 import {
   ApplicationMonitorService,
 } from '../../../../../../cloud-foundry/src/features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
+import { UptimePipe } from '../../../../../../core/src/shared/pipes/uptime.pipe';
+import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-card-app-uptime',
+  selector: 'app-card-app-uptime',
   templateUrl: './card-app-uptime.component.html',
   styleUrls: ['./card-app-uptime.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    UptimePipe,
+    MetadataItemComponent
+  ]
 })
 export class CardAppUptimeComponent implements OnInit {
 

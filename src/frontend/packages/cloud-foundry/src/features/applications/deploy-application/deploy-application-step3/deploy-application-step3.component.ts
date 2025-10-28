@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -12,6 +13,7 @@ import { filter, first, map, startWith } from 'rxjs/operators';
 import { DeleteDeployAppSection } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { LogViewerComponent } from '../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -21,10 +23,14 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 
 @Component({
-selector: 'app-deploy-application-step3',
+  selector: 'app-deploy-application-step3',
   templateUrl: './deploy-application-step3.component.html',
   styleUrls: ['./deploy-application-step3.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    LogViewerComponent,
+  ]
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 

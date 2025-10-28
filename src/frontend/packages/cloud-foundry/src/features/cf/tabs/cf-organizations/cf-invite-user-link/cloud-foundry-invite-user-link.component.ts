@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -13,10 +16,15 @@ interface UserInviteStepperLink {
 }
 
 @Component({
-selector: 'app-cloud-foundry-invite-user-link',
+  selector: 'app-cloud-foundry-invite-user-link',
   templateUrl: './cloud-foundry-invite-user-link.component.html',
   styleUrls: ['./cloud-foundry-invite-user-link.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatCardModule
+  ]
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {
 

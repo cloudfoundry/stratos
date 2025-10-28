@@ -1,4 +1,4 @@
-import { registerLocaleData } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { Component, Input } from '@angular/core';
 
@@ -7,10 +7,13 @@ import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 
 
 @Component({
-selector: 'app-service-plan-price',
+  selector: 'app-service-plan-price',
   templateUrl: './service-plan-price.component.html',
   styleUrls: ['./service-plan-price.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+  ]
 })
 export class ServicePlanPriceComponent {
 

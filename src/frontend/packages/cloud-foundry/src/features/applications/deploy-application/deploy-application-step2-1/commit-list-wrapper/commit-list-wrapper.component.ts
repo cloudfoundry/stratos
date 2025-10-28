@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { filter, map, mergeMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
+import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import {
   GithubCommitsListConfigServiceDeploy,
@@ -15,7 +16,10 @@ import {
   selector: 'app-commit-list-wrapper',
   templateUrl: './commit-list-wrapper.component.html',
   styleUrls: ['./commit-list-wrapper.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    ListComponent
+  ],
   providers: [
     {
       provide: ListConfig,

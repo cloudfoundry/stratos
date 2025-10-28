@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -10,10 +13,15 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
 
 @Component({
-selector: 'app-cf-admin-add-user-warning',
+  selector: 'app-cf-admin-add-user-warning',
   templateUrl: './cf-admin-add-user-warning.component.html',
   styleUrls: ['./cf-admin-add-user-warning.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatIconModule
+  ]
 })
 export class CfAdminAddUserWarningComponent {
 

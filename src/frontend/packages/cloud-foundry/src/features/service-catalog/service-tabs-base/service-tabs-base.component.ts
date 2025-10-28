@@ -1,21 +1,33 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IPageSideNavTab } from '../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { getServiceName } from '../services-helper';
 import { ServicesService } from '../services.service';
 
 @Component({
-selector: 'app-service-tabs-base',
+  selector: 'app-service-tabs-base',
   templateUrl: './service-tabs-base.component.html',
   styleUrls: ['./service-tabs-base.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent,
+    LoadingPageComponent,
+    CfUserPermissionDirective
+  ]
 })
 export class ServiceTabsBaseComponent {
   canCreateServiceInstance: CfCurrentUserPermissions;

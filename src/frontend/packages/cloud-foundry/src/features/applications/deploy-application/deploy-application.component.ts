@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
+import { AsyncPipe, NgIf } from '@angular/common';
 
 import {
   DeleteDeployAppSection,
@@ -24,16 +25,38 @@ import { CfAppsDataSource } from '../../../shared/components/list/list-types/app
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
+import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
+import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
+import { DeployApplicationStepSourceUploadComponent } from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
+import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step/deploy-application-options-step.component';
+import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 
 @Component({
-selector: 'app-deploy-application',
+  selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
   styleUrls: ['./deploy-application.component.scss'],
   providers: [
     CfOrgSpaceDataService,
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    NgIf,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    CreateApplicationStep1Component,
+    DeployApplicationStep2Component,
+    DeployApplicationStep21Component,
+    DeployApplicationStepSourceUploadComponent,
+    DeployApplicationOptionsStepComponent,
+    DeployApplicationStep3Component
+  ]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 

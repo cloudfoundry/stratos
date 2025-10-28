@@ -1,4 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
@@ -7,6 +11,8 @@ import {
   ActionListConfigProvider,
 } from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
 import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
+import { ListViewComponent } from '../../../../../../core/src/shared/components/list/list-view/list-view.component';
+import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../cf-api.types';
@@ -15,10 +21,18 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
-selector: 'app-cloud-foundry-organizations',
+  selector: 'app-cloud-foundry-organizations',
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    PageSubNavComponent,
+    ListViewComponent
+  ]
 })
 export class CloudFoundryOrganizationsComponent {
   public canAddOrg$: Observable<boolean>;

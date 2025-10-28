@@ -1,10 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOptionModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
@@ -14,10 +19,18 @@ import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permis
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 
 @Component({
-selector: 'app-create-application-step1',
+  selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    FocusDirective
+  ]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 

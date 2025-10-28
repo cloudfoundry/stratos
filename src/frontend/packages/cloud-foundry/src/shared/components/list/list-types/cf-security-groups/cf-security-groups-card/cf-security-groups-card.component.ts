@@ -1,16 +1,39 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+import { AppChip, ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import {
+  MetaCardComponent,
+  MetaCardItemComponent,
+  MetaCardKeyComponent,
+  MetaCardTitleComponent,
+  MetaCardValueComponent,
+} from '../../../../../../../../core/src/shared/components/meta-card/meta-card.component';
+import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IRule, IRuleType, ISpace } from '../../../../../../cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
-selector: 'app-cf-security-groups-card',
+  selector: 'app-cf-security-groups-card',
   templateUrl: './cf-security-groups-card.component.html',
   styleUrls: ['./cf-security-groups-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MultilineTitleComponent,
+    BooleanIndicatorComponent,
+    ChipsComponent,
+  ]
 })
 export class CfSecurityGroupsCardComponent extends CardCell<APIResource> implements OnInit {
 

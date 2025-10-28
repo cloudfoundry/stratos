@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatDialog } from '@stratosui/core';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -6,8 +8,13 @@ import { filter, first, map, switchMap } from 'rxjs/operators';
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell, IListRowCell } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { MetaCardComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
@@ -30,9 +37,11 @@ import {
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CSI_CANCEL_URL } from '../../../../add-service-instance/csi-mode.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
@@ -43,10 +52,22 @@ interface EnvVarData {
   value: string;
 }
 @Component({
-selector: 'app-app-service-binding-card',
+  selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
   styleUrls: ['./app-service-binding-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    ServiceIconComponent,
+    AppChipsComponent,
+    TableCellServiceBrokerComponent
+  ]
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 

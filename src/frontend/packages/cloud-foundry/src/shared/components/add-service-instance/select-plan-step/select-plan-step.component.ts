@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, NgFor, NgIf, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,7 +7,11 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -38,24 +42,45 @@ import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
+import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { IServicePlan } from '../../../../cf-api-svc.types';
+import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
+import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
 @Component({
-selector: 'app-select-plan-step',
+  selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
   providers: [
     TitleCasePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
+    AsyncPipe,
+    NgFor,
+    NgIf,
+    FocusDirective,
+    MetadataItemComponent,
+    CardStatusComponent,
+    ServicePlanPublicComponent,
+    ServicePlanPriceComponent
+  ]
 })
 export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;

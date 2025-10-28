@@ -1,7 +1,10 @@
 import { Component, Inject, InjectionToken } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { TailwindDialogRef } from '@stratosui/core';
+import { DialogErrorComponent } from '@stratosui/core';
 
 // Temporary injection token to replace MAT_DIALOG_DATA
 export const DIALOG_DATA = new InjectionToken<any>('DialogData');
@@ -13,10 +16,16 @@ import { UserInviteConfigureService } from '../user-invite.service';
 
 
 @Component({
-selector: 'app-user-invite-configuration-dialog',
+  selector: 'app-user-invite-configuration-dialog',
   templateUrl: './user-invite-configuration-dialog.component.html',
   styleUrls: ['./user-invite-configuration-dialog.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatProgressBarModule,
+    DialogErrorComponent
+  ]
 })
 export class UserInviteConfigurationDialogComponent {
   connecting$: Observable<boolean>;

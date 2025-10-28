@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, NgIf, TitleCasePipe } from '@angular/common';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -41,17 +41,26 @@ import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { CreateApplicationStep1Component } from '../../create-application/create-application-step1/create-application-step1.component';
+import { SelectServiceComponent } from '../../select-service/select-service.component';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
+import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
+import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
 
 @Component({
-selector: 'app-add-service-instance',
+  selector: 'app-add-service-instance',
   templateUrl: './add-service-instance.component.html',
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
@@ -62,7 +71,21 @@ selector: 'app-add-service-instance',
     CsiModeService,
     CfOrgSpaceDataService
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    NgIf,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    CreateApplicationStep1Component,
+    SelectServiceComponent,
+    SelectPlanStepComponent,
+    BindAppsStepComponent,
+    SpecifyDetailsStepComponent,
+    SpecifyUserProvidedDetailsComponent
+  ]
 })
 export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
   initialisedService$: Observable<boolean>;

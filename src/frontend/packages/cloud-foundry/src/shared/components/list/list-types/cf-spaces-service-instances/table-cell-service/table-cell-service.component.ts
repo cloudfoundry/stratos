@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -11,15 +13,21 @@ import { entityCatalog } from '../../../../../../../../store/src/entity-catalog/
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IService, IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
+  TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
 } from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
-selector: 'app-table-cell-service',
+  selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',
   styleUrls: ['./table-cell-service.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    TableCellServiceBrokerComponent
+  ]
 })
 export class TableCellServiceComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 

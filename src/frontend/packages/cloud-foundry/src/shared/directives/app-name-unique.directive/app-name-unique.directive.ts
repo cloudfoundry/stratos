@@ -40,7 +40,7 @@ export class AppNameUniqueChecking {
 @Directive({
 selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique][formControl],[appApplicationNameUnique][ngModel]',
   providers: [APP_UNIQUE_NAME_PROVIDER],
-standalone: false
+standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 

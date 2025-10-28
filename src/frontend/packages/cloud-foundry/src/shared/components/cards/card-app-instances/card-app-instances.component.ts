@@ -1,4 +1,11 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -10,15 +17,28 @@ import { ConfirmationDialogConfig } from '../../../../../../core/src/shared/comp
 import { ConfirmationDialogService } from '../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
 
 @Component({
-selector: 'app-card-app-instances',
+  selector: 'app-card-app-instances',
   templateUrl: './card-app-instances.component.html',
   styleUrls: ['./card-app-instances.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    CardStatusComponent,
+    RunningInstancesComponent
+  ]
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
 

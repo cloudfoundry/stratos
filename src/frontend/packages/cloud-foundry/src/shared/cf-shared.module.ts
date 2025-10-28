@@ -24,7 +24,6 @@ import {
   ApplicationInstanceChartComponent,
 } from './components/application-instance-chart/application-instance-chart.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
-import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
@@ -89,25 +88,6 @@ import {
 import {
   TableCellConfirmRoleAddRemComponent,
 } from './components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import { EventMetadataComponent } from './components/list/list-types/cf-events/event-metadata/event-metadata.component';
-import {
-  TableCellEventActeeComponent,
-} from './components/list/list-types/cf-events/table-cell-event-actee/table-cell-event-actee.component';
-import {
-  EventTabActorIconPipe,
-} from './components/list/list-types/cf-events/table-cell-event-action/event-tab-actor-icon.pipe';
-import {
-  TableCellEventActionComponent,
-} from './components/list/list-types/cf-events/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from './components/list/list-types/cf-events/table-cell-event-detail/table-cell-event-detail.component';
-import {
-  TableCellEventTimestampComponent,
-} from './components/list/list-types/cf-events/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from './components/list/list-types/cf-events/table-cell-event-type/table-cell-event-type.component';
 import {
   TableCellFeatureFlagDescriptionComponent,
 } from './components/list/list-types/cf-feature-flags/table-cell-feature-flag-description/table-cell-feature-flag-description.component';
@@ -230,13 +210,8 @@ const cfListTableCells: Type<TableCellCustom<any>>[] = [
   TableCellAppInstancesComponent,
   TableCellAppNameComponent,
   TableCellEditVariableComponent,
-  TableCellEventTimestampComponent,
-  TableCellEventTypeComponent,
-  TableCellEventActionComponent,
-  TableCellEventDetailComponent,
   TableCellUsageComponent,
   TableCellQuotaComponent,
-  TableCellEventActeeComponent,
   TableCellServiceTagsComponent,
   TableCellServiceCfBreadcrumbsComponent,
   TableCellServiceProviderComponent,
@@ -267,6 +242,7 @@ const cfListCards: Type<CardCell<any>>[] = [
         SharedModule,
         ApplicationModule,
         TailwindJsonSchemaFormModule,
+        EnvVarViewComponent,
     ],
     declarations: [
         ServiceIconComponent,
@@ -285,7 +261,6 @@ const cfListCards: Type<CardCell<any>>[] = [
         SpecifyUserProvidedDetailsComponent,
         AddServiceInstanceBaseStepComponent,
         SchemaFormComponent,
-        CardAppStatusComponent,
         CardAppInstancesComponent,
         CardAppUsageComponent,
         CardAppUptimeComponent,
@@ -301,16 +276,13 @@ const cfListCards: Type<CardCell<any>>[] = [
         ServicePlanPublicComponent,
         ServicePlanPriceComponent,
         CreateApplicationStep1Component,
-        EventTabActorIconPipe,
         CloudFoundryEventsListComponent,
-        EventMetadataComponent,
         ...cfListTableCells,
         ...cfListCards,
         ServiceInstanceLastOpComponent,
         TableCellFeatureFlagDescriptionComponent,
         AppNameUniqueDirective,
         ApplicationInstanceChartComponent,
-        EnvVarViewComponent,
         CfUserPermissionDirective
     ],
     exports: [
@@ -331,7 +303,6 @@ const cfListCards: Type<CardCell<any>>[] = [
         AddServiceInstanceBaseStepComponent,
         CfServiceCardComponent,
         SchemaFormComponent,
-        CardAppStatusComponent,
         CardAppInstancesComponent,
         CardAppUsageComponent,
         CardAppUptimeComponent,
@@ -350,7 +321,6 @@ const cfListCards: Type<CardCell<any>>[] = [
         CloudFoundryEventsListComponent,
         AppNameUniqueDirective,
         ApplicationInstanceChartComponent,
-        EnvVarViewComponent,
         CfUserPermissionDirective
     ],
     providers: [

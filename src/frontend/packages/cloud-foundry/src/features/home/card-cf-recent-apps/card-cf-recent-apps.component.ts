@@ -1,21 +1,31 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 
 import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IApp } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
+import { PollingIndicatorComponent } from '../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import { CompactAppCardComponent } from './compact-app-card/compact-app-card.component';
 
 
 const RECENT_ITEMS_COUNT = 10;
 
 @Component({
-selector: 'app-card-cf-recent-apps',
+  selector: 'app-card-cf-recent-apps',
   templateUrl: './card-cf-recent-apps.component.html',
   styleUrls: ['./card-cf-recent-apps.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    PollingIndicatorComponent,
+    CompactAppCardComponent
+  ]
 })
 export class CardCfRecentAppsComponent implements OnInit {
 

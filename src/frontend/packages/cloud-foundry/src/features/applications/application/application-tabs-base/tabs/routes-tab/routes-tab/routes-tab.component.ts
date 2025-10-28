@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,11 @@ import {
 import {
   ConfirmationDialogService,
 } from '../../../../../../../../../core/src/shared/components/confirmation-dialog.service';
+import { ListComponent } from '../../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
+import {
+  NoContentMessageComponent,
+} from '../../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import {
   CfAppRoutesListConfigService,
 } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
@@ -22,7 +26,12 @@ import { ApplicationService } from '../../../../../application.service';
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
   styleUrls: ['./routes-tab.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ListComponent,
+    NoContentMessageComponent
+  ],
   providers: [
     {
       provide: ListConfig,

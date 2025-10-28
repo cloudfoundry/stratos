@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import {
@@ -7,12 +8,19 @@ import {
 import { IMetricMatrixResult } from '../../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../../store/src/types/metric.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
+import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsParentRangeSelectorComponent } from '../../../../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 
 @Component({
-selector: 'app-cloud-foundry-cell-charts',
+  selector: 'app-cloud-foundry-cell-charts',
   templateUrl: './cloud-foundry-cell-charts.component.html',
   styleUrls: ['./cloud-foundry-cell-charts.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetricsChartComponent,
+    MetricsParentRangeSelectorComponent
+  ]
 })
 export class CloudFoundryCellChartsComponent {
 

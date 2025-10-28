@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -18,12 +23,37 @@ import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { PageSubNavComponent } from '../../../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { TileGridComponent } from '../../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { LoadingPageComponent } from '../../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { CardNumberMetricComponent } from '../../../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from '../../../../../../../features/home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { CfSharedModule } from '../../../../../../../shared/cf-shared.module';
 
 @Component({
-selector: 'app-cloud-foundry-space-summary',
+  selector: 'app-cloud-foundry-space-summary',
   templateUrl: './cloud-foundry-space-summary.component.html',
   styleUrls: ['./cloud-foundry-space-summary.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageSubNavComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CfUserPermissionDirective,
+    CfSharedModule
+  ]
 })
 export class CloudFoundrySpaceSummaryComponent {
   detailsLoading$: Observable<boolean>;

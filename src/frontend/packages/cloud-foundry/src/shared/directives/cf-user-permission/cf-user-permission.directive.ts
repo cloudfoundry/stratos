@@ -9,8 +9,8 @@ import { waitForCFPermissions } from '../../../features/cf/cf.helpers';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 @Directive({
-selector: '[appCfUserPermission]',
-standalone: false
+  selector: '[appCfUserPermission]',
+  standalone: true
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
   @Input()

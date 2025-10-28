@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
+import { ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -15,10 +17,14 @@ import { createEntityRelationKey } from '../../../../../../entity-relations/enti
 import { getCfServiceInstance } from '../../../../../../features/service-catalog/services-helper';
 
 @Component({
-selector: 'app-table-cell-service-instance-apps-attached',
+  selector: 'app-table-cell-service-instance-apps-attached',
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
   styleUrls: ['./table-cell-service-instance-apps-attached.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ChipsComponent
+  ]
 })
 export class TableCellServiceInstanceAppsAttachedComponent
   extends TableCellCustom<APIResource<IServiceInstance>>

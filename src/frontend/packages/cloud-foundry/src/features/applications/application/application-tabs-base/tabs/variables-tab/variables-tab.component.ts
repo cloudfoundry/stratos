@@ -1,13 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
   ListDataSource,
 } from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
+import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+import { UniqueDirective } from '../../../../../../../../core/src/shared/components/unique.directive';
 import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import {
   ListAppEnvVar,
@@ -24,14 +29,21 @@ export interface VariableTabAllEnvVarType {
 }
 
 @Component({
-selector: 'app-variables-tab',
+  selector: 'app-variables-tab',
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAppVariablesListConfigService,
   }],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ListComponent,
+    CodeBlockComponent,
+    UniqueDirective,
+  ]
 })
 export class VariablesTabComponent implements OnInit {
 

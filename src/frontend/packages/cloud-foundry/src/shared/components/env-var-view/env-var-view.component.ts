@@ -1,12 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
+import { CodeBlockComponent, MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
 
 @Component({
-selector: 'app-env-var-view',
+  selector: 'app-env-var-view',
   templateUrl: './env-var-view.component.html',
   styleUrls: ['./env-var-view.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    CodeBlockComponent
+  ]
 })
 export class EnvVarViewComponent {
 

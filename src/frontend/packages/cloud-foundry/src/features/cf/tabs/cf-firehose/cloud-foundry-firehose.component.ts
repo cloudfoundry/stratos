@@ -1,18 +1,28 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { environment } from '../../../../../../core/src/environments/environment.prod';
+import { LogViewerComponent } from '../../../../../../core/src/shared/components/log-viewer/log-viewer.component';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 
 @Component({
-selector: 'app-cloud-foundry-firehose',
+  selector: 'app-cloud-foundry-firehose',
   templateUrl: './cloud-foundry-firehose.component.html',
   styleUrls: ['./cloud-foundry-firehose.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCheckboxModule,
+    LogViewerComponent,
+  ]
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;

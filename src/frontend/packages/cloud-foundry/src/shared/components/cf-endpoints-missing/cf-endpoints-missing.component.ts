@@ -11,7 +11,7 @@ import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 selector: 'app-cf-endpoints-missing',
   templateUrl: './cf-endpoints-missing.component.html',
   styleUrls: ['./cf-endpoints-missing.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 

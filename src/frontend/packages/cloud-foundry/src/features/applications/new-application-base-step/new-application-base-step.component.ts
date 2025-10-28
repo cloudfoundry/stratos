@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -5,8 +6,12 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../../../core/src/shared/components/tile/tile-selector.types';
+import { TileSelectorComponent } from '../../../../../core/src/shared/components/tile-selector/tile-selector.component';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import {
   ApplicationDeploySourceTypes,
@@ -24,10 +29,17 @@ export interface IAppTileData extends ITileData {
 }
 
 @Component({
-selector: 'app-new-application-base-step',
+  selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
   styleUrls: ['./new-application-base-step.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ]
 })
 export class NewApplicationBaseStepComponent {
 

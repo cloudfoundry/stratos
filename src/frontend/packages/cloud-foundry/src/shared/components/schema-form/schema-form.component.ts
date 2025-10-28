@@ -1,6 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { delay } from 'rxjs/operators';
+
+import { safeStringToObj } from '../../../../../core/src/core/utils.service';
+import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';
+import { TailwindJsonSchemaFormModule } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
+
 // Simple JsonPointer replacement
 class JsonPointer {
   static parse(path: any): string[] {
@@ -11,11 +22,6 @@ class JsonPointer {
     return pathStr.split('/').slice(1);
   }
 }
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { delay } from 'rxjs/operators';
-
-import { safeStringToObj } from '../../../../../core/src/core/utils.service';
-import { isValidJsonValidator } from '../../../../../core/src/shared/form-validators';
 
 export interface SchemaFormValidationError {
   dataPath: {};
@@ -28,13 +34,22 @@ export class SchemaFormConfig {
 }
 
 @Component({
-selector: 'app-schema-form',
+  selector: 'app-schema-form',
   templateUrl: './schema-form.component.html',
   styleUrls: ['./schema-form.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatRadioModule,
+    TailwindJsonSchemaFormModule
+  ],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ],
-  standalone: false
+  ]
 })
 export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
 

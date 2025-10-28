@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -17,6 +19,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { entityCatalog } from '../../../../../../store/src/entity-catalog/entity-catalog';
@@ -36,11 +39,16 @@ import { ApplicationService } from '../../application.service';
 import { ApplicationPollingService } from './application-polling.service';
 
 @Component({
-selector: 'app-application-tabs-base',
+  selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
   styleUrls: ['./application-tabs-base.component.scss'],
   providers: [ApplicationPollingService],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PageHeaderComponent
+  ]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public appState$: Observable<ApplicationStateData>;

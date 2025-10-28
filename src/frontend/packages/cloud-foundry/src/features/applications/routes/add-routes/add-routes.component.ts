@@ -18,14 +18,22 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 @Component({
-selector: 'app-add-routes',
+  selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
   styleUrls: ['./add-routes.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent
+  ]
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
