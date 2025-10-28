@@ -90,12 +90,23 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
     });
 
     const canEditApp$ = appEntService.waitForEntity$.pipe(
-      switchMap(app => cups.can(
-        CfCurrentUserPermissions.APPLICATION_EDIT,
-        endpointGuid,
-        app.entity.entity.space.entity.organization_guid,
-        app.entity.entity.space.metadata.guid
-      )),
+      switchMap(app => {
+        // Null safety: ensure all nested properties exist before accessing
+        const orgGuid = app?.entity?.entity?.space?.entity?.organization_guid;
+        const spaceGuid = app?.entity?.entity?.space?.metadata?.guid;
+
+        // If required data isn't available, deny permission (hide tab)
+        if (!orgGuid || !spaceGuid) {
+          return of(false);
+        }
+
+        return cups.can(
+          CfCurrentUserPermissions.APPLICATION_EDIT,
+          endpointGuid,
+          orgGuid,
+          spaceGuid
+        );
+      }),
     );
 
     const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
@@ -212,8 +223,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
           return false;
         }
         const build = info.entity.entity.build;
+        // Null safety: ensure build exists and can be split
+        if (!build || typeof build !== 'string') {
+          return false;
+        }
         const buildParts = build.split('.');
-        if (buildParts.length < 0) {
+        if (buildParts.length === 0) {
           return false;
         }
         return Number.parseInt(buildParts[0], 10) >= 3;
@@ -239,14 +254,20 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.loadLatestMetricsUponPolicy();
 
     this.appAutoscalerAppMetricNames$ = this.appAutoscalerPolicySafe$.pipe(
-      map(entity => Object.keys(entity.scaling_rules_map).map((name) => {
-        const unit = entity.scaling_rules_map[name].upper[0] && entity.scaling_rules_map[name].upper[0].unit
-          || entity.scaling_rules_map[name].lower[0] && entity.scaling_rules_map[name].lower[0].unit;
-        return {
-          name,
-          unit,
-        };
-      })),
+      map(entity => {
+        // Null safety: ensure entity and scaling_rules_map exist
+        if (!entity?.scaling_rules_map) {
+          return [];
+        }
+        return Object.keys(entity.scaling_rules_map).map((name) => {
+          const unit = entity.scaling_rules_map[name]?.upper?.[0]?.unit
+            || entity.scaling_rules_map[name]?.lower?.[0]?.unit;
+          return {
+            name,
+            unit,
+          };
+        });
+      }),
     );
 
     this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
@@ -310,6 +331,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.appAutoscalerPolicySafe$.pipe(
       first(),
     ).subscribe(appAutoscalerPolicy => {
+      // Null safety: ensure policy exists before processing
+      if (!appAutoscalerPolicy) {
+        return;
+      }
       this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
       this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
       if (appAutoscalerPolicy.scaling_rules_map) {
@@ -457,8 +482,14 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       return { labels: [], datasets: [] };
     }
 
-    const current = metricData[0].entity.latest.target[0];
-    const max = metricData[0].entity.chartMaxValue;
+    // Null safety: ensure all nested properties exist
+    const entity = metricData[0]?.entity;
+    if (!entity?.latest?.target?.[0] || entity.chartMaxValue === undefined) {
+      return { labels: [], datasets: [] };
+    }
+
+    const current = entity.latest.target[0];
+    const max = entity.chartMaxValue;
     const remaining = max - current;
 
     return {
@@ -466,7 +497,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          metricData[0].entity.latest.colorTarget[0],
+          entity.latest.colorTarget?.[0] || '#2196F3', // Fallback color if missing
           '#E0E0E0'
         ]
       }]

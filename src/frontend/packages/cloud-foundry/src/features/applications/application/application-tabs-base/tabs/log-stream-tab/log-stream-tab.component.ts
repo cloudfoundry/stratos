@@ -1,11 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import moment from 'moment';
-import { NEVER, Observable, Subject } from 'rxjs';
+import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, first, map, share, startWith, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { AnsiColorizer } from '../../../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
@@ -21,6 +21,12 @@ export interface LogItem {
   source_instance: string;
   timestamp: number;
 }
+
+interface ConnectionError {
+  message: string;
+  retryable: boolean;
+  timestamp: number;
+}
 @Component({
   selector: 'app-log-stream-tab',
   templateUrl: './log-stream-tab.component.html',
@@ -31,10 +37,15 @@ export interface LogItem {
     LogViewerComponent
   ]
 })
-export class LogStreamTabComponent implements OnInit {
+export class LogStreamTabComponent implements OnInit, OnDestroy {
   public messages: Observable<string>;
   private connectionStatusSubject = new Subject<number>();
   public connectionStatus: Observable<number>;
+  private socketError = false;
+  private connectionAttempts = 0;
+  private maxRetries = 3;
+  private retryDelayMs = 2000;
+  private lastError: ConnectionError | null = null;
 
   @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
@@ -49,40 +60,173 @@ export class LogStreamTabComponent implements OnInit {
     this.filter = this.jsonFilter.bind(this);
   }
 
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this.connectionStatusSubject.complete();
+  }
+
   ngOnInit() {
     this.connectionStatusSubject.next(0);
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
       this.messages = NEVER;
+      this.connectionStatus = of(-1); // Indicate invalid configuration
+      this.lastError = {
+        message: 'Invalid configuration: Missing application or Cloud Foundry endpoint information',
+        retryable: false,
+        timestamp: Date.now()
+      };
     } else {
+      // Use window.location.protocol to construct proper WebSocket URL
+      // This ensures we use the correct protocol (ws/wss) based on page protocol
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      const streamUrl = `wss://${host}/pp/v1/${
+      const streamUrl = `${protocol}//${host}/pp/v1/${
         this.applicationService.cfGuid
         }/apps/${this.applicationService.appGuid}/stream`;
 
-      const socket$ = makeWebSocketObservable(streamUrl).pipe(catchError(e => {
-        console.error(
-          'Error while connecting to socket: ' + JSON.stringify(e)
-        );
-        return [];
-      }),
+      console.log('WebSocket connection URL:', streamUrl);
+
+      const socket$ = makeWebSocketObservable(streamUrl).pipe(
+        tap(() => {
+          // Reset connection tracking on successful connection
+          this.connectionAttempts = 0;
+          this.socketError = false;
+          this.lastError = null;
+          console.log('WebSocket connected successfully');
+        }),
+        retryWhen(errors => errors.pipe(
+          tap(error => {
+            this.connectionAttempts++;
+            const errorMessage = this.parseWebSocketError(error);
+            console.warn(
+              `WebSocket connection attempt ${this.connectionAttempts} failed:`,
+              errorMessage
+            );
+
+            this.lastError = {
+              message: errorMessage,
+              retryable: this.connectionAttempts < this.maxRetries,
+              timestamp: Date.now()
+            };
+
+            if (this.connectionAttempts >= this.maxRetries) {
+              this.socketError = true;
+              this.connectionStatusSubject.next(-1);
+              console.error(
+                `WebSocket connection failed after ${this.maxRetries} attempts. Reason: ${errorMessage}`
+              );
+            } else {
+              // Inform user of retry attempt
+              this.connectionStatusSubject.next(-2); // -2 indicates retrying
+            }
+          }),
+          delayWhen(() => {
+            // Exponential backoff: 2s, 4s, 8s
+            const delay = this.retryDelayMs * Math.pow(2, this.connectionAttempts - 1);
+            console.log(`Retrying WebSocket connection in ${delay}ms...`);
+            return timer(delay);
+          }),
+          take(this.maxRetries)
+        )),
+        catchError(e => {
+          const errorMessage = this.parseWebSocketError(e);
+          console.error(
+            'WebSocket connection failed permanently: ' + errorMessage
+          );
+          this.socketError = true;
+          this.lastError = {
+            message: errorMessage,
+            retryable: false,
+            timestamp: Date.now()
+          };
+          this.connectionStatusSubject.next(-1);
+          // Return EMPTY to complete the stream gracefully
+          return EMPTY;
+        }),
         share(),
       );
 
       this.messages = socket$.pipe(
-        switchMap((getResponses: GetWebSocketResponses) => {
+        switchMap((getResponses: GetWebSocketResponses | null) => {
+          if (!getResponses) {
+            console.warn('WebSocket getResponses is null');
+            return EMPTY;
+          }
           return getResponses(new Subject<string>());
         }),
         map((message: string) => message),
+        catchError(error => {
+          const errorMessage = error?.message || 'Unknown message stream error';
+          console.error('Error in message stream:', errorMessage);
+          this.lastError = {
+            message: `Message stream error: ${errorMessage}`,
+            retryable: false,
+            timestamp: Date.now()
+          };
+          this.connectionStatusSubject.next(-1);
+          return EMPTY;
+        })
       );
 
       this.connectionStatus = socket$.pipe(
         first(),
-        map(() => 1),
+        map(() => {
+          this.connectionStatusSubject.next(1);
+          console.log('WebSocket connection status: Connected');
+          return 1;
+        }),
         startWith(0),
         // Ensure the connection message doesn't flash onscreen.
-        debounceTime(250)
+        debounceTime(250),
+        catchError(() => {
+          this.connectionStatusSubject.next(-1);
+          return of(-1);
+        })
       );
     }
+  }
+
+  /**
+   * Parse WebSocket error to provide user-friendly error messages
+   */
+  private parseWebSocketError(error: any): string {
+    if (!error) {
+      return 'Unknown connection error';
+    }
+
+    // Check for common error patterns
+    if (error.type === 'error' && error.target instanceof WebSocket) {
+      const readyState = error.target.readyState;
+
+      switch (readyState) {
+        case WebSocket.CONNECTING:
+          return 'Connection attempt in progress';
+        case WebSocket.CLOSED:
+          return 'Backend service unavailable. Please ensure the Jetstream backend is running.';
+        case WebSocket.CLOSING:
+          return 'Connection is closing';
+        default:
+          return 'WebSocket connection failed - backend may be unavailable';
+      }
+    }
+
+    // SSL/Certificate errors
+    if (error.message?.includes('certificate') || error.message?.includes('SSL')) {
+      return 'SSL certificate error. Please accept the self-signed certificate for local development.';
+    }
+
+    // Network errors
+    if (error.message?.includes('NetworkError') || error.message?.includes('network')) {
+      return 'Network error - unable to reach backend service';
+    }
+
+    // Timeout errors
+    if (error.message?.includes('timeout')) {
+      return 'Connection timeout - backend service not responding';
+    }
+
+    // Default to error message or generic message
+    return error.message || error.toString() || 'WebSocket connection failed';
   }
 
   jsonFilter(jsonString) {

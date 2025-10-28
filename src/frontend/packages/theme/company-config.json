@@ -5,10 +5,10 @@
     "supportEmail": "support@stratos.app"
   },
   "logos": {
-    "main": "/assets/core/logo.png",
-    "navigation": "/assets/core/nav-logo.png",
-    "navigationIcon": "/assets/core/nav-logo-icon.png",
-    "favicon": "/assets/favicon.ico"
+    "main": "/core/assets/logo.png",
+    "navigation": "/core/assets/logo.png",
+    "navigationIcon": "/core/assets/logo.png",
+    "favicon": "/favicon.ico"
   },
   "theme": {
     "primary": "#2196f3",

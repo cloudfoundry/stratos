@@ -16,6 +16,7 @@ import { PageHeaderComponent } from '../../../../../core/src/shared/components/p
 import { CSI_CANCEL_URL } from '../../../shared/components/add-service-instance/csi-mode.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 
 @Component({
   selector: 'app-services-wall',
@@ -33,7 +34,8 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
     CommonModule,
     PageHeaderComponent,
     ListComponent,
-    CfEndpointsMissingComponent
+    CfEndpointsMissingComponent,
+    CfUserPermissionDirective
   ]
 })
 export class ServicesWallComponent {

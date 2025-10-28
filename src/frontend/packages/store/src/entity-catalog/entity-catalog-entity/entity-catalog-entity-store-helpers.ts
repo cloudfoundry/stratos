@@ -36,7 +36,11 @@ export class EntityCatalogEntityStoreHelpers {
 
   // Lazy getter for EntityCatalogHelper to avoid circular dependency
   private static get helper() {
-    return EntityCatalogHelpers.GetEntityCatalogHelper();
+    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
+    if (!helper) {
+      throw new Error('EntityCatalogHelper not initialized. Make sure EntityCatalogProvidersModule is imported and EntityCatalogHelpers.SetEntityCatalogHelper() was called.');
+    }
+    return helper;
   }
 
   private static createEntityService<Y>(
@@ -47,9 +51,17 @@ export class EntityCatalogEntityStoreHelpers {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is of type pagination`);
     }
     if (!action.guid) {
-      throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` has no guid`);
+      throw new Error(
+        `\`${actionBuilderKey}\` action for entity \`${action.entityType}\` has no guid. ` +
+        `Ensure the entity ID is provided when calling getEntityService(). ` +
+        `Action: ${JSON.stringify({ entityType: action.entityType, guid: action.guid, endpointGuid: action.endpointGuid })}`
+      );
     }
-    return this.helper.esf.create<Y>(
+    const helper = this.helper;
+    if (!helper.esf) {
+      throw new Error(`EntityServiceFactory (esf) not available in EntityCatalogHelper for action \`${actionBuilderKey}\` on entity \`${action.entityType}\``);
+    }
+    return helper.esf.create<Y>(
       action.guid,
       action
     );
@@ -63,7 +75,11 @@ export class EntityCatalogEntityStoreHelpers {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
-    return this.helper.pmf.create<Y>(pAction.paginationKey, pAction, pAction.flattenPagination);
+    const helper = this.helper;
+    if (!helper.pmf) {
+      throw new Error(`PaginationMonitorFactory (pmf) not available in EntityCatalogHelper for action \`${actionBuilderKey}\` on entity \`${action.entityType}\``);
+    }
+    return helper.pmf.create<Y>(pAction.paginationKey, pAction, pAction.flattenPagination);
   }
 
   private static createPaginationService<Y>(
@@ -74,10 +90,17 @@ export class EntityCatalogEntityStoreHelpers {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
-    return this.helper.getPaginationObservables<Y>({
-      store: this.helper.store,
+    const helper = this.helper;
+    if (!helper.pmf) {
+      throw new Error(`PaginationMonitorFactory (pmf) not available in EntityCatalogHelper for action \`${actionBuilderKey}\` on entity \`${action.entityType}\``);
+    }
+    if (!helper.store) {
+      throw new Error(`Store not available in EntityCatalogHelper for action \`${actionBuilderKey}\` on entity \`${action.entityType}\``);
+    }
+    return helper.getPaginationObservables<Y>({
+      store: helper.store,
       action: pAction,
-      paginationMonitor: this.helper.pmf.create<Y>(
+      paginationMonitor: helper.pmf.create<Y>(
         pAction.paginationKey,
         pAction,
         pAction.flattenPagination

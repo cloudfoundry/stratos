@@ -25,10 +25,8 @@ describe('ApplicationTabsBaseComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        ApplicationTabsBaseComponent,
-      ],
       imports: [
+        ApplicationTabsBaseComponent,
         ...generateCfStoreModules(),
         StoreModule,
         CoreModule,

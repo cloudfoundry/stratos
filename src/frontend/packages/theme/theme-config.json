@@ -33,7 +33,7 @@
     "logo": "/core/assets/logo.png",
     "navLogo": "/core/assets/logo.png",
     "navLogoIcon": "/core/assets/logo.png",
-    "favicon": "/core/assets/favicon.ico",
+    "favicon": "/favicon.ico",
     "companyName": "My Stratos",
     "loginTitle": "Stratos Console",
     "loginSubtitle": "Multi-Cloud Management Platform"
@@ -41,7 +41,7 @@
   "login": {
     "showLogo": true,
     "showTitle": true,
-    "backgroundImage": "/assets/core/login-bg.jpg",
+    "backgroundImage": "/core/assets/login-bg.jpg",
     "backgroundColor": "#f1f5f9",
     "cardBackground": "#ffffff"
   }

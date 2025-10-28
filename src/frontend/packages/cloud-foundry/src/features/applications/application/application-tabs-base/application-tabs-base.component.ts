@@ -55,11 +55,7 @@ import { ApplicationPollingService } from './application-polling.service';
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public appState$: Observable<ApplicationStateData>;
   public schema: EntitySchema;
-
-  public favorite$ = this.applicationService.app$.pipe(
-    filter(app => !!app),
-    map(app => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(app.entity, applicationEntityType, CF_ENDPOINT_TYPE))
-  );
+  public favorite$: Observable<any>;
 
   isBusyUpdating$: Observable<{ updating: boolean; }>;
 
@@ -75,6 +71,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private userFavoriteManager: UserFavoriteManager,
     private appPollingService: ApplicationPollingService
   ) {
+    // Initialize favorite$ after applicationService is available
+    this.favorite$ = this.applicationService.app$.pipe(
+      filter(app => !!app),
+      map(app => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(app.entity, applicationEntityType, CF_ENDPOINT_TYPE))
+    );
     const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogEntity.getSchema();
     const endpoints$ = store.select(endpointEntitiesSelector);

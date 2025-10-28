@@ -92,10 +92,10 @@ export const defaultTheme: StratosTheme = {
     contentBorder: '#e2e8f0',
   },
   branding: {
-    logo: '/assets/core/logo.png',
-    navLogo: '/assets/core/nav-logo.png',
-    navLogoIcon: '/assets/core/nav-logo-icon.png',
-    favicon: '/assets/favicon.ico',
+    logo: '/core/assets/logo.png',
+    navLogo: '/core/assets/logo.png',
+    navLogoIcon: '/core/assets/logo.png',
+    favicon: '/favicon.ico',
     companyName: 'Stratos',
     loginTitle: 'Stratos Console',
     loginSubtitle: 'Multi-Cloud Management Platform',
@@ -103,7 +103,7 @@ export const defaultTheme: StratosTheme = {
   login: {
     showLogo: true,
     showTitle: true,
-    backgroundImage: '/assets/core/login-bg.jpg',
+    backgroundImage: '/core/assets/login-bg.jpg',
     backgroundColor: '#f5f5f5',
     cardBackground: '#ffffff',
   },

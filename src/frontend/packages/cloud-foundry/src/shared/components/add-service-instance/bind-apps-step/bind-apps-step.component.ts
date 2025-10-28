@@ -4,11 +4,12 @@ import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angu
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { SetCreateServiceInstanceApp } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { pathGet, safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { pathGet } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServicePlan } from '../../../../cf-api-svc.types';
@@ -36,7 +37,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   @Input()
   apps$: Observable<APIResource<IApp>[]>;
 
-  validateSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(true);
   serviceInstanceGuid: string;
   stepperForm: UntypedFormGroup;
@@ -44,6 +44,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   selectedServicePlan: APIResource<IServicePlan>;
   bindingParams: object = {};
   schemaFormConfig: SchemaFormConfig;
+
+  // Lifecycle management for subscriptions
+  private destroyed$ = new Subject<void>();
 
   constructor(
     private store: Store<CFAppState>,
@@ -63,6 +66,16 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   ngAfterContentInit() {
     this.setBoundApp();
+
+    // Validate step based on app selection
+    this.stepperForm.controls.apps.valueChanges.pipe(
+      takeUntil(this.destroyed$)
+    ).subscribe(app => {
+      if (!app) {
+        // If there's no app selected the step will always be valid
+        this.validate.next(true);
+      }
+    });
   }
 
   onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
@@ -70,14 +83,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       // Don't overwrite if it's null (we've returned to this step from the next)
       this.selectedServicePlan = selectedServicePlan;
     }
-
-    // Start
-    this.validateSubscription = this.stepperForm.controls.apps.valueChanges.subscribe(app => {
-      if (!app) {
-        // If there's no app selected the step will always be valid
-        this.validate.next(true);
-      }
-    });
 
     if (!this.schemaFormConfig) {
       // Create new config
@@ -92,7 +97,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
         schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
       };
     }
-
   }
 
   setBindingParams(data) {
@@ -112,7 +116,8 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngOnDestroy(): void {
-    safeUnsubscribe(this.validateSubscription);
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
 }

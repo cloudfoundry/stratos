@@ -32,6 +32,13 @@ export class CreateServiceInstanceHelper {
     @Inject(CF_GUID) public cfGuid: string,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    // Validate required GUIDs before initialization
+    if (!this.serviceGuid) {
+      throw new Error('CreateServiceInstanceHelper requires a valid serviceGuid');
+    }
+    if (!this.cfGuid) {
+      throw new Error('CreateServiceInstanceHelper requires a valid cfGuid');
+    }
     this.initBaseObservables();
   }
 

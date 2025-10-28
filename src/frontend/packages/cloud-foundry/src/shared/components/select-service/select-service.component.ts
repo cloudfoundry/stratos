@@ -4,8 +4,8 @@ import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators }
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
+import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
@@ -42,12 +42,15 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   cfGuid: string;
-  serviceSubscription: Subscription;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: UntypedFormGroup;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isFetching$: Observable<boolean>;
   selectedService$: Observable<APIResource<IService>>;
+
+  // Lifecycle management for subscriptions
+  private destroyed$ = new Subject<void>();
+  public errorMessage: string | null = null;
 
   constructor(
     private store: Store<CFAppState>,
@@ -58,13 +61,16 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     this.stepperForm = new UntypedFormGroup({
       service: new UntypedFormControl('', [Validators.required as any]),
     });
+
     const cfSpaceGuid$ =
-      combineLatest(
+      combineLatest([
         this.store.select(selectCreateServiceInstanceCfGuid),
         this.store.select(selectCreateServiceInstanceSpaceGuid)
-      ).pipe(
-        filter(([p, q]) => !!p && !!q)
+      ]).pipe(
+        filter(([p, q]) => !!p && !!q),
+        takeUntil(this.destroyed$)
       );
+
     const schema = cfEntityFactory(serviceEntityType);
     this.isFetching$ = cfSpaceGuid$.pipe(
       switchMap(([cfGuid, spaceGuid]) => {
@@ -74,24 +80,46 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       }),
       tap(fetching => {
         fetching ? this.stepperForm.disable() : this.stepperForm.enable();
-      })
+      }),
+      catchError(error => {
+        console.error('Error monitoring service fetch status:', error);
+        this.stepperForm.enable();
+        return observableOf(false);
+      }),
+      takeUntil(this.destroyed$)
     );
+
     this.services$ = cfSpaceGuid$.pipe(
       tap(([cfGuid]) => this.cfGuid = cfGuid),
       switchMap(([cfGuid, spaceGuid]) => this.servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
-      map(services => services.sort((a, b) => a.entity.label.localeCompare(b.entity.label))),
+      map(services => services.sort((a, b) => a?.entity?.label?.localeCompare(b?.entity?.label || '') || 0)),
       tap(services => {
         if (services.length === 1) {
-          const guid = services[0].metadata.guid;
-          this.stepperForm.controls.service.setValue(guid);
+          const guid = services[0]?.metadata?.guid;
+          if (guid) {
+            this.stepperForm.controls.service.setValue(guid);
+          }
+        } else if (services.length === 0) {
+          this.errorMessage = 'No services available in this space.';
         }
-      })
+      }),
+      catchError(error => {
+        console.error('Error fetching services:', error);
+        this.errorMessage = 'Failed to fetch services. Please try again.';
+        this.stepperForm.enable();
+        return observableOf([]);
+      }),
+      takeUntil(this.destroyed$)
     );
 
-    this.selectedService$ = combineLatest(this.services$, this.stepperForm.controls.service.statusChanges).pipe(
-      map(([services, change]) => services.filter(a => a.metadata.guid === this.stepperForm.controls.service.value)[0]),
-      filter(p => !!p)
+    this.selectedService$ = combineLatest([
+      this.services$,
+      this.stepperForm.controls.service.statusChanges
+    ]).pipe(
+      map(([services, change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
+      filter(p => !!p),
+      takeUntil(this.destroyed$)
     );
   }
 
@@ -104,12 +132,15 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.serviceSubscription = this.stepperForm.controls.service.statusChanges.pipe(
-      map(() => this.validate.next(this.stepperForm.controls.service.valid))
+    // Validate step based on form status
+    this.stepperForm.controls.service.statusChanges.pipe(
+      map(() => this.validate.next(this.stepperForm.controls.service.valid)),
+      takeUntil(this.destroyed$)
     ).subscribe();
   }
 
   ngOnDestroy(): void {
-    this.serviceSubscription.unsubscribe();
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 }

@@ -36,12 +36,13 @@ import {
 })
 export class AutoscalerMetricPageComponent implements OnInit {
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
+  parentUrl: string;
   applicationName$: Observable<string>;
 
   constructor(
     public applicationService: ApplicationService,
   ) {
+    this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
 
   ngOnInit() {

@@ -42,7 +42,7 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 })
 export class EditAutoscalerPolicyComponent implements OnInit {
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
+  parentUrl: string;
   applicationName$: Observable<string>;
   isCreate = false;
 
@@ -50,6 +50,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
     public applicationService: ApplicationService,
     private route: ActivatedRoute
   ) {
+    this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
 
   ngOnInit() {

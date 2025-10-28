@@ -42,7 +42,7 @@ import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
 })
 export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
+  parentUrl: string;
   applicationName$: Observable<string>;
 
   public editCredentialForm: UntypedFormGroup;
@@ -65,6 +65,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     private appAutoscalerCredentialSnackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService,
   ) {
+    this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
     this.editCredentialForm = this.fb.group({
       actype: new UntypedFormControl({ value: true }),
       acusername: new UntypedFormControl({ value: '', disabled: true }, Validators.required),

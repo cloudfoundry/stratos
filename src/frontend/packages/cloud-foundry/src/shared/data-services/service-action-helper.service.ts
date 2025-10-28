@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
@@ -13,7 +13,7 @@ import { EntityService } from '../../../../store/src/entity-service';
 import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../cf-api-svc.types';
-import { CfEntityCatalog } from '../../cf-entity-catalog';
+import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   SERVICE_INSTANCE_TYPES,
@@ -28,16 +28,7 @@ export class ServiceActionHelperService {
   constructor(
     private confirmDialog: ConfirmationDialogService,
     private store: Store<CFAppState>,
-    private injector: Injector,
   ) { }
-
-  /**
-   * Lazy getter for cfEntityCatalog to break circular dependency initialization cycle.
-   * This prevents "Cannot access 'es' before initialization" runtime errors.
-   */
-  private get cfEntityCatalog(): CfEntityCatalog {
-    return this.injector.get(CfEntityCatalog);
-  }
 
   detachServiceBinding = (
     serviceBindings: APIResource<IServiceBinding>[],
@@ -63,7 +54,7 @@ export class ServiceActionHelperService {
       return;
     }
 
-    const action = this.cfEntityCatalog.serviceBinding.actions.remove(serviceBindings[0].metadata.guid, endpointGuid, { serviceInstanceGuid });
+    const action = cfEntityCatalog.serviceBinding.actions.remove(serviceBindings[0].metadata.guid, endpointGuid, { serviceInstanceGuid });
     if (!noConfirm) {
       const confirmation = new ConfirmationDialogConfig(
         'Detach Service Instance',
@@ -91,8 +82,8 @@ export class ServiceActionHelperService {
     };
 
     const action = userProvided ?
-      this.cfEntityCatalog.userProvidedService.actions.remove(serviceInstanceGuid, endpointGuid, serviceInstancesEntityConfig) :
-      this.cfEntityCatalog.serviceInstance.actions.remove(serviceInstanceGuid, endpointGuid);
+      cfEntityCatalog.userProvidedService.actions.remove(serviceInstanceGuid, endpointGuid, serviceInstancesEntityConfig) :
+      cfEntityCatalog.serviceInstance.actions.remove(serviceInstanceGuid, endpointGuid);
 
     const confirmation = new ConfirmationDialogConfig(
       'Delete Service Instance',
@@ -120,8 +111,8 @@ export class ServiceActionHelperService {
     ));
 
     const es: EntityService = userProvided ?
-      this.cfEntityCatalog.userProvidedService.store.getEntityService(guid, endpointGuid, {}) :
-      this.cfEntityCatalog.serviceInstance.store.getEntityService(guid, endpointGuid);
+      cfEntityCatalog.userProvidedService.store.getEntityService(guid, endpointGuid, {}) :
+      cfEntityCatalog.serviceInstance.store.getEntityService(guid, endpointGuid);
 
     return es.entityObs$.pipe(
       filter(res => !!res),

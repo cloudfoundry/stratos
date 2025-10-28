@@ -8,11 +8,14 @@ import {
   interval as observableInterval,
   NEVER,
   Observable,
+  of,
   Subscription,
 } from 'rxjs';
 import {
   buffer,
+  catchError,
   combineLatest,
+  defaultIfEmpty,
   distinctUntilChanged,
   filter,
   map,
@@ -91,12 +94,37 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         next: wsStatus => {
           switch (wsStatus) {
             case 0:
-              this.statusMessage$.next({ message: 'Connecting....' });
+              this.statusMessage$.next({ message: 'Connecting to log stream...' });
+              break;
+            case 1:
+              // Successfully connected
+              this.statusMessage$.next({ message: '' });
+              break;
+            case -1:
+              // Connection failed permanently
+              this.statusMessage$.next({
+                message: 'Unable to connect to log stream. Please check that the backend service is running and try refreshing the page.',
+                isError: true
+              });
+              break;
+            case -2:
+              // Retrying connection
+              this.statusMessage$.next({
+                message: 'Connection lost. Retrying...',
+                isError: false
+              });
               break;
             default:
               this.statusMessage$.next({ message: '' });
               break;
           }
+        },
+        error: err => {
+          console.error('Status subscription error:', err);
+          this.statusMessage$.next({
+            message: 'Connection error occurred. Please refresh the page.',
+            isError: true
+          });
         }
       });
     }
@@ -167,6 +195,11 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           }
           ele.innerHTML = elementString;
           contentElement.append(ele);
+        }),
+        startWith([]),
+        catchError(err => {
+          console.warn('Log stream error:', err);
+          return of([]);
         })
       );
 
