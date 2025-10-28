@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -21,6 +21,8 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
+    DatePipe,
     RouterModule,
     ApplicationStateIconComponent
   ]

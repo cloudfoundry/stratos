@@ -1,5 +1,5 @@
 import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { AppState, InternalAppState } from '../app-state';
@@ -32,6 +32,20 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   httpClient: PipelineHttpClient,
   { action, requestType, catalogEntity }: SingleRequestPipelineConfig
 ): Observable<PipelineResult> => {
+  // Defensive null checks for Angular 20 DI compatibility
+  if (!store || !httpClient || !action || !catalogEntity) {
+    console.error('baseRequestPipelineFactory: Missing required dependencies', {
+      hasStore: !!store,
+      hasHttpClient: !!httpClient,
+      hasAction: !!action,
+      hasCatalogEntity: !!catalogEntity
+    });
+    return of({
+      success: false,
+      errorMessage: 'Missing required dependencies in baseRequestPipelineFactory'
+    } as PipelineResult);
+  }
+
   const preRequest = getPreRequestFunction(catalogEntity);
   const actionDispatcher = (actionToDispatch: Action) => store.dispatch(actionToDispatch);
   const baseRequest = buildRequestEntityPipe(requestType, action.options);
@@ -45,13 +59,25 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
       action.options.url,
       definition.nonJetstreamRequestHandler
     );
-  return makeRequestEntityPipe(
+
+  const requestPipe = makeRequestEntityPipe(
     httpClient,
     request,
     entityCatalog.getEndpoint(action.endpointType, action.subType),
     action.endpointGuid,
     action.externalRequest
-  ).pipe(
+  );
+
+  // Guard against null/undefined Observable from makeRequestEntityPipe
+  if (!requestPipe) {
+    console.error('baseRequestPipelineFactory: makeRequestEntityPipe returned null');
+    return of({
+      success: false,
+      errorMessage: 'Request pipe creation failed'
+    } as PipelineResult);
+  }
+
+  return requestPipe.pipe(
     map(response => isJetstreamEntityRequest ? singleRequestToPaged(response) : response),
     // Convert { [endpointGuid]: <raw response> } to { { errors: [], successes: [] } }
     map(handleMultiEndpointsPipe),

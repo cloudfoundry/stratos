@@ -186,8 +186,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (this.showCACertField) {
       this.lastSkipSSLValue = this.registerForm.value.skipSSLField;
       this.registerForm.controls.skipSSLField.setValue(false);
+      this.registerForm.controls.skipSSLField.disable();
     } else {
       this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue);
+      this.registerForm.controls.skipSSLField.enable();
     }
   }
 

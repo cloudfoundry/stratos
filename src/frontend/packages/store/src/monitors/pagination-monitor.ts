@@ -109,7 +109,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     const currentPage = pagination.ids[pagination.currentPage];
     const hasPageIds = !!currentPage;
     const requestInfo =
-      pagination.pageRequests[pagination.clientPagination.currentPage];
+      pagination.pageRequests[pagination.clientPagination?.currentPage ?? pagination.currentPage];
     const hasPageRequestInfo = !!requestInfo;
     const hasPage = hasPageIds && (!hasPageRequestInfo || !requestInfo.busy);
     return hasPage;

@@ -25,7 +25,7 @@ export class DialogConfirmComponent {
   public textToMatch: string;
 
   constructor(
-    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<DialogConfirmComponent>,
+    public dialogRef: TailwindDialogRef<DialogConfirmComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogConfig
   ) {
     const typeToConfirm = data.message as TypeToConfirm;

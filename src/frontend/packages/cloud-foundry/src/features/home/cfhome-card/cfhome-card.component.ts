@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -49,6 +49,7 @@ import { TileSelectorComponent } from '../../../../../core/src/shared/components
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,

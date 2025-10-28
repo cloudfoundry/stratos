@@ -13,7 +13,8 @@
 <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
   <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
   <button class="confirm-dialog__confirm" *ngIf="data.confirm"
-    [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'" [mat-dialog-close]="true" [innerHtml]=""
+    [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
+    (click)="dialogRef.close(true)"
     [disabled]="textToMatch && textToMatch !== matchValue">{{
     data.confirm }}</button>
 </div>

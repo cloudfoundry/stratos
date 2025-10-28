@@ -1,5 +1,16 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, ComponentFactoryResolver, Type } from '@angular/core';
+import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, createComponent, EnvironmentInjector, Type, InjectionToken } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
+
+// Define the MAT_DIALOG_DATA token for providing dialog data
+export const MAT_DIALOG_DATA = new InjectionToken<any>('MAT_DIALOG_DATA');
+
+// Abstract class for dialog ref to enable DI
+export abstract class TailwindDialogRef<T = any, R = any> {
+  abstract afterClosed(): Observable<R | undefined>;
+  abstract afterOpened(): Observable<void>;
+  abstract close(dialogResult?: R): void;
+  abstract componentInstance: T;
+}
 
 export interface TailwindDialogConfig<D = any> {
   data?: D;
@@ -12,21 +23,20 @@ export interface TailwindDialogConfig<D = any> {
   disableClose?: boolean;
 }
 
-export interface TailwindDialogRef<T = any, R = any> {
-  afterClosed(): Observable<R | undefined>;
-  afterOpened(): Observable<void>;
-  close(dialogResult?: R): void;
-  componentInstance: T;
-}
-
-export class TailwindDialogRefImpl<T = any, R = any> implements TailwindDialogRef<T, R> {
+export class TailwindDialogRefImpl<T = any, R = any> extends TailwindDialogRef<T, R> {
   private _afterClosed = new Subject<R | undefined>();
   private _afterOpened = new Subject<void>();
+  public componentInstance: T;
+  private removeCallback: (result?: R) => void;
 
   constructor(
-    public componentInstance: T,
-    private removeCallback: (result?: R) => void
-  ) {}
+    componentInstance: T,
+    removeCallback: (result?: R) => void
+  ) {
+    super();
+    this.componentInstance = componentInstance;
+    this.removeCallback = removeCallback;
+  }
 
   afterClosed(): Observable<R | undefined> {
     return this._afterClosed.asObservable();
@@ -57,28 +67,43 @@ export class TailwindDialogService {
   constructor(
     private appRef: ApplicationRef,
     private injector: Injector,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private environmentInjector: EnvironmentInjector
   ) {}
 
   open<T, D = any, R = any>(
     component: Type<T>,
     config?: TailwindDialogConfig<D>
   ): TailwindDialogRef<T, R> {
-    // Create component
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef = componentFactory.create(this.injector);
+    // Create dialog ref first so we can provide it via DI
+    const dialogRef = new TailwindDialogRefImpl<T, R>(
+      null as any, // Will be set after component creation
+      null as any  // Will be set below
+    );
 
-    // Pass data to component if available
-    if (config?.data && (componentRef.instance as any).data !== undefined) {
-      (componentRef.instance as any).data = config.data;
-    }
+    // Create custom injector that provides MAT_DIALOG_DATA and TailwindDialogRef
+    const injector = Injector.create({
+      parent: this.injector,
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: config?.data || {} },
+        { provide: TailwindDialogRef, useValue: dialogRef },
+        { provide: 'TailwindDialogRef', useValue: dialogRef }
+      ]
+    });
+
+    // Create component using modern Angular API (Angular 13+)
+    const componentRef = createComponent(component, {
+      environmentInjector: this.environmentInjector,
+      elementInjector: injector
+    });
+
+    // Update dialog ref with component instance
+    (dialogRef as any).componentInstance = componentRef.instance;
 
     // Create dialog container
     const dialogContainer = this.createDialogContainer(componentRef, config);
-    const dialogRef = new TailwindDialogRefImpl<T, R>(
-      componentRef.instance,
-      (result?: R) => this.removeDialog(dialogContainer, componentRef)
-    );
+
+    // Set the remove callback
+    (dialogRef as any).removeCallback = (result?: R) => this.removeDialog(dialogContainer, componentRef);
 
     // Attach component to application
     this.appRef.attachView(componentRef.hostView);

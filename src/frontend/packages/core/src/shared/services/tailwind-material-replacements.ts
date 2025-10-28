@@ -41,15 +41,15 @@ export {
   TailwindIconRegistry as MatIconRegistry
 } from './tailwind-icon-registry.service';
 
-// Injection tokens for backward compatibility
-export const MAT_DIALOG_DATA = new InjectionToken<any>('StratosDialogData');
-export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData');
-
-// Export dialog services for injection
+// Export dialog services and tokens for injection
 export {
   TailwindDialogService as MatDialog,
-  TailwindDialogRef as MatDialogRef
+  TailwindDialogRef as MatDialogRef,
+  MAT_DIALOG_DATA
 } from './tailwind-dialog.service';
+
+// Snackbar data token
+export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData');
 
 import { TailwindDialogRefImpl } from './tailwind-dialog.service';
 

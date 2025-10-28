@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AsyncPipe, NgIf } from '@angular/common';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import {
@@ -6,12 +7,14 @@ import {
   EndpointsMissingComponent,
 } from '../../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 
 @Component({
 selector: 'app-cf-endpoints-missing',
   templateUrl: './cf-endpoints-missing.component.html',
   styleUrls: ['./cf-endpoints-missing.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [AsyncPipe, NgIf, NoContentMessageComponent]
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
 

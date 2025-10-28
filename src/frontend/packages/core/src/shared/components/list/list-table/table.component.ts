@@ -106,6 +106,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   initWidgetStore() {
+    // If sort directive is not available (not in template), skip initialization
+    if (!this.sort) {
+      return;
+    }
+
     const sortStoreToWidget = this.paginationController.sort$.pipe(
       tap((sort: ListSort) => {
         if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {

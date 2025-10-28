@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +22,7 @@ const RECENT_ITEMS_COUNT = 10;
   standalone: true,
   imports: [
     CommonModule,
+    AsyncPipe,
     MatCardModule,
     PollingIndicatorComponent,
     CompactAppCardComponent

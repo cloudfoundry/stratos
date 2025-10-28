@@ -219,14 +219,12 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private resetEndpointTypeFilter(pagination: PaginationEntityState) {
     if (
-      pagination.clientPagination &&
-      pagination.clientPagination.filter &&
-      pagination.clientPagination.filter.items[BaseEndpointsDataSource.typeFilterKey]
+      pagination.clientPagination?.filter?.items?.[BaseEndpointsDataSource.typeFilterKey]
     ) {
       const clientPaginationFilter = {
         ...pagination.clientPagination.filter,
         items: {
-          ...pagination.clientPagination.filter.items,
+          ...(pagination.clientPagination.filter.items ?? {}),
           [BaseEndpointsDataSource.typeFilterKey]: null
         }
       };

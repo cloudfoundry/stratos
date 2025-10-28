@@ -29,16 +29,16 @@ export class LoggedInService {
   private sessionChecker: Subscription;
 
   // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
-  private checkSessionInterval = 5 * 1000;
+  private readonly checkSessionInterval: number = 5 * 1000;
 
   // Warn inactive users 2 minutes before logging them out
-  private warnBeforeLogout = 2 * 60 * 1000;
+  private readonly warnBeforeLogout: number = 2 * 60 * 1000;
 
   // User considered idle if no interaction for 5 minutes
-  private userIdlePeriod = 5 * 60 * 1000;
+  private readonly userIdlePeriod: number = 5 * 60 * 1000;
 
   // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
-  private autoLogoutDelta = 5 * 1000;
+  private readonly autoLogoutDelta: number = 5 * 1000;
   // When we see the following events, we consider the user as active
   private userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
@@ -89,8 +89,10 @@ export class LoggedInService {
   // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
+    // Ensure interval configuration is valid
+    const intervalTime = this.checkSessionInterval || 5000;
     this.ngZone.runOutsideAngular(() => {
-      this.sessionChecker = interval(this.checkSessionInterval)
+      this.sessionChecker = interval(intervalTime)
         .pipe(
           withLatestFrom(
             this.store.select(selectDashboardState),
@@ -131,6 +133,11 @@ export class LoggedInService {
 
   private _checkSession(dashboardState: DashboardState, authState: AuthState) {
     if (this.activityPromptShown || this.destroying) {
+      return;
+    }
+
+    // Guard against undefined authState or sessionData
+    if (!authState || !authState.sessionData || typeof authState.sessionData.sessionExpiresOn !== 'number') {
       return;
     }
 

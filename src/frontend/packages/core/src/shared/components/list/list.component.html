@@ -195,7 +195,7 @@
         <div class="paginator flex items-center justify-between p-4">
           <div class="paginator-info text-sm text-gray-600">
             Showing {{paginatorSettings.pageIndex * paginatorSettings.pageSize + 1}} to
-            {{Math.min((paginatorSettings.pageIndex + 1) * paginatorSettings.pageSize, paginatorSettings.length)}}
+            {{getPageEndIndex()}}
             of {{paginatorSettings.length}} entries
           </div>
           <div class="paginator-controls flex items-center gap-2">
@@ -217,7 +217,7 @@
             </button>
             <button class="btn btn-sm btn-secondary"
               [disabled]="(paginatorSettings.pageIndex + 1) * paginatorSettings.pageSize >= paginatorSettings.length"
-              (click)="paginatorSettings.pageIndex = Math.floor(paginatorSettings.length / paginatorSettings.pageSize)">
+              (click)="paginatorSettings.pageIndex = getLastPageIndex()">
               Last
             </button>
           </div>

@@ -11,6 +11,7 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { InfinityPipe } from '../../../../../../../../core/src/core/infinity.pipe';
+import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -68,6 +69,7 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
     MetaCardValueComponent,
     MultilineTitleComponent,
     InfinityPipe,
+    MbToHumanSizePipe,
   ]
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {

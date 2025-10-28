@@ -87,7 +87,11 @@ export class CustomRouterStateSerializer
 const storeDebugImports = environment.production ? [] : [
   StoreDevtoolsModule.instrument({
     maxAge: 100,
-    logOnly: !environment.production
+    logOnly: !environment.production,
+    connectInZone: true,
+    autoPause: true,
+    trace: false,
+    traceLimit: 75
   })
 ];
 
@@ -99,11 +103,10 @@ class AppStoreDebugModule { }
 
 @NgModule({
   declarations: [
-    // All components are now standalone and imported below
+    AppComponent
   ],
   imports: [
     // Standalone Components
-    AppComponent,
     NoEndpointsNonAdminComponent,
     // Modules
     EntityCatalogModule.forFeature(generateStratosEntities),
@@ -226,16 +229,21 @@ export class AppModule {
       withLatestFrom(allFavs$)
     ).subscribe(
       ([entities, [favoriteGroups, favorites]]) => {
+        if (!favoriteGroups || !favorites) {
+          return;
+        }
         Object.keys(favoriteGroups).forEach(endpointId => {
           const favoriteGroup = favoriteGroups[endpointId];
-          if (!favoriteGroup.ethereal) {
+          if (!favoriteGroup || !favoriteGroup.ethereal) {
             const endpointFavorite = favorites[endpointId];
             this.syncFavorite(endpointFavorite, entities);
           }
-          favoriteGroup.entitiesIds.forEach(id => {
-            const favorite = favorites[id];
-            this.syncFavorite(favorite, entities);
-          });
+          if (favoriteGroup?.entitiesIds) {
+            favoriteGroup.entitiesIds.forEach(id => {
+              const favorite = favorites[id];
+              this.syncFavorite(favorite, entities);
+            });
+          }
         });
       }
     );
@@ -245,12 +253,18 @@ export class AppModule {
       withLatestFrom(recents$)
     ).subscribe(
       ([entities, recents]) => {
+        if (!recents || !entities) {
+          return;
+        }
         Object.values(recents).forEach(recentEntity => {
+          if (!recentEntity) {
+            return;
+          }
           const entityKey = entityCatalog.getEntityKey(recentEntity);
           if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
             const entity = entities[entityKey][recentEntity.entityId];
             const entityToMetadata = this.userFavoriteManager.getEntityMetadata(recentEntity, entity);
-            const name = entityToMetadata.name;
+            const name = entityToMetadata?.name;
             if (name && name !== recentEntity.name) {
               // Update the entity name
               this.store.dispatch(new SetRecentlyVisitedEntityAction({
@@ -273,13 +287,18 @@ export class AppModule {
   }
 
   private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
-    if (favorite) {
+    if (favorite && entities) {
       const isEndpoint = (favorite.entityType === endpointEntityType);
       // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
       const entityKey = isEndpoint ? entityCatalog.getEntityKey({
         ...favorite,
         endpointType: STRATOS_ENDPOINT_TYPE
       }) : entityCatalog.getEntityKey(favorite);
+
+      if (!entities[entityKey]) {
+        return;
+      }
+
       const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
       if (entity) {
         const newMetadata = this.userFavoriteManager.getEntityMetadata(favorite, entity);
@@ -295,6 +314,9 @@ export class AppModule {
   private metadataHasChanged(oldMeta: IFavoriteMetadata, newMeta: IFavoriteMetadata) {
     if ((!oldMeta && newMeta) || (oldMeta && !newMeta)) {
       return true;
+    }
+    if (!oldMeta && !newMeta) {
+      return false;
     }
     const oldKeys = Object.keys(oldMeta);
     const newKeys = Object.keys(newMeta);

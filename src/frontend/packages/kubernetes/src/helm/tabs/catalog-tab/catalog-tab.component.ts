@@ -136,8 +136,10 @@ export class CatalogTabComponent implements OnDestroy {
     helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(first()).subscribe(pagination => {
       const action = helmEntityCatalog.chart.actions.getMultiple();
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
-        ...pagination.clientPagination.filter,
+        string: pagination.clientPagination?.filter?.string ?? '',
+        ...(pagination.clientPagination?.filter ?? {}),
         items: {
+          ...(pagination.clientPagination?.filter?.items ?? {}),
           [REPO_FILTER_NAME]: repoName,
         },
       }));

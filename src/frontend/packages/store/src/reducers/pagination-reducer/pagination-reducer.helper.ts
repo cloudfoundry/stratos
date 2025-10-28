@@ -25,6 +25,7 @@ import {
   PaginationParam,
 } from '../../types/pagination.types';
 import { getCurrentPageRequestInfo, PaginationObservables } from './pagination-reducer.types';
+import { defaultClientPaginationPageSize } from './pagination-reducer-reset-pagination';
 
 export function removeEmptyParams(params: PaginationParam) {
   const newObject = {};
@@ -275,13 +276,25 @@ export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 
-export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {
+export function spreadClientPagination(pag: PaginationClientPagination | undefined): PaginationClientPagination {
+  if (!pag) {
+    return {
+      pageSize: defaultClientPaginationPageSize,
+      currentPage: 1,
+      filter: {
+        string: '',
+        items: {}
+      },
+      totalResults: 0
+    };
+  }
+
   return {
     ...pag,
     filter: {
-      ...pag.filter,
+      ...(pag.filter || { string: '', items: {} }),
       items: {
-        ...pag.filter.items
+        ...(pag.filter?.items || {})
       }
     }
   };

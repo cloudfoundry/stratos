@@ -1,22 +1,46 @@
 import { NgZone } from '@angular/core';
-import { Scheduler, Subscription } from 'rxjs';
+import { SchedulerLike, SchedulerAction, Subscription } from 'rxjs';
 
-class LeaveZoneScheduler {
-  constructor(private zone: NgZone, private scheduler: Scheduler) { }
+class LeaveZoneScheduler implements SchedulerLike {
+  constructor(private zone: NgZone, private scheduler: SchedulerLike) { }
 
-  schedule = (...args: any[]): Subscription => this.zone.runOutsideAngular(() => this.scheduler.schedule.apply(this.scheduler, args));
+  now(): number {
+    return this.scheduler.now();
+  }
+
+  schedule<T>(
+    work: (this: SchedulerAction<T>, state?: T) => void,
+    delay?: number,
+    state?: T
+  ): Subscription {
+    return this.zone.runOutsideAngular(() =>
+      this.scheduler.schedule(work, delay, state)
+    );
+  }
 }
 
-class EnterZoneScheduler {
-  constructor(private zone: NgZone, private scheduler: Scheduler) { }
+class EnterZoneScheduler implements SchedulerLike {
+  constructor(private zone: NgZone, private scheduler: SchedulerLike) { }
 
-  schedule = (...args: any[]): Subscription => this.zone.run(() => this.scheduler.schedule.apply(this.scheduler, args));
+  now(): number {
+    return this.scheduler.now();
+  }
+
+  schedule<T>(
+    work: (this: SchedulerAction<T>, state?: T) => void,
+    delay?: number,
+    state?: T
+  ): Subscription {
+    return this.zone.run(() =>
+      this.scheduler.schedule(work, delay, state)
+    );
+  }
 }
 
-export function leaveZone(zone: NgZone, scheduler: Scheduler): Scheduler {
-  return new LeaveZoneScheduler(zone, scheduler) as any;
+export function leaveZone(zone: NgZone, scheduler: SchedulerLike): SchedulerLike {
+  return new LeaveZoneScheduler(zone, scheduler);
 }
 
-export function enterZone(zone: NgZone, scheduler: Scheduler): Scheduler {
-  return new EnterZoneScheduler(zone, scheduler) as any;
+export function enterZone(zone: NgZone, scheduler: SchedulerLike): SchedulerLike {
+  return new EnterZoneScheduler(zone, scheduler);
 }

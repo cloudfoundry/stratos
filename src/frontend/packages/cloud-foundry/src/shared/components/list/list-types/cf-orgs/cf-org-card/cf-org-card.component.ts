@@ -11,6 +11,7 @@ import {
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { InfinityPipe } from '../../../../../../../../core/src/core/infinity.pipe';
 import { truthyIncludingZeroString } from '../../../../../../../../core/src/core/utils.service';
+import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
 import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -56,6 +57,7 @@ selector: 'app-cf-org-card',
     MetaCardValueComponent,
     MultilineTitleComponent,
     InfinityPipe,
+    MbToHumanSizePipe,
   ]
 })
 export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {

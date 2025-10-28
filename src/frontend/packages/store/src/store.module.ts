@@ -25,6 +25,8 @@ import { AppReducersModule } from './reducers.module';
 
 @NgModule({
   providers: [
+    // Explicitly provide PipelineHttpClient for Angular 20 DI compatibility
+    // Even though it has providedIn: 'root', re-declaring helps ensure proper initialization
     PipelineHttpClient
   ],
   imports: [

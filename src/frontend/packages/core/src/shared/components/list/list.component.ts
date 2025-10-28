@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -36,6 +36,7 @@ import {
   ResetPagination,
   ResetPaginationSortFilter,
   PaginatedAction,
+  defaultClientPaginationPageSize,
 } from '@stratosui/store';
 import {
   asapScheduler,
@@ -95,6 +96,7 @@ selector: 'app-list',
   styleUrls: ['./list.component.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     CommonModule,
     FormsModule,
     CardsComponent,
@@ -191,10 +193,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     pageIndex: number,
     length: number;
   } = {
-      pageSizeOptions: null,
-      pageSize: null,
-      pageIndex: null,
-      length: null
+      pageSizeOptions: [],
+      pageSize: defaultClientPaginationPageSize,
+      pageIndex: 0,
+      length: 0
     };
   private headerSort: {
     direction: SortDirection,
@@ -726,6 +728,28 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         takeWhile(isLoading => isLoading)
       );
     }
+  }
+
+  /**
+   * Helper method to calculate the last item index on the current page
+   */
+  public getPageEndIndex(): number {
+    if (!this.paginatorSettings) {
+      return 0;
+    }
+    const { pageIndex, pageSize, length } = this.paginatorSettings;
+    return Math.min((pageIndex + 1) * pageSize, length);
+  }
+
+  /**
+   * Helper method to calculate the last page index
+   */
+  public getLastPageIndex(): number {
+    if (!this.paginatorSettings || !this.paginatorSettings.pageSize) {
+      return 0;
+    }
+    const { length, pageSize } = this.paginatorSettings;
+    return Math.floor(length / pageSize);
   }
 
   // Used by multi-entity lists

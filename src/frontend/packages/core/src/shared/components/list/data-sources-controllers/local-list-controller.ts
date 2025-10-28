@@ -1,4 +1,4 @@
-import { LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
+import { defaultClientPaginationPageSize, LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -80,7 +80,7 @@ export class LocalListController<T = any> {
    */
   private buildCurrentPageNumberObservable(pagination$: Observable<PaginationEntityState>) {
     return pagination$.pipe(
-      map(pagination => pagination.clientPagination.currentPage),
+      map(pagination => pagination.clientPagination?.currentPage ?? 1),
       distinctUntilChanged((oldPage, newPage) => oldPage === newPage)
     );
   }
@@ -90,7 +90,7 @@ export class LocalListController<T = any> {
    */
   private buildCurrentPageSizeObservable(pagination$: Observable<PaginationEntityState>) {
     return pagination$.pipe(
-      map(pagination => pagination.clientPagination.pageSize),
+      map(pagination => pagination.clientPagination?.pageSize ?? defaultClientPaginationPageSize),
       distinctUntilChanged()
     );
   }
@@ -134,10 +134,10 @@ export class LocalListController<T = any> {
     return paginationEntity.totalResults
       + (paginationEntity.params['order-direction-field'] as string || '') + ','
       + (paginationEntity.params['order-direction'] as string || '') + ','
-      + paginationEntity.clientPagination.filter.string + ','
-      + paginationEntity.clientPagination.filter.filterKey + ','
+      + (paginationEntity.clientPagination?.filter?.string ?? '') + ','
+      + (paginationEntity.clientPagination?.filter?.filterKey ?? '') + ','
       + paginationEntity.forcedLocalPage
-      + Object.values(paginationEntity.clientPagination.filter.items);
+      + Object.values(paginationEntity.clientPagination?.filter?.items ?? {});
     // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 

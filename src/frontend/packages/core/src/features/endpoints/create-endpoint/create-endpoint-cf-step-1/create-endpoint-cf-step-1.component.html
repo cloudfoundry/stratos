@@ -26,7 +26,7 @@
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
       <h1 class="create-endpoint__section-title">Options</h1>
-      <mat-checkbox [disabled]="showCACertField" matInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</mat-checkbox>
+      <mat-checkbox matInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</mat-checkbox>
       <mat-checkbox matInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</mat-checkbox>
       <mat-checkbox matInput *ngIf="showAdvancedFields" (change)="toggleAdvancedOptions()">Show Advanced Options</mat-checkbox>
       <mat-checkbox matInput *ngIf="endpointTypeSupportsSSO" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</mat-checkbox>
@@ -36,7 +36,7 @@
   <!-- Full-width sections below grid -->
   <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
     <span class="create-endpoint__cacert-title">Specify CA Certificate:</span>
-    <textarea rows="10" class="create-endpoint__cacert" matInput formControlName="caCertField" name="caCert"></textarea>
+    <textarea rows="10" class="create-endpoint__cacert" matInput formControlName="caCertField" name="caCertField"></textarea>
   </div>
 
   <div [ngClass]="{'hide': !showAdvancedFields, 'show': showAdvancedFields}" class="create-endpoint__section">
