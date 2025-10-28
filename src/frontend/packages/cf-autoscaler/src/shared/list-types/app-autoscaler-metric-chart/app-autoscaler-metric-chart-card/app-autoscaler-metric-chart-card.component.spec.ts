@@ -34,7 +34,6 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AppAutoscalerMetricChartCardComponent,
-        AppAutoscalerComboChartComponent,
         AppAutoscalerComboSeriesVerticalComponent
       ],
       imports: [
@@ -42,7 +41,8 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         createEmptyStoreModule(),
         CoreModule,
         BaseChartDirective,
-        AppTestModule
+        AppTestModule,
+        AppAutoscalerComboChartComponent,
       ],
       providers: [
         EntityMonitorFactory,

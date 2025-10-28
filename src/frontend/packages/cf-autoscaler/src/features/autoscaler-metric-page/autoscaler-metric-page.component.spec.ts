@@ -19,8 +19,8 @@ describe('AutoscalerMetricPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [AutoscalerMetricPageComponent],
       imports: [
+        AutoscalerMetricPageComponent,
         CfAutoscalerTestingModule,
         NoopAnimationsModule,
         createEmptyStoreModule(),

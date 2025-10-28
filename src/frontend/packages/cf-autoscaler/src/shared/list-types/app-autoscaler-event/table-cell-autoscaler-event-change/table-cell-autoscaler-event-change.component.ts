@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellAutoscalerEventChangeIconPipe } from './table-cell-autoscaler-event-change-icon.pipe';
 
 @Component({
-selector: 'app-table-cell-autoscaler-event-change',
+  selector: 'app-table-cell-autoscaler-event-change',
   templateUrl: './table-cell-autoscaler-event-change.component.html',
   styleUrls: ['./table-cell-autoscaler-event-change.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    TableCellAutoscalerEventChangeIconPipe
+  ]
 })
 export class TableCellAutoscalerEventChangeComponent extends TableCellCustom<any> { }

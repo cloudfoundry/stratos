@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-name: 'tableCellAutoscalerEventChangeIcon',
-standalone: false
+  name: 'tableCellAutoscalerEventChangeIcon',
+  standalone: true
 })
 export class TableCellAutoscalerEventChangeIconPipe implements PipeTransform {
 

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import moment from 'moment-timezone';
@@ -19,15 +20,27 @@ import {
   validateRecurringSpecificMax,
   validateRecurringSpecificMin,
 } from '../edit-autoscaler-policy-step4/edit-autoscaler-policy-step4.component';
+import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
+import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-edit-autoscaler-policy-step3',
+  selector: 'app-edit-autoscaler-policy-step3',
   templateUrl: './edit-autoscaler-policy-step3.component.html',
   styleUrls: ['./edit-autoscaler-policy-step3.component.scss'],
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    MetadataItemComponent
+  ]
 })
 export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDirective implements OnInit {
 

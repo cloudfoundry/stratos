@@ -1,8 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 
@@ -10,6 +12,7 @@ import { ApplicationService } from '../../../../cloud-foundry/src/features/appli
 import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { AppState } from '../../../../store/src/app-state';
 import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
 import { EntityService } from '../../../../store/src/entity-service';
@@ -23,13 +26,19 @@ import {
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
 
 @Component({
-selector: 'app-edit-autoscaler-credential',
+  selector: 'app-edit-autoscaler-credential',
   templateUrl: './edit-autoscaler-credential.component.html',
   styleUrls: ['./edit-autoscaler-credential.component.scss'],
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher },
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    PageHeaderComponent,
+  ]
 })
 export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 

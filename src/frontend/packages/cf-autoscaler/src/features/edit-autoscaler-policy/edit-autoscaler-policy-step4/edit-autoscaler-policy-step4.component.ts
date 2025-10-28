@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
@@ -27,15 +28,27 @@ import {
 } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
+import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-edit-autoscaler-policy-step4',
+  selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
   styleUrls: ['./edit-autoscaler-policy-step4.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    MetadataItemComponent
+  ],
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
-  ],
-  standalone: false
+  ]
 })
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
 

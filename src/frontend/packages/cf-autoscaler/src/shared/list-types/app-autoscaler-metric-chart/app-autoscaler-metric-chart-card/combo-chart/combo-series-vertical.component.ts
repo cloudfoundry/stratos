@@ -1,4 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 
 import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
@@ -15,7 +16,7 @@ function formatLabel(label: any): string {
 
 /* tslint:disable:component-selector  */
 @Component({
-selector: 'g[ngx-combo-charts-series-vertical]',
+  selector: 'g[ngx-combo-charts-series-vertical]',
   template: `
     <svg:g ngx-charts-bar *ngFor="let bar of bars; trackBy: trackBy"
       [@animationState]="'active'"
@@ -42,7 +43,10 @@ selector: 'g[ngx-combo-charts-series-vertical]',
     </svg:g>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   animations: [
     trigger('animationState', [
       transition('* => void', [

@@ -18,8 +18,8 @@ describe('EditAutoscalerPolicyStep2Component', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EditAutoscalerPolicyStep2Component],
       imports: [
+        EditAutoscalerPolicyStep2Component,
         NoopAnimationsModule,
         createEmptyStoreModule(),
         CoreModule,

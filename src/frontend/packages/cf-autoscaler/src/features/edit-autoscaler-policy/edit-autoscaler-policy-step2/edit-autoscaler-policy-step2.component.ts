@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -22,15 +24,26 @@ import {
 import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
+import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 
 @Component({
-selector: 'app-edit-autoscaler-policy-step2',
+  selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
   styleUrls: ['./edit-autoscaler-policy-step2.component.scss'],
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatAutocompleteModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent
+  ]
 })
 export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDirective implements OnInit, OnDestroy {
 

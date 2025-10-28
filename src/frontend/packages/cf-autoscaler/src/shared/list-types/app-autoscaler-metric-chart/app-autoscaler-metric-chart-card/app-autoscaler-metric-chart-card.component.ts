@@ -1,5 +1,7 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BaseChartDirective } from 'ng2-charts';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -17,13 +19,19 @@ import {
   AppScalingTrigger,
 } from '../../../../store/app-autoscaler.types';
 import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../../../store/autoscaler-entity-factory';
+import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
 
 
 @Component({
-selector: 'app-app-autoscaler-metric-chart-card',
+  selector: 'app-app-autoscaler-metric-chart-card',
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
   styleUrls: ['./app-autoscaler-metric-chart-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    BaseChartDirective,
+    AppAutoscalerComboChartComponent
+  ]
 })
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {

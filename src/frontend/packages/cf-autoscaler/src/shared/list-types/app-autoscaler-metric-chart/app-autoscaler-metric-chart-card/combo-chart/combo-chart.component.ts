@@ -7,13 +7,17 @@ import {
   OnChanges,
 } from '@angular/core';
 import { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-autoscaler-combo-chart-component',
   templateUrl: './combo-chart.component.html',
   styleUrls: ['./combo-chart.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: false
+  standalone: true,
+  imports: [
+    BaseChartDirective,
+  ]
 })
 export class AppAutoscalerComboChartComponent implements OnChanges {
 

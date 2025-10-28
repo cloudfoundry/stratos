@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -7,16 +11,26 @@ import { ListConfig } from '../../../../core/src/shared/components/list/list.com
 import {
   CfAppAutoscalerEventsConfigService,
 } from '../../shared/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
+import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
+import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
 
 @Component({
-selector: 'app-autoscaler-scale-history-page',
+  selector: 'app-autoscaler-scale-history-page',
   templateUrl: './autoscaler-scale-history-page.component.html',
   styleUrls: ['./autoscaler-scale-history-page.component.scss'],
   providers: [{
     provide: ListConfig,
     useClass: CfAppAutoscalerEventsConfigService,
   }],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    PageHeaderModule,
+    ListComponent,
+  ]
 })
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
 

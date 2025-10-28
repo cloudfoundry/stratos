@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
   CreateEndpointHelperComponent,
@@ -10,7 +11,10 @@ import { filter, first, map, pairwise } from 'rxjs/operators';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
-import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { StepComponent, StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { UniqueDirective } from '../../../../../core/src/shared/components/unique.directive';
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
@@ -51,10 +55,18 @@ enum GitTypeKeys {
 }
 
 @Component({
-selector: 'app-git-registration',
+  selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
   styleUrls: ['./git-registration.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    SteppersComponent,
+    StepComponent,
+    CreateEndpointConnectComponent,
+    UniqueDirective
+  ]
 })
 export class GitRegistrationComponent extends CreateEndpointHelperComponent implements OnDestroy {
 

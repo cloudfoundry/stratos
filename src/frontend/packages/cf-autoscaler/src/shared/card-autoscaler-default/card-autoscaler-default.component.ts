@@ -1,8 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { RunningInstancesComponent } from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
+import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { EntityService } from '../../../../store/src/entity-service';
 import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { APIResource } from '../../../../store/src/types/api.types';
@@ -11,10 +14,15 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 
 @Component({
-selector: 'app-card-autoscaler-default',
+  selector: 'app-card-autoscaler-default',
   templateUrl: './card-autoscaler-default.component.html',
   styleUrls: ['./card-autoscaler-default.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MetadataItemComponent,
+    RunningInstancesComponent
+  ]
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
