@@ -7,10 +7,10 @@ import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
 
 @Component({
-selector: 'app-chart-details-readme',
+  selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
   styleUrls: ['./chart-details-readme.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class ChartDetailsReadmeComponent {
 

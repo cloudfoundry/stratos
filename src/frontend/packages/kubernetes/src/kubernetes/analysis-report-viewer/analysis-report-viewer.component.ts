@@ -1,6 +1,5 @@
 import {
   Component,
-  ComponentFactoryResolver,
   ComponentRef,
   Input,
   OnDestroy,
@@ -21,7 +20,7 @@ export interface IReportViewer {
 selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
   styleUrls: ['./analysis-report-viewer.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
 
@@ -40,8 +39,6 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     this.id = report.id;
     this.updateReport(report);
   }
-
-  constructor(private resolver: ComponentFactoryResolver) { }
 
   updateReport(report) {
     switch (report.format) {
@@ -63,8 +60,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     if (this.reportComponentRef) {
       this.reportComponentRef.destroy();
     }
-    const factory = this.resolver.resolveComponentFactory<IReportViewer>(component);
-    this.reportComponentRef = this.container.createComponent<IReportViewer>(factory);
+    this.reportComponentRef = this.container.createComponent<IReportViewer>(component);
     // this.reportComponentRef.instance.setReport(report);
     this.reportComponentRef.instance.report = report;
   }

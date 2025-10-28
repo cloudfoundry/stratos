@@ -1,12 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderModule } from '../../../../../core/src/shared/components/page-header/page-header.module';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../../services/kubernetes.service';
@@ -18,7 +24,16 @@ type MessageUpdater = (msg: string) => void;
   selector: 'app-kubedash-configuration',
   templateUrl: './kubedash-configuration.component.html',
   styleUrls: ['./kubedash-configuration.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    PageHeaderModule
+  ],
   providers: [
     {
       provide: BaseKubeGuid,

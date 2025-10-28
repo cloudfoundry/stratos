@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IHeaderBreadcrumbLink } from 'frontend/packages/core/src/shared/components/page-header/page-header.types';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
@@ -7,12 +9,18 @@ import { catchError, first, map, startWith } from 'rxjs/operators';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { getParentURL } from '../../../services/route.helper';
+import { PageHeaderModule } from 'frontend/packages/core/src/shared/components/page-header/page-header.module';
 
 @Component({
-selector: 'app-kubernetes-analysis-report',
+  selector: 'app-kubernetes-analysis-report',
   templateUrl: './kubernetes-analysis-report.component.html',
   styleUrls: ['./kubernetes-analysis-report.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatProgressSpinnerModule,
+    PageHeaderModule
+  ]
 })
 export class KubernetesAnalysisReportComponent implements OnInit {
 

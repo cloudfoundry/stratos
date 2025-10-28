@@ -1,17 +1,23 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { KubernetesNodesListConfigService } from '../../list-types/kubernetes-nodes/kubernetes-nodes-list-config.service';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 @Component({
-selector: 'app-kubernetes-nodes-tab',
+  selector: 'app-kubernetes-nodes-tab',
   templateUrl: './kubernetes-nodes-tab.component.html',
   styleUrls: ['./kubernetes-nodes-tab.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ListComponent
+  ],
   providers: [{
     provide: ListConfig,
     useClass: KubernetesNodesListConfigService,
-  }],
-  standalone: false
+  }]
 })
 export class KubernetesNodesTabComponent {
 

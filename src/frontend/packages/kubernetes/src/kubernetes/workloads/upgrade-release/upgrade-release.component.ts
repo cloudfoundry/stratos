@@ -24,7 +24,10 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   selector: 'app-upgrade-release',
   templateUrl: './upgrade-release.component.html',
   styleUrls: ['./upgrade-release.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    ChartValuesEditorComponent
+  ],
   providers: [
     HelmReleaseHelperService,
     {

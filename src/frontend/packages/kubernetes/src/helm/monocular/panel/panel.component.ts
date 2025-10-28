@@ -1,20 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-selector: 'app-panel',
+  selector: 'app-panel',
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['title', 'background', 'container', 'border'],
-  standalone: false
+  standalone: true
 })
 export class PanelComponent {
   // Title of the panel
-  public title = '';
+  @Input() title = '';
   // Display a gray background
-  public background = false;
+  @Input() background = false;
   // Show a border
-  public border = false;
+  @Input() border = false;
   // Set the size of the panel to 80%
-  public container = false;
+  @Input() container = false;
 }

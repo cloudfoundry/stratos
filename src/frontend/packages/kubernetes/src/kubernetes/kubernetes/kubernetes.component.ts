@@ -24,7 +24,7 @@ selector: 'app-kubernetes',
     EndpointListHelper,
     KubernetesService
   ],
-  standalone: false
+  standalone: true
 })
 export class KubernetesComponent {
 

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
@@ -8,7 +9,10 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 selector: 'app-kube-config-table-select',
   templateUrl: './kube-config-table-select.component.html',
   styleUrls: ['./kube-config-table-select.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatCheckboxModule,
+  ]
 })
 export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFileCluster> {
 

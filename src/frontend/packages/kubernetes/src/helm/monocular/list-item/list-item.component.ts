@@ -5,12 +5,10 @@ import { map } from 'rxjs/operators';
 import { Chart } from '../shared/models/chart';
 
 @Component({
-selector: 'app-list-item',
+  selector: 'app-list-item',
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['detailUrl'],
-  standalone: false
+  standalone: true
 })
 export class ListItemComponent implements OnInit {
 
@@ -18,7 +16,7 @@ export class ListItemComponent implements OnInit {
   @Input() public artifactHubAndHelmRepoTypes$: Observable<boolean>;
   @Input() chart: Chart;
 
-  public detailUrl: string;
+  @Input() public detailUrl: string;
   public showArtifactHub$: Observable<boolean>;
 
   ngOnInit() {

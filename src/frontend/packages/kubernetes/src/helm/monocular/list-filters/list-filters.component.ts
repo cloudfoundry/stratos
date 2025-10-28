@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-selector: 'app-list-filters',
+  selector: 'app-list-filters',
   templateUrl: './list-filters.component.html',
   styleUrls: ['./list-filters.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['filters'],
-  standalone: false
+  standalone: true
 })
 
 export class ListFiltersComponent {
-  public filters: { title: string, items: Array<{}>, }[] = [];
+  @Input() public filters: { title: string, items: Array<{}>, }[] = [];
 }

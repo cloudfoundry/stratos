@@ -17,7 +17,7 @@ selector: 'app-kubernetes-namespace-analysis-report-tab',
     KubernetesNamespaceService,
     KubernetesAnalysisService,
   ],
-  standalone: false
+  standalone: true
 })
 export class KubernetesNamespaceAnalysisReportComponent {
 

@@ -1,4 +1,5 @@
 import { Component, ComponentFactoryResolver, Injector, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -29,6 +30,7 @@ import { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '
 import {
   KubeConfigTableImportStatusComponent,
 } from './kube-config-table-import-status/kube-config-table-import-status.component';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
@@ -37,7 +39,12 @@ const CONNECT_ACTION = 'Connect endpoint';
 selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
   styleUrls: ['./kube-config-import.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    KubeConfigTableImportStatusComponent,
+    ListComponent,
+  ]
 })
 export class KubeConfigImportComponent implements OnDestroy {
 

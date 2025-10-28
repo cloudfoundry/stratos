@@ -26,7 +26,7 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
   selector: 'app-pod-metrics',
   templateUrl: './pod-metrics.component.html',
   styleUrls: ['./pod-metrics.component.scss'],
-  standalone: false,
+  standalone: true,
   providers: [
     {
       provide: BaseKubeGuid,

@@ -1,8 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
+import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { ListViewComponent } from '../../../../../core/src/shared/components/list/list-view/list-view.component';
 
 import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
 import {
@@ -38,10 +45,18 @@ import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
 const namespaceColumnId = 'namespace';
 
 @Component({
-selector: 'app-kubernetes-resource-list',
+  selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
   styleUrls: ['./kubernetes-resource-list.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    PageSubNavComponent,
+    ListViewComponent
+  ]
 })
 export class KubernetesResourceListComponent implements OnDestroy {
 

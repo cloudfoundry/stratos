@@ -1,11 +1,18 @@
+import { AsyncPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
+import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
 import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
 import { ThemeService } from '../../../../../store/src/theme.service';
 import { diffObjects } from './diffvalues';
@@ -38,7 +45,21 @@ enum EditorMode {
   selector: 'app-chart-values-editor',
   templateUrl: './chart-values-editor.component.html',
   styleUrls: ['./chart-values-editor.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatIconButton,
+    MatIcon,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatButton,
+    MatProgressSpinner,
+    MonacoEditorComponent,
+    TailwindJsonSchemaFormComponent
+  ]
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 

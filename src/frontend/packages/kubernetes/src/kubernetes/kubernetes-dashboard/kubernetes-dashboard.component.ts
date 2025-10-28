@@ -1,13 +1,19 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import {
   EndpointMissingMessageParts,
 } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
+import { EndpointsMissingComponent } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -16,7 +22,16 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kubernetes-dashboard',
   templateUrl: './kubernetes-dashboard.component.html',
   styleUrls: ['./kubernetes-dashboard.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatIconModule,
+    EndpointsMissingComponent,
+    PageHeaderModule
+  ],
   providers: [
     {
       provide: BaseKubeGuid,

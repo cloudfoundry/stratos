@@ -1,7 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
@@ -15,10 +17,14 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
 
 
 @Component({
-selector: 'app-helm-release-tab-base',
+  selector: 'app-helm-release-tab-base',
   templateUrl: './helm-release-tab-base.component.html',
   styleUrls: ['./helm-release-tab-base.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    RouterModule,
+    PageHeaderComponent
+  ],
   providers: [
     HelmReleaseHelperService,
     KubernetesAnalysisService,

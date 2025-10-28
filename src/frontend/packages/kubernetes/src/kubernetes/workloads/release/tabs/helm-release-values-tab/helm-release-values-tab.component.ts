@@ -1,6 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { JsonViewerComponent } from '../../../../../../../core/src/shared/components/json-viewer/json-viewer.component';
+import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
@@ -8,7 +13,13 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   selector: 'app-helm-release-values-tab',
   templateUrl: './helm-release-values-tab.component.html',
   styleUrls: ['./helm-release-values-tab.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    PageSubNavComponent,
+    JsonViewerComponent,
+    NoContentMessageComponent
+  ]
 })
 export class HelmReleaseValuesTabComponent {
 

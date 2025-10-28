@@ -5,10 +5,10 @@ import { KubernetesPodExpandedStatusTypes } from '../../../services/kubernetes-e
 import { KubernetesPod } from '../../../store/kube.types';
 
 @Component({
-selector: 'app-kubernetes-pod-status',
+  selector: 'app-kubernetes-pod-status',
   templateUrl: './kubernetes-pod-status.component.html',
   styleUrls: ['./kubernetes-pod-status.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesPodStatusComponent extends TableCellCustom<KubernetesPod> {
 

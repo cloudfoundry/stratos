@@ -3,6 +3,8 @@ import moment from 'moment';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
+import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table/table.component';
+
 import {
   ITableListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
@@ -34,7 +36,10 @@ class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
   selector: 'app-helm-release-history-tab',
   templateUrl: './helm-release-history-tab.component.html',
   styleUrls: ['./helm-release-history-tab.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    TableComponent
+  ]
 })
 export class HelmReleaseHistoryTabComponent {
 

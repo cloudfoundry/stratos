@@ -1,8 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
-import { Edge } from '@swimlane/ngx-graph';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
+import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
+import { WorkloadLiveReloadComponent } from '../../../workload-live-reload/workload-live-reload.component';
 
 import {
   KubernetesResourceViewerComponent,
@@ -55,7 +65,19 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
   styleUrls: ['./helm-release-resource-graph.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    NgxGraphModule,
+    PageSubNavComponent,
+    AnalysisReportRunnerComponent,
+    AnalysisReportSelectorComponent,
+    WorkloadLiveReloadComponent
+  ]
 })
 export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 

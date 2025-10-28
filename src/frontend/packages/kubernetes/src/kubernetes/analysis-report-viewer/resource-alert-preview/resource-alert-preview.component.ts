@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
 import { PreviewableComponent } from 'frontend/packages/core/src/shared/previewable-component';
 
 @Component({
 selector: 'app-resource-alert-preview',
   templateUrl: './resource-alert-preview.component.html',
   styleUrls: ['./resource-alert-preview.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatExpansionModule,
+    MatIcon
+  ]
 })
 export class ResourceAlertPreviewComponent implements PreviewableComponent {
 

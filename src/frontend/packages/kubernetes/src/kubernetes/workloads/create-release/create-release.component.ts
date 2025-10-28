@@ -1,8 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
+
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -22,7 +27,15 @@ import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
-  standalone: false,
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    ChartValuesEditorComponent
+  ],
   providers: [
     ...createMonocularProviders()
   ]

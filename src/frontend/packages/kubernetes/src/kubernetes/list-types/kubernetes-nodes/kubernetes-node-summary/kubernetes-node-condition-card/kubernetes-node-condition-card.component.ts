@@ -6,10 +6,10 @@ import { CaaspNodeData, KubernetesEndpointService } from '../../../../services/k
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
-selector: 'app-kubernetes-node-condition-card',
+  selector: 'app-kubernetes-node-condition-card',
   templateUrl: './kubernetes-node-condition-card.component.html',
   styleUrls: ['./kubernetes-node-condition-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesNodeConditionCardComponent {
   public caaspNode$: Observable<CaaspNodeData>;

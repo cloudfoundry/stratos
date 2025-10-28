@@ -1,4 +1,9 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,7 +17,16 @@ import {
 selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
   styleUrls: ['./analysis-report-runner.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    MatButton,
+    MatIcon,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatTooltip
+  ]
 })
 export class AnalysisReportRunnerComponent implements OnInit {
 

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -22,6 +23,7 @@ import {
   KubeConfigTableSubTypeSelectComponent,
 } from './kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
 import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-select/kube-config-table-user-select.component';
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 export interface KubeConfigTableListDataSource extends ITableListDataSource<KubeConfigFileCluster> {
   editRowName: string;
@@ -34,7 +36,17 @@ selector: 'app-kube-config-selection',
   providers: [
     KubeConfigHelper
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    KubeConfigTableCertComponent,
+    KubeConfigTableNameComponent,
+    KubeConfigTableSelectComponent,
+    KubeConfigTableSubTypeSelectComponent,
+    KubeConfigTableUserSelectComponent,
+    ListComponent,
+    TableHeaderSelectComponent,
+  ]
 })
 export class KubeConfigSelectionComponent {
 

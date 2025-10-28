@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
@@ -5,6 +6,7 @@ import { endpointOfTypeSelector } from 'frontend/packages/store/src/selectors/en
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
 import { HelmReleasesListConfig } from '../list-types/helm-releases-list-config.service';
@@ -21,7 +23,11 @@ selector: 'app-releases-tab',
     },
     KubernetesNamespacesFilterService,
   ],
-  standalone: false
+  standalone: true,
+  imports: [
+    ListComponent,
+    AsyncPipe
+  ]
 })
 export class HelmReleasesTabComponent implements OnInit {
   public helmIds$: Observable<string[]>;

@@ -5,10 +5,10 @@ import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint
 import { KubernetesNamespace } from '../../../store/kube.types';
 
 @Component({
-selector: 'app-kubernetes-namespace-link',
+  selector: 'app-kubernetes-namespace-link',
   templateUrl: './kubernetes-namespace-link.component.html',
   styleUrls: ['./kubernetes-namespace-link.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesNamespaceLinkComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   routerLink: string;

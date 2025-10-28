@@ -1,14 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 @Component({
-selector: 'app-analysis-info-card',
+  selector: 'app-analysis-info-card',
   templateUrl: './analysis-info-card.component.html',
   styleUrls: ['./analysis-info-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class AnalysisInfoCardComponent {
 

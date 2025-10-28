@@ -1,16 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
   IChartThresholds,
   ISimpleUsageChartData,
 } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.types';
+import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
+import { MetaCardComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardTitleComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppState, entityCatalog } from '../../../../../store/src/public-api';
 import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
@@ -31,10 +40,22 @@ interface IEndpointDetails {
 }
 
 @Component({
-selector: 'app-kubernetes-summary',
+  selector: 'app-kubernetes-summary',
   templateUrl: './kubernetes-summary.component.html',
   styleUrls: ['./kubernetes-summary.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    RouterModule,
+    SimpleUsageChartComponent,
+    MetaCardComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
+    MetaCardTitleComponent
+  ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public podCount$: Observable<number>;

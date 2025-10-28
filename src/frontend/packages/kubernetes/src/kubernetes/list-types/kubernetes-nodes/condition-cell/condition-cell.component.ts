@@ -4,10 +4,10 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 import { KubernetesNode } from '../../../store/kube.types';
 
 @Component({
-selector: 'app-condition-cell',
+  selector: 'app-condition-cell',
   templateUrl: './condition-cell.component.html',
   styleUrls: ['./condition-cell.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class ConditionCellComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   public isTrue: boolean = null;

@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigHelper } from '../../kube-config.helper';
@@ -8,7 +12,13 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 selector: 'app-kube-config-table-user-select',
   templateUrl: './kube-config-table-user-select.component.html',
   styleUrls: ['./kube-config-table-user-select.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+  ]
 })
 export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 

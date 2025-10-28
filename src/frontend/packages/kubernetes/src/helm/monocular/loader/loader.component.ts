@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-selector: 'app-loader',
+  selector: 'app-loader',
   templateUrl: './loader.component.html',
   styleUrls: ['./loader.component.scss'],
-  /* tslint:disable-next-line:no-inputs-metadata-property */
-  inputs: ['loading'],
-  standalone: false
+  standalone: true
 })
 export class LoaderComponent {
   // Show the loader or the content
-  public loading = false;
+  @Input() public loading = false;
 }

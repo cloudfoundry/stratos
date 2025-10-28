@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { combineLatest, Observable } from 'rxjs';
@@ -9,12 +10,17 @@ import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-ca
 import { EndpointModel } from '../../../../store/src/public-api';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { HomePageEndpointCardComponent } from '../../../../core/src/features/home/home-page-endpoint-card/home-page-endpoint-card.component';
 
 @Component({
-selector: 'app-k8s-home-card',
+  selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
   styleUrls: ['./kubernetes-home-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    HomePageEndpointCardComponent
+  ]
 })
 export class KubernetesHomeCardComponent implements OnInit {
 

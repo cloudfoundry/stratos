@@ -1,14 +1,27 @@
 import { DatePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
+import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { HelmRelease } from '../../workload.types';
 
 @Component({
   selector: 'app-helm-release-card',
   templateUrl: './helm-release-card.component.html',
   styleUrls: ['./helm-release-card.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    MatTooltip,
+    CardStatusComponent,
+    DatePipe
+  ],
+  providers: [DatePipe]
 })
 export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
 

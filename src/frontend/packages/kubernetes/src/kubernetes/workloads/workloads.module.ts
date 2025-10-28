@@ -44,8 +44,6 @@ const monacoConfig: NgxMonacoEditorConfig = {
         KubernetesModule,
         TailwindJsonSchemaFormModule,
         MonacoEditorModule.forRoot(monacoConfig),
-    ],
-    declarations: [
         HelmReleasesTabComponent,
         HelmReleaseTabBaseComponent,
         HelmReleaseSummaryTabComponent,

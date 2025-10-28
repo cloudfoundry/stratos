@@ -1,4 +1,10 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
 import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -11,7 +17,15 @@ import { AnalysisReport } from '../../store/kube.types';
 selector: 'app-analysis-report-selector',
   templateUrl: './analysis-report-selector.component.html',
   styleUrls: ['./analysis-report-selector.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    MatSelect,
+    MatOption,
+    MatIconButton,
+    MatIcon,
+    MatTooltip
+  ]
 })
 export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 

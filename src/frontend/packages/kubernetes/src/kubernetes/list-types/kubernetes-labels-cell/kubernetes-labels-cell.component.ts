@@ -9,7 +9,7 @@ import { KubeAPIResource } from '../../store/kube.types';
 selector: 'app-kubernetes-labels-cell',
   templateUrl: './kubernetes-labels-cell.component.html',
   styleUrls: ['./kubernetes-labels-cell.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesLabelsCellComponent extends TableCellCustom<KubeAPIResource> implements OnInit {
 

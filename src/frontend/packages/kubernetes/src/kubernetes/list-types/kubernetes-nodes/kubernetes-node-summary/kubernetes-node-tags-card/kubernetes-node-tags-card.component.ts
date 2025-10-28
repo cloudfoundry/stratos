@@ -9,7 +9,7 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
 selector: 'app-kubernetes-node-tags-card',
   templateUrl: './kubernetes-node-tags-card.component.html',
   styleUrls: ['./kubernetes-node-tags-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesNodeTagsCardComponent implements OnInit {
 

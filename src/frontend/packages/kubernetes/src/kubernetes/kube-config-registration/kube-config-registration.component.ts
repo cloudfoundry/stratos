@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
 selector: 'app-kube-config-registration',
   templateUrl: './kube-config-registration.component.html',
   styleUrls: ['./kube-config-registration.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubeConfigRegistrationComponent { }

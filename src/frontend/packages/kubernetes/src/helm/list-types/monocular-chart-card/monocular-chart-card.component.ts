@@ -8,10 +8,10 @@ import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } f
 import { MonocularChart } from '../../store/helm.types';
 
 @Component({
-selector: 'app-monocular-chart-card',
+  selector: 'app-monocular-chart-card',
   templateUrl: './monocular-chart-card.component.html',
   styleUrls: ['./monocular-chart-card.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class MonocularChartCardComponent extends CardCell<MonocularChart> {
 

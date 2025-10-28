@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
 selector: 'app-resource-alert-view',
   templateUrl: './resource-alert-view.component.html',
   styleUrls: ['./resource-alert-view.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class ResourceAlertViewComponent {
 

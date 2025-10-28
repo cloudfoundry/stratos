@@ -6,10 +6,10 @@ import { KubernetesNodeService } from '../../../../../services/kubernetes-node.s
 import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
 @Component({
-selector: 'app-kubernetes-node-condition',
+  selector: 'app-kubernetes-node-condition',
   templateUrl: './kubernetes-node-condition.component.html',
   styleUrls: ['./kubernetes-node-condition.component.scss'],
-  standalone: false
+  standalone: true
 })
 export class KubernetesNodeConditionComponent implements OnInit {
 

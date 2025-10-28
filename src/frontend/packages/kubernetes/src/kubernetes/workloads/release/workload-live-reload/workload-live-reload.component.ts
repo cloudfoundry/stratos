@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-socket-service';
 
@@ -6,7 +7,10 @@ import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-
   selector: 'app-workload-live-reload',
   templateUrl: './workload-live-reload.component.html',
   styleUrls: ['./workload-live-reload.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    MatSlideToggle
+  ]
 })
 export class WorkloadLiveReloadComponent implements OnInit {
   public checked = false;
