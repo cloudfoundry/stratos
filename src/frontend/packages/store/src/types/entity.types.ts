@@ -1,10 +1,10 @@
-import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { IMetrics } from './base-metric.types';
-import { EndpointModel } from './endpoint.types';
-import { SystemInfo } from './system.types';
-import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
-import { UserProfileInfo } from './user-profile.types';
+import type { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
+import type { RequestInfoState } from '../reducers/api-request-reducer/types';
+import type { IMetrics } from './base-metric.types';
+import type { EndpointModel } from './endpoint.types';
+import type { SystemInfo } from './system.types';
+import type { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
+import type { UserProfileInfo } from './user-profile.types';
 
 export interface BaseEntityValues {
   // FIXME: Should come from catalog and start with stratos - STRAT-151

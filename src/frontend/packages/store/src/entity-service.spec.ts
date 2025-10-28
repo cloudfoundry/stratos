@@ -8,6 +8,7 @@ import { createEntityStore, TestStoreEntity } from '../testing/src/store-test-he
 import { APIResponse } from './actions/request.actions';
 import { GeneralAppState } from './app-state';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
+import { entityCatalog } from './entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogEntityConfig, IStratosEndpointDefinition } from './entity-catalog/entity-catalog.types';
 import { failedEntityHandler } from './entity-request-pipeline/entity-request-base-handlers/fail-entity-request.handler';
@@ -74,7 +75,7 @@ function createTestService(
   action: EntityRequestAction,
 ) {
   const entityMonitor = new EntityMonitor(store, guid, schema.key, schema);
-  return new EntityService(store, entityMonitor, action);
+  return new EntityService(store, entityMonitor, action, entityCatalog);
 }
 
 function getAllTheThings(store: Store<GeneralAppState>, guid: string, schemaKey: string) {

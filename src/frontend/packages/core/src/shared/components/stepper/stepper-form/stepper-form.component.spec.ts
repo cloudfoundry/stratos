@@ -8,7 +8,10 @@ describe('StepperFormComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [StepperFormComponent]
+      imports: [
+        StepperFormComponent
+      ],
+      
     })
       .compileComponents();
   }));

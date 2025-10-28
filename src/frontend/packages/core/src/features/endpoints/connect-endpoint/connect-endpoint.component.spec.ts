@@ -13,14 +13,16 @@ describe('ConnectEndpointComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ConnectEndpointComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        ConnectEndpointComponent
       ]
+    
     })
       .compileComponents();
   }));

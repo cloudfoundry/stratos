@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../app-state';
-import { entityCatalog } from '../entity-catalog/entity-catalog';
+import type { IEntityCatalog } from '../entity-catalog/entity-catalog.interface';
 import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import { ENTITY_CATALOG_TOKEN } from '../tokens/store-injection.tokens';
 import { EntityMonitor } from './entity-monitor';
 
 @Injectable({
@@ -13,6 +14,7 @@ export class EntityMonitorFactory {
 
   constructor(
     private store: Store<AppState>,
+    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog,
   ) { }
 
   private monitorCache: {
@@ -29,7 +31,7 @@ export class EntityMonitorFactory {
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
-      const catalogEntity = entityCatalog.getEntity(entityConfig);
+      const catalogEntity = this.entityCatalog.getEntity(entityConfig);
       if (!catalogEntity) {
         throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
       }

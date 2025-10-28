@@ -1,5 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { PaginationMonitorFactory } from '../../../store/src/monitors/pagination-monitor.factory';
 import { CoreTestingModule } from '../../test-framework/core-test.modules';
@@ -12,9 +12,9 @@ describe('EndpointsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        ...STORE_TEST_PROVIDERS,
         EndpointsService,
         UtilsService,
-        PaginationMonitorFactory,
         SessionService
       ],
       imports: [

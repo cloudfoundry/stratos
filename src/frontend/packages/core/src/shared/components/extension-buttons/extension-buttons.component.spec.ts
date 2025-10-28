@@ -9,8 +9,12 @@ describe('ExtensionButtonsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ExtensionButtonsComponent],
-      imports: [...BaseTestModulesNoShared],
+      
+      imports: [
+        ...BaseTestModulesNoShared,
+        ExtensionButtonsComponent
+      ],
+    
     })
       .compileComponents();
   }));

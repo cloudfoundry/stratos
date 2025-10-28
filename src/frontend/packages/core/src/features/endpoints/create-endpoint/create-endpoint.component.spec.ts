@@ -22,12 +22,6 @@ describe('CreateEndpointComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CreateEndpointComponent,
-        CreateEndpointCfStep1Component,
-        CreateEndpointConnectComponent,
-        ConnectEndpointComponent
-      ],
       imports: [
         CoreModule,
         SharedModule,
@@ -35,7 +29,11 @@ describe('CreateEndpointComponent', () => {
         createBasicStoreModule(),
         RouterTestingModule,
         NoopAnimationsModule,
-        HttpClientModule
+        HttpClientModule,
+        CreateEndpointComponent,
+        CreateEndpointCfStep1Component,
+        CreateEndpointConnectComponent,
+        ConnectEndpointComponent
       ],
       providers: [{
         provide: ActivatedRoute,

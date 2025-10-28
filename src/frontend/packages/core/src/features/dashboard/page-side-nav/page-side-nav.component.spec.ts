@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { EntityMonitorFactory } from '../../../../../store/src/monitors/entity-monitor.factory.service';
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';
@@ -11,9 +12,11 @@ describe('PageSideNavComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [BaseTestModulesNoShared],
-      declarations: [PageSideNavComponent],
-      providers: [TabNavService, EntityMonitorFactory]
+      imports: [
+        BaseTestModulesNoShared,
+        PageSideNavComponent
+      ],
+      providers: [TabNavService, ...STORE_TEST_PROVIDERS]
     })
       .compileComponents();
   }));

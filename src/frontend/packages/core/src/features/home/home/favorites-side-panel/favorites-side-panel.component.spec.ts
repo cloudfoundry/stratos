@@ -8,7 +8,10 @@ describe('FavoritesSidePanelComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ FavoritesSidePanelComponent ]
+      imports: [
+        FavoritesSidePanelComponent
+      ],
+      
     })
     .compileComponents();
   }));

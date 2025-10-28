@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
@@ -19,8 +20,8 @@ describe('EntityFavoriteStarComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
+        ...STORE_TEST_PROVIDERS,
         ConfirmationDialogService,
-        PaginationMonitorFactory,
         SessionService
       ],
       imports: [

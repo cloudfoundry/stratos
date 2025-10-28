@@ -15,18 +15,20 @@ describe('HomePageEndpointCardComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ HomePageEndpointCardComponent ],
+      
       imports: [
         CommonModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        HomePageEndpointCardComponent
       ],
       providers: [
         SidePanelService
       ]
+    
     })
     .compileComponents();
   }));

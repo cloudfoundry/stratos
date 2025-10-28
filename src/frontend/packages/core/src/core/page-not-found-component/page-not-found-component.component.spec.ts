@@ -11,8 +11,12 @@ describe('PageNotFoundComponentComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PageNotFoundComponentComponent ],
-      imports: [ MatIconModule ]
+      
+      imports: [
+        MatIconModule,
+        PageNotFoundComponentComponent
+      ]
+    
     })
     .compileComponents();
   }));

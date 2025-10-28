@@ -1,10 +1,10 @@
 import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import type { Action } from '@ngrx/store';
 
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { ListActionState } from '../reducers/api-request-reducer/types';
-import { EntityRequestAction } from './request.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { ListActionState } from '../reducers/api-request-reducer/types';
+import type { EntityRequestAction } from './request.types';
 
 
 export interface PaginationParam {

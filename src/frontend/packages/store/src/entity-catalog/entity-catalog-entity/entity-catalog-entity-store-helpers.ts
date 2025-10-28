@@ -34,18 +34,22 @@ export type ActionDispatchers<ABC extends OrchestratedActionBuilders> = {
 
 export class EntityCatalogEntityStoreHelpers {
 
+  // Lazy getter for EntityCatalogHelper to avoid circular dependency
+  private static get helper() {
+    return EntityCatalogHelpers.GetEntityCatalogHelper();
+  }
+
   private static createEntityService<Y>(
     actionBuilderKey: string,
     action: any,
   ): EntityService<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is of type pagination`);
     }
     if (!action.guid) {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` has no guid`);
     }
-    return helper.esf.create<Y>(
+    return this.helper.esf.create<Y>(
       action.guid,
       action
     );
@@ -55,27 +59,25 @@ export class EntityCatalogEntityStoreHelpers {
     actionBuilderKey: string,
     action: any,
   ): PaginationMonitor<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
-    return helper.pmf.create<Y>(pAction.paginationKey, pAction, pAction.flattenPagination);
+    return this.helper.pmf.create<Y>(pAction.paginationKey, pAction, pAction.flattenPagination);
   }
 
   private static createPaginationService<Y>(
     actionBuilderKey: string,
     action: any,
   ): PaginationObservables<Y> {
-    const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
     if (!isPaginatedAction(action)) {
       throw new Error(`\`${actionBuilderKey}\` action for entity \`${action.entityType}\` is not of type pagination`);
     }
     const pAction = action as PaginatedAction;
-    return helper.getPaginationObservables<Y>({
-      store: helper.store,
+    return this.helper.getPaginationObservables<Y>({
+      store: this.helper.store,
       action: pAction,
-      paginationMonitor: helper.pmf.create<Y>(
+      paginationMonitor: this.helper.pmf.create<Y>(
         pAction.paginationKey,
         pAction,
         pAction.flattenPagination
@@ -106,10 +108,8 @@ export class EntityCatalogEntityStoreHelpers {
     actionKey: string,
   ): ActionDispatcher<K, ABC> {
     return <T extends ActionDispatcherReturnTypes>(...args: Parameters<ABC[K]>): Observable<T> => {
-      const helper = EntityCatalogHelpers.GetEntityCatalogHelper();
-
       const action = builder(...args);
-      helper.store.dispatch(action);
+      this.helper.store.dispatch(action);
       if (isPaginatedAction(action)) {
         return es[actionKey].getPaginationMonitor(
           ...args
@@ -149,7 +149,7 @@ export class EntityCatalogEntityStoreHelpers {
           startWithNull: false
         }
       ): EntityMonitor<Y> => new EntityMonitor<Y>(
-        EntityCatalogHelpers.GetEntityCatalogHelper().store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull
+        this.helper.store, entityId, entityKey, getSchema(params.schemaKey), params.startWithNull
       ),
       getEntityService: (
         ...args: Parameters<ABC['get']>
@@ -204,7 +204,7 @@ export class EntityCatalogEntityStoreHelpers {
               throw new Error(`\`${key}\` action is of type pagination`);
             }
             return new EntityMonitor<Y>(
-              EntityCatalogHelpers.GetEntityCatalogHelper().store,
+              this.helper.store,
               action.guid,
               entityKey,
               getSchema(action.schemaKey),

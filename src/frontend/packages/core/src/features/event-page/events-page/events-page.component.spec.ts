@@ -15,18 +15,20 @@ describe('EventsPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EventsPageComponent],
+      
       imports: [
         CoreModule,
         SharedModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        RouterTestingModule
+        RouterTestingModule,
+        EventsPageComponent
       ],
       providers: [
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

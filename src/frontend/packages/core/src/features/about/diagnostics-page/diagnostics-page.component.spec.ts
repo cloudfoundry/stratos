@@ -15,18 +15,20 @@ describe('DiagnosticsPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DiagnosticsPageComponent],
+      
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
         CoreTestingModule,
-        createBasicStoreModule(),
+        createBasicStoreModule(),,
+        DiagnosticsPageComponent
       ],
       providers: [
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

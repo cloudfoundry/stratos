@@ -11,10 +11,12 @@ describe('StatefulIconComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [StatefulIconComponent],
+      
       imports: [
-        MDAppModule
+        MDAppModule,
+        StatefulIconComponent
       ]
+    
     })
       .compileComponents();
   }));

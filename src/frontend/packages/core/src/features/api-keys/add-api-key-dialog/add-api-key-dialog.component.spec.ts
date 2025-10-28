@@ -16,8 +16,8 @@ describe('AddApiKeyDialogComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
+        AddApiKeyDialogComponent
       ],
-      declarations: [AddApiKeyDialogComponent],
       providers: [
         {
           provide: MatDialogRef,

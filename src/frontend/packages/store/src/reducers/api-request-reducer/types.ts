@@ -1,4 +1,4 @@
-import { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../../entity-catalog/entity-catalog.types';
 
 export const enum RequestSectionKeys {
   CF = 'cf',

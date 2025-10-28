@@ -23,7 +23,7 @@ describe('DashboardBaseComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DashboardBaseComponent, SideNavComponent, PageSideNavComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
@@ -34,7 +34,10 @@ describe('DashboardBaseComponent', () => {
           appReducers
         ),
         HttpClientModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
+        DashboardBaseComponent,
+        SideNavComponent,
+        PageSideNavComponent
       ],
       providers: [
         PageHeaderService,
@@ -44,6 +47,7 @@ describe('DashboardBaseComponent', () => {
         HttpHandler,
         SidePanelService
       ],
+    
     })
       .compileComponents();
   }));

@@ -13,7 +13,7 @@ import {
   CFEndpointsListConfigService,
 } from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
+import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -24,7 +24,7 @@ import { CloudFoundrySharedModule } from '../../../shared/cf-shared.module';
     CommonModule,
     PageHeaderComponent,
     ListComponent,
-    CloudFoundrySharedModule
+    CfEndpointsMissingComponent
   ],
   providers: [
     {

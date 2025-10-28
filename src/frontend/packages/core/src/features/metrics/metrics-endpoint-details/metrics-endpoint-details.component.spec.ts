@@ -17,9 +17,9 @@ describe('MetricsEndpointDetailsComponent', () => {
         CoreModule,
         SharedModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        MetricsEndpointDetailsComponent
       ],
-      declarations: [ MetricsEndpointDetailsComponent ],
       providers: [ MetricsService ]
     })
     .compileComponents();

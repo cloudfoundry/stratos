@@ -9,12 +9,12 @@ describe('TableCellFavoriteComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        TableCellFavoriteComponent,
-      ],
+      
       imports: [
-        ...BaseTestModulesNoShared
+        ...BaseTestModulesNoShared,
+        TableCellFavoriteComponent
       ]
+    
     })
       .compileComponents();
   }));

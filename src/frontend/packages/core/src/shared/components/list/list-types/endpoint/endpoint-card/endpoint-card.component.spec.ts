@@ -16,15 +16,17 @@ describe('EndpointCardComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MetricsEndpointDetailsComponent],
+      
       imports: [
         ...BaseTestModules,
-        EndpointCardComponent
+        EndpointCardComponent,
+        MetricsEndpointDetailsComponent
       ],
       providers: [
         EndpointListHelper,
         MetricsService
       ],
+    
     })
       .compileComponents();
   }));

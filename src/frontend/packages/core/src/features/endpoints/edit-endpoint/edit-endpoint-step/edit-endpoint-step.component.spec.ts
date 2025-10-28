@@ -14,13 +14,13 @@ describe('EditEndpointStepComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EditEndpointStepComponent],
       imports: [
         CoreTestingModule,
         createBasicStoreModule(),
         CommonModule,
         CoreModule,
         SharedModule,
+        EditEndpointStepComponent
       ],
       providers: [
         {

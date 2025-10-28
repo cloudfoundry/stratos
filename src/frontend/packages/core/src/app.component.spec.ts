@@ -1,6 +1,6 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { AppComponent } from './app.component';
@@ -12,18 +12,17 @@ describe('AppComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
-      providers: [
-        LoggedInService,
-        CurrentUserPermissionsService,
-      ],
       imports: [
+        AppComponent,  // Move to imports since it's standalone
         SharedModule,
         RouterTestingModule,
         CoreTestingModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        LoggedInService,
+        CurrentUserPermissionsService,
       ]
     }).compileComponents();
   }));

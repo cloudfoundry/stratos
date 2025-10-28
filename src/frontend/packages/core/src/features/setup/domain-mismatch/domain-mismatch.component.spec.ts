@@ -11,10 +11,14 @@ describe('DomainMismatchComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DomainMismatchComponent, IntroScreenComponent, StratosTitleComponent ],
+      
       imports: [
-        MDAppModule,
+        MDAppModule,,
+        DomainMismatchComponent,
+        IntroScreenComponent,
+        StratosTitleComponent
       ]
+    
     })
     .compileComponents();
   }));

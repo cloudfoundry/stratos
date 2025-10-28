@@ -11,15 +11,15 @@ describe('BackupConnectionCellComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        BackupConnectionCellComponent,
-      ],
+      
       imports: [
-        ...BaseTestModulesNoShared
+        ...BaseTestModulesNoShared,
+        BackupConnectionCellComponent
       ],
       providers: [
         BackupEndpointsService
       ]
+    
     })
       .compileComponents();
   }));

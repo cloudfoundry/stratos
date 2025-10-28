@@ -14,15 +14,17 @@ describe('ErrorPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ErrorPageComponent],
+      
       imports: [
         CoreModule,
         SharedModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        RouterTestingModule
+        RouterTestingModule,
+        ErrorPageComponent
       ],
       providers: [TabNavService]
+    
     })
       .compileComponents();
   }));

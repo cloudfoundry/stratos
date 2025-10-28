@@ -18,11 +18,11 @@ describe('TableCellActionsComponent', () => {
       providers: [
         ListConfig
       ],
-      declarations: [TableCellActionsComponent],
       imports: [
         CoreModule,
         CoreTestingModule,
         createBasicStoreModule(),
+        TableCellActionsComponent
       ]
     })
       .compileComponents();

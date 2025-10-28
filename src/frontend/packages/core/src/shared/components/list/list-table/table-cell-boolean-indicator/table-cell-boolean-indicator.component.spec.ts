@@ -11,8 +11,13 @@ describe('TableCellBooleanIndicatorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellBooleanIndicatorComponent, BooleanIndicatorComponent],
-      imports: [...BaseTestModulesNoShared]
+      
+      imports: [
+        ...BaseTestModulesNoShared,
+        TableCellBooleanIndicatorComponent,
+        BooleanIndicatorComponent
+      ]
+    
     })
       .compileComponents();
   }));

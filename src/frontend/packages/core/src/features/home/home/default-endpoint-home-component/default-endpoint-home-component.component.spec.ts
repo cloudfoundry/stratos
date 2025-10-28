@@ -8,7 +8,7 @@ describe('DefaultEndpointHomeComponentComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ DefaultEndpointHomeComponent ]
+      imports: [ DefaultEndpointHomeComponent ]
     })
     .compileComponents();
   }));

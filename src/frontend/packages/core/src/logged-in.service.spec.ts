@@ -1,6 +1,7 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '@stratosui/store/testing';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { CoreTestingModule } from '../test-framework/core-test.modules';
 import { CoreModule } from './core/core.module';
@@ -14,6 +15,7 @@ describe('LoggedInService', () => {
       providers: [
         LoggedInService,
         CurrentUserPermissionsService,
+        ...STORE_TEST_PROVIDERS,
       ],
       imports: [
         CoreModule,

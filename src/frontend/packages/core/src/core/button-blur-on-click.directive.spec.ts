@@ -28,7 +28,9 @@ describe('ButtonBlurOnClickDirective', () => {
         { provide: Renderer2, useClass: MockRenderer }
       ],
       declarations: [
-        TestButtonComponent,
+        TestButtonComponent
+      ],
+      imports: [
         ButtonBlurOnClickDirective
       ],
     }).compileComponents();

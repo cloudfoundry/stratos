@@ -15,18 +15,18 @@ describe('CreateEndpointConnectComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CreateEndpointConnectComponent,
-        ConnectEndpointComponent,
-      ],
+      
       imports: [
         CoreModule,
         SharedModule,
         CoreTestingModule,
         RouterTestingModule,
-        createBasicStoreModule(),
+        createBasicStoreModule(),,
+        CreateEndpointConnectComponent,
+        ConnectEndpointComponent
       ],
       providers: [SidePanelService],
+    
     })
       .compileComponents();
   }));

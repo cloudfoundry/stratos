@@ -15,13 +15,13 @@ describe('CreateEndpointCfStep1Component', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateEndpointCfStep1Component],
       imports: [
         CoreModule,
         SharedModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        CreateEndpointCfStep1Component
       ],
       providers: [{
         provide: ActivatedRoute,

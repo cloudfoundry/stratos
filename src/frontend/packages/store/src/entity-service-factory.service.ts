@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from './app-state';
-import { entityCatalog } from './entity-catalog/entity-catalog';
+import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { EntityService } from './entity-service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';
 import { EntityRequestAction } from './types/request.types';
 
 @Injectable({
@@ -21,6 +22,7 @@ export class EntityServiceFactory {
   constructor(
     private store: Store<GeneralEntityAppState>,
     private entityMonitorFactory: EntityMonitorFactory,
+    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog,
   ) { }
 
   // FIXME: See #3833. Improve typing of action passed to entity service factory create
@@ -46,14 +48,14 @@ export class EntityServiceFactory {
     );
     if (isConfig) {
       // Get the get action from the entity catalog.
-      const actionBuilder = entityCatalog.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
+      const actionBuilder = this.entityCatalog.getEntity(config.endpointType, config.entityType).actionOrchestrator.getActionBuilder('get');
       return new EntityService<T>(this.store, entityMonitor, actionBuilder(
         config.entityGuid,
         config.endpointGuid,
         config.actionMetadata || {}
-      ));
+      ), this.entityCatalog);
     }
-    return new EntityService<T>(this.store, entityMonitor, action);
+    return new EntityService<T>(this.store, entityMonitor, action, this.entityCatalog);
   }
 
 }

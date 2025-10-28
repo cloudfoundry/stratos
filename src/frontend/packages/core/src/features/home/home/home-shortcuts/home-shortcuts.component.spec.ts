@@ -8,7 +8,10 @@ describe('HomeShortcutsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ HomeShortcutsComponent ]
+      imports: [
+        HomeShortcutsComponent
+      ],
+      
     })
     .compileComponents();
   }));

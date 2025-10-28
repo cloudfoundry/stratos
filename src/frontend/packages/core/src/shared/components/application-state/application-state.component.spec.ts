@@ -11,14 +11,16 @@ describe('ApplicationStateComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      
       declarations: [
-        ApplicationStateIconComponent,
         ApplicationStateIconPipe
       ],
       imports: [
         MDAppModule,
-        ApplicationStateComponent
+        ApplicationStateComponent,
+        ApplicationStateIconComponent
       ]
+    
     })
       .compileComponents();
   }));

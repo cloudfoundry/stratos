@@ -18,6 +18,7 @@ import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
+import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
 
@@ -28,6 +29,7 @@ import { AppReducersModule } from './reducers.module';
   ],
   imports: [
     AppReducersModule,
+    EntityCatalogProvidersModule,
     HttpClientModule,
     EffectsModule.forRoot([
       DashboardEffect,

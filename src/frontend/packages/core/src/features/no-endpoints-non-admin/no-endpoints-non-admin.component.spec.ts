@@ -15,18 +15,20 @@ describe('NoEndpointsNonAdminComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [NoEndpointsNonAdminComponent],
+      
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
         CoreTestingModule,
-        createBasicStoreModule(),
+        createBasicStoreModule(),,
+        NoEndpointsNonAdminComponent
       ],
       providers: [
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

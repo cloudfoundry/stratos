@@ -11,10 +11,14 @@ describe('UpgradePageComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [UpgradePageComponent, IntroScreenComponent, StratosTitleComponent],
+      
       imports: [
-        MDAppModule,
+        MDAppModule,,
+        UpgradePageComponent,
+        IntroScreenComponent,
+        StratosTitleComponent
       ]
+    
     })
       .compileComponents();
   });

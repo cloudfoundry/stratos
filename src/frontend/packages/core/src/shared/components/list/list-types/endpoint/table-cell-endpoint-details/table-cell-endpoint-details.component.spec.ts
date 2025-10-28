@@ -10,7 +10,6 @@ describe('TableCellEndpointDetailsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [],
       imports: [...BaseTestModules],
       providers: [EndpointListHelper]
     })

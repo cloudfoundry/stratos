@@ -20,7 +20,7 @@ describe('EndpointsPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EndpointsPageComponent],
+      
       imports: [
         CoreTestingModule,
         createBasicStoreModule(),
@@ -32,9 +32,11 @@ describe('EndpointsPageComponent', () => {
         StoreModule.forRoot(
           appReducers
         ),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        EndpointsPageComponent
       ],
       providers: [TabNavService, SidePanelService, CurrentUserPermissionsService]
+    
     })
       .compileComponents();
   }));

@@ -10,10 +10,12 @@ describe('TableCellEditComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellEditComponent],
+      
       imports: [
-        CoreModule,
+        CoreModule,,
+        TableCellEditComponent
       ]
+    
     })
       .compileComponents();
   }));

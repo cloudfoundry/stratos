@@ -18,7 +18,7 @@ describe('ProfileInfoComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ProfileInfoComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
@@ -26,13 +26,15 @@ describe('ProfileInfoComponent', () => {
         RouterTestingModule,
         NoopAnimationsModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        ProfileInfoComponent
       ],
       providers: [
         UserProfileService,
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

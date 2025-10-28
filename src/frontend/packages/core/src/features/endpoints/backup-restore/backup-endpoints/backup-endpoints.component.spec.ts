@@ -11,14 +11,16 @@ describe('BackupEndpointsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [BackupEndpointsComponent],
+      
       imports: [
         ...BaseTestModulesNoShared,
-        SharedModule
+        SharedModule,
+        BackupEndpointsComponent
       ],
       providers: [
         TabNavService
       ]
+    
     })
       .compileComponents();
   }));

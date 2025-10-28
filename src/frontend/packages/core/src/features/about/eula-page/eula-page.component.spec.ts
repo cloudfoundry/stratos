@@ -16,19 +16,21 @@ describe('EulaPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EulaPageComponent],
+      
       imports: [
         CoreModule,
         RouterTestingModule,
         SharedModule,
         HttpClientModule,
         HttpClientTestingModule,
-        createBasicStoreModule(),
+        createBasicStoreModule(),,
+        EulaPageComponent
       ],
       providers: [
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

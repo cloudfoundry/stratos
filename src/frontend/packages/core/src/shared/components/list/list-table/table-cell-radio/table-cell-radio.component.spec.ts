@@ -12,10 +12,14 @@ describe('TableCellRadioComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [TableCellRadioComponent],
-        imports: [CoreModule],
+      
+        imports: [
+        CoreModule,
+        TableCellRadioComponent
+      ],
         providers: []
-      }).compileComponents();
+      
+    }).compileComponents();
     })
   );
 

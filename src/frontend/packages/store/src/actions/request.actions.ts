@@ -1,4 +1,4 @@
-import { NormalizedResponse } from '../types/api.types';
+import type { NormalizedResponse } from '../types/api.types';
 
 export const ApiActionTypes = {
   API_REQUEST_START: 'API_REQUEST_START'

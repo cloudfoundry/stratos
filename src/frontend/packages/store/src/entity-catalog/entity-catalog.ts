@@ -13,7 +13,7 @@ import {
 import { EntityCatalogHelpers } from './entity-catalog.helper';
 import { EntityCatalogEntityConfig, IEntityMetadata, IStratosBaseEntityDefinition } from './entity-catalog.types';
 
-class EntityCatalog {
+export class EntityCatalog {
   protected entities: Map<string, StratosCatalogEntity> = new Map();
   protected endpoints: Map<string, StratosCatalogEndpointEntity> = new Map();
 

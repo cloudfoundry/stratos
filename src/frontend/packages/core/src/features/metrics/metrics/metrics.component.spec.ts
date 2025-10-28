@@ -26,8 +26,8 @@ describe('MetricsComponent', () => {
         NoopAnimationsModule,
         CoreTestingModule,
         createBasicStoreModule(),
+        MetricsComponent
       ],
-      declarations: [MetricsComponent],
       providers: [
         MetricsService,
         TabNavService,

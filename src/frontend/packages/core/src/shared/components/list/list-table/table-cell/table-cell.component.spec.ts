@@ -21,20 +21,14 @@ describe('TableCellComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+
       declarations: [
-        AppActionMonitorIconComponent,
-        TableCellComponent,
-        ...listTableCells,
         // EventTabActorIconPipe,
         ValuesPipe,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
         ApplicationStateIconPipe,
-        UsageGaugeComponent,
         PercentagePipe,
         // RunningInstancesComponent,
         AppChipsComponent,
-        BooleanIndicatorComponent,
         // CfRoleCheckboxComponent,
         // GithubCommitAuthorComponent,
         // ServicePlanPriceComponent,
@@ -43,11 +37,19 @@ describe('TableCellComponent', () => {
         // ServiceInstanceLastOpComponent
       ],
       imports: [
-        CoreModule
+        CoreModule,
+        AppActionMonitorIconComponent,
+        TableCellComponent,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        UsageGaugeComponent,
+        BooleanIndicatorComponent,
+        ...listTableCells
       ],
       providers: [
         UtilsService,
       ]
+    
     })
       .compileComponents();
   }));

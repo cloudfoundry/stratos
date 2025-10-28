@@ -9,12 +9,12 @@ describe('TableCellIconComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        TableCellIconComponent,
-      ],
+      
       imports: [
-        CoreModule
+        CoreModule,
+        TableCellIconComponent
       ]
+    
     })
       .compileComponents();
   }));

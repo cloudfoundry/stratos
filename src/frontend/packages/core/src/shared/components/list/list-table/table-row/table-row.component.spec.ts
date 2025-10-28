@@ -43,15 +43,20 @@ describe('TableRowComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableRowComponent, TestHostComponent],
+      
+      declarations: [
+        TestHostComponent
+      ],
       imports: [
         CoreModule,
         CdkTableModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        TableRowComponent
       ],
       providers: [
         TableRowExpandedService
       ]
+    
     })
       .compileComponents();
   }));

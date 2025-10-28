@@ -3,7 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { GeneralEntityAppState } from './app-state';
-import { entityCatalog } from './entity-catalog/entity-catalog';
+import type { IEntityCatalog } from './entity-catalog/entity-catalog.interface';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityActionBuilderEntityConfig } from './entity-catalog/entity-catalog.types';
 import { EntityFetch, EntityFetchHandler } from './entity-request-pipeline/entity-request-pipeline.types';
@@ -61,9 +61,10 @@ export class EntityService<T = any> {
     store: Store<GeneralEntityAppState>,
     public entityMonitor: EntityMonitor<T>,
     actionOrConfig: EntityRequestAction | EntityActionBuilderEntityConfig,
+    private entityCatalog: IEntityCatalog,
   ) {
     this.action = this.getAction(actionOrConfig);
-    const catalogEntity = entityCatalog.getEntity(this.action);
+    const catalogEntity = this.entityCatalog.getEntity(this.action);
 
     // Setup Fetch Handler
     this.actionDispatch = dispatcherFactory<T>(store, this.action, catalogEntity);
@@ -176,7 +177,7 @@ export class EntityService<T = any> {
         entityType,
         endpointType
       } = dispatcherConfigOrAction as EntityActionBuilderEntityConfig;
-      const actionBuilder = entityCatalog.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
+      const actionBuilder = this.entityCatalog.getEntity(endpointType, entityType).actionOrchestrator.getActionBuilder('get');
       return actionBuilder(entityGuid, endpointGuid, actionMetadata);
     }
   }

@@ -38,11 +38,6 @@ describe('ConnectEndpointDialogComponent', () => {
         { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
         SidePanelService
       ],
-      declarations: [
-        ConnectEndpointDialogComponent,
-        ConnectEndpointComponent,
-        CredentialsAuthFormComponent
-      ],
       imports: [
         CommonModule,
         CoreModule,
@@ -52,7 +47,11 @@ describe('ConnectEndpointDialogComponent', () => {
         CoreTestingModule,
         createBasicStoreModule(),
         MetricsModule,
+        ConnectEndpointDialogComponent,
+        ConnectEndpointComponent,
+        CredentialsAuthFormComponent
       ]
+    
     });
     testingModule.compileComponents();
   }));

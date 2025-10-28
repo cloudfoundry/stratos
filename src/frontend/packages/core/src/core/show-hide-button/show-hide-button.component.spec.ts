@@ -8,7 +8,10 @@ describe('ShowHideButtonComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ShowHideButtonComponent ]
+      imports: [
+        ShowHideButtonComponent
+      ],
+      
     })
     .compileComponents();
   }));

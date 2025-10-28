@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
+import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { first, tap } from 'rxjs/operators';
 
 import { AppState } from '../../../../store/src/app-state';
@@ -465,6 +465,7 @@ describe('CurrentUserPermissionsService', () => {
     TestBed.configureTestingModule({
       providers: [
         CurrentUserPermissionsService,
+        ...STORE_TEST_PROVIDERS,
       ],
       imports: [
         {

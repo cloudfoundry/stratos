@@ -17,16 +17,14 @@ describe('CreateEndpointBaseStepComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CreateEndpointBaseStepComponent,
-      ],
       imports: [
         CoreModule,
         SharedModule,
         RouterTestingModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        CreateEndpointBaseStepComponent
       ],
       providers: [
         {

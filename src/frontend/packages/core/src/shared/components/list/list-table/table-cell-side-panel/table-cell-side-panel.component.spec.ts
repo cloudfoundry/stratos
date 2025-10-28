@@ -10,13 +10,15 @@ describe('TableCellSidePanelComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellSidePanelComponent],
+      
       providers: [
         SidePanelService,
       ],
       imports: [
-        RouterTestingModule
+        RouterTestingModule,
+        TableCellSidePanelComponent
       ]
+    
     })
       .compileComponents();
   }));

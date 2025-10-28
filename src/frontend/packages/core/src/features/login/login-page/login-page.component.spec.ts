@@ -15,7 +15,7 @@ describe('LoginPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [LoginPageComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
@@ -24,8 +24,10 @@ describe('LoginPageComponent', () => {
         NoopAnimationsModule,
         StoreModule.forRoot(
           appReducers
-        )
+        ),
+        LoginPageComponent
       ]
+    
     })
       .compileComponents();
   }));

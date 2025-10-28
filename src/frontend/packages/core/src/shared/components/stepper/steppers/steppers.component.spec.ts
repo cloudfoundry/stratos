@@ -14,15 +14,17 @@ describe('SteppersComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [SteppersComponent],
+      
       imports: [
         MDAppModule,
         RouterTestingModule,
         CommonModule,
         CoreModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        SteppersComponent
       ]
+    
     })
       .compileComponents();
   }));

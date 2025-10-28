@@ -12,13 +12,15 @@ describe('BackupCheckboxCellComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [BackupCheckboxCellComponent],
+      
       imports: [
-        ...BaseTestModulesNoShared
+        ...BaseTestModulesNoShared,
+        BackupCheckboxCellComponent
       ],
       providers: [
         BackupEndpointsService
       ]
+    
     })
       .compileComponents();
   }));

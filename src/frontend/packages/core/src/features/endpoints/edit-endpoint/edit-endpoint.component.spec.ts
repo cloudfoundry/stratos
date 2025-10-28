@@ -18,7 +18,6 @@ describe('EditEndpointComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [EditEndpointComponent, EditEndpointStepComponent],
       imports: [
         CoreTestingModule,
         createBasicStoreModule(),
@@ -26,6 +25,8 @@ describe('EditEndpointComponent', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
+        EditEndpointComponent,
+        EditEndpointStepComponent
       ],
       providers: [
         {

@@ -11,10 +11,12 @@ describe('TableCellSelectComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellSelectComponent],
+      
       imports: [
-        CoreModule,
+        CoreModule,,
+        TableCellSelectComponent
       ]
+    
     })
       .compileComponents();
   }));

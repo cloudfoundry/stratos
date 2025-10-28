@@ -10,8 +10,12 @@ describe('TableHeaderSelectComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableHeaderSelectComponent],
-      imports: [CoreModule]
+      
+      imports: [
+        CoreModule,
+        TableHeaderSelectComponent
+      ]
+    
     })
       .compileComponents();
   }));

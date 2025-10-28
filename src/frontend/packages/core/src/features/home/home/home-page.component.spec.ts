@@ -17,7 +17,7 @@ describe('HomePageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [HomePageComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
@@ -25,12 +25,14 @@ describe('HomePageComponent', () => {
         RouterTestingModule,
         NoopAnimationsModule,
         CoreTestingModule,
-        createEmptyStoreModule()
+        createEmptyStoreModule(),
+        HomePageComponent
       ],
       providers: [
         TabNavService,
         CurrentUserPermissionsService
       ]
+    
     })
       .compileComponents();
   }));

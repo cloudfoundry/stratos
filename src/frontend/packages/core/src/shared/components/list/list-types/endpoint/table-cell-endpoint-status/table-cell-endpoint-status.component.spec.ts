@@ -10,10 +10,12 @@ describe('TableCellEndpointStatusComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellEndpointStatusComponent],
+      
       imports: [
-        CoreModule
+        CoreModule,
+        TableCellEndpointStatusComponent
       ]
+    
     })
       .compileComponents();
   }));

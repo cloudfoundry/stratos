@@ -8,7 +8,10 @@ describe('TokenEndpointComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TokenEndpointComponent ]
+      imports: [
+        TokenEndpointComponent
+      ],
+      
     })
     .compileComponents();
   }));

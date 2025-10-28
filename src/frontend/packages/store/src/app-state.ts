@@ -1,16 +1,16 @@
-import { RequestInfoState } from './reducers/api-request-reducer/types';
-import { AuthState } from './reducers/auth.reducer';
-import { ListsState } from './reducers/list.reducer';
-import { ICurrentUserRolesState } from './types/current-user-roles.types';
-import { DashboardState } from './types/dashboard.types';
-import { EndpointState } from './types/endpoint.types';
-import { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
-import { IUserFavoritesGroupsState } from './types/favorite-groups.types';
-import { InternalEventsState } from './types/internal-events.types';
-import { PaginationEntityTypeState } from './types/pagination.types';
-import { IRecentlyVisitedState } from './types/recently-visited.types';
-import { RoutingHistory } from './types/routing.type';
-import { UAASetupState } from './types/uaa-setup.types';
+import type { RequestInfoState } from './reducers/api-request-reducer/types';
+import type { AuthState } from './reducers/auth.reducer';
+import type { ListsState } from './reducers/list.reducer';
+import type { ICurrentUserRolesState } from './types/current-user-roles.types';
+import type { DashboardState } from './types/dashboard.types';
+import type { EndpointState } from './types/endpoint.types';
+import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
+import type { IUserFavoritesGroupsState } from './types/favorite-groups.types';
+import type { InternalEventsState } from './types/internal-events.types';
+import type { PaginationEntityTypeState } from './types/pagination.types';
+import type { IRecentlyVisitedState } from './types/recently-visited.types';
+import type { RoutingHistory } from './types/routing.type';
+import type { UAASetupState } from './types/uaa-setup.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: any;

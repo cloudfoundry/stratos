@@ -10,13 +10,15 @@ describe('TableCellExpanderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellExpanderComponent],
+      
       imports: [
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        TableCellExpanderComponent
       ],
       providers: [
         TableRowExpandedService
       ]
+    
     })
       .compileComponents();
   }));

@@ -17,8 +17,8 @@ describe('ApiKeysPageComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
+        ApiKeysPageComponent
       ],
-      declarations: [ApiKeysPageComponent],
       providers: [
         {
           provide: MatDialogRef,

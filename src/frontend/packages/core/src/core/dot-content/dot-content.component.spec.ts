@@ -8,7 +8,10 @@ describe('DotContentComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DotContentComponent]
+      imports: [
+        DotContentComponent
+      ],
+      
     })
       .compileComponents();
   }));

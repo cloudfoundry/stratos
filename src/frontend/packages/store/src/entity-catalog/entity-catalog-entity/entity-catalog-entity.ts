@@ -1,22 +1,24 @@
-import { ActionReducer } from '@ngrx/store';
+import type { ActionReducer } from '@ngrx/store';
 
-import { IRequestEntityTypeState } from '../../app-state';
-import {
+import type { IRequestEntityTypeState } from '../../app-state';
+import type {
   EntitiesFetchHandler,
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
 } from '../../entity-request-pipeline/entity-request-pipeline.types';
-import {
+import type {
   PaginationPageIteratorConfig,
 } from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EntityPipelineEntity, stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
-import { EndpointAuthTypeConfig } from '../../extension-types';
+import type { EntityPipelineEntity } from '../../entity-request-pipeline/pipeline.types';
+import { stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
+import type { EndpointAuthTypeConfig } from '../../extension-types';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
-import { EndpointModel } from '../../types/endpoint.types';
-import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
-import { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
+import type { EndpointModel } from '../../types/endpoint.types';
+import { APISuccessOrFailedAction } from '../../types/request.types';
+import type { EntityRequestAction } from '../../types/request.types';
+import type { IEndpointFavMetadata, UserFavorite } from '../../types/user-favorites.types';
 import {
   ActionBuilderAction,
   ActionOrchestrator,
@@ -24,7 +26,7 @@ import {
   OrchestratedActionBuilders,
 } from '../action-orchestrator/action-orchestrator';
 import { EntityCatalogHelpers } from '../entity-catalog.helper';
-import {
+import type {
   EntityCatalogSchemas,
   IEntityMetadata,
   IStratosBaseEntityDefinition,
@@ -35,8 +37,8 @@ import {
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
 import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import { EntityCatalogEntityStore } from './entity-catalog-entity.types';
-import { NonOptionalKeys, RemoveIndex } from './type.helpers';
+import type { EntityCatalogEntityStore } from './entity-catalog-entity.types';
+import type { NonOptionalKeys, RemoveIndex } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<
   ABC,

@@ -31,7 +31,7 @@ import { LoadingPageComponent } from '../../../../../../../../../core/src/shared
 import { CardNumberMetricComponent } from '../../../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
 import { CardCfRecentAppsComponent } from '../../../../../../../features/home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
-import { CloudFoundrySharedModule } from '../../../../../../../shared/cf-shared.module';
+import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
@@ -52,7 +52,7 @@ import { CloudFoundrySharedModule } from '../../../../../../../shared/cf-shared.
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CfUserPermissionDirective,
-    CloudFoundrySharedModule
+    CardCfSpaceDetailsComponent
   ]
 })
 export class CloudFoundrySpaceSummaryComponent {

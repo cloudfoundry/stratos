@@ -14,16 +14,18 @@ describe('SideNavComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [SideNavComponent],
+      
       imports: [
         RouterTestingModule,
         MDAppModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        SideNavComponent
       ],
       providers: [
         CustomizationService
       ]
+    
     })
       .compileComponents();
   }));

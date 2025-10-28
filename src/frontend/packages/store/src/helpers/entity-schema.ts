@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { EntityCatalogHelpers } from '../entity-catalog/entity-catalog.helper';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 
 function wrapSchema(definition: Schema) {
   return {

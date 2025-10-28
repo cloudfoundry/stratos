@@ -2,7 +2,7 @@ import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { ComponentFixture, inject, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { PaginationEntityState } from 'frontend/packages/store/src/types/pagination.types';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -60,6 +60,7 @@ describe('ListComponent', () => {
           createBasicStoreModule(),
         ],
         providers: [
+          ...STORE_TEST_PROVIDERS,
           { provide: ChangeDetectorRef, useValue: { detectChanges: () => { } } },
           // Fun fact, NgZone will execute something on import which causes an undefined error
           { provide: MockedNgZone, useValue: new MockedNgZone() },
@@ -124,10 +125,9 @@ describe('ListComponent', () => {
     beforeEach(waitForAsync(() => {
       TestBed.configureTestingModule({
         providers: [
+          ...STORE_TEST_PROVIDERS,
           { provide: ListConfig, useClass: EndpointsListConfigService },
           // ApplicationStateService,
-          PaginationMonitorFactory,
-          EntityMonitorFactory,
           EndpointListHelper,
           CurrentUserPermissionsService
         ],

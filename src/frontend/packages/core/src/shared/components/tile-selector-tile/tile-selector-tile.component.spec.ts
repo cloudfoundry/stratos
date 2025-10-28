@@ -10,10 +10,11 @@ describe('TileSelectorTileComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      
       imports: [
-        MDAppModule
-      ],
-      declarations: [ TileSelectorTileComponent ]
+        MDAppModule,
+        TileSelectorTileComponent
+      ]
     })
     .compileComponents();
   }));

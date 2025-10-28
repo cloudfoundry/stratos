@@ -16,8 +16,8 @@ import { combineLatest, Observable, Subscription, timer } from 'rxjs';
 import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { SharedModule } from '../../shared.module';
-import { CustomProgressBarSelectorComponent, CustomSpinnerComponent } from '../custom-material/custom-material.component';
+import { CustomProgressBarComponent, CustomSpinnerComponent } from '../custom-material/custom-material.component';
+import { CustomCardComponent } from '../custom-card/custom-card.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
@@ -42,8 +42,9 @@ export interface MetricsConfig<T = any> {
   imports: [
     CommonModule,
     BaseChartDirective,
-    SharedModule,
-    CustomSpinnerComponent
+    CustomCardComponent,
+    CustomSpinnerComponent,
+    CustomProgressBarComponent
   ]
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {

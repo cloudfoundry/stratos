@@ -5,7 +5,7 @@ import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
 import { EventWatcherService } from '../../../core/event-watcher/event-watcher.service';
-import { SharedModule } from '../../shared.module';
+import { CustomProgressBarComponent } from '../custom-material/custom-material.component';
 
 // Import Xterm and Xterm Fit Addon
 @Component({
@@ -15,7 +15,7 @@ import { SharedModule } from '../../shared.module';
   standalone: true,
   imports: [
     CommonModule,
-    SharedModule, // Provides mat-progress-bar via CustomProgressBarComponent
+    CustomProgressBarComponent
   ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {

@@ -70,6 +70,15 @@
             "scripts": []
           },
           "configurations": {
+            "development": {
+              "optimization": false,
+              "outputHashing": "none",
+              "sourceMap": true,
+              "namedChunks": true,
+              "extractLicenses": false,
+              "vendorChunk": true,
+              "buildOptimizer": false
+            },
             "production": {
               "optimization": true,
               "outputHashing": "all",
@@ -106,9 +115,13 @@
             "proxyConfig": "proxy.conf.js",
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
-            "buildTarget": "stratos:build"
+            "buildTarget": "stratos:build:development",
+            "port": 5000
           },
           "configurations": {
+            "development": {
+              "buildTarget": "stratos:build:development"
+            },
             "production": {
               "buildTarget": "stratos:build:production"
             },

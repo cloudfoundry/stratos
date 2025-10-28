@@ -18,7 +18,7 @@ describe('EditProfileInfoComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [EditProfileInfoComponent],
+      
       imports: [
         CommonModule,
         CoreModule,
@@ -26,9 +26,11 @@ describe('EditProfileInfoComponent', () => {
         RouterTestingModule,
         NoopAnimationsModule,
         CoreTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        EditProfileInfoComponent
       ],
       providers: [UserProfileService, TabNavService, CurrentUserPermissionsService],
+    
     })
       .compileComponents();
   });

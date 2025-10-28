@@ -15,7 +15,7 @@ import {
   TableCellRequestMonitorIconComponent,
 } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../list/list-table/table.types';
-import { SharedModule } from '../../shared.module';
+import { TableComponent } from '../list/list-table/table.component';
 
 @Component({
   selector: 'app-action-monitor',
@@ -24,7 +24,7 @@ import { SharedModule } from '../../shared.module';
   standalone: true,
   imports: [
     CommonModule,
-    SharedModule
+    TableComponent
   ]
 })
 export class AppActionMonitorComponent<T> implements OnInit {
