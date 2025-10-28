@@ -1,14 +1,22 @@
 # Stratos Development Makefile
 # Full stack development with source maps and hot reload
 
-.PHONY: help dev-frontend dev-backend dev-full-build clean-dev
+.PHONY: help build build-frontend build-backend dev-frontend dev-backend dev-full-build clean-dev
 
 # Default target
+.DEFAULT_GOAL := help
+
 help:
 	@echo "Stratos Development Commands:"
 	@echo ""
-	@echo "  make dev-frontend    - Start Angular dev server (port 5000) with source maps + hot reload"
-	@echo "  make dev-backend     - Start Jetstream backend API server (port 5443)"
+	@echo "Build Commands:"
+	@echo "  make build           - Build both frontend and backend"
+	@echo "  make build-frontend  - Build Angular frontend only"
+	@echo "  make build-backend   - Build Jetstream backend only"
+	@echo ""
+	@echo "Development Commands:"
+	@echo "  make dev-frontend    - Build and start Angular dev server (port 5000)"
+	@echo "  make dev-backend     - Build and start Jetstream backend API server (port 5443)"
 	@echo "  make dev-full-build  - Build backend, then start full stack development"
 	@echo "  make clean-dev       - Clean development artifacts"
 	@echo ""
@@ -18,8 +26,22 @@ help:
 	@echo "  Access at:  http://127.0.0.1:5000"
 	@echo ""
 
+# Build both frontend and backend
+build: build-frontend build-backend
+	@echo "✅ Full build complete (frontend + backend)"
+
+# Build Angular frontend
+build-frontend:
+	@echo "Building Angular frontend..."
+	bun run build
+
+# Build Jetstream backend
+build-backend:
+	@echo "Building Jetstream backend..."
+	bun run build-backend
+
 # Start Angular dev server with source maps and hot reload
-dev-frontend:
+dev-frontend: build-frontend
 	@echo "Starting Angular dev server with source maps on http://127.0.0.1:5000"
 	@echo "✅ Source maps enabled (real TypeScript line numbers)"
 	@echo "✅ Hot reload enabled (instant updates on file save)"
@@ -39,11 +61,6 @@ dev-backend:
 		$(MAKE) -s build-backend; \
 	fi
 	cd src/jetstream && ./jetstream
-
-# Build backend before starting
-build-backend:
-	@echo "Building Jetstream backend..."
-	bun run build-backend
 
 # Full build and start (for convenience)
 dev-full-build: build-backend
