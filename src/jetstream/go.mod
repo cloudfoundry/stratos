@@ -32,6 +32,7 @@ require (
 	github.com/cloudfoundry/noaa/v2 v2.5.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
+	github.com/cloudfoundry/stratos/src/jetstream/docs v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
@@ -59,7 +60,6 @@ require (
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.33.0
-
 )
 
 require (
@@ -108,7 +108,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/cli v24.0.6+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v24.0.7+incompatible // indirect
+	github.com/docker/docker v25.0.13+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
