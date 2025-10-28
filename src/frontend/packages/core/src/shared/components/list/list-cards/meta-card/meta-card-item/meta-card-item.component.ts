@@ -11,9 +11,7 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
-    MetaCardKeyComponent,
-    MetaCardValueComponent
+    CommonModule
   ]
 })
 export class MetaCardItemComponent implements OnInit {

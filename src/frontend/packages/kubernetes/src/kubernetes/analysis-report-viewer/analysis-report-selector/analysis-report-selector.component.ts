@@ -1,10 +1,5 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgIf, NgFor } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { MatTooltip } from '@angular/material/tooltip';
 import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -20,11 +15,8 @@ selector: 'app-analysis-report-selector',
   standalone: true,
   imports: [
     AsyncPipe,
-    MatSelect,
-    MatOption,
-    MatIconButton,
-    MatIcon,
-    MatTooltip
+    NgIf,
+    NgFor
   ]
 })
 export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
@@ -44,6 +36,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   @Output() reportCount = new EventEmitter<number>();
 
   autoSelected = false;
+  isMenuOpen = false;
 
   subs: Subscription[] = [];
 
@@ -93,6 +86,14 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
     this.analysisService.getByPath(this.endpoint, this.path, true);
     $event.preventDefault();
     $event.cancelBubble = true;
+  }
+
+  public toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  public closeMenu() {
+    this.isMenuOpen = false;
   }
 
   ngOnDestroy() {

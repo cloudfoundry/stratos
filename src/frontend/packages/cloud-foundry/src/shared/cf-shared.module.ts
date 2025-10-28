@@ -242,9 +242,7 @@ const cfListCards: Type<CardCell<any>>[] = [
         SharedModule,
         ApplicationModule,
         TailwindJsonSchemaFormModule,
-        EnvVarViewComponent,
-    ],
-    declarations: [
+        // Standalone components
         ServiceIconComponent,
         CfEndpointDetailsComponent,
         CliCommandComponent,
@@ -277,13 +275,16 @@ const cfListCards: Type<CardCell<any>>[] = [
         ServicePlanPriceComponent,
         CreateApplicationStep1Component,
         CloudFoundryEventsListComponent,
+        EnvVarViewComponent,
         ...cfListTableCells,
         ...cfListCards,
         ServiceInstanceLastOpComponent,
-        TableCellFeatureFlagDescriptionComponent,
-        AppNameUniqueDirective,
         ApplicationInstanceChartComponent,
+        // Standalone directives
+        AppNameUniqueDirective,
         CfUserPermissionDirective
+    ],
+    declarations: [
     ],
     exports: [
         ServiceIconComponent,
@@ -301,7 +302,6 @@ const cfListCards: Type<CardCell<any>>[] = [
         BindAppsStepComponent,
         SpecifyUserProvidedDetailsComponent,
         AddServiceInstanceBaseStepComponent,
-        CfServiceCardComponent,
         SchemaFormComponent,
         CardAppInstancesComponent,
         CardAppUsageComponent,
@@ -319,6 +319,8 @@ const cfListCards: Type<CardCell<any>>[] = [
         ServicePlanPriceComponent,
         CreateApplicationStep1Component,
         CloudFoundryEventsListComponent,
+        EnvVarViewComponent,
+        ServiceInstanceLastOpComponent,
         AppNameUniqueDirective,
         ApplicationInstanceChartComponent,
         CfUserPermissionDirective

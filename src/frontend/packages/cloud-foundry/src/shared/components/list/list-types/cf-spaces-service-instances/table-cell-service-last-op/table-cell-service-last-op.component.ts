@@ -5,7 +5,7 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import { userProvidedServiceInstanceEntityType } from '../../../../../../cf-entity-types';
-import { ServiceInstanceLastOpComponent } from '../../../../../service-instance-last-op/service-instance-last-op.component';
+import { ServiceInstanceLastOpComponent } from '../../../../service-instance-last-op/service-instance-last-op.component';
 
 @Component({
   selector: 'app-table-cell-service-last-op',

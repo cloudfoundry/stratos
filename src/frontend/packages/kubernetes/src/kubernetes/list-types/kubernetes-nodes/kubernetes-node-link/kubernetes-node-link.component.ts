@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -8,7 +9,8 @@ import { KubernetesNode } from '../../../store/kube.types';
   selector: 'app-kubernetes-node-link',
   templateUrl: './kubernetes-node-link.component.html',
   styleUrls: ['./kubernetes-node-link.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [RouterLink]
 })
 export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

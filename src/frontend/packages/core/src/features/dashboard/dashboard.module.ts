@@ -15,8 +15,6 @@ import { SideNavComponent } from './side-nav/side-nav.component';
     ScrollingModule,
     SharedModule,
     MetricsModule,
-  ],
-  declarations: [
     SideNavComponent,
     DashboardBaseComponent,
     PageSideNavComponent

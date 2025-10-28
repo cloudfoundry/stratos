@@ -19,7 +19,7 @@ import { NoContentMessageComponent } from '../../../shared/components/no-content
 import { UserProfileBannerComponent } from '../../../shared/components/user-profile-banner/user-profile-banner.component';
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 import { ProfileSettingsComponent } from '../../../shared/components/profile-settings/profile-settings.component';
-import { ChipsComponent } from '../../../shared/components/chips/chips.component';
+import { AppChipsComponent } from '../../../shared/components/chips/chips.component';
 
 @Component({
   selector: 'app-profile-info',
@@ -34,7 +34,7 @@ import { ChipsComponent } from '../../../shared/components/chips/chips.component
     UserProfileBannerComponent,
     MetadataItemComponent,
     ProfileSettingsComponent,
-    ChipsComponent
+    AppChipsComponent
   ]
 })
 export class ProfileInfoComponent {

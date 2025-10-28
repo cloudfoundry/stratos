@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -10,7 +11,8 @@ import { KubernetesNode } from '../../../store/kube.types';
   selector: 'app-node-pod-count',
   templateUrl: './node-pod-count.component.html',
   styleUrls: ['./node-pod-count.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [AsyncPipe]
 })
 export class NodePodCountComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   podCount$: Observable<string>;

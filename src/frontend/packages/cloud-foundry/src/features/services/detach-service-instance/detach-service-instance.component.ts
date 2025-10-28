@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -13,6 +13,7 @@ import {
 import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppActionMonitorComponent } from '../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
@@ -23,6 +24,7 @@ import { APIResource } from '../../../../../store/src/types/api.types';
 import { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -30,9 +32,12 @@ import { CF_ENDPOINT_TYPE } from '../../../cf-types';
   styleUrls: ['./detach-service-instance.component.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
-    StepComponent
+    StepComponent,
+    DetachAppsComponent,
+    AppActionMonitorComponent
   ]
 })
 export class DetachServiceInstanceComponent {

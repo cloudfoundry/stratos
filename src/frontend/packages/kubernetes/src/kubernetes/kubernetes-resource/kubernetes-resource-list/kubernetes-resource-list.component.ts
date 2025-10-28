@@ -8,8 +8,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { ListViewComponent } from '../../../../../core/src/shared/components/list/list-view/list-view.component';
+import { PageSubNavComponent, ListViewComponent } from '@stratosui/core';
 
 import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
 import {

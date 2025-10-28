@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
 
@@ -9,7 +10,11 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   selector: 'app-kubernetes-config-auth-form',
   templateUrl: './kubernetes-config-auth-form.component.html',
   styleUrls: ['./kubernetes-config-auth-form.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    FileInputComponent,
+  ]
 })
 export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: UntypedFormGroup;

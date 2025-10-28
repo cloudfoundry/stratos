@@ -5,9 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { BytesToHumanSizePipe } from '../../../../../../core/src/core/bytes-to-human-size/bytes-to-human-size.pipe';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { UploadProgressIndicatorComponent } from '../../../../../../core/src/shared/components/upload-progress-indicator/upload-progress-indicator.component';
+import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
@@ -21,7 +19,7 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
   imports: [
     CommonModule,
     UploadProgressIndicatorComponent,
-    BytesToHumanSizePipe
+    BytesToHumanSize
   ]
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {

@@ -13,6 +13,7 @@ import { ConfirmationDialogConfig } from '../../../../../core/src/shared/compone
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderModule } from '../../../../../core/src/shared/components/page-header/page-header.module';
+import { ProductNameComponent } from '../../../../../core/src/shared/components/product-name.ccomponent';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../../services/kubernetes.service';
@@ -32,7 +33,8 @@ type MessageUpdater = (msg: string) => void;
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    PageHeaderModule
+    PageHeaderModule,
+    ProductNameComponent
   ],
   providers: [
     {

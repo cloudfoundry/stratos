@@ -1,9 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import {
   ITableListDataSource,
   RowState,
@@ -11,6 +13,7 @@ import {
 import {
   TableHeaderSelectComponent,
 } from '../../../../../core/src/shared/components/list/list-table/table-header-select/table-header-select.component';
+import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { AppState } from '../../../../../store/src/public-api';
@@ -19,11 +22,8 @@ import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
 import { KubeConfigTableNameComponent } from './kube-config-table-name/kube-config-table-name.component';
 import { KubeConfigTableSelectComponent } from './kube-config-table-select/kube-config-table-select.component';
-import {
-  KubeConfigTableSubTypeSelectComponent,
-} from './kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
+import { KubeConfigTableSubTypeSelectComponent } from './kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
 import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-select/kube-config-table-user-select.component';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 export interface KubeConfigTableListDataSource extends ITableListDataSource<KubeConfigFileCluster> {
   editRowName: string;
@@ -39,13 +39,9 @@ selector: 'app-kube-config-selection',
   standalone: true,
   imports: [
     CommonModule,
-    KubeConfigTableCertComponent,
-    KubeConfigTableNameComponent,
-    KubeConfigTableSelectComponent,
-    KubeConfigTableSubTypeSelectComponent,
-    KubeConfigTableUserSelectComponent,
-    ListComponent,
-    TableHeaderSelectComponent,
+    MatIconModule,
+    FileInputComponent,
+    TableComponent,
   ]
 })
 export class KubeConfigSelectionComponent {

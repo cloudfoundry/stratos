@@ -1,10 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 
+import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
 import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { RouterNav } from '../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../store/src/public-api';
 import {
@@ -13,7 +16,7 @@ import {
 import { KubernetesService } from '../services/kubernetes.service';
 
 @Component({
-selector: 'app-kubernetes',
+  selector: 'app-kubernetes',
   templateUrl: './kubernetes.component.html',
   styleUrls: ['./kubernetes.component.scss'],
   providers: [
@@ -24,7 +27,12 @@ selector: 'app-kubernetes',
     EndpointListHelper,
     KubernetesService
   ],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    ListComponent,
+    PageHeaderComponent
+  ]
 })
 export class KubernetesComponent {
 

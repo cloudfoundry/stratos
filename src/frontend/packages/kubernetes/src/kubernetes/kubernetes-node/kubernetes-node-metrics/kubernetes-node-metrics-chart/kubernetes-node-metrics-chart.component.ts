@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
 
-import { MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
@@ -11,7 +12,13 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
   selector: 'app-kubernetes-node-metrics-chart',
   templateUrl: './kubernetes-node-metrics-chart.component.html',
   styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MetricsChartComponent
+  ]
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 

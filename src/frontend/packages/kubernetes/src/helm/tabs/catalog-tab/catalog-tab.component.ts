@@ -1,8 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
+
+import { ListComponent } from '@stratosui/core';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../store/src/actions/pagination.actions';
@@ -22,7 +31,17 @@ const REPO_FILTER_NAME = 'repository';
     provide: ListConfig,
     useClass: MonocularChartsListConfig,
   }],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    ListComponent
+  ]
 })
 export class CatalogTabComponent implements OnDestroy {
 

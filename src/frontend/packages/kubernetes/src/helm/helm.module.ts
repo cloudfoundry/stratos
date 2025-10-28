@@ -16,9 +16,7 @@ import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
         CommonModule,
         SharedModule,
         HelmRoutingModule,
-        MonocularModule
-    ],
-    declarations: [
+        MonocularModule,
         MonocularTabBaseComponent,
         CatalogTabComponent,
         MonocularChartCardComponent,

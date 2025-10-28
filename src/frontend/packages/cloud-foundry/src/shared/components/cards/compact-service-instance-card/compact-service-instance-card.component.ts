@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 
-import { ChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChipsComponent, AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
 
@@ -13,7 +12,7 @@ import { IServiceInstance } from '../../../../cf-api-svc.types';
   standalone: true,
   imports: [
     CommonModule,
-    ChipsComponent
+    AppChipsComponent
   ]
 })
 export class CompactServiceInstanceCardComponent implements OnInit {

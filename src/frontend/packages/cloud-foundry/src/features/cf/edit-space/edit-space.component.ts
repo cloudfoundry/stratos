@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
@@ -31,6 +32,7 @@ import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.compon
   imports: [
     CommonModule,
     PageHeaderComponent,
+    StepComponent,
     SteppersComponent,
     EditSpaceStepComponent
   ]

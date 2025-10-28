@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -7,13 +9,25 @@ import { Chart } from '../shared/models/chart';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { ReposService } from '../shared/services/repos.service';
+import { LoaderComponent } from '../loader/loader.component';
+import { PanelComponent } from '../panel/panel.component';
+import { ListFiltersComponent } from '../list-filters/list-filters.component';
+import { ChartListComponent } from '../chart-list/chart-list.component';
 
 @Component({
   selector: 'app-charts',
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.scss'],
   viewProviders: [MatIconRegistry],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    LoaderComponent,
+    PanelComponent,
+    ListFiltersComponent,
+    ChartListComponent
+  ]
 })
 export class ChartsComponent implements OnInit {
   charts: Chart[] = [];

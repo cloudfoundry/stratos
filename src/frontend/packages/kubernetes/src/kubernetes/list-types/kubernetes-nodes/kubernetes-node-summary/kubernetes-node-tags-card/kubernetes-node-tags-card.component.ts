@@ -1,15 +1,25 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppChip } from '../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChip, AppChipsComponent } from '../../../../../../../core/src/shared/components/chips/chips.component';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
-selector: 'app-kubernetes-node-tags-card',
+  selector: 'app-kubernetes-node-tags-card',
   templateUrl: './kubernetes-node-tags-card.component.html',
   styleUrls: ['./kubernetes-node-tags-card.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    MatCard,
+    MatCardHeader,
+    MatCardTitle,
+    MatCardContent,
+    AppChipsComponent
+  ]
 })
 export class KubernetesNodeTagsCardComponent implements OnInit {
 

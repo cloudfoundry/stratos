@@ -99,10 +99,13 @@ class AppStoreDebugModule { }
 
 @NgModule({
   declarations: [
-    AppComponent,
-    NoEndpointsNonAdminComponent,
+    // All components are now standalone and imported below
   ],
   imports: [
+    // Standalone Components
+    AppComponent,
+    NoEndpointsNonAdminComponent,
+    // Modules
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     AppStoreModule,

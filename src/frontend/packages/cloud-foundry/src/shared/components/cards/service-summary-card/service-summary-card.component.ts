@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { ChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
 import {
   MetaCardComponent,
 } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
@@ -21,7 +21,7 @@ import {
 import {
   MetaCardValueComponent,
 } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { ClickStopPropagationDirective } from '../../../../../../core/src/core/click-stop-propagation.directive';
+import { ClickStopPropagationDirective } from '@stratosui/core';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import {
   ServiceTag,
@@ -47,7 +47,7 @@ import { ServiceIconComponent } from '../../service-icon/service-icon.component'
     MetaCardValueComponent,
     ServiceIconComponent,
     BooleanIndicatorComponent,
-    ChipsComponent,
+    AppChipsComponent,
     ClickStopPropagationDirective
   ]
 })

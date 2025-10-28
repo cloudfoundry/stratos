@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
-import { ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChipsComponent, AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
@@ -23,7 +22,7 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
   standalone: true,
   imports: [
     CommonModule,
-    ChipsComponent
+    AppChipsComponent
   ]
 })
 export class TableCellServiceInstanceAppsAttachedComponent

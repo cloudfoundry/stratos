@@ -6,9 +6,7 @@ import { TailwindJsonSchemaFormComponent } from './tailwind-json-schema-form.com
 @NgModule({
   imports: [
     CommonModule,
-    ReactiveFormsModule
-  ],
-  declarations: [
+    ReactiveFormsModule,
     TailwindJsonSchemaFormComponent
   ],
   exports: [

@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 
+import { BytesToHumanSize } from '@stratosui/core';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 
 
@@ -8,7 +9,8 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
   templateUrl: './kubernetes-node-capacity.component.html',
   styleUrls: ['./kubernetes-node-capacity.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: true
+  standalone: true,
+  imports: [BytesToHumanSize]
 })
 export class KubernetesNodeCapacityComponent<T> extends TableCellCustom<T> {
 

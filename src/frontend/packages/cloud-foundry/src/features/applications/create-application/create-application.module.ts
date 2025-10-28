@@ -13,9 +13,7 @@ import { CreateApplicationComponent } from './create-application.component';
     CommonModule,
     CoreModule,
     SharedModule,
-    CloudFoundrySharedModule
-  ],
-  declarations: [
+    CloudFoundrySharedModule,
     CreateApplicationComponent,
     CreateApplicationStep2Component,
     CreateApplicationStep3Component

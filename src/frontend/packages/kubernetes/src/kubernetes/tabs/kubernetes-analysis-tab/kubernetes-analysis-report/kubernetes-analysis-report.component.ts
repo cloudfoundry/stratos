@@ -10,6 +10,9 @@ import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { getParentURL } from '../../../services/route.helper';
 import { PageHeaderModule } from 'frontend/packages/core/src/shared/components/page-header/page-header.module';
+import { PageSubNavComponent } from 'frontend/packages/core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { LoadingPageComponent } from 'frontend/packages/core/src/shared/components/loading-page/loading-page.component';
+import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/analysis-report-viewer.component';
 
 @Component({
   selector: 'app-kubernetes-analysis-report',
@@ -19,7 +22,10 @@ import { PageHeaderModule } from 'frontend/packages/core/src/shared/components/p
   imports: [
     CommonModule,
     MatProgressSpinnerModule,
-    PageHeaderModule
+    PageHeaderModule,
+    PageSubNavComponent,
+    LoadingPageComponent,
+    AnalysisReportViewerComponent
   ]
 })
 export class KubernetesAnalysisReportComponent implements OnInit {

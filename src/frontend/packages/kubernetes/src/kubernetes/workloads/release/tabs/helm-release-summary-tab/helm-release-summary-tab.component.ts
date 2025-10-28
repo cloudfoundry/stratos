@@ -3,30 +3,30 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ComponentFactoryResolver, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ConfirmationDialogConfig } from 'frontend/packages/core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from 'frontend/packages/core/src/shared/components/confirmation-dialog.service';
-import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
-import { RouterNav } from 'frontend/packages/store/src/actions/router.actions';
-import { AppState } from 'frontend/packages/store/src/app-state';
+import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
+import { ClearPaginationOfType } from '@stratosui/store';
+import { RouterNav } from '@stratosui/store';
+import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
-import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { EntitySummaryTitleComponent } from '../../../../../../../core/src/shared/components/entity-summary-title/entity-summary-title.component';
-import { MetadataItemComponent } from '../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { TileGridComponent } from '../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../../../core/src/shared/components/tile/tile/tile.component';
-import { RingChartComponent } from '../../../../../../../core/src/shared/components/ring-chart/ring-chart.component';
-import { CardNumberMetricComponent } from '../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import {
+  PageSubNavComponent,
+  LoadingPageComponent,
+  EntitySummaryTitleComponent,
+  MetadataItemComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent,
+  RingChartComponent,
+  CardNumberMetricComponent
+} from '@stratosui/core';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { WorkloadLiveReloadComponent } from '../../../workload-live-reload/workload-live-reload.component';
+import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
-import { SnackBarService } from '../../../../../../../core/src/shared/services/snackbar.service';
-import { endpointsEntityRequestDataSelector } from '../../../../../../../store/src/selectors/endpoint.selectors';
+import { SnackBarService } from '@stratosui/core';
+import { endpointsEntityRequestDataSelector } from '@stratosui/store';
 import {
   ResourceAlertPreviewComponent,
 } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';

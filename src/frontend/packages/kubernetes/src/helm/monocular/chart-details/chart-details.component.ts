@@ -1,18 +1,33 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { finalize, first, switchMap, tap } from 'rxjs/operators';
+
+import { EntitySummaryTitleComponent } from '@stratosui/core';
 
 import { Chart } from '../shared/models/chart';
 import { ChartVersion } from '../shared/models/chart-version';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../stratos-monocular.helper';
+import { LoaderComponent } from '../loader/loader.component';
+import { PanelComponent } from '../panel/panel.component';
+import { ChartDetailsInfoComponent } from './chart-details-info/chart-details-info.component';
+import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-details-readme.component';
 
 @Component({
   selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
   styleUrls: ['./chart-details.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    EntitySummaryTitleComponent,
+    LoaderComponent,
+    PanelComponent,
+    ChartDetailsInfoComponent,
+    ChartDetailsReadmeComponent
+  ]
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */

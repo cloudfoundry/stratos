@@ -10,17 +10,14 @@ import { map, switchMap } from 'rxjs/operators';
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ListComponent } from '../../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../../core/src/shared/components/list/list.component.types';
-import { NoContentMessageComponent } from '../../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { PageSubNavComponent } from '../../../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { ListComponent, ListConfig, NoContentMessageComponent, PageSubNavComponent } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
 import { CFAppState } from '../../../../../../../cf-app-state';
 import {
   CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfAdminAddUserWarningComponent } from '../../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
+import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
 import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../../../cf.helpers';
 import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organizations/cf-invite-user-link/cloud-foundry-invite-user-link.component';

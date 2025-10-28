@@ -1,8 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '@stratosui/core';
+import { LoadingPageComponent } from '@stratosui/core';
 import { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -17,6 +20,12 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
   templateUrl: './kubernetes-tab-base.component.html',
   styleUrls: ['./kubernetes-tab-base.component.scss'],
   standalone: true,
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    PageHeaderComponent,
+    LoadingPageComponent,
+  ],
   providers: [
     {
       provide: BaseKubeGuid,

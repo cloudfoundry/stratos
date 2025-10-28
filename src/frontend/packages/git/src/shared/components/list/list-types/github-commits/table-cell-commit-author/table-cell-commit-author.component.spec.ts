@@ -10,8 +10,11 @@ describe('TableCellCommitAuthorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellCommitAuthorComponent, GithubCommitAuthorComponent],
-      imports: [...BaseTestModulesNoShared]
+      imports: [
+        ...BaseTestModulesNoShared,
+        TableCellCommitAuthorComponent,
+        GithubCommitAuthorComponent
+      ]
     })
       .compileComponents();
   }));

@@ -19,6 +19,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
+import { LoadingPageComponent } from '../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -47,6 +48,7 @@ import { ApplicationPollingService } from './application-polling.service';
   imports: [
     CommonModule,
     RouterModule,
+    LoadingPageComponent,
     PageHeaderComponent
   ]
 })

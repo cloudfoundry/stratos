@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -10,7 +11,8 @@ import { KubernetesNamespace } from '../../../store/kube.types';
   selector: 'app-kube-namespace-pod-count',
   templateUrl: './kube-namespace-pod-count.component.html',
   styleUrls: ['./kube-namespace-pod-count.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [AsyncPipe]
 })
 export class KubeNamespacePodCountComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   podCount$: Observable<number>;

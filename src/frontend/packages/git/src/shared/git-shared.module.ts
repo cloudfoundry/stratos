@@ -19,15 +19,15 @@ import { GitSCMService } from './scm/scm.service';
         MDAppModule,
         // Need to import this so that the git register endpoints process can use the generic register and connect steps
         // HOWEVER as this module is not lazy loaded it will be brought in on app load
-        CreateEndpointModule
-    ],
-    declarations: [
+        CreateEndpointModule,
+        // Standalone components
         TableCellCommitAuthorComponent,
         GithubCommitAuthorComponent,
         GitRegistrationComponent,
         GitEndpointDetailsComponent,
     ],
     exports: [
+        TableCellCommitAuthorComponent,
         GithubCommitAuthorComponent,
         GitRegistrationComponent,
         GitEndpointDetailsComponent,

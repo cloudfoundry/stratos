@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, NgModule } from '@angular/core';
+import { ComponentFactory, ComponentFactoryResolver, NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CoreModule } from '@stratosui/core';
@@ -18,8 +18,7 @@ import { CFHomeCardComponent } from './cfhome-card.component';
     MDAppModule,
     SharedModule,
     HomeModule,
-  ],
-  declarations: [
+    // Standalone components
     CFHomeCardComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
@@ -35,8 +34,9 @@ import { CFHomeCardComponent } from './cfhome-card.component';
   ]
 })
 export class CFHomeCardModule {
-
-  public createHomeCard(componentFactoryResolver: ComponentFactoryResolver) {
+  // Kept for backward compatibility with entity generator
+  // In Angular 20+, this method is deprecated but still functional
+  public createHomeCard(componentFactoryResolver: ComponentFactoryResolver): ComponentFactory<CFHomeCardComponent> {
     return componentFactoryResolver.resolveComponentFactory(CFHomeCardComponent);
   }
 }

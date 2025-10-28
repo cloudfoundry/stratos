@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesNode } from '../../../store/kube.types';
@@ -7,7 +9,11 @@ import { KubernetesNode } from '../../../store/kube.types';
   selector: 'app-kubernetes-node-labels',
   templateUrl: './kubernetes-node-labels.component.html',
   styleUrls: ['./kubernetes-node-labels.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    MatIconModule,
+    MatTooltipModule,
+  ]
 })
 export class KubernetesNodeLabelsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

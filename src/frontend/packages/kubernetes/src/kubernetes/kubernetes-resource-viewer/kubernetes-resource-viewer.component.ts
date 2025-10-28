@@ -16,6 +16,7 @@ import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/ope
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
+import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
@@ -58,7 +59,10 @@ interface KubernetesResourceViewerResource {
 selector: 'app-kubernetes-resource-viewer',
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    SidepanelPreviewComponent
+  ]
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
 

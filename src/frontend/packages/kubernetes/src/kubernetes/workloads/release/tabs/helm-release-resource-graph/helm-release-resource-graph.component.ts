@@ -12,7 +12,7 @@ import { distinctUntilChanged, filter, first, map, publishReplay, refCount, star
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { WorkloadLiveReloadComponent } from '../../../workload-live-reload/workload-live-reload.component';
+import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import {
   KubernetesResourceViewerComponent,

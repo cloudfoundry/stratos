@@ -1,14 +1,18 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
   StepComponent,
   StepOnNextFunction,
   StepOnNextResult,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
@@ -26,7 +30,12 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   styleUrls: ['./upgrade-release.component.scss'],
   standalone: true,
   imports: [
-    ChartValuesEditorComponent
+    AsyncPipe,
+    ChartValuesEditorComponent,
+    ListComponent,
+    PageHeaderComponent,
+    StepComponent,
+    SteppersComponent
   ],
   providers: [
     HelmReleaseHelperService,

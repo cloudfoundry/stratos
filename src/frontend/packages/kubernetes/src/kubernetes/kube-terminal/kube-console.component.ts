@@ -1,9 +1,12 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -16,6 +19,13 @@ import { KubernetesService } from '../services/kubernetes.service';
   templateUrl: './kube-console.component.html',
   styleUrls: ['./kube-console.component.scss'],
   standalone: true,
+  imports: [
+    AsyncPipe,
+    MatIconModule,
+    PageHeaderComponent,
+    RouterLink,
+    SshViewerComponent,
+  ],
   providers: [
     {
       provide: BaseKubeGuid,

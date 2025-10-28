@@ -22,11 +22,12 @@ import { ServicesRoutingModule } from './services.routing';
     ServiceCatalogModule,
     CreateApplicationModule,
     CloudFoundrySharedModule,
-  ],
-  declarations: [
+    // Standalone components
     ServicesWallComponent,
     DetachServiceInstanceComponent,
     DetachAppsComponent
+  ],
+  declarations: [
   ],
   providers: [
     DatePipe

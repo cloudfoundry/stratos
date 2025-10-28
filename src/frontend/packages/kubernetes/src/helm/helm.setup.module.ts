@@ -21,8 +21,6 @@ import { HelmStoreModule } from './helm.store.module';
     CommonModule,
     SharedModule,
     HelmStoreModule,
-  ],
-  declarations: [
     HelmHubRegistrationComponent
   ]
 })

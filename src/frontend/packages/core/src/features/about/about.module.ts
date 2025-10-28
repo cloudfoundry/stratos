@@ -12,8 +12,6 @@ import { EulaPageComponent } from './eula-page/eula-page.component';
     CoreModule,
     SharedModule,
     AboutRoutingModule,
-  ],
-  declarations: [
     AboutPageComponent,
     EulaPageComponent,
     DiagnosticsPageComponent

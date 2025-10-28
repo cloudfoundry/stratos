@@ -1,4 +1,6 @@
+import { NgClass } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -8,7 +10,11 @@ import { Chart } from '../shared/models/chart';
   selector: 'app-list-item',
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    NgClass,
+    RouterLink,
+  ]
 })
 export class ListItemComponent implements OnInit {
 

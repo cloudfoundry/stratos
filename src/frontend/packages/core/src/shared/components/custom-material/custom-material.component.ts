@@ -88,6 +88,15 @@ export class CustomDialogActionsComponent {
 export class CustomDialogTitleComponent {
 }
 
+// Datepicker directive for input binding (moved before usage)
+@Directive({
+  selector: '[matDatepicker]',
+  standalone: true
+})
+export class MatDatepickerDirective {
+  @Input() matDatepicker: any;
+}
+
 // Custom Datepicker Component (Basic)
 @Component({
   selector: 'mat-datepicker',
@@ -111,7 +120,8 @@ export class CustomDatepickerComponent {
   selector: 'mat-datepicker-input',
   template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker" [value]="value" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [MatDatepickerDirective]
 })
 export class CustomDatepickerInputComponent {
   @Input() matDatepicker: any;
@@ -149,13 +159,4 @@ export class CustomDatepickerToggleComponent {
       this.for.open();
     }
   }
-}
-
-// Datepicker directive for input binding
-@Directive({
-  selector: '[matDatepicker]',
-  standalone: true
-})
-export class MatDatepickerDirective {
-  @Input() matDatepicker: any;
 }

@@ -15,11 +15,8 @@ import {
   ISimpleUsageChartData,
 } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.types';
 import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
-import { MetaCardComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { MetaCardTitleComponent } from '../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { AppState, entityCatalog } from '../../../../../store/src/public-api';
 import { getCurrentPageRequestInfo } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
@@ -50,11 +47,8 @@ interface IEndpointDetails {
     MatProgressSpinnerModule,
     RouterModule,
     SimpleUsageChartComponent,
-    MetaCardComponent,
-    MetaCardItemComponent,
-    MetaCardKeyComponent,
-    MetaCardValueComponent,
-    MetaCardTitleComponent
+    PageSubNavComponent,
+    LoadingPageComponent
   ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {

@@ -17,6 +17,8 @@
     "ng": "ng",
     "start": "ng serve",
     "start-high-mem": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve",
+    "start-http": "ng serve --ssl=false",
+    "start-http-high-mem": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --ssl=false",
     "start-dev-high-mem": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --aot=false",
     "start-prod-high-mem": "node --max_old_space_size=8192 node_modules/@angular/cli/bin/ng serve --configuration production",
     "start-dev": "ng serve --aot=false",

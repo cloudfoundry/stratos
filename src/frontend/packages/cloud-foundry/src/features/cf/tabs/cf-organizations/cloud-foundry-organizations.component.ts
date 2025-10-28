@@ -9,10 +9,10 @@ import { Observable } from 'rxjs';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import {
   ActionListConfigProvider,
-} from '../../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
-import { ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
-import { ListViewComponent } from '../../../../../../core/src/shared/components/list/list-view/list-view.component';
-import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+  ListViewTypes,
+  ListViewComponent,
+  PageSubNavComponent
+} from '@stratosui/core';
 import { ListView } from '../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../cf-api.types';

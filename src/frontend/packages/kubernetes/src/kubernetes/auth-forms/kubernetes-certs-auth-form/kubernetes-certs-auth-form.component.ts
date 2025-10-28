@@ -1,6 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatTabsModule } from '@angular/material/tabs';
 
+import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
 
@@ -8,7 +11,13 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   selector: 'app-kubernetes-certs-auth-form',
   templateUrl: './kubernetes-certs-auth-form.component.html',
   styleUrls: ['./kubernetes-certs-auth-form.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatInputModule,
+    MatTabsModule,
+    FileInputComponent,
+  ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
   @Input() formGroup: UntypedFormGroup;

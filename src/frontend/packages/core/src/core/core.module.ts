@@ -45,12 +45,22 @@ import { WindowRef } from './window-ref/window-ref.service';
         MomentModule,
         FormsModule,
         ReactiveFormsModule,
-        // Standalone directives and components
+        PortalModule,
+        // All standalone components, directives, and pipes
         ClickStopPropagationDirective,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
-        // Standalone pipes
         BytesToHumanSize,
+        MegaBytesToHumanSize,
+        LogOutDialogComponent,
+        StatefulIconComponent,
+        ShowHideButtonComponent,
+        DotContentComponent,
+        PageNotFoundComponentComponent,
+        TruncatePipe,
+        InfinityPipe,
+        SafeImgPipe,
+        ButtonBlurOnClickDirective,
     ],
     exports: [
         MDAppModule,
@@ -58,6 +68,8 @@ import { WindowRef } from './window-ref/window-ref.service';
         FormsModule,
         MomentModule,
         ReactiveFormsModule,
+        PortalModule,
+        // Re-export standalone components, directives, and pipes
         LogOutDialogComponent,
         TruncatePipe,
         InfinityPipe,
@@ -68,7 +80,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         DotContentComponent,
         ButtonBlurOnClickDirective,
         PageNotFoundComponentComponent,
-        PortalModule,
         EntityFavoriteStarComponent,
         RecentEntitiesComponent,
         StatefulIconComponent,
@@ -103,18 +114,6 @@ import { WindowRef } from './window-ref/window-ref.service';
             provide: 'TailwindDialogRef',
             useFactory: createMatDialogRef
         }
-    ],
-    declarations: [
-        StatefulIconComponent,
-        LogOutDialogComponent,
-        TruncatePipe,
-        InfinityPipe,
-        MegaBytesToHumanSize,
-        SafeImgPipe,
-        DotContentComponent,
-        ButtonBlurOnClickDirective,
-        PageNotFoundComponentComponent,
-        ShowHideButtonComponent
     ]
 })
 export class CoreModule {

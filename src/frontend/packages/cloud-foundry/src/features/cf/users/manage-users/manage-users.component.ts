@@ -17,8 +17,8 @@ import { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
-import { ManageUsersConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
-import { ManageUsersModifyComponent } from './manage-users-modify/manage-users-modify.component';
+import { UsersRolesConfirmComponent } from './manage-users-confirm/manage-users-confirm.component';
+import { UsersRolesModifyComponent } from './manage-users-modify/manage-users-modify.component';
 import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/manage-users-set-usernames.component';
 
 
@@ -33,8 +33,8 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
     SteppersComponent,
     StepComponent,
     ManageUsersSetUsernamesComponent,
-    ManageUsersModifyComponent,
-    ManageUsersConfirmComponent
+    UsersRolesModifyComponent,
+    UsersRolesConfirmComponent
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,

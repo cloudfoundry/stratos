@@ -42,8 +42,7 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
   standalone: true,
   imports: [
     MatButtonModule,
-    MatIconModule,
-    StackedInputActionComponent
+    MatIconModule
   ]
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {

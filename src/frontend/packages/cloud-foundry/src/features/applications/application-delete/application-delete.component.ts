@@ -14,6 +14,7 @@ import {
   AppMonitorComponentTypes,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
@@ -62,7 +63,8 @@ import { ApplicationService } from '../application.service';
   imports: [
     PageHeaderComponent,
     SteppersComponent,
-    StepComponent
+    StepComponent,
+    LoadingPageComponent
   ],
   providers: [
     CfAppRoutesListConfigService,

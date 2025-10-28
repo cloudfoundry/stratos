@@ -9,7 +9,7 @@ describe('GithubCommitAuthorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [GithubCommitAuthorComponent]
+      imports: [GithubCommitAuthorComponent]
     })
       .compileComponents();
   }));

@@ -43,8 +43,7 @@ export interface MetricsConfig<T = any> {
     CommonModule,
     BaseChartDirective,
     SharedModule,
-    CustomSpinnerComponent,
-    CustomProgressBarSelectorComponent,
+    CustomSpinnerComponent
   ]
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {

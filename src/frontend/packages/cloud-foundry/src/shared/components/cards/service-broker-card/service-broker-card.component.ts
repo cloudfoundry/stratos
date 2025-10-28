@@ -16,7 +16,7 @@ import { MetaCardKeyComponent } from '../../../../../../core/src/shared/componen
 import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { ClickStopPropagationDirective } from '../../../../../../core/src/shared/directives/click-stop-propagation.directive';
+import { ClickStopPropagationDirective } from '@stratosui/core';
 
 @Component({
   selector: 'app-service-broker-card',

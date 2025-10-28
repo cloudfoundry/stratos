@@ -6,6 +6,8 @@ import { AnalysisReportsListConfig } from '../../list-types/analysis-reports-lis
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesAnalysisService } from '../../services/kubernetes.analysis.service';
 import { ListComponent } from 'frontend/packages/core/src/shared/components/list/list.component';
+import { PageSubNavComponent } from 'frontend/packages/core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
 
 @Component({
   selector: 'app-kubernetes-analysis-tab',
@@ -14,7 +16,9 @@ import { ListComponent } from 'frontend/packages/core/src/shared/components/list
   standalone: true,
   imports: [
     CommonModule,
-    ListComponent
+    ListComponent,
+    PageSubNavComponent,
+    AnalysisReportRunnerComponent
   ],
   providers: [
     KubernetesAnalysisService,

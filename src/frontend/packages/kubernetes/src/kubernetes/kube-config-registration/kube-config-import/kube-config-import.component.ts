@@ -19,6 +19,7 @@ import {
   ITableListDataSource,
   RowState,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppState } from '../../../../../store/src/public-api';
@@ -30,7 +31,6 @@ import { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '
 import {
   KubeConfigTableImportStatusComponent,
 } from './kube-config-table-import-status/kube-config-table-import-status.component';
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
@@ -42,8 +42,7 @@ selector: 'app-kube-config-import',
   standalone: true,
   imports: [
     CommonModule,
-    KubeConfigTableImportStatusComponent,
-    ListComponent,
+    TableComponent,
   ]
 })
 export class KubeConfigImportComponent implements OnDestroy {

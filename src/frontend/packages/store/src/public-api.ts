@@ -95,6 +95,7 @@ export { TestEntityCatalog, entityCatalog } from './entity-catalog/entity-catalo
 export { InternalEventSeverity, InternalEventState } from './types/internal-events.types';
 export {
   AddParams,
+  ClearPaginationOfType,
   CreatePagination,
   IgnorePaginationMaxedState,
   SetClientFilter,

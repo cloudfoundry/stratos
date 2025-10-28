@@ -1,4 +1,5 @@
 import { TemplatePortal } from '@angular/cdk/portal';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 
 import { TabNavService } from '../../../tab-nav.service';
@@ -9,7 +10,7 @@ import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
   templateUrl: './page-sub-nav.component.html',
   styleUrls: ['./page-sub-nav.component.scss'],
   standalone: true,
-  imports: []
+  imports: [CommonModule]
 })
 export class PageSubNavComponent implements AfterViewInit, OnDestroy {
 

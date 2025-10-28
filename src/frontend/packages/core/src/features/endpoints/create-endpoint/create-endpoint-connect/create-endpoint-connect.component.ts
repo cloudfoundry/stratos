@@ -8,7 +8,7 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
-import { AppBlurDirective } from '../../../../shared/app-blur.directive';
+import { BlurDirective } from '../../../../shared/components/blur.directive';
 import { MarkdownPreviewComponent } from '../../../../shared/components/markdown-preview/markdown-preview.component';
 import { IStepperStep, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
@@ -26,7 +26,7 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.ser
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    AppBlurDirective,
+    BlurDirective,
     ConnectEndpointComponent
   ]
 })

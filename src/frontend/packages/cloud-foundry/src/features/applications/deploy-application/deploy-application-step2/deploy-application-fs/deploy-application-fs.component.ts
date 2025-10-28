@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
-import { ByteFormatPipe } from '../../../../../../../core/src/core/byte-formatters.pipe';
+import { BytesToHumanSize } from '../../../../../../../core/src/core/byte-formatters.pipe';
 import { getEventFiles } from '../../../../../../../core/src/core/browser-helper';
 import { MetadataItemComponent } from '../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { FileScannerInfo } from './deploy-application-fs-scanner';
@@ -28,7 +28,7 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    ByteFormatPipe,
+    BytesToHumanSize,
     MetadataItemComponent
   ]
 })

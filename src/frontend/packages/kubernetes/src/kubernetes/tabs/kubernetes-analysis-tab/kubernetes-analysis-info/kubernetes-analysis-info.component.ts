@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-card.component';
+import { SidepanelPreviewComponent } from 'frontend/packages/core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 
 
 @Component({
@@ -14,7 +15,8 @@ import { AnalysisInfoCardComponent } from './analysis-info-card/analysis-info-ca
   standalone: true,
   imports: [
     CommonModule,
-    AnalysisInfoCardComponent
+    AnalysisInfoCardComponent,
+    SidepanelPreviewComponent
   ],
   providers: [
     KubernetesAnalysisService

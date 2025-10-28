@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
@@ -5,12 +6,17 @@ import { catchError, map } from 'rxjs/operators';
 
 import { ChartVersion } from '../../shared/models/chart-version';
 import { ChartsService } from '../../shared/services/charts.service';
+import { LoaderComponent } from '../../loader/loader.component';
 
 @Component({
   selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
   styleUrls: ['./chart-details-readme.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    LoaderComponent
+  ]
 })
 export class ChartDetailsReadmeComponent {
 

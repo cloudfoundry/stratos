@@ -9,15 +9,17 @@ import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-subheader/page-sub-nav/page-sub-nav.component';
-import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
+import {
+  PageHeaderComponent,
+  IHeaderBreadcrumb,
+  PageSubNavComponent,
+  BooleanIndicatorComponent,
+  LoadingPageComponent,
+  CardNumberMetricComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  TileComponent
+} from '@stratosui/core';
 import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';

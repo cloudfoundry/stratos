@@ -1,15 +1,20 @@
+import { AsyncPipe, NgFor } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { MetricsConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsChartComponent, MetricsConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
   ChartDataTypes,
   getMetricsChartConfigBuilder,
 } from '../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import {
+  MetricsParentRangeSelectorComponent,
+} from '../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
@@ -27,6 +32,13 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
   templateUrl: './pod-metrics.component.html',
   styleUrls: ['./pod-metrics.component.scss'],
   standalone: true,
+  imports: [
+    AsyncPipe,
+    NgFor,
+    PageHeaderComponent,
+    MetricsParentRangeSelectorComponent,
+    MetricsChartComponent,
+  ],
   providers: [
     {
       provide: BaseKubeGuid,

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesNodePodsListConfigService,
@@ -13,6 +14,9 @@ import {
     provide: ListConfig,
     useClass: KubernetesNodePodsListConfigService,
   }],
-  standalone: true
+  standalone: true,
+  imports: [
+    ListComponent
+  ]
 })
 export class KubernetesNodePodsComponent { }

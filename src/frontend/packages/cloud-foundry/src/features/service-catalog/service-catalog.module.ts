@@ -21,15 +21,15 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     CoreModule,
     CreateApplicationModule,
     CloudFoundrySharedModule,
-  ],
-  declarations: [
+    // Standalone components
     ServiceCatalogPageComponent,
     ServiceBaseComponent,
     ServiceInstancesComponent,
     ServicePlansComponent,
     ServiceTabsBaseComponent,
     ServiceSummaryComponent,
-
+  ],
+  declarations: [
   ],
   exports: [
     ServiceTabsBaseComponent,

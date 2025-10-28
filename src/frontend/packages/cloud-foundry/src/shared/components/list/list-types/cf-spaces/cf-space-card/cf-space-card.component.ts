@@ -31,7 +31,6 @@ import {
   MetaCardValueComponent,
 } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { MbToHumanSizePipe } from '../../../../../../../../core/src/shared/pipes/mb-to-human-size.pipe';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -69,7 +68,6 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
     MetaCardValueComponent,
     MultilineTitleComponent,
     InfinityPipe,
-    MbToHumanSizePipe,
   ]
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {

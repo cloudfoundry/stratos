@@ -2,6 +2,7 @@ import { Component, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
+import { MatDialogActions } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -25,6 +26,7 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
     MatFormFieldModule,
     MatInputModule,
     MatProgressBarModule,
+    MatDialogActions,
     DialogErrorComponent
   ]
 })

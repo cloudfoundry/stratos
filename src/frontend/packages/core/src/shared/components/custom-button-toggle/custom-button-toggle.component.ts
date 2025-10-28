@@ -32,7 +32,7 @@ export class CustomButtonToggleComponent {
   templateUrl: './custom-button-toggle-group.component.html',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
-  imports: [CommonModule, CustomButtonToggleComponent],
+  imports: [CommonModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

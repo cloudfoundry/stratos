@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
@@ -7,7 +9,11 @@ import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } 
   selector: 'app-kubernetes-node-ips',
   templateUrl: './kubernetes-node-ips.component.html',
   styleUrls: ['./kubernetes-node-ips.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    MatIconModule,
+    MatTooltipModule,
+  ]
 })
 export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

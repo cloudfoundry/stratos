@@ -11,9 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import {
   EndpointMissingMessageParts,
 } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
-import { EndpointsMissingComponent } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
+import { LoadingPageComponent } from '@stratosui/core';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -29,8 +29,8 @@ import { KubernetesService } from '../services/kubernetes.service';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    EndpointsMissingComponent,
-    PageHeaderModule
+    PageHeaderModule,
+    LoadingPageComponent
   ],
   providers: [
     {

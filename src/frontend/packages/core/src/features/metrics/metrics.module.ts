@@ -16,8 +16,9 @@ import { MetricsService } from './services/metrics-service';
         CommonModule,
         SharedModule,
         MetricsRoutingModule,
+        MetricsComponent,
+        MetricsEndpointDetailsComponent
     ],
-    declarations: [MetricsComponent, MetricsEndpointDetailsComponent],
     providers: [
         MetricsService,
     ]

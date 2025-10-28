@@ -13,15 +13,14 @@ import { CreateEndpointComponent } from './create-endpoint.component';
   imports: [
     CommonModule,
     CoreModule,
-    SharedModule
-  ],
-  declarations: [
+    SharedModule,
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,
     CreateEndpointBaseStepComponent,
     CreateEndpointConnectComponent,
     ConnectEndpointComponent,
   ],
+  declarations: [],
   exports: [
     CreateEndpointComponent,
     CreateEndpointCfStep1Component,

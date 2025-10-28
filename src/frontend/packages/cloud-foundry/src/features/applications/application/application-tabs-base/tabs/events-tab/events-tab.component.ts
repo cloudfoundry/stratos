@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
+import { CloudFoundryEventsListComponent } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 import {
   CfAppEventsConfigService,
 } from '../../../../../../shared/components/list/list-types/cf-events/types/cf-app-events-config.service';
@@ -15,6 +15,8 @@ import {
     useClass: CfAppEventsConfigService,
   }],
   standalone: true,
-  imports: [ListComponent]
+  imports: [
+    CloudFoundryEventsListComponent
+  ]
 })
 export class EventsTabComponent { }

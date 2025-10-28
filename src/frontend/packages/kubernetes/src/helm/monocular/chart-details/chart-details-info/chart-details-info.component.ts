@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 import { of } from 'rxjs';
 import { catchError, first } from 'rxjs/operators';
 
@@ -6,12 +8,20 @@ import { Chart } from '../../shared/models/chart';
 import { ChartVersion } from '../../shared/models/chart-version';
 import { Maintainer } from '../../shared/models/maintainer';
 import { ChartsService } from '../../shared/services/charts.service';
+import { ChartDetailsUsageComponent } from '../chart-details-usage/chart-details-usage.component';
+import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-details-versions.component';
 
 @Component({
   selector: 'app-chart-details-info',
   templateUrl: './chart-details-info.component.html',
   styleUrls: ['./chart-details-info.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    ChartDetailsUsageComponent,
+    ChartDetailsVersionsComponent
+  ]
 })
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;

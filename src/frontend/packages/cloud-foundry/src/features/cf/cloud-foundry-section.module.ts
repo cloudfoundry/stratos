@@ -141,8 +141,7 @@ import { RemoveUserComponent } from './users/remove-user/remove-user.component';
         BaseChartDirective,
         CloudFoundrySharedModule,
         CFHomeCardModule,
-    ],
-    declarations: [
+        // Standalone components moved from declarations
         CloudFoundryBaseComponent,
         CloudFoundryTabsBaseComponent,
         CloudFoundryComponent,

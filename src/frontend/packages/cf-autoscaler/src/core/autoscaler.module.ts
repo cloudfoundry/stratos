@@ -44,16 +44,17 @@ import {
     AutoscalerRoutingModule,
     CloudFoundrySharedModule,
     EditAutoscalerCredentialComponent,
+    EditAutoscalerPolicyStep1Component,
     EditAutoscalerPolicyStep3Component,
     AppAutoscalerComboChartComponent,
     AppAutoscalerMetricChartCardComponent,
-  ],
-  declarations: [
     EditAutoscalerPolicyComponent,
     TableCellAutoscalerEventChangeComponent,
     TableCellAutoscalerEventStatusComponent,
     TableCellAutoscalerEventStatusIconPipe,
     TableCellAutoscalerEventChangeIconPipe,
+  ],
+  declarations: [
   ],
   providers: [
     ApplicationService,

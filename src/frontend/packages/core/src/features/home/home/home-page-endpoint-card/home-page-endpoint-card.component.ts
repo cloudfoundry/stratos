@@ -25,7 +25,7 @@ import {
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
-import { MultilineTitle } from '../../../../shared/components/multiline-title/multiline-title.component';
+import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
@@ -57,7 +57,7 @@ enum Status {
   imports: [
     CommonModule,
     RouterModule,
-    MultilineTitle,
+    MultilineTitleComponent,
     EntityFavoriteStarComponent,
     HomeShortcutsComponent,
     FavoritesMetaCardComponent,

@@ -9,9 +9,7 @@ import {
 } from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
 import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { ApplicationService } from '../../application.service';
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
 
 @Component({
   selector: 'app-map-routes',
@@ -19,9 +17,7 @@ import { StepComponent } from '../../../../../../core/src/shared/components/step
   styleUrls: ['./map-routes.component.scss'],
   standalone: true,
   imports: [
-    PageHeaderComponent,
-    SteppersComponent,
-    StepComponent
+    ListComponent
   ],
   providers: [
     {

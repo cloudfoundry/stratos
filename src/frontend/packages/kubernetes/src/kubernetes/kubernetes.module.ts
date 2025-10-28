@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { CoreModule } from '@stratosui/core';
-import { SharedModule } from '@stratosui/core';
+import { CoreModule, SharedModule } from '@stratosui/core';
 import {
   AnalysisReportRunnerComponent,
 } from './analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -133,6 +132,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
         SharedModule,
         BaseChartDirective,
         KubernetesRoutingModule,
+        // Standalone components
         KubernetesComponent,
         PodMetricsComponent,
         KubernetesLabelsCellComponent,
@@ -148,32 +148,34 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
         KubernetesNamespaceAnalysisReportComponent,
         KubernetesNamespacePreviewComponent,
         KubernetesNodeTagsCardComponent,
-    ],
-    declarations: [
+        KubernetesAnalysisInfoComponent,
+        AnalysisInfoCardComponent,
+        AnalysisStatusCellComponent,
+        KubernetesAnalysisTabComponent,
+        KubernetesNamespacesTabComponent,
+        KubernetesSummaryTabComponent,
         KubernetesNodesTabComponent,
+        KubernetesDashboardTabComponent,
+        KubedashConfigurationComponent,
+        KubernetesNodeComponent,
+        KubernetesNodePodsComponent,
+        KubernetesNodeMetricsComponent,
+        KubernetesNodeMetricsChartComponent,
+        KubernetesNodeMetricStatsCardComponent,
+        KubernetesNodeSimpleMetricComponent,
+        KubernetesAnalysisReportComponent,
         KubernetesTabBaseComponent,
         KubernetesNodeCapacityComponent,
         KubernetesPodTagsComponent,
-        KubernetesNamespacesTabComponent,
-        KubernetesDashboardTabComponent,
-        KubernetesSummaryTabComponent,
-        KubernetesAnalysisTabComponent,
         KubernetesNodeLinkComponent,
         KubernetesNodeIpsComponent,
         KubernetesNodeLabelsComponent,
         KubernetesNodePressureComponent,
-        KubernetesNodeComponent,
         KubernetesNodeSummaryComponent,
-        KubernetesNodePodsComponent,
         KubernetesNodeSummaryCardComponent,
         KubernetesNodeConditionCardComponent,
-        KubernetesNodePodsComponent,
         KubernetesNodeInfoCardComponent,
-        KubernetesNodeMetricsComponent,
         KubernetesNodeConditionComponent,
-        KubernetesNodeMetricsChartComponent,
-        KubernetesNodeMetricStatsCardComponent,
-        KubernetesNodeSimpleMetricComponent,
         ConditionCellComponent,
         KubernetesNamespaceLinkComponent,
         KubeNamespacePodCountComponent,
@@ -181,12 +183,7 @@ import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kub
         KubernetesServicePortsComponent,
         KubernetesPodStatusComponent,
         KubeServiceCardComponent,
-        KubedashConfigurationComponent,
         KubernetesPodContainersComponent,
-        KubernetesAnalysisReportComponent,
-        KubernetesAnalysisInfoComponent,
-        AnalysisInfoCardComponent,
-        AnalysisStatusCellComponent,
     ],
     providers: [
         KubernetesService,

@@ -1,22 +1,35 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
-import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
+import { MetricsChartComponent, MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import {
   ChartDataTypes,
   getMetricsChartConfigBuilder,
 } from '../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import { MetricsParentRangeSelectorComponent } from '../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
+import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
 import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { formatAxisCPUTime, formatCPUTime } from '../../kubernetes-metrics.helpers';
 import { KubeNodeMetric, KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
+import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
 
 @Component({
   selector: 'app-kubernetes-node-metrics',
   templateUrl: './kubernetes-node-metrics.component.html',
   styleUrls: ['./kubernetes-node-metrics.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileComponent,
+    TileGroupComponent,
+    KubernetesNodeMetricStatsCardComponent,
+    MetricsParentRangeSelectorComponent,
+    MetricsChartComponent
+  ]
 })
 export class KubernetesNodeMetricsComponent implements OnInit {
   memoryMetric: KubeNodeMetric;

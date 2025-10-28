@@ -39,9 +39,7 @@ selector: 'app-backup-endpoints',
     SteppersComponent,
     StepComponent,
     TableComponent,
-    ShowHideButtonComponent,
-    BackupCheckboxCellComponent,
-    BackupConnectionCellComponent
+    ShowHideButtonComponent
   ]
 })
 export class BackupEndpointsComponent implements OnDestroy {

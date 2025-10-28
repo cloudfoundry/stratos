@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-import { CodeBlockComponent } from '../../../../../../core/src/shared/components/code-block/code-block.component';
+import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
 
 // Context used in the CLI Info template
 export interface CFAppCLIInfoContext {

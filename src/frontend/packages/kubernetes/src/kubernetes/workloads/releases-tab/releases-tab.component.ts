@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
@@ -8,6 +7,7 @@ import { map } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
 import { HelmReleasesListConfig } from '../list-types/helm-releases-list-config.service';
 import { KubernetesNamespacesFilterService } from '../list-types/kube-namespaces-filter-config.service';
@@ -26,7 +26,7 @@ selector: 'app-releases-tab',
   standalone: true,
   imports: [
     ListComponent,
-    AsyncPipe
+    PageHeaderComponent
   ]
 })
 export class HelmReleasesTabComponent implements OnInit {

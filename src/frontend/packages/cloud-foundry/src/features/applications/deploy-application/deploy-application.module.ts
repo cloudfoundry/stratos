@@ -27,9 +27,7 @@ import { GithubProjectExistsDirective } from './github-project-exists.directive'
     SharedModule,
     CommonModule,
     CreateApplicationModule,
-    CloudFoundrySharedModule
-  ],
-  declarations: [
+    CloudFoundrySharedModule,
     DeployApplicationComponent,
     DeployApplicationStep2Component,
     GithubProjectExistsDirective,

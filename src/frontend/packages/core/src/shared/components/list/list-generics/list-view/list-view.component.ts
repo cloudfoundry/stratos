@@ -11,8 +11,7 @@ import { ListConfigProvider } from '../list-config-provider.types';
   styleUrls: ['./list-view.component.scss'],
   standalone: true,
   imports: [
-    ListHostDirective,
-    ListComponent
+    ListHostDirective
   ]
 })
 export class ListViewComponent<T> implements OnDestroy {

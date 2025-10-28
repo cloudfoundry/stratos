@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -33,7 +33,6 @@ import { TileComponent } from '../../../../../../../../core/src/shared/component
 import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
 import { NoContentMessageComponent } from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
-import { GithubCommitAuthorComponent } from '../../../../../../../../../git/src/shared/components/github-commit-author/github-commit-author.component';
 import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
 
 @Component({

@@ -19,8 +19,6 @@ import { HomeShortcutsComponent } from './home/home-shortcuts/home-shortcuts.com
     RouterModule,
     MDAppModule,
     SharedModule,
-  ],
-  declarations: [
     HomePageComponent,
     HomePageEndpointCardComponent,
     FavoritesMetaCardComponent,

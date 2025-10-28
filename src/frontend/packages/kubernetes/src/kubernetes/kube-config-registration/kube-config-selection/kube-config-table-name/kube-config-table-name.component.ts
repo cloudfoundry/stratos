@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { TableCellEditComponent } from '../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -19,6 +20,7 @@ selector: 'app-kube-config-table-name',
     MatIconModule,
     MatInputModule,
     MatTooltipModule,
+    TableCellEditComponent,
   ]
 })
 export class KubeConfigTableNameComponent extends TableCellCustom<KubeConfigFileCluster> { }

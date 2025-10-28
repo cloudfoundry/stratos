@@ -26,7 +26,7 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
-    MomentDatePipe,
+    MomentModule,
     StartEndDateComponent
   ]
 })

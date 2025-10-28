@@ -14,8 +14,6 @@ import { KubernetesHomeCardComponent } from './kubernetes-home-card.component';
     MDAppModule,
     SharedModule,
     HomeModule,
-  ],
-  declarations: [
     KubernetesHomeCardComponent,
   ],
   exports: [

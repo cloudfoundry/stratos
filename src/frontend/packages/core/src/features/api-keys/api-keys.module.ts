@@ -12,8 +12,6 @@ import { ApiKeysRoutingModule } from './api-keys.routing';
     CoreModule,
     SharedModule,
     ApiKeysRoutingModule,
-  ],
-  declarations: [
     ApiKeysPageComponent,
     AddApiKeyDialogComponent
   ]

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { PageHeaderComponent } from '@stratosui/core';
+
+import { ChartDetailsComponent } from '../monocular/chart-details/chart-details.component';
 import { ChartsService } from '../monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../monocular/stratos-monocular-providers.helpers';
 
@@ -12,7 +15,11 @@ import { createMonocularProviders } from '../monocular/stratos-monocular-provide
   providers: [
     ...createMonocularProviders()
   ],
-  standalone: true
+  standalone: true,
+  imports: [
+    PageHeaderComponent,
+    ChartDetailsComponent
+  ]
 })
 export class MonocularChartViewComponent implements OnInit {
 

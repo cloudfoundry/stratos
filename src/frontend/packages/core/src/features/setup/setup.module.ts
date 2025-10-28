@@ -12,9 +12,7 @@ import { UpgradePageComponent } from './upgrade-page/upgrade-page.component';
 @NgModule({
   imports: [
     CoreModule,
-    SharedModule
-  ],
-  declarations: [
+    SharedModule,
     ConsoleUaaWizardComponent,
     UpgradePageComponent,
     DomainMismatchComponent,

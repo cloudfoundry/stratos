@@ -18,9 +18,16 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
-import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { MatRadioModule } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
+import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
@@ -30,9 +37,16 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
   styleUrls: ['./add-routes.component.scss'],
   standalone: true,
   imports: [
-    PageHeaderComponent,
-    SteppersComponent,
-    StepComponent
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatCheckboxModule,
+    FocusDirective,
+    MapRoutesComponent
   ]
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
-import { PreviewableComponent } from 'frontend/packages/core/src/shared/previewable-component';
+
+import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
+import { SidepanelPreviewComponent } from '../../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 
 @Component({
 selector: 'app-resource-alert-preview',
@@ -10,7 +11,7 @@ selector: 'app-resource-alert-preview',
   standalone: true,
   imports: [
     MatExpansionModule,
-    MatIcon
+    SidepanelPreviewComponent
   ]
 })
 export class ResourceAlertPreviewComponent implements PreviewableComponent {

@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 
-import { CoreModule } from '@stratosui/core';
+import { CoreModule, SharedModule } from '@stratosui/core';
 import { EndpointsService } from '../../../core/src/core/endpoints.service';
-import { SharedModule } from '@stratosui/core';
 import { EntityCatalogModule } from '../../../store/src/entity-catalog.module';
 import { EndpointHealthCheck } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
@@ -54,14 +53,14 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
         CoreModule,
         CommonModule,
         SharedModule,
-        KubernetesStoreModule
-    ],
-    declarations: [
+        KubernetesStoreModule,
+        // Standalone auth form components
         KubernetesCertsAuthFormComponent,
         KubernetesAWSAuthFormComponent,
         KubernetesConfigAuthFormComponent,
         KubernetesGKEAuthFormComponent,
         KubernetesSATokenAuthFormComponent,
+        // Standalone KubeConfig components
         KubeConfigRegistrationComponent,
         KubeConfigSelectionComponent,
         KubeConfigImportComponent,
@@ -71,6 +70,8 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
         KubeConfigTableSubTypeSelectComponent,
         KubeConfigTableNameComponent,
         KubeConfigTableCertComponent
+    ],
+    declarations: [
     ],
     providers: [
         BaseKubeGuid,

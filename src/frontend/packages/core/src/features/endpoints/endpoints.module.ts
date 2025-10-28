@@ -27,8 +27,6 @@ import { EndpointsRoutingModule } from './endpoints.routing';
         SharedModule,
         EndpointsRoutingModule,
         CreateEndpointModule,
-    ],
-    declarations: [
         EndpointsPageComponent,
         ConnectEndpointDialogComponent,
         CredentialsAuthFormComponent,

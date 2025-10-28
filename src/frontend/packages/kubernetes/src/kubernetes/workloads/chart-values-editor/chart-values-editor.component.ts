@@ -1,23 +1,25 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
 import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
 import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
 import { ThemeService } from '../../../../../store/src/theme.service';
+import { MonacoEditorModule, NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig } from 'ngx-monaco-editor';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
 import { mergeObjects } from './merge';
+
+// Monaco editor configuration for standalone component
+const monacoConfig: NgxMonacoEditorConfig = {
+  baseUrl: '/core/assets',
+  defaultOptions: { scrollBeyondLastLine: false }
+};
 
 
 export interface ChartValuesConfig {
@@ -47,18 +49,13 @@ enum EditorMode {
   styleUrls: ['./chart-values-editor.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,
-    MatButtonToggleGroup,
-    MatButtonToggle,
-    MatIconButton,
-    MatIcon,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    MatButton,
-    MatProgressSpinner,
-    MonacoEditorComponent,
+    CommonModule,
+    FormsModule,
+    MonacoEditorModule,
     TailwindJsonSchemaFormComponent
+  ],
+  providers: [
+    { provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoConfig }
   ]
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -137,7 +134,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Reference to the editor, so we can adjust its size to fit
   @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor: ElementRef;
 
-  @ViewChild('schemaForm', { static: false }) schemaForm: TailwindJsonSchemaFormComponent;
+  @ViewChild('schemaForm', { static: false }) schemaForm: any;
 
   // Confirmation dialog - copy values
   overwriteValuesConfirmation = new ConfirmationDialogConfig(

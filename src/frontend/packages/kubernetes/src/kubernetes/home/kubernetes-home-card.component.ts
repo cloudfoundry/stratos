@@ -7,10 +7,14 @@ import { first, map } from 'rxjs/operators';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/public-api';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { HomePageEndpointCardComponent } from '../../../../core/src/features/home/home-page-endpoint-card/home-page-endpoint-card.component';
+import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardNumberMetricComponent } from '../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/home-shortcuts/home-shortcuts.component';
 
 @Component({
   selector: 'app-k8s-home-card',
@@ -19,7 +23,11 @@ import { HomePageEndpointCardComponent } from '../../../../core/src/features/hom
   standalone: true,
   imports: [
     CommonModule,
-    HomePageEndpointCardComponent
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    HomeShortcutsComponent
   ]
 })
 export class KubernetesHomeCardComponent implements OnInit {

@@ -27,8 +27,7 @@ export class CustomTabComponent {
   styleUrls: ['./custom-tabs.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    CustomTabComponent
+    CommonModule
   ]
 })
 export class CustomTabGroupComponent implements AfterContentInit {

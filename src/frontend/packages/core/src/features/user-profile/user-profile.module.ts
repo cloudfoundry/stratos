@@ -13,9 +13,10 @@ import { UserProfileRoutingModule } from './user-profile.routing';
     CommonModule,
     CoreModule,
     SharedModule,
-    UserProfileRoutingModule
+    UserProfileRoutingModule,
+    ProfileInfoComponent,
+    EditProfileInfoComponent
   ],
-  declarations: [ProfileInfoComponent, EditProfileInfoComponent],
   providers: [
     UserProfileService
   ]

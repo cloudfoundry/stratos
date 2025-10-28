@@ -11,8 +11,8 @@ import { serviceInstancesEntityType } from '../../../../../../../../cloud-foundr
 import {
   CurrentUserPermissionsService,
 } from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
-import { AppChip, ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { ClickStopPropagationDirective } from '@stratosui/core';
+import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
 import {
   MetaCardComponent
@@ -71,7 +71,7 @@ import {
     CfOrgSpaceLinksComponent,
     TableCellServiceBrokerComponent,
     ServiceInstanceLastOpComponent,
-    ChipsComponent,
+    AppChipsComponent,
     ClickStopPropagationDirective,
   ]
 })

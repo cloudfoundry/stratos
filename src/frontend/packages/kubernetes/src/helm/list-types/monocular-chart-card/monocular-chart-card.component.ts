@@ -5,13 +5,15 @@ import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 import { CardCell } from '../../../../../core/src/shared/components/list/list.types';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../../helm-entity-factory';
+import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
 import { MonocularChart } from '../../store/helm.types';
 
 @Component({
   selector: 'app-monocular-chart-card',
   templateUrl: './monocular-chart-card.component.html',
   styleUrls: ['./monocular-chart-card.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [ChartItemComponent]
 })
 export class MonocularChartCardComponent extends CardCell<MonocularChart> {
 

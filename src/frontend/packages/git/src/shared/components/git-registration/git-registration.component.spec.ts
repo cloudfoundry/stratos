@@ -14,10 +14,10 @@ describe('GitRegistrationComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ GitRegistrationComponent ],
       imports: [
         ...BaseTestModulesNoShared,
         SharedModule,
+        GitRegistrationComponent,
       ],
       providers: [
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },

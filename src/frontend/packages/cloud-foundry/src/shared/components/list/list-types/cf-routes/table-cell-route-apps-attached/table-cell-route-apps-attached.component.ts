@@ -4,7 +4,7 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { CfRoute } from '../../../../../../../../cloud-foundry/src/store/types/route.types';
-import { AppChip, ChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
+import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
@@ -15,7 +15,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   standalone: true,
   imports: [
     CommonModule,
-    ChipsComponent
+    AppChipsComponent
   ]
 })
 export class TableCellRouteAppsAttachedComponent extends TableCellCustom<any> implements OnInit {

@@ -25,7 +25,6 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   standalone: true,
   imports: [
     CommonModule,
-    CommitListWrapperComponent
   ]
 })
 export class DeployApplicationStep21Component {

@@ -51,7 +51,6 @@ import { ApplicationService } from '../application.service';
     StepComponent,
     StatefulIconComponent,
     FocusDirective,
-    AppNameUniqueDirective
   ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {

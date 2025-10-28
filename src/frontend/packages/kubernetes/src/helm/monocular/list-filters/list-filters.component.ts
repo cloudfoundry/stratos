@@ -1,10 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-list-filters',
   templateUrl: './list-filters.component.html',
   styleUrls: ['./list-filters.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [NgFor]
 })
 
 export class ListFiltersComponent {

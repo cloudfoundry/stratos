@@ -167,7 +167,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BooleanIndicatorComponent,
     LoadingPageComponent,
     MetadataItemComponent,
-    JsonViewerComponent, // Now standalone - moved to imports
     CardStatusComponent,
     StratosTitleComponent,
     EditableDisplayValueComponent,
@@ -230,110 +229,34 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
-  ],
-  declarations: [
-    // LoadingPageComponent, // Now standalone - moved to imports
-    // DisplayValueComponent, // Now standalone - moved to imports
-    // EditableDisplayValueComponent, // Now standalone - moved to imports
+    // === Standalone Pipes ===
     MbToHumanSizePipe,
-    // PercentagePipe, // Now standalone - moved to imports
     UptimePipe,
     UsageBytesPipe,
     ValuesPipe,
-    // LoadingPageComponent, // Now standalone - moved to imports (duplicate removed)
-    // DetailsCardComponent, // Now standalone - moved to imports
+    CapitalizeFirstPipe,
+    // === Standalone Directives ===
     FocusDirective,
     BlurDirective,
     UniqueDirective,
-    // CodeBlockComponent, // Now standalone - moved to imports
-    // LogViewerComponent, // Now standalone - moved to imports
-    // EndpointsMissingComponent, // Now standalone - moved to imports
-    // DialogErrorComponent, // Now standalone - moved to imports
-    // SshViewerComponent, // Now standalone - moved to imports
-    // ApplicationStateIconPipe, // Now standalone - moved to imports
-    // ApplicationStateIconComponent, // Now standalone - moved to imports
-    // ApplicationStateComponent, // Now standalone - moved to imports
-    // TileComponent, // Now standalone - moved to imports
-    // TileGroupComponent, // Now standalone - moved to imports
-    // TileGridComponent, // Now standalone - moved to imports
-    // MetadataItemComponent, // Now standalone - moved to imports
-    // UsageGaugeComponent, // Now standalone - moved to imports
-    // CardStatusComponent, // Now standalone - moved to imports
-    // DialogConfirmComponent, // Now standalone - moved to imports
-    ListComponent,
-    ...listCardComponents,
-    ...listTableComponents,
-    // FileInputComponent, // Now standalone - moved to imports
-    // MetaCardComponent, // Now standalone - moved to imports
-    // MetaCardTitleComponent, // Now standalone - moved to imports
-    // MetaCardItemComponent, // Now standalone - moved to imports
-    // MetaCardKeyComponent, // Now standalone - moved to imports
-    // MetaCardValueComponent, // Now standalone - moved to imports
-    // NestedTabsComponent, // Now standalone - moved to imports
-    // BooleanIndicatorComponent, // Now standalone - moved to imports
-    // AppChipsComponent, // Now standalone - moved to imports
-    // CardBooleanMetricComponent, // Now standalone - moved to imports // Now standalone - kept in exports for backward compatibility
-    // CardNumberMetricComponent, // Now standalone - moved to imports
-    // RingChartComponent, // Now standalone - moved to imports
-    // MetricsChartComponent, // Now standalone - moved to imports
-    // StratosTitleComponent, // Now standalone - moved to imports
-    // IntroScreenComponent, // Now standalone - moved to imports
-    // EnumerateComponent, // Now standalone - moved to imports
-    //     // UploadProgressIndicatorComponent, // Now standalone - moved to imports
-    // UserProfileBannerComponent, // Now standalone - moved to imports
-    //     AppActionMonitorComponent,
-    // AppActionMonitorIconComponent, // Now standalone - moved to imports
-    // UserProfileBannerComponent, // Now standalone - moved to imports
-    TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
-    CapitalizeFirstPipe,
-    // RoutingIndicatorComponent, // Now standalone - moved to imports
-    // DateTimeComponent, // Now standalone - moved to imports
-    // StartEndDateComponent, // Now standalone - moved to imports
-    // MetricsRangeSelectorComponent, // Now standalone - moved to imports
-    // ProfileSettingsComponent, // Now standalone - moved to imports
-    // MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
-    // StackedInputActionComponent, // Now standalone - moved to imports
-    // MultilineTitleComponent, // Now standalone - moved to imports
-    // TileSelectorComponent, // Now standalone - moved to imports
-    // MarkdownPreviewComponent, // Now standalone - moved to imports
-    // MarkdownContentObserverDirective, // Now standalone - moved to imports
-    // EndpointCardComponent, // Now standalone - moved to imports
-    // SimpleUsageChartComponent, // Now standalone - moved to imports
-    // PageSubNavComponent, // Now standalone - moved to imports
-    // BreadcrumbsComponent, // Now standalone - moved to imports
-    // PageSubNavSectionComponent, // Now standalone - moved to imports
-    // SidepanelPreviewComponent, // Now standalone - moved to imports
-    // EntitySummaryTitleComponent, // Now standalone - moved to imports
-    // MarkdownPreviewComponent, // Now standalone - moved to imports (duplicate removed)
-    // MarkdownContentObserverDirective, // Now standalone - moved to imports (duplicate removed)
-    // SnackBarReturnComponent, // Now standalone - moved to imports
-    // PollingIndicatorComponent, // Now standalone - moved to imports
-    // UnlimitedInputComponent, // Now standalone - moved to imports
-    // JsonViewerComponent, // Now standalone - moved to imports
     ListHostDirective,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    // === Standalone Components ===
+    ListComponent,
     ListViewComponent,
     EntityListViewComponent,
-    // CopyToClipboardComponent, // Now standalone - moved to imports
-    // SidepanelPreviewComponent, // Now standalone - moved to imports
-    // TileSelectorTileComponent, // Now standalone - moved to imports
-    // ProfileSettingsComponent, // Now standalone - moved to imports
-    TableCellSidePanelComponent,
-    // CardProgressOverlayComponent, // Now standalone - moved to imports
-    // MaxListMessageComponent, // Now standalone - moved to imports
-    // ProfileSettingsComponent, // Now standalone - moved to imports
-    // ProductNameComponent, // Now standalone - moved to imports
-    // ProfileSettingsComponent, // Now standalone - moved to imports (duplicate removed)
-    TailwindSortHeaderDirective,
+    // === Card/Table Component Arrays (all standalone) ===
+    ...listCardComponents,
+    ...listTableComponents,
+    // === Custom Material Wrapper Components ===
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
-    // CustomCheckboxComponent, // Now standalone - moved to imports
-    // DisableRouterLinkDirective, // Now standalone - moved to imports
     MatInputDirective,
     MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
-    // CustomIconComponent, // Now standalone - moved to imports
     CustomIconButtonDirective,
     CustomButtonDirective,
     MatSuffixDirective,
@@ -352,127 +275,130 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardActionsComponent,
     CustomCardFooterComponent,
     CustomTooltipDirective,
-    // CustomIconComponent, // Now standalone - moved to imports (duplicate removed)
-    // CustomProgressBarSelectorComponent, // Now standalone - moved to imports
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
     CustomDialogTitleComponent,
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
-    // NoContentMessageComponent, // Now standalone - moved to imports
-    // UserAvatarComponent, // Now standalone - moved to imports
+  ],
+  declarations: [
+    // All standalone components moved to imports above
   ],
   exports: [
+    // === Standalone Pipes (imported above) ===
     ApplicationStateIconPipe,
-    ApplicationStateIconComponent,
-    TableCellStatusDirective,
-    FormsModule,
-    ReactiveFormsModule,
-    LoadingPageComponent,
-    DialogErrorComponent,
-    PageHeaderModule,
-    DisplayValueComponent,
-    EditableDisplayValueComponent,
-    EnumerateComponent,
-    UserProfileBannerComponent,
-    DetailsCardComponent,
-    SteppersModule,
     MbToHumanSizePipe,
     ValuesPipe,
     PercentagePipe,
     UsageBytesPipe,
     UptimePipe,
-    SteppersModule,
+    CapitalizeFirstPipe,
+
+    // === Standalone Directives (imported above) ===
+    TableCellStatusDirective,
     FocusDirective,
     BlurDirective,
     UniqueDirective,
+    UserPermissionDirective,
+    ListHostDirective,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    DisableRouterLinkDirective,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
+    MatSuffixDirective,
+    CustomTooltipDirective,
+    MarkdownContentObserverDirective,
+
+    // === Modules (can be exported without being in imports) ===
+    FormsModule,
+    ReactiveFormsModule,
+    PageHeaderModule,
+    SteppersModule,
+
+    // === Standalone Components (imported above) ===
+    ApplicationStateIconComponent,
+    ApplicationStateComponent,
+    LoadingPageComponent,
+    DialogErrorComponent,
+    DialogConfirmComponent,
+    DisplayValueComponent,
+    EditableDisplayValueComponent,
+    EnumerateComponent,
+    UserProfileBannerComponent,
+    UserAvatarComponent,
+    DetailsCardComponent,
     CodeBlockComponent,
     LogViewerComponent,
     EndpointsMissingComponent,
-    ApplicationStateComponent,
     SshViewerComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
     CardStatusComponent,
+    CardBooleanMetricComponent,
+    CardNumberMetricComponent,
     MetadataItemComponent,
     UsageGaugeComponent,
-    DialogConfirmComponent,
     SnackBarReturnComponent,
     ListComponent,
+    ListViewComponent,
+    EntityListViewComponent,
     FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    // NestedTabsComponent, // Now standalone - moved to imports
     RingChartComponent,
     AppChipsComponent,
-    CardBooleanMetricComponent, // Now standalone - kept in exports for backward compatibility
-    CardNumberMetricComponent,
     MetricsChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
-    UserProfileBannerComponent,
-    EnumerateComponent,
     UploadProgressIndicatorComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
-    UserPermissionDirective,
     BooleanIndicatorComponent,
     TableComponent,
-    CapitalizeFirstPipe,
-    RoutingIndicatorComponent, // Now standalone - kept in exports for backward compatibility
+    RoutingIndicatorComponent,
     DateTimeComponent,
-    StartEndDateComponent, // Now standalone - kept in exports for backward compatibility
-    MetricsRangeSelectorComponent, // Now standalone - kept in exports for backward compatibility
-    StackedInputActionComponent, // Now standalone - kept in exports for backward compatibility
-    MetricsParentRangeSelectorComponent, // Now standalone - kept in exports for backward compatibility
-    StackedInputActionsComponent, // Now standalone - kept in exports for backward compatibility
+    StartEndDateComponent,
+    MetricsRangeSelectorComponent,
+    MetricsParentRangeSelectorComponent,
+    StackedInputActionComponent,
+    StackedInputActionsComponent,
     PageSubNavComponent,
-    BreadcrumbsComponent,
     PageSubNavSectionComponent,
+    BreadcrumbsComponent,
     TileSelectorComponent,
-    MarkdownPreviewComponent, // Now standalone - kept in exports for backward compatibility
-    MarkdownContentObserverDirective, // Now standalone - kept in exports for backward compatibility
+    TileSelectorTileComponent,
+    MarkdownPreviewComponent,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
-    // MarkdownPreviewComponent, // Duplicate removed
-    // MarkdownContentObserverDirective, // Duplicate removed
     PollingIndicatorComponent,
     UnlimitedInputComponent,
-    ListHostDirective,
-    ListViewComponent,
-    EntityListViewComponent,
-    JsonViewerComponent, // Now standalone - kept in exports for backward compatibility
-    ListHostDirective,
+    JsonViewerComponent,
     CopyToClipboardComponent,
-    SidepanelPreviewComponent, // Now standalone - kept in exports for backward compatibility
-    // TileSelectorTileComponent, // Now standalone - moved to imports
-    // SidepanelPreviewComponent, // duplicate removed
+    SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
-    EndpointCardComponent, // Now standalone - kept in exports for backward compatibility
+    EndpointCardComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent, // Now standalone - kept in exports for backward compatibility
-    ...listTableCells,
+    MaxListMessageComponent,
     ProfileSettingsComponent,
-    ProductNameComponent, // Now standalone - kept in exports for backward compatibility
-    TailwindSortDirective,
-    TailwindSortHeaderDirective,
+    ProductNameComponent,
+    NoContentMessageComponent,
+
+    // === Custom Material Wrapper Components ===
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
     CustomCheckboxComponent,
-    DisableRouterLinkDirective,
-    MatInputDirective,
-    MatDatepickerDirective,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
-    // CustomIconComponent, // Now standalone - moved to imports
-    CustomIconButtonDirective,
-    CustomButtonDirective,
-    MatSuffixDirective,
+    CustomIconComponent,
+    CustomProgressBarSelectorComponent,
     CustomSlideToggleComponent,
     CustomSelectComponent,
     CustomOptionComponent,
@@ -487,17 +413,15 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomCardContentComponent,
     CustomCardActionsComponent,
     CustomCardFooterComponent,
-    CustomTooltipDirective,
-    // CustomIconComponent, // Now standalone - moved to imports (duplicate removed)
-    CustomProgressBarSelectorComponent,
     CustomDialogContentComponent,
     CustomDialogActionsComponent,
     CustomDialogTitleComponent,
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
-    NoContentMessageComponent,
-    UserAvatarComponent,
+
+    // === Table Cell Components (all standalone) ===
+    ...listTableCells,
   ],
   providers: [
     ListConfig,

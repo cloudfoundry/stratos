@@ -9,9 +9,7 @@ import { SteppersComponent } from './steppers/steppers.component';
 @NgModule({
     imports: [
         CommonModule,
-        CoreModule
-    ],
-    declarations: [
+        CoreModule,
         SteppersComponent,
         StepComponent,
         StepperFormComponent

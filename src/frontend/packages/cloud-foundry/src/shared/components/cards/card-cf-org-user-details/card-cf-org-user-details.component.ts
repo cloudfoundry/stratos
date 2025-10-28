@@ -8,7 +8,7 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { BooleanIndicatorComponent } from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { CapitalizeFirstPipe } from '../../../../../../core/src/core/capitalize-first.pipe';
+import { CapitalizeFirstPipe } from '@stratosui/core';
 
 @Component({
   selector: 'app-card-cf-org-user-details',

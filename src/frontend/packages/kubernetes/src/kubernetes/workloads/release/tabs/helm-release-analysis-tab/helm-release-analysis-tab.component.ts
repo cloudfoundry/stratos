@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Subject } from 'rxjs';
 
-import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { NoContentMessageComponent } from '../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
+import { PageSubNavComponent, NoContentMessageComponent } from '@stratosui/core';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
-import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer/analysis-report-viewer.component';
+import { AnalysisReportViewerComponent } from '../../../../analysis-report-viewer/analysis-report-viewer.component';
 
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { AnalysisReport } from '../../../../store/kube.types';

@@ -71,9 +71,6 @@ interface CfUserWithWarning extends CfUser {
     CommonModule,
     EnumerateComponent,
     TableComponent,
-    SpaceRolesListWrapperComponent,
-    TableCellSelectOrgComponent,
-    TableCellRoleOrgSpaceComponent
   ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {

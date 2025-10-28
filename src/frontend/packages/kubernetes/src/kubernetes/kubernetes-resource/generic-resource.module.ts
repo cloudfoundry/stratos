@@ -17,8 +17,6 @@ import { KubernetesResourceListComponent } from './kubernetes-resource-list/kube
     CommonModule,
     SharedModule,
     KubernetesResourceRoutingModule,
-  ],
-  declarations: [
     KubernetesResourceListComponent,
   ],
   providers: [

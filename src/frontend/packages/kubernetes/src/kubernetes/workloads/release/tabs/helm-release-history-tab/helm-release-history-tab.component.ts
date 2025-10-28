@@ -3,11 +3,8 @@ import moment from 'moment';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table/table.component';
-
-import {
-  ITableListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { TableComponent } from '../../../../../../../core/src/shared/components/list/list-table/table.component';
+import { ITableListDataSource } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { HelmReleaseHelperService } from './../helm-release-helper.service';
 

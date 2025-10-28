@@ -6,11 +6,11 @@ import { ErrorPageRoutingModule } from './error-page.routing';
 import { ErrorPageComponent } from './error-page/error-page.component';
 
 @NgModule({
-  declarations: [ErrorPageComponent],
   imports: [
     CoreModule,
     SharedModule,
-    ErrorPageRoutingModule
+    ErrorPageRoutingModule,
+    ErrorPageComponent
   ]
 })
 export class ErrorPageModule { }

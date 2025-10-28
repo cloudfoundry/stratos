@@ -10,10 +10,10 @@ describe('GitEndpointDetailsComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [GitEndpointDetailsComponent],
       imports: [
         CoreModule,
-        SharedModule
+        SharedModule,
+        GitEndpointDetailsComponent
       ]
     })
       .compileComponents();

@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
-import { StatefulIconComponent } from '../../../../../../core/src/shared/components/stateful-icon/stateful-icon.component';
+import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { ServicesService } from '../../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../cf-api-svc.types';
