@@ -12,8 +12,10 @@ describe('AppComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        AppComponent
+      ],
       imports: [
-        AppComponent,  // Move to imports since it's standalone
         SharedModule,
         RouterTestingModule,
         CoreTestingModule,
