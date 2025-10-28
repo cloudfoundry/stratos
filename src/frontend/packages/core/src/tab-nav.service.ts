@@ -14,19 +14,19 @@ export class TabNavService {
 
   static TabsNoLinkValue = null;
 
-  private tabNavsSubject: BehaviorSubject<IPageSideNavTab[]>;
+  private tabNavsSubject = new BehaviorSubject<IPageSideNavTab[]>(undefined);
   public tabNavs$: Observable<IPageSideNavTab[]>;
 
-  private tabHeaderSubject: BehaviorSubject<string>;
+  private tabHeaderSubject = new BehaviorSubject<string>(undefined);
   public tabHeader$: Observable<string>;
 
-  private tabSubNavSubject: BehaviorSubject<Portal<any>>;
+  private tabSubNavSubject = new BehaviorSubject<Portal<any>>(undefined);
   public tabSubNav$: Observable<Portal<any>>;
 
-  private tabSubNavBreadcrumbsSubject: BehaviorSubject<IHeaderBreadcrumbLink[]>;
+  private tabSubNavBreadcrumbsSubject = new BehaviorSubject<IHeaderBreadcrumbLink[]>(undefined);
   public tabSubNavBreadcrumbs$: Observable<IHeaderBreadcrumbLink[]>;
 
-  private pageHeaderSubject: BehaviorSubject<Portal<any>>;
+  private pageHeaderSubject = new BehaviorSubject<Portal<any>>(undefined);
   public pageHeader$: Observable<Portal<any>>;
 
   public setTabs(tabs: IPageSideNavTab[]) {
@@ -96,15 +96,10 @@ export class TabNavService {
   }
 
   constructor(private router: Router) {
-    this.tabNavsSubject = new BehaviorSubject(undefined);
     this.tabNavs$ = this.observeSubject(this.tabNavsSubject);
-    this.tabHeaderSubject = new BehaviorSubject(undefined);
     this.tabHeader$ = this.observeSubject(this.tabHeaderSubject);
-    this.tabSubNavSubject = new BehaviorSubject(undefined);
     this.tabSubNav$ = this.observeSubject(this.tabSubNavSubject);
-    this.tabSubNavBreadcrumbsSubject = new BehaviorSubject(undefined);
     this.tabSubNavBreadcrumbs$ = this.observeSubject(this.tabSubNavBreadcrumbsSubject);
-    this.pageHeaderSubject = new BehaviorSubject(undefined);
     this.pageHeader$ = this.observeSubject(this.pageHeaderSubject);
   }
 }

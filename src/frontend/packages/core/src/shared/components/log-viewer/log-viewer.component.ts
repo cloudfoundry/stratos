@@ -68,7 +68,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private statusSub: Subscription;
   private resizeSub: Subscription;
 
-  private stopped$: BehaviorSubject<boolean>;
+  private stopped$ = new BehaviorSubject<boolean>(false);
   private colorizer = new AnsiColors();
 
   public maxLogLines = 1000;
@@ -79,8 +79,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     const contentElement = this.content.nativeElement;
     const containerElement = this.container.nativeElement;
-
-    this.stopped$ = new BehaviorSubject<boolean>(false);
 
     const stoppableLogStream$ = this.stopped$.pipe(
       switchMap(
@@ -238,7 +236,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   public pause(pause) {
-    this.stopped$.next(pause);
+    if (this.stopped$) {
+      this.stopped$.next(pause);
+    }
   }
 
   private binElement() {

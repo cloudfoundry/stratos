@@ -13,7 +13,8 @@
   <form class="stepper-form" *ngIf="(showModeSelection && formMode === 'create-service-instance') || !showModeSelection"
     [formGroup]="createNewInstanceForm">
     <mat-form-field>
-      <input matInput class="form-control" formControlName="name" placeholder="Name" required>
+      <mat-label>Name</mat-label>
+      <input matInput class="form-control" formControlName="name" required>
       <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
         A service instance with this name already exists. Please enter a different one.
       </mat-error>
@@ -22,16 +23,19 @@
       </mat-error>
     </mat-form-field>
     <mat-form-field class="stepper-form__tags">
-      <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
-        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable"
+      <mat-label>Tags</mat-label>
+      <mat-chip-grid #chipGrid class="stepper-form__tags__chip-list">
+        <mat-chip-row *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip"
           [removable]="tagsRemovable" (removed)="removeTag(tag)">
           {{tag.label}}
-          <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
-        </mat-chip>
-        <input placeholder="Tags" name="tags" [matChipInputFor]="chipList"
+          <button matChipRemove *ngIf="tagsRemovable">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+        <input [matChipInputFor]="chipGrid"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur"
           (matChipInputTokenEnd)="addTag($event)" />
-      </mat-chip-list>
+      </mat-chip-grid>
     </mat-form-field>
     <div class="stepper-form__params">
       <div>Service Parameters</div>
@@ -42,7 +46,8 @@
   <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'"
     [formGroup]="selectExistingInstanceForm">
     <mat-form-field>
-      <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
+      <mat-label>Service Instance</mat-label>
+      <mat-select class="form-control" required formControlName="serviceInstances">
         <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid"
           [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
       </mat-select>

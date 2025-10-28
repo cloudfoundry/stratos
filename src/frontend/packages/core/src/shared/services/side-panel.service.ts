@@ -32,10 +32,10 @@ export enum SidePanelMode {
   providedIn: 'root'
 })
 export class SidePanelService {
-  private openedSubject: BehaviorSubject<boolean>;
+  private openedSubject = new BehaviorSubject<boolean>(false);
   public opened$: Observable<boolean>;
 
-  private previewModeSubject: BehaviorSubject<SidePanelMode>;
+  private previewModeSubject = new BehaviorSubject<SidePanelMode>(SidePanelMode.Normal);
   public previewMode$: Observable<SidePanelMode>;
 
   private container: ViewContainerRef;
@@ -45,12 +45,8 @@ export class SidePanelService {
     private router: Router,
     @Inject(DOCUMENT) private document: Document,
   ) {
-    this.openedSubject = new BehaviorSubject(false);
     this.opened$ = this.observeSubject(this.openedSubject);
-
-    this.previewModeSubject = new BehaviorSubject<SidePanelMode>(SidePanelMode.Normal);
     this.previewMode$ = this.observeSubject(this.previewModeSubject);
-
     this.setupRouterListener();
   }
 

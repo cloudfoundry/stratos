@@ -1,8 +1,8 @@
 import { AsyncPipe, CommonModule, NgIf, TitleCasePipe } from '@angular/common';
-import { AfterContentInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
+import { BehaviorSubject, defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
 import {
   catchError,
   delay,
@@ -10,8 +10,7 @@ import {
   filter,
   first,
   map,
-  publishReplay,
-  refCount,
+  shareReplay,
   switchMap,
   take,
   takeUntil,
@@ -89,7 +88,7 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
     SpecifyUserProvidedDetailsComponent
   ]
 })
-export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
+export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   initialisedService$: Observable<boolean>;
   apps$: Observable<APIResource<IApp>[]>;
   skipApps$: Observable<boolean>;
@@ -97,7 +96,9 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   cSIHelperService: CreateServiceInstanceHelper;
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
-  title$: Observable<string>;
+  // Use BehaviorSubject for imperative title updates without change detection errors
+  private titleSubject = new BehaviorSubject<string>('');
+  title$: Observable<string> = this.titleSubject.asObservable();
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
@@ -109,6 +110,8 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   private cfDetails$ = this.store.select(selectCreateServiceInstance);
   // Lifecycle management for subscriptions - must be declared before use in property initializers
   private destroyed$ = new Subject<void>();
+  // Loading state for applications - used to track async app fetching
+  private appsLoadingSubject$ = new BehaviorSubject<boolean>(false);
 
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
@@ -130,95 +133,155 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const cfGuid = getIdFromRoute(this.activatedRoute, 'endpointId');
     this.cfGuid$ = cfGuid ? observableOf(cfGuid) : this.cfDetails$.pipe(
       map(details => details?.cfGuid),
+      catchError(error => {
+        console.error('constructor: Error retrieving CF GUID from store', error);
+        this.errorMessage = 'Failed to retrieve Cloud Foundry endpoint information';
+        return observableOf(null);
+      }),
       takeUntil(this.destroyed$)
     );
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
-    // Initialize title$ with empty observable to prevent ExpressionChangedAfterItHasBeenCheckedError
-    this.title$ = observableOf('');
+
+    // Initialize initialisedService$ with defer for lazy evaluation and proper timing
+    // This ensures the observable is created when subscribed, not during construction
+    this.initialisedService$ = defer(() => {
+      try {
+        if (this.inMarketplaceMode) {
+          return this.initialiseForMarketplaceMode();
+        }
+        if (this.modeService.isEditServiceInstanceMode()) {
+          return this.configureForEditServiceInstanceMode();
+        }
+        if (this.modeService.isAppServicesMode()) {
+          return this.setupForAppServiceMode();
+        }
+        if (this.modeService.isServicesWallMode()) {
+          this.servicesWallCreateInstance = true;
+          this.titleSubject.next('Create Service Instance');
+          return observableOf(true);
+        }
+        return observableOf(true);
+      } catch (error) {
+        console.error('constructor: Error during initialization mode selection', error);
+        this.errorMessage = 'Failed to initialize component';
+        return observableOf(false);
+      }
+    }).pipe(
+      catchError(error => {
+        console.error('constructor: Error in initialisedService$ observable chain', error);
+        this.errorMessage = 'Failed to initialize service instance creation';
+        return observableOf(false);
+      }),
+      shareReplay({ bufferSize: 1, refCount: true }),
+      takeUntil(this.destroyed$)
+    );
   }
 
-  appsEmitted = new BehaviorSubject(null);
-  ngAfterContentInit(): void {
-    // Check if wizard has been initiated from the Services Marketplace
-    if (this.inMarketplaceMode) {
-      this.initialisedService$ = this.initialiseForMarketplaceMode();
-    }
-
-    // Check if wizard has been initiated to edit a service instance
-    if (this.modeService.isEditServiceInstanceMode()) {
-      this.initialisedService$ = this.configureForEditServiceInstanceMode();
-    } else if (this.modeService.isAppServicesMode()) {
-      // Setup wizard for App services mode
-      this.initialisedService$ = this.setupForAppServiceMode();
-    } else if (this.modeService.isServicesWallMode()) {
-      // Setup wizard for default mode
-      this.servicesWallCreateInstance = true;
-      // Defer title update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-      setTimeout(() => {
-        this.title$ = observableOf(`Create Service Instance`);
-      });
-    }
-
-    if (!this.initialisedService$) {
-      this.initialisedService$ = observableOf(true);
-    }
-
+  ngOnInit(): void {
+    // initialisedService$ is now initialized in constructor using defer() for proper timing
+    // Initialize apps$ and skipApps$ observables for the stepper
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
+      tap(() => this.appsLoadingSubject$.next(true)),
       switchMap(csi => {
-        this.appsEmitted.next(false);
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
         return cfEntityCatalog.application.store.getAllInSpace.getPaginationService(
           csi.spaceGuid, csi.cfGuid, paginationKey
         ).entities$;
       }),
-      tap(() => this.appsEmitted.next(true)),
+      tap(() => this.appsLoadingSubject$.next(false)),
       catchError(error => {
         console.error('Error fetching applications for space:', error);
         this.errorMessage = 'Failed to fetch applications. Please try again.';
-        this.appsEmitted.next(true);
+        this.appsLoadingSubject$.next(false);
         return observableOf([]);
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
       takeUntil(this.destroyed$)
     );
     this.skipApps$ = this.apps$.pipe(
       map(apps => apps?.length === 0),
       catchError(() => observableOf(true)),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
       takeUntil(this.destroyed$)
     );
   }
 
   onNext = () => {
-    this.store.dispatch(new SetCreateServiceInstanceCFDetails(
-      this.cfOrgSpaceService.cf.select.getValue(),
-      this.cfOrgSpaceService.org.select.getValue(),
-      this.cfOrgSpaceService.space.select.getValue()
-    ));
-    return this.appsEmitted.asObservable().pipe(
-      filter(emitted => emitted),
+    try {
+      const cfGuid = this.cfOrgSpaceService.cf.select.getValue();
+      const orgGuid = this.cfOrgSpaceService.org.select.getValue();
+      const spaceGuid = this.cfOrgSpaceService.space.select.getValue();
+
+      if (!cfGuid) {
+        console.error('onNext: Cloud Foundry endpoint not selected');
+        this.errorMessage = 'Please select a Cloud Foundry endpoint';
+        return observableOf({ success: false });
+      }
+
+      if (!orgGuid) {
+        console.error('onNext: Organization not selected');
+        this.errorMessage = 'Please select an organization';
+        return observableOf({ success: false });
+      }
+
+      if (!spaceGuid) {
+        console.error('onNext: Space not selected');
+        this.errorMessage = 'Please select a space';
+        return observableOf({ success: false });
+      }
+
+      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfGuid, orgGuid, spaceGuid));
+    } catch (error) {
+      console.error('onNext: Error dispatching CF details', error);
+      this.errorMessage = 'Failed to save Cloud Foundry details';
+      return observableOf({ success: false });
+    }
+
+    return this.appsLoadingSubject$.asObservable().pipe(
+      filter(loading => !loading),
       delay(1),
       map(() => ({ success: true })),
+      catchError(error => {
+        console.error('onNext: Error waiting for applications to load', error);
+        this.errorMessage = 'Failed to load applications';
+        return observableOf({ success: false });
+      }),
       takeUntil(this.destroyed$)
     );
   }
 
   resetStoreData = () => {
-    if (this.inMarketplaceMode) {
-      this.store.dispatch(new ResetCreateServiceInstanceOrgAndSpaceState());
-    } else if (this.modeService.isServicesWallMode()) {
-      this.store.dispatch(new ResetCreateServiceInstanceState());
+    try {
+      if (this.inMarketplaceMode) {
+        this.store.dispatch(new ResetCreateServiceInstanceOrgAndSpaceState());
+      } else if (this.modeService.isServicesWallMode()) {
+        this.store.dispatch(new ResetCreateServiceInstanceState());
+      }
+    } catch (error) {
+      console.error('resetStoreData: Error resetting store state', error);
+      // Non-critical operation, just log the error
     }
   }
 
   private setupForAppServiceMode() {
     const appId = getIdFromRoute(this.activatedRoute, 'id');
     const cfId = getIdFromRoute(this.activatedRoute, 'endpointId');
+
+    if (!appId) {
+      console.error('setupForAppServiceMode: Application ID is missing from route params');
+      this.errorMessage = 'Cannot bind service instance: Application ID is required';
+      return observableOf(false);
+    }
+
+    if (!cfId) {
+      console.error('setupForAppServiceMode: Cloud Foundry endpoint ID is missing from route params');
+      this.errorMessage = 'Cannot bind service instance: Cloud Foundry endpoint ID is required';
+      return observableOf(false);
+    }
+
     this.appId = appId;
     this.bindAppStepperText = 'Binding Params (Optional)';
     return cfEntityCatalog.application.store.getEntityService(
@@ -230,21 +293,32 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       filter(p => !!p),
       tap(app => {
         const spaceEntity = app?.entity?.entity?.space as APIResource<ISpace>;
-        if (spaceEntity?.entity) {
-          this.store.dispatch(
-            new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
-          );
-          // Defer title update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-          setTimeout(() => {
-            this.title$ = observableOf(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
-          });
+        if (!spaceEntity?.entity) {
+          console.error('setupForAppServiceMode: Space entity not found for application', appId);
+          throw new Error('Application space information is missing');
         }
+        if (!spaceEntity.entity.organization_guid) {
+          console.error('setupForAppServiceMode: Organization GUID missing from space entity', spaceEntity);
+          throw new Error('Organization information is missing from application space');
+        }
+        if (!app.entity.entity.space_guid) {
+          console.error('setupForAppServiceMode: Space GUID missing from application entity', app.entity);
+          throw new Error('Space GUID is missing from application');
+        }
+        this.store.dispatch(
+          new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
+        );
+        this.titleSubject.next(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
       }),
       take(1),
       map(o => true),
       catchError(error => {
-        console.error('Error setting up app service mode:', error);
-        this.errorMessage = 'Failed to load application details.';
+        console.error('setupForAppServiceMode: Failed to fetch application details or space information', {
+          appId,
+          cfId,
+          error
+        });
+        this.errorMessage = 'Failed to load application details. Please try again.';
         return observableOf(false);
       }),
       takeUntil(this.destroyed$)
@@ -255,23 +329,20 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const { endpointId, serviceInstanceId } = this.activatedRoute.snapshot.params;
 
     if (!endpointId) {
-      console.error('Edit service instance mode initialization failed: endpointId is missing from route params');
+      console.error('configureForEditServiceInstanceMode: endpointId is missing from route params');
       this.errorMessage = 'Cannot edit service instance: Cloud Foundry endpoint ID is required';
       return observableOf(false);
     }
 
     if (!serviceInstanceId) {
-      console.error('Edit service instance mode initialization failed: serviceInstanceId is missing from route params');
+      console.error('configureForEditServiceInstanceMode: serviceInstanceId is missing from route params');
       this.errorMessage = 'Cannot edit service instance: Service instance ID is required';
       return observableOf(false);
     }
 
     if (this.serviceType === this.serviceTypes.USER_SERVICE) {
       this.serviceInstanceId = serviceInstanceId;
-      // Defer title update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-      setTimeout(() => {
-        this.title$ = observableOf('Edit User Provided Service Instance');
-      });
+      this.titleSubject.next('Edit User Provided Service Instance');
       return observableOf(true);
     } else {
       return cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, endpointId).waitForEntity$.pipe(
@@ -279,19 +350,31 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         switchMap(serviceInstance => {
           const serviceInstanceEntity = serviceInstance?.entity?.entity;
           if (!serviceInstanceEntity) {
+            console.error('configureForEditServiceInstanceMode: Service instance entity not found', {
+              serviceInstanceId,
+              endpointId
+            });
             throw new Error('Service instance entity not found');
           }
 
           this.csiGuidsService.cfGuid = endpointId;
-          // Defer title update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-          setTimeout(() => {
-            this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
-          });
+          this.titleSubject.next(`Edit Service Instance: ${serviceInstanceEntity.name}`);
           const serviceGuid = serviceInstanceEntity.service_guid;
 
           if (!serviceGuid) {
-            console.error('Edit service instance failed: service_guid is missing from service instance entity', serviceInstanceEntity);
+            console.error('configureForEditServiceInstanceMode: service_guid is missing from service instance entity', {
+              serviceInstanceId,
+              serviceInstanceEntity
+            });
             throw new Error('Cannot edit service instance: Service GUID is required but missing from service instance data');
+          }
+
+          if (!serviceInstanceEntity.space_guid) {
+            console.error('configureForEditServiceInstanceMode: space_guid is missing from service instance entity', {
+              serviceInstanceId,
+              serviceInstanceEntity
+            });
+            throw new Error('Cannot edit service instance: Space GUID is required but missing from service instance data');
           }
 
           this.csiGuidsService.serviceGuid = serviceGuid;
@@ -310,24 +393,47 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           return cfEntityCatalog.space.store.getEntityService(serviceInstanceEntity.space_guid, endpointId).waitForEntity$.pipe(
             filter(p => !!p),
             tap(spaceEntity => {
+              if (!spaceEntity?.entity?.entity?.organization_guid) {
+                console.error('configureForEditServiceInstanceMode: organization_guid missing from space entity', {
+                  spaceGuid: serviceInstanceEntity.space_guid,
+                  spaceEntity
+                });
+                throw new Error('Organization GUID is missing from space entity');
+              }
+              if (!spaceEntity?.entity?.metadata?.guid) {
+                console.error('configureForEditServiceInstanceMode: space metadata guid missing from space entity', {
+                  spaceGuid: serviceInstanceEntity.space_guid,
+                  spaceEntity
+                });
+                throw new Error('Space metadata GUID is missing from space entity');
+              }
               this.store.dispatch(new SetCreateServiceInstanceCFDetails(
                 endpointId,
-                spaceEntity?.entity?.entity?.organization_guid,
-                spaceEntity?.entity?.metadata?.guid)
+                spaceEntity.entity.entity.organization_guid,
+                spaceEntity.entity.metadata.guid)
               );
             }),
             take(1),
             catchError(error => {
-              console.error('Error fetching space entity:', error);
-              return EMPTY;
+              console.error('configureForEditServiceInstanceMode: Failed to fetch space entity', {
+                spaceGuid: serviceInstanceEntity.space_guid,
+                endpointId,
+                error
+              });
+              this.errorMessage = 'Failed to load space information for service instance.';
+              return observableOf(false);
             })
           );
         }),
         take(1),
         map(o => true),
         catchError(error => {
-          console.error('Error configuring edit mode:', error);
-          this.errorMessage = 'Failed to load service instance for editing.';
+          console.error('configureForEditServiceInstanceMode: Failed to configure edit mode', {
+            serviceInstanceId,
+            endpointId,
+            error
+          });
+          this.errorMessage = 'Failed to load service instance for editing. Please try again.';
           return observableOf(false);
         }),
         takeUntil(this.destroyed$)
@@ -338,7 +444,14 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   ngOnDestroy(): void {
     this.destroyed$.next();
     this.destroyed$.complete();
-    this.store.dispatch(new ResetCreateServiceInstanceState());
+    this.titleSubject.complete();
+    this.appsLoadingSubject$.complete();
+    try {
+      this.store.dispatch(new ResetCreateServiceInstanceState());
+    } catch (error) {
+      console.error('ngOnDestroy: Error dispatching reset state action', error);
+      // Non-critical during cleanup, just log
+    }
   }
 
   isSpaceScoped = () => this.modeService.spaceScopedDetails.isSpaceScoped;
@@ -347,47 +460,70 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     const { endpointId, serviceId } = this.activatedRoute.snapshot.params;
 
     if (!endpointId) {
-      console.error('Marketplace mode initialization failed: endpointId is missing from route params');
+      console.error('initialiseForMarketplaceMode: endpointId is missing from route params');
       this.errorMessage = 'Cannot initialize service instance creation: Cloud Foundry endpoint ID is required';
       return observableOf(false);
     }
 
     if (!serviceId) {
-      console.error('Marketplace mode initialization failed: serviceId is missing from route params');
+      console.error('initialiseForMarketplaceMode: serviceId is missing from route params');
       this.errorMessage = 'Cannot initialize service instance creation: Service ID is required';
       return observableOf(false);
     }
 
-    this.csiGuidsService.cfGuid = endpointId;
-    this.csiGuidsService.serviceGuid = serviceId;
-    this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
-    const cfDetails = new SetCreateServiceInstanceCFDetails(endpointId);
-    if (this.modeService.spaceScopedDetails.isSpaceScoped) {
-      cfDetails.spaceGuid = this.modeService.spaceScopedDetails.spaceGuid;
-      cfDetails.orgGuid = this.modeService.spaceScopedDetails.orgGuid;
+    try {
+      this.csiGuidsService.cfGuid = endpointId;
+      this.csiGuidsService.serviceGuid = serviceId;
+      this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
+      const cfDetails = new SetCreateServiceInstanceCFDetails(endpointId);
+      if (this.modeService.spaceScopedDetails.isSpaceScoped) {
+        cfDetails.spaceGuid = this.modeService.spaceScopedDetails.spaceGuid;
+        cfDetails.orgGuid = this.modeService.spaceScopedDetails.orgGuid;
+      }
+      this.store.dispatch(cfDetails);
+      this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
+    } catch (error) {
+      console.error('initialiseForMarketplaceMode: Error during service configuration', {
+        endpointId,
+        serviceId,
+        error
+      });
+      this.errorMessage = 'Failed to configure service instance creation.';
+      return observableOf(false);
     }
-    this.store.dispatch(cfDetails);
-    this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
-    // Defer title update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-    setTimeout(() => {
-      this.title$ = this.cSIHelperService.getServiceName().pipe(
-        map(label => `Create Instance: ${label || 'Service'}`),
-        catchError(error => {
-          console.error('Error fetching service name:', error);
-          return observableOf('Create Service Instance');
-        }),
-        takeUntil(this.destroyed$)
-      );
-    });
+
+    // Subscribe to service name and update title imperatively
+    this.cSIHelperService.getServiceName().pipe(
+      map(label => `Create Instance: ${label || 'Service'}`),
+      catchError(error => {
+        console.error('initialiseForMarketplaceMode: Failed to fetch service name', {
+          serviceId,
+          endpointId,
+          error
+        });
+        return observableOf('Create Service Instance');
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe(title => this.titleSubject.next(title));
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),
       first(),
-      tap(e => this.cfOrgSpaceService.cf.select.next(endpointId)),
+      tap(e => {
+        if (!e || e.length === 0) {
+          console.error('initialiseForMarketplaceMode: No Cloud Foundry endpoints available');
+          throw new Error('No Cloud Foundry endpoints available');
+        }
+        this.cfOrgSpaceService.cf.select.next(endpointId);
+      }),
       map(o => true),
       catchError(error => {
-        console.error('Error initializing marketplace mode:', error);
-        this.errorMessage = 'Failed to initialize service creation.';
+        console.error('initialiseForMarketplaceMode: Failed to initialize marketplace mode', {
+          endpointId,
+          serviceId,
+          error
+        });
+        this.errorMessage = 'Failed to initialize service creation. Please ensure your Cloud Foundry connection is active.';
         return observableOf(false);
       }),
       takeUntil(this.destroyed$)

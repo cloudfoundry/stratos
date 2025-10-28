@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatChipInputEvent } from '@stratosui/core';
+import { MatChipInputEvent } from '@angular/material/chips';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -505,6 +505,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const value = event.value;
     if ((value || '').trim()) {
       this.tags.push({ label: value.trim() });
+      this.updateTagsFormControl();
     }
 
     if (input) {
@@ -517,7 +518,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     if (index >= 0) {
       this.tags.splice(index, 1);
+      this.updateTagsFormControl();
     }
+  }
+
+  private updateTagsFormControl(): void {
+    const tagsArray = this.tags.map(t => t.label);
+    this.createNewInstanceForm.controls.tags.setValue(tagsArray);
+    this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 
   checkName = (value: string = null) => {

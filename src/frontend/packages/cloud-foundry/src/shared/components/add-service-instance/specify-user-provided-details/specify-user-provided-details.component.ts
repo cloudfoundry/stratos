@@ -2,9 +2,17 @@ import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@stratosui/core';
+import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { ActivatedRoute } from '@angular/router';
+import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
+import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -39,7 +47,16 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule,
+    MatChipsModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatRadioModule,
+    AppNameUniqueDirective,
+    StatefulIconComponent
   ]
 })
 export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
@@ -74,7 +91,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string, }[] = [];
-  public valid = new BehaviorSubject(false);
+  public validate = new BehaviorSubject(false);
   private subscriptions: Subscription[] = [];
   private tagsChanged = new BehaviorSubject(true);
 
@@ -133,7 +150,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
         this.bindExistingInstance.updateValueAndValidity();
       }
     }));
-    this.subscriptions.push(obs.subscribe(valid => this.valid.next(valid)));
+    this.subscriptions.push(obs.subscribe(valid => this.validate.next(valid)));
   }
 
   private validAndChanged(isValid = false): boolean {
@@ -170,7 +187,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
   resetForms = (mode: CreateServiceFormMode) => {
-    this.valid.next(false);
+    this.validate.next(false);
     this.createEditServiceInstance.reset();
     this.bindExistingInstance.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
@@ -352,6 +369,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     const label = (event.value || '').trim();
     if (label) {
       this.tags.push({ label });
+      this.updateTagsFormControl();
       this.tagsChanged.next(true);
     }
 
@@ -365,8 +383,15 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     if (index >= 0) {
       this.tags.splice(index, 1);
+      this.updateTagsFormControl();
       this.tagsChanged.next(true);
     }
+  }
+
+  private updateTagsFormControl(): void {
+    const tagsArray = this.tags.map(t => t.label);
+    this.createEditServiceInstance.controls.tags.setValue(tagsArray);
+    this.createEditServiceInstance.controls.tags.markAsTouched();
   }
 
 }

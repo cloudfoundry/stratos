@@ -5,11 +5,14 @@
       <mat-icon *ngIf="collapsed">chevron_right</mat-icon>
       <mat-icon *ngIf="!collapsed">chevron_left</mat-icon>
     </button>
-    <mat-chip-list>
-      <mat-chip *ngIf="filteredRepo">
-        {{filteredRepo}} <mat-icon (click)="filterCharts()" matChipRemove>cancel</mat-icon>
+    <mat-chip-set>
+      <mat-chip *ngIf="filteredRepo" [removable]="true">
+        {{filteredRepo}}
+        <button matChipRemove (click)="filterCharts()">
+          <mat-icon>cancel</mat-icon>
+        </button>
       </mat-chip>
-    </mat-chip-list>
+    </mat-chip-set>
   </div>
 </ng-template>
 

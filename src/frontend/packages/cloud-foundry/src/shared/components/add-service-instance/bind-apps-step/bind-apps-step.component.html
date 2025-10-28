@@ -2,7 +2,8 @@
   <b>{{guideText}}</b>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
-      <mat-select class="form-control" placeholder="App" formControlName="apps">
+      <mat-label>App</mat-label>
+      <mat-select class="form-control" formControlName="apps">
         <mat-option *ngIf="!boundAppId"></mat-option>
         <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
       </mat-select>
