@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRoute, CanActivate, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { RouterNav, InternalAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -19,28 +19,26 @@ export function queryParamMap(): { [key: string]: string } {
   return paramMap;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuardService implements CanActivate {
+export const authGuard: CanActivateFn = (): Observable<boolean> => {
+  const store = inject(Store<InternalAppState>);
 
-  constructor(
-    private store: Store<InternalAppState>,
-  ) { }
+  return store.select('auth').pipe(
+    map((state) => {
+      if (!state.sessionData || !state.sessionData.valid) {
+        store.dispatch(new RouterNav({
+          path: ['/login']
+        }, {
+            path: window.location.pathname,
+            queryParams: queryParamMap()
+          }));
+        return false;
+      }
+      return true;
+    }),
+    first()
+  );
+};
 
-  canActivate(): Observable<boolean> {
-    return this.store.select('auth').pipe(
-      map((state) => {
-        if (!state.sessionData || !state.sessionData.valid) {
-          this.store.dispatch(new RouterNav({
-            path: ['/login']
-          }, {
-              path: window.location.pathname,
-              queryParams: queryParamMap()
-            }));
-          return false;
-        }
-        return true;
-      }), first());
-  }
-}
+// Legacy class-based guard for backward compatibility during migration
+// @deprecated Use authGuard functional guard instead
+export const AuthGuardService = authGuard;

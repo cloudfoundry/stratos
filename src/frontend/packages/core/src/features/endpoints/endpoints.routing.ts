@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DynamicExtensionRoutes } from '../../core/extension/dynamic-extension-routes';
+import { dynamicExtensionRoutesGuard } from '../../core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../core/extension/extension-service';
 import { PageNotFoundComponentComponent } from '../../core/page-not-found-component/page-not-found-component.component';
 import { BackupEndpointsComponent } from './backup-restore/backup-endpoints/backup-endpoints.component';
@@ -54,7 +54,7 @@ const endpointsRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent,
-    canActivate: [DynamicExtensionRoutes],
+    canActivate: [dynamicExtensionRoutesGuard],
     data: {
       stratosRouteGroup: StratosActionType.Endpoints
     }

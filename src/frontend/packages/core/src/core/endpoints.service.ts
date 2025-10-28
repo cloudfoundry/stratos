@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   endpointEntitiesSelector,
@@ -27,7 +27,7 @@ import { UserService } from './user.service';
 @Injectable({
   providedIn: 'root'
 })
-export class EndpointsService implements CanActivate {
+export class EndpointsService {
 
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
@@ -94,48 +94,6 @@ export class EndpointsService implements CanActivate {
     this.endpoints$.pipe(first()).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
   }
 
-  canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
-    // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-    return observableCombineLatest(
-      this.store.select('auth'),
-      this.store.select(endpointStatusSelector)
-    ).pipe(
-      skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
-        return !state.loggedIn || endpointState.loading;
-      }),
-      withLatestFrom(
-        this.haveRegistered$,
-        this.haveConnected$,
-        this.userService.isAdmin$,
-        this.userService.isEndpointAdmin$,
-        this.sessionService.userEndpointsEnabled(),
-        this.disablePersistenceFeatures$
-      ),
-      map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-        : [[AuthState, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
-        const [authState] = state;
-        if (authState.sessionData.valid) {
-          // Redirect to endpoints if there's no connected endpoints
-          let redirect: string;
-          if (!disablePersistenceFeatures) {
-            if (!haveRegistered) {
-              redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
-            } else if (!haveConnected) {
-              redirect = '/endpoints';
-            }
-          }
-
-          // Abort redirect if there's no redirect needed (endpoints are ok or we're already heading to redirect)
-          if (!redirect || redirect === routeState.url) {
-            return true;
-          }
-
-          this.store.dispatch(new RouterNav({ path: [redirect] }, null));
-        }
-
-        return false;
-      }));
-  }
 
   hasMetrics(endpointId: string): Observable<boolean> {
     return endpointHasMetricsByAvailable(this.store, endpointId);
@@ -168,3 +126,55 @@ export class EndpointsService implements CanActivate {
     );
   }
 }
+
+// Functional guard for endpoints check
+export const endpointsGuard: CanActivateFn = (
+  route: ActivatedRouteSnapshot,
+  routeState: RouterStateSnapshot
+): Observable<boolean> => {
+  const store = inject(Store<EndpointOnlyAppState>);
+  const endpointsService = inject(EndpointsService);
+  const userService = inject(UserService);
+  const sessionService = inject(SessionService);
+
+  // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
+  return observableCombineLatest(
+    store.select('auth'),
+    store.select(endpointStatusSelector)
+  ).pipe(
+    skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
+      return !state.loggedIn || endpointState.loading;
+    }),
+    withLatestFrom(
+      endpointsService.haveRegistered$,
+      endpointsService.haveConnected$,
+      userService.isAdmin$,
+      userService.isEndpointAdmin$,
+      sessionService.userEndpointsEnabled(),
+      endpointsService.disablePersistenceFeatures$
+    ),
+    map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
+      : [[AuthState, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
+      const [authState] = state;
+      if (authState.sessionData.valid) {
+        // Redirect to endpoints if there's no connected endpoints
+        let redirect: string;
+        if (!disablePersistenceFeatures) {
+          if (!haveRegistered) {
+            redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';
+          } else if (!haveConnected) {
+            redirect = '/endpoints';
+          }
+        }
+
+        // Abort redirect if there's no redirect needed (endpoints are ok or we're already heading to redirect)
+        if (!redirect || redirect === routeState.url) {
+          return true;
+        }
+
+        store.dispatch(new RouterNav({ path: [redirect] }, null));
+      }
+
+      return false;
+    }));
+};

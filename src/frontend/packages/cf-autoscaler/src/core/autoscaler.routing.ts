@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DynamicExtensionRoutes } from '../../../core/src/core/extension/dynamic-extension-routes';
+import { dynamicExtensionRoutesGuard } from '../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../../core/src/core/extension/extension-service';
 import {
   PageNotFoundComponentComponent,
@@ -40,7 +40,7 @@ const autoscalerRoutes: Routes = [
           {
             path: '**',
             component: PageNotFoundComponentComponent,
-            canActivate: [DynamicExtensionRoutes],
+            canActivate: [dynamicExtensionRoutesGuard],
             data: {
               stratosRouteGroup: StratosActionType.Application
             }

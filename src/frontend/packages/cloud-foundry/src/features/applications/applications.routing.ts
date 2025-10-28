@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DynamicExtensionRoutes } from '../../../../core/src/core/extension/dynamic-extension-routes';
+import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType, StratosTabType } from '../../../../core/src/core/extension/extension-service';
 import {
   PageNotFoundComponentComponent,
@@ -121,7 +121,7 @@ const applicationsRoutes: Routes = [
               {
                 path: '**',
                 component: PageNotFoundComponentComponent,
-                canActivate: [DynamicExtensionRoutes],
+                canActivate: [dynamicExtensionRoutesGuard],
                 data: {
                   stratosRouteGroup: StratosTabType.Application
                 }
@@ -135,7 +135,7 @@ const applicationsRoutes: Routes = [
           {
             path: '**',
             component: PageNotFoundComponentComponent,
-            canActivate: [DynamicExtensionRoutes],
+            canActivate: [dynamicExtensionRoutesGuard],
             data: {
               stratosRouteGroup: StratosActionType.Application
             }
@@ -147,7 +147,7 @@ const applicationsRoutes: Routes = [
   {
     path: '**',
     component: PageNotFoundComponentComponent,
-    canActivate: [DynamicExtensionRoutes],
+    canActivate: [dynamicExtensionRoutesGuard],
     data: {
       stratosRouteGroup: StratosActionType.Applications
     }

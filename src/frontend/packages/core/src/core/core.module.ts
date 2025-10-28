@@ -13,8 +13,6 @@ import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-sta
 import { createMatDialogRef } from '../shared/services/tailwind-material-replacements';
 
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
-import { APIKeyAuthGuardService } from './apiKey-auth-guard.service';
-import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation.directive';
@@ -26,7 +24,6 @@ import { EventWatcherService } from './event-watcher/event-watcher.service';
 import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { MDAppModule } from './md.module';
-import { NotSetupGuardService } from './not-setup-guard.service';
 import { PageHeaderService } from './page-header-service/page-header.service';
 import { PageNotFoundComponentComponent } from './page-not-found-component/page-not-found-component.component';
 import { SafeImgPipe } from './safe-img.pipe';
@@ -86,9 +83,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         ShowHideButtonComponent
     ],
     providers: [
-        AuthGuardService,
-        APIKeyAuthGuardService,
-        NotSetupGuardService,
         PageHeaderService,
         EventWatcherService,
         WindowRef,
