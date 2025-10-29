@@ -41,7 +41,7 @@ function baseEntityCatalogSetup(
   const testEntityCatalog = entityCatalog as TestEntityCatalog;
   testEntityCatalog.clear();
 
-  const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogEntity[];
+  const entities = ([] as StratosBaseCatalogEntity[]).concat(...entityGroups);
   entities.forEach(entity => entityCatalog.register(entity));
 
   const dataReducer = requestDataReducerFactory(requestActions);

@@ -16,5 +16,5 @@ export function getEntityFlattenedList<T>(property: string, entities: APIResourc
   const all = entities
     .map(s => s.entity[property])
     .filter(s => !!s);
-  return [].concat.apply([], all);
+  return ([] as T[]).concat(...all);
 }

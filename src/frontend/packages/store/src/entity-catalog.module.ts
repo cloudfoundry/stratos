@@ -17,7 +17,7 @@ export class EntityCatalogFeatureModule {
     reducerManager: ReducerManager,
     @Inject(CATALOGUE_ENTITIES) entityGroups: StratosBaseCatalogEntity[][],
   ) {
-    const entities = [].concat.apply([], entityGroups) as StratosBaseCatalogEntity[];
+    const entities = entityGroups.flat();
     entities.forEach(entity => entityCatalog.register(entity));
     const dataReducer = requestDataReducerFactory(requestActions);
     const extraReducers = entityCatalog.getAllEntityRequestDataReducers();

@@ -25,7 +25,7 @@ export class RunningInstancesComponent implements OnInit {
   ngOnInit() {
     this.runningInstances$ = cfEntityCatalog.appStats.store.getPaginationMonitor(this.appGuid, this.cfGuid).currentPage$.pipe(
       map(appInstancesPages => {
-        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
+        const allInstances = Object.values(appInstancesPages || []).flat().filter(instance => !!instance);
         return allInstances.filter(stat => stat.state === 'RUNNING').length;
       })
     );
