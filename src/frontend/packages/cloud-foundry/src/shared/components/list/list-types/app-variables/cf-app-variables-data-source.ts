@@ -37,15 +37,15 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
       store,
       action: getAppEnvVarsAction,
       schema: cfEntityFactory(appEnvVarsEntityType),
-      getRowUniqueId: object => object.name,
+      getRowUniqueId: (resource: APIResource<AppEnvVarsState>) => resource.metadata.guid,
       getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: createEntityRelationPaginationKey(applicationEntityType, appService.appGuid),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env = (variables[0].entity.environment_json) ? variables[0].entity.environment_json : {};
-        const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
+        const env: Record<string, any> = (variables[0].entity.environment_json) ? variables[0].entity.environment_json : {};
+        const rows = Object.keys(env).map(name => ({ name, value: env[name] as string }));
         return rows;
       }),
       isLocal: true,
@@ -57,17 +57,17 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
     this.appGuid = appService.appGuid;
   }
 
-  saveAdd() {
+  saveAdd(): void {
     cfEntityCatalog.appEnvVar.api.addNewToApplication(this.appGuid, this.cfGuid, this.transformedEntities, this.addItem);
 
     super.saveAdd();
   }
 
-  startEdit(row: ListAppEnvVar) {
+  startEdit(row: ListAppEnvVar): void {
     super.startEdit({ ...row });
   }
 
-  saveEdit() {
+  saveEdit(): void {
     cfEntityCatalog.appEnvVar.api.editInApplication(this.appGuid, this.cfGuid, this.transformedEntities, this.editRow);
 
     super.saveEdit();

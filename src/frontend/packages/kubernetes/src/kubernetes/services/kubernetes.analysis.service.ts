@@ -56,7 +56,7 @@ export class KubernetesAnalysisService {
     this.enabled$ = KubernetesAnalysisService.isAnalysisEnabled(this.store);
     this.hideAnalysis$ = this.enabled$.pipe(map(enabled => !enabled));
 
-    const allEngines = {
+    const allEngines: Record<string, { name: string; id: string; namespaceAware: boolean; descriptionUrl: string }> = {
       popeye:
       {
         name: 'PopEye',
@@ -107,11 +107,11 @@ export class KubernetesAnalysisService {
     this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }
 
-  public delete(endpointID: string, item: { id: string, }) {
+  public delete(endpointID: string, item: { id: string }): Observable<any> {
     return kubeEntityCatalog.analysisReport.api.delete(endpointID, item.id);
   }
 
-  public refresh() {
+  public refresh(): void {
     this.store.dispatch(new ResetPaginationOfType(this.action));
   }
 

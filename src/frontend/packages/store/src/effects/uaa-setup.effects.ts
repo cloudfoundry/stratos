@@ -52,7 +52,7 @@ export class UAASetupEffect {
       );
     })));
 
-  private fetchError(err): string {
+  private fetchError(err: any): string {
     const httpResponse = isHttpErrorResponse(err);
     if (httpResponse) {
       if (httpResponse.error.error) {

@@ -55,7 +55,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
 
   uaaForm: UntypedFormGroup;
   validateUAAForm: Observable<boolean>;
-  uaaScopes = [];
+  uaaScopes: string[] = [];
   selectedScope = '';
   applyingSetup$ = new BehaviorSubject<boolean>(false);
 
@@ -146,7 +146,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       useSSO: new UntypedFormControl(false),
     });
 
-    let observer;
+    let observer: any;
     this.validateUAAForm = new Observable(o => {
       observer = o;
       observer.next(false);

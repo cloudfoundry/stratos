@@ -47,7 +47,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   private asyncSub: Subscription;
 
-  public valueContext = { value: null };
+  public valueContext: { value: any } = { value: null as any };
   public isLink = false;
   public isExternalLink = false;
   public linkValue: string;
@@ -85,7 +85,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setupLinkDeps();
   }
 
-  private setupAsyncLink(value) {
+  private setupAsyncLink(value: any) {
     if (!this.cellDefinition.getAsyncLink) {
       return;
     }
@@ -94,13 +94,14 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.setupLinkDeps();
   }
 
-  private setupAsync(row) {
+  private setupAsync(row: T) {
     if (this.asyncSub) {
       return;
     }
     const asyncConfig = this.cellDefinition.asyncValue;
-    this.asyncSub = row[asyncConfig.pathToObs].subscribe(value => {
-      this.valueContext.value = pathGet(asyncConfig.pathToValue, value);
+    const rowWithObs = row as Record<string, any>;
+    this.asyncSub = (rowWithObs[asyncConfig.pathToObs] as Observable<any>).subscribe((value: any) => {
+      this.valueContext.value = pathGet(asyncConfig.pathToValue, value as any);
       this.setupAsyncLink(value);
     });
   }

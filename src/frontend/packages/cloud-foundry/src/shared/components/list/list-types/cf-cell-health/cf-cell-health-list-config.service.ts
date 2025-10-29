@@ -60,7 +60,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
     this.init$ = this.createMetricsAction(cloudFoundryCellService.cfGuid, cloudFoundryCellService.cellId).pipe(
       first(),
       tap(action => {
-        this.dataSource = new CfCellHealthDataSource(this.store, this, action);
+        this.dataSource = new CfCellHealthDataSource(this.store, this as BaseCfListConfig<CfCellHealthEntry>, action);
       })
     );
     this.showCustomTime = true;

@@ -61,9 +61,9 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           return [{
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(
-                catchError(() => null), // Be super safe to ensure we pass the first filter
+                catchError((): Observable<null> => of(null)), // Be super safe to ensure we pass the first filter
                 first()
-              ).subscribe(res => {
+              ).subscribe((res: unknown) => {
                 if (res != null) {
                   stratosEntityCatalog.endpoint.api.getAll();
                 }
@@ -108,7 +108,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   helmEntityCatalog.endpoint = new StratosCatalogEndpointEntity(
     endpointDefinition,
-    (fav) => `/monocular/charts/${fav.metadata.name}`,
+    () => '/monocular',
   );
   return helmEntityCatalog.endpoint;
 }

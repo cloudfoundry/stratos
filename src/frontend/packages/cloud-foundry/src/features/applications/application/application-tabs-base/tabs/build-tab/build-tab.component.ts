@@ -333,7 +333,7 @@ export class BuildTabComponent implements OnInit {
     );
   }
 
-  pollEntityService(state, stateString): Observable<any> {
+  pollEntityService(state: any, stateString: string): Observable<any> {
     return this.applicationService.entityService
       .poll(1000, state).pipe(
         delay(1),

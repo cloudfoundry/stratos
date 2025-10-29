@@ -94,8 +94,8 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     super();
   }
 
-  public metricData$: Observable<any>;
-  public appAutoscalerAppMetricLegend;
+  public metricData$: Observable<AppAutoscalerMetricData[]>;
+  public appAutoscalerAppMetricLegend: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: unknown[] };
 
   getLegend2(trigger: AppScalingTrigger) {
     const legendColor = buildLegendData(trigger);

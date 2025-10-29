@@ -330,7 +330,7 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           lastValidationFootprint = newValidationFootprint;
           actionsArray.forEach(actionFromArray => dispatcher(new CfValidateEntitiesStart(
             actionFromArray,
-            state.ids[actionFromArray.__forcedPageNumber__ || state.currentPage]
+            (state.ids as Record<number, string[]>)[actionFromArray.__forcedPageNumber__ || state.currentPage]
           )));
         }
       };
@@ -345,12 +345,13 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       getTotalPages: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
         // Input is keyed per endpoint. Value per endpoint can either be a response or a number of responses (one per page)
         Object.values(responseWithPages).reduce((max, response: CFResponse | CFResponse[]) => {
-          const resp = (response[0] || response);
+          const resp = Array.isArray(response) ? response[0] : response;
           return max > resp.total_pages ? max : resp.total_pages;
         }, 0),
       getTotalEntities: (responseWithPages: JetstreamResponse<CFResponse | CFResponse[]>) =>
         Object.values(responseWithPages).reduce((all, response: CFResponse | CFResponse[]) => {
-          return all + (response[0] || response).total_results;
+          const resp = Array.isArray(response) ? response[0] : response;
+          return all + resp.total_results;
         }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: (store: Store<AppState>) => {
@@ -959,6 +960,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
   cfEntityCatalog.route = new StratosCatalogEntity<
     IFavoriteMetadata,
     APIResource<IRoute>,
+    RoutesActionBuilders,
     RoutesActionBuilders
   >(
     definition,

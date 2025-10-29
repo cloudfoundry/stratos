@@ -47,7 +47,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
 
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no quotas'
   };
@@ -75,7 +75,7 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
       columnId: 'createdAt',
       headerCell: () => 'Creation',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IQuotaDefinition>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -86,14 +86,14 @@ export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource
   ];
 
   private listActionDelete: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.deleteSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.deleteSingleQuota(item),
     label: 'Delete',
     description: 'Delete space quota',
     createVisible: () => this.canDelete
   };
 
   private listActionEdit: IListAction<APIResource<IQuotaDefinition>> = {
-    action: (item: APIResource) => this.editSingleQuota(item),
+    action: (item: APIResource<IQuotaDefinition>) => this.editSingleQuota(item),
     label: 'Edit',
     description: 'Edit space quota',
     createVisible: () => this.canEdit

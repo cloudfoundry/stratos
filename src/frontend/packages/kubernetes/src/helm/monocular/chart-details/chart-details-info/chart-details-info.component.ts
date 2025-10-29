@@ -26,7 +26,7 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;
   versions: ChartVersion[];
-  schema: any = null;
+  schema: unknown = null;
 
   private pCurrentVersion: ChartVersion;
 

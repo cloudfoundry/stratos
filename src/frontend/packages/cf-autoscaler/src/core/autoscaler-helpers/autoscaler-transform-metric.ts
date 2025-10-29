@@ -224,7 +224,7 @@ function getMetricBasicInfo(
   source: AppAutoscalerMetricData[],
   trigger: AppScalingTrigger
 ): AppAutoscalerMetricBasicInfo {
-  const intervalMap = {};
+  const intervalMap: Record<number, number> = {};
   let maxCount = 1;
   let preTimestamp = 0;
   let maxValue = -1;

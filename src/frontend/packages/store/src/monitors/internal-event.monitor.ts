@@ -12,7 +12,7 @@ import {
 
 export function newNonAngularInterval(ngZone: NgZone, intervalTime: number) {
   return new Observable<number>((observer) => {
-    let intervalTimer;
+    let intervalTimer: any;
     let counter = 0;
     observer.add(() => {
       clearInterval(intervalTimer);

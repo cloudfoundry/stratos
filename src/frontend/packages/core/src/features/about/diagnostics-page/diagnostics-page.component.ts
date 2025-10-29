@@ -78,7 +78,7 @@ export class DiagnosticsPageComponent implements OnInit {
       map((sessionData: SessionData) => {
         const lastModified = sessionData.diagnostics.helmLastModified;
         const match = helmLastModifiedRegEx.exec(lastModified);
-        if (match.length === 2) {
+        if (match && match.length === 2) {
           return new Date(parseInt(match[1], 10) * 1000);
         }
         return new Date(0);

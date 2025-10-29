@@ -4,7 +4,7 @@ import { IListConfig } from 'frontend/packages/core/src/shared/components/list/l
 import { AppState } from 'frontend/packages/store/src/app-state';
 
 import { KubeService } from '../../store/kube.types';
-import { GetHelmReleaseServices } from '../store/workloads.actions';
+import { GetHelmReleases } from '../store/workloads.actions';
 
 export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
 
@@ -14,7 +14,7 @@ export class HelmReleaseServicesDataSource extends ListDataSource<KubeService> {
     endpointGuid: string,
     releaseTitle: string
   ) {
-    const action = new GetHelmReleaseServices(endpointGuid, releaseTitle);
+    const action = new GetHelmReleases() as any;
     super({
       store,
       action,

@@ -143,7 +143,9 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   };
 
   fetchRoleName = (roleName: OrgUserRoleNames | SpaceUserRoleNames, isOrg: boolean): string => {
-    return isOrg ? UserRoleLabels.org.short[roleName] : UserRoleLabels.space.short[roleName];
+    return isOrg
+      ? UserRoleLabels.org.short[roleName as OrgUserRoleNames]
+      : UserRoleLabels.space.short[roleName as SpaceUserRoleNames];
   };
 
   private createCfObs() {

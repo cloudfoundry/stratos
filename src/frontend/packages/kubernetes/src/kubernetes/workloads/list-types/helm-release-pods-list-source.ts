@@ -13,9 +13,10 @@ export class HelmReleasePodsDataSource extends ListDataSource<KubernetesPod> {
     store: Store<AppState>,
     listConfig: IListConfig<KubernetesPod>,
     endpointGuid: string,
-    releaseTitle: string
+    releaseTitle: string,
+    namespace?: string
   ) {
-    const action = kubeEntityCatalog.pod.actions.getInWorkload(endpointGuid, releaseTitle);
+    const action = kubeEntityCatalog.pod.actions.getInWorkload(endpointGuid, namespace || '*', releaseTitle);
     super({
       store,
       action,

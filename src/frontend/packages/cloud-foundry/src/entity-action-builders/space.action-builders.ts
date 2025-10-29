@@ -77,7 +77,7 @@ export const spaceActionBuilders: SpaceActionBuilders = {
   },
   remove: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     { orgGuid }: { orgGuid: string, }
   ) => new DeleteSpace(
     guid,

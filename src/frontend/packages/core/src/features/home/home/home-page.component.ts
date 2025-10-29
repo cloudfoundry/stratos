@@ -90,7 +90,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   noneAvailableMsg = noFavoritesMsg;
 
-  @ViewChild('endpointsPanel', { static: false }) endpointsPanel;
+  @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
   @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
 
@@ -237,7 +237,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  setCardsToLoad(cards: any[]) {
+  setCardsToLoad(cards: ElementRef[]) {
     this.notLoadedCardIndices = [];
     for (let i = 0; i < cards.length; i++) {
       this.notLoadedCardIndices.push(i);
@@ -294,9 +294,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
   private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
-    const processed = {};
-    const result = [];
-    const epMap = {};
+    const processed: Record<string, boolean> = {};
+    const result: EndpointModel[] = [];
+    const epMap: Record<string, EndpointModel> = {};
     endpoints.forEach(ep => epMap[ep.guid] = ep);
 
     Object.keys(favorites).forEach(fav => {

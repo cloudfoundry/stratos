@@ -4,7 +4,7 @@ const ansiEscapeExtractor = new RegExp('\x1B\\[([0-9;]*)m([\n]*)', 'g');
 /* eslint-enable no-control-regex */
 
 // Map of ANSI foreground color codes to color names
-const fgAnsiToNames = {
+const fgAnsiToNames: Record<number, string> = {
   30: 'black',
   31: 'red',
   32: 'green',
@@ -16,19 +16,20 @@ const fgAnsiToNames = {
 };
 
 // Map of ANSI background color codes to color names
-const bgAnsiToNames = {};
+const bgAnsiToNames: Record<number, string> = {};
 for (const ansiColor in fgAnsiToNames) {
   if (!fgAnsiToNames.hasOwnProperty(ansiColor)) {
     continue;
   }
-  bgAnsiToNames[parseInt(ansiColor, 10) + 10] = fgAnsiToNames[ansiColor];
+  const colorCode = parseInt(ansiColor, 10);
+  bgAnsiToNames[colorCode + 10] = fgAnsiToNames[colorCode];
 }
 
 export class AnsiColors {
 
   spanOpen = false;
-  currentFg = null;
-  currentBg = null;
+  currentFg: number | null = null;
+  currentBg: number | null = null;
   boldOn = false;
 
   constructor() {}
@@ -73,7 +74,7 @@ export class AnsiColors {
     return close + span;
   }
 
-  smartReplacer(match) {
+  smartReplacer(match: string): string {
     // First flatten all consecutive mode switches into a single string
     const modes = match.replace(ansiEscapeExtractor, this.ansiGroupParser.bind(this)).split(';');
     let lineFeeds = '';
@@ -96,7 +97,7 @@ export class AnsiColors {
     return this.makeSpan() + lineFeeds;
   }
 
-  handleMode(mode) {
+  handleMode(mode: number): void {
     switch (mode) {
       // Reset all
       case 0:
@@ -130,7 +131,7 @@ export class AnsiColors {
     }
   }
 
-  ansiGroupParser(match, graphicModes, lineFeeds) {
+  ansiGroupParser(match: string, graphicModes: string, lineFeeds: string): string {
     let ret = '';
     if (lineFeeds) {
       ret += -lineFeeds.length + ';';
@@ -144,7 +145,7 @@ export class AnsiColors {
     return ret + graphicModes + ';';
   }
 
-  ansiColorsToHtml(str) {
+  ansiColorsToHtml(str: string): string {
     // $log.debug('Calling replacer on String: ' + '\n---\n' + str + '\n---\n');
     if (!str.replace) {
       return str;

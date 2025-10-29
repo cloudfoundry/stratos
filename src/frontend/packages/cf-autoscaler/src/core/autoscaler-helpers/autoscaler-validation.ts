@@ -4,14 +4,15 @@ import moment from 'moment-timezone';
 import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants } from './autoscaler-util';
 
-export function numberWithFractionOrExceedRange(value: any, min: number, max: number, required: boolean) {
-  if ((!value || isNaN(value)) && !required) {
+export function numberWithFractionOrExceedRange(value: number | string | null | undefined, min: number, max: number, required: boolean) {
+  if ((!value || isNaN(Number(value))) && !required) {
     return false;
   }
-  if ((!value || isNaN(value)) && required) {
+  if ((!value || isNaN(Number(value))) && required) {
     return true;
   }
-  return value.toString().indexOf('.') > -1 || value > max || value < min;
+  const numValue = Number(value);
+  return value.toString().indexOf('.') > -1 || numValue > max || numValue < min;
 }
 
 export function timeIsSameOrAfter(startTime: string, endTime: string) {
@@ -36,7 +37,7 @@ export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRe
 
 export function recurringSchedulesOverlapping(
   newSchedule: AppRecurringSchedule, index: number,
-  inputRecurringSchedules: AppRecurringSchedule[], property: string) {
+  inputRecurringSchedules: AppRecurringSchedule[], property: 'days_of_week' | 'days_of_month'): boolean {
   if (!inputRecurringSchedules) {
     return false;
   }
@@ -46,14 +47,19 @@ export function recurringSchedulesOverlapping(
       return false;
     }
     if (timeOverlaps(inputRecurringSchedules[i], newSchedule)) {
-      const intersects = intersect(inputRecurringSchedules[i][property], newSchedule[property]);
-      return intersects.length > 0;
+      const scheduleProperty = inputRecurringSchedules[i][property] as number[] | undefined;
+      const newScheduleProperty = newSchedule[property] as number[] | undefined;
+      if (scheduleProperty && newScheduleProperty) {
+        const intersects = intersect(scheduleProperty, newScheduleProperty);
+        return intersects.length > 0;
+      }
     }
+    return false;
   });
   return !!overlappingSchedule;
 }
 
-export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index: number, inputSpecificDates: AppSpecificDate[]) {
+export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index: number, inputSpecificDates: AppSpecificDate[]): boolean {
   const start = moment(newSchedule.start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
   const end = moment(newSchedule.end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
   if (inputSpecificDates) {
@@ -66,11 +72,13 @@ export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index
           end: endi
         };
       }
+      return undefined;
     });
     const overlappingSchedule = dateRangeList.find((item) => {
       if (item && dateTimeOverlaps(start, end, item.start, item.end)) {
         return true;
       }
+      return false;
     });
     return !!overlappingSchedule;
   } else {
@@ -78,7 +86,7 @@ export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index
   }
 }
 
-function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule) {
+function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule): boolean {
   const startDateTimeI = moment('1970-01-01T' + timeI.start_time, AutoscalerConstants.MomentFormateDateTimeT);
   const endDateTimeI = moment('1970-01-01T' + timeI.end_time, AutoscalerConstants.MomentFormateDateTimeT);
   const startDateTimeJ = moment('1970-01-01T' + tiemJ.start_time, AutoscalerConstants.MomentFormateDateTimeT);
@@ -86,7 +94,7 @@ function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule) 
   return dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
 }
 
-function dateOverlaps(dateI: AppRecurringSchedule, dateJ: AppRecurringSchedule) {
+function dateOverlaps(dateI: AppRecurringSchedule, dateJ: AppRecurringSchedule): boolean {
   const startDateTimeI = moment(dateI.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT);
   const endDateTimeI = moment(dateI.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT);
   const startDateTimeJ = moment(dateJ.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT);
@@ -96,7 +104,7 @@ function dateOverlaps(dateI: AppRecurringSchedule, dateJ: AppRecurringSchedule) 
 
 function dateTimeOverlaps(
   startDateTimeI: moment.Moment, endDateTimeI: moment.Moment,
-  startDateTimeJ: moment.Moment, endDateTimeJ: moment.Moment) {
+  startDateTimeJ: moment.Moment, endDateTimeJ: moment.Moment): boolean {
   if (startDateTimeJ.isAfter(startDateTimeI)) {
     return endDateTimeI.isAfter(startDateTimeJ);
   } else {
@@ -104,7 +112,7 @@ function dateTimeOverlaps(
   }
 }
 
-export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number) {
+export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number): number {
   if (scaleType === 'upper') {
     return policyTriggers.reduce((thresholdMin, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
@@ -119,7 +127,7 @@ export function getThresholdMin(policyTriggers: AppScalingRule[], metricType: st
   }
 }
 
-export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number) {
+export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: string, scaleType: string, index: number): number {
   if (scaleType === 'lower') {
     return policyTriggers.reduce((thresholdMax, trigger, triggerIndex) => {
       if (triggerIndex !== index && trigger.metric_type === metricType &&
@@ -134,7 +142,7 @@ export function getThresholdMax(policyTriggers: AppScalingRule[], metricType: st
   }
 }
 
-export function inValidMetricType(metricType: string) {
+export function inValidMetricType(metricType: string): boolean {
   const metricTypePattern = new RegExp('^[a-zA-Z0-9_]+$');
   return !metricTypePattern.test(metricType);
 }

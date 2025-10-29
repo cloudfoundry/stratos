@@ -55,12 +55,12 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
   getTotalResults = (res: GithubPaginationResponse<T>): number => {
     return res.total_count;
   };
-  mergePages = (response: any[]): T[] => {
-    return response.reduce((all, res) => {
+  mergePages = (response: GithubPaginationResponse<T>[]): T[] => {
+    return response.reduce((all: T[], res: GithubPaginationResponse<T>) => {
       return all.concat(...res.items);
     }, [] as T[]);
   };
-  fetch = (...args: any[]): Observable<GithubPaginationResponse<T>> => {
+  fetch = (...args: Array<Record<string, string>>): Observable<GithubPaginationResponse<T>> => {
     return this.httpClient.get<GithubPaginationResponse<T>>(
       this.url,
       {
@@ -72,7 +72,7 @@ export class GithubFlattenerPaginationConfig<T> implements PaginationFlattener<T
       }
     );
   };
-  buildFetchParams = (i: number): any[] => {
+  buildFetchParams = (i: number): Array<Record<string, string>> => {
     const requestOption = {
       [GITHUB_PAGE_PARAM]: i.toString(),
       [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()
@@ -129,12 +129,12 @@ export class GithubFlattenerForArrayPaginationConfig<T>
   getTotalResults = (res: HttpResponse<GithubPaginationArrayResponse<T>>): number => {
     return this.getTotalPages(res) * GITHUB_PER_PAGE_PARAM_VALUE;
   };
-  mergePages = (response: any[]): GithubPaginationArrayResponse<T> => {
-    return response.reduce((all, res) => {
-      return all.concat(...res.body);
+  mergePages = (response: Array<HttpResponse<GithubPaginationArrayResponse<T>>>): GithubPaginationArrayResponse<T> => {
+    return response.reduce((all: GithubPaginationArrayResponse<T>, res: HttpResponse<GithubPaginationArrayResponse<T>>) => {
+      return all.concat(...(res.body || []));
     }, [] as GithubPaginationArrayResponse<T>);
   };
-  fetch = (...args: any[]): Observable<HttpResponse<GithubPaginationArrayResponse<T>>> => {
+  fetch = (...args: Array<Record<string, string>>): Observable<HttpResponse<GithubPaginationArrayResponse<T>>> => {
     return this.httpClient.get<GithubPaginationArrayResponse<T>>(
       this.url,
       {
@@ -147,7 +147,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
       }
     );
   };
-  buildFetchParams = (i: number): any[] => {
+  buildFetchParams = (i: number): Array<Record<string, string>> => {
     const requestOption = {
       [GITHUB_PAGE_PARAM]: i.toString(),
       [GITHUB_PER_PAGE_PARAM]: GITHUB_PER_PAGE_PARAM_VALUE.toString()

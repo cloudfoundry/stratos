@@ -7,7 +7,7 @@ import {
   CurrentUserPermissionsService,
 } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../cf-api.types';
@@ -25,7 +25,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   // This is a list of spaces and refresh will update the spaces rather than the roles as might have been expected. Until then disable
   hideRefresh = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no spaces'
   };
@@ -71,7 +71,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     columnId: 'spacer',
     headerCell: () => '',
     cellDefinition: {
-      getValue: () => ' '
+      getValue: (_row: APIResource<ISpace>) => ' '
     },
   }];
   initialised = new BehaviorSubject<boolean>(false);
@@ -85,11 +85,11 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
     });
   }
 
-  getColumns = () => this.columns;
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  getColumns = (): ITableColumn<APIResource<ISpace>>[] => this.columns;
+  getGlobalActions = (): IGlobalListAction<APIResource<ISpace>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<ISpace>>[] => [];
+  getSingleActions = (): IListAction<APIResource<ISpace>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): CfUsersSpaceRolesDataSourceService => this.dataSource;
   public getInitialised = () => this.initialised;
 }

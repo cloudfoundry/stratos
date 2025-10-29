@@ -16,12 +16,12 @@ export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResou
   dataSource: CfSecurityGroupsDataSource;
   cardComponent = CfSecurityGroupsCardComponent;
   enableTextFilter = true;
-  text = {
-    title: null,
+  text: { title: string | null; filter: string; noEntries: string } = {
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no security groups'
   };
-  columns: ITableColumn<APIResource>[] = [{
+  columns: ITableColumn<APIResource<any>>[] = [{
     columnId: 'name',
     headerCell: () => 'Name',
     sort: {

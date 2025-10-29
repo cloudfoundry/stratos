@@ -136,7 +136,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
       actee: new UntypedFormControl(null, []),
       type: new UntypedFormControl(null, []),
     });
-    this.config = (listConfig as CfEventsConfigService);
+    this.config = (listConfig as any as CfEventsConfigService);
 
     // Set initial filter values
     this.subs.push(

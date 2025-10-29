@@ -74,13 +74,13 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     return spaces$.pipe(
       // Switch to using the user entity
       switchMap(() => this.userEntity),
-      map(user => user.missingRoles || { space: [] }),
+      map(user => user.missingRoles || { space: [] as any[] }),
       map(missingRoles => missingRoles.space ? !!missingRoles.space.length : false),
       filter(areMissingRoles => !!areMissingRoles),
     );
   }
 
-  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]) {
+  private prefixOrgName(permissionList: ICellPermissionList<SpaceUserRoleNames>[]): Observable<any> {
     // Find all unique org guids
     const orgGuids = permissionList.map(permission => permission.orgGuid).filter((value, index, self) => self.indexOf(value) === index);
     // Find names of all orgs
@@ -90,18 +90,18 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
       filter(org => !!org),
       first(),
       map((orgs: APIResource<IOrganization>[]) => {
-        const orgNames: { [orgGuid: string]: string, } = {};
+        const orgNames: { [orgGuid: string]: string } = {};
         orgs.forEach(org => {
           orgNames[org.metadata.guid] = org.entity.name;
         });
         return orgNames;
       })
-    ) : observableOf([]);
+    ) : observableOf({});
     return combineLatest(
       observableOf(permissionList),
       orgNames$
     ).pipe(
-      map(([permissions, orgNames]) => {
+      map(([permissions, orgNames]: [ICellPermissionList<SpaceUserRoleNames>[], { [key: string]: string }]) => {
         // Prefix permission name with org name
         permissions.forEach(permission => {
           permission.name = `${orgNames[permission.orgGuid]}: ${permission.name}`;

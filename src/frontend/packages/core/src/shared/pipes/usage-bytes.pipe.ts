@@ -10,7 +10,7 @@ export class UsageBytesPipe implements PipeTransform {
 
   constructor(private utils: UtilsService) {}
 
-  transform(mb): string {
-    return this.utils.usageBytes(mb);
+  transform(mb: number | number[]): string {
+    return this.utils.usageBytes(mb as any);
   }
 }

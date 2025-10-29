@@ -44,7 +44,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
 
   // Handle result of a file input form field selection
-  onFileChange(event) {
+  onFileChange(event: any) {
     const files = getEventFiles(event);
     const utils = new DeployApplicationFsUtils();
     utils.handleFileInputSelection(files).pipe(

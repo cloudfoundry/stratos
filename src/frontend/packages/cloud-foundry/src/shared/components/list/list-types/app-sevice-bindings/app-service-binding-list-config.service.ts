@@ -14,6 +14,8 @@ import { ITableColumn } from '../../../../../../../core/src/shared/components/li
 import {
   IGlobalListAction,
   IListAction,
+  IListMultiFilterConfig,
+  IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -177,12 +179,12 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     this.dataSource = new AppServiceBindingDataSource(this.store, appService, this);
   }
 
-  getGlobalActions = () => [this.listActionAdd];
-  getMultiActions = () => [];
-  getSingleActions = () => [
+  getGlobalActions = (): IGlobalListAction<APIResource<IServiceBinding>>[] => [this.listActionAdd];
+  getMultiActions = (): IMultiListAction<APIResource<IServiceBinding>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServiceBinding>>[] => [
     this.listActionEdit,
     this.listActionUnbind,
-  ]
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  ];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): AppServiceBindingDataSource => this.dataSource;
 }

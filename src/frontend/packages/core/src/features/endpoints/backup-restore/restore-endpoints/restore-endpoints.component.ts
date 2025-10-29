@@ -63,7 +63,7 @@ export class RestoreEndpointsComponent {
     );
   }
 
-  onFileChange(event) {
+  onFileChange(event: Event) {
     const files = getEventFiles(event);
     if (!files.length) {
       return;
@@ -99,7 +99,7 @@ export class RestoreEndpointsComponent {
       });
     };
 
-    const backupFailure = err => {
+    const backupFailure = (err: any) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,

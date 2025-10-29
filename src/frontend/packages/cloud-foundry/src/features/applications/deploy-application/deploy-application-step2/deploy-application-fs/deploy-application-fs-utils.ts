@@ -12,11 +12,11 @@ export class DeployApplicationFsUtils {
   constructor() { }
 
   // File list from a file input form field
-  handleFileInputSelection(items): Observable<FileScannerInfo> {
+  handleFileInputSelection(items: any): Observable<FileScannerInfo> {
     const obs$ = new BehaviorSubject<DeployApplicationFSScanner>(undefined);
     let scanner = new DeployApplicationFSScanner(CF_DEFAULT_IGNORES);
-    let cfIgnoreFile;
-    let manifestFile = false;
+    let cfIgnoreFile: any;
+    let manifestFile: any = false;
     let rootFolderName = '';
 
     if (items.length === 1) {

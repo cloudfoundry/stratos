@@ -99,7 +99,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     }
   }
 
-  setBindingParams(data) {
+  setBindingParams(data: any) {
     this.bindingParams = data;
   }
 

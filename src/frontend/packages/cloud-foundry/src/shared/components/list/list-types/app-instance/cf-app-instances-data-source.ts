@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { AppStat } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
+import { AppStat, AppStats } from '../../../../../../../cloud-foundry/src/store/types/app-metadata.types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -13,7 +13,7 @@ import { applicationEntityType, appStatsEntityType } from '../../../../../cf-ent
 import { createEntityRelationPaginationKey } from '../../../../../entity-relations/entity-relations.types';
 import { ListAppInstance, ListAppInstanceUsage } from './app-instance-types';
 
-export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStat> {
+export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AppStats> {
 
   constructor(
     store: Store<CFAppState>,
@@ -29,19 +29,26 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
         store,
         action,
         schema: cfEntityFactory(appStatsEntityType),
-        getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
+        getRowUniqueId: (row: AppStats) => {
+          // AppStats is an object with keys as instance IDs
+          const keys = Object.keys(row || {});
+          return keys.length > 0 ? keys[0] : 'unknown';
+        },
         paginationKey,
         transformEntities: [{ type: 'filter', field: 'value.state' }],
-        transformEntity: map(instances => {
-          if (!instances || instances.length === 0) {
+        transformEntity: map((instancesObj: AppStats[]): ListAppInstance[] => {
+          if (!instancesObj || instancesObj.length === 0) {
             return [];
           }
-          const res = [];
-          Object.keys(instances).forEach(key => {
+          const res: ListAppInstance[] = [];
+          // AppStats is an object where each key is an instance ID
+          const instances = instancesObj[0];
+          Object.keys(instances || {}).forEach((key: string) => {
+            const instance: AppStat = instances[key];
             res.push({
-              index: key,
-              usage: this.calcUsage(instances[key]),
-              value: instances[key]
+              index: parseInt(instance.guid, 10),
+              usage: this.calcUsage(instance),
+              value: instance
             });
           });
           return res;
@@ -54,8 +61,8 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
   }
 
   // Need to calculate usage as a fraction for sorting
-  calcUsage(instanceStats): ListAppInstanceUsage {
-    const usage = {
+  calcUsage(instanceStats: AppStat): ListAppInstanceUsage {
+    const usage: ListAppInstanceUsage = {
       mem: 0,
       disk: 0,
       cpu: 0,

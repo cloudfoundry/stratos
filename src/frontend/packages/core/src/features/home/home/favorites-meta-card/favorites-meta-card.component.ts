@@ -24,7 +24,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
 export class FavoritesMetaCardComponent {
 
   @Input()
-  public endpoint;
+  public endpoint: any;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 

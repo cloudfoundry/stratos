@@ -2,9 +2,9 @@ import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/ac
 import { GetAppStatsAction } from '../actions/app-metadata.actions';
 
 export interface AppStatsActionBuilders extends OrchestratedActionBuilders {
-  getMultiple: (appGuid, endpointGuid) => GetAppStatsAction;
+  getMultiple: (appGuid: string, endpointGuid: string) => GetAppStatsAction;
 }
 
 export const appStatsActionBuilders: AppStatsActionBuilders = {
-  getMultiple: (appGuid, endpointGuid) => new GetAppStatsAction(appGuid, endpointGuid)
+  getMultiple: (appGuid: string, endpointGuid: string) => new GetAppStatsAction(appGuid, endpointGuid)
 };

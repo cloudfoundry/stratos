@@ -59,8 +59,8 @@ export class CfAppMapRoutesListConfigService extends CfAppRoutesListConfigServic
       columnId: 'radio',
       cellComponent: TableCellRadioComponent,
       cellConfig: {
-        isDisabled: (row): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
-          a => a.metadata.guid === appService.appGuid
+        isDisabled: (row: APIResource): boolean => row && row.entity && row.entity.apps && row.entity.apps.find(
+          (a: APIResource) => a.metadata.guid === appService.appGuid
         )
       },
       class: 'table-column-select',

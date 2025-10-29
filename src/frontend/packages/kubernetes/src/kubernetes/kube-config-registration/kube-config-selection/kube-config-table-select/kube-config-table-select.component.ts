@@ -19,7 +19,7 @@ export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFi
   constructor(private helper: KubeConfigHelper) {
     super();
   }
-  changed(v) {
+  changed(v: { checked: boolean }): void {
     this.row._selected = v.checked;
     this.helper.update(this.row);
   }

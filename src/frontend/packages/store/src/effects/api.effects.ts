@@ -27,7 +27,7 @@ export class APIEffect {
   apiRequest$ = createEffect(() => this.actions$.pipe(
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]) => {
+    mergeMap(([action, appState]: [ICFAction | PaginatedAction, InternalAppState]) => {
       if (!(action as PaginatedAction).paginationKey) {
         return apiRequestPipelineFactory(baseRequestPipelineFactory, {
           store: this.store,
@@ -51,7 +51,7 @@ export class APIEffect {
   apiDeleteRequest$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS),
     withLatestFrom(this.store),
-    mergeMap(([action, appState]) => {
+    mergeMap(([action, appState]: [WrapperRequestActionSuccess, InternalAppState]): any[] => {
       if (action.requestType === 'delete') {
         const deleteAction = EntityDeleteCompleteAction.parse(action.apiAction);
         if (deleteAction) {

@@ -73,7 +73,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     public paginationKey: string,
     public orgGuid: string,
     public endpointGuid: string,
-    public includeRelations = [],
+    public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();
@@ -108,7 +108,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     public orgGuid: string,
     public endpointGuid: string,
     public paginationKey: string = null,
-    public includeRelations = [],
+    public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();

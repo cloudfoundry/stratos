@@ -86,10 +86,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 
     this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
-      map(endpoints => endpoints.reduce((res, endpoint) => {
+      map(endpoints => endpoints.reduce((res: EndpointModelMap, endpoint) => {
         res[endpoint.guid] = endpoint;
         return res;
-      }, {}))
+      }, {} as EndpointModelMap))
     );
 
     this.existingEndpointNames$ = this.existingEndpoints.pipe(
@@ -98,7 +98,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     this.endpoint$ = this.existingEndpoints.pipe(
-      map(endpoints => Object.values(endpoints).find((e => e.guid === this.endpointID)))
+      map(endpoints => Object.values(endpoints).find((e: EndpointModel) => e.guid === this.endpointID))
     );
 
     this.definition$ = this.endpoint$.pipe(
@@ -191,7 +191,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   }
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
-  setAdvancedFields(endpoint: any) {
+  setAdvancedFields(endpoint: EndpointModel) {
     const isCloudFoundry = endpoint && endpoint.cnsi_type === 'cf';
     this.showAdvancedFields = isCloudFoundry;
     // Only allow SSL if the endpoint type is Cloud Foundry

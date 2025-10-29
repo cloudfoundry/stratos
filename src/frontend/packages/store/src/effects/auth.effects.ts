@@ -48,7 +48,7 @@ export class AuthEffect {
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Login>(LOGIN),
-    switchMap(({ username, password }) => {
+    switchMap(({ username, password }: { username: string; password: string }) => {
       const params = new HttpParams({
         encoder: new BrowserStandardEncoder(),
         fromObject: {
@@ -155,7 +155,7 @@ export class AuthEffect {
       window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
     })), { dispatch: false });
 
-  private isDomainMismatch(headers): boolean {
+  private isDomainMismatch(headers: any): boolean {
     if (headers.has(DOMAIN_HEADER)) {
       const expectedDomain = headers.get(DOMAIN_HEADER);
       const okay = window.location.hostname.endsWith(expectedDomain);

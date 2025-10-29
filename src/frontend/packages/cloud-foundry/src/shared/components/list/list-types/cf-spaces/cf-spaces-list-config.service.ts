@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../cf-api.types';
@@ -21,7 +21,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
   defaultView = 'cards' as ListView;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no spaces'
   };
@@ -50,10 +50,10 @@ export class CfSpacesListConfigService implements IListConfig<APIResource<ISpace
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 
-  getColumns = () => this.columns;
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
+  getColumns = (): ITableColumn<APIResource<ISpace>>[] => this.columns;
+  getGlobalActions = (): IGlobalListAction<APIResource<ISpace>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<ISpace>>[] => [];
+  getSingleActions = (): IListAction<APIResource<ISpace>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): CfSpacesDataSourceService => this.dataSource;
 }

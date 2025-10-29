@@ -15,7 +15,7 @@ export interface ListState {
 
 const defaultListsState = {} as ListsState;
 
-export function listReducer(state = defaultListsState, action): ListsState {
+export function listReducer(state = defaultListsState, action: any): ListsState {
   switch (action.type) {
     case ListStateActionTypes.SET:
       const setListState = action as SetListViewAction;
@@ -44,7 +44,7 @@ export function listReducer(state = defaultListsState, action): ListsState {
   }
 }
 
-function mergeListState(state, listKey, key, value) {
+function mergeListState(state: any, listKey: any, key: any, value: any) {
   const newListState = {
     [key]: value
   };
@@ -70,11 +70,11 @@ export const getListStateObservables = (
 };
 
 function selectListState(key: string) {
-  return state => state.lists[key];
+  return (state: any) => state.lists[key];
 }
 
 function selectListStateProperty(key: string, property: string) {
-  return state => {
+  return (state: any) => {
     return (state.lists[key] || {})[property];
   };
 }

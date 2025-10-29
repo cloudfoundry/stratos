@@ -6,7 +6,7 @@ export const KUBERNETES_CURRENT_NAMESPACE = 'k8sCurrentNamespace';
 
 const defaultState: KubernetesCurrentNamespace = {};
 
-function createCurrentNamespaceReducer(state: KubernetesCurrentNamespace = defaultState, action) {
+function createCurrentNamespaceReducer(state: KubernetesCurrentNamespace = defaultState, action: { type: string; endpoint?: string; namespace?: string }): KubernetesCurrentNamespace {
   switch (action.type) {
     case SET_CURRENT_NAMESPACE:
       return {

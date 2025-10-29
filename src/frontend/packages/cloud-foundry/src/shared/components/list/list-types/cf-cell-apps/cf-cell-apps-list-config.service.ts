@@ -20,14 +20,14 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
-  text = {
-    title: null,
+  text: { title: string | null; noEntries: string } = {
+    title: null as string | null,
     noEntries: 'There are no applications'
   };
 
   constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell) {
     super();
-    this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this);
+    this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
   }
 
   getColumns = (): ITableColumn<CfCellApp>[] => [

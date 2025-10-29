@@ -35,7 +35,7 @@ export class ApplicationEnvVarsHelper {
     return cfEntityCatalog.appEnvVar.store.getPaginationService(appGuid, cfGuid);
   }
 
-  FetchStratosProject(appEnvVars): EnvVarStratosProject {
+  FetchStratosProject(appEnvVars: any): EnvVarStratosProject {
     if (!appEnvVars) {
       return null;
     }

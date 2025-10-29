@@ -38,7 +38,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   // If the user goes back then cancel any file upload in progress
-  onLeave = (isNext) => {
+  onLeave = (isNext: boolean) => {
     if (!isNext) {
       this.deployer.close();
     }

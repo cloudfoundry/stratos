@@ -87,18 +87,18 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
     // Get labels from the data
     const labels = this.results && this.results.length > 0
-      ? this.results[0].series.map(item => new Date(item.name).toLocaleDateString())
+      ? this.results[0].series.map((item: any) => new Date(item.name).toLocaleDateString())
       : [];
 
     const datasets: any[] = [];
 
     // Add bar datasets
     if (this.results) {
-      this.results.forEach((series, index) => {
+      this.results.forEach((series: any, index: number) => {
         datasets.push({
           type: 'bar',
           label: series.name,
-          data: series.series.map(item => item.value),
+          data: series.series.map((item: any) => item.value),
           backgroundColor: this.getColor(index, 'bar'),
           yAxisID: 'y'
         });
@@ -107,11 +107,11 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
     // Add line datasets
     if (this.lineChart) {
-      this.lineChart.forEach((series, index) => {
+      this.lineChart.forEach((series: any, index: number) => {
         datasets.push({
           type: 'line',
           label: series.name,
-          data: series.series.map(item => item.value),
+          data: series.series.map((item: any) => item.value),
           borderColor: this.getColor(index, 'line'),
           backgroundColor: this.getColor(index, 'line') + '20',
           fill: false,

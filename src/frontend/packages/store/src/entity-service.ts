@@ -1,4 +1,4 @@
-import { compose, Store } from '@ngrx/store';
+import { Action, compose, Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -72,7 +72,7 @@ export class EntityService<T = any> {
     // Setup Emit Handler
     const entityEmitHandlerBuilder = catalogEntity.getEntityEmitHandler();
     const entityEmitHandler = entityEmitHandlerBuilder ? entityEmitHandlerBuilder(
-      this.action, (action) => store.dispatch(action)
+      this.action, (action: Action) => store.dispatch(action)
     ) : () => { };
 
 
@@ -154,7 +154,7 @@ export class EntityService<T = any> {
     );
   }
 
-  private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
+  private isEntityAvailable(entity: T, entityRequestInfo: RequestInfoState) {
     const isBlocked = isEntityBlocked(entityRequestInfo);
     return entity && !isBlocked;
   }

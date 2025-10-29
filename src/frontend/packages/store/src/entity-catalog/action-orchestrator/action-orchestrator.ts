@@ -116,7 +116,7 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
 // This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
-  public updatingKey = null;
+  public updatingKey: string | null = null;
   constructor(
     entity: EntitySchema | EntitySchema[],
     public guid: string,

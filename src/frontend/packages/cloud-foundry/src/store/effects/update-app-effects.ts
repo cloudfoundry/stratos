@@ -17,11 +17,11 @@ export class UpdateAppEffects {
 
    UpdateAppInStore$ = createEffect(() => this.actions$.pipe(
     ofType<WrapperRequestActionSuccess>(CF_APP_UPDATE_SUCCESS),
-    mergeMap((action: WrapperRequestActionSuccess) => {
+    mergeMap((action: WrapperRequestActionSuccess): any[] => {
       const updateAction = action.apiAction as UpdateExistingApplication;
       const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];
-      const actions = [];
-      updateEntities.forEach(updateEntity => {
+      const actions: any[] = [];
+      updateEntities.forEach((updateEntity: any) => {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app

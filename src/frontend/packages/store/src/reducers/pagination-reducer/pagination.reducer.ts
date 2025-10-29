@@ -67,7 +67,7 @@ import { getActionPaginationEntityKey, getActionType, getPaginationKeyFromAction
 
 const getPaginationUpdater = (types: [string, string, string]) => {
   const [requestType, successType, failureType] = types;
-  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action): PaginationEntityState => {
+  return (state: PaginationEntityState = getDefaultPaginationEntityState(), action: any): PaginationEntityState => {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -106,13 +106,13 @@ export function createPaginationReducer(types: [string, string, string]) {
   return paginationReducer(getPaginationUpdater(types));
 }
 
-function paginationReducer(updatePagination) {
-  return (state, action) => {
+function paginationReducer(updatePagination: any) {
+  return (state: any, action: any) => {
     return paginate(action, state, updatePagination);
   };
 }
 
-function paginate(action, state: PaginationState = {}, updatePagination) {
+function paginate(action: any, state: PaginationState = {}, updatePagination: any) {
   if (action.type === ApiActionTypes.API_REQUEST_START) {
     return state;
   }
@@ -230,7 +230,7 @@ function hydratePagination(state: PaginationState, action: HydratePaginationStat
   return newState;
 }
 
-function isEndpointAction(action) {
+function isEndpointAction(action: any) {
   // ... that we care about.
   return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
     action.type === CONNECT_ENDPOINTS_SUCCESS ||
@@ -244,7 +244,7 @@ function logMissing(missing: string, allKeys: any) {
   );
 }
 
-function enterPaginationReducer(state: PaginationState, action, updatePagination) {
+function enterPaginationReducer(state: PaginationState, action: any, updatePagination: any) {
   const actionType = getActionType(action);
   const entityKey = getActionPaginationEntityKey(action);
   const paginationKey = getPaginationKeyFromAction(action);

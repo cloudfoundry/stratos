@@ -26,8 +26,8 @@ module.exports = {
           800: '#1565c0',
           900: '#0d47a1',
         },
-        // Secondary accent colors
-        'accent': {
+        // Secondary accent colors (using shade scale)
+        'accent-shade': {
           50: '#e0f7fa',
           100: '#b2ebf2',
           200: '#80deea',
@@ -39,8 +39,8 @@ module.exports = {
           800: '#00838f',
           900: '#006064',
         },
-        // Status colors
-        'success': {
+        // Status colors (using shade scale)
+        'success-shade': {
           50: '#e8f5e9',
           100: '#c8e6c9',
           200: '#a5d6a7',
@@ -52,7 +52,7 @@ module.exports = {
           800: '#2e7d32',
           900: '#1b5e20',
         },
-        'warning': {
+        'warning-shade': {
           50: '#fff3e0',
           100: '#ffe0b2',
           200: '#ffcc80',
@@ -64,7 +64,7 @@ module.exports = {
           800: '#ef6c00',
           900: '#e65100',
         },
-        'danger': {
+        'danger-shade': {
           50: '#ffebee',
           100: '#ffcdd2',
           200: '#ef9a9a',
@@ -76,7 +76,7 @@ module.exports = {
           800: '#c62828',
           900: '#b71c1c',
         },
-        'info': {
+        'info-shade': {
           50: '#e3f2fd',
           100: '#bbdefb',
           200: '#90caf9',

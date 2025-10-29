@@ -10,6 +10,7 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  IGlobalListAction,
   IListAction,
   IListConfig,
   IMultiListAction,
@@ -140,12 +141,12 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => [this.multiListActionDelete];
-  getSingleActions = () => [this.listActionDelete];
-  getColumns = () => this.columns;
-  getDataSource = () => this.envVarsDataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<ListAppEnvVar>[] => null;
+  getMultiActions = (): IMultiListAction<ListAppEnvVar>[] => [this.multiListActionDelete];
+  getSingleActions = (): IListAction<ListAppEnvVar>[] => [this.listActionDelete];
+  getColumns = (): ITableColumn<ListAppEnvVar>[] => this.columns;
+  getDataSource = (): CfAppVariablesDataSource => this.envVarsDataSource;
+  getMultiFiltersConfigs = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListMultiFilterConfig[] => [];
 
   constructor(
     private store: Store<CFAppState>,

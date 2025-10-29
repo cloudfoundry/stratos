@@ -94,12 +94,12 @@ export class MetricsComponent {
     this.jobDetails$ = this.metricsEndpoint$.pipe(
       filter(mi => !!mi && !!mi.provider && !!mi.provider.metadata && !!mi.provider.metadata.metrics_targets),
       map(mi => mi.provider.metadata.metrics_targets),
-      map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped, t) => {
+      map((targetsData: MetricsAPITargets) => targetsData.activeTargets.reduce((mapped: PrometheusJobs, t) => {
         if (t.labels && t.labels.job) {
-          mapped[t.labels.job] = t;
+          mapped[t.labels.job] = t as any;
         }
         return mapped;
-      }, {}))
+      }, {} as PrometheusJobs))
     );
   }
 }

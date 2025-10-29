@@ -21,12 +21,12 @@ export function getConditionSort(condition: ConditionType): DataFunction<Kuberne
     });
   };
 }
-export function getContainerLengthSort(entities, paginationState) {
+export function getContainerLengthSort(entities: BasicKubeAPIResource[], paginationState: { params: { 'order-direction'?: string } }): BasicKubeAPIResource[] {
   const orderDirection = paginationState.params['order-direction'] || 'asc';
   return entities.sort((a, b) => {
 
-    const aConditionValue = a.spec.containers.length;
-    const bConditionValue = b.spec.containers.length;
+    const aConditionValue = (a.spec as { containers?: unknown[] }).containers?.length || 0;
+    const bConditionValue = (b.spec as { containers?: unknown[] }).containers?.length || 0;
     if (orderDirection === 'desc') {
       return aConditionValue - bConditionValue;
     } else {

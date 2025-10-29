@@ -38,7 +38,7 @@ export class KubeConfigHelper {
     this.checkValidity(cluster).subscribe(() => this.clustersChanged());
   };
 
-  public updateAll(): Observable<any> {
+  public updateAll(): Observable<KubeConfigFileCluster[]> {
     return this.clusters$.pipe(
       tap(clusters => clusters.forEach(cluster => this.update(cluster))),
     );
@@ -66,7 +66,7 @@ export class KubeConfigHelper {
       if (cluster) {
         // Found the cluster
         if (!clusters[cluster.name]) {
-          const clstr = {
+          const clstr: KubeConfigFileCluster = {
             ...cluster,
             _users: []
           };

@@ -5,7 +5,7 @@ import {
   TableCellSidePanelConfig,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ISimpleListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ISimpleListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import {
   KubernetesResourceViewerComponent,
   KubernetesResourceViewerConfig,
@@ -30,7 +30,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
       BaseKubernetesPodsListConfigService.nodeColumnId
     ]
   ) {
-    if (hideColumns && hideColumns.filter.length) {
+    if (hideColumns && hideColumns.length) {
       this.columns = this.columns.filter(column => hideColumns.indexOf(column.columnId) < 0);
     }
   }
@@ -68,7 +68,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
       columnId: BaseKubernetesPodsListConfigService.namespaceColumnId, headerCell: () => 'Namespace',
       cellDefinition: {
         valuePath: 'metadata.namespace',
-        getLink: row => this.showNamespaceLink ? `/kubernetes/${row.metadata.kubeId}/namespaces/${row.metadata.namespace}` : null
+        getLink: (row: KubernetesPod) => this.showNamespaceLink ? `/kubernetes/${row.metadata.kubeId}/namespaces/${row.metadata.namespace}` : null
       },
       sort: {
         type: 'sort',
@@ -82,7 +82,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
       columnId: BaseKubernetesPodsListConfigService.nodeColumnId, headerCell: () => 'Node',
       cellDefinition: {
         valuePath: 'spec.nodeName',
-        getLink: pod => `/kubernetes/${pod.metadata.kubeId}/nodes/${pod.spec.nodeName}/summary`
+        getLink: (pod: KubernetesPod) => `/kubernetes/${pod.metadata.kubeId}/nodes/${pod.spec.nodeName}/summary`
       },
       sort: {
         type: 'sort',
@@ -106,7 +106,7 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
       columnId: 'restarts',
       headerCell: () => 'Restarts',
       cellDefinition: {
-        getValue: pod => pod.expandedStatus.restarts.toString()
+        getValue: (pod: KubernetesPod) => pod.expandedStatus.restarts.toString()
       },
       sort: {
         type: 'sort',
@@ -127,11 +127,11 @@ export abstract class BaseKubernetesPodsListConfigService implements ISimpleList
   };
   expandComponent = KubernetesPodContainersComponent;
 
-  getGlobalActions = () => null;
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<KubernetesPod>[] => [];
+  getMultiActions = (): IMultiListAction<KubernetesPod>[] => [];
+  getSingleActions = (): IListAction<KubernetesPod>[] => [];
+  getColumns = (): ITableColumn<KubernetesPod>[] => this.columns;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 
 export class KubernetesPodsListConfig extends BaseKubernetesPodsListConfigService {

@@ -12,10 +12,10 @@ export class ConfigService {
   // EO configurable options
 
   constructor() {
-    let overrides: any = {};
+    let overrides: Record<string, any> = {};
     // Object.keys(window).find(param => param === 'monocular');
     /* tslint:disable-next-line:no-string-literal */
-    const monocular = window['monocular'];
+    const monocular = (window as any)['monocular'];
     if (monocular) {
       overrides = monocular.overrides || {};
     }

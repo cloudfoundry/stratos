@@ -156,9 +156,9 @@ export class ListConfig<T, A = T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
-  text: ITableText = null;
+  text: ITableText | null = null;
   enableTextFilter = false;
-  cardComponent = null;
+  cardComponent: any | null = null;
   defaultView = 'table' as ListView;
   allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
@@ -253,16 +253,15 @@ export class MultiFilterManager<T> {
     );
   }
 
-  public applyValue(multiFilters: {}) {
+  public applyValue(multiFilters: Record<string, any>): void {
     this.selectItem(multiFilters[this.multiFilterConfig.key]);
-
   }
 
-  public hasValue(multiFilters: {}): boolean {
+  public hasValue(multiFilters: Record<string, any>): boolean {
     return !!multiFilters[this.multiFilterConfig.key];
   }
 
-  public selectItem(itemValue: string) {
+  public selectItem(itemValue: string): void {
     this.multiFilterConfig.loading$.pipe(
       filter(ready => !ready),
       switchMap(() => this.filterItems$),

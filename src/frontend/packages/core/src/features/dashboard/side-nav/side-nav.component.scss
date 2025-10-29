@@ -93,7 +93,7 @@ $icon-nav-width: 50px;
     cursor: pointer;
     display: flex;
     font-size: 14px;
-    letter-spacing: .01em;
+    letter-spacing: 0.01em;
     line-height: $side-nav-mat-icon-height;
     outline: 0;
     padding: 12px $side-nav-padding-h;
@@ -156,8 +156,8 @@ $icon-nav-width: 50px;
     width: 0;
   }
 }
-$transition-time: .2s;
-$transition-delay: .5s;
+$transition-time: 0.2s;
+$transition-delay: 0.5s;
 .side-nav__icon-mode {
   overflow: hidden;
   width: $icon-nav-width;

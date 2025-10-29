@@ -19,9 +19,11 @@
 }
 
 // Color palette replacements integrated with Stratos theme
-$primary: generate-palette(var(--color-primary));
-$accent: generate-palette(var(--color-accent));
-$warn: generate-palette(var(--color-danger));
+// Note: Cannot use generate-palette() with CSS variables at compile time
+// Use static fallback colors that will be overridden by CSS custom properties at runtime
+$primary: generate-palette(#1e293b);
+$accent: generate-palette(#60a5fa);
+$warn: generate-palette(#ef4444);
 
 // Monocular app theme variables - use existing theme colors
 $monocular-app-primary: $primary;

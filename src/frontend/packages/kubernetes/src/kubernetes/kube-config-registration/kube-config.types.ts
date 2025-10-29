@@ -51,7 +51,12 @@ export interface KubeConfigFileUserDetail {
   'client-certificate-data'?: string;
   'client-key-data'?: string;
   token?: string;
-  exec?: any;
+  exec?: {
+    apiVersion?: string;
+    command?: string;
+    args?: string[];
+    env?: { name: string; value: string }[];
+  };
   username?: string;
   password?: string;
 }

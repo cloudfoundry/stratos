@@ -6,10 +6,12 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../../../../../cf-api-svc.types';
 
-interface Tag {
-  value: string;
-  key: APIResource<IServiceInstance>;
+function isUserProvidedServiceInstance(
+  entity: IServiceInstance | IUserProvidedServiceInstance
+): entity is IUserProvidedServiceInstance {
+  return 'tags' in entity;
 }
+
 @Component({
   selector: 'app-table-cell-service-instance-tags',
   templateUrl: './table-cell-service-instance-tags.component.html',
@@ -22,29 +24,27 @@ interface Tag {
 export class TableCellServiceInstanceTagsComponent
   extends TableCellCustom<APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>> {
 
-  tags: AppChip<Tag>[] = [];
+  tags: AppChip<IServiceInstance | IUserProvidedServiceInstance>[] = [];
+
   @Input('row')
-  set row(row) {
-    super.row = row;
-    if (row) {
+  override set row(row: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>) {
+    this.pRow = row;
+    if (row && row.entity) {
       this.tags.length = 0;
-      if (row.entity && row.entity.service_instance && row.entity.service_instance.entity.tags) {
-        row.entity.service_instance.entity.tags.forEach(t => {
+      // Only user-provided service instances have tags
+      if (isUserProvidedServiceInstance(row.entity) && row.entity.tags) {
+        row.entity.tags.forEach((t: string) => {
           this.tags.push({
             value: t,
-            key: row,
-            hideClearButton$: observableOf(true)
-          });
-        });
-      } else if (row.entity && row.entity.tags) {
-        row.entity.tags.forEach(t => {
-          this.tags.push({
-            value: t,
-            key: row,
+            key: row.entity,
             hideClearButton$: observableOf(true)
           });
         });
       }
     }
+  }
+
+  override get row(): APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance> {
+    return this.pRow;
   }
 }

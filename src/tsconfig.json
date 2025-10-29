@@ -19,15 +19,16 @@
     "module": "esnext",
     "useDefineForClassFields": false,
     "noImplicitThis": true,
+    "noImplicitAny": true,
     "strictBindCallApply": true,
     "types": [
-      "hammerjs",
       "jasmine",
       "jasminewd2",
       "karma"
     ],
     "typeRoots": [
-      "../node_modules/@types"
+      "../node_modules/@types",
+      "./frontend/@types"
     ],
     "lib": [
       "es2019",

@@ -38,7 +38,7 @@ export class DialogConfirmComponent {
     this.dialogRef.close();
   }
 
-  handlePaste($event) {
+  handlePaste($event: ClipboardEvent) {
     if (environment.production) {
       $event.preventDefault();
     }

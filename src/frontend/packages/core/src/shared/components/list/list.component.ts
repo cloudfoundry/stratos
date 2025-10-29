@@ -654,7 +654,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public resetFilteringAndSort() {
     /* tslint:disable-next-line:no-string-literal  */
-    const pAction: PaginatedAction = this.dataSource.action['length'] ? this.dataSource.action[0] : this.dataSource.action;
+    const pAction: PaginatedAction = (this.dataSource.action as any)['length'] ? (this.dataSource.action as any)[0] : this.dataSource.action;
     this.store.dispatch(new ResetPaginationSortFilter(pAction));
 
     if (!this.dataSource.isLocal) {
@@ -780,7 +780,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getRowStateGeneratorFromEntityMonitor(entityConfig: EntityCatalogEntityConfig, dataSource: IListDataSource<T>) {
-    return (row) => {
+    return (row: any) => {
       if (!entityConfig || !row) {
         return observableOf(getDefaultRowState());
       }

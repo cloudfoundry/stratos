@@ -37,7 +37,7 @@ export class HelmReleaseValuesTabComponent {
       this.viewType$,
       helmReleaseHelper.release$
     ).pipe(
-      map(([vtype, release]) => {
+      map(([vtype, release]: [string, any]) => {
         switch (vtype) {
           case 'user':
             return release.config || {};
@@ -57,11 +57,11 @@ export class HelmReleaseValuesTabComponent {
     this.viewTypeSubject.next(viewType);
   }
 
-  private isObject(item) {
+  private isObject(item: any): boolean {
     return (item && typeof item === 'object' && !Array.isArray(item));
   }
 
-  private mergeDeep(target, ...sources) {
+  private mergeDeep(target: any, ...sources: any[]): any {
     if (!sources.length) {
       return target;
     }

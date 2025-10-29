@@ -9,6 +9,7 @@ import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { PageSubNavComponent, ListViewComponent } from '@stratosui/core';
+import { GeneralAppState } from '../../../../../store/src/app-state';
 
 import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
 import {
@@ -78,7 +79,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private workloadNamespace: string;
 
   constructor(
-    private store: Store<any>,
+    private store: Store<GeneralAppState>,
     private route: ActivatedRoute,
     router: Router,
     kubeId: BaseKubeGuid,
@@ -112,18 +113,18 @@ export class KubernetesResourceListComponent implements OnDestroy {
       this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
 
       // Watch for namespace changes
-      this.sub = this.store.select<KubernetesCurrentNamespace>(state => state.k8sCurrentNamespace).pipe(
-        map(data => data[this.kubeId]),
-        filter(data => !!data)
-      ).subscribe(ns => {
+      this.sub = this.store.select<KubernetesCurrentNamespace>((state: any) => state.k8sCurrentNamespace).pipe(
+        map((data: Record<string, string>) => data[this.kubeId]),
+        filter((data: string) => !!data)
+      ).subscribe((ns: string) => {
         this.selectedNamespace = ns === '*' ? undefined : ns;
         if (this.isNamespacedView) {
-          this.createProvider(catalogEntity);
+          this.createProvider(catalogEntity as any);
         }
       });
     }
 
-    this.createProvider(catalogEntity);
+    this.createProvider(catalogEntity as any);
   }
 
   ngOnDestroy() {
@@ -132,7 +133,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
   }
 
-  private createProvider(catalogEntity: any) {
+  private createProvider(catalogEntity: { definition: KubeResourceEntityDefinition; actions: any }) {
     this.isNamespacedView = !this.isWorkloadView && !!catalogEntity.definition.apiNamespaced;
     let action;
     if (this.isWorkloadView) {

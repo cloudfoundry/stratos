@@ -8,7 +8,10 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-row/table-row-state-manager';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  IGlobalListAction,
+  IListAction,
   IListConfig,
+  IListMultiFilterConfig,
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -34,7 +37,7 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   defaultView = 'table' as ListView;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no users'
   };
@@ -136,11 +139,11 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     }
   }
 
-  getColumns = () => this.columns;
-  getGlobalActions = () => [];
+  getColumns = (): ITableColumn<APIResource<CfUser>>[] => this.columns;
+  getGlobalActions = (): IGlobalListAction<APIResource<CfUser>>[] => [];
   getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getDataSource = () => this.dataSource;
-  getInitialised = () => this.initialised;
+  getSingleActions = (): IListAction<APIResource<CfUser>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getDataSource = (): CfSelectUsersDataSourceService => this.dataSource;
+  getInitialised = (): Observable<boolean> => this.initialised;
 }

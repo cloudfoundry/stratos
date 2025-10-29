@@ -53,7 +53,7 @@ export class ErrorPageComponent implements OnInit {
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointEntityType, of([endpointId]));
       this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
         withLatestFrom(endpointMonitor.entity$),
-        map(([errors, endpoint]) => {
+        map(([errors, endpoint]: [any, EndpointModel]) => {
           return {
             endpoint,
             errors: errors ? errors[endpointId] : null
@@ -61,7 +61,7 @@ export class ErrorPageComponent implements OnInit {
         })
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
-        map((info) => {
+        map((info: any) => {
           const jsonString = JSON.stringify(info);
           return this.sanitizer.bypassSecurityTrustUrl('data:text/json;charset=UTF-8,' + encodeURIComponent(jsonString));
         })
@@ -76,11 +76,11 @@ export class ErrorPageComponent implements OnInit {
     private sanitizer: DomSanitizer
   ) {
     this.back$ = store.select(getPreviousRoutingState).pipe(first()).pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
+      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );
 
     this.backParams$ = this.back$.pipe(
-      map(urlBack => {
+      map((urlBack: string) => {
         // If we've come from the events page ensure we pass it back it's param
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return urlBack && urlBack.startsWith('/events') ? {

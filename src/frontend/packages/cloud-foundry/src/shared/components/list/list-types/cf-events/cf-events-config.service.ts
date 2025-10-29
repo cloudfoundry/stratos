@@ -55,7 +55,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
   ];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: null,
+    title: null as string,
     noEntries: 'There are no events'
   };
 
@@ -81,14 +81,14 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => this.columns;
-  getDataSource = () => this.eventSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IGlobalListAction<APIResource>[] => null;
+  getMultiActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IMultiListAction<APIResource>[] => null;
+  getSingleActions = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListAction<APIResource>[] => null;
+  getColumns = (): ITableColumn<APIResource>[] => this.columns;
+  getDataSource = (): CfEventsDataSource => this.eventSource;
+  getMultiFiltersConfigs = (): import('../../../../../../../core/src/shared/components/list/list.component.types').IListMultiFilterConfig[] => [];
 
-  setActeeFilter(actee: string) {
+  setActeeFilter(actee: string): void {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {
@@ -99,7 +99,7 @@ export class CfEventsConfigService extends ListConfig<APIResource> implements IL
     });
   }
 
-  setEventFilters(values: { actee: string, type: string[], }) {
+  setEventFilters(values: { actee: string, type: string[] }): void {
     this.getEventFilters().pipe(
       first()
     ).subscribe(currentFilters => {

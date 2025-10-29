@@ -26,13 +26,13 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   public canShow$: Observable<boolean>;
   public analyzers$: Observable<AnalysisReport[]>;
 
-  @Input() endpoint;
-  @Input() path;
+  @Input() endpoint: string;
+  @Input() path: string;
   @Input() prompt = 'Overlay';
   @Input() allowNone = true;
-  @Input() autoSelect;
+  @Input() autoSelect: boolean;
 
-  @Output() selected = new EventEmitter<any>();
+  @Output() selected = new EventEmitter<AnalysisReport | null>();
   @Output() reportCount = new EventEmitter<number>();
 
   autoSelected = false;
@@ -46,14 +46,14 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.analyzers$ = this.analysisService.getByPath(this.endpoint, this.path, true).pipe(
-      map(reports => {
-        const res = [];
+      map((reports: AnalysisReport[]) => {
+        const res: Array<AnalysisReport | { title: string }> = [];
         if (this.allowNone) {
           res.push({ title: 'None' });
         }
         if (reports) {
-          reports.forEach(r => {
-            const c = { ...r };
+          reports.forEach((r: AnalysisReport) => {
+            const c: AnalysisReport & { title?: string } = { ...r };
             const title = c.type.substr(0, 1).toUpperCase() + c.type.substr(1);
             const age = moment(c.created).fromNow(true);
             c.title = `${title} (${age})`;
@@ -61,9 +61,9 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
           });
         }
         this.reportCount.next(res.length);
-        return res;
+        return res as AnalysisReport[];
       }),
-      tap(reports => {
+      tap((reports: AnalysisReport[]) => {
         if (!this.autoSelected && this.autoSelect && reports.length > 0) {
           this.onSelected(reports[0]);
         }
@@ -73,12 +73,12 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 
 
   // Selection changed
-  public onSelected(d) {
-    this.selection = d;
-    if (!d.id) {
+  public onSelected(d: AnalysisReport | { title: string; id?: string }): void {
+    this.selection = d as { title: string };
+    if (!('id' in d) || !d.id) {
       this.selected.emit(null);
     } else {
-      this.selected.next(d);
+      this.selected.next(d as AnalysisReport);
     }
   }
 

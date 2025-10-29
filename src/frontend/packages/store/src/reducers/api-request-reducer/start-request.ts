@@ -8,7 +8,7 @@ import {
   setEntityRequestState,
 } from './request-helpers';
 
-export function startRequest(state, action: IStartRequestAction) {
+export function startRequest(state: any, action: IStartRequestAction) {
   if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
 

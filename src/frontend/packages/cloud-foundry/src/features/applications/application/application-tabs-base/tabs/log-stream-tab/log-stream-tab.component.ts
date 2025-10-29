@@ -229,7 +229,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
     return error.message || error.toString() || 'WebSocket connection failed';
   }
 
-  jsonFilter(jsonString) {
+  jsonFilter(jsonString: string) {
     try {
       const messageObj = JSON.parse(jsonString);
       if (!messageObj) {

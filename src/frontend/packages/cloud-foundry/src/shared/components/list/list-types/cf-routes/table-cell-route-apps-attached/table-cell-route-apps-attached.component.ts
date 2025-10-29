@@ -18,13 +18,13 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
     AppChipsComponent
   ]
 })
-export class TableCellRouteAppsAttachedComponent extends TableCellCustom<any> implements OnInit {
+export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIResource<CfRoute>> implements OnInit {
   boundApps$: Observable<AppChip[]>;
-  config$ = new BehaviorSubject(null);
-  row$ = new BehaviorSubject(null);
+  config$ = new BehaviorSubject<any>(null);
+  row$ = new BehaviorSubject<APIResource<CfRoute> | null>(null);
 
   @Input('config')
-  set config(config: any) {
+  set config(config: { breadcrumbs?: string }) {
     super.config = config;
     this.config$.next(config);
   }

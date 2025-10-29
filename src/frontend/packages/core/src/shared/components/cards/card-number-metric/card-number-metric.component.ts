@@ -44,7 +44,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() mode: string;
 
   @Input('alerts')
-  set alerts(alerts) {
+  set alerts(alerts: any[]) {
     if (alerts) {
       this.processAlerts(alerts);
     }
@@ -128,14 +128,14 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
   }
 
-  processAlerts(alerts) {
+  processAlerts(alerts: any[]) {
     this.alertInfo = {
       info: 0,
       warning: 0,
       error: 0
     };
 
-    alerts.forEach((alert) => {
+    alerts.forEach((alert: any) => {
       switch (alert.level as AlertLevel) {
         case AlertLevel.Warning:
           this.alertInfo.warning++;

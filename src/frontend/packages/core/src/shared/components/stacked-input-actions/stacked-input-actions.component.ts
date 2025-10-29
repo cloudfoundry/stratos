@@ -61,7 +61,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   private wrapperFactory: ComponentFactory<StackedInputActionComponent>;
   private components: {
-    [key: number]: {
+    [key: string]: {
       stateIn: Subject<StackedInputActionsState>,
       stackedAction: StackedInputActionComponent,
       update: StackedInputActionUpdate
@@ -76,7 +76,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(StackedInputActionComponent);
   }
 
-  addComponent() {
+  addComponent(): void {
     const component = this.inputs.createComponent(this.wrapperFactory);
 
     const stackedAction = component.instance;
@@ -91,7 +91,8 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     }));
     // Handle updates of state from the compnent
     this.subs.push(stackedAction.stateOut.subscribe((update: StackedInputActionUpdate) => {
-      const hasChanges = Object.keys(update).filter(key => update[key] !== this.components[update.key].update).length;
+      const updateRecord = update as Record<string, any>;
+      const hasChanges = Object.keys(update).filter(key => updateRecord[key] !== this.components[update.key].update).length;
       if (hasChanges) {
         this.components[update.key].update = update;
         this.emitState();
@@ -115,15 +116,15 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.updatePositions();
   }
 
-  emitState() {
+  emitState(): void {
     const components = Object.values(this.components);
     // Emit a list of values for all components that should be processed. This does not include succeeded components
-    const valuesToSubmit = components ? components.reduce((values, component) => {
+    const valuesToSubmit = components ? components.reduce((values: Record<string, string>, component) => {
       if (!component.stackedAction.state || component.stackedAction.state.result !== StackedInputActionResult.SUCCEEDED) {
         values[component.stackedAction.key] = component.update.value;
       }
       return values;
-    }, {}) : [];
+    }, {} as Record<string, string>) : {};
     // Values can be submitted if there's values and those values are valid
     const valid = components && Object.keys(valuesToSubmit).length && components.length > 0 ?
       !components.find(component => !component.update.valid) : false;
@@ -131,7 +132,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.updateOtherValues();
   }
 
-  removeComponent(stackedAction: StackedInputActionComponent) {
+  removeComponent(stackedAction: StackedInputActionComponent): void {
     // Remove the visual component
     this.inputs.remove(stackedAction.position);
     // Remove the tracked component
@@ -140,7 +141,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.updatePositions();
   }
 
-  private updatePositions() {
+  private updatePositions(): void {
     // Ensure all components know which position they are and whether they can be removed or not
     const componentCount = this.inputs.length;
     Object.values(this.components).sort((a, b) => a.stackedAction.key < b.stackedAction.key ? 1 : 0).forEach((component, position) => {
@@ -149,7 +150,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateOtherValues() {
+  private updateOtherValues(): void {
     // Ensure components are aware of each others values
     Object.entries(this.components).forEach(([key, component]) => {
       component.stateIn.next({
@@ -182,7 +183,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     safeUnsubscribe(...this.subs);
   }
 
-  onKeydown(event) {
+  onKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.addComponent();
     }

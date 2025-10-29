@@ -105,7 +105,7 @@ export class SidePanelService {
     this.document.removeEventListener('keydown', this.onKeyDown);
   }
 
-  onKeyDown = (event) => {
+  onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       this.hide();
     }

@@ -22,10 +22,12 @@ import { StratosCurrentUserPermissions } from '../../../../../core/permissions/s
 import { createTableColumnFavorite } from '../../list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../list-table/table.types';
 import {
+  IGlobalListAction,
   IListAction,
   IListConfig,
   IListMultiFilterConfig,
   IListMultiFilterConfigItem,
+  IMultiListAction,
   ListViewTypes,
 } from '../../list.component.types';
 import { BaseEndpointsDataSource } from './base-endpoints-data-source';
@@ -48,7 +50,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public readonly columns: ITableColumn<EndpointModel>[] = [
     {
       columnId: 'name',
-      headerCell: () => 'Name',
+      headerCell: (): string => 'Name',
       cellComponent: TableCellEndpointNameComponent,
       sort: {
         type: 'sort',
@@ -59,7 +61,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'connection',
-      headerCell: () => 'Status',
+      headerCell: (): string => 'Status',
       cellComponent: TableCellEndpointStatusComponent,
       sort: {
         type: 'sort',
@@ -73,7 +75,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'type',
-      headerCell: () => 'Type',
+      headerCell: (): string => 'Type',
       cellDefinition: {
         getValue: this.getEndpointTypeString
       },
@@ -86,7 +88,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'address',
-      headerCell: () => 'Address',
+      headerCell: (): string => 'Address',
       cellComponent: TableCellEndpointAddressComponent,
       sort: {
         type: 'sort',
@@ -97,7 +99,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     {
       columnId: 'details',
-      headerCell: () => 'Details',
+      headerCell: (): string => 'Details',
       cellComponent: TableCellEndpointDetailsComponent,
       cellFlex: '4'
     }
@@ -142,7 +144,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       if (enabled) {
         this.columns.splice(4, 0, {
           columnId: 'creator',
-          headerCell: () => 'Creator',
+          headerCell: (): string => 'Creator',
           cellDefinition: {
             valuePath: 'creator.name'
           },
@@ -166,11 +168,13 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     );
   }
 
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => this.singleActions;
-  public getColumns = () => this.columns;
-  public getDataSource = () => this.dataSource;
+  public getGlobalActions = (): IGlobalListAction<EndpointModel>[] => [];
+  public getMultiActions = (): IMultiListAction<EndpointModel>[] => [];
+  public getSingleActions = (): IListAction<EndpointModel>[] => this.singleActions;
+  public getColumns = (): ITableColumn<EndpointModel>[] => this.columns;
+  public getDataSource(): EndpointsDataSource {
+    return this.dataSource;
+  }
 
   public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [this.createEndpointTypeFilter()];
 
@@ -217,7 +221,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     };
   }
 
-  private resetEndpointTypeFilter(pagination: PaginationEntityState) {
+  private resetEndpointTypeFilter(pagination: PaginationEntityState): void {
     if (
       pagination.clientPagination?.filter?.items?.[BaseEndpointsDataSource.typeFilterKey]
     ) {
@@ -225,7 +229,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         ...pagination.clientPagination.filter,
         items: {
           ...(pagination.clientPagination.filter.items ?? {}),
-          [BaseEndpointsDataSource.typeFilterKey]: null
+          [BaseEndpointsDataSource.typeFilterKey]: null as string | null
         }
       };
       this.store.dispatch(

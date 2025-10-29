@@ -38,15 +38,15 @@ export class KubernetesNamespaceAnalysisReportComponent {
 
   public report$ = new Subject<AnalysisReport>();
 
-  path: string;
+  path: string | undefined;
 
-  currentReport = null;
+  currentReport: string | null = null;
 
   endpointID: string;
 
   noReportsAvailable = false;
 
-  breadcrumbs = [];
+  breadcrumbs: Array<{ value: string }> = [];
 
   constructor(
     public analyzerService: KubernetesAnalysisService,
@@ -64,10 +64,12 @@ export class KubernetesNamespaceAnalysisReportComponent {
 
   }
 
-  public analysisChanged(report) {
-    if (report.id !== this.currentReport) {
-      this.currentReport = report.id;
-      this.analyzerService.getByID(this.endpointID, report.id).subscribe(r => this.report$.next(r));
+  public analysisChanged(report: AnalysisReport | null) {
+    if (report?.id !== this.currentReport) {
+      this.currentReport = report?.id || null;
+      if (report?.id) {
+        this.analyzerService.getByID(this.endpointID, report.id).subscribe((r: AnalysisReport) => this.report$.next(r));
+      }
     }
   }
 

@@ -17,7 +17,7 @@ import {
 const getDefaultState = () => ({
   internal: {
     isAdmin: false,
-    scopes: []
+    scopes: [] as string[]
   },
   endpoints: {},
   state: getDefaultRolesRequestState()

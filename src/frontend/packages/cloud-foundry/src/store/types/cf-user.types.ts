@@ -87,6 +87,9 @@ export class UserRoleInOrg {
    * See {OrgUserRoleNames.USER} for name
    */
   users: boolean;
+
+  // Index signature to allow dynamic property access
+  [key: string]: boolean;
 }
 /**
  * Temporary function. Once we move to typescript 2.7 (blocked on angular/compiler cli) we can use constant named properties in
@@ -94,7 +97,7 @@ export class UserRoleInOrg {
  * https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#constant-named-properties for details
  */
 export function createUserRoleInOrg(manager: boolean, billingManager: boolean, auditor: boolean, user: boolean): UserRoleInOrg {
-  const res = {};
+  const res = {} as Record<OrgUserRoleNames, boolean>;
   res[OrgUserRoleNames.MANAGER] = manager;
   res[OrgUserRoleNames.BILLING_MANAGERS] = billingManager;
   res[OrgUserRoleNames.AUDITOR] = auditor;
@@ -129,6 +132,9 @@ export interface UserRoleInSpace {
    * See {SpaceUserRoleNames.AUDITOR} for name
    */
   auditors: boolean;
+
+  // Index signature to allow dynamic property access
+  [key: string]: boolean;
 }
 
 /**
@@ -138,7 +144,7 @@ export interface UserRoleInSpace {
  *
  */
 export function createUserRoleInSpace(manager: boolean, auditor: boolean, developer: boolean): UserRoleInSpace {
-  const res = {};
+  const res = {} as Record<SpaceUserRoleNames, boolean>;
   res[SpaceUserRoleNames.MANAGER] = manager;
   res[SpaceUserRoleNames.DEVELOPER] = developer;
   res[SpaceUserRoleNames.AUDITOR] = auditor;

@@ -42,7 +42,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   get quotaDefinition(): any {
     const control = this.createSpaceForm.get('quotaDefinition');
-    const nil = { value: null };
+    const nil: { value: null } = { value: null };
 
     if (this.createSpaceForm) {
       return (control.value === 0) ? nil : control;

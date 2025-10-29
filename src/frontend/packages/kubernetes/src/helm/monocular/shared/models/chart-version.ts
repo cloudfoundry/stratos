@@ -5,9 +5,11 @@ export class ChartVersion {
   type: string;
   attributes: ChartVersionAttributes;
   relationships: ChartVersionRelationships;
+  name?: string; // Promoted from attributes for convenience
 }
 
 export class ChartVersionAttributes {
+  name?: string;
   created: Date;
   digest: string;
   icons: ChartVersionIcon[];

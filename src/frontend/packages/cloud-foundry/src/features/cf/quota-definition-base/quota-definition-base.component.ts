@@ -72,7 +72,7 @@ export class QuotaDefinitionBaseComponent {
     endpoint: EndpointModel,
     org: APIResource<IOrganization>,
     space: APIResource<ISpace>
-  ) {
+  ): any {
     return null;
   }
 }

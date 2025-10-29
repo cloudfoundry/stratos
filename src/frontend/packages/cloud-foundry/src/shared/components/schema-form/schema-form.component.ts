@@ -55,7 +55,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   mode: 'JSON' | 'schema';
   schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
-  private schema;
+  private schema: object | undefined;
 
   @Input()
   set config(config: SchemaFormConfig) {
@@ -141,18 +141,18 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
   }
 
-  private filterSchema = (schema?: object): any => {
+  private filterSchema = (schema?: { [key: string]: any }): { [key: string]: any } | null | undefined => {
     if (!schema) {
       return;
     }
-    const filterSchema = Object.keys(schema).reduce((obj, key) => {
+    const filterSchema = Object.keys(schema).reduce((obj: { [key: string]: any }, key) => {
       if (key !== '$schema') { obj[key] = schema[key]; }
       return obj;
     }, {});
     return Object.keys(filterSchema).length > 0 ? filterSchema : null;
   };
 
-  onFormChange(formData) {
+  onFormChange(formData: object) {
     this.formData = formData;
     this.pDataChange.next(formData);
   }
@@ -163,7 +163,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.pValidChange.next(!this.formValidationErrors.length);
   }
 
-  private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string => {
+  private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string | null => {
     if (!formValidationErrors) {
       return null;
     }

@@ -12,16 +12,16 @@ import { CfStacksDataSource } from './cf-stacks-data-source';
 @Injectable({
   providedIn: 'root'
 })
-export class CfStacksListConfigService extends BaseCfListConfig<APIResource> {
+export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>> {
   dataSource: CfStacksDataSource;
   cardComponent = CfStacksCardComponent;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no stacks'
   };
-  columns: ITableColumn<APIResource>[] = [{
+  columns: ITableColumn<APIResource<any>>[] = [{
     columnId: 'name',
     headerCell: () => 'Name',
     sort: {

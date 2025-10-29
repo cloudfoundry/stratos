@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
@@ -20,11 +21,11 @@ export class ServiceInstanceEffects {
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(DELETE_SERVICE_INSTANCE_ACTIONS[2]),
-    mergeMap(action => {
+    mergeMap((action): typeof EMPTY => {
       if (this.longRunningOpService.isLongRunning({ message: action.response })) {
         this.longRunningOpService.handleLongRunningDeleteService(action.apiAction.guid, action.apiAction.endpointGuid);
       }
-      return [];
+      return EMPTY;
     }),
-  ));
+  ), { dispatch: false });
 }

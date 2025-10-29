@@ -48,7 +48,7 @@ export function addCfRelationParams(request: HttpRequest<any>, action: EntityReq
   const relationInfo = paginationAction ?
     getEntityRelationsForPaginationRequest(paginationAction as EntityInlineParentAction & PaginatedAction) :
     getEntityRelationsForEntityRequest(entityInlineParent as EntityInlineParentAction & EntityRequestAction);
-  const update = {};
+  const update: Record<string, string> = {};
   if (relationInfo.maxDepth > 0) {
     update['inline-relations-depth'] = (relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth) + '';
   }

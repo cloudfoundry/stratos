@@ -30,7 +30,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no feature flags'
   };
@@ -40,7 +40,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
       columnId: CfFeatureFlagsDataSource.nameColumnId,
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => `${row.name}`
+        getValue: (row: IFeatureFlag) => `${row.name}`
       },
       class: 'table-column-select',
       cellFlex: '2',

@@ -5,6 +5,11 @@ import { EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
 import { BackupEndpointsService } from '../backup-endpoints.service';
+import { BackupEndpointTypes } from '../backup-restore.types';
+
+interface BackupCheckboxConfig {
+  type: BackupEndpointTypes;
+}
 
 @Component({
   selector: 'app-backup-checkbox-cell',
@@ -16,7 +21,7 @@ import { BackupEndpointsService } from '../backup-endpoints.service';
     MatCheckboxModule
   ]
 })
-export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel> {
+export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel, BackupCheckboxConfig> {
 
   constructor(public service: BackupEndpointsService) {
     super();

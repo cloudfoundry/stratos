@@ -20,7 +20,7 @@ export class MonocularInterceptor implements HttpInterceptor {
     '/pp/v1/chartsvc'
   ];
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const validUrl = this.includeUrls.find(part => req.url.indexOf(part) >= 0);
     const endpoint = this.route.snapshot.params.endpoint;
     const hasEndpoint = !!endpoint;
@@ -38,20 +38,20 @@ export class MonocularInterceptor implements HttpInterceptor {
 class HttpInterceptorHandler implements HttpHandler {
   constructor(private next: HttpHandler, private interceptor: HttpInterceptor) { }
 
-  handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
+  handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     return this.interceptor.intercept(req, this.next);
   }
 }
 export class HttpInterceptingHandler implements HttpHandler {
-  private chain: HttpHandler = null;
+  private chain: HttpHandler | null = null;
 
   constructor(
     private backend: HttpBackend,
     private interceptors: HttpInterceptor[],
-    private intercept?: (req: HttpRequest<any>) => HttpRequest<any>
+    private intercept?: (req: HttpRequest<unknown>) => HttpRequest<unknown>
   ) { }
 
-  handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
+  handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     if (this.intercept) {
       req = this.intercept(req);
     }

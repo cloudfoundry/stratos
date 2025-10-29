@@ -24,7 +24,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
   markdownHtml: string;
   documentUrl: string;
-  title = null;
+  title: string = null;
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
@@ -43,7 +43,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   ) { }
 
   private parseInline(tokens: any[]): string {
-    return tokens.map(token => {
+    return tokens.map((token: any) => {
       if (token.type === 'text') {
         return token.raw;
       }
@@ -57,12 +57,12 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
   private loadDocument() {
     this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
-      (markText) => {
+      (markText: string) => {
         if (markText && markText.length > 0) {
           // Basic sanitization - Note: marked no longer supports sanitize option
           const renderer = new marked.Renderer();
           // Ensure links in the readme open in a new tab
-          renderer.link = ({ href, title, tokens }) => {
+          renderer.link = ({ href, title, tokens }: any) => {
             const text = this.parseInline(tokens);
             return `<a target="_blank" href="${href}" ${title ? `title="${title}"` : ''}>${text}</a>`;
           };
@@ -70,7 +70,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
           this.markdownHtml = typeof result === 'string' ? result : '';
         }
       },
-      (error) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
+      (error: any) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
   }
 
   public markdownRendered() {

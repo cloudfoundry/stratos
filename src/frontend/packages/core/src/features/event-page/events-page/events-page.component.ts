@@ -64,21 +64,21 @@ export class EventsPageComponent implements OnInit {
 
   ngOnInit() {
     const events$ = this.eventService.events$.pipe(
-      map(events => {
+      map((events: IGlobalEvent[]) => {
         if (this.endpointOnly) {
-          return events.filter(event => event.key.split('-')[0] === 'endpointError');
+          return events.filter((event: IGlobalEvent) => event.key.split('-')[0] === 'endpointError');
         }
         return events;
       })
     );
     this.unreadEvents$ = events$.pipe(
-      map(events => events.filter(event => !event.read))
+      map((events: IGlobalEvent[]) => events.filter((event: IGlobalEvent) => !event.read))
     );
     this.readEvents$ = events$.pipe(
-      map(events => events.filter(event => event.read))
+      map((events: IGlobalEvent[]) => events.filter((event: IGlobalEvent) => event.read))
     );
     this.events$ = this.selectedFilterSubject.pipe(
-      switchMap(filter => {
+      switchMap((filter: EventFilterValues) => {
         switch (filter) {
           case EventFilterValues.READ:
             return this.readEvents$;
@@ -90,9 +90,9 @@ export class EventsPageComponent implements OnInit {
       })
     );
     this.hasReadEvents$ = this.readEvents$.pipe(
-      map(events => !!events.length),
+      map((events: IGlobalEvent[]) => !!events.length),
       distinctUntilChanged(),
-      tap(hasRead => {
+      tap((hasRead: boolean) => {
         if (!hasRead) {
           this.selectedFilterSubject.next(EventFilterValues.UNREAD);
         }
@@ -100,8 +100,8 @@ export class EventsPageComponent implements OnInit {
       share()
     );
     this.back$ = this.store.select(getPreviousRoutingState).pipe(first()).pipe(
-      map(previousState => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
-      map(returnUrl => {
+      map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
+      map((returnUrl: string) => {
         // Override return url if we've come from the error page
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return overrideReturnUrl || returnUrl;
@@ -116,7 +116,7 @@ export class EventsPageComponent implements OnInit {
   createQueryParams(urlForward: string): Observable<object> {
     // Ensure we break the looping 'back' we get from Page --> Events --> Errors --> Events --> Errors etc
     return this.back$.pipe(
-      map(urlBack => {
+      map((urlBack: string) => {
         // Pass a url through to the errors page containing the url to return after returning to this page
         const overrideReturnUrl = this.activatedRoute.snapshot.queryParams[eventReturnUrlParam];
         return urlForward && urlForward.startsWith('/errors') ? {

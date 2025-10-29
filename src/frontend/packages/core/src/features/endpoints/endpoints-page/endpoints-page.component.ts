@@ -74,7 +74,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
 
-  @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer;
+  @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer: ViewContainerRef;
   @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
   customContentComponentRef: ComponentRef<any>;
 

@@ -7,6 +7,9 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
+  IGlobalListAction,
+  IMultiListAction,
+  IListAction,
 } from '../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../store/src/actions/list.actions';
 import { AppState } from '../../../../store/src/public-api';
@@ -89,11 +92,11 @@ export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
     this.dataSource = new MonocularChartsDataSource(store, this);
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<MonocularChart>[] => [];
+  getMultiActions = (): IMultiListAction<MonocularChart>[] => [];
+  getSingleActions = (): IListAction<MonocularChart>[] => [];
+  getColumns = (): ITableColumn<MonocularChart>[] => this.columns;
+  getDataSource = (): MonocularChartsDataSource => this.dataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
 }

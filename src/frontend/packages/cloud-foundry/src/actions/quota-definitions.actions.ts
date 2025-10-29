@@ -115,7 +115,7 @@ export class GetQuotaDefinitions extends CFStartAction implements PaginatedActio
 }
 
 export class GetQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
-  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations: string[] = [], public populateMissing = true) {
     super();
     this.options = new HttpRequest(
       'GET',
@@ -133,7 +133,7 @@ export class GetQuotaDefinition extends CFStartAction implements ICFAction, Enti
 }
 
 export class GetSpaceQuotaDefinition extends CFStartAction implements ICFAction, EntityInlineParentAction {
-  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations: string[] = [], public populateMissing = true) {
     super();
     this.options = new HttpRequest(
       'GET',

@@ -9,6 +9,7 @@ export class Chart {
   attributes: ChartAttributes;
   relationships: ChartRelationships;
   monocularEndpointId?: string;
+  name?: string; // Promoted from attributes for convenience
 }
 
 

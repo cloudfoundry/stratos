@@ -32,9 +32,9 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
 
-  private hasErrored = new BehaviorSubject(null);
+  private hasErrored = new BehaviorSubject<string | null>(null);
   public hasErrored$ = this.hasErrored.asObservable();
-  private isBusy = new BehaviorSubject(false);
+  private isBusy = new BehaviorSubject<boolean>(false);
   public isBusy$ = this.isBusy.asObservable();
 
   private sub: Subscription;

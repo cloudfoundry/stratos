@@ -18,8 +18,10 @@ import {
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/local-filtering-sorting';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  IGlobalListAction,
   IListAction,
   IListConfig,
+  IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
@@ -77,8 +79,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     {
       columnId: 'memory', headerCell: () => 'Memory',
       cellConfig: {
-        value: (row) => row.usage.mem,
-        label: (row) => this.utilsService.usageBytes([
+        value: (row: ListAppInstance): number => row.usage.mem,
+        label: (row: ListAppInstance): string => this.utilsService.usageBytes([
           row.usage.hasStats ? row.value.stats.usage.mem : 0,
           row.usage.hasStats ? row.value.stats.mem_quota : 0
         ])
@@ -92,8 +94,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     {
       columnId: 'disk', headerCell: () => 'Disk',
       cellConfig: {
-        value: (row) => row.usage.disk,
-        label: (row) => this.utilsService.usageBytes([
+        value: (row: ListAppInstance): number => row.usage.disk,
+        label: (row: ListAppInstance): string => this.utilsService.usageBytes([
           row.usage.hasStats ? row.value.stats.usage.disk : 0,
           row.usage.hasStats ? row.value.stats.disk_quota : 0
         ])
@@ -107,8 +109,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     {
       columnId: 'cpu', headerCell: () => 'CPU',
       cellConfig: {
-        value: (row) => row.usage.cpu,
-        label: (row) => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
+        value: (row: ListAppInstance): number => row.usage.cpu,
+        label: (row: ListAppInstance): string => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
       },
       cellComponent: TableCellUsageComponent, sort: {
         type: 'sort',
@@ -141,7 +143,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
-  text = {
+  text: { title: string | null; filter: string; noEntries: string } = {
     title: null,
     filter: 'Search by state',
     noEntries: 'There are no application instances'
@@ -149,7 +151,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   private initialised$: Observable<boolean>;
 
   private listActionTerminate: IListAction<any> = {
-    action: (item) => {
+    action: (item: any) => {
       const confirmation = new ConfirmationDialogConfig(
         'Terminate Instance?',
         `Are you sure you want to terminate instance ${item.index}?`,
@@ -167,7 +169,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   };
 
   private listActionSsh: IListAction<any> = {
-    action: (item) => {
+    action: (item: any) => {
       const index = item.index;
       const sshRoute = (
         `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
@@ -240,13 +242,13 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => this.singleActions;
-  getColumns = () => this.columns;
+  getGlobalActions = (): IGlobalListAction<ListAppInstance>[] => [];
+  getMultiActions = (): IMultiListAction<ListAppInstance>[] => [];
+  getSingleActions = (): IListAction<ListAppInstance>[] => this.singleActions;
+  getColumns = (): ITableColumn<ListAppInstance>[] => this.columns;
   getDataSource = () => this.instancesSource;
-  getMultiFiltersConfigs = () => [];
-  getInitialised = () => this.initialised$;
+  getMultiFiltersConfigs = (): any[] => [];
+  getInitialised = (): Observable<boolean> => this.initialised$;
 
   private createMetricsResults(entityServiceFactory: EntityServiceFactory) {
     const metricsAction = createAppInstancesMetricAction(this.appService.appGuid, this.appService.cfGuid);

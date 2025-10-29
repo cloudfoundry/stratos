@@ -10,8 +10,8 @@ export class StyleService {
     this.rules = this.getAllSelectors();
   }
 
-  hasSelector = (selector) => {
-    return !!this.rules.find(ruleSelector => ruleSelector === selector);
+  hasSelector = (selector: string): boolean => {
+    return !!this.rules.find((ruleSelector: string) => ruleSelector === selector);
   }
 
   private getAllSelectors = (): string[] => {

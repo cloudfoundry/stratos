@@ -32,7 +32,7 @@ export class UserProfileEffect {
 
    getUserProfileInfo$ = createEffect(() => this.actions$.pipe(
     ofType<FetchUserProfileAction>(GET_USERPROFILE),
-    mergeMap(action => {
+    mergeMap((action: FetchUserProfileAction) => {
       this.store.dispatch(new StartRequestAction(action));
       const entityKey = entityCatalog.getEntityKey(action);
       return this.httpClient.get(`/pp/${proxyAPIVersion}/users/${action.userGuid}`).pipe(
@@ -42,7 +42,7 @@ export class UserProfileEffect {
             result: [action.guid]
           }, action)
         ]),
-        catchError((e) => [
+        catchError((e: any) => [
           new WrapperRequestActionFailed('Could not get User Profile Info', action),
         ])
       );
@@ -54,7 +54,7 @@ export class UserProfileEffect {
       this.store.dispatch(new StartRequestAction(action, 'update'));
       const userGuid = action.profile.id;
       const version = action.profile.meta.version;
-      const headers = { 'If-Match': version.toString() };
+      const headers: Record<string, string> = { 'If-Match': version.toString() };
       if (action.password) {
         headers['x-stratos-password'] = action.password;
       }
@@ -68,7 +68,7 @@ export class UserProfileEffect {
             }, action),
           ];
         }),
-        catchError((e) => [
+        catchError((e: any) => [
           new WrapperRequestActionFailed('Could not update User Profile Info', action),
         ]));
     })));
@@ -91,7 +91,7 @@ export class UserProfileEffect {
             }, action)
           ];
         }),
-        catchError((e) => [
+        catchError((e: any) => [
           new WrapperRequestActionFailed('Could not update User Password', action),
         ])
       );

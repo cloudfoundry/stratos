@@ -77,7 +77,7 @@ export class VariablesTabComponent implements OnInit {
     return typeof test === 'object';
   }
 
-  private mapEnvVars(allEnvVars): VariableTabAllEnvVarType[] {
+  private mapEnvVars(allEnvVars: any): VariableTabAllEnvVarType[] {
     if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
       return [];
     }

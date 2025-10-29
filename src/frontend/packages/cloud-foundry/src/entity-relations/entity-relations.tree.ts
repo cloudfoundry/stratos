@@ -48,7 +48,7 @@ function createEntityTree(entity: EntitySchema, isArray: boolean) {
 function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?: EntitySchema, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity.schema;
   Object.keys(rootEntitySchema).forEach(key => {
-    const schemaOrArray = rootEntitySchema[key];
+    const schemaOrArray = (rootEntitySchema as Record<string, any>)[key];
     const isArray = Array.isArray(schemaOrArray);
     const entitySchema = isArray ? schemaOrArray[0] : schemaOrArray;
     const newPath = path ? path + '.' + key : key;

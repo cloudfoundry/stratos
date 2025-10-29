@@ -41,7 +41,7 @@ build-backend:
 	bun run build-backend
 
 # Start Angular dev server with source maps and hot reload
-dev-frontend: build-frontend
+dev-frontend:
 	@echo "Starting Angular dev server with source maps on http://127.0.0.1:5000"
 	@echo "✅ Source maps enabled (real TypeScript line numbers)"
 	@echo "✅ Hot reload enabled (instant updates on file save)"

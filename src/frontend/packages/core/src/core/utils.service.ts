@@ -113,12 +113,12 @@ export class UtilsService {
     return retBytes;
   }
 
-  usageBytes(usage, usedPrecision?, totalPrecision?): string {
+  usageBytes(usage: number[], usedPrecision?: number, totalPrecision?: number): string {
     const used = usage[0];
     const total = usage[1];
 
-    if (isNaN(parseFloat(used)) || !isFinite(used) ||
-      isNaN(parseFloat(total)) || !isFinite(total) ||
+    if (isNaN(parseFloat(used.toString())) || !isFinite(used) ||
+      isNaN(parseFloat(total.toString())) || !isFinite(total) ||
       total === 0) {
       return '-';
     }
@@ -129,7 +129,7 @@ export class UtilsService {
 
     // Units
     const value = this.getNumber(total);
-    let usedNumber = null;
+    let usedNumber: number | null = null;
 
     // Values to display
     const totalDisplay = this.getReducedValue(total, value).toFixed(totalPrecision);
@@ -151,7 +151,7 @@ export class UtilsService {
    * @param uptime in seconds
    * @returns formatted uptime string
    */
-  formatUptime(uptime): string {
+  formatUptime(uptime: number): string {
     if (uptime === undefined || uptime === null || isNaN(uptime)) {
       return '-';
     }
@@ -197,14 +197,14 @@ export class UtilsService {
     return Math.floor(Math.log(value) / Math.log(1024));
   }
 
-  private getFormattedTime(isPlural, value, unit): string {
+  private getFormattedTime(isPlural: boolean, value: string | number, unit: string): string {
     // i18n
     // const formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
     // return $translate.instant(formatString, { value: value, unit: unit });
     return value + unit;
   }
 
-  private formatPart(count, single, plural): string {
+  private formatPart(count: number, single: string, plural: string): string {
     if (count === 0) {
       return '';
     } else if (count === 1) {

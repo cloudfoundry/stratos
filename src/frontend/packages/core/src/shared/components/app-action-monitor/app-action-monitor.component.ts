@@ -50,7 +50,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
    * Get the ID of the ENTITY (not table row)
    */
   @Input()
-  public getId: (element) => string;
+  public getId: (element: T) => string;
 
   /**
    * Get the ID of the ROW
@@ -59,7 +59,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   public trackBy = ((index: number, item: T) => index.toString());
 
   @Input()
-  public getCellConfig: (element) => ITableCellRequestMonitorIconConfig;
+  public getCellConfig: (element: T) => ITableCellRequestMonitorIconConfig;
 
   @Input()
   public columns: ITableColumn<T>[] = [];

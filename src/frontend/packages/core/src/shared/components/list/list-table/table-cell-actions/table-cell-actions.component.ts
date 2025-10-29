@@ -55,7 +55,7 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     );
   }
 
-  initialise(row) {
+  initialise(row: any) {
     if (this.obs) {
       return this.updateActionButtons(row);
     }

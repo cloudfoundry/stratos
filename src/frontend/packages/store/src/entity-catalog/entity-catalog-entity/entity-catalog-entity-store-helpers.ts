@@ -134,13 +134,13 @@ export class EntityCatalogEntityStoreHelpers {
       const action = builder(...args);
       this.helper.store.dispatch(action);
       if (isPaginatedAction(action)) {
-        return es[actionKey].getPaginationMonitor(
+        return (es as any)[actionKey].getPaginationMonitor(
           ...args
         ).currentPageState$;
       }
       const rAction = action as RequestAction;
-      const schema = rAction.entity ? rAction.entity[0] || rAction.entity : null;
-      const schemaKey = schema ? schema.schemaKey : null;
+      const schema = rAction.entity ? (Array.isArray(rAction.entity) ? rAction.entity[0] : rAction.entity) : null;
+      const schemaKey = schema ? (schema as any).schemaKey : null;
 
       if (!rAction.guid) {
         throw new Error(`\`${actionKey}\` action for entity \`${rAction.entityType}\` has no guid`);
@@ -222,7 +222,7 @@ export class EntityCatalogEntityStoreHelpers {
             startWithNull: boolean,
             ...args: any
           ): EntityMonitor<Y> => {
-            const action: EntityRequestAction = builders[key](...args);
+            const action: EntityRequestAction = (builders as any)[key](...args);
             if (isPaginatedAction(action)) {
               throw new Error(`\`${key}\` action is of type pagination`);
             }
@@ -236,13 +236,13 @@ export class EntityCatalogEntityStoreHelpers {
           },
           getEntityService: (
             ...args: any
-          ): EntityService<Y> => EntityCatalogEntityStoreHelpers.createEntityService(key, builders[key](...args)),
+          ): EntityService<Y> => EntityCatalogEntityStoreHelpers.createEntityService(key, (builders as any)[key](...args)),
           getPaginationMonitor: (
             ...args: any
-          ): PaginationMonitor<Y> => EntityCatalogEntityStoreHelpers.createPaginationMonitor(key, builders[key](...args)),
+          ): PaginationMonitor<Y> => EntityCatalogEntityStoreHelpers.createPaginationMonitor(key, (builders as any)[key](...args)),
           getPaginationService: (
             ...args: any
-          ): PaginationObservables<Y> => EntityCatalogEntityStoreHelpers.createPaginationService(key, builders[key](...args))
+          ): PaginationObservables<Y> => EntityCatalogEntityStoreHelpers.createPaginationService(key, (builders as any)[key](...args))
         }
       };
     }, {} as CustomEntityCatalogEntityStore<Y, ABC>);

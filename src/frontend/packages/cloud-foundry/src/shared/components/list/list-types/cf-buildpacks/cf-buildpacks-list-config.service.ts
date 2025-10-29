@@ -18,8 +18,8 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
   dataSource: CfBuildpacksDataSource;
   isLocal = true;
   enableTextFilter = true;
-  text = {
-    title: null,
+  text: { title: string | null; filter: string; noEntries: string } = {
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no buildpacks'
   };
@@ -50,7 +50,7 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
   }];
   constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
-    this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this as BaseCfListConfig<APIResource<IBuildpack>>);
   }
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;

@@ -33,7 +33,16 @@ export class CfRoleChangeWithNames extends CfRoleChange {
   roleName: string;
 }
 
-export const UserRoleLabels = {
+export const UserRoleLabels: {
+  org: {
+    short: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+    long: Record<OrgUserRoleNames | CfUserRoleParams, string>;
+  };
+  space: {
+    short: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+    long: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
+  };
+} = {
   org: {
     short: {
       [OrgUserRoleNames.MANAGER]: 'Manager',
@@ -44,7 +53,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.AUDITED_ORGS]: 'Auditor',
       [OrgUserRoleNames.USER]: 'User',
       [CfUserRoleParams.ORGANIZATIONS]: 'User'
-    },
+    } as Record<OrgUserRoleNames | CfUserRoleParams, string>,
     long: {
       [OrgUserRoleNames.MANAGER]: 'Org Manager',
       [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
@@ -54,7 +63,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
       [OrgUserRoleNames.USER]: 'Org User',
       [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
-    }
+    } as Record<OrgUserRoleNames | CfUserRoleParams, string>
   },
   space: {
     short: {
@@ -64,7 +73,7 @@ export const UserRoleLabels = {
       [CfUserRoleParams.SPACES]: 'Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
-    },
+    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>,
     long: {
       [SpaceUserRoleNames.MANAGER]: 'Space Manager',
       [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
@@ -72,6 +81,6 @@ export const UserRoleLabels = {
       [CfUserRoleParams.SPACES]: 'Space Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
-    }
+    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>
   }
 };

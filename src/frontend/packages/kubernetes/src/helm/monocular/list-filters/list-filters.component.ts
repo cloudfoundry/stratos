@@ -10,5 +10,5 @@ import { NgFor } from '@angular/common';
 })
 
 export class ListFiltersComponent {
-  @Input() public filters: { title: string, items: Array<{}>, }[] = [];
+  @Input() public filters: { title: string, items: Array<Record<string, unknown>>, }[] = [];
 }

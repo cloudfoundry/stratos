@@ -57,7 +57,7 @@ export class GetAllUserProvidedServices extends CFStartAction implements Paginat
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'name',
-    q: []
+    q: [] as string[]
   };
   flattenPagination = true;
   flattenPaginationMax = true;

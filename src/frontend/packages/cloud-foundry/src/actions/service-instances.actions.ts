@@ -61,7 +61,7 @@ export class GetServiceInstances
     'results-per-page': 100,
     'order-direction': 'asc',
     'order-direction-field': 'creation',
-    q: []
+    q: [] as string[]
   };
   flattenPagination = true;
   flattenPaginationMax = true;
@@ -207,7 +207,7 @@ export class ListServiceBindingsForInstance
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'creation',
-    q: []
+    q: [] as string[]
   };
   flattenPagination = true;
 }

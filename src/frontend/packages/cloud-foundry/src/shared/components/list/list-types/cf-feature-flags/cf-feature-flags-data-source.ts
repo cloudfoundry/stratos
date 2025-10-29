@@ -11,7 +11,7 @@ import { IFeatureFlag } from '../../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 
-export const FeatureFlagDescriptions = {
+export const FeatureFlagDescriptions: Record<string, string> = {
   user_org_creation: 'Any user can create an organization',
   private_domain_creation: ' An Org Manager can create private domains for that organization',
   app_bits_upload: 'Space Developers can upload app bits',
@@ -40,7 +40,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<IFeatureFlag> {
       store,
       action,
       schema: cfEntityFactory(featureFlagEntityType),
-      getRowUniqueId: (ff) => ff.guid,
+      getRowUniqueId: (ff: IFeatureFlag) => ff.guid,
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [

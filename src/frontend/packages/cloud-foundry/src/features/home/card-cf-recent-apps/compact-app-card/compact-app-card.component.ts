@@ -29,7 +29,7 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input() app;
+  @Input() app: any;
 
   @Input() endpoint: string;
 

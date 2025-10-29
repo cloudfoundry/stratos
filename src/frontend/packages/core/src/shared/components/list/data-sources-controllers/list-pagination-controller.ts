@@ -97,18 +97,22 @@ export class ListPaginationController<T> implements IListPaginationController<T>
             this.dataSource, this.dataSource.paginationKey, pageSize
           ));
         }
-      } else if (paginationEntityState.params['results-per-page'] !== pageSize) {
-        this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
-          ['results-per-page']: pageSize,
-        }, this.dataSource.isLocal));
+      } else {
+        const params = paginationEntityState.params as Record<string, any>;
+        if (params['results-per-page'] !== pageSize) {
+          this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
+            ['results-per-page']: pageSize,
+          }, this.dataSource.isLocal));
+        }
       }
     });
   }
   sort = (listSort: ListSort) => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      const params = paginationEntityState.params as Record<string, any>;
       if (
-        paginationEntityState.params['order-direction-field'] !== listSort.field ||
-        paginationEntityState.params['order-direction'] !== listSort.direction
+        params['order-direction-field'] !== listSort.field ||
+        params['order-direction'] !== listSort.direction
       ) {
         this.store.dispatch(new AddParams(this.dataSource, this.dataSource.paginationKey, {
           ['order-direction-field']: listSort.field,
@@ -117,7 +121,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
     });
   };
-  filterByString = filterString => {
+  filterByString = (filterString: string) => {
     onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
       if (this.dataSource.isLocal) {
         if (paginationEntityState.clientPagination.filter.string !== filterString) {
@@ -142,7 +146,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
 
       // Changes may include multiple updates for the same key, so only use the very latest
-      const uniqueChanges = [];
+      const uniqueChanges: ListPaginationMultiFilterChange[] = [];
       for (let i = changes.length - 1; i >= 0; i--) {
         const change = changes[i];
         if (!uniqueChanges.find(e => e.key === change.key)) {
@@ -151,7 +155,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       }
       // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
       // chained actions from firing.
-      const cleanChanges = uniqueChanges.reduce((newCleanChanges, change) => {
+      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, any>, change: ListPaginationMultiFilterChange) => {
         const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
         const newFilterParamValue = valueOrCommonFalsy(change.value);
         if (storeFilterParamValue !== newFilterParamValue) {
@@ -200,7 +204,8 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       filter(pag => !!pag),
       map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'] as number)
+        const params = pag.params as Record<string, any>;
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
         // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
@@ -210,7 +215,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           pageIndex
         };
       }),
-      distinctUntilChanged((x, y) => {
+      distinctUntilChanged((x: ListPagination, y: ListPagination) => {
         return x.pageIndex === y.pageIndex && x.pageSize === y.pageSize && x.totalResults === y.totalResults;
       }),
       tag('list-pagination')
@@ -219,7 +224,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
 }
 
-export function valueOrCommonFalsy(value, commonFalsy?) {
+export function valueOrCommonFalsy(value: any, commonFalsy?: any): any {
   // Flatten some specific falsies into the same common value
   if (value === null || value === undefined || value === '') {
     return commonFalsy;

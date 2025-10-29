@@ -65,7 +65,7 @@ export class ListActionConfig<T> {
 interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
   getRowState?(row: T, schemaKey?: string): Observable<RowState>;
-  trackBy(index: number, item: T);
+  trackBy(index: number, item: T): string | number;
 }
 
 interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
@@ -119,11 +119,11 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   getRowUniqueId: getRowUniqueId<T>;
   entitySelectConfig?: EntitySelectConfig; // For multi action lists, this is used to configure the entity select.
 
-  destroy();
+  destroy(): void;
   /**
    * Set's data source specific text filter param
    */
-  setFilterParam(filterParam: string, pag: PaginationEntityState);
+  setFilterParam(filterParam: string, pag: PaginationEntityState): void;
   /**
    * Gets data source specific text filter param
    */
@@ -131,17 +131,17 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   /**
    * Set's data source specific multi filter properties. Only applicable in maxedResult world
    */
-  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam);
-  refresh();
+  setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam): void;
+  refresh(): void;
 
-  updateMetricsAction(newAction: MetricsAction);
+  updateMetricsAction(newAction: MetricsAction): void;
   /**
    * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
    */
-  showAllAfterMax();
+  showAllAfterMax(): void;
 }
 
-export type getRowUniqueId<T> = (T) => string;
+export type getRowUniqueId<T> = (row: T) => string;
 export interface RowsState {
   [rowUID: string]: RowState;
 }

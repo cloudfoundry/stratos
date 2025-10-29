@@ -40,7 +40,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     this.updateReport(report);
   }
 
-  updateReport(report) {
+  updateReport(report: AnalysisReport): void {
     switch (report.format) {
       case 'popeye':
         this.createComponent(PopeyeReportViewerComponent, report);

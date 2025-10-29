@@ -39,9 +39,9 @@ export class CloudFoundryEffects {
       };
       const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
       return this.http
-        .get(url, requestArgs)
+        .get<{ [guid: string]: any }>(url, requestArgs)
         .pipe(
-          mergeMap(info => {
+          mergeMap((info: { [guid: string]: any }) => {
             const mappedData = {
               entities: { [cfInfoKey]: {} },
               result: []

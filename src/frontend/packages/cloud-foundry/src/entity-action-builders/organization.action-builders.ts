@@ -26,16 +26,16 @@ export interface OrganizationActionBuilders extends OrchestratedActionBuilders {
 export const organizationActionBuilders: OrganizationActionBuilders = {
   get: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetOrganization(guid, endpointGuid, includeRelations, populateMissing),
   getMultiple: (
-    endpointGuid,
+    endpointGuid: string,
     paginationKey,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllOrganizations(paginationKey, endpointGuid, includeRelations, populateMissing),
-  remove: (guid, endpointGuid) => new DeleteOrganization(guid, endpointGuid),
-  update: (guid, endpointGuid, updatedOrg: IUpdateOrganization) => new UpdateOrganization(
+  remove: (guid: string, endpointGuid: string) => new DeleteOrganization(guid, endpointGuid),
+  update: (guid: string, endpointGuid: string, updatedOrg: IUpdateOrganization) => new UpdateOrganization(
     guid,
     endpointGuid,
     updatedOrg

@@ -46,13 +46,13 @@ function deleteEndpointEntities(
   state: IRequestEntityTypeState<GitEntity>,
   endpointGuid: string
 ) {
-  return Object.keys(state).reduce((newEntities, guid) => {
+  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<GitEntity>, guid: string) => {
     const entity = state[guid];
     if (entity.endpointGuid !== endpointGuid) {
       newEntities[guid] = entity;
     }
     return newEntities;
-  }, {});
+  }, {} as IRequestEntityTypeState<GitEntity>);
 }
 
 /**

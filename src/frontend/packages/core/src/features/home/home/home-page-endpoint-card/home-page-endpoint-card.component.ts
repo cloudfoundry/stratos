@@ -90,7 +90,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   links$: Observable<LinkMetadata>;
 
-  entity; StratosCatalogEndpointEntity;
+  entity: any;
 
   definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
 
@@ -219,7 +219,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   async createCard(endpointEntity: any) {
     this.customCard.clear();
 
-    let component;
+    let component: any;
     if (!endpointEntity) {
       component = this.componentFactoryResolver.resolveComponentFactory(DefaultEndpointHomeComponent);
     } else {

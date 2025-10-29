@@ -4,7 +4,7 @@
 $top-index: 2;
 $bottom-index: $top-index - 1;
 .page-header {
-  $breadcrumb-opacity: .7;
+  $breadcrumb-opacity: 0.7;
   $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
   position: relative;
@@ -102,7 +102,7 @@ $bottom-index: $top-index - 1;
   }
   &__divider {
     cursor: default;
-    opacity: .3;
+    opacity: 0.3;
     padding: 0 10px 0 5px;
   }
   &__menu-button {

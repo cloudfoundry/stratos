@@ -11,11 +11,14 @@ import {
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
   IListAction,
   IListConfig,
+  IListMultiFilterConfig,
+  IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -53,9 +56,9 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: ListDataSource<APIResource<IUserProvidedServiceInstance>>;
   defaultView = 'table' as ListView;
-  text = {
-    title: null,
-    filter: null,
+  text: ITableText = {
+    title: null as string | null,
+    filter: null as string | null,
     noEntries: 'There are no user provided service instances'
   };
 
@@ -119,8 +122,8 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     },
   ];
 
-  private listActionDelete: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceInstance(item),
+  private listActionDelete: IListAction<APIResource<IUserProvidedServiceInstance>> = {
+    action: (item: APIResource<IUserProvidedServiceInstance>) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
     createVisible: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
@@ -131,8 +134,8 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
       )
   };
 
-  private listActionDetach: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceBinding(item),
+  private listActionDetach: IListAction<APIResource<IUserProvidedServiceInstance>> = {
+    action: (item: APIResource<IUserProvidedServiceInstance>) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IUserProvidedServiceInstance>>) =>
@@ -145,7 +148,7 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
       )
   };
 
-  private listActionEdit: IListAction<APIResource> = {
+  private listActionEdit: IListAction<APIResource<IUserProvidedServiceInstance>> = {
     action: (item: APIResource<IUserProvidedServiceInstance>) =>
       this.serviceActionHelperService.startEditServiceBindingStepper(
         item.metadata.guid,
@@ -208,11 +211,11 @@ export class CfUserServiceInstancesListConfigBase implements IListConfig<APIReso
     );
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.serviceInstanceColumns;
-  getDataSource = () => this.dataSource;
+  getGlobalActions = (): IGlobalListAction<APIResource<IUserProvidedServiceInstance>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IUserProvidedServiceInstance>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IUserProvidedServiceInstance>>[] => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IUserProvidedServiceInstance>>[] => this.serviceInstanceColumns;
+  getDataSource = (): ListDataSource<APIResource<IUserProvidedServiceInstance>> => this.dataSource;
 
 }

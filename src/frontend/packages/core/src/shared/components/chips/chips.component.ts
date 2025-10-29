@@ -58,7 +58,7 @@ export class AppChipsComponent implements OnInit {
   @Input()
   displayProperty = 'value';
 
-  public limit;
+  public limit: number;
 
   ngOnInit() {
     this.limit = this.lowerLimit;

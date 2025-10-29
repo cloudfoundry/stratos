@@ -43,7 +43,7 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
     const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
     this.instanceMetricConfig = {
-      getSeriesName: result => result.metric.name ? result.metric.name : result.metric.id,
+      getSeriesName: result => (result.metric as any).name ? (result.metric as any).name : (result.metric as any).id || result.metric.__name__ || 'unknown',
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),

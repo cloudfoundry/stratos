@@ -70,8 +70,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
-  public podsChartData = [];
-  public containersChartData = [];
+  public podsChartData: any[] = [];
+  public containersChartData: any[] = [];
 
   private successChartColor = '#4DD3A7';
   private completedChartColour = '#7aa3e5';
@@ -113,7 +113,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public resources$: Observable<any[]>;
 
   // Cached analysis report
-  private analysisReport;
+  private analysisReport: any;
 
   private analysisReportUpdated = new Subject<string>();
   private analysisReportUpdated$ = this.analysisReportUpdated.pipe(startWith(null), distinctUntilChanged());
@@ -134,7 +134,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         startWith(false)
       )
     ]).pipe(
-      map(([isFetching, isDeleting]) => isFetching || isDeleting),
+      map(([isFetching, isDeleting]: [boolean, boolean]) => isFetching || isDeleting),
       startWith(true)
     );
 
@@ -142,25 +142,25 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
     this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
       distinctUntilChanged(),
-      map(chartData => ({
+      map((chartData: any) => ({
         ...chartData,
-        containersChartData: chartData.containersChartData.sort((a, b) => a.name.localeCompare(b.name)),
-        podsChartData: chartData.podsChartData.sort((a, b) => a.name.localeCompare(b.name))
+        containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
+        podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
       })
       )
     );
 
-    this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map(v => v ? v.version : null));
+    this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
 
     // Can upgrade if the Chart is available
-    this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map(v => !!v));
+    this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
 
     this.resources$ = combineLatest(
       this.helmReleaseHelper.fetchReleaseGraph(),
       this.analysisReportUpdated$
     ).pipe(
-      map(([graph]) => {
-        const resources = {};
+      map(([graph, _]: [any, any]) => {
+        const resources: Record<string, any> = {};
         // Collect the resources
         Object.values(graph.nodes).forEach((node: any) => {
           if (!resources[node.data.kind]) {
@@ -187,14 +187,14 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       this.chartData$,
       this.resources$
     ]).pipe(
-      map(([chartData, resources]) => !!chartData && !!resources)
+      map(([chartData, resources]: [any, any]) => !!chartData && !!resources)
     );
 
     this.hasAllResources$ = combineLatest([
       this.resources$,
       this.hasResources$
     ]).pipe(
-      map(([resources, hasSome]) => hasSome && resources && resources.length > 0)
+      map(([resources, hasSome]: [any, boolean]) => hasSome && resources && resources.length > 0)
     );
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
@@ -209,17 +209,17 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       this.resources$,
       this.hasResources$
     ]).pipe(
-      map(([resources, hasSome]) => hasSome && resources && resources.length > 0)
+      map(([resources, hasSome]: [any, boolean]) => hasSome && resources && resources.length > 0)
     );
   }
 
-  public analysisChanged(report) {
+  public analysisChanged(report: any) {
     if (report === null) {
       // No report selected
       this.analysisReport = null;
       this.analysisReportUpdated.next('');
     } else {
-      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe(results => {
+      this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: any) => {
         this.analysisReport = results;
         this.analysisReportUpdated.next(report.id);
       });
@@ -287,13 +287,13 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   public getClusterName(): Observable<string> {
     return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
-      filter(e => !!e),
-      map(e => e.name),
+      filter((e: any) => !!e),
+      map((e: any) => e.name),
       first()
     );
   }
 
-  private applyAnalysis(resources, report) {
+  private applyAnalysis(resources: any, report: any) {
     // Clear out existing alerts for all resources
     Object.values(resources).forEach((resource: any) => resource.alerts = []);
 
@@ -313,7 +313,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     }
   }
 
-  public showAlerts(alerts, resource) {
+  public showAlerts(alerts: any, resource: any) {
     this.previewPanel.show(
       ResourceAlertPreviewComponent,
       {

@@ -6,12 +6,12 @@ import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog
 import type { ActionState, RequestInfoState, UpdatingSection } from '../reducers/api-request-reducer/types';
 import type { APIResource } from '../types/api.types';
 
-export const getEntityById = <T>(guid: string) => (entities): T => {
+export const getEntityById = <T>(guid: string) => (entities: any): T => {
   return entities[guid];
 };
 
 export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (
-  entities
+  entities: any
 ): T => {
   let entity = entities;
   entityKeys.forEach(k => entity = entity[k]);
@@ -29,7 +29,7 @@ export const getEntityUpdateSections = (
 };
 
 export const getUpdateSectionById = (guid: string) => (
-  updating
+  updating: any
 ): ActionState => {
   return updating ? updating[guid] : null;
 };

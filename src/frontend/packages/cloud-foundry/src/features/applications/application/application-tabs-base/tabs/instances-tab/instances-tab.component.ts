@@ -33,7 +33,7 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   providers: [
     {
       provide: ActiveRouteCfOrgSpace,
-      useFactory: (cfGuid) => ({ cfGuid }),
+      useFactory: (cfGuid: string) => ({ cfGuid }),
       deps: [CF_GUID]
     },
     CloudFoundryEndpointService,

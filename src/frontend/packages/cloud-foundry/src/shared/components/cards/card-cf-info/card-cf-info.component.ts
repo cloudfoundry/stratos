@@ -64,7 +64,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     );
   }
 
-  getApiEndpointUrl(apiEndpoint) {
+  getApiEndpointUrl(apiEndpoint: any) {
     const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
   }

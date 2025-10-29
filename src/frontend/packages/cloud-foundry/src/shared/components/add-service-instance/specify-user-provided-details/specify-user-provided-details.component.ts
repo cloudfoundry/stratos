@@ -122,7 +122,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   ];
   formMode = CreateServiceFormMode.CreateServiceInstance;
 
-  private originalFormValue;
+  private originalFormValue: IUserProvidedServiceInstanceData | null = null;
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subscriptions);

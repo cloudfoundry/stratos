@@ -18,9 +18,9 @@ import { PageHeaderComponent } from '../../../../core/src/shared/components/page
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../store/src/types/metric.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
+import { IKubernetesMetric } from '../kubernetes-metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -58,13 +58,13 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 export class PodMetricsComponent {
   podName: string;
   podEntity$: Observable<EntityInfo<KubernetesPod>>;
-  namespaceName: any;
+  namespaceName: string;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   public instanceMetricConfigs: [
-    MetricsConfig<IMetricMatrixResult<IMetricApplication>>,
+    MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
     MetricsLineChartConfig
-  ][];
+  ][] = [];
 
   constructor(
     public activatedRoute: ActivatedRoute,
@@ -73,11 +73,13 @@ export class PodMetricsComponent {
     this.podName = activatedRoute.snapshot.params.podName;
     this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
     const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
-    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `${result.metric.container}`);
-    const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
-      (result => !!result.metric.cpu ? `${result.metric.container}:${result.metric.cpu}` : `${result.metric.container}`);
-    const networkChartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>
-      (result => `Network Interface: ${result.metric.interface}`);
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(result => `${result.metric.container || ''}`);
+    const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(
+      result => result.metric.cpu ? `${result.metric.container || ''}:${result.metric.cpu}` : `${result.metric.container || ''}`
+    );
+    const networkChartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(
+      result => `Network Interface: ${result.metric.interface || ''}`
+    );
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
@@ -89,7 +91,10 @@ export class PodMetricsComponent {
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
           // Remove the metric series for pod overhead and for the total!
-          return series.filter(s => !!s.metadata.container && s.metadata.container !== 'POD');
+          return series.filter(s => {
+            const metadata = s.metadata as IKubernetesMetric;
+            return !!metadata.container && metadata.container !== 'POD';
+          });
         },
         null,
         (value: string) => value + ' MB'
@@ -103,7 +108,10 @@ export class PodMetricsComponent {
         'CPU Usage',
         ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => !!s.metadata.container && s.metadata.container !== 'POD');
+          return series.filter(s => {
+            const metadata = s.metadata as IKubernetesMetric;
+            return !!metadata.container && metadata.container !== 'POD';
+          });
         },
         (tick: string) => formatAxisCPUTime(tick),
         (value: string) => formatCPUTime(value),

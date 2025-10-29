@@ -98,8 +98,8 @@ export class SshApplicationComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap(getResponse => getResponse(this.sshInput)),
-        catchError((e: Error) => {
+        switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
+        catchError((e: Error): any[] => {
           if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }

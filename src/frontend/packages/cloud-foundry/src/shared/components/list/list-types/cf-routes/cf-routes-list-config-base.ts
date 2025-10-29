@@ -12,6 +12,7 @@ import {
   IGlobalListAction,
   IListAction,
   IListConfig,
+  IListMultiFilterConfig,
   IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -86,8 +87,8 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   };
   enableTextFilter = true;
 
-  private multiListActionDelete: IMultiListAction<APIResource> = {
-    action: (items: APIResource[]) => {
+  private multiListActionDelete: IMultiListAction<APIResource<ListCfRoute>> = {
+    action: (items: APIResource<ListCfRoute>[]) => {
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);
       } else {
@@ -100,8 +101,8 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     description: 'Unmap and delete route',
   };
 
-  private multiListActionUnmap: IMultiListAction<APIResource> = {
-    action: (items: APIResource[]) => {
+  private multiListActionUnmap: IMultiListAction<APIResource<ListCfRoute>> = {
+    action: (items: APIResource<ListCfRoute>[]) => {
       if (items.length === 1) {
         this.unmapSingleRoute(items[0]);
       } else {
@@ -115,21 +116,21 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   };
 
   private listActionDelete: IListAction<APIResource<ListCfRoute>> = {
-    action: (item: APIResource) => this.deleteSingleRoute(item),
+    action: (item: APIResource<ListCfRoute>) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
     createVisible: this.canEditRoute,
   };
 
-  private listActionUnmap: IListAction<APIResource> = {
-    action: (item: APIResource) => this.unmapSingleRoute(item),
+  private listActionUnmap: IListAction<APIResource<ListCfRoute>> = {
+    action: (item: APIResource<ListCfRoute>) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
     createVisible: this.canEditRoute,
     createEnabled: (row$: Observable<APIResource>) => row$.pipe(map(row => row.entity.apps && row.entity.apps.length))
   };
 
-  private dispatchDeleteAction(route: APIResource<ListCfRoute>) {
+  private dispatchDeleteAction(route: APIResource<ListCfRoute>): void {
     const appGuids = (route.entity.apps || []).map(app => app.metadata.guid);
     const singleApp = appGuids.length === 1;
     cfEntityCatalog.route.api.delete(
@@ -141,7 +142,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     );
   }
 
-  private dispatchUnmapAction(routeGuid: string, appGuids: string[]) {
+  private dispatchUnmapAction(routeGuid: string, appGuids: string[]): void {
     appGuids.forEach(appGuid => {
       cfEntityCatalog.route.api.unmap(
         routeGuid,
@@ -152,7 +153,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     });
   }
 
-  private deleteSingleRoute(item: APIResource<ListCfRoute>) {
+  private deleteSingleRoute(item: APIResource<ListCfRoute>): void {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Route',
       `Are you sure you want to delete the route \n\'${item.entity.url}\'?`,
@@ -165,7 +166,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     });
   }
 
-  private deleteMultipleRoutes(items: APIResource<ListCfRoute>[]) {
+  private deleteMultipleRoutes(items: APIResource<ListCfRoute>[]): void {
     const confirmation = new ConfirmationDialogConfig(
       'Delete Routes from Application',
       `Are you sure you want to delete ${items.length} routes?`,
@@ -178,10 +179,10 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
   }
 
   // If the data source only caters for a single app ensure we update that app alone
-  private getSingleOrMultiAppGuids = (route: APIResource<ListCfRoute>) =>
+  private getSingleOrMultiAppGuids = (route: APIResource<ListCfRoute>): string[] =>
     !!this.getDataSource().appGuid ? [this.getDataSource().appGuid] : route.entity.apps.map(app => app.metadata.guid)
 
-  private unmapSingleRoute(item: APIResource<ListCfRoute>) {
+  private unmapSingleRoute(item: APIResource<ListCfRoute>): void {
     const appText = !!this.getDataSource().appGuid ? '' : ` from ${item.entity.apps.length} application/s`;
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Route',
@@ -195,7 +196,7 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     });
   }
 
-  private unmapMultipleRoutes(items: APIResource<ListCfRoute>[]) {
+  private unmapMultipleRoutes(items: APIResource<ListCfRoute>[]): void {
     const appText = !!this.getDataSource().appGuid ? '' : ' from multiple applications';
     const confirmation = new ConfirmationDialogConfig(
       'Unmap Routes',
@@ -209,8 +210,8 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     });
   }
 
-  getColumns = () => this.columns;
-  getMultiFiltersConfigs = () => [];
+  getColumns = (): ITableColumn<APIResource>[] => this.columns;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
   /**
    * Creates an instance of CfRoutesListConfigBase.

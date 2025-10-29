@@ -264,7 +264,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 }
 
-export function validateRecurringSpecificMin(editForm, editMutualValidation): ValidatorFn {
+export function validateRecurringSpecificMin(editForm: UntypedFormGroup, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
@@ -280,7 +280,7 @@ export function validateRecurringSpecificMin(editForm, editMutualValidation): Va
   };
 }
 
-export function validateRecurringSpecificMax(editForm, editMutualValidation): ValidatorFn {
+export function validateRecurringSpecificMax(editForm: UntypedFormGroup, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);

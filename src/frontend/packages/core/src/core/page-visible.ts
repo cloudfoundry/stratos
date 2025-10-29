@@ -46,23 +46,23 @@ export class PageVisible {
   // }
 
   private isHidden(): boolean {
-    return document[this.hidden];
+    return (document as any)[this.hidden];
   }
 
   private getVisibilityState(): string {
-    return document[this.visibilityState];
+    return (document as any)[this.visibilityState];
   }
 
   private defineBrowserSupport() {
-    if (typeof document[HiddenKeyConstant.DEFAULT] !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+    if (typeof (document as any)[HiddenKeyConstant.DEFAULT] !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
       this.hidden = HiddenKeyConstant.DEFAULT;
       this.visibilityState = 'visibilityState';
       // this.visibilityChanged = 'visibilitychange';
-    } else if (typeof document[HiddenKeyConstant.MS] !== 'undefined') {
+    } else if (typeof (document as any)[HiddenKeyConstant.MS] !== 'undefined') {
       this.hidden = HiddenKeyConstant.MS;
       this.visibilityState = 'msVisibilityState';
       // this.visibilityChanged = 'msvisibilitychange';
-    } else if (typeof document[HiddenKeyConstant.WEB_KIT] !== 'undefined') {
+    } else if (typeof (document as any)[HiddenKeyConstant.WEB_KIT] !== 'undefined') {
       this.hidden = HiddenKeyConstant.WEB_KIT;
       this.visibilityState = 'webkitVisibilityState';
       // this.visibilityChanged = 'webkitvisibilitychange';

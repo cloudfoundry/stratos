@@ -127,7 +127,7 @@ export abstract class BaseEndpointTileManager {
       filter(endpoints => !!endpoints),
       map(endpoints => {
         const endpointsByType: ExpandedEndpoints<Observable<number>> = [];
-        return endpointEntities.reduce((res, endpointEntity) => {
+        return endpointEntities.reduce((res: ExpandedEndpoints<Observable<number>>, endpointEntity: StratosCatalogEndpointEntity) => {
           const { type: endpointType, subType: endpointSubType } = endpointEntity.getTypeAndSubtype();
           res.push({
             current: endpoints.filter(em => em.cnsi_type === endpointType && em.sub_type === endpointSubType).length,
@@ -137,8 +137,8 @@ export abstract class BaseEndpointTileManager {
           return res;
         }, endpointsByType);
       }),
-      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map(type => type.limit.pipe(
-        map(limit => ({
+      switchMap(endpointsByType => combineLatest(Object.values(endpointsByType).map((type: ExpandedEndpoint<Observable<number>>) => type.limit.pipe(
+        map((limit: number) => ({
           ...type,
           limit
         }))

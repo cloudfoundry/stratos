@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../store/src/entity-service';
@@ -56,7 +56,7 @@ export class CloudFoundryEndpointService {
 
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
-  paginationSubscription: any;
+  paginationSubscription: Subscription;
   appsPagObs: PaginationObservables<APIResource<IApp>>;
   usersCount$: Observable<number | null>;
   orgs$: Observable<APIResource<IOrganization>[]>;
@@ -225,7 +225,7 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
-      .map(a => a.entity[statMetric] * a.entity.instances)
+      .map(a => (a.entity as Record<string, any>)[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
   }
 

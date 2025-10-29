@@ -32,7 +32,7 @@ import {
   selectCfUsersRolesPicked,
   selectCfUsersRolesRoles,
 } from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
+import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
@@ -81,7 +81,7 @@ export class CfRolesService {
     guid: string,
     cfGuid: string,
     orgGuid: string,
-    spaceGuid): Observable<{ guid: string, canEdit: boolean, }> {
+    spaceGuid: string): Observable<{ guid: string, canEdit: boolean, }> {
     return canUpdateOrgSpaceRoles(userPerms, cfGuid, orgGuid, spaceGuid).pipe(
       first(),
       map(canEdit => ({ guid, canEdit }))
@@ -175,7 +175,7 @@ export class CfRolesService {
       ),
       first(),
       map(([existingRoles, newRoles, pickedUsers]) => {
-        const changes = [];
+        const changes: CfRoleChange[] = [];
         // For each user, loop through the new roles and compare with any existing. If there's a diff, add it to a changes collection to be
         // returned
         pickedUsers.forEach(user => {
@@ -268,7 +268,7 @@ export class CfRolesService {
     oldPerms: UserRoleInOrg | UserRoleInSpace,
     newPerms: UserRoleInOrg | UserRoleInSpace)
     : CfRoleChange[] {
-    const changes = [];
+    const changes: CfRoleChange[] = [];
     Object.keys(oldPerms).forEach(permKey => {
       if (newPerms[permKey] === undefined) {
         // Skip this, the user hasn't set it
@@ -278,7 +278,7 @@ export class CfRolesService {
         changes.push({
           ...template,
           add: !!newPerms[permKey],
-          role: permKey
+          role: permKey as OrgUserRoleNames | SpaceUserRoleNames
         });
       }
     });

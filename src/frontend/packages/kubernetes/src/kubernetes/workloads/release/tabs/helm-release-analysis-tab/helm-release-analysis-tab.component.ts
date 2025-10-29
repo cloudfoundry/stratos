@@ -31,7 +31,7 @@ export class HelmReleaseAnalysisTabComponent {
 
   path: string;
 
-  currentReport = null;
+  currentReport: AnalysisReport | null = null;
 
   noReportsAvailable = false;
 
@@ -42,10 +42,10 @@ export class HelmReleaseAnalysisTabComponent {
     this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
   }
 
-  public analysisChanged(report) {
+  public analysisChanged(report: any) {
     if (report.id !== this.currentReport) {
       this.currentReport = report.id;
-      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe(r => this.report$.next(r));
+      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.report$.next(r));
     }
   }
 

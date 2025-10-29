@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 export function queryParamMap(): { [key: string]: string } {
-  const paramMap = {};
+  const paramMap: { [key: string]: string } = {};
   const query = window.location.search.substring(1);
   if (query.length === 0) {
     return paramMap;

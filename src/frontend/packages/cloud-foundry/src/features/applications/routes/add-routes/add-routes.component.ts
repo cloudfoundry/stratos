@@ -153,11 +153,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.subscriptions.push(selRoute$);
   }
 
-  _getValueForKey(key, form) {
+  _getValueForKey(key: string, form: any) {
     return form.value[key] ? form.value[key] : '';
   }
 
-  _getValue(key, form) {
+  _getValue(key: string, form: any) {
     return form.value[key] !== '' ? form.value[key] : null;
   }
 

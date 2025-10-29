@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, pairwise, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { ResetPagination } from '../../../../store/src/actions/pagination.actions';
@@ -51,8 +51,8 @@ export class UsersRolesEffects {
 
   clearEntityUpdates$ = createEffect(() => this.actions$.pipe(
     ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),
-    mergeMap(action => {
-      const actions = [];
+    mergeMap((action): any[] => {
+      const actions: any[] = [];
       action.changedRoles.forEach(change => {
         const apiAction: ICFAction = {
           guid: change.spaceGuid ? change.spaceGuid : change.orgGuid,
@@ -138,11 +138,11 @@ export class UsersRolesEffects {
           if (listActions && listActions.length) {
             return listActions.map(listAction => new ResetPagination(listAction, listAction.paginationKey));
           }
-          return [];
+          return EMPTY;
         }),
-        catchError(() => {
+        catchError((_error: unknown) => {
           // Swallow the error so it doesn't print in the console
-          return [];
+          return EMPTY;
         })
       );
 
@@ -239,20 +239,21 @@ export class UsersRolesEffects {
       );
   }
 
-  private createActionObs(action: ChangeCfUserRole): Observable<any> {
+  private createActionObs(action: ChangeCfUserRole): Observable<boolean> {
     return entityCatalog.getEntity(action)
       .store
       .getEntityMonitor(action.guid)
       .getUpdatingSection(action.updatingKey).pipe(
         pairwise(),
-        filter(([oldUpdate, newUpdate]) => !!oldUpdate.busy && !newUpdate.busy),
-        map(([, newUpdate]) => newUpdate),
+        filter(([oldUpdate, newUpdate]: [ActionState, ActionState]) => !!oldUpdate.busy && !newUpdate.busy),
+        map(([, newUpdate]: [ActionState, ActionState]) => newUpdate),
         tap((update: ActionState) => {
           if (update.error) {
             // Ensure we throw an error such that any subsequent requests fail
             throw new Error(`Failed: ${update.message}`);
           }
-        })
+        }),
+        map((): boolean => true)
       );
   }
 }

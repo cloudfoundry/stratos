@@ -30,7 +30,7 @@ export class BytesToHumanSize implements PipeTransform {
   }
 }
 
-function precisionIfUseful(size, precision = 1) {
+function precisionIfUseful(size: number, precision: number = 1): number {
   const floored = Math.floor(size);
   const fixed = Number(size.toFixed(precision));
   if (floored === fixed) {

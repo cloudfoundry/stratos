@@ -11,8 +11,8 @@ import { MetricsParentRangeSelectorComponent } from '../../../../../core/src/sha
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../store/src/types/metric.types';
 import { formatAxisCPUTime, formatCPUTime } from '../../kubernetes-metrics.helpers';
+import { IKubernetesMetric } from '../../kubernetes-metric.types';
 import { KubeNodeMetric, KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
@@ -38,9 +38,9 @@ export class KubernetesNodeMetricsComponent implements OnInit {
   cpuUnit: string;
 
   public instanceMetricConfigs: [
-    MetricsConfig<IMetricMatrixResult<IMetricApplication>>,
+    MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
     MetricsLineChartConfig
-  ][];
+  ][] = [];
 
   constructor(
     public kubeNodeService: KubernetesNodeService
@@ -50,12 +50,12 @@ export class KubernetesNodeMetricsComponent implements OnInit {
   }
 
   ngOnInit() {
-    const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(
-      result => {
+    const chartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(
+      (result: IMetricMatrixResult<IKubernetesMetric>) => {
         const metric = result.metric;
-        if (!!metric.pod && !!metric.namespace) {
-          const containerName = `${metric.namespace}:${metric.pod}:${metric.container}`;
-          if (!!metric.cpu) {
+        if (metric.pod && metric.namespace) {
+          const containerName = `${metric.namespace}:${metric.pod}:${metric.container || ''}`;
+          if (metric.cpu) {
             return `${containerName}:${metric.cpu}`;
           }
           return containerName;
@@ -65,7 +65,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
           return metric.name;
         }
 
-        return result.metric.id;
+        return metric.id || '';
 
       },
     );
@@ -80,7 +80,10 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'Memory Usage (MB)',
         ChartDataTypes.BYTES,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container && s.metadata.container !== 'POD');
+          return series.filter(s => {
+            const metadata = s.metadata as IKubernetesMetric;
+            return s.name.indexOf('/') !== 0 && !!metadata.container && metadata.container !== 'POD';
+          });
         },
         null,
         (value: string) => value + ' MB'
@@ -94,10 +97,13 @@ export class KubernetesNodeMetricsComponent implements OnInit {
         'CPU Usage (secs)',
         ChartDataTypes.CPU_TIME,
         (series: ChartSeries[]) => {
-          return series.filter(s => s.name.indexOf('/') !== 0 && !!s.metadata.container && s.metadata.container !== 'POD');
+          return series.filter(s => {
+            const metadata = s.metadata as IKubernetesMetric;
+            return s.name.indexOf('/') !== 0 && !!metadata.container && metadata.container !== 'POD';
+          });
         },
-        (t) => formatAxisCPUTime(t),
-        (t) => formatCPUTime(t)
+        (t: string) => formatAxisCPUTime(t),
+        (t: string | number) => formatCPUTime(t)
       )
     ];
   }

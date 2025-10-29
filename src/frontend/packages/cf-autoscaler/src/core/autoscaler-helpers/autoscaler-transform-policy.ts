@@ -119,7 +119,7 @@ function hasNamedSchedule(schedule: any) {
 }
 
 function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, metricName: string, newTrigger: AppScalingRule) {
-  const scaleType = getScaleType(newTrigger.operator);
+  const scaleType = getScaleType(newTrigger.operator) as 'upper' | 'lower';
   newTrigger.breach_duration_secs =
     newTrigger.breach_duration_secs || AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
   newTrigger.cool_down_secs = newTrigger.cool_down_secs || AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;
@@ -143,8 +143,9 @@ function pushAndSortTrigger(map: { [metricName: string]: AppScalingTrigger }, me
 
 function buildFormUponMap(newPolicy: AppAutoscalerPolicyLocal, metricName: string) {
   AutoscalerConstants.ScaleTypes.forEach((triggerType) => {
-    if (newPolicy.scaling_rules_map[metricName][triggerType]) {
-      newPolicy.scaling_rules_map[metricName][triggerType].forEach((trigger: AppScalingRule) => {
+    const scaleType = triggerType as 'upper' | 'lower';
+    if (newPolicy.scaling_rules_map[metricName][scaleType]) {
+      newPolicy.scaling_rules_map[metricName][scaleType].forEach((trigger: AppScalingRule) => {
         newPolicy.scaling_rules_form.push(trigger);
       });
     }

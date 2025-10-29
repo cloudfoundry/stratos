@@ -27,17 +27,17 @@ export class ReposService {
    * @return An observable that will an array with all repos
    */
   getRepos(): Observable<RepoAttributes[]> {
-    return this.http.get(`${this.hostname}`).pipe(
-      map(this.extractData),
+    return this.http.get<{ data: RepoAttributes[] }>(`${this.hostname}`).pipe(
+      map(r => this.extractData(r)),
       catchError(this.handleError)
     );
   }
 
-  private extractData(res: { data: any, }) {
-    return res.data || {};
+  private extractData<T>(res: { data: T, }): T {
+    return res.data || {} as T;
   }
 
-  private handleError(error: any) {
+  private handleError(error: { json: () => { message?: string }; status?: number; statusText?: string }): Observable<never> {
     const errMsg = (error.json().message) ? error.json().message :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     console.error(errMsg);

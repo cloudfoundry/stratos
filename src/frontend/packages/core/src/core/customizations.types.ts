@@ -11,7 +11,7 @@ export interface CustomizationsMetadata {
   aboutInfoComponent?: any;
   supportInfoComponent?: any;
   noEndpointsComponent?: any;
-  alwaysShowNavForEndpointTypes?: (epType) => boolean;
+  alwaysShowNavForEndpointTypes?: (epType: string) => boolean;
 }
 
 @Injectable({

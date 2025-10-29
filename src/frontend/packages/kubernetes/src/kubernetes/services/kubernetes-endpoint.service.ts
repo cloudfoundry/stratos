@@ -106,7 +106,7 @@ export class KubernetesEndpointService {
     }
   }
 
-  initialize(kubeGuid) {
+  initialize(kubeGuid: string): void {
     this.kubeGuid = kubeGuid;
 
     this.kubeEndpointEntityService = this.entityServiceFactory.create(
@@ -127,7 +127,7 @@ export class KubernetesEndpointService {
           disruptiveUpdates: 0,
           securityUpdates: 0
         };
-        const versions = {};
+        const versions: Record<string, number> = {};
 
         nodes.forEach(n => {
           const nodeData = this.getCaaspNodeData(n);
@@ -159,7 +159,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getCaaspNodeData(n: KubernetesNode): CaaspNodeData {
+  getCaaspNodeData(n: KubernetesNode): CaaspNodeData | undefined {
     if (n && n.metadata && n.metadata.annotations) {
       return {
         version: n.metadata.annotations[CAASP_VERSION_ANNOTATION],
@@ -168,6 +168,7 @@ export class KubernetesEndpointService {
         securityUpdates: this.hasBooleanAnnotation(n.metadata.annotations, CAASP_SECURITY_UPDATES_ANNOTATION)
       };
     }
+    return undefined;
   }
 
   // Check for the specified annotation with a value of 'yes'
@@ -175,10 +176,10 @@ export class KubernetesEndpointService {
     return annotations[annotation] && annotations[annotation] === 'yes' ? true : false;
   }
 
-  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$) {
+  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<string> {
     return nodes$.pipe(
       map(nodes => {
-        const versions = {};
+        const versions: Record<string, string> = {};
         nodes.forEach(node => {
           const v = node.status.nodeInfo.kubeletVersion;
           if (!versions[v]) {
@@ -190,7 +191,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getCountObservable(entities$: Observable<any[]>) {
+  getCountObservable(entities$: Observable<any[]>): Observable<number | null> {
     return entities$.pipe(
       map(entities => entities.length),
       startWith(null)
@@ -211,9 +212,9 @@ export class KubernetesEndpointService {
   getNodeStatusCount(
     nodes$: Observable<KubernetesNode[]>,
     conditionType: string,
-    valueLabels: object = {},
+    valueLabels: Record<string, any> = {},
     countStatus = 'True'
-  ) {
+  ): Observable<any> {
     return nodes$.pipe(
       map(nodes => {
         const total = nodes.length;

@@ -134,10 +134,10 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     );
   }
 
-  validate = (value: string = null) => {
+  validate = (value: string = null): boolean => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
-        .filter(o => o !== this.originalName)
+        .filter((o: string) => o !== this.originalName)
         .indexOf(value ? value : this.editOrgName.value.orgName) === -1;
     }
     return true;

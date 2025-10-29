@@ -102,7 +102,7 @@ function checkAndUpperCase(value: any) {
   return value;
 }
 
-function getValue(obj, fieldArray: string[], index = 0, castToString = false): string {
+function getValue(obj: any, fieldArray: string[], index = 0, castToString = false): string {
   const field = fieldArray[index];
   if (!field) {
     if (castToString) {

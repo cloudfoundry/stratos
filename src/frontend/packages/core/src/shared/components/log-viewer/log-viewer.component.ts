@@ -235,7 +235,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     containerElement.scrollTop = contentElement.clientHeight;
   }
 
-  public pause(pause) {
+  public pause(pause: boolean) {
     if (this.stopped$) {
       this.stopped$.next(pause);
     }

@@ -16,7 +16,7 @@ export class KubeConfigAuthHelper {
 
   authTypes: { [name: string]: EndpointAuthTypeConfig, } = {};
 
-  public subTypes = [];
+  public subTypes: Array<{ id: string; name: string }> = [];
 
   constructor() {
     const epTypeInfo = entityCatalog.getAllEndpointTypes(false);
@@ -87,7 +87,7 @@ export class KubeConfigAuthHelper {
       };
     }
 
-    const authProvider = user.user['auth-provider'];
+    const authProvider = (user.user as Record<string, { config?: Record<string, string> }>)['auth-provider'];
     if (authProvider && authProvider.config) {
       if (authProvider.config['cmd-path'] && authProvider.config['cmd-path'].indexOf('gcloud') !== -1) {
         // GKE

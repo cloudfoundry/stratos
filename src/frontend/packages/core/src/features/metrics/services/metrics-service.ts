@@ -31,7 +31,7 @@ export class MetricsService {
 
   private setupObservables() {
     this.metricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+      map((endpoints: EndpointModel[]) => {
         const result: MetricsEndpointProvider[] = [];
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         metrics.forEach(ep => {
@@ -42,7 +42,7 @@ export class MetricsService {
           endpoints.forEach(e => {
             if (e.metadata && e.metadata.metrics && e.metadata.metrics === ep.guid) {
               provider.endpoints.push(e);
-              e.url = getFullEndpointApiUrl(e);
+              (e as any).url = getFullEndpointApiUrl(e);
             }
           });
           result.push(provider);
@@ -54,7 +54,7 @@ export class MetricsService {
     );
 
     this.haveNoMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+      map((endpoints: EndpointModel[]) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         return metrics.length === 0;
       }),
@@ -63,7 +63,7 @@ export class MetricsService {
     );
 
     this.haveNoConnectedMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
-      map((endpoints: any) => {
+      map((endpoints: EndpointModel[]) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         const connected = metrics.filter(e => !!e.user);
         return connected.length === 0;

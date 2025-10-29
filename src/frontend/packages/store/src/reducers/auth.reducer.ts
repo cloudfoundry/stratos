@@ -44,7 +44,7 @@ const defaultState: AuthState = {
   verifying: false,
 };
 
-export function authReducer(state: AuthState = defaultState, action): AuthState {
+export function authReducer(state: AuthState = defaultState, action: any): AuthState {
   switch (action.type) {
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };

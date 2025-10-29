@@ -91,7 +91,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
   cardLoaded = false;
 
-  recentApps = [];
+  recentApps: APIResource<IApp>[] = [];
 
   private appStatsLoaded = new BehaviorSubject<boolean>(false);
   private appStatsToLoad: APIResource<IApp>[] = [];
@@ -128,7 +128,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     const type = tile ? tile.data.type : null;
     if (tile) {
-      const query = {
+      const query: Record<string, string> = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
         [AUTO_SELECT_CF_URL_PARAM]: this.guid
       };
@@ -203,7 +203,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
           pairwise(),
           filter(([oldR, newR]) => oldR.busy && !newR.busy),
           first()
-        ).subscribe(a => {
+        ).subscribe((a: any) => {
           this.fetchAppStats();
         });
       } else {

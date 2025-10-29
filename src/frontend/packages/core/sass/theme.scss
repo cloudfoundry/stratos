@@ -1,6 +1,5 @@
 // Stratos theme system migrated to Tailwind CSS
 @use './ansi-colors';
-@use './all-theme';
 
 // CSS Custom Properties for theme colors (replacing Angular Material palettes)
 :root {
@@ -85,8 +84,9 @@ $stratos-app-theme: (
   intro-screen-background-color: null
 );
 
-// Apply custom Stratos theming (converted to use CSS custom properties)
-@include app-theme((app-theme: $stratos-app-theme));
+// Legacy app-theme mixin removed - theme configuration now uses CSS custom properties
+// defined in the theme package and component-specific SCSS
+// The $stratos-app-theme map is preserved for reference but no longer applied via mixin
 
 // Basic Stratos styling - migrated to Tailwind CSS
 html {

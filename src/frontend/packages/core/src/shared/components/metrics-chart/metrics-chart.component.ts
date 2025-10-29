@@ -26,7 +26,7 @@ const MAX_SERIES_IN_TOOLTIP = 16;
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
-  getSeriesName: (T) => string;
+  getSeriesName: (item: T) => string;
   mapSeriesItemName?: (value: any) => string | Date;
   mapSeriesItemValue?: (value: any) => any;
   filterSeries?: MetricsFilterSeries;
@@ -236,7 +236,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     return this.metricsConfig.tooltipValueFormatter ? this.metricsConfig.tooltipValueFormatter(model.value) : model.value;
   }
 
-  public getSeriesTooltipModel(model) {
+  public getSeriesTooltipModel(model: any) {
     if (model.length <= MAX_SERIES_IN_TOOLTIP) {
       return model;
     }

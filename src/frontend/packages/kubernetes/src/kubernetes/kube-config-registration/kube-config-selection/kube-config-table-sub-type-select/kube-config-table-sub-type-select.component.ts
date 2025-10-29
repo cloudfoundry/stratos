@@ -23,7 +23,7 @@ export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeC
 
   selected: string;
 
-  subTypes: string[];
+  subTypes: Array<{ id: string; name: string }>;
 
   constructor(private helper: KubeConfigHelper) {
     super();
@@ -35,7 +35,7 @@ export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeC
     this.selected = this.row._subType || '';
   }
 
-  valueChanged(value) {
+  valueChanged(value: string): void {
     this.row._subType = value;
     this.helper.update(this.row);
   }

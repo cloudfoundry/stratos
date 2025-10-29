@@ -124,7 +124,7 @@ export class DeployApplicationStep2Component
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser;
+  @ViewChild('fsChooser') fsChooser: any;
 
   ngOnDestroy() {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -371,15 +371,15 @@ export class DeployApplicationStep2Component
     }
 
     const cacheName = this.scm.getType() + ':' + name;
-    if (this.cachedSuggestions[cacheName]) {
-      return observableOf(this.cachedSuggestions[cacheName]);
+    if ((this.cachedSuggestions as { [key: string]: any })[cacheName]) {
+      return observableOf((this.cachedSuggestions as { [key: string]: any })[cacheName]);
     }
 
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
       catchError(e => observableOf(null)),
-      tap(suggestions => this.cachedSuggestions[cacheName] = suggestions),
+      tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
     );
   }
 

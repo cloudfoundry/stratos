@@ -22,20 +22,20 @@ interface RestoreEndpointsData {
 export class RestoreEndpointsService {
 
   // Step 1
-  validFileContent = new BehaviorSubject(false);
+  validFileContent = new BehaviorSubject<boolean>(false);
   validFileContent$: Observable<boolean> = this.validFileContent.asObservable();
 
   file = new BehaviorSubject<{
     name: string,
     content: BackupContent,
-  }>(null);
+  } | null>(null);
   file$ = this.file.asObservable();
 
-  validDb = new BehaviorSubject(false);
+  validDb = new BehaviorSubject<boolean>(false);
   validDb$: Observable<boolean>;
-  unparsableFileContent: string = null;
+  unparsableFileContent: string | null = null;
   currentDbVersion$: Observable<number>;
-  ignoreDbVersion = new BehaviorSubject(false);
+  ignoreDbVersion = new BehaviorSubject<boolean>(false);
   ignoreDbVersion$ = this.ignoreDbVersion.asObservable();
 
   // Step 2
@@ -58,8 +58,8 @@ export class RestoreEndpointsService {
       this.file$,
       this.currentDbVersion$
     ]).pipe(
-      filter(([file]) => !!file && !!file.content),
-      map(([file, currentDbVersion]) => {
+      filter(([file]: [any, number]) => !!file && !!file.content),
+      map(([file, currentDbVersion]: [any, number]) => {
         return file && file.content && file.content.dbVersion === currentDbVersion;
       })
     );
@@ -69,11 +69,11 @@ export class RestoreEndpointsService {
       this.validDb$,
       this.ignoreDbVersion$
     ]).pipe(
-      map(([file, validDb, ignoreDb]) => !!file && (ignoreDb || validDb))
+      map(([file, validDb, ignoreDb]: [any, boolean, boolean]) => !!file && (ignoreDb || validDb))
     );
   }
 
-  setFile(file): Promise<string> {
+  setFile(file: any): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -87,10 +87,10 @@ export class RestoreEndpointsService {
     });
   }
 
-  private setFileResult(content: string, fileName: string) {
-    let parsedContent: BackupContent;
+  private setFileResult(content: string | null, fileName: string | null) {
+    let parsedContent: BackupContent | null;
     try {
-      parsedContent = JSON.parse(content);
+      parsedContent = content ? JSON.parse(content) : null;
       this.unparsableFileContent = null;
     } catch (err) {
       console.warn('Failed to parse file contents: ', err);
@@ -124,7 +124,7 @@ export class RestoreEndpointsService {
       this.file$,
       this.ignoreDbVersion$
     ]).pipe(
-      switchMap(([file, ignoreDb]) => {
+      switchMap(([file, ignoreDb]: [any, boolean]) => {
         const body: RestoreEndpointsData = {
           data: JSON.stringify(file.content),
           password: this.password,

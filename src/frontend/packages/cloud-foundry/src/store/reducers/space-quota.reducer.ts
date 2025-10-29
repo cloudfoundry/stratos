@@ -56,8 +56,8 @@ function applySpaceQuota(
 
 function removeSpaceQuota(
   state: IRequestEntityTypeState<entityOrgType>,
-  space: entityOrgType,
-) {
+  space: entityOrgType
+): IRequestEntityTypeState<entityOrgType> {
   return {
     ...state,
     [space.metadata.guid]: {

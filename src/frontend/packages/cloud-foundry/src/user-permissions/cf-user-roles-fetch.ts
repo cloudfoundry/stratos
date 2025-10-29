@@ -145,23 +145,23 @@ function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppSta
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
 
-  constructor(httpClient: HttpClient, public url, public requestOptions: { [key: string]: any, }) {
+  constructor(httpClient: HttpClient, public url: string, public requestOptions: { [key: string]: any }) {
     super(httpClient, url, requestOptions, 'page');
   }
-  public getTotalPages = (res: CFResponse) => res.total_pages;
+  public getTotalPages = (res: CFResponse): number => res.total_pages;
 
-  public mergePages = (res: CFResponse[]) => {
+  public mergePages = (res: CFResponse[]): CFResponse => {
     const firstRes = res.shift();
-    const final = res.reduce((finalRes, currentRes) => {
+    const final = res.reduce((finalRes: CFResponse, currentRes: CFResponse) => {
       finalRes.resources = [
         ...finalRes.resources,
       ];
       return finalRes;
-    }, firstRes);
+    }, firstRes as CFResponse);
     return final;
   };
   public getTotalResults = (res: CFResponse): number => res.total_results;
-  public clearResults = (res: CFResponse) => of(res);
+  public clearResults = (res: CFResponse): Observable<CFResponse> => of(res);
 }
 
 export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {

@@ -141,7 +141,7 @@ export class KubernetesPodExpandedStatusHelper {
     if (pod.spec.readinessGates && pod.spec.readinessGates.length > 0) {
       let trueConditions = 0;
       pod.spec.readinessGates.forEach(readinessGate => {
-        const conditionType = readinessGate.ConditionType;
+        const conditionType = readinessGate.conditionType;
         for (const condition of pod.status.conditions) {
           if (condition.type === conditionType) {
             if (condition.status === 'True') {

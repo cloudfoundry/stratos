@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
 
@@ -61,13 +61,13 @@ function formatLabel(label: any): string {
 })
 export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
-  @Input() dims;
+  @Input() dims: any;
   @Input() type = 'standard';
-  @Input() series;
-  @Input() seriesLine;
-  @Input() xScale;
-  @Input() yScale;
-  @Input() colors;
+  @Input() series: any[];
+  @Input() seriesLine: any[];
+  @Input() xScale: any;
+  @Input() yScale: any;
+  @Input() colors: any;
   @Input() tooltipDisabled = false;
   @Input() gradient: boolean;
   @Input() activeEntries: AppAutoscalerMetricDataLine[];
@@ -77,30 +77,30 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
   @Output() deactivate = new EventEmitter();
-  @Output() bandwidth = new EventEmitter();
+  @Output() bandwidth = new EventEmitter<number>();
 
-  bars: any;
+  bars: any[];
   x: any;
   y: any;
 
-  ngOnChanges(changes): void {
+  ngOnChanges(changes: SimpleChanges): void {
     this.update();
   }
 
   update(): void {
-    let width;
+    let width: number;
     if (this.series.length) {
       width = this.xScale.bandwidth();
       this.bandwidth.emit(width);
     }
 
     let d0 = 0;
-    let total;
+    let total: number;
     if (this.type === 'normalized') {
-      total = this.series.map(d => d.value).reduce((sum, d) => sum + d, 0);
+      total = this.series.map((d: any) => d.value).reduce((sum: number, d: any) => sum + d, 0);
     }
 
-    this.bars = this.series.map((d, index) => {
+    this.bars = this.series.map((d: any, index: number) => {
 
       let value = d.value;
       const label = d.name;
@@ -188,7 +188,7 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
     });
   }
 
-  getSeriesTooltips(seriesLine: AppAutoscalerMetricDataLine[], index): AppAutoscalerMetricDataPoint[] {
+  getSeriesTooltips(seriesLine: AppAutoscalerMetricDataLine[], index: number): AppAutoscalerMetricDataPoint[] {
     return seriesLine.map(d => {
       return d.series[index];
     });
@@ -204,11 +204,11 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
     return item !== undefined;
   }
 
-  onClick(data): void {
+  onClick(data: any): void {
     this.select.emit(data);
   }
 
-  trackBy(index, bar): string {
+  trackBy(index: number, bar: any): string {
     return bar.label;
   }
 

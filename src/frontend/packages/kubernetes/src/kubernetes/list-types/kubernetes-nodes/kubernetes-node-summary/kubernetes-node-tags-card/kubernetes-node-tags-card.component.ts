@@ -36,14 +36,14 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
     public kubeNodeService: KubernetesNodeService
   ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(
-      map(node => this.getTags(node.metadata[this.mode])),
+      map(node => this.getTags((node.metadata as any)[this.mode])),
     );
   }
 
 
-  private getTags(tags: {}) {
+  private getTags(tags: Record<string, any>): AppChip[] {
     const labelEntries = Object.entries(tags);
     return labelEntries.map(t => ({
       value: `${t[0]}:${t[1]}`

@@ -12,7 +12,7 @@ import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-head
 })
 export class TabNavService {
 
-  static TabsNoLinkValue = null;
+  static TabsNoLinkValue: string = null;
 
   private tabNavsSubject = new BehaviorSubject<IPageSideNavTab[]>(undefined);
   public tabNavs$: Observable<IPageSideNavTab[]>;
@@ -62,13 +62,13 @@ export class TabNavService {
   }
 
   public getCurrentTabHeaderObservable() {
-    return combineLatest(
+    return combineLatest([
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
         startWith(null)
       ),
       this.tabNavs$
-    ).pipe(
+    ]).pipe(
       map(([event, tabs]) => this.getCurrentTabHeader(tabs)),
     );
   }

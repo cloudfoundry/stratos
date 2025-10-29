@@ -122,7 +122,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     this.graph = combineLatest(
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]) => {
+    ).subscribe(([g, report]: [any, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
@@ -170,7 +170,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private applyAlertToNode(newNode, report) {
+  private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
     if (report && report.alerts) {
       Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
@@ -180,11 +180,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
             // namespace is undefined, however the only resources we have should be from the correct context
           ) {
             newNode.data.alerts = newNode.data.alerts || [];
-            newNode.data.alerts.push(alert);
+            (newNode.data.alerts as any).push(alert);
             newNode.data.alertSummary = newNode.data.alertSummary || {};
-            if (alert.level > newNode.data.alertSummary.level || !newNode.data.alertSummary.level) {
-              newNode.data.alertSummary.color = this.alertLevelToColor(alert.level);
-              newNode.data.alertSummary.level = alert.level;
+            if (alert.level > (newNode.data.alertSummary as any).level || !(newNode.data.alertSummary as any).level) {
+              (newNode.data.alertSummary as any).color = this.alertLevelToColor(alert.level);
+              (newNode.data.alertSummary as any).level = alert.level;
             }
           }
         });
@@ -212,7 +212,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // Open side panel when node is clicked
   public onNodeClick(node: CustomHelmReleaseGraphNode) {
-    this.analysisReportUpdated$.pipe(first()).subscribe(analysis => {
+    this.analysisReportUpdated$.pipe(first()).subscribe((analysis: any) => {
       this.previewPanel.show(
         KubernetesResourceViewerComponent,
         {
@@ -267,19 +267,19 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
     return this.helper.fetchReleaseResources().pipe(
-      filter(r => !!r),
-      map((r: HelmReleaseResources) => Object.values(r.data).find((res) =>
+      filter((r: any) => !!r),
+      map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>
         res.metadata.name === node.label && res.kind === node.data.kind
       )),
       first(),
     );
   }
 
-  public analysisChanged(report) {
+  public analysisChanged(report: any) {
     if (report === null) {
       this.analysisReportUpdated.next(null);
     } else {
-      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe(results => {
+      this.analyzerService.getByID(this.helper.endpointGuid, report.id).subscribe((results: any) => {
         this.analysisReportUpdated.next(results);
       });
     }

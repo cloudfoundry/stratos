@@ -34,7 +34,7 @@ export class ChartsComponent implements OnInit {
   orderedCharts: Chart[] = [];
   loading = true;
   searchTerm: string;
-  searchTimeout: any;
+  searchTimeout: ReturnType<typeof setTimeout>;
   filtersOpen = false;
 
   // Default filters
@@ -119,7 +119,7 @@ export class ChartsComponent implements OnInit {
     });
   }
 
-  onSelectRepo(index) {
+  onSelectRepo(index: number): void {
     this.repoName = this.filters[0].items[index].value;
     this.filters[0].items = this.filters[0].items.map(r => {
       r.selected = r.value === this.repoName;
@@ -131,7 +131,7 @@ export class ChartsComponent implements OnInit {
     );
   }
 
-  onSelectOrderBy(index) {
+  onSelectOrderBy(index: number): void {
     this.orderBy = this.filters[1].items[index].value;
     this.filters[1].items = this.filters[1].items.map(o => {
       o.selected = o.value === this.orderBy;
@@ -140,11 +140,12 @@ export class ChartsComponent implements OnInit {
     this.orderedCharts = this.orderCharts(this.orderedCharts);
   }
 
-  searchChange(e) {
-    this.searchTerm = e.target.value;
+  searchChange(e: Event): void {
+    this.searchTerm = (e.target as HTMLInputElement).value;
     clearTimeout(this.searchTimeout);
     if (!this.searchTerm) {
-      return (this.orderedCharts = this.orderCharts(this.charts));
+      this.orderedCharts = this.orderCharts(this.charts);
+      return;
     }
     this.searchTimeout = setTimeout(() => this.searchCharts(), 1000);
   }
@@ -163,7 +164,7 @@ export class ChartsComponent implements OnInit {
   }
 
   // Sort charts
-  orderCharts(charts): Chart[] {
+  orderCharts(charts: Chart[]): Chart[] {
     switch (this.orderBy) {
       case 'created': {
         return charts.sort(this.sortByCreated).reverse();

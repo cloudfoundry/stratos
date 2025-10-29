@@ -63,7 +63,7 @@ export class PageSideNavComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map(item => item ? item.label : null));
+    this.activeTab$ = this.tabNavService.getCurrentTabHeaderObservable().pipe(map((item: any) => item ? item.label : null));
   }
 
 }

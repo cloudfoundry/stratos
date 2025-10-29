@@ -14,8 +14,11 @@ import {
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
   IListAction,
   IListConfig,
+  IListMultiFilterConfig,
+  IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -123,8 +126,8 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     },
   ];
 
-  private listActionDelete: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceInstance(item),
+  private listActionDelete: IListAction<APIResource<IServiceInstance>> = {
+    action: (item: APIResource<IServiceInstance>) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
@@ -135,8 +138,8 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
       )
   };
 
-  private listActionDetach: IListAction<APIResource> = {
-    action: (item: APIResource) => this.deleteServiceBinding(item),
+  private listActionDetach: IListAction<APIResource<IServiceInstance>> = {
+    action: (item: APIResource<IServiceInstance>) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
@@ -203,11 +206,11 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     );
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.serviceInstanceColumns;
-  getDataSource = () => null;
+  getGlobalActions = (): IGlobalListAction<APIResource<IServiceInstance>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IServiceInstance>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServiceInstance>>[] => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IServiceInstance>>[] => this.serviceInstanceColumns;
+  getDataSource = (): ListDataSource<APIResource> | null => null;
 
 }

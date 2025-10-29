@@ -359,9 +359,9 @@ export class KubernetesEffects {
       of([action.kubeGuid]) :
       this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
         first(),
-        map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+        map(endpoints => Object.values(endpoints).map((endpoint: any) => endpoint.guid))
       );
-    let pKubeIds: string[];
+    let pKubeIds: string[] = [];
 
     const entityKey = entityCatalog.getEntityKey(action);
     return getKubeIds.pipe(
@@ -370,7 +370,7 @@ export class KubernetesEffects {
         const headers = new HttpHeaders({ 'x-cap-cnsi-list': pKubeIds });
         const requestArgs = {
           headers,
-          params: null
+          params: null as any
         };
         const paginationAction = action as KubePaginationAction;
         if (paginationAction.initialParams) {
@@ -387,20 +387,22 @@ export class KubernetesEffects {
         } as NormalizedResponse;
 
         const items: Array<T> = Object.entries(allRes).reduce((combinedRes, [kubeId, res]) => {
-          if (!res.items) {
+          const resObj = res as any;
+          if (!resObj.items) {
             // The request to this endpoint has failed. Note - throwing this hides any other failures,
             // however we follow the same approach elsewhere
             throw res;
           }
-          res.items.forEach(item => {
+          resObj.items.forEach((item: any) => {
             item.metadata.kubeId = kubeId;
             combinedRes.push(item);
           });
           return combinedRes;
-        }, []);
+        }, [] as Array<T>);
         const processesData = items
           .reduce((res, data) => {
-            const id = action.entity[0].getId(data);
+            const entityArray = Array.isArray(action.entity) ? action.entity : [action.entity];
+            const id = entityArray[0].getId(data);
             const updatedData = action.entityType === kubernetesPodsEntityType ?
               KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(data as unknown as KubernetesPod) :
               data;

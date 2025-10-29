@@ -32,8 +32,8 @@ describe('Autoscaler Transform Metric Helper', () => {
       total_results: 12,
       total_pages: 1,
       page: 1,
-      prev_url: null,
-      next_url: null,
+      prev_url: null as string | null,
+      next_url: null as string | null,
       resources: [
         {
           app_id: '2bd98ff4-99f4-422a-a037-172298277c8b',

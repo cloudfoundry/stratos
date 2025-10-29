@@ -50,7 +50,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
 
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string | null,
     filter: 'Search by name',
     noEntries: 'There are no quotas'
   };
@@ -105,7 +105,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
   getDataSource = () => this.dataSource;
   getSingleActions = () => [this.listActionEdit, this.listActionDelete];
 
-  editSingleQuota = (item: APIResource<IQuotaDefinition>) => {
+  editSingleQuota = (item: APIResource<IQuotaDefinition>): void => {
     this.store.dispatch(
       new RouterNav({
         path: [
@@ -122,7 +122,7 @@ export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuo
     );
   }
 
-  deleteSingleQuota(item: APIResource<IQuotaDefinition>) {
+  deleteSingleQuota(item: APIResource<IQuotaDefinition>): void {
     const quotaGuid = item.metadata.guid;
     const confirmation = new ConfirmationDialogConfig(
       'Delete Quota',

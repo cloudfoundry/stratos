@@ -101,7 +101,7 @@ function createPaginationAction(config: HandleRelationsConfig) {
   );
 }
 
-function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
+function createEntityWatcher(store: Store<GeneralEntityAppState>, paramAction: EntityRequestAction, guid: string): Observable<ValidateResultFetchingState> {
   return store.select(selectRequestInfo(entityCatalog.getEntityKey(paramAction), guid)).pipe(
     map((requestInfo: RequestInfoState) => {
       return { fetching: requestInfo ? requestInfo.fetching : true };
@@ -139,7 +139,7 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Action
   );
 }
 
-function createValidationPaginationWatcher(store, paramPaginationAction: PaginatedAction):
+function createValidationPaginationWatcher(store: Store<GeneralEntityAppState>, paramPaginationAction: PaginatedAction):
   Observable<ValidateResultFetchingState> {
   return store.select(selectPaginationState(entityCatalog.getEntityKey(paramPaginationAction), paramPaginationAction.paginationKey)).pipe(
     map((paginationState: PaginationEntityState) => {
@@ -200,7 +200,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
   }
 
   // Have we failed to find some required missing entities?
-  let results = [];
+  let results: ValidateEntityResult[] = [];
   if (childEntities) {
     if (!childRelation.isArray) {
       // We've already got the missing entity in the store or current response, we just need to associate it with it's parent
@@ -241,8 +241,8 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
         if (childRelation.isArray) {
           const paginationState: PaginationEntityState = pathGet(
             `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityType, entity.metadata.guid)}`,
-            allPagination);
-          childEntitiesAsArray = paginationState ? paginationState.ids[paginationState.currentPage] : null;
+            allPagination) as PaginationEntityState;
+          childEntitiesAsArray = paginationState ? (paginationState.ids as Record<number, string[]>)[paginationState.currentPage] : null;
         } else {
           const guid = pathGet(childRelation.path + '_guid', entity);
           childEntitiesAsArray = [guid];
@@ -294,13 +294,13 @@ function associateChildWithParent(
   store: Store<GeneralEntityAppState>,
   action: EntityInlineChildAction,
   apiResponse: APIResponse): Observable<boolean> {
-  let childValue;
+  let childValue: Observable<string | string[]>;
   // Fetch the child value to associate with parent. Will either be a guid or a list of guids
   if (action.child.isArray) {
     const { paginationKey } = action as FetchRelationPaginatedAction;
     childValue = store.select(selectPaginationState(entityCatalog.getEntityKey(action), paginationKey)).pipe(
       first(),
-      map((paginationSate: PaginationEntityState) => paginationSate.ids[1] || [])
+      map((paginationSate: PaginationEntityState) => (paginationSate.ids as Record<number, string[]>)[1] || [])
     );
   } else {
     const { guid } = action as FetchRelationSingleAction;
@@ -308,7 +308,7 @@ function associateChildWithParent(
   }
 
   return childValue.pipe(
-    map(value => {
+    map((value: string | string[]) => {
       if (!value) {
         return true;
       }
@@ -345,7 +345,7 @@ function associateChildWithParent(
         if (!environment.production) {
           // Add for easier debugging
           /* tslint:disable-next-line:no-string-literal  */
-          parentAction['childEntityKey'] = action.child.entityKey;
+          (parentAction as any)['childEntityKey'] = action.child.entityKey;
         }
 
 
@@ -514,12 +514,12 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
       /* tslint:disable-next-line:no-string-literal  */
-      const entities = parentEntitySchema.schema['entity'] || {};
+      const entities = (parentEntitySchema.schema as Record<string, any>)['entity'] || {};
       const params = Object.keys(entities);
       for (const paramName of params) {
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
         /* tslint:disable-next-line:no-string-literal  */
-        const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
+        const arraySafeEntitySchema: EntitySchema = Array.isArray(entitySchema) ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.entityType === action.entityType) {
           // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
@@ -528,7 +528,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
 
           const catalogEntity = entityCatalog.getEntity(eicAction);
           const entityKey = catalogEntity.entityKey;
-          const normedEntities = entity.entity[paramName].reduce((newNormedEntities, guidOrEntity) => {
+          const normedEntities = entity.entity[paramName].reduce((newNormedEntities: Record<string, Record<string, any>>, guidOrEntity: any) => {
             const guid = typeof (guidOrEntity) === 'string' ? guidOrEntity : catalogEntity.getGuidFromEntity(guidOrEntity);
             newNormedEntities[entityKey][guid] = guidOrEntity;
             return newNormedEntities;

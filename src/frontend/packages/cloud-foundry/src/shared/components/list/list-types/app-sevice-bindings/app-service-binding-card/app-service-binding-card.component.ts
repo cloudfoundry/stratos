@@ -15,6 +15,7 @@ import { MetaCardItemComponent } from '../../../../../../../../core/src/shared/c
 import { MetaCardKeyComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { MetaCardTitleComponent } from '../../../../../../../../core/src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
 import { ComponentEntityMonitorConfig } from '../../../../../../../../store/src/types/shared.types';
@@ -148,7 +149,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.setupEnvVars();
   }
 
-  private setupAsServiceInstance() {
+  private setupAsServiceInstance(): void {
     const serviceInstance$ = cfEntityCatalog.serviceInstance.store.getEntityService(
       this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
@@ -196,7 +197,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   }
 
-  private setupAsUserProvidedServiceInstance() {
+  private setupAsUserProvidedServiceInstance(): void {
     const userProvidedServiceInstance$ = cfEntityCatalog.userProvidedService.store.getEntityService(
       this.row.entity.service_instance_guid, this.appService.cfGuid
     ).waitForEntity$;
@@ -216,7 +217,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     this.envVarServicesSection$ = of('user-provided');
   }
 
-  private setupEnvVars() {
+  private setupEnvVars(): void {
     this.envVarsAvailable$ = observableCombineLatest(
       this.envVarServicesSection$,
       this.serviceInstance$,
@@ -229,21 +230,21 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
           return systemEnvJson.VCAP_SERVICES[serviceLabel] ? {
             key: serviceInstanceName,
-            value: systemEnvJson.VCAP_SERVICES[serviceLabel].find(s => s.name === serviceInstanceName)
+            value: systemEnvJson.VCAP_SERVICES[serviceLabel].find((s: any) => s.name === serviceInstanceName)
           } : null;
         }),
         filter(p => !!p),
       );
   }
 
-  showEnvVars = (envVarData: EnvVarData) => {
+  showEnvVars = (envVarData: EnvVarData): void => {
     this.dialog.open(EnvVarViewComponent, {
       data: envVarData,
       disableClose: false
     });
   };
 
-  private detach = () => {
+  private detach = (): void => {
     this.serviceActionHelperService.detachServiceBinding(
       [this.row],
       this.row.entity.service_instance_guid,
@@ -253,13 +254,15 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     );
   };
 
-  private edit = () => this.serviceActionHelperService.startEditServiceBindingStepper(
-    this.row.entity.service_instance_guid,
-    this.appService.cfGuid,
-    {
-      appId: this.appService.appGuid,
-      [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
-    },
-    this.isUserProvidedServiceInstance
-  );
+  private edit = (): void => {
+    this.serviceActionHelperService.startEditServiceBindingStepper(
+      this.row.entity.service_instance_guid,
+      this.appService.cfGuid,
+      {
+        appId: this.appService.appGuid,
+        [CSI_CANCEL_URL]: `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/services`
+      },
+      this.isUserProvidedServiceInstance
+    );
+  };
 }

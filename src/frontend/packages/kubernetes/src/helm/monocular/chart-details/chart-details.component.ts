@@ -39,7 +39,7 @@ export class ChartDetailsComponent implements OnInit {
   titleVersion: string;
   chartSubTitle: string;
 
-  loadingDelay: any;
+  loadingDelay: ReturnType<typeof setTimeout>;
 
   constructor(
     private route: ActivatedRoute,

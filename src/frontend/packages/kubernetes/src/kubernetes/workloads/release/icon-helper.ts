@@ -1,4 +1,4 @@
-const iconMappings = {
+const iconMappings: Record<string, { name: string; font: string; fontSet?: string }> = {
   Namespace: {
     name: 'namespace',
     font: 'stratos-icons'
@@ -76,7 +76,7 @@ const iconMappings = {
   }
 };
 
-export function getIcon(kind: string) {
+export function getIcon(kind: string): { name: string; font: string; fontSet?: string } {
   const rkind = kind || 'Pod';
   if (iconMappings[rkind]) {
     return iconMappings[rkind];

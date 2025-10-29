@@ -189,7 +189,9 @@ export class GitEffects {
       projectName,
       endpointGuid,
     };
-    newCommit.guid = action.entity[0].getId(newCommit);
+    const entities = Array.isArray(action.entity) ? action.entity : [action.entity];
+    const entitySchema = entities[0] as { getId: (entity: GitCommit) => string };
+    newCommit.guid = entitySchema.getId(newCommit);
 
     return newCommit;
   }

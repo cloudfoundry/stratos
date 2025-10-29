@@ -11,7 +11,11 @@ import {
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
   defaultPaginationPageSizeOptionsTable,
+  IGlobalListAction,
+  IListAction,
   IListConfig,
+  IListMultiFilterConfig,
+  IMultiListAction,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
@@ -41,7 +45,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   dataSource: IListDataSource<APIResource<IServicePlan>>;
   defaultView = 'table' as ListView;
-  text = {
+  text: { title: string | null; filter: string; noEntries: string } = {
     title: null,
     filter: 'Search by name',
     noEntries: 'There are no service plans'
@@ -53,7 +57,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
       columnId: 'name',
       headerCell: () => 'Name',
       cellDefinition: {
-        getValue: (row) => getServicePlanName(row.entity)
+        getValue: (row: APIResource<IServicePlan>) => getServicePlanName(row.entity)
       },
       sort: {
         type: 'sort',
@@ -91,7 +95,7 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        getValue: (row: APIResource<IServicePlan>) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
       },
       sort: {
         type: 'sort',
@@ -111,10 +115,10 @@ export class ServicePlansListConfigService implements IListConfig<APIResource<IS
     this.dataSource = new ServicePlansDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);
   }
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.dataSource;
+  getGlobalActions = (): IGlobalListAction<APIResource<IServicePlan>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<IServicePlan>>[] => [];
+  getSingleActions = (): IListAction<APIResource<IServicePlan>>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<IServicePlan>>[] => this.columns;
+  getDataSource = (): import('../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types').IListDataSource<APIResource<IServicePlan>> => this.dataSource;
 }

@@ -64,7 +64,7 @@ export class UnlimitedInputComponent implements OnInit {
     }
   }
 
-  setInitialValues(value) {
+  setInitialValues(value: any) {
     this.initialValue = value;
     this.unlimited = value === UNLIMITED;
     this.onChange();

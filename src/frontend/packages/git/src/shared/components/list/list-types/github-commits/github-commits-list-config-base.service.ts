@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../../../store/src/app-state';
 import { GitCommit } from '../../../../../store/git.public-types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
@@ -89,11 +89,11 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
     private datePipe: DatePipe,
   ) { }
 
-  public getColumns = () => this.columns;
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => [];
-  public getMultiFiltersConfigs = () => [];
+  public getColumns = (): ITableColumn<GitCommit>[] => this.columns;
+  public getGlobalActions = (): IGlobalListAction<GitCommit>[] => [];
+  public getMultiActions = (): IMultiListAction<GitCommit>[] => [];
+  public getSingleActions = (): IListAction<GitCommit>[] => [];
+  public getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   public getDataSource = () => this.dataSource;
   public getInitialised = () => this.initialised;
 }

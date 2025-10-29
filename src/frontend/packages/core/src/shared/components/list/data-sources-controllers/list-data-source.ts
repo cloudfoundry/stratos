@@ -60,17 +60,17 @@ export class DataFunctionDefinition {
   type: DataFunctionDefinitionType;
   orderKey?: string;
   field: string;
-  static is(obj) {
+  static is(obj: any): obj is DataFunctionDefinition {
     if (obj) {
       const typed = obj as DataFunctionDefinition;
-      return typed.type && typed.orderKey && typed.field;
+      return !!(typed.type && typed.orderKey && typed.field);
     }
     return false;
   }
 }
 
-export function distinctPageUntilChanged(dataSource) {
-  return (oldPage, newPage) => {
+export function distinctPageUntilChanged<T>(dataSource: IListDataSource<T>) {
+  return (oldPage: T[], newPage: T[]) => {
     const oldPageKeys = (oldPage || []).map(dataSource.getRowUniqueId).join();
     const newPageKeys = (newPage || []).map(dataSource.getRowUniqueId).join();
     return oldPageKeys === newPageKeys;
@@ -122,6 +122,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public action: PaginatedAction | PaginatedAction[];
   public masterAction: PaginatedAction;
   public sourceScheme: EntitySchema;
+  // Use A type for getRowUniqueId since it's provided in config with pre-transform type
+  // but create a wrapper for post-transform usage
+  private getRowUniqueIdInternal: getRowUniqueId<A>;
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
@@ -164,7 +167,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformEntities = this.transformEntities || [];
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
-    listColumns.forEach(column => {
+    listColumns.forEach((column: any) => {
       if (!column.sort) {
         return;
       }
@@ -179,8 +182,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     const setResultCount = (paginationEntity: PaginationEntityState, entities: any[]) => {
       const newLength = entities.length;
+      const ids = paginationEntity.ids as Record<number, string[]>;
       if (
-        paginationEntity.ids[paginationEntity.currentPage] &&
+        ids[paginationEntity.currentPage] &&
         (paginationEntity.totalResults !== newLength || paginationEntity.clientPagination.totalResults !== newLength)) {
         this.store.dispatch(new SetResultCount(this, this.paginationKey, newLength));
       }
@@ -230,7 +234,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.action = config.action;
     this.refresh = this.getRefreshFunction(config);
     this.sourceScheme = this.getSourceSchema(config.schema);
-    this.getRowUniqueId = config.getRowUniqueId;
+    this.getRowUniqueIdInternal = config.getRowUniqueId;
+
+    // Create wrapper for T type usage
+    // When there's a transform, A and T may be different types
+    // The function works on the unique ID which should be consistent across both types
+    // (typically a string/number ID that exists on both A and T)
+    this.getRowUniqueId = this.getRowUniqueIdInternal as unknown as getRowUniqueId<T>;
+
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
     this.transformEntity = config.transformEntity;
@@ -249,14 +260,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
       // (one for the page size in the action and another when the initial page size is set)
       this.masterAction.initialParams = this.masterAction.initialParams || {};
-      this.masterAction.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+      (this.masterAction.initialParams as Record<string, any>)['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
     }
   }
   private setupAction(config: IListDataSourceConfig<A, T>) {
     if (config.schema instanceof MultiActionConfig) {
       if (!config.isLocal) {
         // We cannot do multi action lists for non-local lists
-        this.action = config.schema[0].paginationAction;
+        this.action = (config.schema as any)[0].paginationAction;
         this.masterAction = this.action as PaginatedAction;
       } else {
         this.action = config.schema.schemaConfigs.map((multiActionConfig, i) => ({
@@ -273,7 +284,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.entitySelectConfig = this.getEntitySelectConfig(config.schema);
     }
     /* tslint:disable-next-line:no-string-literal  */
-    if (this.action['length']) {
+    if ((this.action as any)['length']) {
       this.action = (this.action as PaginatedAction[]).map(a => ({
         ...a,
         isList: true
@@ -382,11 +393,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   selectAllFilteredRows() {
     this.selectAllChecked = !this.selectAllChecked;
 
-    const updatedAllRows$ = this.page$.pipe(switchMap((filterEntities) => {
-      return combineLatest(filterEntities.reduce((obs, row) => {
+    const updatedAllRows$ = this.page$.pipe(switchMap((filterEntities: T[]) => {
+      return combineLatest(filterEntities.reduce((obs: Observable<RowState>[], row: T) => {
         obs.push(this.getRowState(row).pipe(
           first(),
-          tap(rowState => {
+          tap((rowState: RowState) => {
             if (rowState.disabled) {
               return;
             }
@@ -428,15 +439,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     delete this.editRow;
   }
 
-  trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
+  trackBy = (index: number, item: T): string | number => {
+    const id = this.getRowUniqueId(item);
+    return id || JSON.stringify(item);
+  }
 
-  private attachTransformEntity<Y = T>(entities$, entityLettable): Observable<Y[]> {
+  private attachTransformEntity(entities$: Observable<A[]>, entityLettable: OperatorFunction<A[], T[]> | null): Observable<T[]> {
     if (entityLettable) {
       return entities$.pipe(
-        this.transformEntity
+        entityLettable
       );
     } else {
-      return entities$;
+      // No transform means A === T, safe cast
+      return entities$ as unknown as Observable<T[]>;
     }
   }
 
@@ -478,10 +493,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private createSortObservable(): Observable<ListSort> {
     return this.pagination$.pipe(
-      map(pag => ({
-        direction: pag.params['order-direction'] as SortDirection,
-        field: pag.params['order-direction-field']
-      })),
+      map(pag => {
+        const params = pag.params as Record<string, any>;
+        return {
+          direction: params['order-direction'] as SortDirection,
+          field: params['order-direction-field'] as string
+        };
+      }),
       filter(x => !!x),
       distinctUntilChanged((x: ListSort, y: ListSort) => x.direction === y.direction && x.field === y.field),
       tag('list-sort')

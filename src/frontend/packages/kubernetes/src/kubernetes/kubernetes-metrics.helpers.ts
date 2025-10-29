@@ -3,7 +3,7 @@ import moment from 'moment';
 
 export function formatCPUTime(value: string | number, debug = false): string {
 
-  const cpuTimeFormat = {
+  const cpuTimeFormat: Record<string, number> = {
     day: 86400,
     hour: 3600,
     minute: 60,
@@ -17,8 +17,8 @@ export function formatCPUTime(value: string | number, debug = false): string {
   }
 
   // Duration is in seconds
-  const result = [];
-  cpuTimeFormatOrder.forEach(key => {
+  const result: string[] = [];
+  cpuTimeFormatOrder.forEach((key: string) => {
     const v = Math.floor(num / cpuTimeFormat[key]);
     num -= v * cpuTimeFormat[key];
     if (v > 0 || result.length > 0) {
@@ -33,7 +33,7 @@ export function formatCPUTime(value: string | number, debug = false): string {
   return result.join(' ');
 }
 
-function replaceAll(str, find, replace) {
+function replaceAll(str: string, find: string, replace: string): string {
   return str.replace(new RegExp(find, 'g'), replace);
 }
 

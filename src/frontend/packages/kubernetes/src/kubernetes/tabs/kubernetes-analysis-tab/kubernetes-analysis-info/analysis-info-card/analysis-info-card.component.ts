@@ -39,19 +39,19 @@ export class AnalysisInfoCardComponent {
   }
 
   constructor(private http: HttpClient) {
-    this.renderer.link = ({ href, title, tokens }) => `<a target="_blank" title="${title || ''}" href="${href}">${this.parser.parseInline(tokens)}</a>`;
-    this.renderer.code = ({ text }) => `<code>${text}</code>`;
+    this.renderer.link = ({ href, title, tokens }: { href: string; title?: string; tokens: any }) => `<a target="_blank" title="${title || ''}" href="${href}">${this.parser.parseInline(tokens)}</a>`;
+    this.renderer.code = ({ text }: { text: string }) => `<code>${text}</code>`;
   }
 
-  private getDescription(url): Observable<any> {
+  private getDescription(url: string): Observable<any> {
     return this.http.get(url, { responseType: 'text' }).pipe(
-      map(resp => {
+      map((resp: string) => {
         this.loading = false;
         return marked(resp, {
           renderer: this.renderer
         });
       }),
-      catchError((error) => {
+      catchError((error: any) => {
         this.loading = false;
         if (error.status === 404) {
           return of('<h1>Unable to load description for this Analyzer</h1>');

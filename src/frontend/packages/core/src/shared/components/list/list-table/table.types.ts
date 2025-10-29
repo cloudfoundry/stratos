@@ -25,7 +25,7 @@ export interface ICellDefinition<T> {
   // Automatically turns the cell into a link
   getLink?: (row: T, schemaKey?: string) => string;
   // Used in conjunction with asyncValue
-  getAsyncLink?: (value, schemaKey?: string) => string;
+  getAsyncLink?: (value: any, schemaKey?: string) => string;
   newTab?: boolean;
   asyncValue?: ICellAsyncValue;
   showShortLink?: boolean;

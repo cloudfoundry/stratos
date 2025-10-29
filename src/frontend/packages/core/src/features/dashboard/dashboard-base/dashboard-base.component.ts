@@ -69,7 +69,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
 
-  @ViewChild('content', { static: false }) public content;
+  @ViewChild('content', { static: false }) public content: any;
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
@@ -123,7 +123,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     this.drawer = drawer;
     if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
+      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]: [any, DashboardState]) => {
         if (state.isMobile) {
           this.store.dispatch(new CloseSideNav());
         }
@@ -160,7 +160,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       ),
       this.tabNavService.tabSubNav$,
       this.tabNavService.tabSubNavBreadcrumbs$
-    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
+    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
 
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
@@ -209,7 +209,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     if (!routes) {
       return [];
     }
-    return routes.reduce((nav, route) => {
+    return routes.reduce((nav: SideNavItem[], route: Route) => {
       if (route.data && route.data.stratosNavigation) {
         const item: SideNavItem = {
           ...route.data.stratosNavigation,

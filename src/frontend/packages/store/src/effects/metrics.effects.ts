@@ -29,14 +29,14 @@ export class MetricsEffect {
 
    metrics$ = createEffect(() => this.actions$.pipe(
     ofType<MetricsAction>(METRICS_START),
-    mergeMap(action => {
+    mergeMap((action: MetricsAction) => {
       const fullUrl = action.directApi ? action.url : this.buildFullUrl(action);
       const { guid } = action;
       this.store.dispatch(new StartRequestAction(action));
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
-        map(metrics => {
+        map((metrics: { [cfguid: string]: IMetricsResponse }) => {
           const catalogEntity = entityCatalog.getEntity(action);
           const metric = metrics[action.endpointGuid];
           const metricObject = metric ? {
@@ -56,7 +56,7 @@ export class MetricsEffect {
             action
           );
         })
-      ).pipe(catchError(errObservable => {
+      ).pipe(catchError((errObservable: any) => {
         return [
           new WrapperRequestActionFailed(
             errObservable.message,
@@ -74,15 +74,15 @@ export class MetricsEffect {
 
    metricsAPI$ = createEffect(() => this.actions$.pipe(
     ofType<MetricsAPIAction>(METRIC_API_START),
-    mergeMap(action => {
+    mergeMap((action: MetricsAPIAction) => {
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(action.url, {
         headers: { 'x-cap-cnsi-list': action.endpointGuid }
       }).pipe(
-        map(metrics => {
+        map((metrics: { [cfguid: string]: IMetricsResponse }) => {
           const metric = metrics[action.endpointGuid];
           return new MetricsAPIActionSuccess(action.endpointGuid, metric, action.queryType);
         })
-      ).pipe(catchError(errObservable => {
+      ).pipe(catchError((errObservable: any) => {
         return [
           {
             type: METRIC_API_FAILED,

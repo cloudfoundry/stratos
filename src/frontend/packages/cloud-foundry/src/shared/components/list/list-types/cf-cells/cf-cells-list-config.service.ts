@@ -36,7 +36,7 @@ export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResu
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;
   text = {
-    title: null,
+    title: null as string,
     filter: 'Search by id',
     noEntries: 'There are no cells'
   };

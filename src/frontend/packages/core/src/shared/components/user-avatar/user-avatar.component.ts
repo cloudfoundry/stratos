@@ -19,7 +19,7 @@ export class UserAvatarComponent {
   public gravatar: string;
 
   private canUseGravatar = false;
-  private userInfo = null;
+  private userInfo: UserProfileInfo = null;
 
   @Input() size = 'small';
   @Input() color = 'normal';

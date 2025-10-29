@@ -56,7 +56,7 @@ export class CreateApplicationStep3Component implements OnInit {
 
   domains$: Observable<APIResource<IDomain>[]>;
 
-  message = null;
+  message: any = null;
 
   newAppData: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {

@@ -23,9 +23,9 @@ interface BackupRequest {
 })
 export class BackupEndpointsService {
 
-  hasChanges = new BehaviorSubject(false);
+  hasChanges = new BehaviorSubject<boolean>(false);
   hasChanges$ = this.hasChanges.asObservable();
-  allChanged = new BehaviorSubject(false);
+  allChanged = new BehaviorSubject<boolean>(false);
   allChanged$ = this.allChanged.asObservable();
 
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
@@ -39,7 +39,7 @@ export class BackupEndpointsService {
 
   // State Related
   initialize(endpoints: EndpointModel[]) {
-    endpoints.forEach(entity => {
+    endpoints.forEach((entity: EndpointModel) => {
       this.state[entity.guid] = {
         [BackupEndpointTypes.ENDPOINT]: false,
         [BackupEndpointTypes.CONNECT]: BackupEndpointConnectionTypes.NONE,
@@ -51,18 +51,18 @@ export class BackupEndpointsService {
 
   stateUpdated() {
     const endpoints = Object.values(this.state);
-    endpoints.forEach(endpoint => {
+    endpoints.forEach((endpoint: BackupEndpointConfigUI) => {
       if (!endpoint[BackupEndpointTypes.ENDPOINT]) {
         endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
       }
     });
 
-    const hasChanges = !!endpoints.find(endpoint =>
+    const hasChanges = !!endpoints.find((endpoint: BackupEndpointConfigUI) =>
       endpoint[BackupEndpointTypes.ENDPOINT] ||
       endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE
     );
     this.hasChanges.next(hasChanges);
-    const allChanged = endpoints.every(endpoint => {
+    const allChanged = endpoints.every((endpoint: BackupEndpointConfigUI) => {
       const e = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
       const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) ||
         endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE;
@@ -98,7 +98,7 @@ export class BackupEndpointsService {
   }
 
   selectAll() {
-    Object.values(this.state).forEach(endpoint => {
+    Object.values(this.state).forEach((endpoint: BackupEndpointConfigUI) => {
       if (this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT)) {
         endpoint[BackupEndpointTypes.ENDPOINT] = true;
       }
@@ -110,7 +110,7 @@ export class BackupEndpointsService {
   }
 
   selectNone() {
-    Object.values(this.state).forEach(endpoint => {
+    Object.values(this.state).forEach((endpoint: BackupEndpointConfigUI) => {
       endpoint[BackupEndpointTypes.ENDPOINT] = false;
       endpoint[BackupEndpointTypes.CONNECT] = BackupEndpointConnectionTypes.NONE;
     });
@@ -118,7 +118,7 @@ export class BackupEndpointsService {
   }
 
   hasConnectionDetails(): boolean {
-    return !!Object.values(this.state).find(e => e[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE);
+    return !!Object.values(this.state).find((e: BackupEndpointConfigUI) => e[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE);
   }
 
   // Request Related
@@ -137,13 +137,13 @@ export class BackupEndpointsService {
     //   first(),
     // );
     return this.http.post(url, this.createBodyToSend(), { params }).pipe(
-      map(res => new Blob([JSON.stringify(res)])),
+      map((res: any) => new Blob([JSON.stringify(res)])),
       first(),
     );
   }
 
   private createBodyToSend(): BackupRequest {
-    const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res, [endpointId, endpoint]) => {
+    const state: BackupEndpointsConfig<BaseEndpointConfig> = Object.entries(this.state).reduce((res: BackupEndpointsConfig<BaseEndpointConfig>, [endpointId, endpoint]: [string, BackupEndpointConfigUI]) => {
       if (endpoint[BackupEndpointTypes.ENDPOINT]) {
         const { entity, ...rest } = endpoint;
         const requestConfig: BaseEndpointConfig = {

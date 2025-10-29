@@ -2,24 +2,24 @@ import { ResourceAlert, ResourceAlertLevel, ResourceAlertMap } from './analysis-
 
 export class PopeyeReportHelper {
 
-  constructor(public report: any) { }
+  constructor(public report: Record<string, any>) { }
 
   // Map the report to the alert format
-  public map() {
+  public map(): void {
     if (!this.report.report || !this.report.report.popeye) {
       return;
     }
 
-    const popeye = this.report.report.popeye;
+    const popeye: any = this.report.report.popeye;
     // Go through the report and re-map
     const result = {} as ResourceAlertMap;
-    popeye.sanitizers.forEach(s => {
+    popeye.sanitizers.forEach((s: any) => {
       // We just care about issues
       const resourceType = s.sanitizer;
       if (s.issues) {
-        Object.keys(s.issues).forEach(resourcePath => {
-          const issues = s.issues[resourcePath];
-          issues.forEach(issue => {
+        Object.keys(s.issues).forEach((resourcePath: string) => {
+          const issues: any[] = s.issues[resourcePath];
+          issues.forEach((issue: any) => {
             // Level must be greater than 0 (OK)
             if (issue.level > 0) {
               let namespace;

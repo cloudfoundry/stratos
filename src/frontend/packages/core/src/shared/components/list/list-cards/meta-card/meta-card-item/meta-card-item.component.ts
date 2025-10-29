@@ -17,7 +17,7 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
 export class MetaCardItemComponent implements OnInit {
 
   defaultStyle = 'row';
-  styles = {
+  styles: { [key: string]: string } = {
     row: 'meta-card-item-row',
     'row-top': 'meta-card-item-row-top',
     column: 'meta-card-item-column',

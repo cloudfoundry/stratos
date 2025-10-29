@@ -10,11 +10,11 @@ export interface ITableCellRequestMonitorIconConfig {
   schema: EntitySchema;
   monitorState?: AppMonitorComponentTypes;
   updateKey?: string;
-  getId?: (element) => string;
+  getId?: (element: any) => string;
 }
 
 interface Config<T> {
-  getConfig: (T) => ITableCellRequestMonitorIconConfig;
+  getConfig: (row: T) => ITableCellRequestMonitorIconConfig;
 }
 
 @Component({
@@ -38,7 +38,7 @@ export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCust
     if (this.configObj && this.configObj.getId) {
       this.id = this.configObj.getId(this.row);
       /* tslint:disable-next-line:no-string-literal  */
-    } else if (this.row && this.row['metadata']) {
+    } else if (this.row && (this.row as any)['metadata']) {
       const row = this.row as unknown as APIResource;
       this.id = getRowMetadata(row);
     } else {

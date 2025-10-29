@@ -140,7 +140,7 @@ export class StratosBaseCatalogEntity<
       return newSchema;
     }, {
       default: entitySchemas.default
-    });
+    } as EntityCatalogSchemas);
   }
 
   private getEndpointType(definition: IStratosBaseEntityDefinition) {

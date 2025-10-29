@@ -117,7 +117,7 @@ export class BooleanIndicatorComponent {
     }
     const text = this.getText({ isTrue, inverse });
     return {
-      icon: this.icons[text],
+      icon: (this.icons as any)[text],
       text,
       isTrue: inverse ? !isTrue : isTrue,
       subtle

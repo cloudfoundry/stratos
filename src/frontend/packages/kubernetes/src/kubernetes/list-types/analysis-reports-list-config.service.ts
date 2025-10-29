@@ -6,6 +6,8 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
+  IGlobalListAction,
+  IMultiListAction,
 } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 import moment from 'moment';
 import { of } from 'rxjs';
@@ -34,7 +36,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
       columnId: 'name', headerCell: () => 'Name',
       cellDefinition: {
         getValue: (row: AnalysisReport) => row.name,
-        getLink: row => row.status === 'completed' ? `/kubernetes/${this.guid}/analysis/report/${row.id}` : null
+        getLink: (row: AnalysisReport) => row.status === 'completed' ? `/kubernetes/${this.guid}/analysis/report/${row.id}` : null
       },
       sort: {
         type: 'sort',
@@ -116,10 +118,10 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
     this.listActionDelete,
   ];
 
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => this.singleActions;
-  getColumns = () => this.columns;
-  getDataSource = () => this.AppsDataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<AnalysisReport>[] => [];
+  getMultiActions = (): IMultiListAction<AnalysisReport>[] => [];
+  getSingleActions = (): IListAction<AnalysisReport>[] => this.singleActions;
+  getColumns = (): ITableColumn<AnalysisReport>[] => this.columns;
+  getDataSource = (): AnalysisReportsDataSource => this.AppsDataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }

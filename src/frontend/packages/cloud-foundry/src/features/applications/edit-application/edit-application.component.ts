@@ -124,7 +124,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   updateApp: StepOnNextFunction = () => {
-    const updates = {};
+    const updates: { [key: string]: any } = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editAppForm.value)) {
       if (!this.editAppForm.controls[key].pristine) {

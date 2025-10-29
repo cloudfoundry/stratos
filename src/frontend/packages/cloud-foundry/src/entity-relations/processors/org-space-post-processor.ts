@@ -28,13 +28,13 @@ function updateUser(
   apiUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   existingUsers: IRequestEntityTypeState<APIResource<CfUser>>,
   newUsers: IRequestEntityTypeState<APIResource<CfUser>>,
-  orgOrSpace,
+  orgOrSpace: any,
   orgSpaceParamName: string,
-  userParamName: string) {
+  userParamName: string): IRequestEntityTypeState<APIResource<CfUser>> {
   if (orgOrSpace[orgSpaceParamName]) {
-    orgOrSpace[orgSpaceParamName].forEach(userGuid => {
+    orgOrSpace[orgSpaceParamName].forEach((userGuid: string) => {
       const existingUser = apiUsers[userGuid] || existingUsers[userGuid];
-      const existingRoles = existingUser.entity[userParamName] || [];
+      const existingRoles = (existingUser.entity as Record<string, any>)[userParamName] || [];
 
       if (existingRoles.indexOf(orgOrSpace.guid) < 0) {
         newUsers[userGuid] = mergeEntity({
@@ -117,7 +117,7 @@ export function orgSpacePostProcess(
       fetchingState$: store.select(selectPaginationState(cfUserEntityKey, paginatedAction.paginationKey)).pipe(
         map((state: PaginationEntityState) => {
           const res: ValidateResultFetchingState = {
-            fetching: !state || !state.ids[1]
+            fetching: !state || !(state.ids as Record<number, string[]>)[1]
           };
           return res;
         })

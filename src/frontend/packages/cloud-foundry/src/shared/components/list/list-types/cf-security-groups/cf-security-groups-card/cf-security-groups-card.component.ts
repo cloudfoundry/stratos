@@ -33,10 +33,10 @@ import { CloudFoundryEndpointService } from '../../../../../../features/cf/servi
     AppChipsComponent,
   ]
 })
-export class CfSecurityGroupsCardComponent extends CardCell<APIResource> implements OnInit {
+export class CfSecurityGroupsCardComponent extends CardCell<APIResource<any>> implements OnInit {
 
   tags: AppChip<IRule>[] = [];
-  private typeColors = {
+  private typeColors: Record<string, string> = {
     tcp: 'tcp-class',
     all: 'all-class',
     udp: 'udp-class'
@@ -47,15 +47,15 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
     super();
   }
 
-  ngOnInit() {
-    this.tags = this.row.entity.rules.map(t => ({
+  ngOnInit(): void {
+    this.tags = this.row.entity.rules.map((t: IRule) => ({
       value: `${t.protocol} ${this.getRuleString(t)}`,
       key: t,
       color: this.typeColors[t.protocol]
     }));
   }
 
-  getSpaceUrl = (space: APIResource<ISpace>) => {
+  getSpaceUrl = (space: APIResource<ISpace>): string[] => {
     return [
       '/cloud-foundry',
       `${this.cfEndpointService.cfGuid}`,
@@ -67,7 +67,7 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
 
   }
 
-  getRuleString = (rule: IRule) => {
+  getRuleString = (rule: IRule): string => {
 
     let destination = rule.destination;
 

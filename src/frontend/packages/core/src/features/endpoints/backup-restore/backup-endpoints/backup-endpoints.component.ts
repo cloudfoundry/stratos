@@ -112,7 +112,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       isTableLoading$: endpointObs.fetchingEntities$,
       connect: () => endpoints$,
       disconnect: () => { },
-      trackBy: (index, row) => row.guid
+      trackBy: (index: number, row: EndpointModel) => row.guid
     };
 
     this.disableSelectAll$ = this.service.allChanged$;
@@ -154,7 +154,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       });
     };
 
-    const backupSuccess = data => {
+    const backupSuccess = (data: Blob) => {
       const downloadURL = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = downloadURL;
@@ -169,7 +169,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       });
     };
 
-    const backupFailure = err => {
+    const backupFailure = (err: any) => {
       const errorMessage = httpErrorResponseToSafeString(err);
       result.next({
         success: false,

@@ -7,12 +7,12 @@ class ConfigHolder<T = any> {
 
   private configs: T = {} as T;
 
-  set(name: string, config: T) {
-    this.configs[name] = config;
+  set(name: string, config: T): void {
+    (this.configs as any)[name] = config;
   }
 
   get<Y = any>(name: string): Y {
-    return name ? this.configs[name] : undefined;
+    return name ? (this.configs as any)[name] : undefined;
   }
 }
 

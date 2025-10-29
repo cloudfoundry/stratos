@@ -69,7 +69,7 @@ import {
 const { proxyAPIVersion } = environment;
 const commonPrefix = `/pp/${proxyAPIVersion}/autoscaler`;
 
-function extractAutoscalerError(error): string {
+function extractAutoscalerError(error: any): string {
   const httpResponse: HttpErrorResponse = isHttpErrorResponse(error);
   if (httpResponse) {
     return httpResponse.error ? httpResponse.error.error : JSON.stringify(httpResponse.error);
@@ -77,7 +77,7 @@ function extractAutoscalerError(error): string {
   return error._body;
 }
 
-function createAutoscalerErrorMessage(requestType: string, error) {
+function createAutoscalerErrorMessage(requestType: string, error: any): string {
   return `Unable to ${requestType}: ${error.status} ${extractAutoscalerError(error) || ''}`;
 }
 
@@ -494,7 +494,7 @@ export class AutoscalerEffects {
 
   transformTriggerData(
     key: string, mappedData: NormalizedResponse, data: AppAutoscalerPolicyLocal, query: AutoscalerQuery, appGuid: string) {
-    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity, metricType) => {
+    mappedData.entities[key] = Object.keys(data.scaling_rules_map).reduce((entity: Record<string, any>, metricType: string) => {
       const id = AutoscalerConstants.createMetricId(appGuid, metricType);
       data.scaling_rules_map[metricType].query = query;
       entity[id] = {

@@ -29,7 +29,7 @@ export const getSvcAvailability = (
   servicePlan: APIResource<IServicePlan>,
   serviceBroker: APIResource<IServiceBroker>,
   allServicePlanVisibilities: APIResource<IServicePlanVisibility>[]) => {
-  const svcAvailability = {
+  const svcAvailability: { isPublic: boolean; spaceScoped: boolean; hasVisibilities: boolean; guid: string; spaceGuid: any } = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
   if (serviceBroker && serviceBroker.entity.space_guid) {

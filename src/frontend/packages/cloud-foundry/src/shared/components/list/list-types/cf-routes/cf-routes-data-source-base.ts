@@ -34,8 +34,8 @@ export interface ListCfRoute extends IRoute {
   mappedAppsCountLabel?: string;
 }
 
-function isListCfRoute(anything: any): boolean {
-  return !!anything.url && !!anything.isTCPRoute;
+function isListCfRoute(anything: IRoute | ListCfRoute): boolean {
+  return !!(anything as ListCfRoute).url && !!(anything as ListCfRoute).isTCPRoute;
 }
 
 export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResource<ListCfRoute>, APIResource<IRoute>> {
@@ -120,7 +120,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
    */
   private static createRowState(
     store: Store<AppState>,
-    paginationKey,
+    paginationKey: string,
     genericRouteState: boolean,
     isLocal: boolean): { rowsState: Observable<RowsState>, sub: Subscription } {
     if (genericRouteState) {

@@ -69,12 +69,12 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     }
   }
 
-  schemaUrl: string;
-  valuesUrl: string;
-  releaseValues: string;
+  schemaUrl!: string;
+  valuesUrl!: string;
+  releaseValues!: string;
 
   // Model for the editor - we set this once when the YAML support has been loaded
-  public model;
+  public model: any;
 
   // Editor mode - either 'editor' for the Monaco Code Editor or 'form' for the JSON Schema Form editor
   public mode: EditorMode = EditorMode.CodeEditor;
@@ -104,7 +104,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   public lineNumbers = true;
 
   // Chart Values - as both raw text (keeping comments) and parsed JSON
-  public chartValuesYaml: string;
+  public chartValuesYaml!: string;
   public chartValues: any;
 
   // Default Monaco options
@@ -129,7 +129,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private themeSub: Subscription;
 
   // Track whether the user changes the code in the text editor
-  private codeOnEnter: string;
+  private codeOnEnter!: string;
 
   // Reference to the editor, so we can adjust its size to fit
   @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor: ElementRef;
@@ -174,20 +174,20 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens
-    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe(event => this.resize());
+    this.resizeSub = fromEvent(window, 'resize').pipe(debounceTime(150)).subscribe((event: any) => this.resize());
   }
 
   private init() {
     // Observabled for loading schema and values for the Chart
-    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError(e => of(null)));
+    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError((e: any) => of(null)));
     const values$: Observable<string> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
-      catchError(e => of(null))
+      catchError((e: any) => of(null))
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
     this.loading$ = combineLatest(schema$, values$, this.monacoLoaded$).pipe(
-      filter(([schema, values, loaded]) => schema !== undefined && values !== undefined && loaded),
-      tap(([schema, values, loaded]) => {
+      filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
+      tap(([schema, values, loaded]: [any, any, boolean]) => {
         this.schema = schema;
         if (values !== null) {
           this.chartValuesYaml = values;
@@ -212,7 +212,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
         }
         this.updateModel();
       }),
-      map(([schema, values, loaded]) => !loaded),
+      map(([schema, values, loaded]: [any, any, boolean]) => !loaded),
       startWith(true)
     );
 
@@ -251,15 +251,15 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   // The edit mode has changed (form or editor)
-  editModeChanged(mode) {
+  editModeChanged(mode: any) {
     this.mode = mode.value;
 
     if (this.mode === EditorMode.CodeEditor) {
       // Form -> Editor
       // Only copy if there is not an error - otherwise keep the invalid yaml from the editor that needs fixing
       if (!this.yamlError) {
-        const codeYaml = yaml.load(this.code || '{}', { json: true });
-        const data = mergeObjects(codeYaml, this.formData);
+        const codeYaml = yaml.load(this.code || '{}', { json: true }) as any;
+        const data = mergeObjects(codeYaml as Record<string, unknown>, this.formData);
         this.code = this.getDiff(data);
         this.codeOnEnter = this.code;
       }
@@ -282,7 +282,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
           throw new Error('Invalid YAML');
         }
         this.yamlError = false;
-        const data = mergeObjects(this.formData, json);
+        const data = mergeObjects(this.formData, json as Record<string, unknown>);
         this.initialFormData = data;
         this.formData = data;
       } catch (e) {
@@ -294,7 +294,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // Called once the Monaco editor has loaded and then each time the model is update
   // Store a reference to the editor and ensure the editor theme is synchronized with the Stratos theme
-  onMonacoInit(editor) {
+  onMonacoInit(editor: any) {
     this.editor = editor;
     this.resize();
 
@@ -312,7 +312,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     });
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
-    this.themeSub = this.themeService.getTheme().subscribe(theme => {
+    this.themeSub = this.themeService.getTheme().subscribe((theme: any) => {
       const monaco = (window as any).monaco;
       const monacoTheme = (theme.styleName === 'dark-theme') ? 'vs-dark' : 'vs';
       monaco.editor.setTheme(monacoTheme);

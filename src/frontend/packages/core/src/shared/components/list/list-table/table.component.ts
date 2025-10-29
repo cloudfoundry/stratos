@@ -3,10 +3,10 @@ import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
 import { MatSortModule } from '@angular/material/sort';
 import { ListSort } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
+import { ITableListDataSource, RowState } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { ListExpandedComponentType } from '../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
@@ -87,7 +87,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           ...tableColumnExpander,
           cellConfig: (row: T) => {
             const res: TableCellExpanderConfig = {
-              rowId: this.dataSource.trackBy(null, row)
+              rowId: String(this.dataSource.trackBy(0, row))
             };
             return res;
           }
@@ -138,7 +138,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-  getRowState(row: T) {
+  getRowState(row: T): Observable<RowState> | null {
     if (this.dataSource.getRowState) {
       return this.dataSource.getRowState(row);
     }

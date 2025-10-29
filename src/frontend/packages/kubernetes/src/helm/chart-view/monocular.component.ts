@@ -23,7 +23,7 @@ import { createMonocularProviders } from '../monocular/stratos-monocular-provide
 })
 export class MonocularChartViewComponent implements OnInit {
 
-  public breadcrumbs = [];
+  public breadcrumbs: Array<{ breadcrumbs: Array<{ value: string; routerLink?: string }> }> = [];
 
   public title = '';
 

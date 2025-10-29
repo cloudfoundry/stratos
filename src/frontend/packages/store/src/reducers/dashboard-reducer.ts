@@ -24,7 +24,7 @@ import {
 } from './../actions/dashboard-actions';
 
 
-export function dashboardReducer(state: DashboardState = defaultDashboardState, action): DashboardState {
+export function dashboardReducer(state: DashboardState = defaultDashboardState, action: any): DashboardState {
   switch (action.type) {
     case OPEN_SIDE_NAV:
       if (state.isMobile) {
@@ -71,7 +71,7 @@ export function dashboardReducer(state: DashboardState = defaultDashboardState, 
       };
     case SET_DASHBOARD_STATE_VALUE:
       const setValueAction = action as SetDashboardStateValueAction;
-      if (state[setValueAction.prop] === setValueAction.value) {
+      if ((state as any)[setValueAction.prop] === setValueAction.value) {
         return state;
       }
       return {

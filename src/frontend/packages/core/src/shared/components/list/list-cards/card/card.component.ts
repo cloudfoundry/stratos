@@ -81,7 +81,7 @@ export class CardComponent<T> {
     this.updateComponentInputs(dataSource, entityKey, entity);
   }
 
-  private updateComponentInputs(dataSource, entityKey, entity) {
+  private updateComponentInputs(dataSource: any, entityKey: any, entity: any) {
     if (this.cardComponent) {
       this.cardComponent.row = entity;
       this.cardComponent.dataSource = dataSource;

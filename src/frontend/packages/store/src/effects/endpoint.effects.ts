@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import {
@@ -69,7 +70,7 @@ export class EndpointsEffect {
 
    getAllEndpoints$ = createEffect(() => this.actions$.pipe(
     ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS),
-    mergeMap(action => {
+    mergeMap((action: GetSystemSuccess) => {
       const { associatedAction } = action;
       const entityKey = entityCatalog.getEntityKey(associatedAction);
       const endpoints = action.payload.endpoints;
@@ -83,7 +84,7 @@ export class EndpointsEffect {
 
       Object.keys(endpoints).forEach((type: string) => {
         const endpointsForType = endpoints[type];
-        Object.values(endpointsForType).forEach(endpointInfo => {
+        Object.values(endpointsForType).forEach((endpointInfo: any) => {
           mappedData.entities[entityKey][endpointInfo.guid] = {
             ...endpointInfo,
             connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
@@ -104,7 +105,7 @@ export class EndpointsEffect {
 
    connectEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<ConnectEndpoint>(CONNECT_ENDPOINTS),
-    mergeMap(action => {
+    mergeMap((action: ConnectEndpoint): any[] | Observable<any> => {
       // Special-case SSO login - redirect to the back-end
       if (action.authType === 'sso') {
         const loc = window.location.protocol + '//' + window.location.hostname +
@@ -121,8 +122,8 @@ export class EndpointsEffect {
       body.set('system_shared', String(action.systemShared));
 
       // Add auth values to the body
-      Object.keys(action.authValues).forEach(key => {
-        body.set(key, action.authValues[key]);
+      Object.keys(action.authValues).forEach((key: string) => {
+        body.set(key, (action.authValues as Record<string, any>)[key]);
       });
 
       // If there's a custom body provided, merge it
@@ -139,16 +140,16 @@ export class EndpointsEffect {
         action,
         '/api/v1/tokens',
         new HttpParams(),
-        null,
+        null as any,
         action.endpointsType,
         body,
-        response => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
+        (response: any) => httpErrorResponseToSafeString(response) || 'Could not connect, please try again',
       );
     })));
 
    disconnect$ = createEffect(() => this.actions$.pipe(
     ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS),
-    mergeMap(action => {
+    mergeMap((action: DisconnectEndpoint) => {
 
       return this.doEndpointAction(
         action,
@@ -164,7 +165,7 @@ export class EndpointsEffect {
 
    unregister$ = createEffect(() => this.actions$.pipe(
     ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS),
-    mergeMap(action => {
+    mergeMap((action: UnregisterEndpoint) => {
       return this.doEndpointAction(
         action,
         '/api/v1/endpoints/' + action.guid,
@@ -179,8 +180,8 @@ export class EndpointsEffect {
 
    register$ = createEffect(() => this.actions$.pipe(
     ofType<RegisterEndpoint>(REGISTER_ENDPOINTS),
-    mergeMap(action => {
-      const paramsObj = {
+    mergeMap((action: RegisterEndpoint) => {
+      const paramsObj: Record<string, string> = {
         endpoint_type: action.endpointsType,
         cnsi_name: action.name,
         api_endpoint: action.endpoint,
@@ -198,7 +199,7 @@ export class EndpointsEffect {
       }
       // Encode all values in the form body
       const body: any = new FormData();
-      Object.keys(paramsObj).forEach(key => {
+      Object.keys(paramsObj).forEach((key: string) => {
         body.set(key, paramsObj[key]);
       });
 
@@ -216,7 +217,7 @@ export class EndpointsEffect {
    updateEndpoint$ = createEffect(() => this.actions$.pipe(
     ofType<UpdateEndpoint>(UPDATE_ENDPOINT),
     mergeMap((action: UpdateEndpoint) => {
-      const paramsObj = {
+      const paramsObj: Record<string, string | boolean> = {
         name: action.name,
         skipSSL: action.skipSSL,
         setClientInfo: action.setClientInfo,
@@ -228,8 +229,8 @@ export class EndpointsEffect {
 
       // Encode auth values in the body, not the query string
       const body: any = new FormData();
-      Object.keys(paramsObj).forEach(key => {
-        body.set(key, paramsObj[key]);
+      Object.keys(paramsObj).forEach((key: string) => {
+        body.set(key, String(paramsObj[key]));
       });
 
       return this.doEndpointAction(
@@ -273,7 +274,7 @@ export class EndpointsEffect {
     body?: any,
     errorMessageHandler?: (e: any) => string,
     method: string = 'POST',
-  ) {
+  ): Observable<any> {
 
     const endpointEntityKey = entityCatalog.getEntityKey(apiAction);
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
@@ -318,7 +319,7 @@ export class EndpointsEffect {
         return actions;
       }
       ),
-      catchError(e => {
+      catchError((e: any) => {
         const actions = [];
         if (apiAction.actions[2]) {
           actions.push({ type: apiAction.actions[2], guid: apiAction.guid });

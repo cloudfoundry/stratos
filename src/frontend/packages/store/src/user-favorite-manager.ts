@@ -132,7 +132,7 @@ export class UserFavoriteManager {
     const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
     return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
       map(favs => {
-        const result = [];
+        const result: Array<UserFavorite<IFavoriteMetadata>> = [];
         Object.values(favs).forEach(f => {
           if (f.endpointId === endpointID && f.entityId) {
             // Ensure we actually have a UserFavorite object and not a struct

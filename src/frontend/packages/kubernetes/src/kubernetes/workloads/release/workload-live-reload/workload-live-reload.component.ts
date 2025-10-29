@@ -23,7 +23,7 @@ export class WorkloadLiveReloadComponent implements OnInit {
     this.checked = this.socketService.isStarted();
   }
 
-  public onChange(event) {
+  public onChange(event: any) {
     this.socketService.pause(!event.checked);
   }
 

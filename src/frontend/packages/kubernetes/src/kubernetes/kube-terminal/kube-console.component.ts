@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { NEVER, Observable, Subject } from 'rxjs';
+import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
@@ -84,17 +84,17 @@ export class KubeConsoleComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap(getResponse => getResponse(this.sshInput)),
-        catchError((e: Error) => {
+        switchMap((getResponse: (input: Subject<string>) => Observable<string>): Observable<string> => getResponse(this.sshInput)),
+        catchError((e: Error): Observable<never> => {
           if (e.message !== normalClosureMessage && !this.sshViewer.isConnected) {
             this.errorMessage = 'Error launching Kubernetes Terminal';
           }
-          return [];
+          return EMPTY;
         }));
 
       // Breadcrumbs
       this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-        map(endpoint => ([{
+        map((endpoint: any) => ([{
           breadcrumbs: [
             { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
           ]

@@ -16,6 +16,6 @@ export class MetaCardTitleComponent {
   @ViewChild(TemplateRef, { static: true })
   content: TemplateRef<any>;
 
-  @Input() noMargin;
+  @Input() noMargin: boolean;
 
 }

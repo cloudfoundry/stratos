@@ -70,7 +70,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       { link: 'history', label: 'History', icon: 'schedule' },
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Resources' },
-      { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map(tp => !tp)) },
+      { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map((tp: boolean) => !tp)) },
       ...this.getTabsFromEntityConfig()
     ];
 
@@ -83,7 +83,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   private getTabsFromEntityConfig(): IPageSideNavTab[] {
-    const tabsFromRouterConfig = [];
+    const tabsFromRouterConfig: IPageSideNavTab[] = [];
 
     // Get the tabs from the router configuration
     kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {

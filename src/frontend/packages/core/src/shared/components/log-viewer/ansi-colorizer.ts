@@ -1,7 +1,7 @@
 // Ansi code to reset all colours
 const RESET = '\x1B[0m';
 
-const colorCodes = {
+const colorCodes: { [key: string]: number } = {
   black: 0,
   red: 1,
   green: 2,

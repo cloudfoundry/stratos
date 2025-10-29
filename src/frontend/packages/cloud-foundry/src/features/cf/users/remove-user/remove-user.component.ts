@@ -19,7 +19,7 @@ import {
 } from '../../../../actions/users-roles.actions';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../store/types/cf-user.types';
+import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -136,7 +136,7 @@ export class RemoveUserComponent implements OnDestroy {
     });
   }
 
-  getRolesChanges(user: CfUser, orgs) {
+  getRolesChanges(user: CfUser, orgs: any) {
     const changes = [];
     const orgGuids = this.orgGuid ? [this.orgGuid] : Object.keys(orgs);
 
@@ -150,8 +150,8 @@ export class RemoveUserComponent implements OnDestroy {
     return changes;
   }
 
-  getOrgRolesChanges(user: CfUser, org: IUserPermissionInOrg) {
-    const changes = [];
+  getOrgRolesChanges(user: CfUser, org: IUserPermissionInOrg): CfRoleChange[] {
+    const changes: CfRoleChange[] = [];
 
     if (!this.spaceGuid && !this.onlySpaces) {
       const roles = org.permissions;
@@ -165,7 +165,7 @@ export class RemoveUserComponent implements OnDestroy {
             orgGuid: org.orgGuid,
             orgName: org.name,
             add: false,
-            role,
+            role: role as OrgUserRoleNames,
           });
         }
       }
@@ -174,8 +174,8 @@ export class RemoveUserComponent implements OnDestroy {
     return changes;
   }
 
-  getSpacesRolesChanges(user: CfUser, spaces) {
-    const changes = [];
+  getSpacesRolesChanges(user: CfUser, spaces: { [spaceGuid: string]: IUserPermissionInSpace }): CfRoleChange[] {
+    const changes: CfRoleChange[] = [];
     const spaceGuids = this.spaceGuid ? [this.spaceGuid] : Object.keys(spaces);
 
     for (const spaceGuid of spaceGuids) {
@@ -193,7 +193,7 @@ export class RemoveUserComponent implements OnDestroy {
             spaceGuid,
             spaceName: space.name,
             add: false,
-            role,
+            role: role as SpaceUserRoleNames,
           });
         }
       }

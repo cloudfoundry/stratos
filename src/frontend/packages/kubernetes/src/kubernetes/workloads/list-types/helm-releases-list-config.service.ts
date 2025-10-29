@@ -10,6 +10,9 @@ import {
   IListConfig,
   IListMultiFilterConfig,
   ListViewTypes,
+  IGlobalListAction,
+  IMultiListAction,
+  IListAction,
 } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { filter, map } from 'rxjs/operators';
@@ -132,24 +135,24 @@ export class HelmReleasesListConfig implements IListConfig<HelmRelease> {
     ];
   }
 
-  public getColumns = () => this.columns;
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
-  public getSingleActions = () => [];
-  getMultiFiltersConfigs = () => this.multiFilterConfigs;
-  public getDataSource = () => this.dataSource;
+  public getColumns = (): ITableColumn<HelmRelease>[] => this.columns;
+  public getGlobalActions = (): IGlobalListAction<HelmRelease>[] => [];
+  public getMultiActions = (): IMultiListAction<HelmRelease>[] => [];
+  public getSingleActions = (): IListAction<HelmRelease>[] => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
+  public getDataSource = (): HelmReleasesDataSource => this.dataSource;
 }
 
-function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceItem: KubernetesNamespacesFilterItem) {
+function createKubeNamespaceFilterConfig(key: string, label: string, cfOrgSpaceItem: KubernetesNamespacesFilterItem): IListMultiFilterConfig {
   return {
     key,
     label,
     ...cfOrgSpaceItem,
-    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
+    list$: cfOrgSpaceItem.list$.pipe(map((entities: Array<{ name?: string; metadata?: { name?: string }; guid?: string }>) => {
       return entities.map(entity => ({
-        label: entity.name || entity.metadata.name,
+        label: entity.name || entity.metadata?.name || '',
         item: entity,
-        value: entity.guid || entity.metadata.name // Endpoint search via guid, namespace by name (easier filtering)
+        value: entity.guid || entity.metadata?.name || '' // Endpoint search via guid, namespace by name (easier filtering)
       }));
     })),
   };

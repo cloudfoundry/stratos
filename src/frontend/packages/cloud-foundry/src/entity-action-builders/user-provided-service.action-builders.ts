@@ -50,7 +50,7 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
 export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder = {
   get: (
     guid,
-    endpointGuid,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetUserProvidedService(guid, endpointGuid, includeRelations, populateMissing),
   remove: (

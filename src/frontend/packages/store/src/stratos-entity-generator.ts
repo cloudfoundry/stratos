@@ -36,11 +36,11 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   /**
    * This is used as a fake endpoint type to allow the store to be initiated correctly
    */
-  const stratosType = {
+  const stratosType: any = {
     logoUrl: '',
-    authTypes: [],
+    authTypes: [] as string[],
     type: STRATOS_ENDPOINT_TYPE,
-    schema: null
+    schema: null as any
   };
   return [
     generateEndpoint(stratosType),
@@ -56,7 +56,7 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
  * DefaultEndpointEntityType is used to represent a general endpoint
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
-function generateEndpoint(stratosType) {
+function generateEndpoint(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(endpointEntityType),
     type: endpointEntityType,
@@ -78,7 +78,7 @@ function generateEndpoint(stratosType) {
   return stratosEntityCatalog.endpoint;
 }
 
-function generateSystemInfo(stratosType) {
+function generateSystemInfo(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(systemInfoEntityType),
     type: systemInfoEntityType,
@@ -97,7 +97,7 @@ function generateSystemInfo(stratosType) {
   return stratosEntityCatalog.systemInfo;
 }
 
-function generateUserFavorite(stratosType) {
+function generateUserFavorite(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(userFavouritesEntityType),
     type: userFavouritesEntityType,
@@ -120,7 +120,7 @@ function generateUserFavorite(stratosType) {
   return stratosEntityCatalog.userFavorite;
 }
 
-function generateUserProfile(stratosType) {
+function generateUserProfile(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(userProfileEntityType),
     type: userProfileEntityType,
@@ -155,7 +155,7 @@ function generateMetricsEndpoint() {
   return stratosEntityCatalog.metricsEndpoint;
 }
 
-function generateAPIKeys(stratosType) {
+function generateAPIKeys(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(apiKeyEntityType),
     type: apiKeyEntityType,

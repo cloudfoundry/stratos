@@ -62,29 +62,34 @@ export interface StratosExtensionRoutes {
 }
 
 // Stores the extension metadata as defined by the decorators
-const extensionMetadata = {
+const extensionMetadata: {
+  loginComponent: any | null;
+  extensionRoutes: { [key: string]: StratosExtensionRoutes[] };
+  tabs: { [key: string]: IPageSideNavTab[] };
+  actions: { [key: string]: StratosActionMetadata[] };
+} = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
-  tabs: {} as { [key: string]: IPageSideNavTab[], },
-  actions: {} as { [key: string]: StratosActionMetadata[], },
+  extensionRoutes: {},
+  tabs: {},
+  actions: {},
 };
 
 /**
  * Decorator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadataConfig) {
-  return target => addExtensionTab(props.type, target, props);
+  return (target: any) => addExtensionTab(props.type, target, props);
 }
 
 /**
  * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return target => addExtensionAction(props.type, target, props);
+  return (target: any) => addExtensionAction(props.type, target, props);
 }
 
 export function StratosLoginComponent() {
-  return target => extensionMetadata.loginComponent = target;
+  return (target: any) => extensionMetadata.loginComponent = target;
 }
 
 function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {

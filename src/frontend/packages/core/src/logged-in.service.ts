@@ -114,7 +114,7 @@ export class LoggedInService {
   }
 
 
-  private _promptInactiveUser(expiryDate) {
+  private _promptInactiveUser(expiryDate: number) {
     this.activityPromptShown = true;
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
@@ -122,7 +122,7 @@ export class LoggedInService {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((verify = false) => {
+    dialogRef.afterClosed().subscribe((verify: boolean = false) => {
       if (verify) {
         this.store.dispatch(new VerifySession(false, false));
         this.openSessionCheckerPoll();

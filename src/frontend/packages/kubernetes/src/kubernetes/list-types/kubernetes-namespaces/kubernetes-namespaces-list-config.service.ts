@@ -6,7 +6,7 @@ import {
   createTableColumnFavorite,
 } from '../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { IListConfig, ListViewTypes, IGlobalListAction, IMultiListAction, IListAction, IListMultiFilterConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../store/src/public-api';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
@@ -44,7 +44,7 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
     {
       columnId: 'status', headerCell: () => 'Status',
       cellDefinition: {
-        getValue: (row) => `${row.status.phase}`
+        getValue: (row: KubernetesNamespace) => `${row.status.phase}`
       },
       sort: {
         type: 'sort',
@@ -69,12 +69,12 @@ export class KubernetesNamespacesListConfigService implements IListConfig<Kubern
     noEntries: 'There are no namespaces'
   };
 
-  getGlobalActions = () => null;
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getColumns = () => this.columns;
-  getDataSource = () => this.podsDataSource;
-  getMultiFiltersConfigs = () => [];
+  getGlobalActions = (): IGlobalListAction<KubernetesNamespace>[] => [];
+  getMultiActions = (): IMultiListAction<KubernetesNamespace>[] => [];
+  getSingleActions = (): IListAction<KubernetesNamespace>[] => [];
+  getColumns = (): ITableColumn<KubernetesNamespace>[] => this.columns;
+  getDataSource = (): KubernetesNamespacesDataSource => this.podsDataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 
   constructor(
     store: Store<AppState>,

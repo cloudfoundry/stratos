@@ -1,54 +1,24 @@
 // Stratos theme configuration migrated to Tailwind CSS
-@use './all-theme';
+// Note: all-theme removed during Angular 20 migration
 
-// Import the theme - re-enable the existing Stratos theme system
-@use '~@stratosui/theme';
+// Import the Tailwind-based theme system
+@use '~@stratosui/theme/styles/main' as theme-main;
 
 $stratos-dark-theme-supported: false !default;
 
 // Angular Material core styles removed - using Tailwind CSS instead
+// Theme configuration is now handled via CSS custom properties in theme/styles/main.scss
+// Components should use Tailwind utility classes and CSS custom properties
 
-// Define the default theme configuration
-$stratos-themes: stratos-theme();
-
-// stratos-theme() can return a single theme rather than a map of default and dark themes
-@if type-of($stratos-themes) != map or not map-has-key($stratos-themes, default) {
-  $stratos-themes: (
-    default: $stratos-themes
-  );
-}
-
-// Import any custom scss that the theme defines
-// This import defines the mixin 'apply-theme'
-@use '~@stratosui/theme/extensions';
-
-// Default theme ( = light theme)
-$stratos-theme: map-get($stratos-themes, default);
-
-// Check if dark theme is supported and apply themes accordingly
-@if map-has-key($stratos-themes, dark) {
-  $stratos-dark-theme-supported: true !global;
-  $dark-stratos-theme: map-get($stratos-themes, dark);
-
-  body.stratos {
-    .dark-theme {
-      // Angular Material theming removed - using Tailwind CSS classes
-      @include app-theme($dark-stratos-theme);
-      // Apply theme to extensions
-      @include apply-theme($dark-stratos-theme);
-    }
-  }
-}
+// Legacy theme support removed - all styling now uses:
+// 1. Tailwind utility classes
+// 2. CSS custom properties (--color-primary, --color-accent, etc.)
+// 3. Component-scoped SCSS where needed
 
 .default {
-  // Angular Material theming removed - using Tailwind CSS classes
-
-  // Apply custom app theme
-  @include app-theme($stratos-theme);
-
-  // Apply theme to extensions
-  @include apply-theme($stratos-theme);
+  // Theme is applied via CSS custom properties defined in theme/styles/main.scss
+  // No additional styles needed here
 }
 
 // Migration note: Angular Material imports and theming have been removed
-// Components should now use Tailwind CSS utilities for styling
+// Components should now use Tailwind CSS utilities and CSS custom properties for styling

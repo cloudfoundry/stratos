@@ -34,7 +34,7 @@ export function getEntityRequestState(
 
 export function setEntityRequestState(
   state: BaseRequestState,
-  requestState,
+  requestState: any,
   actionOrKey: BaseEntityRequestAction | string,
   guid: string = (actionOrKey as BaseEntityRequestAction).guid
 ) {
@@ -65,8 +65,8 @@ export function createRequestStateFromResponse(
   }
   const { entities } = response;
   let newState = { ...state };
-  Object.keys(entities).forEach(entityKey => {
-    Object.keys(entities[entityKey]).forEach(guid => {
+  Object.keys(entities).forEach((entityKey: string) => {
+    Object.keys(entities[entityKey]).forEach((guid: string) => {
       const entState = getEntityRequestState(state, entityKey, guid);
       entState.fetching = entState.fetching || false;
       entState.error = entState.error || false;
@@ -112,7 +112,7 @@ export function modifyRequestWithRequestType(requestState: RequestInfoState, typ
 /**
  * Merge the content of a new object into another object
  */
-export function mergeObject(coreObject, newObject) {
+export function mergeObject(coreObject: any, newObject: any) {
   return {
     ...coreObject,
     ...newObject
@@ -122,14 +122,14 @@ export function mergeObject(coreObject, newObject) {
 /**
  * Merge the content of a new object into a property of another's
  */
-export function mergeInnerObject(key, state, newObject) {
+export function mergeInnerObject(key: string, state: any, newObject: any) {
   return {
     ...state,
     [key]: mergeObject(state[key], newObject)
   };
 }
 
-export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
+export function mergeUpdatingState(apiAction: any, updatingState: any, newUpdatingState: any) {
   const updateKey = apiAction.updatingKey || rootUpdatingKey;
   return mergeInnerObject(updateKey, updatingState, newUpdatingState);
 }
@@ -139,10 +139,10 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
 }) {
   const defaultState = {} as BaseRequestState;
 
-  keys.forEach(key => {
+  keys.forEach((key: string) => {
     defaultState[key] = {};
     if (initialSections && initialSections[key] && initialSections[key].length) {
-      initialSections[key].forEach(sectionKey => {
+      initialSections[key].forEach((sectionKey: string) => {
         defaultState[key][sectionKey] = getDefaultRequestState();
       });
     }
@@ -179,7 +179,7 @@ export function completeApiRequest<T extends GeneralAppState = GeneralAppState>(
 export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
   store: Store<T>,
   apiAction: EntityRequestAction,
-  error,
+  error: any,
   catalogEntity: StratosBaseCatalogEntity,
   requestType: ApiRequestTypes = 'fetch',
   internalEndpointError?: InternalEndpointError
@@ -197,7 +197,7 @@ export function failApiRequest<T extends GeneralAppState = GeneralAppState>(
 
 export function getFailApiRequestActions(
   apiAction: EntityRequestAction,
-  error,
+  error: any,
   requestType: ApiRequestTypes = 'fetch',
   catalogEntity: StratosBaseCatalogEntity,
   internalEndpointError?: InternalEndpointError,

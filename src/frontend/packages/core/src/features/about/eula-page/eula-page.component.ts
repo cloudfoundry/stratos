@@ -33,7 +33,7 @@ export class EulaPageComponent {
   // Load the EULA
   constructor(http: HttpClient) {
     http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe(
-      html => this.eulaHtml = html,
+      (html: string) => this.eulaHtml = html,
       () => this.eulaHtml = 'An error occurred retrieving the EULA'
     );
   }

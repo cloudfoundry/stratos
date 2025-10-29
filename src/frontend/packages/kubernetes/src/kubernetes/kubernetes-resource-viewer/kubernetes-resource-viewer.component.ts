@@ -21,6 +21,7 @@ import { PreviewableComponent } from '../../../../core/src/shared/previewable-co
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
 import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { entityDeleted } from '../../../../store/src/operators';
+import { DeleteActionState } from '../../../../store/src/reducers/api-request-reducer/types';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
@@ -32,7 +33,9 @@ import { entityCatalog } from './../../../../store/src/entity-catalog/entity-cat
 import { UserFavoriteManager } from './../../../../store/src/user-favorite-manager';
 
 export interface KubernetesResourceViewerComponentConfig {
+  endpointId?: string;
   resource: BasicKubeAPIResource;
+  definition?: KubeResourceEntityDefinition;
 }
 
 export interface KubernetesResourceViewerConfig {
@@ -83,27 +86,27 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   public hasPodMetrics$: Observable<boolean>;
   public podRouterLink$: Observable<string[]>;
 
-  private analysis;
-  public alerts;
+  private analysis: any;
+  public alerts: any;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 
   // Custom component
-  @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer;
-  componentRef: ComponentRef<PreviewableComponent>;
+  @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer: ViewContainerRef | undefined;
+  componentRef: ComponentRef<PreviewableComponent> | undefined;
 
   component: any;
 
-  data: any; // TODO: Typing
+  data: KubernetesResourceViewerComponentConfig;
 
   @ViewChild('header', { static: false }) templatePortalContent: TemplateRef<unknown>;
   headerContent: Portal<any>;
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.removeCustomComponent();
   }
 
-  removeCustomComponent() {
+  removeCustomComponent(): void {
     if (this.customComponentContainer) {
       this.customComponentContainer.clear();
     }
@@ -112,21 +115,21 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     }
   }
 
-  createCustomComponent() {
+  createCustomComponent(): void {
     this.removeCustomComponent();
     if (this.component && this.customComponentContainer) {
-      const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.component);
+      const factory: ComponentFactory<PreviewableComponent> = this.resolver.resolveComponentFactory(this.component);
       this.componentRef = this.customComponentContainer.createComponent(factory);
       this.componentRef.instance.setProps(this.data);
     }
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.createCustomComponent();
     setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
-  setProps(props: KubernetesResourceViewerConfig) {
+  setProps(props: KubernetesResourceViewerConfig): void {
     this.title = props.title;
     this.analysis = props.analysis;
     this.component = props.component;
@@ -135,19 +138,19 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       filter(item => !!item),
       map((item: (KubeAPIResource | KubeStatus)) => {
         const resource: KubernetesResourceViewerResource = {} as KubernetesResourceViewerResource;
-        const newItem = {} as any;
+        const newItem: Record<string, any> = {};
+        const itemWithDynamicProps = item as Record<string, any>;
 
         resource.raw = item;
-        Object.keys(item || []).forEach(k => {
+        Object.keys(item || {}).forEach((k: string) => {
           if (k !== 'endpointId' && k !== 'releaseTitle' && k !== 'expandedStatus' && k !== '_metadata') {
-            newItem[k] = item[k];
+            newItem[k] = itemWithDynamicProps[k];
           }
         });
 
-        resource.jsonView = newItem;
+        resource.jsonView = newItem as KubeAPIResource;
 
-        /* tslint:disable-next-line:no-string-literal  */
-        const fallback = item['_metadata'] || {};
+        const fallback = itemWithDynamicProps['_metadata'] || {};
 
         const ts = item.metadata ? item.metadata.creationTimestamp : fallback.creationTimestamp;
         resource.age = moment(ts).fromNow(true);
@@ -155,7 +158,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
         if (item.metadata && item.metadata.labels) {
           resource.labels = [];
-          Object.keys(item.metadata.labels || []).forEach(labelName => {
+          Object.keys(item.metadata.labels || {}).forEach(labelName => {
             resource.labels.push({
               name: labelName,
               value: item.metadata.labels[labelName]
@@ -165,18 +168,17 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
         if (item.metadata && item.metadata.annotations) {
           resource.annotations = [];
-          Object.keys(item.metadata.annotations || []).forEach(labelName => {
+          Object.keys(item.metadata.annotations || {}).forEach(labelName => {
             resource.annotations.push({
               name: labelName,
-              value: item.metadata.annotations[labelName]
+              value: item.metadata.annotations![labelName]
             });
           });
         }
 
-        /* tslint:disable-next-line:no-string-literal  */
-        resource.kind = item['kind'] || fallback.kind || props.resourceKind;
-        /* tslint:disable-next-line:no-string-literal  */
-        resource.apiVersion = item['apiVersion'] || fallback.apiVersion || this.getVersionFromSelfLink(item.metadata['selfLink']);
+        resource.kind = itemWithDynamicProps['kind'] || fallback.kind || props.resourceKind;
+        const metadataWithSelfLink = item.metadata as Record<string, any>;
+        resource.apiVersion = itemWithDynamicProps['apiVersion'] || fallback.apiVersion || this.getVersionFromSelfLink(metadataWithSelfLink['selfLink']);
 
         this.component = props.component;
         this.data = {
@@ -221,19 +223,19 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     this.createCustomComponent();
   }
 
-  private getVersionFromSelfLink(url: string): string {
+  private getVersionFromSelfLink(url: string): string | undefined {
     if (!url) {
-      return;
+      return undefined;
     }
     const parts = url.split('/');
     return `${parts[1]}/${parts[2]}`;
   }
 
-  private getEndpointId(res): string {
+  private getEndpointId(res: { endpointId?: string; metadata?: { kubeId?: string } }): string | undefined {
     return this.kubeEndpointService?.kubeGuid || res.endpointId || res.metadata?.kubeId;
   }
 
-  private applyAnalysis(resource) {
+  private applyAnalysis(resource: KubernetesResourceViewerResource): void {
     let id = (resource.kind || 'pod').toLowerCase();
     id = `${id}/${resource.raw.metadata.namespace}/${resource.raw.metadata.name}`;
     if (this.analysis && this.analysis.alerts[id]) {
@@ -243,7 +245,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     }
   }
 
-  private setFavorite(defn: KubeResourceEntityDefinition, item: any) {
+  private setFavorite(defn: KubeResourceEntityDefinition, item: BasicKubeAPIResource): void {
     if (defn) {
       const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
       const canFav = this.userFavoriteManager.canFavoriteEntityType(entityDefn);
@@ -254,9 +256,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   // Warn about deletion and then delete the resource if confirmed
-  public deleteWarn() {
+  public deleteWarn(): void {
     // Namespace vs Pod definition in different places
-    const defn = (this.data.definition?.definition || this.data.definition) as KubeResourceEntityDefinition;
+    const defnRaw = this.data.definition as any;
+    const defn = (defnRaw?.definition || this.data.definition) as KubeResourceEntityDefinition;
     this.sidePanelService.hide();
     const confirmation = new ConfirmationDialogConfig(
       `Delete ${defn.label}`,
@@ -276,8 +279,8 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         ).pipe(
           entityDeleted(),
           first()
-        ).subscribe((result) => {
-          const msg = result.error ? `Could not delete reosource: ${result.error}` : `Deleted resource '${this.data.resource.metadata.name}'`;
+        ).subscribe((result: DeleteActionState) => {
+          const msg = result.error ? `Could not delete resource: ${result.message}` : `Deleted resource '${this.data.resource.metadata.name}'`;
           this.snackBarService.show(msg);
         }
         );

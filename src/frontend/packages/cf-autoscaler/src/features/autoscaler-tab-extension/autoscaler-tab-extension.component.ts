@@ -338,7 +338,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
       this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
       if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap, metricName) => {
+        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, any>, metricName: string) => {
           metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
           return metricMap;
         }, {});

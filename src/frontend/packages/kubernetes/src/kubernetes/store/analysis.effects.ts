@@ -54,7 +54,7 @@ export class AnalysisEffects {
             result: []
           };
           const items: any = response as Array<any>;
-          items.forEach(item => {
+          items.forEach((item: AnalysisReport) => {
             const id = item.id;
             res.entities[entityKey][id] = item;
             res.result.push(id);
@@ -235,13 +235,13 @@ export class AnalysisEffects {
   ));
 
 
-  private processReport(report: any) {
+  private processReport(report: Record<string, any>): void {
     // Check the path of the report
-    if (report.path.split('/').length !== 2) {
+    if (report['path'].split('/').length !== 2) {
       return;
     }
 
-    switch (report.format) {
+    switch (report['format']) {
       case 'popeye':
         const helper = new PopeyeReportHelper(report);
         helper.map();
@@ -251,7 +251,7 @@ export class AnalysisEffects {
         kubeScoreHelper.map();
         break;
       default:
-        console.warn('Do not know how to handle this report type: ', report.format);
+        console.warn('Do not know how to handle this report type: ', report['format']);
         break;
     }
   }

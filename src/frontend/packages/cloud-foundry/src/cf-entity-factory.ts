@@ -319,7 +319,7 @@ entityCache[featureFlagEntityType] = FeatureFlagSchema;
 const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBrokerEntityType] = ServiceBrokerSchema;
 
-function createUserOrgSpaceSchema(schemaKey, entity, relationKey): EntitySchema {
+function createUserOrgSpaceSchema(schemaKey: string, entity: any, relationKey: string): EntitySchema {
   return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
 }
 

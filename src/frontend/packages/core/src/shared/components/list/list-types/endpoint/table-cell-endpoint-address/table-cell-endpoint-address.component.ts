@@ -25,7 +25,7 @@ export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointM
   set row(row: EndpointModel | RowWithEndpointId) {
     super.row = row;
     /* tslint:disable-next-line:no-string-literal */
-    const id = row['endpointId'] || row['guid'];
+    const id = (row as any)['endpointId'] || (row as any)['guid'];
     this.endpointAddress$ = stratosEntityCatalog.endpoint.store.getEntityService(id).waitForEntity$.pipe(
       map(data => data.entity),
       map((data: any) => getFullEndpointApiUrl(data))

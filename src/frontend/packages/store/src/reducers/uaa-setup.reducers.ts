@@ -3,14 +3,14 @@ import { UAASetupState } from '../types/uaa-setup.types';
 import { SETUP_GET_SCOPES, SETUP_SAVE_CONFIG, SETUP_FAILED } from '../actions/setup.actions';
 
 const defaultState = {
-  payload: null,
+  payload: null as null,
   setup: false,
   error: false,
   message: '',
   settingUp: false
 };
 
-export function uaaSetupReducer(state: UAASetupState = defaultState, action) {
+export function uaaSetupReducer(state: UAASetupState = defaultState, action: any) {
   switch (action.type) {
     case SETUP_GET_SCOPES:
     case SETUP_SAVE_CONFIG:

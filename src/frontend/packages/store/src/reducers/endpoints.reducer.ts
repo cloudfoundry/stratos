@@ -7,7 +7,7 @@ export function endpointsReducer(
     error: false,
     message: ''
   },
-  action
+  action: any
 ): EndpointState {
   switch (action.type) {
     case GET_ENDPOINTS:

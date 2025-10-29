@@ -29,7 +29,7 @@ export class ChartDetailsReadmeComponent {
   public loading = false;
   public readmeContent$: Observable<string>;
   private renderer = new marked.Renderer();
-  private loadingDelay: any;
+  private loadingDelay: ReturnType<typeof setTimeout>;
 
   constructor(private chartsService: ChartsService) {
     this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;

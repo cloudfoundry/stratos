@@ -12,8 +12,11 @@ import {
 } from '../../../../../../../core/src/shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
 import { ITableColumn, ITableText } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import {
+  IGlobalListAction,
+  IListAction,
   IListConfig,
   IListMultiFilterConfig,
+  IMultiListAction,
   ListConfig,
   ListViewTypes,
 } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -154,11 +157,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   cardComponent = CardAppComponent;
   defaultView = 'cards' as ListView;
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => this.columns;
-  getDataSource = () => this.appsDataSource;
-  getMultiFiltersConfigs = () => this.multiFilterConfigs;
-  getInitialised = () => this.initialised$;
+  getGlobalActions = (): IGlobalListAction<APIResource<IApp>>[] | null => null;
+  getMultiActions = (): IMultiListAction<APIResource<IApp>>[] | null => null;
+  getSingleActions = (): IListAction<APIResource<IApp>>[] | null => null;
+  getColumns = (): ITableColumn<APIResource<IApp>>[] => this.columns;
+  getDataSource = (): CfAppsDataSource => this.appsDataSource;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => this.multiFilterConfigs;
+  getInitialised = (): Observable<boolean> => this.initialised$;
 }

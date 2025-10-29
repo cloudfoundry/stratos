@@ -27,9 +27,9 @@ function getChildRoutes(r: any) {
   return r.children ? r.children : loadedRoutes;
 }
 
-function setChildRoutes(r: any, newRoutes: any) {
+function setChildRoutes(r: any, newRoutes: any): void {
   if (!r) {
-    return [];
+    return;
   }
   const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
   if (r.children) {

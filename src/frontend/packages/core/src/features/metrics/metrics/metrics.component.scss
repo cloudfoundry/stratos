@@ -23,7 +23,7 @@
     }
     &__detail {
       margin-left: 32px;
-      opacity: .8;
+      opacity: 0.8;
     }
   }
   &-metadata {
@@ -84,7 +84,7 @@ $tree-indicator-width: 3px;
 }
 
 .tree ul {
-  margin-left: .5em;
+  margin-left: 0.5em;
 }
 
 .tree::before,

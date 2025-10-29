@@ -35,7 +35,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
   @Output() onFileData: EventEmitter<string> = new EventEmitter();
 
-  @Input() fileFormControlName;
+  @Input() fileFormControlName: string;
 
   @Input() buttonLabel = '';
 
@@ -67,16 +67,16 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   get fileCount(): number { return this.files && this.files.length || 0; }
 
-  onNativeInputFileSelect($event) {
+  onNativeInputFileSelect($event: Event) {
     const fs = getEventFiles($event);
-    if (fs.length > 0) {
-      this.files = fs;
+    if (fs && fs.length > 0) {
+      this.files = Array.from(fs);
       this.onFileSelect.emit(this.files[0]);
 
       if (!!this.formGroupControl) {
-        this.handleFileData(this.files[0], (value) => this.updateFileState(value));
+        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.updateFileState(value));
       } else {
-        this.handleFileData(this.files[0], (value) => this.onFileData.emit(value));
+        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.onFileData.emit(value as string));
       }
       if (this.files.length > 0) {
         this.name = this.files[0].name;
@@ -84,13 +84,13 @@ export class FileInputComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectFile($event) {
+  selectFile($event: Event) {
     this.nativeInputFile.nativeElement.click();
     $event.preventDefault();
     return false;
   }
 
-  handleFileData(file, done) {
+  handleFileData(file: File, done: (value: string | ArrayBuffer | null) => void) {
     const reader = new FileReader();
     reader.onload = () => {
       done(reader.result);

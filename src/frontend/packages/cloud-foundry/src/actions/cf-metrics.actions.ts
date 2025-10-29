@@ -58,7 +58,7 @@ export class FetchCFMetricsPaginatedAction extends FetchCFMetricsAction implemen
     super(guid, cfGuid, query, queryType);
     this.paginationKey = this.guid;
   }
-  actions = [];
+  actions: string[] = [];
   paginationKey: string;
   initialParams = {
     'order-direction': 'desc',
@@ -71,7 +71,7 @@ export class FetchCFCellMetricsPaginatedAction extends FetchCFCellMetricsAction 
     super(cfGuid, cellId, query, queryType);
     this.paginationKey = this.guid;
   }
-  actions = [];
+  actions: string[] = [];
   paginationKey: string;
   initialParams = {
     'order-direction': 'desc',

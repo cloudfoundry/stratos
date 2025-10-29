@@ -97,15 +97,15 @@ export class DeployApplicationDeployer {
   // Are we deploying?
   deploying = false;
 
-  private inputStream;
+  private inputStream: any;
 
   private isOpen = false;
 
   public fsFileInfo: FileScannerInfo;
 
-  private fileTransfers;
+  private fileTransfers: any;
   private fileTransferStatus: FileTransferStatus;
-  private currentFileTransfer;
+  private currentFileTransfer: any;
 
   constructor(
     private store: Store<CFAppState>,
@@ -176,7 +176,7 @@ export class DeployApplicationDeployer {
         const buffer = websocketConnect(streamUrl)
           .pipe(
             switchMap((get) => get(this.inputStream)),
-            catchError(e => {
+            catchError((e: any): any[] => {
               return [];
             }),
             filter(l => !!l),
@@ -304,7 +304,7 @@ export class DeployApplicationDeployer {
     return JSON.stringify(msg);
   };
 
-  processWebSocketMessage = (log) => {
+  processWebSocketMessage = (log: any) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -415,7 +415,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log, title, error) {
+  private onClose(log: any, title: string, error: any) {
     if (title) {
       this.streamTitle = title;
     }
@@ -428,7 +428,7 @@ export class DeployApplicationDeployer {
 
   // File Upload
   sendLocalSourceMetadata() {
-    const metadata = {
+    const metadata: { files: any[]; folders: any[] } = {
       files: [],
       folders: []
     };
@@ -462,9 +462,9 @@ export class DeployApplicationDeployer {
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata, base, folder) {
+  collectFoldersAndFiles(metadata: any, base: string, folder: any) {
     if (folder.files) {
-      folder.files.forEach(file => {
+      folder.files.forEach((file: any) => {
         file.fullPath = base ? base + '/' + file.name : file.name;
         metadata.files.push(file);
       });

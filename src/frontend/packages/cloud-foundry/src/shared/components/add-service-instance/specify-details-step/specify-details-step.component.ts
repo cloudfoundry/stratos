@@ -114,7 +114,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   tagsRemovable = true;
   tagsAddOnBlur = true;
   separatorKeysCodes = [ENTER, COMMA, SPACE];
-  tags = [];
+  tags: string[] = [];
   spaceScopeSub: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
@@ -172,7 +172,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         if (!this.appId) {
           return svcs;
         } else {
-          const updated = [];
+          const updated: APIResource<IServiceInstance>[] = [];
           svcs.forEach(svc => {
             const alreadyBound = !!svc.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
             if (alreadyBound) {
@@ -226,7 +226,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
-            this.tags = [].concat(state.tags.map(t => ({ label: t })));
+            this.tags = [].concat(state.tags);
           }
         })
       ).subscribe();
@@ -234,7 +234,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.subscriptions.push(this.setupFormValidatorData());
   };
 
-  setServiceParams(data) {
+  setServiceParams(data: any) {
     this.serviceParams = data;
   }
 
@@ -285,7 +285,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     });
   }
 
-  setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
+  setOrg = (guid: string) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -383,8 +383,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   };
 
-  private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[], }, }) =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0];
+  private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
+    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response?.result?.[0];
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
@@ -465,7 +465,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = this.serviceParams;
-    const tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
+    const tagsStr: string[] = this.tags.length > 0 ? this.tags : [];
 
     const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
 
@@ -504,7 +504,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const input = event.input;
     const value = event.value;
     if ((value || '').trim()) {
-      this.tags.push({ label: value.trim() });
+      this.tags.push(value.trim());
       this.updateTagsFormControl();
     }
 
@@ -513,7 +513,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
   }
 
-  removeTag(tag: any): void {
+  removeTag(tag: string): void {
     const index = this.tags.indexOf(tag);
 
     if (index >= 0) {
@@ -523,8 +523,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private updateTagsFormControl(): void {
-    const tagsArray = this.tags.map(t => t.label);
-    this.createNewInstanceForm.controls.tags.setValue(tagsArray);
+    this.createNewInstanceForm.controls.tags.setValue(this.tags);
     this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 

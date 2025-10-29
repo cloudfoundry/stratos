@@ -138,7 +138,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editProfileForm.value)) {
       if (!this.editProfileForm.controls[key].pristine) {
-        updates[key] = this.editProfileForm.value[key];
+        (updates as any)[key] = this.editProfileForm.value[key];
       }
     }
     return this.userProfileService.updateProfile(this.profile, updates).pipe(

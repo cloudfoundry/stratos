@@ -42,7 +42,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) stepComponents: QueryList<StepComponent>;
 
-  @Input() cancel = null;
+  @Input() cancel: string = null;
   @Input() nextButtonProgress = true;
   @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
@@ -56,7 +56,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   stepValidateSub: Subscription = null;
 
-  private enterData;
+  private enterData: any;
   private snackBarRef: TailwindSnackBarRef<any>;
 
   currentIndex = 0;
@@ -111,7 +111,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.steps = this.allSteps.filter((step => !step.hidden));
   }
 
-  goNext() {
+  goNext(): void {
     // Close previous error snackbar if there was one
     if (this.snackBarRef) {
       this.snackBar.dismiss();
@@ -153,30 +153,30 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           } else if (!success && message) {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
           }
-          return [];
+          return observableOf(undefined);
         })).subscribe();
     }
   }
 
-  redirect(redirectPayload?: IRouterNavPayload) {
+  redirect(redirectPayload?: IRouterNavPayload): Observable<void> {
     if (redirectPayload) {
       return observableOf(this.dispatchRedirect(redirectPayload));
     }
-    return combineLatest(
+    return combineLatest([
       this.cancel$,
       this.cancelQueryParams$
-    ).pipe(
+    ]).pipe(
       map(([path, params]) => {
         this.dispatchRedirect({ path, query: params });
       })
     );
   }
 
-  private dispatchRedirect(redirectPayload: IRouterNavPayload) {
+  private dispatchRedirect(redirectPayload: IRouterNavPayload): void {
     this.store.dispatch(new RouterNav(redirectPayload));
   }
 
-  setActive(index: number) {
+  setActive(index: number): void {
     if (this.basePreviousRedirect && index < 0) {
       this.dispatchRedirect(this.basePreviousRedirect);
     }
@@ -291,7 +291,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(step: StepComponent, index: number): 'done' {
+  getIconLigature(step: StepComponent, index: number): string {
     return 'done';
   }
 

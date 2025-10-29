@@ -34,7 +34,7 @@ export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConf
     this.hasUser = this.row._users.length > 0;
   }
 
-  valueChanged(value) {
+  valueChanged(value: string): void {
     this.row._user = value;
     this.helper.update(this.row);
   }

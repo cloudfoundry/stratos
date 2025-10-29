@@ -3,7 +3,7 @@ import { IFailedRequestAction } from '../../types/request.types';
 import { isNullOrUndefined } from '../../utils';
 import { getEntityRequestState, mergeUpdatingState, setEntityRequestState } from './request-helpers';
 
-export function failRequest(state, action: IFailedRequestAction) {
+export function failRequest(state: any, action: IFailedRequestAction) {
   if (isNullOrUndefined(action.apiAction.guid)) {
     return state;
   }

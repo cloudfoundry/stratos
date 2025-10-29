@@ -165,7 +165,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
 
   private groupConfigs(configs: PermissionConfig[]): IConfigGroups {
-    return configs.reduce((grouped, config) => {
+    return configs.reduce((grouped: IConfigGroups, config) => {
       const type = config.type;
       return {
         ...grouped,
@@ -174,7 +174,7 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
           config
         ]
       };
-    }, {});
+    }, {} as IConfigGroups);
   }
 
 }

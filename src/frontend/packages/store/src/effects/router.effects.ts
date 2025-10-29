@@ -21,7 +21,7 @@ export class RouterEffect {
   routerGoUrl$ = createEffect(() => this.actions$.pipe(
     ofType<RouterNav>(RouterActions.GO),
     map((action: RouterNav) => action.payload),
-    tap(({ path, query: queryParams, extras = {} }) => {
+    tap(({ path, query: queryParams, extras = {} }: { path: any; query: any; extras?: any }) => {
       const extraParams = { ...extras, queryParams };
       if (typeof path === 'string') {
         path = path.split('/');

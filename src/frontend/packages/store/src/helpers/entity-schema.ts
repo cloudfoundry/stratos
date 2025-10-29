@@ -28,7 +28,7 @@ export class StratosEntitySchema extends schema.Entity {
 export class EntitySchema extends schema.Entity implements EntityCatalogEntityConfig {
   schema: Schema;
   schemaKey: string;
-  public declare getId: (input, parent?, key?) => string;
+  public declare getId: (input: unknown, parent?: unknown, key?: string) => string;
   /**
    * @param entityKey As per schema.Entity ctor
    * @param [definition] As per schema.Entity ctor

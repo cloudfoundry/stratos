@@ -19,7 +19,7 @@ export class ViewBuildpackComponent implements OnInit, OnChanges {
 
   ngOnInit() { }
 
-  ngOnChanges(values) {
+  ngOnChanges(values: any) {
     if (values.buildPack.firstChange || values.buildPack.currentValue !== values.buildPack.previousValue) {
       const buildPack = values.buildPack.currentValue;
       let url = typeof buildPack !== 'undefined' && buildPack ? buildPack : '';

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { EMPTY } from 'rxjs';
 import { catchError, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { SET_PAGE_BUSY } from '../../../../store/src/actions/pagination.actions';
 import { rootUpdatingKey } from '../../../../store/src/reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../../../../store/src/selectors/api.selectors';
 import { getPaginationState } from '../../../../store/src/selectors/pagination.selectors';
-import { UpdateCfAction } from '../../../../store/src/types/request.types';
+import { ICFAction, UpdateCfAction } from '../../../../store/src/types/request.types';
 import {
   CfValidateEntitiesComplete,
   CfValidateEntitiesStart,
@@ -88,19 +89,19 @@ export class CfValidateEffects {
           )];
         })
       )
-        .pipe(catchError(error => {
+        .pipe(catchError((error: unknown): import('rxjs').Observable<never> => {
           console.warn(`Entity validation process failed`, error);
-          this.update(apiAction, false, error.message);
-          return [];
+          this.update(apiAction, false, error instanceof Error ? error.message : String(error));
+          return EMPTY;
         }));
     })
   ));
 
    completeEntities$ = createEffect(() => this.actions$.pipe(
     ofType<CfValidateEntitiesComplete>(EntitiesPipelineActionTypes.COMPLETE),
-    mergeMap(action => {
+    mergeMap((action): any[] => {
       const completeAction: CfValidateEntitiesComplete = action;
-      const actions = [];
+      const actions: any[] = [];
       if (completeAction.validationResult.started && completeAction.independentUpdates) {
         this.update(completeAction.apiAction, false, null);
       }
@@ -108,8 +109,8 @@ export class CfValidateEffects {
     })));
 
 
-  update(apiAction, busy: boolean, error: string) {
-    if (apiAction.paginationKey) {
+  update(apiAction: ICFAction | any, busy: boolean, error: string | null): void {
+    if ((apiAction as any).paginationKey) {
       this.store.dispatch({
         type: SET_PAGE_BUSY,
         busy,
@@ -117,8 +118,8 @@ export class CfValidateEffects {
         apiAction
       });
     } else {
-      const newAction = {
-        ...apiAction,
+      const newAction: ICFAction = {
+        ...(apiAction as ICFAction),
       };
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;

@@ -106,7 +106,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
     if (!pagination) {
       return false;
     }
-    const currentPage = pagination.ids[pagination.currentPage];
+    const currentPage = (pagination.ids as Record<number, any>)[pagination.currentPage];
     const hasPageIds = !!currentPage;
     const requestInfo =
       pagination.pageRequests[pagination.clientPagination?.currentPage ?? pagination.currentPage];
@@ -174,7 +174,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   ) {
     return pagination$.pipe(
       distinctUntilChanged(this.isPageSameIsh),
-      map(pagination => pagination.ids[pagination.currentPage] || [])
+      map(pagination => (pagination.ids as Record<number, any>)[pagination.currentPage] || [])
     );
   }
 
@@ -241,7 +241,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       combineLatestOperator(entityObservable$),
       withLatestFrom(allEntitiesObservable$),
       map(([[pagination], allEntities]) => {
-        return this.getLocalEntities(pagination, allEntities, schema).filter(ent => !!ent);
+        return this.getLocalEntities(pagination, allEntities, schema).filter((ent: any) => !!ent);
       }),
       tag('de-norming-local ' + schema.key),
     );
@@ -287,17 +287,17 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
       if (pagination.forcedLocalPage) {
         const { page, pageSchema } = this.getPageInfo(pagination, pagination.forcedLocalPage, defaultSchema);
 
-        return this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key));
+        return this.denormalizePage(page, pageSchema, allEntities).map((entity: any) => new MultiActionListEntity(entity, pageSchema.key));
       }
       return pages.reduce((allPageEntities, pageNumber) => {
         const { page, pageSchema } = this.getPageInfo(pagination, pageNumber, defaultSchema);
         return [
           ...allPageEntities,
-          ...this.denormalizePage(page, pageSchema, allEntities).map(entity => new MultiActionListEntity(entity, pageSchema.key))
+          ...this.denormalizePage(page, pageSchema, allEntities).map((entity: any) => new MultiActionListEntity(entity, pageSchema.key))
         ];
       }, []);
     } else {
-      const page = pagination.ids[pagination.currentPage] || [];
+      const page = (pagination.ids as Record<number, any>)[pagination.currentPage] || [];
       return page.length
         ? denormalize(page, [defaultSchema], allEntities)
         : [];
@@ -306,12 +306,12 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
 
   private denormalizePage(page: string[], schema: normalizrSchema.Entity, allEntities: GeneralRequestDataState) {
     return page.length
-      ? denormalize(page, [schema], allEntities).filter(ent => !!ent)
+      ? denormalize(page, [schema], allEntities).filter((ent: any) => !!ent)
       : [];
   }
 
   private getPageInfo(pagination: PaginationEntityState, pageId: number | string, defaultSchema: normalizrSchema.Entity) {
-    const page = pagination.ids[pageId] || [];
+    const page = (pagination.ids as Record<string | number, any>)[pageId] || [];
     const pageState = pagination.pageRequests[pageId] || {} as ListActionState;
     const pageSchema = pageState.entityConfig ? entityCatalog.getEntity(
       pageState.entityConfig.endpointType,
@@ -338,7 +338,7 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
         y.pageRequests[y.currentPage].busy
       );
     const samePageIdList =
-      samePage && x.ids[x.currentPage] === y.ids[y.currentPage];
+      samePage && (x.ids as any)[x.currentPage] === (y.ids as any)[y.currentPage];
     return samePageIdList && samePageBusyState;
   }
 

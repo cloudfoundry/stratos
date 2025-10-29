@@ -201,9 +201,9 @@ export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
   return orgSpaces.some((space) => hasRoleWithinSpace(user, space.metadata.guid));
 }
 
-function hasRole(user: CfUser, guid: string, roleType: string) {
-  if (user[roleType]) {
-    const roles = user[roleType] as APIResource[];
+function hasRole(user: CfUser, guid: string, roleType: string): boolean {
+  if ((user as Record<string, any>)[roleType]) {
+    const roles = (user as Record<string, any>)[roleType] as APIResource[];
     return !!roles.find(o => o ? o.metadata.guid === guid : false);
   }
   return false;
@@ -320,11 +320,11 @@ export function fetchTotalResults(
   store: Store<AppState>,
   paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<number> {
-  const newAction = {
+  const newAction: any = {
     ...action,
     paginationKey: createFetchTotalResultsPagKey(action.paginationKey),
     flattenPagination: false,
-    includeRelations: []
+    includeRelations: [] as string[]
   };
   newAction.initialParams['results-per-page'] = 1;
 

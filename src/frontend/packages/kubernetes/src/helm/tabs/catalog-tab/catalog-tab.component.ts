@@ -16,6 +16,7 @@ import { ListComponent } from '@stratosui/core';
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { SetClientFilter } from '../../../../../store/src/actions/pagination.actions';
 import { AppState } from '../../../../../store/src/app-state';
+import { EndpointModel } from '../../../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
@@ -66,15 +67,16 @@ export class CatalogTabComponent implements OnDestroy {
     stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(entities => !!entities),
       first()
-    ).subscribe(endpoints => {
+    ).subscribe((endpoints: unknown[]) => {
       let stratosHelmEndpoints = 0;
       for (const ep of endpoints) {
-        if (ep.cnsi_type !== HELM_ENDPOINT_TYPE) {
+        const endpoint = ep as EndpointModel;
+        if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
           continue;
         }
 
         stratosHelmEndpoints++;
-        if (ep.sub_type === HELM_HUB_ENDPOINT_TYPE) {
+        if (endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE) {
           // Always show the filter if there's artifact hub attached
           this.collapsed = false;
           this.hide = false;
@@ -90,25 +92,25 @@ export class CatalogTabComponent implements OnDestroy {
       this.searchReposSub.asObservable()
     ]).pipe(
       distinctUntilChanged(),
-      map(([repos, repoFilter]) => {
-        const unique = repos.reduce((res, repo) => {
-          const repoName = repo.attributes.repo.name;
-          if (repoFilter && !repoName.startsWith(repoFilter)) {
+      map(([repos, repoFilter]: [unknown[], string]) => {
+        const unique = (repos || []).reduce<{ artifactHubRepos: Record<string, boolean>; stratosRepos: Record<string, boolean> }>(
+          (res, repo: any) => {
+            const repoName = repo?.attributes?.repo?.name;
+            if (!repoName || (repoFilter && !repoName.startsWith(repoFilter))) {
+              return res;
+            }
+            const uniqueRepos = repo.monocularEndpointId ? res.artifactHubRepos : res.stratosRepos;
+            uniqueRepos[repoName] = true;
             return res;
-          }
-          const uniqueRepos = repo.monocularEndpointId ? res.artifactHubRepos : res.stratosRepos;
-          uniqueRepos[repoName] = true;
-          return res;
-        }, {
-          artifactHubRepos: {},
-          stratosRepos: {}
-        });
+          },
+          { artifactHubRepos: {}, stratosRepos: {} }
+        );
         return {
-          artifactHubRepos: Object.keys(unique.artifactHubRepos).sort((a, b) => a.localeCompare(b)),
-          stratosRepos: Object.keys(unique.stratosRepos).sort((a, b) => a.localeCompare(b))
+          artifactHubRepos: Object.keys(unique.artifactHubRepos).sort((a: string, b: string) => a.localeCompare(b)),
+          stratosRepos: Object.keys(unique.stratosRepos).sort((a: string, b: string) => a.localeCompare(b))
         };
       }),
-      startWith(null)
+      startWith({ artifactHubRepos: [], stratosRepos: [] })
     );
 
     const { repo: repoFromRoute } = this.activatedRoute.snapshot.params;
@@ -117,7 +119,7 @@ export class CatalogTabComponent implements OnDestroy {
     );
 
     // Set the initial state... and watch for changes (aka reset filters button)
-    this.sub = repoFromStore$.subscribe(repoFromStore => {
+    this.sub = repoFromStore$.subscribe((repoFromStore: string) => {
       // Only apply repo from url on first load (and if we have one)
       if (!this.initStateSet && repoFromRoute && repoFromRoute.length > 0) {
         this.filterCharts(repoFromRoute);
@@ -133,7 +135,7 @@ export class CatalogTabComponent implements OnDestroy {
    */
   public filterCharts(repoName: string) {
     this.filteredRepo = repoName;
-    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(first()).subscribe(pagination => {
+    helmEntityCatalog.chart.store.getPaginationMonitor().pagination$.pipe(first()).subscribe((pagination: any) => {
       const action = helmEntityCatalog.chart.actions.getMultiple();
       this.store.dispatch(new SetClientFilter(action, action.paginationKey, {
         string: pagination.clientPagination?.filter?.string ?? '',

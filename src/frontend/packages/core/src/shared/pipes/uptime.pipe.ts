@@ -10,10 +10,10 @@ export class UptimePipe implements PipeTransform {
 
   constructor(private utils: UtilsService) { }
 
-  transform(uptime): string {
+  transform(uptime: number | string): string {
     if (uptime === 'offline') {
       return 'Offline';
     }
-    return this.utils.formatUptime(uptime);
+    return this.utils.formatUptime(uptime as number);
   }
 }

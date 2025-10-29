@@ -144,7 +144,7 @@ export interface InternalEndpointError {
   eventCode?: string;
   message?: string;
   url: string;
-  error?;
+  error?: string;
 }
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(

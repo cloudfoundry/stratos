@@ -21,11 +21,11 @@ import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 // Simple class to represent MAJOR.MINOR.REVISION version
 export class Version {
 
-  public major: number;
-  public minor: number;
-  public revision: number;
+  public major!: number;
+  public minor!: number;
+  public revision!: number;
 
-  public prerelease: string;
+  public prerelease!: string;
 
   public valid: boolean;
 
@@ -120,7 +120,7 @@ export class HelmReleaseHelperService {
     );
 
     this.release$ = entityService.waitForEntity$.pipe(
-      map((item) => item.entity),
+      map((item: any) => item.entity),
       map((item: HelmRelease) => {
         if (!item.chart.metadata.icon) {
           const copy = JSON.parse(JSON.stringify(item));
@@ -142,7 +142,7 @@ export class HelmReleaseHelperService {
     // Get helm release
     const guid = workloadsEntityCatalog.graph.actions.get(this.releaseTitle, this.endpointGuid).guid;
     return workloadsEntityCatalog.graph.store.getEntityMonitor(guid).entity$.pipe(
-      filter(graph => !!graph)
+      filter((graph: any) => !!graph)
     );
   }
 
@@ -150,25 +150,25 @@ export class HelmReleaseHelperService {
     // Get helm release
     const guid = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid).guid;
     return workloadsEntityCatalog.resource.store.getEntityMonitor(guid).entity$.pipe(
-      filter(resources => !!resources)
+      filter((resources: any) => !!resources)
     );
   }
 
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
-    return kubeEntityCatalog.pod.store.getInWorkload.getPaginationMonitor(
+    return (kubeEntityCatalog.pod.store as any).getInWorkload.getPaginationMonitor(
       this.endpointGuid,
       this.namespace,
       this.releaseTitle
     ).currentPage$.pipe(
-      filter(pods => !!pods),
-      map(pods => this.mapPods(pods))
+      filter((pods: any) => !!pods),
+      map((pods: any) => this.mapPods(pods))
     );
   }
 
   // Check to see if a workload has updates available
   public getCharts() {
     return helmEntityCatalog.chart.store.getPaginationService().entities$.pipe(
-      filter(charts => !!charts)
+      filter((charts: any) => !!charts)
     );
   }
 
@@ -179,7 +179,7 @@ export class HelmReleaseHelperService {
       this.endpointGuid,
       { namespace: this.namespace }
     ).waitForEntity$.pipe(
-      map(historyEntity => historyEntity.entity.revisions)
+      map((historyEntity: any) => historyEntity.entity.revisions)
     );
   }
 
@@ -242,7 +242,7 @@ export class HelmReleaseHelperService {
   public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade> {
     const updates = combineLatest(this.getCharts(), this.release$);
     return updates.pipe(
-      map(([charts, release]) => {
+      map(([charts, release]: [any, any]) => {
         let score = -1;
         let match;
         for (const c of charts) {
@@ -271,7 +271,7 @@ export class HelmReleaseHelperService {
         // NOTE: If the helm repository is removed that we installed from, we won't be able to find the chart
         if (returnLatest) {
           // Need to check that the chart is probably the same
-          const releaseChart = charts.find(c => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
+          const releaseChart = charts.find((c: any) => this.compareCharts(c.attributes, release.chart.metadata) !== -1 &&
             c.relationships.latestChartVersion.data.version === release.chart.metadata.version);
           if (releaseChart) {
             return {
@@ -297,7 +297,7 @@ export class HelmReleaseHelperService {
     }
 
     // Find common words in the descriptions
-    const words = {};
+    const words: Record<string, boolean> = {};
     for (let w of a.description.split(' ')) {
       w = w.toLowerCase();
       if (w.length > 3 && w !== 'helm' && w !== 'chart') {

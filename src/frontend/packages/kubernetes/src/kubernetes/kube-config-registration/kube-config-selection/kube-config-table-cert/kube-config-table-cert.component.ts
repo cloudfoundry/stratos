@@ -73,7 +73,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
     this.valueChanged(checked);
   }
 
-  valueChanged(value) {
+  valueChanged(value: boolean): void {
     this.row.cluster['insecure-skip-tls-verify'] = value;
     this.helper.update(this.row);
   }

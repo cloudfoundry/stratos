@@ -26,7 +26,7 @@ export class CardsComponent<T> {
   set component(cardCell: CardTypes<T>) {
     this.pComponent = cardCell;
     /* tslint:disable-next-line */
-    this.columns = cardCell['columns'];
+    this.columns = (cardCell as any)['columns'];
   }
 
   public multiActionTrackBy() {

@@ -8,7 +8,8 @@ import {
   BaseCfListConfig,
 } from '../../../../../cloud-foundry/src/shared/components/list/list-types/base-cf/base-cf-list-config';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { IGlobalListAction, IListAction, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { MetricsRangeSelectorService } from '../../../../../core/src/shared/services/metrics-range-selector.service';
 import { ITimeRange } from '../../../../../core/src/shared/services/metrics-range-selector.types';
 import { ListView } from '../../../../../store/src/actions/list.actions';
@@ -41,7 +42,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     }
   ];
   text = {
-    title: null,
+    title: null as string | null,
     noEntries: 'There are no metrics defined in the policy'
   };
 
@@ -71,7 +72,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   ];
 
   private twoHours = 1000 * 60 * 60 * 2;
-  customTimeValidation = (start: moment.Moment, end: moment.Moment) => {
+  customTimeValidation = (start: moment.Moment | null, end: moment.Moment | null): string | null => {
     if (!end || !start) {
       return ' ';
     }
@@ -81,6 +82,7 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     if (end.diff(start) > this.twoHours) {
       return 'Time window must be two hours or less';
     }
+    return null;
   }
 
   constructor(
@@ -97,10 +99,10 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
     );
   }
 
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
+  getGlobalActions = (): IGlobalListAction<APIResource<AppScalingTrigger>>[] => [];
+  getMultiActions = (): IMultiListAction<APIResource<AppScalingTrigger>>[] => [];
+  getSingleActions = (): IListAction<APIResource<AppScalingTrigger>>[] => [];
   getDataSource = () => this.autoscalerMetricSource;
-  getMultiFiltersConfigs = () => [];
-  getColumns = () => this.columns;
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getColumns = (): ITableColumn<APIResource<AppScalingTrigger>>[] => this.columns;
 }
