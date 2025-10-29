@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { EditProfileInfoComponent } from './edit-profile-info/edit-profile-info.component';
 import { ProfileInfoComponent } from './profile-info/profile-info.component';
 
-const userProfile: Routes = [{
+export const USER_PROFILE_ROUTES: Routes = [{
   path: '',
   children: [
     {
@@ -17,8 +16,3 @@ const userProfile: Routes = [{
     }
   ]
 }];
-
-@NgModule({
-  imports: [RouterModule.forChild(userProfile)]
-})
-export class UserProfileRoutingModule { }

@@ -86,24 +86,24 @@ const appRoutes: Routes = [
         },
         children: [{
           path: 'metrics',
-          loadChildren: () => import('./features/metrics/metrics.module').then(m => m.MetricsModule),
+          loadChildren: () => import('./features/metrics/metrics.routes').then(m => m.METRICS_ROUTES),
         },
         {
           path: '',
-          loadChildren: () => import('./features/endpoints/endpoints.module').then(m => m.EndpointsModule),
+          loadChildren: () => import('./features/endpoints/endpoints.routes').then(m => m.ENDPOINTS_ROUTES),
         }]
       },
-      { path: 'about', loadChildren: () => import('./features/about/about.module').then(m => m.AboutModule) },
-      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.module').then(m => m.UserProfileModule) },
+      { path: 'about', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
+      { path: 'user-profile', loadChildren: () => import('./features/user-profile/user-profile.routes').then(m => m.USER_PROFILE_ROUTES) },
       {
         path: 'api-keys',
-        loadChildren: () => import('./features/api-keys/api-keys.module').then(m => m.ApiKeysModule),
+        loadChildren: () => import('./features/api-keys/api-keys.routes').then(m => m.API_KEYS_ROUTES),
         canActivate: [apiKeyAuthGuard]
       },
-      { path: 'events', loadChildren: () => import('./features/event-page/event-page.module').then(m => m.EventPageModule) },
+      { path: 'events', loadChildren: () => import('./features/event-page/event-page.routes').then(m => m.EVENT_PAGE_ROUTES) },
       {
         path: 'errors/:endpointId',
-        loadChildren: () => import('./features/error-page/error-page.module').then(m => m.ErrorPageModule)
+        loadChildren: () => import('./features/error-page/error-page.routes').then(m => m.ERROR_PAGE_ROUTES)
       },
     ]
   },

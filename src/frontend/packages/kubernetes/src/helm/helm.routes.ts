@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { MonocularChartViewComponent } from './chart-view/monocular.component';
 import { MonocularTabBaseComponent } from './monocular-tab-base/monocular-tab-base.component';
 import { CatalogTabComponent } from './tabs/catalog-tab/catalog-tab.component';
 
-const monocular: Routes = [
+export const HELM_ROUTES: Routes = [
   {
     path: '',
     component: MonocularTabBaseComponent,
@@ -18,8 +17,3 @@ const monocular: Routes = [
   { pathMatch: 'full', path: 'charts/:endpoint/:repo/:chartName/:version', component: MonocularChartViewComponent },
   { path: 'charts/:endpoint/:repo/:chartName', component: MonocularChartViewComponent },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(monocular)]
-})
-export class HelmRoutingModule { }

@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { AboutPageComponent } from './about-page/about-page.component';
 import { DiagnosticsPageComponent } from './diagnostics-page/diagnostics-page.component';
 import { EulaPageComponent } from './eula-page/eula-page.component';
 
-const about: Routes = [
+export const ABOUT_ROUTES: Routes = [
   {
     path: '',
     component: AboutPageComponent
@@ -19,10 +18,3 @@ const about: Routes = [
     component: DiagnosticsPageComponent
   }
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forChild(about),
-  ]
-})
-export class AboutRoutingModule { }

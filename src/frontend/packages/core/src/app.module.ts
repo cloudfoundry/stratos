@@ -41,7 +41,6 @@ import { ExtensionService } from './core/extension/extension-service';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { CustomImportModule } from './custom-import.module';
 import { environment } from './environments/environment';
-import { AboutModule } from './features/about/about.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
 import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
@@ -53,7 +52,8 @@ import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
 import { TabNavService } from './tab-nav.service';
-import { XSRFModule } from './xsrf.module';
+import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -123,9 +123,7 @@ class AppStoreDebugModule { }
     HomeModule,
     DashboardModule,
     StoreRouterConnectingModule.forRoot({ serializer: FullRouterStateSerializer }), // Create action for router navigation
-    AboutModule,
     CustomImportModule,
-    XSRFModule,
   ],
   providers: [
     CustomizationService,
@@ -138,7 +136,12 @@ class AppStoreDebugModule { }
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
     CurrentUserPermissionsService,
-    provideCharts(withDefaultRegisterables())
+    provideCharts(withDefaultRegisterables()),
+    // HTTP Client with functional interceptors (Angular 20 pattern)
+    provideHttpClient(
+      withInterceptors([xsrfInterceptor])
+    ),
+    { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor }
   ],
   bootstrap: [AppComponent]
 })

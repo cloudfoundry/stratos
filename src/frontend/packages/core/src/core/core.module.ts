@@ -83,24 +83,16 @@ import { WindowRef } from './window-ref/window-ref.service';
         ShowHideButtonComponent
     ],
     providers: [
-        PageHeaderService,
-        EventWatcherService,
-        WindowRef,
-        UtilsService,
-        EndpointsService,
-        UserService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
+        // Note: Most services already use providedIn: 'root' and don't need to be provided here
+        // Keeping only services that require special configuration or don't use providedIn
         EntityCatalogHelper,
         PaginationMonitorFactory,
-        UserProfileService,
-        EntityServiceFactory,
         {
             provide: APP_TITLE,
             useFactory: appTitleFactory,
             deps: [Title]
         },
-        // Tailwind Material service providers
+        // Tailwind Material service providers (these don't use providedIn: 'root')
         TailwindDialogService,
         TailwindSnackBarService,
         TailwindErrorStateMatcher,

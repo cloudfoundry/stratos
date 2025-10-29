@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { KubeConsoleComponent } from './kube-terminal/kube-console.component';
 import {
@@ -29,7 +28,7 @@ import { KubernetesNamespacesTabComponent } from './tabs/kubernetes-namespaces-t
 import { KubernetesNodesTabComponent } from './tabs/kubernetes-nodes-tab/kubernetes-nodes-tab.component';
 import { KubernetesSummaryTabComponent } from './tabs/kubernetes-summary-tab/kubernetes-summary.component';
 
-const kubernetes: Routes = [{
+export const KUBERNETES_ROUTES: Routes = [{
   path: '',
   component: KubernetesComponent
 },
@@ -108,7 +107,7 @@ const kubernetes: Routes = [{
     },
     {
       path: 'resource/:resource',
-      loadChildren: () => import('./kubernetes-resource/generic-resource.module').then(m => m.KubernetesGenericResourceModule),
+      loadChildren: () => import('./kubernetes-resource/generic-resource.routes').then(m => m.GENERIC_RESOURCE_ROUTES),
     },
 
   ]
@@ -141,8 +140,3 @@ const kubernetes: Routes = [{
   }
 }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(kubernetes)]
-})
-export class KubernetesRoutingModule { }

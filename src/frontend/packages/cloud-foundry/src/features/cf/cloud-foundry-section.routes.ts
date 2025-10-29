@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../../../core/src/core/extension/extension-service';
@@ -133,7 +132,7 @@ const usersRoles: Routes = [
   },
 ];
 
-const cloudFoundry: Routes = [{
+export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
   path: '',
   component: CloudFoundryComponent
 },
@@ -414,8 +413,3 @@ const cloudFoundry: Routes = [{
     }
   ]
 }];
-
-@NgModule({
-  imports: [RouterModule.forChild(cloudFoundry)]
-})
-export class CloudFoundrySectionRoutingModule { }

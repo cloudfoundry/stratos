@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import {
   AddServiceInstanceBaseStepComponent,
@@ -10,7 +9,7 @@ import {
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
 
-const services: Routes = [
+export const SERVICES_ROUTES: Routes = [
   {
     path: '',
     component: ServicesWallComponent,
@@ -32,10 +31,3 @@ const services: Routes = [
     component: DetachServiceInstanceComponent
   }
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forChild(services),
-  ]
-})
-export class ServicesRoutingModule { }

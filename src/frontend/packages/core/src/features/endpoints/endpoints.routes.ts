@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { dynamicExtensionRoutesGuard } from '../../core/extension/dynamic-extension-routes';
 import { StratosActionType } from '../../core/extension/extension-service';
@@ -16,7 +15,7 @@ import { CreateEndpointComponent } from './create-endpoint/create-endpoint.compo
 import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 
-const endpointsRoutes: Routes = [
+export const ENDPOINTS_ROUTES: Routes = [
   {
     path: '', component: EndpointsPageComponent,
     data: {
@@ -60,10 +59,3 @@ const endpointsRoutes: Routes = [
     }
   }
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forChild(endpointsRoutes),
-  ]
-})
-export class EndpointsRoutingModule { }

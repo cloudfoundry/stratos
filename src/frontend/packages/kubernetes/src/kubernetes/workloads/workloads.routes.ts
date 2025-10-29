@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { BaseChartDirective } from 'ng2-charts';
+import { Routes } from '@angular/router';
 
 import { CreateReleaseComponent } from './create-release/create-release.component';
 import { HelmReleaseTabBaseComponent } from './release/helm-release-tab-base/helm-release-tab-base.component';
@@ -17,7 +15,7 @@ import { HelmReleaseValuesTabComponent } from './release/tabs/helm-release-value
 import { HelmReleasesTabComponent } from './releases-tab/releases-tab.component';
 import { UpgradeReleaseComponent } from './upgrade-release/upgrade-release.component';
 
-const routes: Routes = [
+export const WORKLOADS_ROUTES: Routes = [
   {
     path: '',
     children: [
@@ -51,7 +49,7 @@ const routes: Routes = [
           { path: 'analysis', component: HelmReleaseAnalysisTabComponent },
           {
             path: 'resource/:resource',
-            loadChildren: () => import('../kubernetes-resource/generic-resource.module').then(m => m.KubernetesGenericResourceModule),
+            loadChildren: () => import('../kubernetes-resource/generic-resource.routes').then(m => m.GENERIC_RESOURCE_ROUTES),
             data: {
               isWorkload: true
             }
@@ -61,11 +59,3 @@ const routes: Routes = [
     ]
   },
 ];
-
-@NgModule({
-  imports: [
-    BaseChartDirective,
-    RouterModule.forChild(routes)
-  ]
-})
-export class WorkloadsRouting { }

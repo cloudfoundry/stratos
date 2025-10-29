@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import {
   AddServiceInstanceComponent,
@@ -11,7 +10,7 @@ import { ServicePlansComponent } from './service-plans/service-plans.component';
 import { ServiceSummaryComponent } from './service-summary/service-summary.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 
-const serviceCatalog: Routes = [
+export const SERVICE_CATALOG_ROUTES: Routes = [
   {
     path: '',
     component: ServiceCatalogPageComponent,
@@ -53,12 +52,4 @@ const serviceCatalog: Routes = [
       }
     ]
   }
-
 ];
-
-@NgModule({
-  imports: [
-    RouterModule.forChild(serviceCatalog),
-  ]
-})
-export class ServiceCatalogRoutingModule { }

@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { dynamicExtensionRoutesGuard } from '../../../../core/src/core/extension/dynamic-extension-routes';
 import { StratosActionType, StratosTabType } from '../../../../core/src/core/extension/extension-service';
@@ -27,15 +26,13 @@ import { ServicesTabComponent } from './application/application-tabs-base/tabs/s
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
-import { CreateApplicationModule } from './create-application/create-application.module';
 import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
-import { DeployApplicationModule } from './deploy-application/deploy-application.module';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { NewApplicationBaseStepComponent } from './new-application-base-step/new-application-base-step.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
-const applicationsRoutes: Routes = [
+export const APPLICATIONS_ROUTES: Routes = [
   {
     path: 'new',
     component: NewApplicationBaseStepComponent,
@@ -153,12 +150,3 @@ const applicationsRoutes: Routes = [
     }
   }
 ];
-
-@NgModule({
-  imports: [
-    CreateApplicationModule,
-    DeployApplicationModule,
-    RouterModule.forChild(applicationsRoutes)
-  ]
-})
-export class ApplicationsRoutingModule { }

@@ -39,13 +39,20 @@ import {
 import {
   KubeConfigTableUserSelectComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
-import { KUBERNETES_ENDPOINT_TYPE } from './kubernetes-entity-factory';
+import { KUBERNETES_ENDPOINT_TYPE, kubernetesNamespacesEntityType } from './kubernetes-entity-factory';
 import { kubeEntityCatalog } from './kubernetes-entity-generator';
 import { KubernetesListConfigService } from './kubernetes-list-service';
+import {
+  KubernetesNamespacePreviewComponent,
+} from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
+import { KubernetesPodsListConfig } from './list-types/kubernetes-pods/kubernetes-pods-list-config.service';
+import { KubernetesServicesListConfig } from './list-types/kubernetes-services/kubernetes-service-list-config.service';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesUIConfigService } from './kubernetes-ui-service';
 import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
+import { KubernetesNodeService } from './services/kubernetes-node.service';
+import { KubernetesService } from './services/kubernetes.service';
 
 @NgModule({
     imports: [
@@ -76,12 +83,15 @@ import { KubernetesEndpointService } from './services/kubernetes-endpoint.servic
     providers: [
         BaseKubeGuid,
         KubernetesEndpointService,
+        KubernetesNodeService,
+        KubernetesService,
         KubernetesUIConfigService,
     ]
 })
 export class KubernetesSetupModule {
   constructor(
     endpointService: EndpointsService,
+    uiConfigService: KubernetesUIConfigService,
     @Optional() @SkipSelf() parentModule: KubernetesSetupModule
   ) {
     if (parentModule) {
@@ -90,6 +100,11 @@ export class KubernetesSetupModule {
       endpointService.registerHealthCheck(
         new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => kubeEntityCatalog.node.api.healthCheck(endpoint.guid))
       );
+
+      // Configure UI services (from KubernetesModule)
+      uiConfigService.listConfig.set('k8s-pods', new KubernetesPodsListConfig());
+      uiConfigService.listConfig.set('k8s-services', new KubernetesServicesListConfig());
+      uiConfigService.previewComponent.set(kubernetesNamespacesEntityType, KubernetesNamespacePreviewComponent);
     }
   }
 }
