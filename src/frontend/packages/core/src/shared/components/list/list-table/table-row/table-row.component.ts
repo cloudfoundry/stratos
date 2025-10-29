@@ -1,6 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { CdkTableModule } from '@angular/cdk/table';
-import { CdkRow } from '@angular/cdk/table';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,7 +10,6 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
@@ -21,6 +18,8 @@ import { map } from 'rxjs/operators';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { ListExpandedComponentType } from '../../list.component.types';
 import { CardCell } from '../../list.types';
+import { ITableColumn } from '../table.types';
+import { TableCellComponent } from '../table-cell/table-cell.component';
 import { TableRowExpandedService } from './table-row-expanded-service';
 
 @Component({
@@ -33,17 +32,18 @@ selector: 'app-table-row',
   standalone: true,
   imports: [
     CommonModule,
-    CdkTableModule,
-    MatExpansionModule,
     MatIconModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    TableCellComponent
   ]
 })
-export class TableRowComponent<T = any> extends CdkRow implements OnInit {
+export class TableRowComponent<T = any> implements OnInit {
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
   expandedComponent: ViewContainerRef;
 
+  @Input() columns: ITableColumn<T>[];
+  @Input() dataSource: any;
   @Input() rowState: Observable<RowState>;
   @Input() expandComponent: ListExpandedComponentType<T>;
   @Input() row: T;
@@ -62,15 +62,14 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
   public isDeleting$: Observable<boolean>;
   public isWarningIcon$: Observable<boolean>;
   public defaultMinRowHeight = '50px';
+  public isExpanded = false;
 
   private expandedComponentRef: ComponentRef<any>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     public expandedService: TableRowExpandedService
-  ) {
-    super();
-  }
+  ) { }
 
   ngOnInit() {
     if (this.rowState) {
@@ -133,6 +132,18 @@ export class TableRowComponent<T = any> extends CdkRow implements OnInit {
     }
     const instance: CardCell<any> = this.expandedComponentRef.instance;
     instance.row = this.row; // This could be set again when `row` changes above
+  }
+
+  public toggleExpand() {
+    if (!this.expandComponent) {
+      return;
+    }
+    this.isExpanded = !this.isExpanded;
+    if (this.isExpanded) {
+      this.panelOpened();
+    } else {
+      this.expandedService.collapse(this.rowId);
+    }
   }
 
 }

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +23,8 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
     {
       provide: ListConfig,
       useClass: CfQuotasListConfigService
-    }
+    },
+    DatePipe
   ],
   standalone: true,
   imports: [

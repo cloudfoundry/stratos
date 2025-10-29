@@ -205,8 +205,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       direction: null,
       value: null
     };
-  private sortColumns: ITableColumn<T>[];
-  private filterColumns: IListFilter[];
+  sortColumns: ITableColumn<T>[] = [];
+  filterColumns: IListFilter[] = [];
   private filterSelected: IListFilter;
 
   private paginationWidgetToStore: Subscription;
@@ -423,8 +423,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginatorSettings.pageSize = pagination.pageSize;
     }));
 
-    this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
-      return column.sort;
+    this.sortColumns = (this.columns || []).filter((column: ITableColumn<T>) => {
+      return column && column.sort;
     });
 
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {

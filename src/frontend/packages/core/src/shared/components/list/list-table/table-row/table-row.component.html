@@ -1,27 +1,52 @@
 <div class="table-row-wrapper"
   [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__info': inInfoState$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async}">
+
+  <!-- Deletion Progress Bar -->
   <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
     <div class="table-row__deletion-bar-inner">
       <div class="table-row__deletion-bar-text">Deleting</div>
       <mat-progress-bar class="table-row__deletion-bar" mode="indeterminate"></mat-progress-bar>
     </div>
   </div>
+
+  <!-- Main Row -->
   <div role="row" class="table-row"
-    [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'has-error-row': errorMessage$ | async}">
-    <div class="mat-row table-row__inner">
-            <mat-expansion-panel class="table-row__inner__expansion" [togglePosition]="togglePosition" [disabled]="!expandComponent"
-        (opened)="panelOpened()" (closed)="expandedService.collapse(rowId)" [expanded]="expandedService.expanded[rowId]"
-        [hideToggle]="true" [ngClass]="{'table-row-wrapper__highlighted': isHighlighted$ | async}">
-        <mat-expansion-panel-header class="table-row__inner__expansion--header"
-          [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}"
-          [collapsedHeight]="'auto'" [expandedHeight]="'auto'"
-          [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
-          <ng-container cdkCellOutlet></ng-container>
-        </mat-expansion-panel-header>
-        <div #expandedComponent></div>
-      </mat-expansion-panel>
+    [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'has-error-row': errorMessage$ | async, 'table-row-wrapper__highlighted': isHighlighted$ | async}">
+    <div class="mat-row table-row__inner"
+      [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
+
+      <!-- Expander Cell (if expandable) -->
+      <div *ngIf="expandComponent"
+           class="table-cell table-cell-expander cursor-pointer"
+           (click)="toggleExpand()">
+        <span class="material-icons text-sm transition-transform"
+              [class.rotate-90]="isExpanded">
+          chevron_right
+        </span>
+      </div>
+
+      <!-- Data Cells - Manual rendering replacing cdkCellOutlet -->
+      <div *ngFor="let column of columns"
+           class="table-cell"
+           [ngClass]="column.class || ''"
+           [style.flex]="column.cellFlex">
+        <app-table-cell
+          [component]="column.cellComponent"
+          [func]="column.cellDefinition?.getValue"
+          [row]="row"
+          [config]="column"
+          [dataSource]="dataSource">
+        </app-table-cell>
+      </div>
     </div>
   </div>
+
+  <!-- Expanded Row -->
+  <div *ngIf="isExpanded && expandComponent" class="table-row__expanded">
+    <div #expandedComponent class="table-row__expanded-content"></div>
+  </div>
+
+  <!-- Error Row -->
   <div class="table-row__error mat-row" *ngIf="errorMessage$ | async">
     <div [ngClass]="{'table-row table-row__error-spacer__prominentErrorBar': prominentErrorBar}"
       class="table-row  table-row table-row__error-spacer"></div>

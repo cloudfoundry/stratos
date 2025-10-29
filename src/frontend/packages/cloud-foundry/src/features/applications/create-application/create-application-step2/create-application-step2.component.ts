@@ -43,10 +43,8 @@ export class CreateApplicationStep2Component implements OnInit {
   appName = new UntypedFormControl();
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
-  name: string;
-
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetNewAppName(this.name));
+    this.store.dispatch(new SetNewAppName(this.appName.value));
     return observableOf({ success: true });
   }
 

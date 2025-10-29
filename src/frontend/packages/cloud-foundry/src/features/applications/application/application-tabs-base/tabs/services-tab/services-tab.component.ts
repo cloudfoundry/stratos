@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
@@ -12,6 +13,7 @@ import {
   templateUrl: './services-tab.component.html',
   styleUrls: ['./services-tab.component.scss'],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useClass: AppServiceBindingListConfigService

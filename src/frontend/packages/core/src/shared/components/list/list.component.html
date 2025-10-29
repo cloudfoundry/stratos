@@ -100,8 +100,8 @@
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (selectionChange)="updateListSort($event.value, headerSort.direction)">
-                <option *ngFor="let column of sortColumns" [value]="column.columnId">
-                  {{column.headerCell()}}
+                <option *ngFor="let column of sortColumns" [value]="column?.columnId">
+                  {{column?.headerCell?.()}}
                 </option>
               </select>
             </div>

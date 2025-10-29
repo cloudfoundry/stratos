@@ -158,7 +158,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         }
         if (this.modeService.isServicesWallMode()) {
           this.servicesWallCreateInstance = true;
-          this.titleSubject.next('Create Service Instance');
+          // Use setTimeout to schedule title update outside current change detection cycle
+          setTimeout(() => this.titleSubject.next('Create Service Instance'), 0);
           return observableOf(true);
         }
         return observableOf(true);
@@ -308,7 +309,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.store.dispatch(
           new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
         );
-        this.titleSubject.next(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
+        // Use setTimeout to schedule title update outside current change detection cycle
+        setTimeout(() => {
+          this.titleSubject.next(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
+        }, 0);
       }),
       take(1),
       map(o => true),
@@ -342,7 +346,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
     if (this.serviceType === this.serviceTypes.USER_SERVICE) {
       this.serviceInstanceId = serviceInstanceId;
-      this.titleSubject.next('Edit User Provided Service Instance');
+      // Use setTimeout to schedule title update outside current change detection cycle
+      setTimeout(() => this.titleSubject.next('Edit User Provided Service Instance'), 0);
       return observableOf(true);
     } else {
       return cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, endpointId).waitForEntity$.pipe(
@@ -358,7 +363,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           }
 
           this.csiGuidsService.cfGuid = endpointId;
-          this.titleSubject.next(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+          // Use setTimeout to schedule title update outside current change detection cycle
+          setTimeout(() => {
+            this.titleSubject.next(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+          }, 0);
           const serviceGuid = serviceInstanceEntity.service_guid;
 
           if (!serviceGuid) {
@@ -493,6 +501,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     }
 
     // Subscribe to service name and update title imperatively
+    // Use setTimeout to schedule title update outside current change detection cycle
+    // This prevents ExpressionChangedAfterItHasBeenCheckedError
     this.cSIHelperService.getServiceName().pipe(
       map(label => `Create Instance: ${label || 'Service'}`),
       catchError(error => {
@@ -504,7 +514,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         return observableOf('Create Service Instance');
       }),
       takeUntil(this.destroyed$)
-    ).subscribe(title => this.titleSubject.next(title));
+    ).subscribe(title => {
+      setTimeout(() => this.titleSubject.next(title), 0);
+    });
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),

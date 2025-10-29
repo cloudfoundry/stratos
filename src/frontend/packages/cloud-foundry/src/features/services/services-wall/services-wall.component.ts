@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -27,7 +27,8 @@ import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-pe
       provide: ListConfig,
       useClass: ServiceInstancesWallListConfigService
     },
-    CfOrgSpaceDataService
+    CfOrgSpaceDataService,
+    DatePipe
   ],
   standalone: true,
   imports: [

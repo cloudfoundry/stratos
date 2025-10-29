@@ -39,6 +39,9 @@ export interface IAppTileData extends ITileData {
     SteppersComponent,
     StepComponent,
     TileSelectorComponent
+  ],
+  providers: [
+    ApplicationDeploySourceTypes
   ]
 })
 export class NewApplicationBaseStepComponent {

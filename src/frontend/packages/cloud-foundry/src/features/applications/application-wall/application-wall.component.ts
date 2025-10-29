@@ -1,5 +1,5 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -26,6 +26,7 @@ import { goToAppWall } from '../../cf/cf.helpers';
   standalone: true,
   imports: [
     CommonModule,
+    DatePipe,
     RouterModule,
     PageHeaderComponent,
     ListComponent,
@@ -45,10 +46,12 @@ import { goToAppWall } from '../../cf/cf.helpers';
     ]
     )
   ],
-  providers: [{
-    provide: ListConfig,
-    useClass: CfAppConfigService
-  },
+  providers: [
+    DatePipe,
+    {
+      provide: ListConfig,
+      useClass: CfAppConfigService
+    },
     CfOrgSpaceDataService
   ]
 })

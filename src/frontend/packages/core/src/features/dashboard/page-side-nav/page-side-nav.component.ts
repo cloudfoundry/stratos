@@ -33,9 +33,13 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 })
 export class PageSideNavComponent implements OnInit {
 
-  pTabs: IPageSideNavTab[];
+  pTabs: IPageSideNavTab[] = [];
   @Input() set tabs(tabs: IPageSideNavTab[]) {
-    if (!tabs || (this.pTabs && tabs.length === this.pTabs.length)) {
+    if (!tabs) {
+      this.pTabs = [];
+      return;
+    }
+    if (this.pTabs && tabs.length === this.pTabs.length) {
       return;
     }
     this.pTabs = tabs.map(tab => ({

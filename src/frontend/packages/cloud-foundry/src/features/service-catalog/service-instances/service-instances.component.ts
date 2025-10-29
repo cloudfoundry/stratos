@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
@@ -18,6 +19,7 @@ import {
   ],
   standalone: true,
   imports: [
+    DatePipe,
     ListComponent
   ]
 })

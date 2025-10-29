@@ -41,6 +41,7 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
   styleUrls: ['./deploy-application.component.scss'],
   providers: [
     CfOrgSpaceDataService,
+    ApplicationDeploySourceTypes,
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],
   standalone: true,

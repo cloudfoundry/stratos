@@ -29,10 +29,12 @@ import { ApplicationService } from '../../../../../application.service';
   standalone: true,
   imports: [
     CommonModule,
+    DatePipe,
     ListComponent,
     NoContentMessageComponent
   ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useFactory: (
