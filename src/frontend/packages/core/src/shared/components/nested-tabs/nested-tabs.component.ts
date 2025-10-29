@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { MatTabsModule } from '@angular/material/tabs';
 import { RouterModule } from '@angular/router';
 
 import { TabNavItem } from '../../../tab-nav.types';
@@ -12,7 +11,6 @@ import { TabNavItem } from '../../../tab-nav.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatTabsModule,
     RouterModule,
   ]
 })

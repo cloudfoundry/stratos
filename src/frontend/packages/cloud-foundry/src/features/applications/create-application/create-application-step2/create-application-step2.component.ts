@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { Store } from '@ngrx/store';
@@ -26,8 +25,7 @@ selector: 'app-create-application-step2',
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
+    CustomFormFieldComponent,
     AppNameUniqueDirective,
     StatefulIconComponent
   ]

@@ -5,7 +5,7 @@
   <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
     <div class="table-row__deletion-bar-inner">
       <div class="table-row__deletion-bar-text">Deleting</div>
-      <mat-progress-bar class="table-row__deletion-bar" mode="indeterminate"></mat-progress-bar>
+      <app-progress-bar class="table-row__deletion-bar" mode="indeterminate"></app-progress-bar>
     </div>
   </div>
 
@@ -51,8 +51,8 @@
     <div [ngClass]="{'table-row table-row__error-spacer__prominentErrorBar': prominentErrorBar}"
       class="table-row  table-row table-row__error-spacer"></div>
     <div class="table-row table-row__error-content">
-      <mat-icon *ngIf="isWarningIcon$ | async" class="table-row__error-icon">warning</mat-icon>
-      <mat-icon *ngIf="!(isWarningIcon$ | async)" class="table-row__error-icon">info</mat-icon>
+      <app-custom-icon *ngIf="isWarningIcon$ | async" class="table-row__error-icon">warning</app-custom-icon>
+      <app-custom-icon *ngIf="!(isWarningIcon$ | async)" class="table-row__error-icon">info</app-custom-icon>
       <div class="table-row__error-message" [innerHTML]="errorMessage$ | async"></div>
     </div>
   </div>

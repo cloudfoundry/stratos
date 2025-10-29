@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -16,10 +16,10 @@ import { ConnectEndpointConfig } from '../connect.service';
 import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form.component';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
-class MatDialogRefMock {
+class TailwindDialogRefMock {
 }
 
-class MatDialogDataMock implements ConnectEndpointConfig {
+class DialogDataMock implements ConnectEndpointConfig {
   guid = '57ab08d8-86cc-473a-8818-25d5e8d0ea23';
   name = 'Test';
   type = 'metrics';
@@ -34,8 +34,8 @@ describe('ConnectEndpointDialogComponent', () => {
   beforeEach(waitForAsync(() => {
     const testingModule = TestBed.configureTestingModule({
       providers: [
-        { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
         SidePanelService
       ],
       imports: [
@@ -51,7 +51,7 @@ describe('ConnectEndpointDialogComponent', () => {
         ConnectEndpointComponent,
         CredentialsAuthFormComponent
       ]
-    
+
     });
     testingModule.compileComponents();
   }));

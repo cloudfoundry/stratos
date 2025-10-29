@@ -12,31 +12,31 @@
   </div>
   <form class="stepper-form" *ngIf="(showModeSelection && formMode === 'create-service-instance') || !showModeSelection"
     [formGroup]="createNewInstanceForm">
-    <mat-form-field>
-      <mat-label>Name</mat-label>
-      <input matInput class="form-control" formControlName="name" required>
-      <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
+    <app-form-field>
+      <app-label>Name</app-label>
+      <input appInput class="form-control" formControlName="name" required>
+      <app-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
         A service instance with this name already exists. Please enter a different one.
-      </mat-error>
-      <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('maxlength')">
+      </app-error>
+      <app-error *ngIf="createNewInstanceForm.controls.name?.hasError('maxlength')">
         A service instance name cannot exceed 50 characters.
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field class="stepper-form__tags">
-      <mat-label>Tags</mat-label>
+      </app-error>
+    </app-form-field>
+    <app-form-field class="stepper-form__tags">
+      <app-label>Tags</app-label>
       <mat-chip-grid #chipGrid class="stepper-form__tags__chip-list">
         <mat-chip-row *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip"
           [removable]="tagsRemovable" (removed)="removeTag(tag)">
           {{tag.label}}
           <button matChipRemove *ngIf="tagsRemovable">
-            <mat-icon>cancel</mat-icon>
+            <span class="material-icons">cancel</span>
           </button>
         </mat-chip-row>
         <input [matChipInputFor]="chipGrid"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur"
           (matChipInputTokenEnd)="addTag($event)" />
       </mat-chip-grid>
-    </mat-form-field>
+    </app-form-field>
     <div class="stepper-form__params">
       <div>Service Parameters</div>
       <app-schema-form [config]="schemaFormConfig" (dataChange)="setServiceParams($event)"
@@ -45,13 +45,13 @@
   </form>
   <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'"
     [formGroup]="selectExistingInstanceForm">
-    <mat-form-field>
-      <mat-label>Service Instance</mat-label>
-      <mat-select class="form-control" required formControlName="serviceInstances">
-        <mat-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid"
-          [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <app-form-field>
+      <app-label>Service Instance</app-label>
+      <app-select class="form-control" required formControlName="serviceInstances">
+        <app-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid"
+          [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
+      </app-select>
+    </app-form-field>
   </form>
 
 </div>

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
+
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 
@@ -26,7 +26,6 @@ import { ClickStopPropagationDirective } from '@stratosui/core';
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,

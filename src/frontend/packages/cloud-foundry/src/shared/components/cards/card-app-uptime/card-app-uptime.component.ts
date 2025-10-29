@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { MatCardModule } from '@angular/material/card';
 
 import {
   ApplicationMonitorService,
@@ -18,7 +17,6 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     UptimePipe,
     MetadataItemComponent
   ]

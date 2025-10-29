@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -22,7 +21,6 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
   imports: [
     CommonModule,
     RouterModule,
-    MatCardModule,
     MetadataItemComponent,
     BooleanIndicatorComponent
   ]

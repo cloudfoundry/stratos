@@ -1,11 +1,8 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -31,11 +28,7 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
+    CustomFormFieldComponent,
     CardStatusComponent,
     RunningInstancesComponent
   ]

@@ -1,95 +1,76 @@
 .autoscaler-tab {
-  display: flex;
-  position: relative;
-  width: 100%;
+  @apply flex relative w-full;
   &__actions {
-    bottom: 10px;
-    padding-top: 0;
-    position: absolute;
-    right: 24px;
-    text-align: right;
+    @apply absolute bottom-2.5 right-6 pt-0 text-right;
   }
-  .mat-header-cell:first-of-type {
-    padding-left: unset;
+  .table-header:first-of-type {
+    @apply pl-0;
   }
   .autoscaler-tab-table-no-record {
-    margin-top: 0.5em;
+    @apply mt-2;
   }
 
   &__latest-metrics {
-    flex: 2;
-    min-height: 200px;
+    @apply flex-[2] min-h-[200px];
   }
 }
 
 
 .app-metadata {
-  display: flex;
-  flex-direction: row;
+  @apply flex flex-row;
   &__two-cols {
-    padding-right: 40px;
+    @apply pr-10;
     app-metadata-item:first-child {
-      margin-top: 0;
+      @apply mt-0;
     }
   }
   app-metadata-item {
-    margin-bottom: 0;
+    @apply mb-0;
   }
 }
 
 .app-metadata-table {
-  display: block;
-  padding-bottom: 8px;
+  @apply block pb-2;
 }
 
 .app-autoscaler-tile-grid-100 {
-  width: 100%;
+  @apply w-full;
 }
 
 table {
-  width: 100%;
+  @apply w-full;
   td {
-    padding-left: 0.5em;
+    @apply pl-2;
   }
 }
 
 .autoscaler-tile-events {
-  flex-direction: column;
+  @apply flex-col;
 
   &__no-policy {
-    align-items: center;
-    display: flex;
-    margin-bottom: 12px;
-    padding: 14px;
+    @apply flex items-center mb-3 p-3.5;
   }
 
   &__header {
-    display: flex;
-    flex: 1;
-    height: 40px;
-    justify-content: space-between;
-    padding-top: 0;
+    @apply flex flex-1 h-10 justify-between pt-0;
 
-    mat-card-title {
-      margin-bottom: 0;
+    .card-title {
+      @apply mb-0;
     }
 
     button {
-      margin-right: -10px;
-      margin-top: -10px;
+      @apply -mr-2.5 -mt-2.5;
     }
   }
 }
 .nav-button-with-text {
-  margin: 0 10px 0 0;
-  padding: 0 5px;
+  @apply my-0 mr-2.5 ml-0 py-0 px-1.5;
 
   &__span {
-    align-items: center;
-    display: flex;
+    @apply flex items-center;
   }
 
   &__icon {
-    margin-right: 5px;
+    @apply mr-1.5;
   }
 }

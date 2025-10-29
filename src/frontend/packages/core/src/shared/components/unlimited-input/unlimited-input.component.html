@@ -1,8 +1,8 @@
 <div class="unlimited-input">
-  <mat-form-field>
-    <input type="number" [id]="name" matInput [formControlName]="name" [placeholder]="placeholder" [required]="required"
+  <app-form-field>
+    <input type="number" [id]="name" appInput [formControlName]="name" [placeholder]="placeholder" [required]="required"
       min="0">
     <span *ngIf="suffix" matSuffix>{{suffix}}</span>
-  </mat-form-field>
-  <mat-checkbox [checked]="unlimited" (change)="onChange()">Unlimited</mat-checkbox>
+  </app-form-field>
+  <app-checkbox [checked]="unlimited" (change)="onChange()">Unlimited</app-checkbox>
 </div>

@@ -1,14 +1,14 @@
 <div class="select-plan">
   <div #noplans></div>
   <form class="stepper-form" [formGroup]="stepperForm">
-    <mat-form-field>
-      <mat-label>Service Plan</mat-label>
-      <mat-select class="form-control" formControlName="servicePlans" [appFocus]="servicePlans$ | async">
-        <mat-option *ngFor="let servicePlan of servicePlans$ | async" [value]="servicePlan.metadata.guid">{{ servicePlan.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <app-form-field>
+      <app-label>Service Plan</app-label>
+      <app-select class="form-control" formControlName="servicePlans" [appFocus]="servicePlans$ | async">
+        <app-option *ngFor="let servicePlan of servicePlans$ | async" [value]="servicePlan.metadata.guid">{{ servicePlan.entity.name }}</app-option>
+      </app-select>
+    </app-form-field>
   </form>
-  <mat-card class="select-plan__details" *ngIf="selectedPlan$ | async as selPlan">
+  <app-card class="select-plan__details" *ngIf="selectedPlan$ | async as selPlan">
     <app-card-status *ngIf="(selectedPlanAccessibility$ | async)" [status$]="selectedPlanAccessibility$"></app-card-status>
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.description}} </app-metadata-item>
@@ -27,5 +27,5 @@
         <li *ngFor="let bulletPoint of selPlan.entity.extraTyped.bullets">{{bulletPoint}}</li>
       </ul>
     </app-metadata-item>
-  </mat-card>
+  </app-card>
 </div>

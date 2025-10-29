@@ -12,11 +12,11 @@
       Please specify details for the new route.
     </div>
     <form class="stepper-form" [formGroup]="domainFormGroup">
-      <mat-form-field>
-        <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required [appFocus]="domains">
-          <mat-option *ngFor="let domain of domains" [value]="domain">{{domain?.entity?.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <app-form-field>
+        <app-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required [appFocus]="domains">
+          <app-option *ngFor="let domain of domains" [value]="domain">{{domain?.entity?.name}}</app-option>
+        </app-select>
+      </app-form-field>
     </form>
 
     <form [formGroup]="addHTTPRoute" class="stepper-form" *ngIf="selectedDomain?.entity.router_group_type !== 'tcp'">
@@ -25,19 +25,19 @@
       </div>
       <div class="add-route__form-fields">
         <div>
-          <mat-form-field>
-            <input matInput formControlName="host" placeholder="Host" required>
-            <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.pattern">Invalid Hostname</mat-error>
-            <mat-error *ngIf="addHTTPRoute.controls['host'].errors?.maxlength">Host cannot exceed 63 characters</mat-error>
-          </mat-form-field>
+          <app-form-field>
+            <input appInput formControlName="host" placeholder="Host" required>
+            <app-error *ngIf="addHTTPRoute.controls['host'].errors?.pattern">Invalid Hostname</app-error>
+            <app-error *ngIf="addHTTPRoute.controls['host'].errors?.maxlength">Host cannot exceed 63 characters</app-error>
+          </app-form-field>
         </div>
         <div>
-          <mat-form-field>
-            <input matInput formControlName="path" placeholder="Path">
-            <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.pattern">Invalid Path</mat-error>
-            <mat-error *ngIf="addHTTPRoute.controls['path'].errors?.maxlength">Path cannot exceed 128 characters</mat-error>
+          <app-form-field>
+            <input appInput formControlName="path" placeholder="Path">
+            <app-error *ngIf="addHTTPRoute.controls['path'].errors?.pattern">Invalid Path</app-error>
+            <app-error *ngIf="addHTTPRoute.controls['path'].errors?.maxlength">Path cannot exceed 128 characters</app-error>
             <span matPrefix>/&nbsp;</span>
-          </mat-form-field>
+          </app-form-field>
         </div>
       </div>
     </form>
@@ -48,11 +48,11 @@
       </div>
       <div class="add-route__form-fields">
         <div>
-          <mat-checkbox formControlName="useRandomPort">Use a random port</mat-checkbox>
-          <mat-form-field>
-            <input type="number" matInput formControlName="port" placeholder="Port" required>
-            <mat-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</mat-error>
-          </mat-form-field>
+          <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
+          <app-form-field>
+            <input type="number" appInput formControlName="port" placeholder="Port" required>
+            <app-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</app-error>
+          </app-form-field>
         </div>
       </div>
     </form>

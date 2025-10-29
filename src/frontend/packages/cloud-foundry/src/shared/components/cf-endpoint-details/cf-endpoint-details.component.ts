@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import {
   EndpointListDetailsComponent,
@@ -15,8 +15,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomTooltipDirective
   ]
 })
 export class CfEndpointDetailsComponent extends EndpointListDetailsComponent { }

@@ -1,6 +1,6 @@
 <div *ngIf="hasCondition$ | async" class="kube-node-condition" [ngStyle]="{'padding-top': paddingTop}">
   <div class="kube-node-condition__title">
-    <mat-icon [fontSet]="icons[condition][1]">{{ icons[condition][0] }}</mat-icon>
+    <span [class]="icons[condition][1]">{{ icons[condition][0] }}</span>
     <div>
       <span class="kube-node-condition__title__span">{{ titles[condition] }}</span>
     </div>

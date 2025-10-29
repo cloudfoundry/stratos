@@ -2,13 +2,13 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { first, map, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-page-header-events',
@@ -18,7 +18,7 @@ import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../glo
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule
+    CustomIconComponent
   ],
   animations: [
     trigger(

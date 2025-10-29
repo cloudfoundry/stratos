@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { interval, Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-routing-indicator',
@@ -11,8 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   styleUrls: ['./routing-indicator.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    MatProgressBarModule
+    CommonModule
   ]
 })
 export class RoutingIndicatorComponent {

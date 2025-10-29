@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { TailwindDialogRef } from '@stratosui/core';
 
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { TabNavService } from '../../../tab-nav.service';
@@ -21,7 +21,7 @@ describe('ApiKeysPageComponent', () => {
       ],
       providers: [
         {
-          provide: MatDialogRef,
+          provide: TailwindDialogRef,
           useValue: mockDialogRef
         },
         TabNavService

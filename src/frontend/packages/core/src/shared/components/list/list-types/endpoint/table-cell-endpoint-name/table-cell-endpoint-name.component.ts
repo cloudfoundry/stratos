@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -9,6 +8,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { TableCellCustom } from '../../../list.types';
+import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
 
 export interface RowWithEndpointId {
   endpointId: string;
@@ -22,8 +22,8 @@ export interface RowWithEndpointId {
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomIconComponent,
+    CustomTooltipDirective
   ]
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {

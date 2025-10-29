@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { ConfirmationDialogService } from './confirmation-dialog.service';
-import { MatDialog } from '@stratosui/core';
+import { TailwindDialogService } from '@stratosui/core';
 import { CoreModule } from '../../core/core.module';
 
 describe('ConfirmationDialogService', () => {
@@ -9,7 +9,7 @@ describe('ConfirmationDialogService', () => {
     TestBed.configureTestingModule({
       providers: [
         ConfirmationDialogService,
-        MatDialog,
+        TailwindDialogService,
       ],
       imports: [
         CoreModule,

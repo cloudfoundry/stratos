@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
@@ -9,6 +8,7 @@ import { first, tap } from 'rxjs/operators';
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { EndpointsService } from '../endpoints.service';
+import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-entity-favorite-star',
@@ -17,8 +17,8 @@ import { EndpointsService } from '../endpoints.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomIconComponent,
+    CustomTooltipDirective
   ]
 })
 export class EntityFavoriteStarComponent {

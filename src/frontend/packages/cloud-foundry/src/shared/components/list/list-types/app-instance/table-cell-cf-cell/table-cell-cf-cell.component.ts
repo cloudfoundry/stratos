@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
@@ -18,8 +17,7 @@ import { ListAppInstance } from '../app-instance-types';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    MatProgressSpinnerModule
+    RouterModule
   ]
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {

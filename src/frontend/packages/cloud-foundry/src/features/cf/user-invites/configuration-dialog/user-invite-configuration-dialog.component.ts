@@ -1,7 +1,7 @@
 import { Component, Inject, InjectionToken } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AppProgressBarComponent } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { TailwindDialogRef } from '@stratosui/core';
 import { DialogErrorComponent } from '@stratosui/core';
@@ -23,7 +23,7 @@ import { UserInviteConfigureService } from '../user-invite.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatProgressBarModule,
+    AppProgressBarComponent,
     DialogErrorComponent
   ]
 })

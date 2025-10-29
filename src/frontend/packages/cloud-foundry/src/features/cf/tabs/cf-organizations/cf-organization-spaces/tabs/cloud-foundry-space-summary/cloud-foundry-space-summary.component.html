@@ -1,19 +1,19 @@
 <app-page-sub-nav>
-  <button mat-icon-button name="rename"
+  <button class="btn btn-icon" name="rename"
     *appCfUserPermission="permsSpaceEdit;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;spaceGuid:cfSpaceService.spaceGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space"
     matTooltip="Edit Space">
-    <mat-icon>edit</mat-icon>
+    <span class="material-icons">edit</span>
   </button>
-  <button mat-icon-button name="delete"
+  <button class="btn btn-icon" name="delete"
     *appCfUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
     (click)="deleteSpaceWarn()" matTooltip="Delete Space">
-    <mat-icon>delete</mat-icon>
+    <span class="material-icons">delete</span>
   </button>
-  <button mat-icon-button name="cli"
+  <button class="btn btn-icon" name="cli"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/cli"
     matTooltip="CLI Info">
-    <mat-icon>keyboard</mat-icon>
+    <span class="material-icons">keyboard</span>
   </button>
 </app-page-sub-nav>
 

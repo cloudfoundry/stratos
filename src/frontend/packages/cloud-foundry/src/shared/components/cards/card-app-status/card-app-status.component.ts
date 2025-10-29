@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,7 +13,6 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   styleUrls: ['./card-app-status.component.scss'],
   standalone: true,
   imports: [
-    MatCardModule,
     CardStatusComponent,
     ApplicationStateComponent
   ]

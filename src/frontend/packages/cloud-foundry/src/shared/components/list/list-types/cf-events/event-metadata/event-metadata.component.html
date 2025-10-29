@@ -1,17 +1,17 @@
 <ng-container *ngIf="isPopup; else notPopup">
-  <mat-dialog-content class="details__popup">
+  <div class="details__popup p-6">
     <ng-container *ngTemplateOutlet="showValues">
     </ng-container>
-  </mat-dialog-content>
-  <mat-dialog-actions class="dialog__actions">
-    <button [mat-dialog-close]="true" mat-button>Close</button>
-  </mat-dialog-actions>
+  </div>
+  <div class="dialog__actions flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+    <button class="btn btn-ghost">Close</button>
+  </div>
 </ng-container>
 
 
 <ng-template #notPopup>
   <div *ngIf="showPopup; else showValues">
-    <button mat-stroked-button color="primary" (click)="doShowPopup()">
+    <button class="btn btn-outline" (click)="doShowPopup()">
       Show Details
     </button>
   </div>

@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { StratosTheme, defaultTheme } from './theme.config';
+import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 @Injectable({
   providedIn: 'root'
@@ -9,17 +11,48 @@ export class StratosThemeService {
   private themeSubject = new BehaviorSubject<StratosTheme>(defaultTheme);
   public theme$: Observable<StratosTheme> = this.themeSubject.asObservable();
 
+  private themeModeSubject = new BehaviorSubject<ThemeMode>('system');
+  public themeMode$: Observable<ThemeMode> = this.themeModeSubject.asObservable();
+
+  private isDarkModeSubject = new BehaviorSubject<boolean>(false);
+  public isDarkMode$: Observable<boolean> = this.isDarkModeSubject.asObservable();
+
+  private readonly THEME_MODE_KEY = 'stratos-theme-mode';
+  private readonly THEME_STORAGE_KEY = 'stratos-theme';
+  private mediaQueryList: MediaQueryList;
+
   constructor() {
     this.initializeTheme();
   }
 
   private async initializeTheme() {
     console.log('[StratosThemeService] Initializing theme...');
+
+    // Add initializing class to prevent FOUC (Flash of Unstyled Content)
+    document.body.classList.add('theme-initializing');
+
+    // Initialize media query listener for system theme preference
+    this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
+    this.mediaQueryList.addEventListener('change', this.onSystemThemeChange.bind(this));
+
+    // Load theme mode preference from localStorage
+    const savedMode = this.loadThemeModeFromStorage();
+    this.themeModeSubject.next(savedMode);
+
+    // Load theme configuration
     await this.loadThemeFromConfig();
     console.log('[StratosThemeService] Theme loaded:', this.themeSubject.value);
-    this.applyTheme(this.themeSubject.value);
+
+    // Apply the theme based on mode
+    this.applyThemeMode(savedMode);
     this.updateBranding(this.themeSubject.value);
     console.log('[StratosThemeService] Theme applied to DOM');
+
+    // Remove initializing class after a small delay to enable transitions
+    // This prevents the initial flash while allowing smooth transitions afterward
+    setTimeout(() => {
+      document.body.classList.remove('theme-initializing');
+    }, 100);
   }
 
   setTheme(theme: Partial<StratosTheme>) {
@@ -162,9 +195,88 @@ export class StratosThemeService {
 
   private saveThemeToStorage(theme: StratosTheme) {
     try {
-      localStorage.setItem('stratos-theme', JSON.stringify(theme));
+      localStorage.setItem(this.THEME_STORAGE_KEY, JSON.stringify(theme));
     } catch (error) {
       console.warn('Could not save theme to localStorage');
+    }
+  }
+
+  // Theme mode management methods
+  setThemeMode(mode: ThemeMode) {
+    console.log('[StratosThemeService] Setting theme mode to:', mode);
+    this.themeModeSubject.next(mode);
+    this.saveThemeModeToStorage(mode);
+    this.applyThemeMode(mode);
+  }
+
+  getThemeMode(): ThemeMode {
+    return this.themeModeSubject.value;
+  }
+
+  toggleTheme() {
+    const currentMode = this.themeModeSubject.value;
+    // Toggle between light and dark (ignore system for toggle)
+    const isDark = this.isDarkModeSubject.value;
+    const newMode: ThemeMode = isDark ? 'light' : 'dark';
+    this.setThemeMode(newMode);
+  }
+
+  private applyThemeMode(mode: ThemeMode) {
+    const isDark = this.resolveThemeMode(mode);
+    this.isDarkModeSubject.next(isDark);
+
+    // Apply dark class to body for CSS-based theming
+    if (isDark) {
+      document.body.classList.add('dark-theme');
+      document.documentElement.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark-theme');
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Update theme colors based on mode
+    // This allows the theme service to maintain its color system
+    // while respecting dark/light mode
+    console.log('[StratosThemeService] Theme mode applied:', mode, 'isDark:', isDark);
+  }
+
+  private resolveThemeMode(mode: ThemeMode): boolean {
+    if (mode === 'system') {
+      return this.getSystemThemePreference();
+    }
+    return mode === 'dark';
+  }
+
+  private getSystemThemePreference(): boolean {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  private onSystemThemeChange(event: MediaQueryListEvent) {
+    console.log('[StratosThemeService] System theme changed to:', event.matches ? 'dark' : 'light');
+    // Only update if current mode is 'system'
+    if (this.themeModeSubject.value === 'system') {
+      this.applyThemeMode('system');
+    }
+  }
+
+  private loadThemeModeFromStorage(): ThemeMode {
+    try {
+      const saved = localStorage.getItem(this.THEME_MODE_KEY);
+      if (saved && ['light', 'dark', 'system'].includes(saved)) {
+        return saved as ThemeMode;
+      }
+    } catch (error) {
+      console.warn('Could not load theme mode from localStorage');
+    }
+    // Default to system preference
+    return 'system';
+  }
+
+  private saveThemeModeToStorage(mode: ThemeMode) {
+    try {
+      localStorage.setItem(this.THEME_MODE_KEY, mode);
+    } catch (error) {
+      console.warn('Could not save theme mode to localStorage');
     }
   }
 

@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { TailwindSnackBarService } from '@stratosui/core';
+
+import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
@@ -41,9 +39,7 @@ import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/compone
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     PageSubNavComponent,
     TileGridComponent,
     TileGroupComponent,

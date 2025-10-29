@@ -1,36 +1,30 @@
 .sub-nav-menu-button {
-  border: 1px solid #777;
-  border-radius: 5px;
-  margin-left: 20px;
-  width: 200px;
+  @apply border border-gray-600 rounded ml-5 w-[200px];
 
   &__btn {
+    @apply w-full;
     line-height: 28px;
     padding: 0 8px 0 12px;
-    width: 100%;
 
-    .mat-button-wrapper {
-      display: flex;
-      justify-content: flex-start;
+    // Converted from Material button wrapper
+    .btn-wrapper {
+      @apply flex justify-start;
     }
   }
+
   &__label {
-    flex: 1;
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @apply flex-1 overflow-hidden text-left truncate whitespace-nowrap;
   }
+
   &__arrow {
-    margin: 0;
-    margin-Left: 10px;
+    @apply m-0 ml-2.5; // 10px = spacing[2.5]
   }
+
   &__not-allowed {
-    opacity: 0.5
+    @apply opacity-50;
   }
 }
 
 .menu {
-  max-height: 400px;
-  width: 180px;
+  @apply max-h-[400px] w-[180px];
 }

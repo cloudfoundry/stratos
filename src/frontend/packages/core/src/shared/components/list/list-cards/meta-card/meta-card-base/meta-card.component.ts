@@ -1,11 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../shared/components/custom-card/custom-card.component';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -25,6 +22,7 @@ import { ClickStopPropagationDirective } from '../../../../../../core/click-stop
 import { EntityFavoriteStarComponent } from '../../../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
+import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
 
 
 export function createMetaCardMenuItemSeparator(): MenuItem {
@@ -42,12 +40,12 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardContentComponent,
+    CustomIconComponent,
     MatMenuModule,
-    MatProgressBarModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     ApplicationStateIconComponent,
     CardStatusComponent,
     ClickStopPropagationDirective,

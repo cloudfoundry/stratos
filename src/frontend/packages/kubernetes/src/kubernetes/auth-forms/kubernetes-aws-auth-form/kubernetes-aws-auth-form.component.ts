@@ -1,10 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
 import { ShowHideButtonComponent } from '../../../../../core/src/core/show-hide-button/show-hide-button.component';
+import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 
 @Component({
   selector: 'app-kubernetes-aws-auth-form',
@@ -13,8 +12,7 @@ import { ShowHideButtonComponent } from '../../../../../core/src/core/show-hide-
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
+    CustomFormFieldComponent,
     ShowHideButtonComponent
   ]
 })

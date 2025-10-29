@@ -1,15 +1,16 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { FormControl, NgControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'mat-form-field',
+  selector: 'app-form-field',
   templateUrl: './custom-form-field.component.html',
   styleUrls: ['./custom-form-field.component.scss'],
   standalone: true,
   imports: [CommonModule]
 })
-export class CustomFormFieldComponent implements AfterContentInit {
+export class CustomFormFieldComponent implements AfterContentInit, OnDestroy {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
   @Input() floatLabel: 'always' | 'never' | 'auto' = 'auto';
@@ -17,38 +18,148 @@ export class CustomFormFieldComponent implements AfterContentInit {
   @Input() hintLabel = '';
 
   @ContentChild('input', { read: ElementRef, static: false }) inputElement: ElementRef;
+  @ContentChild(NgControl, { static: false }) ngControl: NgControl;
 
   public focused = false;
   public hasValue = false;
   public placeholder = '';
+  public errorMessage = '';
+  public isRequired = false;
+  public inputId = '';
+
+  private destroy$ = new Subject<void>();
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterContentInit() {
     if (this.inputElement) {
       const input = this.inputElement.nativeElement;
       this.placeholder = input.placeholder || '';
-      
+      this.isRequired = input.hasAttribute('required');
+      this.inputId = input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Set input id if not present for label association
+      if (!input.id) {
+        input.id = this.inputId;
+      }
+
+      // Add ARIA attributes for accessibility
+      input.setAttribute('aria-describedby', `${this.inputId}-hint`);
+      if (this.isRequired) {
+        input.setAttribute('aria-required', 'true');
+      }
+
       // Listen for focus/blur events
       input.addEventListener('focus', () => {
         this.focused = true;
+        this.cdr.detectChanges();
       });
-      
+
       input.addEventListener('blur', () => {
         this.focused = false;
+        this.updateErrorMessage();
+        this.cdr.detectChanges();
       });
-      
+
       // Listen for value changes
       input.addEventListener('input', () => {
         this.hasValue = input.value.length > 0;
+        this.updateErrorMessage();
+        this.cdr.detectChanges();
       });
-      
+
       // Initial value check
       this.hasValue = input.value.length > 0;
+
+      // Listen to form control status changes if available
+      if (this.ngControl && this.ngControl.statusChanges) {
+        this.ngControl.statusChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+          this.updateErrorMessage();
+          this.updateAriaAttributes();
+          this.cdr.detectChanges();
+        });
+      }
     }
+
+    // Check for errors on init
+    setTimeout(() => {
+      this.updateErrorMessage();
+      this.updateAriaAttributes();
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get shouldFloatLabel(): boolean {
-    return this.floatLabel === 'always' || 
+    return this.floatLabel === 'always' ||
            (this.floatLabel === 'auto' && (this.focused || this.hasValue));
+  }
+
+  get isInvalid(): boolean {
+    if (!this.ngControl) return false;
+    return !!(this.ngControl.invalid && (this.ngControl.dirty || this.ngControl.touched));
+  }
+
+  get isValid(): boolean {
+    if (!this.ngControl) return false;
+    return !!(this.ngControl.valid && (this.ngControl.dirty || this.ngControl.touched));
+  }
+
+  get isDisabled(): boolean {
+    if (!this.ngControl) return false;
+    return !!this.ngControl.disabled;
+  }
+
+  get hasPrefix(): boolean {
+    // This will be set by parent component if prefix is provided
+    return false; // Override in template with content projection check
+  }
+
+  private updateErrorMessage(): void {
+    if (!this.ngControl || !this.ngControl.errors) {
+      this.errorMessage = '';
+      return;
+    }
+
+    const errors = this.ngControl.errors;
+
+    if (errors['required']) {
+      this.errorMessage = 'This field is required';
+    } else if (errors['email']) {
+      this.errorMessage = 'Please enter a valid email address';
+    } else if (errors['minlength']) {
+      this.errorMessage = `Minimum length is ${errors['minlength'].requiredLength} characters`;
+    } else if (errors['maxlength']) {
+      this.errorMessage = `Maximum length is ${errors['maxlength'].requiredLength} characters`;
+    } else if (errors['min']) {
+      this.errorMessage = `Minimum value is ${errors['min'].min}`;
+    } else if (errors['max']) {
+      this.errorMessage = `Maximum value is ${errors['max'].max}`;
+    } else if (errors['pattern']) {
+      this.errorMessage = 'Please enter a valid format';
+    } else {
+      // Generic error message for custom validators
+      const firstError = Object.keys(errors)[0];
+      this.errorMessage = errors[firstError]?.message || 'Invalid value';
+    }
+  }
+
+  private updateAriaAttributes(): void {
+    if (!this.inputElement) return;
+
+    const input = this.inputElement.nativeElement;
+
+    if (this.isInvalid) {
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-errormessage', `${this.inputId}-error`);
+    } else {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-errormessage');
+    }
   }
 }
 
@@ -117,4 +228,13 @@ export class MatInputDirective {
   }
 })
 export class MatSuffixDirective {
+}
+
+@Component({
+  selector: 'app-label',
+  template: '<label class="mat-form-field-label"><ng-content></ng-content></label>',
+  styleUrls: ['./custom-form-field.component.scss'],
+  standalone: true
+})
+export class MatLabelComponent {
 }

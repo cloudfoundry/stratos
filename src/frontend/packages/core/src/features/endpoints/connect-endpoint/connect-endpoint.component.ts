@@ -12,10 +12,10 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
 import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
@@ -31,9 +31,10 @@ import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } fr
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatCheckboxModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomCheckboxComponent,
     MatInputModule
   ]
 })

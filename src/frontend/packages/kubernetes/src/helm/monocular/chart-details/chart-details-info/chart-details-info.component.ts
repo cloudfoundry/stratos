@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { catchError, first } from 'rxjs/operators';
 
@@ -18,7 +18,7 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
+    CardWrapperComponent,
     ChartDetailsUsageComponent,
     ChartDetailsVersionsComponent
   ]

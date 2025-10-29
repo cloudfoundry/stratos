@@ -3,7 +3,7 @@
   <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
     <div class="meta-card__deleting-overlay-inner">
       <div class="meta-card__deleting-text">Deleting</div>
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <app-progress-bar mode="indeterminate"></app-progress-bar>
     </div>
   </div>
   <app-card-status *ngIf="status$" [status$]="status$">
@@ -23,16 +23,16 @@
       [favorite]="favorite">
     </app-entity-favorite-star>
     <div class="meta-card__header-container__actions" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
-      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu"
+      <button class="btn btn-icon meta-card__header__button" type="button" [matMenuTriggerFor]="menu"
         [disabled]="isDeleting$ | async">
-        <mat-icon>more_vert</mat-icon>
+        <app-custom-icon>more_vert</app-custom-icon>
       </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu" xPosition="before">
         <ng-container *ngFor="let menuItem of actionMenu">
           <ng-container *ngIf="menuItem.can | async">
             <button *ngIf="!menuItem.separator" class="meta-card__header__popup__btn"
               [disabled]="menuItem.disabled | async" mat-menu-item (click)="menuItem.action()">
-              <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
+              <app-custom-icon *ngIf="menuItem.icon">{{menuItem.icon}}</app-custom-icon>
               <span>{{menuItem.label}}</span>
             </button>
             <div *ngIf="menuItem.separator" class="meta-card__header__popup-separator"></div>

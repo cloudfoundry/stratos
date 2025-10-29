@@ -8,7 +8,7 @@ export interface MatCheckboxChange {
 }
 
 @Component({
-  selector: 'mat-checkbox',
+  selector: 'mat-checkbox, app-checkbox',
   standalone: true,
   imports: [
     CommonModule
@@ -33,6 +33,8 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   @Input() required = false;
   @Input() labelPosition: 'before' | 'after' = 'after';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() invalid = false;
+  @Input() errorMessage = '';
 
   @Output() change = new EventEmitter<MatCheckboxChange>();
   @Output() indeterminateChange = new EventEmitter<boolean>();

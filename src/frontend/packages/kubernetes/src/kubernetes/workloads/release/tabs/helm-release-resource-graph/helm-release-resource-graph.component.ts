@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
+import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
+import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
@@ -68,10 +67,9 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatTooltipModule,
+    AppProgressBarComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
     NgxGraphModule,
     PageSubNavComponent,
     AnalysisReportRunnerComponent,

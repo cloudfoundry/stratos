@@ -1,12 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { AppState, getPreviousRoutingState } from '@stratosui/store';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -15,6 +11,8 @@ import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/op
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../../../shared/components/custom-button-toggle/custom-button-toggle.component';
 
 export const eventReturnUrlParam = 'returnFromEvents';
 
@@ -32,12 +30,11 @@ export enum EventFilterValues {
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatCardModule,
-    MatIconModule,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomIconComponent,
     MatListModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     PageHeaderComponent,
     StatefulIconComponent
   ]

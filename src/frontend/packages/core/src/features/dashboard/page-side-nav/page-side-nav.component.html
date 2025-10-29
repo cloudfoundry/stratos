@@ -3,7 +3,7 @@
     {{ header }}
   </div>
   <div class="page-side-nav__items-compact-header">
-    <mat-icon class="page-side-nav__items-compact-dropdown">arrow_drop_down</mat-icon>
+    <app-custom-icon class="page-side-nav__items-compact-dropdown">arrow_drop_down</app-custom-icon>
     <small> {{ header }}</small>
     <div class="page-side-nav__items-compact-tab-label"> {{ activeTab$ | async }}</div>
   </div>
@@ -12,9 +12,9 @@
       <div *ngIf="tab && !tab.link" class="page-side-nav__item-sep">{{ tab?.label }}</div>
       <a *ngIf="tab && tab.link && (!tab.hidden$ || !(tab.hidden$ | async))" class="page-side-nav__item"
         [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
-        <mat-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
-        </mat-icon>
-        <mat-icon class="page-side-nav__icon" *ngIf="!tab.icon"></mat-icon>
+        <app-custom-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
+        </app-custom-icon>
+        <app-custom-icon class="page-side-nav__icon" *ngIf="!tab.icon"></app-custom-icon>
         <span>{{ tab?.label }}</span>
       </a>
     </li>

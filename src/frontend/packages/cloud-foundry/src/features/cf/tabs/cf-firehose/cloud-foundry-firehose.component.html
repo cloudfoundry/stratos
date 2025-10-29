@@ -7,18 +7,18 @@
   </div>
 
   <div class="firehose-filter-panel__filters">
-    <mat-checkbox class="firehose-filter-panel__apps-filter"
-      [(ngModel)]="formatter.hoseFilters.apps">Apps</mat-checkbox>
-    <mat-checkbox class="firehose-filter-panel__api-filter"
-      [(ngModel)]="formatter.hoseFilters.api">Api</mat-checkbox>
-    <mat-checkbox class="firehose-filter-panel__metrics-filter"
-      [(ngModel)]="formatter.hoseFilters.metrics">Metrics</mat-checkbox>
-    <mat-checkbox class="firehose-filter-panel__counters-filter"
-      [(ngModel)]="formatter.hoseFilters.counters">Counters</mat-checkbox>
-    <mat-checkbox class="firehose-filter-panel__container-metrics-filter"
-      [(ngModel)]="formatter.hoseFilters.containerMetrics">Container Metrics</mat-checkbox>
-    <mat-checkbox class="firehose-filter-panel__errors-filter"
-      [(ngModel)]="formatter.hoseFilters.errors">Errors</mat-checkbox>
+    <app-checkbox class="firehose-filter-panel__apps-filter"
+      [(ngModel)]="formatter.hoseFilters.apps">Apps</app-checkbox>
+    <app-checkbox class="firehose-filter-panel__api-filter"
+      [(ngModel)]="formatter.hoseFilters.api">Api</app-checkbox>
+    <app-checkbox class="firehose-filter-panel__metrics-filter"
+      [(ngModel)]="formatter.hoseFilters.metrics">Metrics</app-checkbox>
+    <app-checkbox class="firehose-filter-panel__counters-filter"
+      [(ngModel)]="formatter.hoseFilters.counters">Counters</app-checkbox>
+    <app-checkbox class="firehose-filter-panel__container-metrics-filter"
+      [(ngModel)]="formatter.hoseFilters.containerMetrics">Container Metrics</app-checkbox>
+    <app-checkbox class="firehose-filter-panel__errors-filter"
+      [(ngModel)]="formatter.hoseFilters.errors">Errors</app-checkbox>
   </div>
 </div>
 

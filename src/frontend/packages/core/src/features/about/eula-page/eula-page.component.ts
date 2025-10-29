@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
 selector: 'app-eula-page',
@@ -13,9 +12,8 @@ selector: 'app-eula-page',
   styleUrls: ['./eula-page.component.scss'],
   standalone: true,
   imports: [
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     RouterModule,
     PageHeaderComponent
   ]

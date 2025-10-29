@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, Subject } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, filter, map, share, switchMap } from 'rxjs/operators';
@@ -20,7 +20,7 @@ import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatte
   imports: [
     CommonModule,
     FormsModule,
-    MatCheckboxModule,
+    CustomCheckboxComponent,
     LogViewerComponent,
   ]
 })

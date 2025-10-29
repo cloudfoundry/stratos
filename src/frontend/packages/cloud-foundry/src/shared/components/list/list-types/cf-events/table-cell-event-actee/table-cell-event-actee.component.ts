@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective, CustomIconComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
-
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 
@@ -19,8 +17,8 @@ interface CellEVentActeeConfig {
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomIconComponent,
+    CustomTooltipDirective
   ]
 })
 export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {

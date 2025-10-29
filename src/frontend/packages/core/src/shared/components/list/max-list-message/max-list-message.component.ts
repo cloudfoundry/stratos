@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
 import { Store } from '@ngrx/store';
 import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
@@ -17,7 +16,6 @@ import { ITableTextMaxed } from '../list-table/table.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
     NoContentMessageComponent
   ]
 })

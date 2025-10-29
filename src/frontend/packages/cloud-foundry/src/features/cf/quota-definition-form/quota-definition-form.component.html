@@ -1,15 +1,15 @@
 <form [formGroup]="formGroup" class="stepper-form">
-  <mat-form-field>
-    <input matInput formControlName="name" placeholder="Quota Name" required [appFocus]="true">
-    <mat-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
+  <app-form-field>
+    <input appInput formControlName="name" placeholder="Quota Name" required [appFocus]="true">
+    <app-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
       A quota with this name already exists. Please enter a different one.
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <input type="number" matInput formControlName="memoryLimit"
+    </app-error>
+  </app-form-field>
+  <app-form-field>
+    <input type="number" appInput formControlName="memoryLimit"
       placeholder="Total amount of memory an organization can have" required>
     <span matSuffix>MB</span>
-  </mat-form-field>
+  </app-form-field>
   <app-unlimited-input name="instanceMemoryLimit"
     placeholder="Max amount of memory an app instance can have" suffix="MB" [required]="true"></app-unlimited-input>
 
@@ -30,6 +30,6 @@
   <app-unlimited-input name="totalPrivateDomains" placeholder="Total number of private domains">
   </app-unlimited-input>
 
-  <mat-checkbox matInput formControlName="nonBasicServicesAllowed">Can provision instances of paid service plans
-  </mat-checkbox>
+  <app-checkbox appInput formControlName="nonBasicServicesAllowed">Can provision instances of paid service plans
+  </app-checkbox>
 </form>

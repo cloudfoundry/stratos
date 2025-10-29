@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigAuthHelper } from '../../kube-config-auth.helper';
@@ -15,8 +14,8 @@ selector: 'app-kube-config-table-sub-type-select',
   standalone: true,
   imports: [
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
+    CustomSelectComponent,
+    CustomOptionComponent,
   ]
 })
 export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomCheckboxComponent } from '@stratosui/core';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
@@ -47,8 +47,8 @@ enum CfRoleCheckboxMode {
   standalone: true,
   imports: [
     CommonModule,
-    MatCheckboxModule,
-    MatTooltipModule
+    CustomCheckboxComponent,
+    CustomTooltipDirective
   ]
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {

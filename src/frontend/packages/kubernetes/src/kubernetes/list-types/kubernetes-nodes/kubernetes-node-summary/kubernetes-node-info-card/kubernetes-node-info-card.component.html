@@ -1,9 +1,9 @@
 <div class="kubernetes-node-info-card">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Node Information</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <app-card>
+      <app-card-header>
+        <app-card-title>Node Information</app-card-title>
+      </app-card-header>
+      <app-card-content>
         <div class="kubernetes-node-info-card__content">
           <app-metadata-item label="Operating System">{{ (kubeNodeService.nodeEntity$ | async)?.status.nodeInfo.operatingSystem }}</app-metadata-item>
           <app-metadata-item label="Archtecture">{{ (kubeNodeService.nodeEntity$ | async)?.status.nodeInfo.architecture }}</app-metadata-item>
@@ -12,8 +12,8 @@
           <app-metadata-item label="Kubelet Version">{{ (kubeNodeService.nodeEntity$ | async)?.status.nodeInfo.kubeletVersion }}</app-metadata-item>
           <app-metadata-item label="Kube Proxy Version">{{ (kubeNodeService.nodeEntity$ | async)?.status.nodeInfo.kubeProxyVersion }}</app-metadata-item>
         </div>
-      </mat-card-content>
-    </mat-card>
-  
+      </app-card-content>
+    </app-card>
+
   </div>
   

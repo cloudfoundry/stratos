@@ -1,7 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -30,8 +28,6 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
     PageSubNavComponent,
     ListComponent
   ]

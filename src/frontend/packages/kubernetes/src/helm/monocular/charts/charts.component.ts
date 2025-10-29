@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -22,7 +21,6 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
     LoaderComponent,
     PanelComponent,
     ListFiltersComponent,

@@ -2,7 +2,7 @@
   <app-no-content-message [icon]="state.icon" [iconFont]="state.iconFont" [firstLine]="state.firstLine"
     [otherLines]="state.otherLines">
     <span *ngIf="state.canIgnoreMaxedState">
-      <button color="primary" (click)="showAll()" mat-raised-button>
+      <button class="btn btn-primary" type="button" (click)="showAll()">
         <!--
           This used to be !!count -> Fetch All ({{count}}), and then !!count for others.
           Cannot rely on count now. It comes from the paginator's no. of results value.

@@ -4,8 +4,13 @@ import { InjectionToken } from '@angular/core';
 // MatSnackBar is exported from tailwind-snackbar.service
 export type MatSnackBarRef<T> = any; // Will be replaced with TailwindSnackBarRef<T>
 // SimpleSnackBar is exported from tailwind-snackbar.service
-// MatDialog is exported from tailwind-dialog.service
-// MatDialogRef is exported from tailwind-dialog.service
+
+// Re-export Tailwind services directly (no aliases)
+export {
+  TailwindDialogService,
+  TailwindDialogRef
+} from './tailwind-dialog.service';
+
 // Re-export classes directly for provider usage
 export {
   TailwindErrorStateMatcher as ErrorStateMatcher,
@@ -41,25 +46,13 @@ export {
   TailwindIconRegistry as MatIconRegistry
 } from './tailwind-icon-registry.service';
 
-// Export dialog services and tokens for injection
+// Export dialog data token for injection
 export {
-  TailwindDialogService as MatDialog,
-  TailwindDialogRef as MatDialogRef,
   MAT_DIALOG_DATA
 } from './tailwind-dialog.service';
 
 // Snackbar data token
 export const MAT_SNACK_BAR_DATA = new InjectionToken<any>('StratosSnackBarData');
-
-import { TailwindDialogRefImpl } from './tailwind-dialog.service';
-
-// Create a factory for MatDialogRef that handles generics
-export function createMatDialogRef<T = any, R = any>(componentInstance?: T): TailwindDialogRefImpl<T, R> {
-  return new TailwindDialogRefImpl<T, R>(
-    componentInstance as T,
-    () => {} // empty close callback
-  );
-}
 
 // Re-export our Tailwind implementations
 export {
@@ -109,3 +102,5 @@ export {
   JsonSchemaFormData as StratosJsonSchemaFormData,
   JsonSchemaFormConfig as StratosJsonSchemaFormConfig
 } from './tailwind-json-schema-form.service';
+
+// Factory removed - use TailwindDialogService.open() instead

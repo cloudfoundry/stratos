@@ -5,7 +5,7 @@
   <ng-container *ngIf="showShortLink">
     <div *ngIf="linkValue" class="link__short">
       <a class="link__short__icon" [href]="linkValue" [attr.target]="linkTarget" (click)="$event.stopPropagation()">
-        <mat-icon>launch</mat-icon>
+        <app-custom-icon>launch</app-custom-icon>
       </a>
       <a [href]="linkValue" [attr.target]="linkTarget">View</a>
     </div>

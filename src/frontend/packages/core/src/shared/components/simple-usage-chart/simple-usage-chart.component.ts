@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from './simple-usage-chart.types';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-simple-usage-chart',
@@ -14,8 +14,8 @@ import { IChartData, IChartThresholds, ISimpleUsageChartData, IUsageColor } from
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     BaseChartDirective
   ]
 })

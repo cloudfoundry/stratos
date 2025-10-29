@@ -1,7 +1,7 @@
 form {
-  mat-form-field {
+  .form-field {
     &:not(:last-of-type) {
-      padding-right: 10px;
+      @apply pr-2.5;
     }
   }
 }

@@ -10,7 +10,7 @@ import {
   ViewContainerRef,
   ChangeDetectorRef,
 } from '@angular/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -61,7 +61,7 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
   imports: [
     CommonModule,
     RouterModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     MatCardModule,
     PageHeaderEventsComponent,
     MetaCardComponent,

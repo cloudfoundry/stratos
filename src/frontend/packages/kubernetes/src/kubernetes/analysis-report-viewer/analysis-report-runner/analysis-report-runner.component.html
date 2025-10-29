@@ -7,9 +7,9 @@
       <button (click)="showAnalyzersInfo()" mat-menu-item>Analyzer Info</button>
     </mat-menu>
 
-    <button mat-button [matMenuTriggerFor]="appMenu" *ngIf="analyzers.length > 0" class="report-runner__run">
+    <button class="btn btn-ghost report-runner__run" [matMenuTriggerFor]="appMenu" *ngIf="analyzers.length > 0">
       <span>Analyze</span>
-      <mat-icon>arrow_drop_down</mat-icon>
+      <span class="material-symbols-outlined">arrow_drop_down</span>
     </button>
   </div>
 </ng-container>

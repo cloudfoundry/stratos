@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } from '../../../store/kube.types';
@@ -11,8 +10,7 @@ import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } 
   styleUrls: ['./kubernetes-node-ips.component.scss'],
   standalone: true,
   imports: [
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
   ]
 })
 export class KubernetesNodeIpsComponent extends TableCellCustom<KubernetesNode> implements OnInit {

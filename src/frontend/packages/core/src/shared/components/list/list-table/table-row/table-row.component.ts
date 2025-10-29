@@ -10,8 +10,6 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -21,6 +19,7 @@ import { CardCell } from '../../list.types';
 import { ITableColumn } from '../table.types';
 import { TableCellComponent } from '../table-cell/table-cell.component';
 import { TableRowExpandedService } from './table-row-expanded-service';
+import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
 selector: 'app-table-row',
@@ -32,8 +31,7 @@ selector: 'app-table-row',
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatProgressBarModule,
+    CustomIconComponent,
     TableCellComponent
   ]
 })

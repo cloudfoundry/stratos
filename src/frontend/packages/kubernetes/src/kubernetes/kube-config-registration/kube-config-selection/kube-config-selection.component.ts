@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -39,7 +38,6 @@ selector: 'app-kube-config-selection',
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
     FileInputComponent,
     TableComponent,
   ]

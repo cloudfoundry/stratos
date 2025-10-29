@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, TemplateRef } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { StratosStatus } from '@stratosui/store';
+import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
 
 interface IconDefinition {
   icon: string;
@@ -23,8 +22,7 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
+    CustomIconComponent
   ]
 })
 

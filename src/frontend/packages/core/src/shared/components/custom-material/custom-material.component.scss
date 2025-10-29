@@ -13,6 +13,13 @@
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+
+  &.inline {
+    font-size: inherit;
+    line-height: inherit;
+    vertical-align: baseline;
+  }
 
   &.stratos-icons {
     font-family: 'stratos-icons';

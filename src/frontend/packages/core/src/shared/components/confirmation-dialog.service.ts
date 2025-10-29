@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '../services/tailwind-material-replacements';
+import { TailwindDialogService } from '../services/tailwind-dialog.service';
 import { take } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from './confirmation-dialog.config';
@@ -10,7 +10,7 @@ import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.componen
 })
 export class ConfirmationDialogService {
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private dialog: TailwindDialogService) { }
 
   open(dialog: ConfirmationDialogConfig, doFn: (res?: any) => void): void {
     this.openWithCancel(dialog, doFn, () => {});

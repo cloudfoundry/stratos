@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -19,8 +18,7 @@ import { waitForCFPermissions } from '../../cf.helpers';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatIconModule
+    MatCardModule
   ]
 })
 export class CfAdminAddUserWarningComponent {

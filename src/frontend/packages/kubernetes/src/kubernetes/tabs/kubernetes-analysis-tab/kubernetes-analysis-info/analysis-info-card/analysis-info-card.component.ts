@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -14,8 +13,7 @@ import { catchError, map } from 'rxjs/operators';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatProgressSpinnerModule
+    MatCardModule
   ]
 })
 export class AnalysisInfoCardComponent {

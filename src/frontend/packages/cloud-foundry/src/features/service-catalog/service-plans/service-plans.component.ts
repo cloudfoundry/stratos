@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -13,7 +12,6 @@ import {
   styleUrls: ['./service-plans.component.scss'],
   standalone: true,
   imports: [
-    DatePipe,
     ListComponent
   ],
   providers: [

@@ -11,11 +11,10 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 import {
   StackedInputActionComponent,
   StackedInputActionConfig,
@@ -41,8 +40,7 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
   styleUrls: ['./stacked-input-actions.component.scss'],
   standalone: true,
   imports: [
-    MatButtonModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {

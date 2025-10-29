@@ -1,0 +1,66 @@
+// Theme Transition Styles
+// Smooth transitions for theme changes and FOUC prevention
+
+// Prevent flash of unstyled content (FOUC) during theme initialization
+// Disable transitions on page load to avoid animation flash
+.theme-initializing * {
+  transition: none !important;
+}
+
+// Apply smooth transitions after theme is initialized
+body:not(.theme-initializing) {
+  // Transition background and text colors smoothly
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
+
+  // Apply transitions to all elements for smooth theme changes
+  * {
+    transition:
+      background-color 300ms ease,
+      color 300ms ease,
+      border-color 300ms ease,
+      box-shadow 300ms ease,
+      fill 300ms ease,
+      stroke 300ms ease;
+  }
+
+  // Preserve existing transitions for interactive elements
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  .transition,
+  [class*="transition-"] {
+    // Allow these to keep their specific transitions
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease,
+      opacity 200ms ease;
+  }
+}
+
+// Dark theme specific styles
+body.dark-theme,
+html.dark {
+  color-scheme: dark;
+}
+
+// Light theme specific styles
+body:not(.dark-theme),
+html:not(.dark) {
+  color-scheme: light;
+}
+
+// Reduced motion support for accessibility
+@media (prefers-reduced-motion: reduce) {
+  body * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

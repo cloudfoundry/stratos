@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
-import { MatDialog } from '../../../../services/tailwind-material-replacements';
+import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -59,7 +59,7 @@ function combineCreateVisibles(
 export class EndpointListHelper {
   constructor(
     private store: Store<AppState>,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private currentUserPermissionsService: CurrentUserPermissionsService,
     private confirmDialog: ConfirmationDialogService,
     private snackBarService: SnackBarService,

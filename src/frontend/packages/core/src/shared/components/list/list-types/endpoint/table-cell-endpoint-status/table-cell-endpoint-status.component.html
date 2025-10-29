@@ -2,38 +2,38 @@
   <ng-container *ngIf="connectable; else notConnectable">
     <ng-container *ngIf="row.connectionStatus === 'connected' ">
       <span *ngIf="config?.showLabel">Connected <span *ngIf="row.local">(local)</span></span>
-      <mat-icon fontSet="stratos-icons">endpoints_connected</mat-icon>
+      <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'disconnected'">
       <span *ngIf="config?.showLabel">Disconnected <span *ngIf="row.local">(local)</span></span>
-      <mat-icon fontSet="stratos-icons">endpoints_disconnected</mat-icon>
+      <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
     </ng-container>
     <ng-container *ngIf="row.connectionStatus === 'checking'">
       <span *ngIf="config?.showLabel">Updating </span>
-      <mat-spinner diameter="20"></mat-spinner>
+      <app-spinner [diameter]="20"></app-spinner>
     </ng-container>
     <ng-container *ngIf="!row.connectionStatus || row.connectionStatus === 'unknown'">
       <span *ngIf="config?.showLabel">Unknown </span>
-      <mat-icon>help_outline</mat-icon>
+      <app-custom-icon>help_outline</app-custom-icon>
     </ng-container>
   </ng-container>
   <ng-template #notConnectable>
     <ng-container *ngIf="row?.endpoint_metadata?.status as status; else noStatus">
       <ng-container *ngIf="status === 'Synchronized'">
         <span *ngIf="config?.showLabel">Synchronized </span>
-        <mat-icon>cloud_done</mat-icon>
+        <app-custom-icon>cloud_done</app-custom-icon>
       </ng-container>
       <ng-container *ngIf="status === 'Synchronizing'">
         <span *ngIf="config?.showLabel">Synchronizing </span>
-        <mat-spinner diameter="20"></mat-spinner>
+        <app-spinner [diameter]="20"></app-spinner>
       </ng-container>
       <ng-container *ngIf="status === 'Pending'">
         <span *ngIf="config?.showLabel">Sync Pending</span>
-        <mat-icon>hourglass_empty</mat-icon>
+        <app-custom-icon>hourglass_empty</app-custom-icon>
       </ng-container>
       <ng-container *ngIf="status === 'Failed'">
         <span *ngIf="config?.showLabel">Synchronization failed</span>
-        <mat-icon>sync_problem</mat-icon>
+        <app-custom-icon>sync_problem</app-custom-icon>
       </ng-container>
     </ng-container>
     <ng-template #noStatus>

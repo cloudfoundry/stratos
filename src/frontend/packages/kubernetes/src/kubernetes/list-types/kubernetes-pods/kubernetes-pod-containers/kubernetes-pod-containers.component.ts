@@ -1,5 +1,6 @@
 import { TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
 import moment from 'moment';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -22,7 +23,8 @@ export interface ContainerForTable {
   providers: [
     TitleCasePipe
   ],
-  standalone: true
+  standalone: true,
+  imports: [CustomTooltipDirective]
 })
 export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
 

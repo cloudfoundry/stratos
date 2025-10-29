@@ -1,12 +1,11 @@
 import { Portal, PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
 import { SidePanelService } from '../../services/side-panel.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-sidepanel-preview',
@@ -16,8 +15,7 @@ import { SidePanelService } from '../../services/side-panel.service';
   imports: [
     CommonModule,
     PortalModule,
-    MatButtonModule,
-    MatIconModule,
+    CustomIconComponent,
     EntityFavoriteStarComponent
   ]
 })

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RoutingIndicatorComponent } from './routing-indicator.component';
 import { CoreModule } from '../../../core/core.module';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoutingIndicatorComponent', () => {
@@ -15,7 +15,7 @@ describe('RoutingIndicatorComponent', () => {
         RoutingIndicatorComponent,
         RouterTestingModule,
         CoreModule,
-        MatProgressBarModule
+        ProgressBarComponent
       ]
     })
       .compileComponents();

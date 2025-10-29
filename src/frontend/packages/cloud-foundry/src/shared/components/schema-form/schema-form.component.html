@@ -1,11 +1,11 @@
 <ng-template #json>
   <form [formGroup]="jsonForm">
-    <mat-form-field class="schema-form__raw">
-      <textarea matInput placeholder="JSON" matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="json"></textarea>
-      <mat-error *ngIf="jsonForm.controls.json.hasError('notValidJson')">
+    <app-form-field class="schema-form__raw">
+      <textarea appInput placeholder="JSON" matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="json"></textarea>
+      <app-error *ngIf="jsonForm.controls.json.hasError('notValidJson')">
         Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
+      </app-error>
+    </app-form-field>
   </form>
 </ng-template>
 

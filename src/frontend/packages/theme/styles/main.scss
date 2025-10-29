@@ -1,24 +1,13 @@
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Material Icons fallback styles */
-.material-icons {
-  font-family: 'Material Icons' !important;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
+/* Icon font styles - supports both material-icons and custom icon fonts */
+.material-icons,
+.icon {
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
   word-wrap: normal;
   direction: ltr;
-  font-feature-settings: 'liga';
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
 }
 
 /* CSS Custom Properties for theme customization */
@@ -62,11 +51,172 @@
 
   /* Logo */
   --logo-bg: #ffffff;
+
+  /* Interactive elements - light theme */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #1e293b;
+  --input-placeholder: #9ca3af;
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: #f3f4f6;
+
+  /* Card and panel colors */
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --card-header-bg: #f9fafb;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Table colors */
+  --table-header-bg: #f9fafb;
+  --table-header-text: #374151;
+  --table-row-hover: #f9fafb;
+  --table-border: #e5e7eb;
+
+  /* Status and state colors */
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --success-border: #86efac;
+
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+  --warning-border: #fcd34d;
+
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+  --danger-border: #fca5a5;
+
+  --info-bg: #dbeafe;
+  --info-text: #1e40af;
+  --info-border: #93c5fd;
+
+  /* Shadow system */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme - WCAG AA Compliant */
+.dark-theme {
+  /* Brand colors - adjusted for dark theme with higher contrast */
+  --color-primary: #60a5fa;
+  --color-secondary: #38bdf8;
+  --color-accent: #38bdf8;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+
+  /* Navigation colors - dark theme */
+  --nav-bg: #0f172a;
+  --nav-text: #f1f5f9;
+  --nav-text-muted: rgba(241, 245, 249, 0.7);
+  --nav-hover: rgba(241, 245, 249, 0.1);
+  --nav-active: rgba(241, 245, 249, 0.15);
+  --nav-border: rgba(241, 245, 249, 0.1);
+  --nav-tooltip: #1e293b;
+
+  /* Layout colors - dark theme with proper contrast */
+  --app-bg: #0f172a;
+  --body-bg: #020617;
+  --app-text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --header-bg: #1e293b;
+  --header-text: #f1f5f9;
+  --header-border: #334155;
+  --content-bg: #1e293b;
+  --content-secondary: #0f172a;
+  --content-border: #334155;
+  --content-text: #f1f5f9;
+  --content-muted: #94a3b8;
+
+  /* Login page - dark theme */
+  --login-bg: #0f172a;
+  --login-bg-image: url('/core/assets/login-bg-dark.jpg');
+  --login-card-bg: #1e293b;
+
+  /* Logo - dark theme */
+  --logo-bg: #1e293b;
+
+  /* Interactive elements - dark theme */
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --input-text: #f1f5f9;
+  --input-placeholder: #64748b;
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: #0f172a;
+
+  /* Card and panel colors - dark theme */
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --card-header-bg: #0f172a;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Table colors - dark theme */
+  --table-header-bg: #0f172a;
+  --table-header-text: #cbd5e1;
+  --table-row-hover: #334155;
+  --table-border: #334155;
+
+  /* Status and state colors - dark theme with WCAG AA compliance */
+  --success-bg: #14532d;
+  --success-text: #86efac;
+  --success-border: #22c55e;
+
+  --warning-bg: #78350f;
+  --warning-text: #fcd34d;
+  --warning-border: #f59e0b;
+
+  --danger-bg: #7f1d1d;
+  --danger-text: #fca5a5;
+  --danger-border: #ef4444;
+
+  --info-bg: #1e3a8a;
+  --info-text: #93c5fd;
+  --info-border: #3b82f6;
+
+  /* Shadow system - enhanced for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Smooth theme transitions */
+html,
+body,
+.card,
+.input,
+.btn,
+.nav-item,
+.table th,
+.table td {
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* Reduced Motion Support (WCAG AAA) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .theme-icon,
+  .spinner,
+  [class*='animate-'],
+  [class*='transition-'] {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* Base layout styles */
 * {
-  box-sizing: border-box;
+  @apply box-border;
 }
 
 html {
@@ -76,124 +226,118 @@ html {
 }
 
 body {
-  @apply h-full m-0 p-0;
-  font-family: 'Inter', system-ui, sans-serif;
+  @apply h-full m-0 p-0 font-sans;
 }
 
 /* Component base styles */
 @layer components {
   /* Modern Button System */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 border border-transparent text-sm font-medium rounded-md transition-all duration-200 cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2;
+    @apply border border-transparent text-sm font-medium rounded-md;
+    @apply transition-all duration-200 cursor-pointer;
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
-    line-height: 1.5;
   }
 
   /* Primary Button */
   .btn-primary {
     @apply text-white shadow-sm;
     background-color: var(--color-primary);
-  }
 
-  .btn-primary:hover:not(:disabled) {
-    @apply shadow-md;
-    background-color: color-mix(in srgb, var(--color-primary) 90%, black);
-    transform: translateY(-1px);
-  }
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      transform: translateY(-1px);
+    }
 
-  .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
-  }
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
 
-  .btn-primary:focus {
-    --tw-ring-color: var(--color-primary);
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
   }
 
   /* Secondary Button */
   .btn-secondary {
     @apply text-gray-700 bg-white border-gray-300 shadow-sm;
-  }
+    @apply hover:bg-gray-50 hover:border-gray-400 hover:shadow;
 
-  .btn-secondary:hover:not(:disabled) {
-    @apply bg-gray-50 border-gray-400 shadow;
-  }
-
-  .btn-secondary:focus {
-    --tw-ring-color: var(--color-primary);
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
   }
 
   /* Success Button */
   .btn-success {
     @apply text-white shadow-sm;
     background-color: var(--color-success);
-  }
 
-  .btn-success:hover:not(:disabled) {
-    @apply shadow-md;
-    background-color: color-mix(in srgb, var(--color-success) 90%, black);
-    transform: translateY(-1px);
-  }
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-success) 90%, black);
+      transform: translateY(-1px);
+    }
 
-  .btn-success:focus {
-    --tw-ring-color: var(--color-success);
+    &:focus {
+      --tw-ring-color: var(--color-success);
+    }
   }
 
   /* Warning Button */
   .btn-warning {
     @apply text-white shadow-sm;
     background-color: var(--color-warning);
-  }
 
-  .btn-warning:hover:not(:disabled) {
-    @apply shadow-md;
-    background-color: color-mix(in srgb, var(--color-warning) 90%, black);
-    transform: translateY(-1px);
-  }
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-warning) 90%, black);
+      transform: translateY(-1px);
+    }
 
-  .btn-warning:focus {
-    --tw-ring-color: var(--color-warning);
+    &:focus {
+      --tw-ring-color: var(--color-warning);
+    }
   }
 
   /* Danger Button */
   .btn-danger {
     @apply text-white shadow-sm;
     background-color: var(--color-danger);
-  }
 
-  .btn-danger:hover:not(:disabled) {
-    @apply shadow-md;
-    background-color: color-mix(in srgb, var(--color-danger) 90%, black);
-    transform: translateY(-1px);
-  }
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-danger) 90%, black);
+      transform: translateY(-1px);
+    }
 
-  .btn-danger:focus {
-    --tw-ring-color: var(--color-danger);
+    &:focus {
+      --tw-ring-color: var(--color-danger);
+    }
   }
 
   /* Info Button */
   .btn-info {
     @apply text-white shadow-sm;
     background-color: var(--color-info);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-info) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-info);
+    }
   }
 
-  .btn-info:hover:not(:disabled) {
-    @apply shadow-md;
-    background-color: color-mix(in srgb, var(--color-info) 90%, black);
-    transform: translateY(-1px);
-  }
-
-  .btn-info:focus {
-    --tw-ring-color: var(--color-info);
-  }
-
-  /* Ghost Button (transparent with border) */
+  /* Ghost Button */
   .btn-ghost {
     @apply bg-transparent border-gray-300 text-gray-700;
-  }
-
-  .btn-ghost:hover:not(:disabled) {
-    @apply bg-gray-100 border-gray-400;
+    @apply hover:bg-gray-100 hover:border-gray-400;
   }
 
   /* Outline Variants */
@@ -201,56 +345,37 @@ body {
     @apply bg-transparent border-2 text-gray-700;
     border-color: var(--color-primary);
     color: var(--color-primary);
-  }
 
-  .btn-outline-primary:hover:not(:disabled) {
-    background-color: var(--color-primary);
-    @apply text-white shadow-sm;
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary);
+      @apply text-white shadow-sm;
+    }
   }
 
   .btn-outline-secondary {
     @apply bg-transparent border-2 border-gray-300 text-gray-700;
+    @apply hover:bg-gray-100 hover:border-gray-400;
   }
 
-  .btn-outline-secondary:hover:not(:disabled) {
-    @apply bg-gray-100 border-gray-400;
+  /* Icon Buttons - DRY approach with shared base */
+  %btn-icon-base {
+    @apply rounded-md p-2;
+    @apply inline-flex items-center justify-center;
   }
 
-  /* Icon Buttons */
   .btn-icon {
-    @apply rounded-md;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    padding: 0.5rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    @extend %btn-icon-base;
+    @apply w-9 h-9 min-w-[36px] min-h-[36px];
   }
 
   .btn-icon-sm {
-    @apply rounded-md;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    padding: 0.375rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    @extend %btn-icon-base;
+    @apply w-8 h-8 min-w-[32px] min-h-[32px];
   }
 
   .btn-icon-lg {
-    @apply rounded-md;
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    padding: 0.625rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    @extend %btn-icon-base;
+    @apply w-11 h-11 min-w-[44px] min-h-[44px];
   }
 
   /* Button Sizes */
@@ -262,40 +387,28 @@ body {
     @apply px-6 py-3 text-base;
   }
 
-  /* Button with icon */
+  /* Icon sizing within buttons */
   .btn .material-icons,
-  .btn .mat-icon {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
-    line-height: 20px !important;
-  }
-
+  .btn .icon,
   .btn-icon .material-icons,
-  .btn-icon .mat-icon {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
-    line-height: 20px !important;
+  .btn-icon .icon {
+    @apply text-[20px] w-5 h-5 leading-5;
   }
 
   .btn-sm .material-icons,
-  .btn-sm .mat-icon {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
+  .btn-sm .icon {
+    @apply text-[18px] w-[18px] h-[18px];
   }
 
   .btn-lg .material-icons,
-  .btn-lg .mat-icon {
-    font-size: 24px !important;
-    width: 24px !important;
-    height: 24px !important;
+  .btn-lg .icon {
+    @apply text-2xl w-6 h-6;
   }
 
   /* Input styles */
   .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent;
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm;
+    @apply placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent;
     --tw-ring-color: var(--color-primary);
   }
 
@@ -317,23 +430,27 @@ body {
   }
 
   /* Status indicators */
-  .status-success {
+  %status-base {
     @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @extend %status-base;
     background-color: var(--color-success);
   }
 
   .status-warning {
-    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    @extend %status-base;
     background-color: var(--color-warning);
   }
 
   .status-danger {
-    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    @extend %status-base;
     background-color: var(--color-danger);
   }
 
   .status-info {
-    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+    @extend %status-base;
     background-color: var(--color-info);
   }
 
@@ -345,156 +462,49 @@ body {
 
   .nav-item {
     @apply transition-colors duration-200;
-  }
 
-  .nav-item:hover {
-    background-color: var(--nav-hover);
-  }
+    &:hover {
+      background-color: var(--nav-hover);
+    }
 
-  .nav-item.active {
-    background-color: var(--nav-active);
-  }
-
-  /* Navigation utility classes */
-  .bg-nav-bg {
-    background-color: var(--nav-bg) !important;
-  }
-
-  .text-nav-text {
-    color: var(--nav-text) !important;
-  }
-
-  .text-nav-muted {
-    color: var(--nav-text-muted) !important;
-  }
-
-  .bg-nav-hover {
-    background-color: var(--nav-hover) !important;
-  }
-
-  .bg-nav-active {
-    background-color: var(--nav-active) !important;
+    &.active {
+      background-color: var(--nav-active);
+    }
   }
 }
 
-/* Material Button Overrides - Apply modern button styles globally */
+/* Legacy Material component support - temporary compatibility layer */
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-flat-button,
 .mat-mdc-stroked-button,
 .mat-mdc-icon-button {
-  @apply rounded-md transition-all duration-200;
-  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-  font-weight: 500 !important;
-  line-height: 1.5 !important;
+  @apply btn;
 }
 
-.mat-mdc-button,
-.mat-mdc-raised-button,
-.mat-mdc-flat-button,
-.mat-mdc-stroked-button {
-  padding: 0.5rem 0.875rem !important;
-  min-height: 36px !important;
-}
-
-.mat-mdc-raised-button,
-.mat-mdc-flat-button {
-  @apply shadow-sm;
-
-  &:hover:not([disabled]) {
-    @apply shadow-md;
-    transform: translateY(-1px);
-  }
-
-  &:active:not([disabled]) {
-    transform: translateY(0);
-  }
-}
-
-/* Material primary button */
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-flat-button.mat-primary {
-  background-color: var(--color-primary) !important;
-  color: white !important;
-
-  &:hover:not([disabled]) {
-    background-color: color-mix(in srgb, var(--color-primary) 90%, black) !important;
-  }
-
-  &:focus {
-    --tw-ring-color: var(--color-primary);
-  }
+  @apply btn-primary;
 }
 
-/* Material accent/secondary button */
 .mat-mdc-raised-button.mat-accent,
 .mat-mdc-flat-button.mat-accent,
 .mat-mdc-stroked-button {
-  background-color: white !important;
-  color: #374151 !important;
-  border: 1px solid #d1d5db !important;
-
-  &:hover:not([disabled]) {
-    background-color: #f9fafb !important;
-    border-color: #9ca3af !important;
-  }
+  @apply btn-secondary;
 }
 
-/* Material warn/danger button */
 .mat-mdc-raised-button.mat-warn,
 .mat-mdc-flat-button.mat-warn {
-  background-color: var(--color-danger) !important;
-  color: white !important;
-
-  &:hover:not([disabled]) {
-    background-color: color-mix(in srgb, var(--color-danger) 90%, black) !important;
-  }
-
-  &:focus {
-    --tw-ring-color: var(--color-danger);
-  }
+  @apply btn-danger;
 }
 
-/* Material icon buttons */
 .mat-mdc-icon-button {
-  @apply rounded-md;
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  padding: 0.5rem !important;
+  @apply btn-icon;
 
-  &:hover:not([disabled]) {
-    @apply bg-gray-100;
+  .material-icons,
+  .icon {
+    @apply text-[20px] w-5 h-5;
   }
-
-  .mat-icon,
-  .material-icons {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
-  }
-}
-
-/* Material disabled state */
-.mat-mdc-button[disabled],
-.mat-mdc-raised-button[disabled],
-.mat-mdc-flat-button[disabled],
-.mat-mdc-stroked-button[disabled],
-.mat-mdc-icon-button[disabled] {
-  @apply opacity-50 cursor-not-allowed shadow-none;
-}
-
-.border-nav-border {
-  border-color: var(--nav-border) !important;
-}
-
-.bg-nav-tooltip {
-  background-color: var(--nav-tooltip) !important;
-}
-
-.bg-accent {
-  background-color: var(--color-accent) !important;
 }
 
 /* Header styles */
@@ -505,9 +515,9 @@ body {
 
 /* Login page styles */
 .login-page {
+  @apply bg-cover bg-center min-h-screen;
   background-color: var(--login-bg);
   background-image: var(--login-bg-image);
-  @apply bg-cover bg-center min-h-screen;
 }
 
 .login-card {
@@ -527,18 +537,18 @@ body {
 /* Table styles */
 .table {
   @apply min-w-full divide-y divide-gray-200;
-}
 
-.table th {
-  @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
-}
+  th {
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
 
-.table td {
-  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
-}
+  td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
 
-.table tbody tr {
-  @apply even:bg-gray-50;
+  tbody tr {
+    @apply even:bg-gray-50;
+  }
 }
 
 /* List styles */
@@ -597,36 +607,20 @@ body {
 /* Tooltip */
 .tooltip {
   @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
+
+  &:hover .tooltip-text {
+    @apply visible opacity-100;
+  }
 }
 
-.tooltip:hover .tooltip-text {
-  @apply visible opacity-100;
-}
-
-/* Modal styles */
+/* Modal body scroll lock */
 body.modal-open {
-  overflow: hidden;
+  @apply overflow-hidden;
 }
 
-/* Primary button with theme colors */
-.bg-primary {
-  background-color: var(--color-primary) !important;
-}
-
-.text-primary {
-  color: var(--color-primary) !important;
-}
-
-.border-primary {
-  border-color: var(--color-primary) !important;
-}
-
-.hover\:bg-primary:hover {
-  background-color: var(--color-primary) !important;
-}
-
-/* Utility classes */
+/* Utility classes with CSS variables */
 @layer utilities {
+  /* Color utilities using CSS variables for theme support */
   .text-primary {
     color: var(--color-primary);
   }
@@ -643,6 +637,10 @@ body.modal-open {
     background-color: var(--color-secondary);
   }
 
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
   .border-primary {
     border-color: var(--color-primary);
   }
@@ -651,7 +649,40 @@ body.modal-open {
     border-color: var(--color-secondary);
   }
 
+  .hover\:bg-primary:hover {
+    background-color: var(--color-primary);
+  }
+
   .focus\:ring-primary:focus {
     --tw-ring-color: var(--color-primary);
+  }
+
+  /* Navigation utilities */
+  .bg-nav-bg {
+    background-color: var(--nav-bg);
+  }
+
+  .text-nav-text {
+    color: var(--nav-text);
+  }
+
+  .text-nav-muted {
+    color: var(--nav-text-muted);
+  }
+
+  .bg-nav-hover {
+    background-color: var(--nav-hover);
+  }
+
+  .bg-nav-active {
+    background-color: var(--nav-active);
+  }
+
+  .border-nav-border {
+    border-color: var(--nav-border);
+  }
+
+  .bg-nav-tooltip {
+    background-color: var(--nav-tooltip);
   }
 }

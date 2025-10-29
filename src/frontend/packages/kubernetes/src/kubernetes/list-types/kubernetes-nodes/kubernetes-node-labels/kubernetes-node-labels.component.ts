@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesNode } from '../../../store/kube.types';
@@ -11,8 +10,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   styleUrls: ['./kubernetes-node-labels.component.scss'],
   standalone: true,
   imports: [
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
   ]
 })
 export class KubernetesNodeLabelsComponent extends TableCellCustom<KubernetesNode> implements OnInit {

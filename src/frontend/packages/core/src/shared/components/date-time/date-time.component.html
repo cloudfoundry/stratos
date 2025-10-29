@@ -1,10 +1,10 @@
 <form class="date-time-form">
   <div class="form-field">
-    <input matInput name="date" [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date">
+    <input appInput name="date" [formControl]="date" [matDatepicker]="picker" placeholder="Choose a date">
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker disabled="false" #picker></mat-datepicker>
   </div>
   <div class="form-field">
-    <input matInput name="time" [formControl]="time" placeholder="Choose time" type="time">
+    <input appInput name="time" [formControl]="time" placeholder="Choose time" type="time">
   </div>
 </form>

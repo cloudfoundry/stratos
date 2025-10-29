@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
+import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
 
 const UNLIMITED = -1;
@@ -21,9 +21,9 @@ const UNLIMITED = -1;
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
-    MatCheckboxModule
+    CustomCheckboxComponent
   ]
 })
 export class UnlimitedInputComponent implements OnInit {

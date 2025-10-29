@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
 import { entityCatalog, EndpointModel, SystemSharedUserGuid } from '@stratosui/store';
 
@@ -19,10 +18,10 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatTooltipModule
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomTooltipDirective
   ]
 })
 export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {

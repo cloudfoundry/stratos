@@ -1,13 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { of } from 'rxjs';
 
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
@@ -22,9 +21,8 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomIconComponent,
+    CustomTooltipDirective
   ]
 })
 export class ExtensionButtonsComponent implements OnInit {

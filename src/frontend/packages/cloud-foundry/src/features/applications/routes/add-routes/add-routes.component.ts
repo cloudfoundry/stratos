@@ -21,11 +21,10 @@ import { ApplicationService } from '../../application.service';
 import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
+import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
@@ -41,10 +40,10 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
     FormsModule,
     ReactiveFormsModule,
     MatRadioModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatCheckboxModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomCheckboxComponent,
     FocusDirective,
     MapRoutesComponent
   ]

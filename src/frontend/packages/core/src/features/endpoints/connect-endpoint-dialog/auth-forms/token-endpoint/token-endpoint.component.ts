@@ -1,11 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
 
 import { IAuthForm } from '../../../../../../../store/src/extension-types';
+import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-token-endpoint',
@@ -14,9 +13,8 @@ import { IAuthForm } from '../../../../../../../store/src/extension-types';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
+    CustomFormFieldComponent,
+    CustomIconComponent,
     MatInputModule
   ]
 })

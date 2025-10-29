@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { CustomIconComponent } from '@stratosui/core';
 import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../core/src/shared/components/list/list.component.types';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
@@ -24,6 +25,7 @@ import {
     RouterModule,
     MatButtonModule,
     MatIconModule,
+    CustomIconComponent,
     PageHeaderComponent,
     ListComponent,
   ],

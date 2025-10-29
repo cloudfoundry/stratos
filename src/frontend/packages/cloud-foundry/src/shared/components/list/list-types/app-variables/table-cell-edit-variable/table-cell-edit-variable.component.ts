@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialog } from '@stratosui/core';
+import { TailwindDialogService } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
@@ -18,7 +18,7 @@ import { ListAppEnvVar } from '../cf-app-variables-data-source';
 export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
   ) {
     super();
   }

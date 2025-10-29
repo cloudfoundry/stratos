@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
@@ -10,10 +8,7 @@ selector: 'app-popeye-report-viewer',
   templateUrl: './popeye-report-viewer.component.html',
   styleUrls: ['./popeye-report-viewer.component.scss'],
   standalone: true,
-  imports: [
-    MatExpansionModule,
-    MatIcon
-  ]
+  imports: []
 })
 export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
 

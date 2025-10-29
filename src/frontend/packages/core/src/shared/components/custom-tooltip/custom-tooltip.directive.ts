@@ -8,6 +8,9 @@ export class CustomTooltipDirective implements OnDestroy {
   @Input('matTooltip') tooltipText: string = '';
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
   @Input('matTooltipClass') tooltipClass: string = '';
+  @Input('matTooltipShowDelay') showDelay: number = 500;
+  @Input('matTooltipHideDelay') hideDelay: number = 100;
+  @Input('matTooltipDisabled') disabled: boolean = false;
 
   private tooltipElement: HTMLElement | null = null;
   private showTimeout: any;
@@ -20,11 +23,11 @@ export class CustomTooltipDirective implements OnDestroy {
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(event: MouseEvent) {
-    if (this.tooltipText && this.tooltipText.trim()) {
+    if (!this.disabled && this.tooltipText && this.tooltipText.trim()) {
       this.clearTimeouts();
       this.showTimeout = setTimeout(() => {
         this.showTooltip();
-      }, 500);
+      }, this.showDelay);
     }
   }
 
@@ -33,7 +36,7 @@ export class CustomTooltipDirective implements OnDestroy {
     this.clearTimeouts();
     this.hideTimeout = setTimeout(() => {
       this.hideTooltip();
-    }, 100);
+    }, this.hideDelay);
   }
 
   private showTooltip() {

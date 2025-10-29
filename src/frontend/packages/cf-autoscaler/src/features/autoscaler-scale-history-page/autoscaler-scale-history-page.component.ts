@@ -13,6 +13,7 @@ import {
 } from '../../shared/list-types/app-autoscaler-event/cf-app-autoscaler-events-config.service';
 import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
 import { ListComponent } from '../../../../core/src/shared/components/list/list.component';
+import { CustomIconComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-autoscaler-scale-history-page',
@@ -30,6 +31,7 @@ import { ListComponent } from '../../../../core/src/shared/components/list/list.
     MatIconModule,
     PageHeaderModule,
     ListComponent,
+    CustomIconComponent,
   ]
 })
 export class AutoscalerScaleHistoryPageComponent implements OnInit {

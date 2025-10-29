@@ -1,9 +1,9 @@
-@use '../../sass/material-compat';
+// Migrated from Material theming to Tailwind CSS custom properties
 
 @mixin page-404($theme, $app-theme) {
-  $primary: map-get($theme, primary);
   .page-not-found {
-    background-color: mat-contrast($primary, 500);
-    color: mat-color($primary, 500);
+    // Using Tailwind CSS custom properties instead of Material color functions
+    background-color: var(--color-primary-contrast, #ffffff);
+    color: var(--color-primary, #1976d2);
   }
 }

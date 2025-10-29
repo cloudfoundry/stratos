@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { CustomSlideToggleComponent } from '@stratosui/core';
 
 import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-socket-service';
 
@@ -9,7 +9,7 @@ import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-
   styleUrls: ['./workload-live-reload.component.scss'],
   standalone: true,
   imports: [
-    MatSlideToggle
+    CustomSlideToggleComponent
   ]
 })
 export class WorkloadLiveReloadComponent implements OnInit {

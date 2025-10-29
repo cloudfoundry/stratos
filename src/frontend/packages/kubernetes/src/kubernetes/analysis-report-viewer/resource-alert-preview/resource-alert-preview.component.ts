@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { MatExpansionModule } from '@angular/material/expansion';
 
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
@@ -10,7 +9,6 @@ selector: 'app-resource-alert-preview',
   styleUrls: ['./resource-alert-preview.component.scss'],
   standalone: true,
   imports: [
-    MatExpansionModule,
     SidepanelPreviewComponent
   ]
 })

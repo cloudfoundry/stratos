@@ -66,16 +66,11 @@ $mappy-queries: (
   }
 }
 
-// Material components converted to Tailwind utility classes
-// These styles are now handled by Tailwind classes:
+// Material components have been fully migrated to Tailwind utility classes
+// Form field classes: .w-full, .input-reverse, .text-2xl
+// Input styling: handled by input base styles and placeholder utilities
 
-// mat-form-field.mat-input--full -> .w-full
-// mat-form-field.mat-input--reverse -> .input-reverse (custom class)
-// mat-form-field.mat-input--big -> .text-2xl
-// .mat-input-infix -> handled by input base styles
-// .mat-input-placeholder -> placeholder: text-gray-500
-
-// Custom input classes for special cases
+// Custom input classes for Kubernetes/Helm specific use cases
 .input-reverse {
   @apply bg-gray-100 text-gray-100;
 

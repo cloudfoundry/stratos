@@ -8,6 +8,9 @@
 // Import Tailwind animations for custom components
 @use './shared/styles/tailwind-animations.scss';
 
+// Import theme transitions and FOUC prevention
+@use '../../theme/theme-transitions.scss';
+
 // Base styles are handled by Tailwind in main.css
 // Override font family to match existing design
 body {

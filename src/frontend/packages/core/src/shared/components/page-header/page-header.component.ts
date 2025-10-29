@@ -34,6 +34,7 @@ import { ExtensionButtonsComponent } from '../extension-buttons/extension-button
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
 selector: 'app-page-header',
@@ -48,7 +49,8 @@ selector: 'app-page-header',
     ExtensionButtonsComponent,
     RecentEntitiesComponent,
     UserAvatarComponent,
-    PageHeaderEventsComponent
+    PageHeaderEventsComponent,
+    ThemeToggleComponent
   ]
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {

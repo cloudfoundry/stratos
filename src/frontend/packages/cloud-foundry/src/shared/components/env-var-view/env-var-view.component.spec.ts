@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@stratosui/core';
+import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
 import {
@@ -21,7 +21,7 @@ describe('EnvVarViewComponent', () => {
       ],
       imports: [...BaseTestModulesNoShared],
       providers: [
-        { provide: MatDialogRef, useValue: {} }, { provide: MAT_DIALOG_DATA, useValue: { key: '', value: '' } }
+        { provide: TailwindDialogRef, useValue: {} }, { provide: MAT_DIALOG_DATA, useValue: { key: '', value: '' } }
       ]
     })
       .compileComponents();

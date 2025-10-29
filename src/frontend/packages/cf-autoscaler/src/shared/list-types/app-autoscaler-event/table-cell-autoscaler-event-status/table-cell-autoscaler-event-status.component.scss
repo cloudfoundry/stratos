@@ -1,12 +1,9 @@
 .app-autoscaler-event-status {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  .mat-icon {
-    height: 14px;
-    width: 14px;
+  @apply flex flex-row items-center;
+  .icon {
+    @apply h-3.5 w-3.5;
   }
   .material-icons {
-    font-size: 14px;
+    @apply text-sm;
   }
 }

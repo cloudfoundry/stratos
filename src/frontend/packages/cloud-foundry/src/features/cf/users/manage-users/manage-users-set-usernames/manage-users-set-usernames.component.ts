@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
 import { MatRadioChange, MatRadioModule } from '@angular/material/radio';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -53,8 +52,7 @@ export class ManageUsersSetUsernamesHelper {
     CommonModule,
     FormsModule,
     MatRadioModule,
-    MatFormFieldModule,
-    MatInputModule,
+    CustomFormFieldComponent,
     StackedInputActionsComponent
   ]
 })

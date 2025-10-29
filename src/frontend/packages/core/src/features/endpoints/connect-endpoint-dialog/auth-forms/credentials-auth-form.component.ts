@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
 import { IAuthForm } from '@stratosui/store';
 
@@ -15,7 +15,7 @@ import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
     ShowHideButtonComponent
   ]

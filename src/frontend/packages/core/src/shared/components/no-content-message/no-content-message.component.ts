@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 export interface NoContentMessageLine {
   link?: string;
@@ -15,7 +15,7 @@ export interface NoContentMessageLine {
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
+    CustomIconComponent,
     RouterModule
   ]
 })

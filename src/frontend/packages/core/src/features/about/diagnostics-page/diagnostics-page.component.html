@@ -3,7 +3,7 @@
 </app-page-header>
 
 <div *ngIf="(sessionData$ | async) as session">
-  <mat-card class="diagnostics-page__card">
+  <app-card class="diagnostics-page__card">
     <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
     <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
     <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
@@ -20,9 +20,9 @@
         </div>
       </app-metadata-item>
     </div>
-  </mat-card>
+  </app-card>
 
-  <mat-card class="diagnostics-page__card diagnostics-page__columns">
+  <app-card class="diagnostics-page__card diagnostics-page__columns">
     <div class="diagnostics-page__two-column">
       <div *ngIf="!!gitHubRepository">
         <app-metadata-item icon="storage" label="GitHub Repository">
@@ -55,33 +55,48 @@
         </app-metadata-item>
       </div>
     </div>
-  </mat-card>
+  </app-card>
 
-  <mat-card class="diagnostics-page__card">
+  <app-card class="diagnostics-page__card">
     <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}
     </app-metadata-item>
     <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
-    <table mat-table [dataSource]="session.diagnostics.databaseMigrations" class="diagnostics-page__migrations">
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef> ID </th>
-        <td mat-cell *matCellDef="let row"> {{row.id}} </td>
-      </ng-container>
-      <ng-container matColumnDef="applied">
-        <th mat-header-cell *matHeaderCellDef> Applied </th>
-        <td mat-cell *matCellDef="let row">
-          <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="version">
-        <th mat-header-cell *matHeaderCellDef> Version </th>
-        <td mat-cell *matCellDef="let row"> {{row.version_id}} </td>
-      </ng-container>
-      <ng-container matColumnDef="timestamp">
-        <th mat-header-cell *matHeaderCellDef> Timestamp </th>
-        <td mat-cell *matCellDef="let row"> {{row.timestamp}} </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="['id', 'version', 'applied', 'timestamp']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['id', 'version', 'applied', 'timestamp']"></tr>
-    </table>
-  </mat-card>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-800">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              ID
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Version
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Applied
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Timestamp
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+          <tr *ngFor="let row of session.diagnostics.databaseMigrations"
+              class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{row.id}}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{row.version_id}}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+              {{row.timestamp}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </app-card>
 </div>

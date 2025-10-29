@@ -17,18 +17,14 @@
   }
 
   &__header {
-    display: flex;
-    flex: 1;
-    height: 40px;
-    justify-content: space-between;
+    @apply flex flex-1 h-10 justify-between;
 
-    mat-card-title {
-      margin-bottom: 0;
+    .card-title {
+      @apply mb-0;
     }
 
     app-polling-indicator {
-      margin-right: -10px;
-      margin-top: -10px;
+      @apply -mr-2.5 -mt-2.5;
     }
   }
 
@@ -40,7 +36,6 @@
 }
 
 // Remove box shadow in plain mode
-mat-card.recent-apps-card.mat-card.recent-apps-card__plain {
-  box-shadow: none;
-  padding: 0 1em;
+.card.recent-apps-card.recent-apps-card__plain {
+  @apply shadow-none px-4;
 }

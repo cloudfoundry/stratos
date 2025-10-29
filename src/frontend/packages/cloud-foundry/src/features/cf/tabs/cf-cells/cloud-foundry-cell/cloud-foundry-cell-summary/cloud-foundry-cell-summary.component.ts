@@ -4,7 +4,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { MatCardModule } from '@angular/material/card';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {
+  CustomTooltipDirective,
+  CardWrapperComponent,
+  CardContentComponent
+} from '@stratosui/core';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { StratosStatus } from '../../../../../../../../store/src/types/shared.types';
@@ -29,7 +33,9 @@ import { ListComponent } from '../../../../../../../../core/src/shared/component
   imports: [
     CommonModule,
     MatCardModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
+    CardWrapperComponent,
+    CardContentComponent,
     CardStatusComponent,
     MetadataItemComponent,
     BooleanIndicatorComponent,

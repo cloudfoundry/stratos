@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-entity-summary-title',
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatTooltipModule
+    CustomIconComponent,
+    CustomTooltipDirective
   ],
   templateUrl: './entity-summary-title.component.html',
   styleUrls: ['./entity-summary-title.component.scss']

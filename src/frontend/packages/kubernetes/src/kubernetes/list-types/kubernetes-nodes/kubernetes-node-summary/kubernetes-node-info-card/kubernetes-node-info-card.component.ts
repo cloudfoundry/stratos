@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 
-import { MetadataItemComponent } from '@stratosui/core';
+import { MetadataItemComponent, CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
 
 @Component({
@@ -12,7 +11,10 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   standalone: true,
   imports: [
     AsyncPipe,
-    MatCardModule,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
     MetadataItemComponent
   ]
 })

@@ -1,12 +1,11 @@
 <ng-container *ngIf="!fabButton else fabButtonTemplate">
-  <button mat-icon-button [disabled]="!manualPoll" (click)="poll.emit()" matTooltip="Refresh"
+  <button class="btn btn-icon" type="button" [disabled]="!manualPoll" (click)="poll.emit()" matTooltip="Refresh"
     matTooltipShowDelay="1000">
-    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+    <app-custom-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</app-custom-icon>
   </button>
 </ng-container>
 <ng-template #fabButtonTemplate>
-  <button mat-icon-button [disabled]="!manualPoll" (click)="poll.emit()" matTooltip="Refresh" matTooltipShowDelay="1000"
-    mat-mini-fab>
-    <mat-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</mat-icon>
+  <button class="btn btn-icon btn-primary" type="button" [disabled]="!manualPoll" (click)="poll.emit()" matTooltip="Refresh" matTooltipShowDelay="1000">
+    <app-custom-icon class="poll-icon" [ngClass]="{polling: isPolling}" aria-label="Poll">refresh</app-custom-icon>
   </button>
 </ng-template>

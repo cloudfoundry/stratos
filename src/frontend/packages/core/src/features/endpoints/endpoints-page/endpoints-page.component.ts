@@ -11,9 +11,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
@@ -43,6 +41,7 @@ import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -56,9 +55,8 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     PageHeaderComponent,
     ListComponent,
     EndpointsMissingComponent,

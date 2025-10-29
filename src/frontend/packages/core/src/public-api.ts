@@ -30,12 +30,56 @@ export * from './shared/services/tailwind-paginator.service';
 export * from './shared/services/tailwind-json-schema-form.service';
 export * from './shared/services/tailwind-icon-registry.service';
 
+// Tailwind Progress Components
+export { ProgressSpinnerComponent, MatSpinnerComponent } from './shared/components/progress-spinner/progress-spinner.component';
+export { AppSpinnerComponent } from './shared/components/progress-spinner/app-spinner.component';
+export { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
+export { AppProgressBarComponent } from './shared/components/progress-bar/app-progress-bar.component';
+
 // Shared Components
 export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
 export { StepComponent } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
+
+// Custom Material Replacement Components
+export { CustomIconComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomSpinnerComponent } from './shared/components/custom-material/custom-material.component';
+export { AppCustomSpinnerComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomProgressBarComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomProgressBarSelectorComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogContentComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogActionsComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogTitleComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerInputComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerToggleComponent } from './shared/components/custom-material/custom-material.component';
+export { MatDatepickerDirective } from './shared/components/custom-material/custom-material.component';
+export { CustomTabGroupComponent, CustomTabComponent, MatTabChangeEvent } from './shared/components/custom-tabs/custom-tabs.component';
+
+// Custom Expansion Panel Components
+export { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './shared/components/custom-expansion-panel/custom-expansion-panel.component';
+
+// Custom Form Field Components
+export {
+  CustomFormFieldComponent,
+  CustomFormFieldIconComponent,
+  CustomIconButtonDirective,
+  CustomButtonDirective,
+  MatInputDirective,
+  MatSuffixDirective,
+  MatLabelComponent
+} from './shared/components/custom-form-field/custom-form-field.component';
+
+// Custom Select Components
+export { CustomSelectComponent, CustomOptionComponent } from './shared/components/custom-select/custom-select.component';
+
+// Custom Checkbox Component
+export { CustomCheckboxComponent } from './shared/components/custom-checkbox/custom-checkbox.component';
+
+// Custom Slide Toggle Component
+export { CustomSlideToggleComponent } from './shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 // Tile Components
 export { TileGridComponent } from './shared/components/tile/tile-grid/tile-grid.component';
@@ -51,6 +95,7 @@ export { NoContentMessageComponent } from './shared/components/no-content-messag
 export { UploadProgressIndicatorComponent } from './shared/components/upload-progress-indicator/upload-progress-indicator.component';
 export { EntitySummaryTitleComponent } from './shared/components/entity-summary-title/entity-summary-title.component';
 export { RingChartComponent } from './shared/components/ring-chart/ring-chart.component';
+export { CardProgressOverlayComponent } from './shared/components/card-progress-overlay/card-progress-overlay.component';
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
@@ -68,6 +113,24 @@ export { DialogErrorComponent } from './shared/components/dialog-error/dialog-er
 export { CodeBlockComponent } from './shared/components/code-block/code-block.component';
 export { CardNumberMetricComponent } from './shared/components/cards/card-number-metric/card-number-metric.component';
 
+// Card Components
+export { CardWrapperComponent } from './shared/components/cards/card/card.component';
+export { CardHeaderComponent } from './shared/components/cards/card-header/card-header.component';
+export { CardTitleComponent } from './shared/components/cards/card-title/card-title.component';
+export { CardContentComponent } from './shared/components/cards/card-content/card-content.component';
+export { CardStatusComponent } from './shared/components/cards/card-status/card-status.component';
+
+// Custom Card Components (mat-card replacements)
+export {
+  CustomCardComponent,
+  CustomCardHeaderComponent,
+  CustomCardTitleComponent,
+  CustomCardSubtitleComponent,
+  CustomCardContentComponent,
+  CustomCardActionsComponent,
+  CustomCardFooterComponent
+} from './shared/components/custom-card/custom-card.component';
+
 // Stepper Types
 export * from './shared/components/stepper/step/step.component';
 export * from './shared/components/stepper/stepper.types';
@@ -81,6 +144,7 @@ export { CapitalizeFirstPipe } from './shared/pipes/capitalizeFirstLetter.pipe';
 // Directives
 export { BlurDirective } from './shared/components/blur.directive';
 export { ClickStopPropagationDirective } from './core/click-stop-propagation.directive';
+export { CustomTooltipDirective } from './shared/components/custom-tooltip/custom-tooltip.directive';
 
 // Dialog Services and Config
 export { ConfirmationDialogService } from './shared/components/confirmation-dialog.service';

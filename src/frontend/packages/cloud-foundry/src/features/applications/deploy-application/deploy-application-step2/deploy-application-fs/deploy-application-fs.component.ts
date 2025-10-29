@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
@@ -26,8 +24,6 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule,
     BytesToHumanSize,
     MetadataItemComponent
   ]

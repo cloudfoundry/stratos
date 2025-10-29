@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
+import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -36,11 +35,10 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatIconModule,
+    CustomCheckboxComponent,
+    CustomIconComponent,
     UniqueDirective,
     ProductNameComponent
   ]

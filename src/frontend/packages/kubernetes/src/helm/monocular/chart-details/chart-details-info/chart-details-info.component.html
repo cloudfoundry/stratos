@@ -3,7 +3,7 @@
   <app-chart-details-usage [chart]=chart *ngIf="currentVersion" [currentVersion]=currentVersion.attributes.version>
   </app-chart-details-usage>
 
-  <mat-card class="chartInfo__properties">
+  <app-card class="chartInfo__properties">
     <div class="chartInfo__versions">
       <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
     </div>
@@ -35,5 +35,5 @@
         <a href="{{ url }}" class="chartInfo__link" target="_blank">{{ url }}</a>
       </div>
     </div>
-  </mat-card>
+  </app-card>
 </div>

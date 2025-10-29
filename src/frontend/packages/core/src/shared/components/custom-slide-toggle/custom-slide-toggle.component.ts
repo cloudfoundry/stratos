@@ -8,7 +8,7 @@ export interface MatSlideToggleChange {
 }
 
 @Component({
-  selector: 'mat-slide-toggle',
+  selector: 'app-slide-toggle',
   templateUrl: './custom-slide-toggle.component.html',
   styleUrls: ['./custom-slide-toggle.component.scss'],
   standalone: true,
@@ -33,6 +33,8 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   @Input() required = false;
   @Input() labelPosition: 'before' | 'after' = 'after';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() invalid = false;
+  @Input() errorMessage = '';
 
   @Output() change = new EventEmitter<MatSlideToggleChange>();
 

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -13,6 +12,7 @@ import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../tab-nav.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 
 
@@ -28,7 +28,7 @@ export interface IPageSideNavTab extends StratosTabMetadata {
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class PageSideNavComponent implements OnInit {

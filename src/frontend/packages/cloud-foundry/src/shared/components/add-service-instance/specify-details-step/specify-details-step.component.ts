@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
@@ -69,11 +68,11 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
     ReactiveFormsModule,
     FormsModule,
     MatRadioModule,
-    MatFormFieldModule,
-    MatInputModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
     MatChipsModule,
-    MatIconModule,
-    MatSelectModule,
+    CustomSelectComponent,
+    CustomOptionComponent,
     SchemaFormComponent
   ]
 })

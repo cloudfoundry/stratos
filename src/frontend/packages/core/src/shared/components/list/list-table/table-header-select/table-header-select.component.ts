@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CustomCheckboxComponent } from '../../../custom-checkbox/custom-checkbox.component';
 
 import { TableCellCustom } from '../../list.types';
 
@@ -11,7 +11,7 @@ import { TableCellCustom } from '../../list.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatCheckboxModule
+    CustomCheckboxComponent
   ]
 })
 export class TableHeaderSelectComponent<T> extends TableCellCustom<T> { }

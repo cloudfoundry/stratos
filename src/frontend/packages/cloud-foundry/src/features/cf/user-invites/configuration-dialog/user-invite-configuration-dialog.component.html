@@ -1,8 +1,8 @@
 <div class="connection-dialog__loading-wrapper">
-  <mat-progress-bar class="connection-dialog__loading"
+  <app-progress-bar class="connection-dialog__loading"
     [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
     [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
-  </mat-progress-bar>
+  </app-progress-bar>
 </div>
 <div class="connection-dialog">
   <h2 class="dialog-title">

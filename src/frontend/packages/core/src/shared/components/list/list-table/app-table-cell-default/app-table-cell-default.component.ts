@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { Observable, Subscription } from 'rxjs';
 
 import { objectHelper } from '../../../../../core/helper-classes/object.helpers';
 import { pathGet } from '../../../../../core/utils.service';
 import { TableCellCustom } from '../../list.types';
 import { ICellDefinition } from '../table.types';
+import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-table-cell-default',
@@ -17,7 +17,7 @@ import { ICellDefinition } from '../table.types';
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {

@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { BehaviorSubject } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ selector: 'app-kube-config-table-cert',
   standalone: true,
   imports: [
     CommonModule,
-    MatCheckboxModule,
+    CustomCheckboxComponent,
   ]
 })
 export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFileCluster> {

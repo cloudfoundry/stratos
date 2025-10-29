@@ -4,9 +4,6 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 import {
   EndpointMissingMessageParts,
@@ -26,9 +23,6 @@ import { KubernetesService } from '../services/kubernetes.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatProgressSpinnerModule,
-    MatButtonModule,
-    MatIconModule,
     PageHeaderModule,
     LoadingPageComponent
   ],

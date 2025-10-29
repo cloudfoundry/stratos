@@ -1,15 +1,13 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
+import { CustomSlideToggleComponent } from '../../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -30,11 +28,10 @@ import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.ser
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatOptionModule,
-    MatSelectModule,
-    MatSlideToggleModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomSlideToggleComponent,
     FocusDirective
   ]
 })

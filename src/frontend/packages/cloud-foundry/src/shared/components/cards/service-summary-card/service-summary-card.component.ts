@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+
 import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -39,7 +39,6 @@ import { ServiceIconComponent } from '../../service-icon/service-icon.component'
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,

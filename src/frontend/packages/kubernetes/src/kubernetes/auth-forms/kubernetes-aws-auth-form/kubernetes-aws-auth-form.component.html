@@ -1,17 +1,17 @@
 <div [formGroup]="formGroup" class="kube-aws-auth">
   <div formGroupName="authValues" class="kube-aws-auth__form">
-    <mat-form-field>
-      <input matInput placeholder="Cluster" formControlName="cluster">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput placeholder="Access Key ID" formControlName="access_key">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
+    <app-form-field>
+      <input appInput placeholder="Cluster" formControlName="cluster">
+    </app-form-field>
+    <app-form-field>
+      <input appInput placeholder="Access Key ID" formControlName="access_key">
+    </app-form-field>
+    <app-form-field>
+      <input appInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
         formControlName="secret_key">
-      <span matSuffix>
+      <span appSuffix>
         <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
       </span>
-    </mat-form-field>
+    </app-form-field>
   </div>
 </div>

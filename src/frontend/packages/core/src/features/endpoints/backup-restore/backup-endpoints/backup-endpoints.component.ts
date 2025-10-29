@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import moment from 'moment';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
@@ -34,7 +33,6 @@ selector: 'app-backup-endpoints',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatButtonModule,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,

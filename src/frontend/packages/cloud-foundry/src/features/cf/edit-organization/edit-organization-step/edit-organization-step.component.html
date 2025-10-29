@@ -1,27 +1,27 @@
 <div class="edit-org">
   <form [formGroup]="editOrgName" class="stepper-form">
-    <mat-form-field>
-      <input matInput formControlName="orgName" placeholder="Organization Name" required [appFocus]="true">
-      <mat-error *ngIf="!validate()">
+    <app-form-field>
+      <input appInput formControlName="orgName" placeholder="Organization Name" required [appFocus]="true">
+      <app-error *ngIf="!validate()">
         An organization with this name already exists. Please enter a different one.
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
-        <mat-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">
-          {{ quota.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+      </app-error>
+    </app-form-field>
+    <app-form-field>
+      <app-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
+        <app-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">
+          {{ quota.entity.name }}</app-option>
+      </app-select>
+    </app-form-field>
     <!-- See permission `cfCurrentUserPermissions.ORGANIZATION_SUSPEND` -->
     <!-- <div class="edit-org__stepper-form__ssh">
       <div>
         Change Organization Status
       </div>
       <div>
-        <mat-slide-toggle formControlName="toggleStatus" [(ngModel)]="status">
+        <app-slide-toggle formControlName="toggleStatus" [(ngModel)]="status">
           <div *ngIf="status ">Active</div>
           <div *ngIf="!status ">Suspend</div>
-        </mat-slide-toggle>
+        </app-slide-toggle>
       </div>
 
     </div> -->

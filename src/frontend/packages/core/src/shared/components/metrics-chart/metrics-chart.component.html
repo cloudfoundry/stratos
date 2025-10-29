@@ -1,12 +1,12 @@
-<mat-card class="metrics-chart__card">
+<app-card class="metrics-chart__card">
   <div class="metrics-chart__outer">
     <div class="metrics-chart__header">
       <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
-    <mat-spinner *ngIf="isRefreshing$ | async" diameter="20" class="metrics-chart__refreshing"></mat-spinner>
-    <mat-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
-    </mat-progress-bar>
+    <app-spinner *ngIf="isRefreshing$ | async" [diameter]="20" class="metrics-chart__refreshing"></app-spinner>
+    <app-progress-bar *ngIf="isFetching$ | async" class="metrics-chart__loading" color="primary" mode="indeterminate">
+    </app-progress-bar>
     <div class="metrics-chart" *ngIf="!(isFetching$ | async)">
       <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
         <div class="metrics-chart" *ngIf="results.length; else other_content">
@@ -20,7 +20,7 @@
       </div>
     </div>
   </div>
-</mat-card>
+</app-card>
 <ng-template #other_content>
   <div class="no-content">No results found
     <div class="no-content__name" *ngIf="!title">

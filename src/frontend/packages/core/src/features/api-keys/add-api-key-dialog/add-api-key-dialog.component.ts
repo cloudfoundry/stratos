@@ -1,12 +1,10 @@
 import { Component, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
-import { MatDialogActions } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
+import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
@@ -22,11 +20,9 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
-    MatProgressBarModule,
-    MatDialogActions,
+    AppProgressBarComponent,
     DialogErrorComponent
   ]
 })
@@ -43,7 +39,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   constructor(
     private fb: UntypedFormBuilder,
-    @Inject('TailwindDialogRef') public dialogRef: MatDialogRef<ApiKey>,
+    @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<ApiKey>,
   ) {
     this.formGroup = this.fb.group({
       comment: ['', Validators.required],

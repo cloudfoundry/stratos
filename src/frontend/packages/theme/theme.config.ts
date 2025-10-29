@@ -59,7 +59,7 @@ export interface StratosTheme {
   };
 }
 
-// Default Stratos theme
+// Light theme (default)
 export const defaultTheme: StratosTheme = {
   colors: {
     primary: '#2196f3',
@@ -106,6 +106,56 @@ export const defaultTheme: StratosTheme = {
     backgroundImage: '/core/assets/login-bg.jpg',
     backgroundColor: '#f5f5f5',
     cardBackground: '#ffffff',
+  },
+};
+
+// Dark theme
+export const darkTheme: StratosTheme = {
+  colors: {
+    primary: '#3b82f6',
+    secondary: '#06b6d4',
+    accent: '#f59e0b',
+    success: '#10b981',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    info: '#3b82f6',
+  },
+  navigation: {
+    background: '#1e293b',
+    text: '#f1f5f9',
+    textMuted: 'rgba(241, 245, 249, 0.7)',
+    hover: 'rgba(241, 245, 249, 0.1)',
+    active: 'rgba(241, 245, 249, 0.2)',
+    border: 'rgba(241, 245, 249, 0.1)',
+    tooltip: '#475569',
+  },
+  layout: {
+    background: '#0f172a',
+    bodyBackground: '#0f172a',
+    text: '#f1f5f9',
+    textMuted: '#94a3b8',
+    headerBackground: '#1e293b',
+    headerText: '#f1f5f9',
+    headerBorder: '#334155',
+    contentBackground: '#1e293b',
+    contentSecondary: '#334155',
+    contentBorder: '#475569',
+  },
+  branding: {
+    logo: '/core/assets/logo.png',
+    navLogo: '/core/assets/logo.png',
+    navLogoIcon: '/core/assets/logo.png',
+    favicon: '/favicon.ico',
+    companyName: 'Stratos',
+    loginTitle: 'Stratos Console',
+    loginSubtitle: 'Multi-Cloud Management Platform',
+  },
+  login: {
+    showLogo: true,
+    showTitle: true,
+    backgroundImage: '/core/assets/login-bg.jpg',
+    backgroundColor: '#0f172a',
+    cardBackground: '#1e293b',
   },
 };
 

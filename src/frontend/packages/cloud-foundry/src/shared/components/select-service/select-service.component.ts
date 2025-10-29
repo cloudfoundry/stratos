@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -35,8 +35,10 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
     CfServiceCardComponent
   ]
 })

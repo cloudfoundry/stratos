@@ -1,9 +1,9 @@
 <div class="usage-card">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Summary</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="custom-card">
+    <div class="card-header">
+      <h2 class="card-title">Summary</h2>
+    </div>
+    <div class="card-content">
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="title" label="Description">{{ (description$ | async) }}</app-metadata-item>
@@ -29,11 +29,11 @@
             <div class="user-invites">
               <ng-container *ngIf="(userInviteService.canConfigure$ | async) else cannotConfigure">
                 <ng-container *ngIf="(userInviteService.configured$ | async); else inviteNotConfigured">
-                  Configured - <button color="primary" mat-button (click)="deConfigureUserInvites()"
+                  Configured - <button class="btn btn-ghost" (click)="deConfigureUserInvites()"
                     [disabled]="userInviteBusy">Disable</button>
                 </ng-container>
                 <ng-template #inviteNotConfigured>
-                  Not Configured - <button color="primary" mat-button
+                  Not Configured - <button class="btn btn-ghost"
                     (click)="configureUserInvites()">Configure</button>
                 </ng-template>
               </ng-container>
@@ -44,6 +44,6 @@
           </app-metadata-item>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 </div>

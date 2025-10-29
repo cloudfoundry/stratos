@@ -1,16 +1,15 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { MatRadioModule } from '@angular/material/radio';
 import { ActivatedRoute } from '@angular/router';
+
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
@@ -50,10 +49,10 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     ReactiveFormsModule,
     FormsModule,
     MatChipsModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
     MatRadioModule,
     AppNameUniqueDirective,
     StatefulIconComponent

@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListComponent } from '../../../../../../../core/src/shared/components/list/list.component';
@@ -22,9 +21,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   standalone: true,
   imports: [
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     ListComponent,
     PageSubNavComponent,
     CfUserPermissionDirective

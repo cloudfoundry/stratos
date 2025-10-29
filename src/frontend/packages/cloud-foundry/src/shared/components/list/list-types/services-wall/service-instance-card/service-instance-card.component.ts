@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
+
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -61,7 +61,6 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,

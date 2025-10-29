@@ -1,6 +1,9 @@
-<div class="custom-form-field" 
+<div class="custom-form-field group relative w-full mb-4 inline-block text-left"
      [class.focused]="focused"
      [class.has-value]="hasValue"
+     [class.invalid]="isInvalid"
+     [class.valid]="isValid"
+     [class.disabled]="isDisabled"
      [class.appearance-standard]="appearance === 'standard'"
      [class.appearance-fill]="appearance === 'fill'"
      [class.appearance-outline]="appearance === 'outline'"
@@ -8,31 +11,113 @@
      [class.color-primary]="color === 'primary'"
      [class.color-accent]="color === 'accent'"
      [class.color-warn]="color === 'warn'">
-  
-  <div class="form-field-wrapper">
-    <div class="form-field-flex">
-      <div class="form-field-infix">
+
+  <div class="form-field-wrapper relative"
+       style="padding-bottom: 1.34375em;">
+
+    <!-- Main form field flex container -->
+    <div class="form-field-flex inline-flex items-baseline box-border w-full relative transition-all duration-200">
+
+      <!-- Prefix (optional) -->
+      <div class="form-field-prefix flex items-center pr-2 transition-colors duration-200"
+           *ngIf="hasPrefix">
+        <ng-content select="[matPrefix], span[matPrefix]"></ng-content>
+      </div>
+
+      <!-- Input infix with floating label -->
+      <div class="form-field-infix block relative flex-auto min-w-0"
+           style="padding: 0.75em 0; min-width: 180px;">
+
+        <!-- Input content -->
         <ng-content select="input, textarea, select"></ng-content>
-        <span class="form-field-label" 
-              [class.floating]="shouldFloatLabel"
-              *ngIf="placeholder">
+
+        <!-- Floating Label -->
+        <label *ngIf="placeholder"
+               [for]="inputId"
+               class="form-field-label absolute left-0 pointer-events-none select-none
+                      transition-all duration-300 ease-out origin-top-left
+                      text-base leading-tight"
+               [class.floating]="shouldFloatLabel"
+               style="top: 0.75em; transform-origin: 0 0;"
+               [attr.aria-hidden]="true">
           {{ placeholder }}
-        </span>
+          <span *ngIf="isRequired && !hideRequiredMarker"
+                class="text-red-500 dark:text-red-400 ml-0.5 font-medium"
+                aria-label="required">*</span>
+        </label>
       </div>
-      
-      <div class="form-field-suffix">
+
+      <!-- Suffix -->
+      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200">
         <ng-content select="[matSuffix], span[matSuffix]"></ng-content>
+
+        <!-- Error icon indicator -->
+        <svg *ngIf="isInvalid"
+             class="error-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+             viewBox="0 0 20 20"
+             fill="currentColor"
+             xmlns="http://www.w3.org/2000/svg"
+             aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"/>
+        </svg>
+
+        <!-- Success icon indicator -->
+        <svg *ngIf="isValid"
+             class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+             viewBox="0 0 20 20"
+             fill="currentColor"
+             xmlns="http://www.w3.org/2000/svg"
+             aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"/>
+        </svg>
       </div>
     </div>
-    
-    <div class="form-field-underline">
-      <span class="form-field-ripple"></span>
+
+    <!-- Underline (for standard and legacy appearances) -->
+    <div class="form-field-underline absolute w-full h-px transition-colors duration-200"
+         style="bottom: 1.34375em;"
+         *ngIf="appearance === 'standard' || appearance === 'legacy'">
+      <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
+                   transform scale-x-0 origin-center transition-transform duration-300 ease-out"></span>
     </div>
-    
-    <div class="form-field-subscript-wrapper">
-      <div class="form-field-hint-wrapper" *ngIf="hintLabel">
-        <div class="form-field-hint-spacer"></div>
-        <div class="form-field-hint">{{ hintLabel }}</div>
+
+    <!-- Subscript wrapper for hints and errors -->
+    <div class="form-field-subscript-wrapper absolute box-border w-full overflow-hidden"
+         style="top: calc(100% - 1.34375em); padding-top: 0.5em;">
+
+      <!-- Error Messages -->
+      <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown"
+           *ngIf="isInvalid && errorMessage"
+           role="alert"
+           aria-live="polite">
+        <svg class="w-4 h-4 flex-shrink-0 mt-0.5"
+             fill="currentColor"
+             viewBox="0 0 20 20"
+             xmlns="http://www.w3.org/2000/svg"
+             aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"/>
+        </svg>
+        <div class="form-field-error flex-1 text-xs leading-tight"
+             [id]="inputId + '-error'">
+          {{ errorMessage }}
+        </div>
+        <ng-content select="mat-error"></ng-content>
+      </div>
+
+      <!-- Hint Text (only shown when no errors) -->
+      <div class="form-field-hint-wrapper flex justify-between gap-2"
+           *ngIf="!isInvalid && hintLabel">
+        <div class="form-field-hint flex-1 text-xs leading-tight"
+             [id]="inputId + '-hint'">
+          {{ hintLabel }}
+        </div>
+        <ng-content select="mat-hint"></ng-content>
       </div>
     </div>
   </div>

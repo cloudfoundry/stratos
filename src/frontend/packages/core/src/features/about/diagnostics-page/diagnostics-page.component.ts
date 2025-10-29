@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -20,7 +19,6 @@ import { BooleanIndicatorComponent } from '../../../shared/components/boolean-in
   imports: [
     CommonModule,
     MatCardModule,
-    MatTableModule,
     PageHeaderComponent,
     MetadataItemComponent,
     BooleanIndicatorComponent

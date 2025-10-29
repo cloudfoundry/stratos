@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 
 import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-breadcrumbs',
@@ -13,7 +13,7 @@ import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumb
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class BreadcrumbsComponent {

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
 
 import { CfUserService } from '../../../../../../cloud-foundry/src/shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
@@ -18,7 +17,6 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
   imports: [
     CommonModule,
     RouterModule,
-    MatCardModule,
     MetadataItemComponent,
     BooleanIndicatorComponent,
     CapitalizeFirstPipe

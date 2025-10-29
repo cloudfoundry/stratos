@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
+import { CustomIconComponent } from '@stratosui/core';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../core/src/shared/components/stepper/step/step.component';
@@ -31,6 +32,7 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
     RouterModule,
     MatButtonModule,
     MatIconModule,
+    CustomIconComponent,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,

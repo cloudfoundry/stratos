@@ -1,13 +1,10 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TableCellEditComponent } from '../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubeConfigFileCluster } from '../../kube-config.types';
+import { CustomFormFieldComponent } from '../../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 
 @Component({
 selector: 'app-kube-config-table-name',
@@ -16,10 +13,7 @@ selector: 'app-kube-config-table-name',
   standalone: true,
   imports: [
     FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatTooltipModule,
+    CustomFormFieldComponent,
     TableCellEditComponent,
   ]
 })

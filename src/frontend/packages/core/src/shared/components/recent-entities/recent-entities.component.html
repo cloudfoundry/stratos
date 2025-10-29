@@ -1,8 +1,8 @@
 <!-- history is set when used in the dropdown menu to only show recent history-->
 
-<mat-card *ngIf="!history && ((hasHits$ | async) === true)">
+<app-card *ngIf="!history && ((hasHits$ | async) === true)">
   <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
-</mat-card>
+</app-card>
 
 <ng-container *ngIf="!history && ((hasHits$ | async) === false)">
   <ng-container *ngTemplateOutlet="noActivity"></ng-container>
@@ -20,7 +20,7 @@
       <div [routerLink]="countedEntity.entity.routerLink" [ngClass]="{clickable: !!countedEntity.entity.routerLink}"
         class="recent-entity" *ngFor="let countedEntity of recentEntities">
         <div class="recent-entity__icon-container" *ngIf="countedEntity.icon">
-          <mat-icon class="recent-entity__icon" [fontSet]="countedEntity.iconFont">{{ countedEntity.icon }}</mat-icon>
+          <app-custom-icon class="recent-entity__icon" [fontSet]="countedEntity.iconFont">{{ countedEntity.icon }}</app-custom-icon>
         </div>
         <div>
           <a class="recent-entity--name" *ngIf="countedEntity.entity.routerLink as routerLink; else noLink">{{

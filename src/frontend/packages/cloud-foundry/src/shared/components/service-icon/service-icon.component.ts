@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 
+import { CustomIconComponent } from '@stratosui/core';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { IService, IServiceExtra } from '../../../cf-api-svc.types';
 
@@ -12,7 +12,7 @@ import { IService, IServiceExtra } from '../../../cf-api-svc.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class ServiceIconComponent implements OnInit {

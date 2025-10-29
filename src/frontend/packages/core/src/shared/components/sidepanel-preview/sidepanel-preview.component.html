@@ -5,8 +5,8 @@
     <div  class="sidepanel-preview__custom">
       <ng-container *ngIf="header" [cdkPortalOutlet]="header"></ng-container>
     </div>
-    <button class="sidepanel__close" mat-icon-button (click)="sidePanelService.hide()">
-      <mat-icon>close</mat-icon>
+    <button class="sidepanel__close btn btn-icon" type="button" (click)="sidePanelService.hide()">
+      <app-custom-icon>close</app-custom-icon>
     </button>
   </div>
   <div class="sidepanel-preview__content">

@@ -1,13 +1,13 @@
-<mat-card class="metrics-range-parent-selector metrics-range-parent-selector_card">
+<app-card class="metrics-range-parent-selector metrics-range-parent-selector_card">
   <div>
     <div class="metrics-range-parent-selector__dropdown-wrapper">
-      <mat-form-field>
-        <mat-select [(value)]="rangeSelectorManager.selectedTimeRange">
-          <mat-option *ngFor="let time of rangeSelectorManager.times" [value]="time">
+      <app-form-field>
+        <app-select [(value)]="rangeSelectorManager.selectedTimeRange">
+          <app-option *ngFor="let time of rangeSelectorManager.times" [value]="time">
             {{time.label}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          </app-option>
+        </app-select>
+      </app-form-field>
 
       <div class="metrics-range-parent-selector__selected-range" *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY">
         <div class="metrics-range-parent-selector__selected-range-dates" *ngIf="rangeSelectorManager.committedStartEnd[0] && rangeSelectorManager.committedStartEnd[1] ; else noDatesSelected">
@@ -29,12 +29,12 @@
       class="metrics-range-parent-selector__date-range">
       <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start" [(end)]="rangeSelectorManager.end"></app-start-end-date>
       <div class="metrics-range-parent-selector__date-range-buttons">
-        <button mat-raised-button color="primary" class="metrics-range-parent-selector__date-set" (click)="rangeSelectorManager.commit()"
+        <button class="btn btn-primary metrics-range-parent-selector__date-set" type="button" (click)="rangeSelectorManager.commit()"
           [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
       </div>
     </div>
   </div>
-</mat-card>
+</app-card>
 
 <div class="metrics-range-parent-selector__charts">
   <ng-content select="app-metrics-chart"></ng-content>

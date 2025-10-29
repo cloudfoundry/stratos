@@ -7,7 +7,6 @@ import { Store } from '@ngrx/store';
 import { combineLatest, interval, Observable, Subscription } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
@@ -44,7 +43,6 @@ interface IEndpointDetails {
   imports: [
     CommonModule,
     MatCardModule,
-    MatProgressSpinnerModule,
     RouterModule,
     SimpleUsageChartComponent,
     PageSubNavComponent,

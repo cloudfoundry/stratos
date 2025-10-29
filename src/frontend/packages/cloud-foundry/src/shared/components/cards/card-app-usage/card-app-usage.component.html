@@ -1,6 +1,6 @@
-<mat-card *ngIf="appData$ | async as appData">
+<app-card *ngIf="appData$ | async as appData">
   <app-card-status [status$]="status$"></app-card-status>
-  <mat-card-content *ngIf="appData.isRunning && appData.monitor">
+  <app-card-content *ngIf="appData.isRunning && appData.monitor">
     <table class="instances__detail">
       <tr>
         <td>Usage</td>
@@ -21,10 +21,10 @@
         <td>{{ appData.monitor.avg.cpu | percentage }}</td>
       </tr>
     </table>
-  </mat-card-content>
-  <mat-card-content *ngIf="!appData.isRunning">
-    <mat-card-header>
-      <mat-card-title>Application is not running</mat-card-title>
-    </mat-card-header>
-  </mat-card-content>
-</mat-card>
+  </app-card-content>
+  <app-card-content *ngIf="!appData.isRunning">
+    <app-card-header>
+      <app-card-title>Application is not running</app-card-title>
+    </app-card-header>
+  </app-card-content>
+</app-card>

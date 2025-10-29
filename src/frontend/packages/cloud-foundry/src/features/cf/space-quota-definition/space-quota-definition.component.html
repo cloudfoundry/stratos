@@ -2,8 +2,8 @@
   <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
   <div class="page-header-right" *ngIf="canEditQuota$ | async">
     <!-- Show edit button in top blue bar -->
-    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
-      <mat-icon>edit</mat-icon>
+    <button class="btn btn-icon" name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+      <span class="material-icons">edit</span>
     </button>
   </div>
 </app-page-header>
@@ -11,8 +11,8 @@
 <app-page-sub-nav *ngIf="!isOrg">
   <!-- Show edit button inline with header-->
   <ng-container *ngIf="canEditQuota$ | async">
-    <button mat-icon-button name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
-      <mat-icon>edit</mat-icon>
+    <button class="btn btn-icon" name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+      <span class="material-icons">edit</span>
     </button>
   </ng-container>
 </app-page-sub-nav>

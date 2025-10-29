@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { TailwindDialogRef } from '@stratosui/core';
 
 import { BaseTestModules } from '../../../../test-framework/core-test.helper';
 import { AddApiKeyDialogComponent } from './add-api-key-dialog.component';
@@ -20,7 +20,7 @@ describe('AddApiKeyDialogComponent', () => {
       ],
       providers: [
         {
-          provide: MatDialogRef,
+          provide: TailwindDialogRef,
           useValue: mockDialogRef
         }
       ]

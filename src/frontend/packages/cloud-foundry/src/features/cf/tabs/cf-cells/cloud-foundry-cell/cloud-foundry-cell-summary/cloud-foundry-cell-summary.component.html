@@ -1,6 +1,6 @@
-<mat-card class="cell-summary__summary">
+<app-card class="cell-summary__summary">
   <app-card-status [status$]="status$"></app-card-status>
-  <mat-card-content>
+  <app-card-content>
     <div class="cell-summary__summary__app-metadata">
       <div class="cell-summary__summary__app-metadata--twoCols">
         <app-metadata-item icon="perm_identity" label="ID">{{ (cfCellService.cellMetric$ | async)?.bosh_job_id}}</app-metadata-item>
@@ -15,8 +15,8 @@
         <app-metadata-item *ngIf="cfCellService.cpus$ | async as cpus" icon="developer_board" label="Number of CPUs">{{ cpus }}</app-metadata-item>
       </div>
     </div>
-  </mat-card-content>
-</mat-card>
+  </app-card-content>
+</app-card>
 
 <app-tile-grid [fit]="false" class="cell-summary__usage">
   <app-tile-group>

@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
@@ -21,7 +21,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   standalone: true,
   imports: [
     AsyncPipe,
-    MatIconModule,
+    CustomTooltipDirective,
     PageHeaderComponent,
     RouterLink,
     SshViewerComponent,

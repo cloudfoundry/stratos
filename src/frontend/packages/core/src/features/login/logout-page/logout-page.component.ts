@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatButtonModule } from '@angular/material/button';
+import { CardWrapperComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Logout, AppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -18,9 +16,7 @@ selector: 'app-logout-page',
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatButtonModule,
+    CardWrapperComponent,
     IntroScreenComponent,
     StratosTitleComponent
   ]

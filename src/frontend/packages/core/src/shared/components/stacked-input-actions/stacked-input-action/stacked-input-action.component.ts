@@ -11,15 +11,15 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomFormFieldComponent } from '../../../components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { StackedInputActionsState } from '../stacked-input-actions.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 export enum StackedInputActionResult {
   PROCESSING = 'PROCESSING',
@@ -54,10 +54,10 @@ export interface StackedInputActionUpdate {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     BooleanIndicatorComponent
   ]
 })

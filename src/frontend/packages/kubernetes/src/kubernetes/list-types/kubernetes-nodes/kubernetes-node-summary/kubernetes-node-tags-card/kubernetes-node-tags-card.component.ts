@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,10 +14,10 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   standalone: true,
   imports: [
     AsyncPipe,
-    MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardContent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
     AppChipsComponent
   ]
 })

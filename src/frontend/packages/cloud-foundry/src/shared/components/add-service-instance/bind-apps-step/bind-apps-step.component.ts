@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -24,8 +24,10 @@ import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
     SchemaFormComponent
   ]
 })

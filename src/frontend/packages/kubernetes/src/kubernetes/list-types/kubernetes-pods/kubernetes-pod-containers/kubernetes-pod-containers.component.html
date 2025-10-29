@@ -1,9 +1,9 @@
 <div *ngIf="containers$ | async as containers" class="pod-containers">
   <div *ngFor="let container of containers" class="pod-containers__container">
     <div class="pod-containers__container__icon">
-      <mat-icon *ngIf="icon[container.isInit] as iconDetail" class="" [fontSet]="iconDetail.font"
+      <span *ngIf="icon[container.isInit] as iconDetail" [class]="iconDetail.font"
         [ngClass]="{'container-icon': iconDetail.icon === 'container'}" [matTooltip]="iconDetail.tooltip">
-        {{ iconDetail.icon }}</mat-icon>
+        {{ iconDetail.icon }}</span>
     </div>
     <div class="pod-containers__container__details">
       <div class="pod-containers__container__details--header">

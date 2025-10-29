@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -25,6 +21,8 @@ import { CurrentUserPermissionsService } from '../../../core/permissions/current
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../custom-button-toggle/custom-button-toggle.component';
 
 export enum ProfileSettingsTypes {
   GRAVATAR,
@@ -40,12 +38,11 @@ export enum ProfileSettingsTypes {
   standalone: true,
   imports: [
     CommonModule,
-    MatSlideToggleModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatCardModule,
-    MatButtonToggleModule,
-    MatButtonModule,
+    CustomSlideToggleComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
     BytesToHumanSize
   ]
 })

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../../shared/components/list/list.types';
@@ -18,7 +18,7 @@ interface BackupCheckboxConfig {
   standalone: true,
   imports: [
     FormsModule,
-    MatCheckboxModule
+    CustomCheckboxComponent
   ]
 })
 export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel, BackupCheckboxConfig> {

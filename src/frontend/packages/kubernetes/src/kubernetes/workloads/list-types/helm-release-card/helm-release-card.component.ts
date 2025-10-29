@@ -1,6 +1,5 @@
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
@@ -19,7 +18,6 @@ import { HelmRelease } from '../../workload.types';
   styleUrls: ['./helm-release-card.component.scss'],
   standalone: true,
   imports: [
-    MatIcon,
     RouterModule,
     MetaCardComponent,
     MetaCardItemComponent,

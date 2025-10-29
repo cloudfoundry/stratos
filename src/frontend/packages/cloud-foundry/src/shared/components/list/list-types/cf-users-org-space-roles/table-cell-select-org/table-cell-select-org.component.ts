@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -24,8 +24,9 @@ import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
   ]
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {

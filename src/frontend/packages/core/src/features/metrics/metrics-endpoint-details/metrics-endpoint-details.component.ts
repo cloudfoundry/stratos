@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -9,6 +8,7 @@ import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 interface MetricsDetailsInfo {
   ok: number;
@@ -24,7 +24,7 @@ interface MetricsDetailsInfo {
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {

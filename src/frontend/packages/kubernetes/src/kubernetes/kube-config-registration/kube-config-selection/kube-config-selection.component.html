@@ -1,6 +1,6 @@
 <div class="kube-config-select__panel" *ngIf="!(helper.clusters$ | async) else haveClusters">
   <div class="kube-config-select__upload">
-    <mat-icon class="kube-config-select__icon">insert_drive_file</mat-icon>
+    <app-custom-icon class="kube-config-select__icon">insert_drive_file</app-custom-icon>
     <h1 class="kube-config-select__title">Select a Kube Config file to import clusters</h1>
     <div class="kube-config-auth__form">
       <app-file-input placeholder="kubeconfig" (onFileData)="clustersParse($event)"

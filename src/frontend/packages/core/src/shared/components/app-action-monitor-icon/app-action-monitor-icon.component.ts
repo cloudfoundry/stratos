@@ -1,7 +1,5 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   EntityMonitor,
   EntityMonitorFactory,
@@ -12,6 +10,7 @@ import {
 } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -126,8 +125,7 @@ export class ActionMonitorComponentState {
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
+    CustomIconComponent
   ]
 })
 export class AppActionMonitorIconComponent implements OnInit {

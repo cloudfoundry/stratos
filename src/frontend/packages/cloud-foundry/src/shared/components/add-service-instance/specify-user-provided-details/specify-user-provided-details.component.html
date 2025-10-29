@@ -9,62 +9,62 @@
 </div>
 <form class="stepper-form" [formGroup]="createEditServiceInstance"
   *ngIf="formMode === 'create-service-instance'; else bindService">
-  <mat-form-field>
-    <mat-label>Name</mat-label>
-    <input matInput formControlName="name" [appApplicationNameUnique]="appNameChecking"
+  <app-form-field>
+    <app-label>Name</app-label>
+    <input appInput formControlName="name" [appApplicationNameUnique]="appNameChecking"
       [appApplicationNameUniqueRequest]="getUniqueRequest" required>
-    <mat-error *ngIf="createEditServiceInstance.controls.name?.hasError('appNameTaken')">
+    <app-error *ngIf="createEditServiceInstance.controls.name?.hasError('appNameTaken')">
       A service instance with this name already exists. Please enter a different one.
-    </mat-error>
-    <mat-error *ngIf="createEditServiceInstance.controls.name?.hasError('maxlength')">
+    </app-error>
+    <app-error *ngIf="createEditServiceInstance.controls.name?.hasError('maxlength')">
       A service instance name cannot exceed 50 characters.
-    </mat-error>
+    </app-error>
     <div *ngIf="!createEditServiceInstance.controls.name?.hasError('maxlength')" class="inline-icon inline-icon__form">
       <app-stateful-icon [state]="appNameChecking?.status"></app-stateful-icon>
     </div>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Route Service URL</mat-label>
-    <input matInput formControlName="route_service_url" type="url">
-    <mat-error *ngIf="createEditServiceInstance.controls.route_service_url?.hasError('pattern')">Invalid URL</mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Syslog Drain URL</mat-label>
-    <input matInput formControlName="syslog_drain_url">
-    <mat-error *ngIf="createEditServiceInstance.controls.syslog_drain_url?.hasError('pattern')">Invalid URL</mat-error>
-  </mat-form-field>
-  <mat-form-field class="stepper-form__tags">
-    <mat-label>Tags</mat-label>
+  </app-form-field>
+  <app-form-field>
+    <app-label>Route Service URL</app-label>
+    <input appInput formControlName="route_service_url" type="url">
+    <app-error *ngIf="createEditServiceInstance.controls.route_service_url?.hasError('pattern')">Invalid URL</app-error>
+  </app-form-field>
+  <app-form-field>
+    <app-label>Syslog Drain URL</app-label>
+    <input appInput formControlName="syslog_drain_url">
+    <app-error *ngIf="createEditServiceInstance.controls.syslog_drain_url?.hasError('pattern')">Invalid URL</app-error>
+  </app-form-field>
+  <app-form-field class="stepper-form__tags">
+    <app-label>Tags</app-label>
     <mat-chip-grid #chipGrid class="stepper-form__tags__chip-list">
       <mat-chip-row *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [removable]="true" (removed)="removeTag(tag)">
         {{tag.label}}
         <button matChipRemove>
-          <mat-icon>cancel</mat-icon>
+          <span class="material-icons">cancel</span>
         </button>
       </mat-chip-row>
       <input [matChipInputFor]="chipGrid"
         [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addTag($event)" />
     </mat-chip-grid>
-  </mat-form-field>
-  <mat-form-field class="">
-    <mat-label>Credentials (JSON)</mat-label>
-    <textarea matInput formControlName="credentials" matAutosizeMinRows="2"
+  </app-form-field>
+  <app-form-field class="">
+    <app-label>Credentials (JSON)</app-label>
+    <textarea appInput formControlName="credentials" matAutosizeMinRows="2"
       matAutosizeMaxRows="5"></textarea>
-    <mat-error *ngIf="createEditServiceInstance.controls.credentials.hasError('notValidJson')">
+    <app-error *ngIf="createEditServiceInstance.controls.credentials.hasError('notValidJson')">
       Not valid JSON.
-    </mat-error>
-  </mat-form-field>
+    </app-error>
+  </app-form-field>
 </form>
 
 <ng-template #bindService>
   <form class="stepper-form" [formGroup]="bindExistingInstance">
-    <mat-form-field>
-      <mat-label>User Provided Service Instance</mat-label>
-      <mat-select class="form-control" required
+    <app-form-field>
+      <app-label>User Provided Service Instance</app-label>
+      <app-select class="form-control" required
         formControlName="serviceInstances">
-        <mat-option *ngFor="let sI of serviceBindingForApplication$ | async" [disabled]="!sI.metadata.guid"
-          [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+        <app-option *ngFor="let sI of serviceBindingForApplication$ | async" [disabled]="!sI.metadata.guid"
+          [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
+      </app-select>
+    </app-form-field>
   </form>
 </ng-template>

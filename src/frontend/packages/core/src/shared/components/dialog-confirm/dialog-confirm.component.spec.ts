@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -10,12 +10,12 @@ describe('DialogConfirmComponent', () => {
   let fixture: ComponentFixture<DialogConfirmComponent>;
   let element: HTMLElement;
 
-  class MatDialogRefMock {
+  class TailwindDialogRefMock {
     close() {
     }
   }
 
-  class MatDialogDataMock {
+  class DialogDataMock {
     confirm = 'Confirm';
     message = { textToMatch: 'textToMatch' };
     title = 'Title';
@@ -34,8 +34,8 @@ describe('DialogConfirmComponent', () => {
         NoopAnimationsModule,
       ],
       providers: [
-        { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
       ]
     })
       .compileComponents();

@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { MatDialog } from './shared/services/tailwind-material-replacements';
+import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
 import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
@@ -18,7 +18,7 @@ export class LoggedInService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private ngZone: NgZone,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) { }

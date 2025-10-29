@@ -1,16 +1,15 @@
 .app-metadata {
-  display: flex;
-  flex-direction: row;
+  @apply flex flex-row;
 
   &__two-cols {
-    flex: 1;
+    @apply flex-1;
 
     app-metadata-item:first-child {
-      margin-top: 0;
+      @apply mt-0;
     }
   }
 }
 
-.mat-card-title {
-  font-weight: 500;
+.card-title {
+  @apply font-medium;
 }

@@ -12,7 +12,7 @@
       {{ message }}
     </div>
   </div>
-  <mat-progress-bar *ngIf="isConnecting" mode="indeterminate"></mat-progress-bar>
+  <app-progress-bar *ngIf="isConnecting" mode="indeterminate"></app-progress-bar>
   <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected}">
     <div id="terminal" #terminal></div>
   </div>

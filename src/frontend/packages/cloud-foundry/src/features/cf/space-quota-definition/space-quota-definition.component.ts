@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
@@ -41,9 +39,7 @@ export const QUOTA_SPACE_GUID = 'space';
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
     LoadingPageComponent,

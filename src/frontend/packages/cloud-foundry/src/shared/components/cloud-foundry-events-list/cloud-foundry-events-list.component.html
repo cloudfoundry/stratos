@@ -1,17 +1,17 @@
 <ng-template #customFilters>
   <form [formGroup]="filtersFormGroup" class="">
-    <mat-form-field [floatLabel]="'never'">
-      <!-- <mat-label>Event Type</mat-label> -->
-      <mat-select multiple name="type" formControlName="type" placeholder="Type">
-        <mat-option *ngFor="let pType of typeValues" [value]="pType">{{pType}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field *ngIf="showActee" [floatLabel]="'never'">
-      <input type="text" matInput name="actee" formControlName="actee" placeholder="Actee's GUID">
-      <button mat-button *ngIf="hasActeeFilter" matSuffix mat-icon-button aria-label="Clear" (click)="clearActeeFilter()">
-        <mat-icon>close</mat-icon>
+    <app-form-field [floatLabel]="'never'">
+      <!-- <app-label>Event Type</app-label> -->
+      <app-select multiple name="type" formControlName="type" placeholder="Type">
+        <app-option *ngFor="let pType of typeValues" [value]="pType">{{pType}}</app-option>
+      </app-select>
+    </app-form-field>
+    <app-form-field *ngIf="showActee" [floatLabel]="'never'">
+      <input type="text" appInput name="actee" formControlName="actee" placeholder="Actee's GUID">
+      <button class="btn btn-icon" *ngIf="hasActeeFilter" matSuffix aria-label="Clear" (click)="clearActeeFilter()">
+        <span class="material-icons">close</span>
       </button>
-    </mat-form-field>
+    </app-form-field>
   </form>
 </ng-template>
 

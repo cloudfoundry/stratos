@@ -1,28 +1,28 @@
 <div class="key-dialog__loading-wrapper">
-  <mat-progress-bar class="key-dialog__loading"
+  <app-progress-bar class="key-dialog__loading"
     [color]="(hasErrored$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
     [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
-  </mat-progress-bar>
+  </app-progress-bar>
 </div>
 <div class="key-dialog">
   <div class="key-dialog__title">
-    <h2 mat-dialog-title>
+    <h2 class="text-xl font-semibold mb-4">
       Create an API Key
     </h2>
   </div>
   <div>
   </div>
   <div [formGroup]="formGroup">
-    <mat-form-field>
-      <input matInput placeholder="Description" formControlName="comment" required>
-    </mat-form-field>
+    <app-form-field>
+      <input appInput placeholder="Description" formControlName="comment" required>
+    </app-form-field>
   </div>
 
   <app-dialog-error message="{{hasErrored$ | async}}" [show]="(hasErrored$ | async) && !(isBusy$ | async)">
   </app-dialog-error>
-  <mat-dialog-actions class="key-dialog__actions">
-    <button (click)="dialogRef.close()" class="btn btn-warn" [disabled]="(isBusy$ | async)">Cancel</button>
-    <button (click)="submit()" [disabled]="(isBusy$ | async) || !formGroup.valid" mat-button
-      color="primary">Create</button>
-  </mat-dialog-actions>
+  <div class="key-dialog__actions flex justify-end gap-2 mt-4">
+    <button (click)="dialogRef.close()" class="btn btn-danger" type="button" [disabled]="(isBusy$ | async)">Cancel</button>
+    <button (click)="submit()" [disabled]="(isBusy$ | async) || !formGroup.valid" class="btn btn-primary"
+      type="button">Create</button>
+  </div>
 </div>

@@ -1,56 +1,49 @@
-.custom-button-toggle-group {
-  display: inline-flex;
-  border-radius: 4px;
-  overflow: hidden;
+@tailwind components;
 
-  &.vertical {
-    flex-direction: column;
+@layer components {
+  .custom-button-toggle-group {
+    @apply inline-flex rounded-md overflow-hidden shadow-sm;
+
+    &.vertical {
+      @apply flex-col;
+    }
+
+    &.disabled {
+      @apply opacity-50 pointer-events-none;
+    }
   }
 
-  &.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-}
+  .custom-button-toggle {
+    @apply px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer select-none;
+    @apply border border-gray-300 bg-white text-gray-700;
+    @apply first:ml-0 -ml-px first:rounded-l-md last:rounded-r-md;
 
-.custom-button-toggle {
-  border: 1px solid #ccc;
-  background-color: white;
-  padding: 8px 16px;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  font-size: inherit;
-  margin-left: -1px;
+    &:hover:not(.disabled) {
+      @apply bg-gray-50 border-gray-400;
+    }
 
-  &:first-child {
-    margin-left: 0;
-  }
+    &:focus {
+      @apply outline-none ring-2 ring-offset-1;
+      --tw-ring-color: var(--color-primary);
+    }
 
-  &:hover:not(.disabled) {
-    background-color: #f5f5f5;
-  }
+    &.selected {
+      @apply text-white z-10;
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
 
-  &.selected {
-    background-color: #2196f3;
-    color: white;
-    border-color: #2196f3;
-    z-index: 1;
+      &:hover:not(.disabled) {
+        background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      }
+    }
+
+    &.disabled {
+      @apply opacity-50 cursor-not-allowed pointer-events-none;
+    }
   }
 
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-}
-
-.custom-button-toggle-group.vertical .custom-button-toggle {
-  margin-left: 0;
-  margin-top: -1px;
-
-  &:first-child {
-    margin-top: 0;
+  .custom-button-toggle-group.vertical .custom-button-toggle {
+    @apply ml-0 -mt-px first:mt-0;
+    @apply first:rounded-t-md first:rounded-l-none last:rounded-b-md last:rounded-r-none;
   }
 }

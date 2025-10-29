@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MAT_DIALOG_DATA, MatDialogRef } from '../../../shared/services/tailwind-material-replacements';
+import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
+import { MAT_DIALOG_DATA, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { delay, first, startWith } from 'rxjs/operators';
 
@@ -22,8 +21,7 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.servic
   standalone: true,
   imports: [
     CommonModule,
-    MatProgressBarModule,
-    MatButtonModule,
+    AppProgressBarComponent,
     BlurDirective,
     ConnectEndpointComponent,
     DialogErrorComponent
@@ -40,7 +38,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public helpDocument$: Observable<string>;
 
   constructor(
-    public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+    public dialogRef: TailwindDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConnectEndpointConfig,
     endpointsService: EndpointsService,
     private sidePanelService: SidePanelService,

@@ -1,20 +1,18 @@
 :host {
-  flex: 1;
+  @apply flex-1;
 }
 
 .create-users {
   > * {
-    padding-bottom: 10px;
+    @apply pb-2.5;
   }
 
   &__roles {
     &__space {
-      display: flex;
-      flex-direction: column;
+      @apply flex flex-col;
 
-      mat-radio-button {
-        padding-right: 10px;
-        padding-top: 10px;
+      .radio-button {
+        @apply pr-2.5 pt-2.5;
       }
     }
   }

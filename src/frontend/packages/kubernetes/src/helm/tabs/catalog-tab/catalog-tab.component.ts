@@ -2,11 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
@@ -21,6 +17,7 @@ import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-ca
 import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsListConfig } from '../../list-types/monocular-charts-list-config.service';
+import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 
 const REPO_FILTER_NAME = 'repository';
 
@@ -36,11 +33,8 @@ const REPO_FILTER_NAME = 'repository';
   imports: [
     CommonModule,
     FormsModule,
-    MatButtonModule,
     MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
+    CustomFormFieldComponent,
     ListComponent
   ]
 })

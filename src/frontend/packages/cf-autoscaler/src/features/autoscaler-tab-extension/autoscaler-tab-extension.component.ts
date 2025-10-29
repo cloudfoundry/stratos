@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -130,7 +129,6 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatTableModule,
     BaseChartDirective,
     PageSubNavComponent,
     TileGridComponent,

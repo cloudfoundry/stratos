@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -43,9 +42,7 @@ export const QUOTA_ORG_GUID = 'org';
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomTooltipDirective,
     PageHeaderComponent,
     PageSubNavComponent,
     BooleanIndicatorComponent,

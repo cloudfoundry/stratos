@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatIconRegistry } from '@stratosui/core';
+import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -14,7 +14,8 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   styleUrls: ['./chart-details-usage.component.scss'],
   viewProviders: [MatIconRegistry],
   encapsulation: ViewEncapsulation.None,
-  standalone: true
+  standalone: true,
+  imports: [CustomTooltipDirective]
 })
 export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart: Chart;

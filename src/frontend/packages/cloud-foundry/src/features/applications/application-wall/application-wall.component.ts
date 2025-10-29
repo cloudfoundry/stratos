@@ -26,7 +26,6 @@ import { goToAppWall } from '../../cf/cf.helpers';
   standalone: true,
   imports: [
     CommonModule,
-    DatePipe,
     RouterModule,
     PageHeaderComponent,
     ListComponent,

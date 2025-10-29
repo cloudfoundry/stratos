@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 
 import { HomeCardShortcut } from '../../../../../../store/src/entity-catalog/entity-catalog.types';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-home-shortcuts',
@@ -13,7 +13,7 @@ import { HomeCardShortcut } from '../../../../../../store/src/entity-catalog/ent
   imports: [
     CommonModule,
     RouterModule,
-    MatIconModule
+    CustomIconComponent
   ]
 })
 export class HomeShortcutsComponent {

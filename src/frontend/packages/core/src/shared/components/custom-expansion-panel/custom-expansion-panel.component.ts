@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } fro
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'mat-expansion-panel',
+  selector: 'app-expansion-panel',
   templateUrl: './custom-expansion-panel.component.html',
   styleUrls: ['./custom-expansion-panel.component.scss'],
   standalone: true,
@@ -32,7 +32,7 @@ export class CustomExpansionPanelComponent {
 }
 
 @Component({
-  selector: 'mat-expansion-panel-header',
+  selector: 'app-expansion-panel-header',
   template: '<ng-content></ng-content>',
   styleUrls: ['./custom-expansion-panel.component.scss'],
   standalone: true

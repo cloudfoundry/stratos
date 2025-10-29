@@ -1,10 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
+import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
@@ -13,8 +12,7 @@ import { TableCellCustom } from '../../../list.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
+    CustomIconComponent
   ]
 })
 export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {

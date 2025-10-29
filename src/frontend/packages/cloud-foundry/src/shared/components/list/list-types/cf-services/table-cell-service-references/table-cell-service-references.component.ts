@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
 
 import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -14,7 +13,6 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
     ClickStopPropagationDirective
   ]
 })

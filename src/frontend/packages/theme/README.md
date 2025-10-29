@@ -145,6 +145,13 @@ Components have been converted to use Tailwind classes:
 
 **After:**
 ```html
+<app-card class="example-card">
+  <app-card-header>Title</app-card-header>
+</app-card>
+```
+
+Or using Tailwind utility classes directly:
+```html
 <div class="card">
   <div class="card-header">Title</div>
 </div>

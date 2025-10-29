@@ -1,27 +1,44 @@
-<div class="custom-slide-toggle" [class.disabled]="disabled" [class.checked]="checked">
-  <label class="slide-toggle-label" [class.label-before]="labelPosition === 'before'" [class.label-after]="labelPosition === 'after'">
-    <span class="slide-toggle-content" *ngIf="labelPosition === 'before'">
-      <ng-content></ng-content>
-    </span>
+<div class="custom-slide-toggle-wrapper">
+  <div class="custom-slide-toggle"
+       [class.disabled]="disabled"
+       [class.checked]="checked"
+       [class.invalid]="invalid"
+       [attr.aria-invalid]="invalid || null"
+       [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
 
-    <div class="slide-toggle-bar" (click)="toggle()">
-      <input
-        type="checkbox"
-        class="slide-toggle-input"
-        [checked]="checked"
-        [disabled]="disabled"
-        [name]="name"
-        [id]="id"
-        [required]="required"
-        (change)="toggle()"
-      />
-      <div class="slide-toggle-thumb-container">
-        <div class="slide-toggle-thumb"></div>
+    <label class="slide-toggle-label"
+           [class.label-before]="labelPosition === 'before'"
+           [class.label-after]="labelPosition === 'after'">
+
+      <span class="slide-toggle-content" *ngIf="labelPosition === 'before'">
+        <ng-content></ng-content>
+      </span>
+
+      <div class="slide-toggle-bar" (click)="toggle()">
+        <input
+          type="checkbox"
+          class="slide-toggle-input"
+          [checked]="checked"
+          [disabled]="disabled"
+          [name]="name"
+          [id]="id"
+          [required]="required"
+          (change)="toggle()"
+        />
+        <div class="slide-toggle-thumb-container">
+          <div class="slide-toggle-thumb"></div>
+        </div>
       </div>
-    </div>
 
-    <span class="slide-toggle-content" *ngIf="labelPosition === 'after'">
-      <ng-content></ng-content>
-    </span>
-  </label>
+      <span class="slide-toggle-content" *ngIf="labelPosition === 'after'">
+        <ng-content></ng-content>
+      </span>
+    </label>
+  </div>
+
+  <div class="slide-toggle-error" *ngIf="invalid && errorMessage">
+    <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
+      {{ errorMessage }}
+    </div>
+  </div>
 </div>

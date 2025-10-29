@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatDialog } from '@stratosui/core';
+import { TailwindDialogService } from '@stratosui/core';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
 
@@ -97,7 +97,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   };
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     private appService: ApplicationService,
     private serviceActionHelperService: ServiceActionHelperService,
     private currentUserPermissionsService: CurrentUserPermissionsService,

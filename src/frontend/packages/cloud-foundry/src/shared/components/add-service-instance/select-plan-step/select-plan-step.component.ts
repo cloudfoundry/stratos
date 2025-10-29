@@ -9,9 +9,8 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatOptionModule } from '@angular/material/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -69,9 +68,11 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatOptionModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+
     AsyncPipe,
     NgFor,
     NgIf,

@@ -8,7 +8,7 @@ export interface MatSelectChange {
 }
 
 @Component({
-  selector: 'mat-option',
+  selector: 'app-option',
   template: '<div class="custom-option-content" [class.selected]="selected" [class.disabled]="disabled" (click)="select()"><ng-content></ng-content></div>',
   styleUrls: ['./custom-select.component.scss'],
   standalone: true
@@ -27,7 +27,7 @@ export class CustomOptionComponent {
 }
 
 @Component({
-  selector: 'mat-select',
+  selector: 'app-select',
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
   standalone: true,
@@ -47,6 +47,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() required = false;
   @Input() name: string;
   @Input() id: string;
+  @Input() invalid = false;
+  @Input() errorMessage = '';
 
   @Input()
   get value(): any {

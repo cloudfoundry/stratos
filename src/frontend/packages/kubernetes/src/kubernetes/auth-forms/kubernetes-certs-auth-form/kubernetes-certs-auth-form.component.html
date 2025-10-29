@@ -9,16 +9,16 @@
           <span>Specify Certificate key file:</span>
           <app-file-input fileFormControlName="certKey" placeholder="certKey">
           </app-file-input>
-          <input matInput formControlName="cert" hidden=true>
-          <input matInput formControlName="certKey" hidden=true>
+          <input formControlName="cert" hidden="true">
+          <input formControlName="certKey" hidden="true">
         </div>
       </mat-tab>
       <mat-tab label="Certificate Content">
-        <div class="kube-certs-auth__form__content" spellcheck=false>
+        <div class="kube-certs-auth__form__content" spellcheck="false">
           <span class="kube-certs-auth__label">Specify Certificate:</span>
-          <textarea matInput formControlName="cert"></textarea>
+          <textarea formControlName="cert"></textarea>
           <span class="kube-certs-auth__label">Specify Certificate key:</span>
-          <textarea matInput formControlName="certKey"></textarea>
+          <textarea formControlName="certKey"></textarea>
         </div>
       </mat-tab>
     </mat-tab-group>

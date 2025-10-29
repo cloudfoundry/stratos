@@ -2,8 +2,8 @@ import { Component, Input, Output, EventEmitter, Directive } from '@angular/core
 
 // Custom Icon Component
 @Component({
-  selector: 'mat-icon',
-  template: '<i class="custom-icon" [class]="fontSet + \' \' + name" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>',
+  selector: 'app-custom-icon',
+  template: `<i class="custom-icon" [class]="fontSet" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
   standalone: true
 })
@@ -13,10 +13,6 @@ export class CustomIconComponent {
   @Input() svgIcon = '';
   @Input() inline = false;
   @Input() ariaLabel = '';
-
-  get name(): string {
-    return this.fontIcon || '';
-  }
 }
 
 // Custom Spinner Component
@@ -27,6 +23,18 @@ export class CustomIconComponent {
   standalone: true
 })
 export class CustomSpinnerComponent {
+  @Input() diameter = 40;
+  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+}
+
+// App Spinner Component (alias for custom spinner)
+@Component({
+  selector: 'app-spinner',
+  template: '<div class="custom-spinner" [style.width.px]="diameter" [style.height.px]="diameter"><div class="spinner-circle"></div></div>',
+  styleUrls: ['./custom-material.component.scss'],
+  standalone: true
+})
+export class AppCustomSpinnerComponent {
   @Input() diameter = 40;
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
 }
@@ -146,7 +154,7 @@ export class CustomDatepickerInputComponent {
 // Custom Datepicker Toggle Component
 @Component({
   selector: 'mat-datepicker-toggle',
-  template: '<button class="custom-datepicker-toggle" (click)="toggle()"><mat-icon>calendar_today</mat-icon></button>',
+  template: '<button class="custom-datepicker-toggle" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   imports: [CustomIconComponent]

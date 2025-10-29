@@ -9,7 +9,10 @@ import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
-import { CardCell } from './list.types';
+import { CardCell, TableCellCustom } from './list.types';
+
+// Re-export for external use
+export { TableCellCustom };
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',

@@ -1,53 +1,40 @@
 :host {
-  flex: 1;
+  @apply flex-1;
 }
 
 .deploy-step2-form {
   .reset-margin {
-    margin-top: 0;
+    @apply mt-0;
   }
   &__radio {
-    display: flex;
-    justify-content: left;
-    mat-radio-button {
-      padding-right: 20px;
+    @apply flex justify-start;
+    .radio-button {
+      @apply pr-5;
     }
   }
   &__project-info-group {
-    display: flex;
-    flex-flow: row;
+    @apply flex flex-row;
     > div {
-      padding: 10px 10px 10px 0;
+      @apply p-2.5 pr-2.5 pt-2.5 pb-2.5 pl-0;
     }
     img {
-      height: 51px;
-      width: 51px;
+      @apply h-[51px] w-[51px];
     }
     .description {
-      flex-flow: row;
-      margin-left: 24px;
-      position: absolute;
+      @apply flex-row ml-6 absolute;
       .centered {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 40%;
+        @apply block mx-auto w-2/5;
       }
     }
   }
 }
 
-.mat-option .git-repo-suggestion {
-  align-items: center;
-  display: flex;
+.select-option .git-repo-suggestion {
+  @apply flex items-center;
   &__label {
-    flex: 1;
+    @apply flex-1;
   }
   &__icon {
-    font-size: 18px;
-    height: 18px;
-    line-height: 18px;
-    margin-right: 0;
-    width: 18px;
+    @apply text-[18px] h-[18px] leading-[18px] mr-0 w-[18px];
   }
 }

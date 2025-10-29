@@ -1,15 +1,15 @@
 <ng-template #listRepoButton>
   <div class="list-header" *ngIf="!hide">
-    <button mat-raised-button (click)="collapsed = !collapsed">
-      <mat-icon>filter_list</mat-icon>
-      <mat-icon *ngIf="collapsed">chevron_right</mat-icon>
-      <mat-icon *ngIf="!collapsed">chevron_left</mat-icon>
+    <button class="btn btn-ghost" (click)="collapsed = !collapsed">
+      <span class="material-symbols-outlined">filter_list</span>
+      <span class="material-symbols-outlined" *ngIf="collapsed">chevron_right</span>
+      <span class="material-symbols-outlined" *ngIf="!collapsed">chevron_left</span>
     </button>
     <mat-chip-set>
       <mat-chip *ngIf="filteredRepo" [removable]="true">
         {{filteredRepo}}
         <button matChipRemove (click)="filterCharts()">
-          <mat-icon>cancel</mat-icon>
+          <span class="material-symbols-outlined">cancel</span>
         </button>
       </mat-chip>
     </mat-chip-set>
@@ -20,10 +20,10 @@
   <div class="charts__repos" *ngIf="!hide && repos$ | async as repos"
     [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
     <h3>Filter By Repository</h3>
-    <mat-form-field>
-      <input matInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
+    <app-form-field>
+      <input appInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
         (ngModelChange)="searchRepos($event)">
-    </mat-form-field>
+    </app-form-field>
     <div class="charts__repos__lists">
       <div class="charts__repos__stratos" *ngIf="repos.stratosRepos.length">
         <h4>Helm Repositories</h4>

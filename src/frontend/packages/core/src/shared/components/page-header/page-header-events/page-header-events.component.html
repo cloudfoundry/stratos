@@ -2,7 +2,7 @@
   <div class="header-event__outer">
     <span class="header-event">
       <span class="header-event__error-message">
-        <mat-icon class="header-event__error-icon">error</mat-icon>
+        <app-custom-icon class="header-event__error-icon">error</app-custom-icon>
         <div class="header-event__message-wrapper">{{ message }} -
           <span *ngIf="!endpointId">
             <a class="header-event__details-link" [routerLink]="['/events/endpoints']">view details</a>
@@ -13,17 +13,17 @@
         </div>
       </span>
       <!-- *ngIf="endpointId"  -->
-      <mat-icon class="header-event__error-dismiss" (click)="markEventsAsRead()">
+      <app-custom-icon class="header-event__error-dismiss" (click)="markEventsAsRead()">
         clear
-      </mat-icon>
+      </app-custom-icon>
     </span>
   </div>
 </div>
 
 <!-- <ng-template #eventIcon let-serverity="serverity" let-serverities="eventServerity">
   <ng-container [ngSwitch]="serverity">
-    <mat-icon *ngSwitchCase="serverities.ERROR">error</mat-icon>
-    <mat-icon *ngSwitchCase="serverities.WARNING">warning</mat-icon>
-    <mat-icon *ngSwitchDefault>info</mat-icon>
+    <app-custom-icon *ngSwitchCase="serverities.ERROR">error</app-custom-icon>
+    <app-custom-icon *ngSwitchCase="serverities.WARNING">warning</app-custom-icon>
+    <app-custom-icon *ngSwitchDefault>info</app-custom-icon>
   </ng-container>
 </ng-template> -->

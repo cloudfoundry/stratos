@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,6 +12,7 @@ import { IStepperStep, StepOnNextResult } from '../../../../shared/components/st
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-create-endpoint-connect',
@@ -23,9 +22,8 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.ser
   imports: [
     CommonModule,
     FormsModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatIconModule,
+    CustomCheckboxComponent,
+    CustomIconComponent,
     BlurDirective,
     ConnectEndpointComponent
   ]

@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
@@ -51,8 +49,6 @@ const namespaceColumnId = 'namespace';
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule,
     MatMenuModule,
     PageSubNavComponent,
     ListViewComponent

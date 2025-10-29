@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,6 +15,7 @@ import { Chart } from '../shared/models/chart';
   imports: [
     NgClass,
     RouterLink,
+    CustomTooltipDirective,
   ]
 })
 export class ListItemComponent implements OnInit {

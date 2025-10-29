@@ -3,8 +3,8 @@
   <h1 *ngIf="!endpointOnly">Notifications</h1>
   <div class="page-header-right">
     <span>
-      <button mat-icon-button matTooltip="Close" [routerLink]="back$ | async">
-        <mat-icon>close</mat-icon>
+      <button class="btn btn-icon" type="button" matTooltip="Close" [routerLink]="back$ | async">
+        <app-custom-icon>close</app-custom-icon>
       </button>
     </span>
   </div>
@@ -23,24 +23,24 @@
 
   <mat-list class="event-page__list" [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
     *ngIf="events$ | async as events">
-    <mat-card class="event-page__event-row-card" *ngFor="let event of events">
+    <app-card class="event-page__event-row-card" *ngFor="let event of events">
       <mat-list-item class="event-page__event-row">
         <app-stateful-icon class="event-page__event-row-icon" [state]="event.stratosStatus">
         </app-stateful-icon>
         <span class="event-page__event-message">{{event.message}}</span>
-        <button class="event-page__event-row-button" *ngIf="event.link" color="primary" mat-flat-button
+        <button class="event-page__event-row-button btn btn-primary" type="button" *ngIf="event.link"
           [routerLink]="event.link" [queryParams]="createQueryParams(event.link) | async">View</button>
-        <button class="event-page__event-row-button" *ngIf="event.read" color="primary" mat-flat-button
+        <button class="event-page__event-row-button btn btn-primary" type="button" *ngIf="event.read"
           (click)="updateReadState(event, false)">Mark as unread</button>
-        <button class="event-page__event-row-button" *ngIf="!event.read" color="primary" mat-flat-button
+        <button class="event-page__event-row-button btn btn-primary" type="button" *ngIf="!event.read"
           (click)="updateReadState(event, true)">Mark as read</button>
       </mat-list-item>
-    </mat-card>
-    <mat-card class="event-page__no-event-message" *ngIf="events.length === 0">
+    </app-card>
+    <app-card class="event-page__no-event-message" *ngIf="events.length === 0">
       <mat-list-item>
         <div *ngIf="endpointOnly">You have no unread endpoint notifications.</div>
         <div *ngIf="!endpointOnly">You have no unread notifications.</div>
       </mat-list-item>
-    </mat-card>
+    </app-card>
   </mat-list>
 </div>

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 
 import { CaaspNodeData, KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from '../../../../services/kubernetes-node.service';
@@ -13,7 +14,11 @@ import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/ku
   styleUrls: ['./kubernetes-node-condition-card.component.scss'],
   standalone: true,
   imports: [
-    MatCardModule,
+    CommonModule,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    CardContentComponent,
     KubernetesNodeConditionComponent
   ]
 })

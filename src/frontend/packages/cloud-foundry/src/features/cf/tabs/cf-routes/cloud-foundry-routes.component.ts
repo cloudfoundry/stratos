@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
@@ -17,12 +16,10 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
       provide: ListConfig,
       useClass: CfRoutesListConfigService
     },
-    CfOrgSpaceDataService,
-    DatePipe
+    CfOrgSpaceDataService
   ],
   standalone: true,
   imports: [
-    DatePipe,
     ListComponent
   ]
 })

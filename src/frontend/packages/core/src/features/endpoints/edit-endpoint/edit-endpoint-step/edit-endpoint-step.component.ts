@@ -2,11 +2,10 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
   EndpointModel,
   getFullEndpointApiUrl,
@@ -39,11 +38,10 @@ interface EndpointModelMap {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
+    CustomFormFieldComponent,
     MatInputModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatIconModule,
+    CustomCheckboxComponent,
+    CustomIconComponent,
     UniqueDirective,
     ProductNameComponent
   ]

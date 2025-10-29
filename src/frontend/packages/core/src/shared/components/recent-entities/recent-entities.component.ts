@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 import { Store } from '@ngrx/store';
 import {
   AppState,
@@ -55,8 +54,7 @@ class RenderableRecent {
   imports: [
     CommonModule,
     RouterModule,
-    MatCardModule,
-    MatIconModule,
+    CustomIconComponent,
     NoContentMessageComponent
   ]
 })

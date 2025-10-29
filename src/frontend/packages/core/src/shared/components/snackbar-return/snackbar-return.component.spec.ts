@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DATA } from '@stratosui/core';
 import { TailwindSnackBarRefImpl } from '../../services/tailwind-snackbar.service';
 
 import { BaseTestModulesNoShared } from '../../../../test-framework/core-test.helper';

@@ -1,7 +1,5 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { Observable } from 'rxjs';
@@ -19,8 +17,6 @@ selector: 'app-analysis-report-runner',
   standalone: true,
   imports: [
     AsyncPipe,
-    MatButton,
-    MatIcon,
     MatMenuTrigger,
     MatMenu,
     MatMenuItem

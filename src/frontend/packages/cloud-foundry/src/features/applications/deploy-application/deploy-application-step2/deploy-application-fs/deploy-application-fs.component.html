@@ -6,13 +6,13 @@
   <div *ngIf="sourceType === 'file'">
     <input #localPathSelectFile fileread="localPathFile" type="file" class="deploy-app-local__input"
       name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
-    <button (click)="localPathSelectFile.click()" color="primary" mat-button mat-raised-button>Application Archive
+    <button (click)="localPathSelectFile.click()" class="btn btn-primary">Application Archive
       file</button>
   </div>
   <div *ngIf="sourceType === 'folder'">
     <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="deploy-app-local__input"
       name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
-    <button (click)="localPathSelectFolder.click()" color="primary" mat-button mat-raised-button>Application
+    <button (click)="localPathSelectFolder.click()" class="btn btn-primary">Application
       Folder</button>
   </div>
   <div *ngIf="(sourceData$ | async) as source" class="deploy-app-local__info">
@@ -30,12 +30,12 @@
       <app-metadata-item icon="folder" label="Folders">{{ source.folders }}</app-metadata-item>
 
       <div *ngIf="!!source.manifestFile" class="deploy-app-local__indicator">
-        <mat-icon>done</mat-icon>
+        <span class="material-icons">done</span>
         <span>Manifest file detected</span>
       </div>
 
       <div *ngIf="!!source.cfIgnoreFile" class="deploy-app-local__indicator">
-        <mat-icon>done</mat-icon>
+        <span class="material-icons">done</span>
         <span>.cfignore file was detected and applied ({{source.excludes.length}} files excluded)</span>
       </div>
     </div>

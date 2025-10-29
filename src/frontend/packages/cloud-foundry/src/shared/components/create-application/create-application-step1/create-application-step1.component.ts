@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOptionModule } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
+import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
@@ -26,9 +25,10 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatOptionModule,
+    CustomFormFieldComponent,
+    MatLabelComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
     FocusDirective
   ]
 })

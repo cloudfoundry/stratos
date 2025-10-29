@@ -1,5 +1,5 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -17,25 +17,24 @@ describe('LogOutDialogComponent', () => {
   let element: HTMLElement;
   let router: any;
 
-  class MatDialogRefMock {
+  class TailwindDialogRefMock {
   }
 
-  class MatDialogDataMock {
+  class DialogDataMock {
     data: '';
   }
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: MatDialogRef, useClass: MatDialogRefMock },
-        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
+        { provide: TailwindDialogRef, useClass: TailwindDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: DialogDataMock },
       ],
       imports: [
         CoreModule,
         RouterTestingModule,
         RouteModule,
         SharedModule,
-        MatDialogModule,
         NoopAnimationsModule,
         CoreTestingModule,
         createBasicStoreModule(),

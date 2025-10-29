@@ -1,9 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
+import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
@@ -18,6 +16,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StepComponent, StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
 selector: 'app-edit-profile-info',
@@ -31,9 +30,8 @@ selector: 'app-edit-profile-info',
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
+    CustomFormFieldComponent,
+    CustomIconComponent,
     MatInputModule,
     PageHeaderComponent,
     SteppersComponent,

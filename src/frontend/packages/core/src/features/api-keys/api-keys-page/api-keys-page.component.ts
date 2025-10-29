@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '../../../shared/services/tailwind-material-replacements';
+import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
+import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { stratosEntityCatalog } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -16,6 +13,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { ListComponent } from '../../../shared/components/list/list.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
 selector: 'app-api-keys-page',
@@ -28,10 +26,8 @@ selector: 'app-api-keys-page',
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     PageHeaderComponent,
     ListComponent,
     NoContentMessageComponent,
@@ -49,7 +45,7 @@ export class ApiKeysPageComponent {
   /* tslint:enable */
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
   ) {
     this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
       map(entities => entities && !!entities.length),

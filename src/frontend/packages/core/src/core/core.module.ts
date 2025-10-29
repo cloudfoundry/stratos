@@ -10,7 +10,6 @@ import { MomentModule } from 'ngx-moment';
 import { TailwindDialogService, TailwindDialogRef, TailwindDialogRefImpl } from '../shared/services/tailwind-dialog.service';
 import { TailwindSnackBarService } from '../shared/services/tailwind-snackbar.service';
 import { TailwindErrorStateMatcher } from '../shared/services/tailwind-error-state-matcher';
-import { createMatDialogRef } from '../shared/services/tailwind-material-replacements';
 
 import { RecentEntitiesComponent } from '../shared/components/recent-entities/recent-entities.component';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
@@ -95,11 +94,7 @@ import { WindowRef } from './window-ref/window-ref.service';
         // Tailwind Material service providers (these don't use providedIn: 'root')
         TailwindDialogService,
         TailwindSnackBarService,
-        TailwindErrorStateMatcher,
-        {
-            provide: 'TailwindDialogRef',
-            useFactory: createMatDialogRef
-        }
+        TailwindErrorStateMatcher
     ]
 })
 export class CoreModule {

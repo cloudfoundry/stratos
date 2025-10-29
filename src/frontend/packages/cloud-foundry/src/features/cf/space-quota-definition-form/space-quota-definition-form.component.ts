@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { CustomCheckboxComponent } from '../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
@@ -30,9 +29,8 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatInputModule,
+    CustomCheckboxComponent,
+    CustomFormFieldComponent,
     FocusDirective,
     UnlimitedInputComponent
   ]

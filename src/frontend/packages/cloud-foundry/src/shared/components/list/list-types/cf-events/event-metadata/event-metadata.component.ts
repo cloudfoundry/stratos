@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
 
 @Component({
   selector: 'app-event-metadata',
@@ -9,9 +8,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/d
   styleUrls: ['./event-metadata.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatDialogModule
+    CommonModule
   ]
 })
 export class EventMetadataComponent implements OnInit {
@@ -25,7 +22,7 @@ export class EventMetadataComponent implements OnInit {
   isPopup = false;
 
   constructor(
-    private dialog: MatDialog,
+    private dialog: TailwindDialogService,
     @Optional() @Inject(MAT_DIALOG_DATA) public data?: {
       metadata: { [name: string]: string, },
     },

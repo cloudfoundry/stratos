@@ -1,28 +1,26 @@
 .variables-tab {
   &__env-code-block {
-    padding-top: 20px;
-    .mat-card-content {
-      padding-top: 20px;
+    @apply pt-5;
+    .card-content {
+      @apply pt-5;
     }
     &--line {
       pre {
-        margin: 0;
-        white-space: pre-wrap;
+        @apply m-0 whitespace-pre-wrap;
       }
     }
     &--section {
       &:not(:first-of-type) {
-        padding-top: 15px;
+        @apply pt-[15px];
       }
     }
   }
   &__env-table--add-form {
     form {
-      display: flex;
-      flex-direction: row;
+      @apply flex flex-row;
     }
-    mat-form-field {
-      padding-right: 10px;
+    .form-field {
+      @apply pr-2.5;
     }
   }
 }

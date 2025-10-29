@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IHeaderBreadcrumbLink } from 'frontend/packages/core/src/shared/components/page-header/page-header.types';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
@@ -21,7 +20,6 @@ import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/a
   standalone: true,
   imports: [
     CommonModule,
-    MatProgressSpinnerModule,
     PageHeaderModule,
     PageSubNavComponent,
     LoadingPageComponent,

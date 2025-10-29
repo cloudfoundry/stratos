@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
+import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({
   selector: 'app-metadata-item',
@@ -12,8 +12,8 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
   standalone: true,
   imports: [
     CommonModule,
-    MatIconModule,
-    MatTooltipModule,
+    CustomIconComponent,
+    CustomTooltipDirective,
     CopyToClipboardComponent
   ]
 })

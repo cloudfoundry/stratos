@@ -1,6 +1,6 @@
 <ng-container *ngIf="errors.length; else noErrors">
   <div *ngFor="let error of errors" class="pressure">
-    <mat-icon class="pressure__icon">info</mat-icon>
+    <span class="material-symbols-outlined pressure__icon">info</span>
     {{ error }}
   </div>
 </ng-container>

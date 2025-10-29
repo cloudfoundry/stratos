@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { CustomCheckboxComponent, TableCellCustom } from '@stratosui/core';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -11,7 +9,7 @@ selector: 'app-kube-config-table-select',
   styleUrls: ['./kube-config-table-select.component.scss'],
   standalone: true,
   imports: [
-    MatCheckboxModule,
+    CustomCheckboxComponent,
   ]
 })
 export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFileCluster> {

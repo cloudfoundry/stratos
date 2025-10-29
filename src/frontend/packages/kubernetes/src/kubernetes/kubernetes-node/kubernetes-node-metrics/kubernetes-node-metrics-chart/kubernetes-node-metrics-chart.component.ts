@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MatCard, MatCardHeader, MatCardContent } from '@angular/material/card';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
@@ -14,9 +14,9 @@ import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions'
   styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],
   standalone: true,
   imports: [
-    MatCard,
-    MatCardHeader,
-    MatCardContent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardContentComponent,
     MetricsChartComponent
   ]
 })

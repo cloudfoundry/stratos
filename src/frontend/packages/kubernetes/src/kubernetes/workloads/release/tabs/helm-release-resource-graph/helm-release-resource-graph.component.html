@@ -1,6 +1,6 @@
 <app-page-sub-nav>
-  <button mat-button name="fit" (click)="fitGraph()" matTooltip="Fit">
-    <mat-icon>all_out</mat-icon>
+  <button class="btn btn-ghost" name="fit" (click)="fitGraph()" matTooltip="Fit">
+    <app-custom-icon>all_out</app-custom-icon>
     <span>Fit</span>
   </button>
 
@@ -50,7 +50,7 @@
 <div class="resources__loading" *ngIf="nodes && !nodes.length">
   <div class="resources__loading__content">
     Loading resources
-    <mat-progress-bar class="" [color]="'primary'" mode="indeterminate">
-    </mat-progress-bar>
+    <app-progress-bar class="" [color]="'primary'" mode="indeterminate">
+    </app-progress-bar>
   </div>
 </div>

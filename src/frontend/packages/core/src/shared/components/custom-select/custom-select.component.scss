@@ -5,8 +5,22 @@
   font-family: inherit;
 
   &.disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     pointer-events: none;
+    cursor: not-allowed;
+
+    .select-trigger {
+      background-color: var(--input-disabled-bg, #f3f4f6);
+      color: var(--text-muted, #9ca3af);
+      border-color: var(--input-border, #d1d5db);
+    }
+  }
+
+  &.invalid {
+    .select-trigger {
+      border-color: var(--color-danger, #ef4444);
+      border-width: 2px;
+    }
   }
 }
 
@@ -15,19 +29,28 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border, #d1d5db);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--input-bg, white);
+  color: var(--input-text, #1e293b);
   cursor: pointer;
   user-select: none;
   min-height: 20px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-  &:hover {
-    border-color: #999;
+  &:hover:not(.disabled) {
+    border-color: var(--input-focus-border, #999);
   }
 
   .custom-select.open & {
-    border-color: #2196f3;
+    border-color: var(--color-primary, #2196f3);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  }
+
+  &:focus-within {
+    outline: none;
+    border-color: var(--color-primary, #2196f3);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
   }
 }
 
@@ -36,14 +59,27 @@
   color: inherit;
 
   &.placeholder {
-    color: #999;
+    color: var(--input-placeholder, #9ca3af);
   }
 }
 
-.select-arrow {
+.select-suffix {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-left: 8px;
-  color: #666;
+}
+
+.error-icon {
+  color: var(--color-danger, #ef4444);
+  flex-shrink: 0;
+}
+
+.select-arrow {
+  color: var(--text-muted, #666);
   transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
 
   .custom-select.open & {
     transform: rotate(180deg);
@@ -75,12 +111,12 @@
   color: inherit;
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--table-row-hover, #f5f5f5);
   }
 
   &.selected {
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background-color: var(--info-bg, #e3f2fd);
+    color: var(--color-primary, #1976d2);
   }
 
   &.disabled {
@@ -89,6 +125,46 @@
 
     &:hover {
       background-color: transparent;
+    }
+  }
+}
+
+.select-error {
+  margin-top: 4px;
+  padding: 4px 0;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--color-danger, #ef4444);
+  animation: slideDown 0.3s ease-out;
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .select-error {
+    animation: none;
+  }
+
+  @keyframes slideDown {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }

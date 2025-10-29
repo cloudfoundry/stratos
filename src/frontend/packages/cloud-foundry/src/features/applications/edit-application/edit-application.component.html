@@ -1,32 +1,32 @@
 <app-page-header>
   <h1>Edit Application: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
-    <button mat-icon-button mat-button routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
-      <mat-icon>clear</mat-icon>
+    <button class="btn btn-icon" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
+      <span class="material-icons">clear</span>
     </button>
   </div>
 </app-page-header>
 <app-steppers cancel="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
   <app-step [title]="'Edit Application'" [valid]="editAppForm.valid && editAppForm.dirty" [onNext]="updateApp">
     <form [formGroup]="editAppForm" validate class="stepper-form edit-app">
-      <mat-form-field class="mat-form-field__spinner">
-        <input matInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
-        <mat-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</mat-error>
-        <mat-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</mat-error>
+      <app-form-field class="mat-form-field__spinner">
+        <input appInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
+        <app-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</app-error>
+        <app-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</app-error>
         <div class="inline-icon inline-icon__form">
           <app-stateful-icon [state]="uniqueNameValidator.appApplicationNameUnique.status"></app-stateful-icon>
         </div>
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Number of Instances" formControlName="instances" type="number">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number" min="1">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number" min="1">
-      </mat-form-field>
-      <mat-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</mat-slide-toggle>
+      </app-form-field>
+      <app-form-field>
+        <input appInput placeholder="Number of Instances" formControlName="instances" type="number">
+      </app-form-field>
+      <app-form-field>
+        <input appInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number" min="1">
+      </app-form-field>
+      <app-form-field>
+        <input appInput placeholder="Memory Quota (MB)" formControlName="memory" type="number" min="1">
+      </app-form-field>
+      <app-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</app-slide-toggle>
     </form>
   </app-step>
 </app-steppers>

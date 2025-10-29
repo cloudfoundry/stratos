@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -34,8 +33,6 @@ import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organization
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
     PageSubNavComponent,
     NoContentMessageComponent,
     ListComponent,

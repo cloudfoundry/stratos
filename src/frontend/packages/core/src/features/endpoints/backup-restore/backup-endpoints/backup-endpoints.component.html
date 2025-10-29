@@ -9,9 +9,9 @@
     <div *ngIf="service.canBackup(); else noEndpoints" class="select-step">
       <p>Select the endpoints and connection details that you would like to backup</p>
       <div class="select-step__buttons">
-        <button mat-raised-button color="primary" [disabled]="disableSelectAll$ | async"
+        <button class="btn btn-primary" type="button" [disabled]="disableSelectAll$ | async"
           (click)="service.selectAll()">Select All</button>
-        <button mat-raised-button color="primary" [disabled]="disableSelectNone$ | async"
+        <button class="btn btn-primary" type="button" [disabled]="disableSelectNone$ | async"
           (click)="service.selectNone()">Select None</button>
       </div>
       <!-- 77px is the min height given Connection details drop down. In some cases it's missing, those rows would be

@@ -1,23 +1,23 @@
 <app-intro-screen class="acme-login login__busy" [ngClass]="{'acme-login__busy': busy$ | async }">
-  <mat-card class="login__card mat-elevation-z">
+  <app-card class="login__card mat-elevation-z">
     <app-stratos-title></app-stratos-title>
     <div class="acme-login__body">
       <div class="acme-login__form-outer" [ngClass]="{'acme-login-sso': ssoLogin}">
         <form class="acme-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <mat-form-field *ngIf="!ssoLogin">
-            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
-          </mat-form-field>
-          <mat-form-field *ngIf="!ssoLogin">
-            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
-          </mat-form-field>
-          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+          <app-form-field *ngIf="!ssoLogin">
+            <input appInput required [(ngModel)]="username" name="username" placeholder="Username">
+          </app-form-field>
+          <app-form-field *ngIf="!ssoLogin">
+            <input appInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+          </app-form-field>
+          <button class="login__submit btn btn-primary" *ngIf="!loggedIn" type="submit" [disabled]="!ssoLogin && !loginForm.valid">Login</button>
         </form>
       </div>
       <div class="acme-login__loading">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <app-progress-bar mode="indeterminate"></app-progress-bar>
       </div>
     </div>
-  </mat-card>
+  </app-card>
   <div class="acme-login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
       {{ message }}
   </div>

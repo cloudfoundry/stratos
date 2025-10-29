@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
+import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
 import { MomentModule } from 'ngx-moment';
 import { EntityMonitorFactory, MetricQueryType, IMetrics, MetricsAction, EntityMonitor } from '@stratosui/store';
 import { Subscription } from 'rxjs';
@@ -25,9 +24,9 @@ import moment from 'moment';
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
     MomentModule,
     StartEndDateComponent
   ]

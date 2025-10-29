@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -10,7 +11,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   templateUrl: './kubernetes-node-link.component.html',
   styleUrls: ['./kubernetes-node-link.component.scss'],
   standalone: true,
-  imports: [RouterLink]
+  imports: [RouterLink, CustomTooltipDirective]
 })
 export class KubernetesNodeLinkComponent extends TableCellCustom<KubernetesNode> implements OnInit {
 

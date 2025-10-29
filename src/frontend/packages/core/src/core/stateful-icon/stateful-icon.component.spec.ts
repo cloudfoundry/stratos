@@ -43,6 +43,6 @@ describe('StatefulIconComponent', () => {
     component.state = StratosStatus.BUSY;
     fixture.detectChanges();
 
-    expect(element.querySelector('mat-spinner')).toBeTruthy();
+    expect(element.querySelector('app-spinner')).toBeTruthy();
   });
 });
