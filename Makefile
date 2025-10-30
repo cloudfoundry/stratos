@@ -6,6 +6,14 @@
 # Default target
 .DEFAULT_GOAL := help
 
+# Color definitions
+BLUE   := \033[0;34m
+GREEN  := \033[0;32m
+YELLOW := \033[0;33m
+RED    := \033[0;31m
+CYAN   := \033[0;36m
+NC     := \033[0m # No Color
+
 help:
 	@echo "Stratos Development Commands:"
 	@echo ""
@@ -25,6 +33,15 @@ help:
 	@echo "  Terminal 2: make dev-backend"
 	@echo "  Access at:  https://127.0.0.1:5440"
 	@echo ""
+
+.PHONY: install-tools
+install-tools:
+	@echo "$(BLUE)==> Installing development tools...$(NC)"
+	@go install github.com/securego/gosec/v2/cmd/gosec@latest
+	@go install golang.org/x/vuln/cmd/govulncheck@latest
+	@echo "$(YELLOW)Note: Install trivy from https://github.com/aquasecurity/trivy$(NC)"
+	@echo "$(GREEN)✓ Tool installation complete$(NC)"
+
 
 # Build both frontend and backend
 build: build-frontend build-backend
@@ -71,6 +88,32 @@ dev-full-build: build-backend
 	@echo "  Terminal 1: make dev-frontend"
 	@echo "  Terminal 2: make dev-backend"
 	@echo ""
+
+.PHONY: security
+security: gosec trivy vuln
+	@echo "$(GREEN)✓ All security checks complete$(NC)"
+
+.PHONY: gosec
+gosec:
+	@echo "$(BLUE)==> Running gosec security scanner...$(NC)"
+	@which gosec > /dev/null || (echo "$(RED)gosec not installed. Run 'make install-tools'$(NC)" && exit 1)
+	@cd src/jetstream && gosec -quiet -fmt json -out gosec-report.json ./... || true
+	@cd src/jetstream && gosec -quiet ./...
+	@echo "$(GREEN)✓ Gosec scan complete$(NC)"
+
+.PHONY: trivy
+trivy:
+	@echo "$(BLUE)==> Running trivy vulnerability scanner...$(NC)"
+	@which trivy > /dev/null || (echo "$(RED)trivy not installed. Run 'make install-tools'$(NC)" && exit 1)
+	@trivy fs --security-checks vuln,config src/jetstream
+	@echo "$(GREEN)✓ Trivy scan complete$(NC)"
+
+.PHONY: vuln
+vuln:
+	@echo "$(BLUE)==> Running govulncheck vulnerability scanner...$(NC)"
+	@which govulncheck > /dev/null || (echo "$(RED)govulncheck not installed. Run 'make install-tools'$(NC)" && exit 1)
+	@cd src/jetstream && govulncheck ./...
+	@echo "$(GREEN)✓ Govulncheck scan complete$(NC)"
 
 # Clean development artifacts
 clean-dev:
