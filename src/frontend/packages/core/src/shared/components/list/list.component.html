@@ -31,7 +31,7 @@
           <!-- Multi actions (those applied to selection) -->
           @if ((dataSource.isSelecting$ | async)) {
             <div class="list-component__header__left--multi-actions">
-              @for (action of multiActions; track action) {
+              @for (action of multiActions; track action.label || $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionMultiple(action)"
                     [disabled]="!(action.enabled$ | async)" [title]="action.description">
@@ -58,7 +58,7 @@
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
-            @for (multiFilterManager of multiFilterManagers; track multiFilterManager; let isFirst = $first) {
+            @for (multiFilterManager of multiFilterManagers; track multiFilterManager.filterKey; let isFirst = $first) {
               @if (!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)) {
                 <div class="form-field">
                   <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
@@ -68,7 +68,7 @@
                     @if (!multiFilterManager.hideAllOption) {
                       <option value="">{{ multiFilterManager.allLabel }}</option>
                     }
-                    @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem) {
+                    @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem.value) {
                       <option
                         [value]="selectItem.value">
                         {{selectItem.label}}
@@ -87,7 +87,7 @@
                 <label class="label">{{entitySelectConfig.selectPlaceholder}}</label>
                 <select class="select" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
                   <option value="">{{ entitySelectConfig.selectEmptyText }}</option>
-                  @for (item of entitySelectConfig.entitySelectItems; track item) {
+                  @for (item of entitySelectConfig.entitySelectItems; track item.page) {
                     <option [value]="item.page">
                       {{item.label}}
                     </option>
@@ -102,7 +102,7 @@
             <div class="form-field">
               <label class="label">Filter Selection</label>
               <select class="select" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
-                @for (filter of filterColumns; track filter) {
+                @for (filter of filterColumns; track filter.key) {
                   <option [ngValue]="filter">
                     {{ filter.label }}
                   </option>
@@ -125,7 +125,7 @@
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (change)="updateListSort(headerSort.value, headerSort.direction)">
-                @for (column of sortColumns; track column) {
+                @for (column of sortColumns; track column.columnId || $index) {
                   <option [value]="column?.columnId">
                     {{column && column.headerCell ? column.headerCell() : ''}}
                   </option>
@@ -150,7 +150,7 @@
           <!-- Global actions (those not applied to specific rows) -->
           @if (!(isAddingOrSelecting$ | async) && globalActions?.length > 0) {
             <div>
-              @for (action of globalActions; track action) {
+              @for (action of globalActions; track action.label || $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionGlobal(action)"
                     [disabled]="!(action.enabled$ | async)" [title]="action.description">

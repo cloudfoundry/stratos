@@ -5,7 +5,7 @@
         <!-- Step headers -->
         @if (steps.length > 1) {
           <div class="steppers-headers flex items-center justify-center mb-8">
-            @for (step of steps; track step; let i = $index; let isLast = $last) {
+            @for (step of steps; track $index; let i = $index; let isLast = $last) {
               <div
                 class="steppers-header flex items-center"
              [ngClass]="{

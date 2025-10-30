@@ -154,13 +154,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngOnInit() {
-    this.subNavData$ = combineLatest(
+    this.subNavData$ = combineLatest([
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
       ),
       this.tabNavService.tabSubNav$,
       this.tabNavService.tabSubNavBreadcrumbs$
-    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
+    ]).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
 
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
@@ -170,12 +170,17 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     });
 
     this.dispatchRelations();
+    // Initialize user favorites - fire and forget action, no subscription needed
     stratosEntityCatalog.userFavorite.api.getAll();
   }
 
   ngOnDestroy() {
-    this.mobileSub.unsubscribe();
-    this.closeSub.unsubscribe();
+    if (this.mobileSub) {
+      this.mobileSub.unsubscribe();
+    }
+    if (this.closeSub) {
+      this.closeSub.unsubscribe();
+    }
     this.sidePanelService.unsetContainer();
   }
 

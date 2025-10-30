@@ -4,7 +4,7 @@
   <app-form-field>
     <app-select #cfSelect="ngModel" [ngModel]="selectedOrgGuid" id="selectOrgGuid"
       (selectionChange)="updateOrg($event.value)" required>
-      @for (org of organizations$ | async; track org?.metadata?.guid($index, org)) {
+      @for (org of organizations$ | async; track org.metadata.guid) {
         <app-option [value]="org.metadata.guid">
           {{org.entity.name}}
         </app-option>

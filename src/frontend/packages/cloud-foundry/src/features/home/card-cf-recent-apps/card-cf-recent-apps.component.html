@@ -17,7 +17,7 @@
           }
           @if (apps.length > 0) {
             <div class="recent-apps-card__scroller">
-              @for (app of apps; track app) {
+              @for (app of apps; track app.metadata.guid) {
                 <app-compact-app-card [showDate]="showDate" [dateMode]="dateMode" [endpoint]="endpoint" [app]="app"></app-compact-app-card>
               }
             </div>
@@ -33,7 +33,7 @@
     </app-card-header>
     <app-card-content class="recent-apps-card__content">
       <div class="recent-apps-card__scroller">
-        @for (app of placeholders; track app) {
+        @for (app of placeholders; track app.metadata.guid) {
           <app-compact-app-card [showDate]="showDate" [dateMode]="dateMode" [endpoint]="endpoint" [app]="app"></app-compact-app-card>
         }
       </div>

@@ -79,6 +79,7 @@ import {
   IGlobalListAction,
   IListConfig,
   IListFilter,
+  IListMultiFilterConfigItem,
   IMultiListAction,
   IOptionalAction,
   ListConfig,
@@ -810,5 +811,30 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   public showAllAfterMax() {
     this.dataSource.showAllAfterMax();
+  }
+
+  // TrackBy functions for @for loops to optimize change detection
+  trackByAction(index: number, action: IOptionalAction<T>): string {
+    return action.label || index.toString();
+  }
+
+  trackByMultiFilterManager(index: number, manager: MultiFilterManager<T>): string {
+    return manager.filterKey;
+  }
+
+  trackByFilterItem(index: number, item: IListMultiFilterConfigItem): string {
+    return item.value;
+  }
+
+  trackByEntitySelectItem(index: number, item: any): number {
+    return item.page;
+  }
+
+  trackByFilter(index: number, filter: IListFilter): string {
+    return filter.key;
+  }
+
+  trackByColumn(index: number, column: ITableColumn<T>): string {
+    return column.columnId || index.toString();
   }
 }

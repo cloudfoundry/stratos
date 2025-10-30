@@ -142,7 +142,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     }
   }
 
-  // Card is instructed to load its view by the container, whn it is visible
+  // Card is instructed to load its view by the container, when it is visible
   load(): Observable<boolean> {
     this.cardLoaded = true;
     this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
@@ -157,7 +157,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     this.hasNoApps$ = appsPagObs.entities$.pipe(first(), map(apps => {
       this.recentApps = apps;
       this.appStatsToLoad = this.restrictApps(apps);
-      this.fetchAppStats();
+      // Initiate app stats fetching (recursive method handles batching)
       this.fetchAppStats();
       return apps.length === 0;
     }));

@@ -1,10 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { InternalAppState, RouterRedirect, RouterNav, Login, VerifySession, AuthState } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
-import { map, startWith, takeWhile, tap } from 'rxjs/operators';
+import { Observable, Subscription, combineLatest } from 'rxjs';
+import { map, startWith, takeWhile, tap, distinctUntilChanged, shareReplay } from 'rxjs/operators';
 import { StratosThemeService } from '../../../../../theme/theme.service';
 import { StratosTheme } from '../../../../../theme/theme.config';
 
@@ -22,7 +22,8 @@ selector: 'app-login-page',
     FormsModule,
     IntroScreenComponent,
     ShowHideButtonComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit, OnDestroy {
 
@@ -38,36 +39,48 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
     private themeService: StratosThemeService
   ) {
-    // Set up login background observables from theme
-    this.loginBackground$ = this.themeService.theme$.pipe(
+    // Set up login background observables from theme with shareReplay to prevent multiple subscriptions
+    const sharedTheme$ = this.themeService.theme$.pipe(
+      distinctUntilChanged(),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    this.loginBackground$ = sharedTheme$.pipe(
       map((theme: StratosTheme) => {
         const bgImage = theme?.login?.backgroundImage;
         return bgImage ? `url(${bgImage})` : 'none';
-      })
-    );
-    
-    this.loginBackgroundColor$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.login?.backgroundColor || '#ffffff')
-    );
-    
-    this.loginCardBackground$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.login?.cardBackground || '#ffffff')
+      }),
+      distinctUntilChanged()
     );
 
-    this.themeLogo$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png')
+    this.loginBackgroundColor$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.login?.backgroundColor || '#ffffff'),
+      distinctUntilChanged()
     );
 
-    this.themeTitle$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.loginTitle || 'Stratos')
+    this.loginCardBackground$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.login?.cardBackground || '#ffffff'),
+      distinctUntilChanged()
     );
 
-    this.themeDisplayName$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.displayName || '')
+    this.themeLogo$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png'),
+      distinctUntilChanged()
     );
 
-    this.themeSubtitle$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || '')
+    this.themeTitle$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginTitle || 'Stratos'),
+      distinctUntilChanged()
+    );
+
+    this.themeDisplayName$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.displayName || ''),
+      distinctUntilChanged()
+    );
+
+    this.themeSubtitle$ = sharedTheme$.pipe(
+      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || ''),
+      distinctUntilChanged()
     );
   }
 
@@ -96,15 +109,46 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   showPassword = false;
 
+  private initialized = false;
+
   ngOnInit() {
+    // Prevent multiple initializations
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
     this.ssoLogin = false;
     this.store.dispatch(new VerifySession());
-    const auth$ = this.store.select(s => ({ auth: s.auth, endpoints: s.endpoints }));
+
+    // Create memoized selectors to prevent unnecessary change detection
+    const authSelector$ = this.store.select(s => s.auth).pipe(
+      distinctUntilChanged((prev, curr) =>
+        prev.verifying === curr.verifying &&
+        prev.loggingIn === curr.loggingIn &&
+        prev.loggedIn === curr.loggedIn &&
+        prev.error === curr.error &&
+        prev.sessionData?.valid === curr.sessionData?.valid
+      ),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    const endpointsSelector$ = this.store.select(s => s.endpoints).pipe(
+      distinctUntilChanged((prev, curr) => prev.loading === curr.loading),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    const auth$ = combineLatest([authSelector$, endpointsSelector$]).pipe(
+      map(([auth, endpoints]) => ({ auth, endpoints })),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
     this.initialLoad$ = auth$.pipe(
-      map(({ auth, }) =>
+      map(({ auth }) =>
         auth.verifying && !auth.loggingIn || // checking if user is logged in but not in processed of logging in
         (auth.sessionData && auth.sessionData.valid) && !this.isLoginFlow // logged in but haven't hit log in
       ),
+      distinctUntilChanged()
     );
 
     this.busy$ = auth$.pipe(
@@ -115,8 +159,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         auth.loggingIn ||
         endpoints.loading
       ),
-      startWith(true)
+      startWith(true),
+      distinctUntilChanged()
     );
+
     this.subscription = auth$.pipe(
       tap(({ auth }) => {
         this.redirect = auth.redirect;

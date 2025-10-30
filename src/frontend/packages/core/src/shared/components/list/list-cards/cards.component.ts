@@ -29,6 +29,16 @@ export class CardsComponent<T> {
     this.columns = (cardCell as any)['columns'];
   }
 
+  public trackByFn(index: number, item: any | MultiActionListEntity) {
+    if (!this.dataSource) {
+      return index;
+    }
+    if (this.isMultiActionItem(item)) {
+      return this.dataSource.trackBy(index, item.entity);
+    }
+    return this.dataSource.trackBy(index, item);
+  }
+
   public multiActionTrackBy() {
     return (index: number, item: any | MultiActionListEntity) => {
       if (!this.dataSource) {

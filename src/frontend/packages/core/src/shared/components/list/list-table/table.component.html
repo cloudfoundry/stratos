@@ -18,7 +18,7 @@
               [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
               [hidden]="hideTable"
               role="row">
-              @for (column of columns; track column) {
+              @for (column of columns; track column.columnId || $index) {
                 <div
                   class="table-header-cell app-table__header-cell"
                   [ngClass]="[column.class || '', column.headerClass || '']"
@@ -38,7 +38,7 @@
             </div>
           </div>
           <div class="table-body" role="rowgroup">
-            @for (row of dataSource.connect(null) | async; track dataSource.trackBy(i, row); let i = $index) {
+            @for (row of dataSource.connect(null) | async; track dataSource.trackBy($index, row); let i = $index) {
               <app-table-row class="app-table__row"
                 [columns]="columns"
                 [dataSource]="dataSource"

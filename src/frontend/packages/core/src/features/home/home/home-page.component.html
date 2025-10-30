@@ -11,7 +11,7 @@
           </button>
           <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden">
             <div class="py-1">
-              @for (layout of layouts; track layout) {
+              @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
                     <button (click)="onChangeLayout(layout)"
@@ -49,7 +49,7 @@
       [class.columns-2]="columns === 2"
       [class.columns-3]="columns === 3"
       #endpointsPanel>
-      @for (ep of endpoints$ | async; track ep) {
+      @for (ep of endpoints$ | async; track ep?.guid ?? $index) {
         <div #endpointCard class="home-grid-item">
           <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
           </app-home-page-endpoint-card>

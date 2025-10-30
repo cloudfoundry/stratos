@@ -2,7 +2,7 @@
   <div>
     @if (collection.length > 0) {
       <div>
-        @for (item of collection; track item; let index = $index) {
+        @for (item of collection; track $index; let index = $index) {
           <span>
             {{labelPath ? item[labelPath] : item}}@if (index !== collection.length - 1) {
             <span>, </span>

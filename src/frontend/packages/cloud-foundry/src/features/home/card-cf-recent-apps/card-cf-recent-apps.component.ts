@@ -53,11 +53,22 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   @Input() set maxRows(value: number) {
     this.maxRowsSubject.next(value);
-    this.placeholders = new Array(value).fill(null);
+    this.placeholders = this.createPlaceholders(value);
   }
 
   constructor() {
-    this.placeholders = new Array(RECENT_ITEMS_COUNT).fill(null);
+    this.placeholders = this.createPlaceholders(RECENT_ITEMS_COUNT);
+  }
+
+  private createPlaceholders(count: number): any[] {
+    return Array.from({ length: count }, (_, i) => ({
+      metadata: { guid: `placeholder-${i}` },
+      entity: {}
+    }));
+  }
+
+  trackByAppGuid(index: number, app: any): string {
+    return app?.metadata?.guid || String(index);
   }
 
   ngOnInit() {

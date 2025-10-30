@@ -182,40 +182,82 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const check$ = this.checkLayout.asObservable().pipe(filter(v => v));
-    const scroll$ = this.scrollDispatcher.scrolled().pipe(map((e: any) => {
-      const el = e.elementRef.nativeElement;
-      return el.scrollTop;
-    }), startWith(0));
+    const check$ = this.checkLayout.asObservable().pipe(
+      filter(v => v),
+      debounceTime(100) // Debounce the check signal itself
+    );
+    const scroll$ = this.scrollDispatcher.scrolled().pipe(
+      map((e: any) => {
+        const el = e.elementRef.nativeElement;
+        return el.scrollTop;
+      }),
+      debounceTime(100), // Debounce scroll events
+      startWith(0)
+    );
 
     // Load cards as they come into view
-    this.viewMonitorSub = combineLatest([scroll$, check$]).pipe(debounceTime(200)).subscribe(([scrollTop, check]) => {
-      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible and shoule be loaded
-      // Only load the first one - after that one has loaded, we'll call this method again and check for the next one
-      const remaining = [];
-      const processedCard = false;
+    this.viewMonitorSub = combineLatest([scroll$, check$]).pipe(
+      debounceTime(150) // Reduce debounce time for better responsiveness
+    ).subscribe(([scrollTop]) => {
+      // Skip if already processing or no cards to check
+      if (this.isLoadingACard || this.notLoadedCardIndices.length === 0) {
+        return;
+      }
+
+      // Reset check signal
+      this.checkLayout.next(false);
+
+      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
+      const remaining: number[] = [];
+      const cardsArray = this.endpointElements.toArray();
+      const cardsComponentArray = this.endpointCards.toArray();
+
+      // Early exit if arrays are empty or mismatched
+      if (cardsArray.length === 0 || cardsComponentArray.length === 0) {
+        return;
+      }
+
+      const panelParent = this.endpointsPanel?.nativeElement?.offsetParent;
+      if (!panelParent) {
+        return;
+      }
+
+      const height = panelParent.offsetHeight;
+      const scrollBottom = scrollTop + height;
+
       for (const index of this.notLoadedCardIndices) {
-        const cardElement = this.endpointElements.toArray()[index] as ElementRef;
+        const cardElement = cardsArray[index];
+        if (!cardElement) {
+          continue;
+        }
+
         const cardTop = cardElement.nativeElement.offsetTop;
         const cardBottom = cardTop + cardElement.nativeElement.offsetHeight;
-        const height = this.endpointsPanel.nativeElement.offsetParent.offsetHeight;
-        const scrollBottom = scrollTop + height;
-        // Check if the card is in view - either its top or bottom must be withtin he visible scroll area
+
+        // Check if the card is in view - either its top or bottom must be within the visible scroll area
         if ((cardTop >= scrollTop && cardTop <= scrollBottom) || (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
-          const card = this.endpointCards.toArray()[index];
-          this.cardsToLoad.push(card);
+          const card = cardsComponentArray[index];
+          if (card) {
+            this.cardsToLoad.push(card);
+          }
         } else {
           remaining.push(index);
         }
       }
-      this.processCardsToLoad();
+
       this.notLoadedCardIndices = remaining;
+      this.processCardsToLoad();
     });
   }
 
   processCardsToLoad() {
-    if (!this.isLoadingACard && this.cardsToLoad.length > 0) {
-      const nextCardToLoad = this.cardsToLoad.shift();
+    // Guard against redundant calls
+    if (this.isLoadingACard || this.cardsToLoad.length === 0) {
+      return;
+    }
+
+    const nextCardToLoad = this.cardsToLoad.shift();
+    if (nextCardToLoad) {
       this.isLoadingACard = true;
       nextCardToLoad.load();
     }
@@ -249,8 +291,14 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   // to check if there are more cards that are visible and thus can be loaded
   cardLoaded() {
     this.isLoadingACard = false;
+
+    // First try to process any cards already in the queue
     this.processCardsToLoad();
-    this.checkCardsInView();
+
+    // Only trigger a new check if we have remaining unloaded cards and no cards in the queue
+    if (this.notLoadedCardIndices.length > 0 && this.cardsToLoad.length === 0) {
+      this.checkCardsInView();
+    }
   }
 
   @HostListener('window:resize')
@@ -357,5 +405,14 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private getLayout(x: number, y: number): HomePageCardLayout {
     return this.layouts.find(item => item && item.x === x && item.y === y);
+  }
+
+  // TrackBy functions for optimal change detection
+  trackByLayoutId(index: number, layout: HomePageCardLayout): number {
+    return layout?.id ?? index;
+  }
+
+  trackByEndpointGuid(index: number, endpoint: EndpointModel): string {
+    return endpoint?.guid ?? index.toString();
   }
 }

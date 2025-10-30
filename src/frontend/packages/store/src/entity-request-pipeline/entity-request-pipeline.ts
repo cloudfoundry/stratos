@@ -120,7 +120,15 @@ export const apiRequestPipelineFactory = (
         actionDispatcher,
         recursivelyDelete
       );
-      console.warn(error);
+
+      // Only log errors that are not expected 404s (e.g., autoscaler plugin not available)
+      const isExpected404 = httpResponse?.status === 404 &&
+        (error.url?.includes('/autoscaler/') || action.options?.url?.includes('/autoscaler/'));
+
+      if (!isExpected404) {
+        console.warn(error);
+      }
+
       return of({ type: 'Stratos error handled.', error });
     }),
   );

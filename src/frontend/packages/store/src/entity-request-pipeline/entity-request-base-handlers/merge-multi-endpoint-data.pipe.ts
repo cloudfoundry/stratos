@@ -10,10 +10,10 @@ export const multiEndpointResponseMergePipe = (
       success: null,
       response: {
         entities,
-        result: [
+        result: Array.from(new Set([
           ...allEntities.response.result,
           ...endpointData.response.result
-        ],
+        ])),
       },
       totalPages: allEntities.totalPages + endpointData.totalPages,
       totalResults: allEntities.totalResults + endpointData.totalResults
