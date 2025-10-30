@@ -97,6 +97,29 @@
       @media (max-width: 767px) {
         justify-content: stretch;
       }
+
+      // Fix form-field layout in filters - should be horizontal
+      .filter .form-field,
+      .sort .form-field {
+        margin-bottom: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+
+        .label {
+          margin-bottom: 0;
+          min-width: max-content;
+          white-space: nowrap;
+        }
+
+        .select {
+          min-width: 120px;
+        }
+
+        .input {
+          min-width: 180px;
+        }
+      }
     }
 
     &__left {
@@ -120,6 +143,24 @@
 
         @media (max-width: 767px) {
           width: 100%;
+        }
+
+        // Fix form-field layout in multi-filters - should be horizontal like filters
+        .form-field {
+          margin-bottom: 0;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.5rem;
+
+          .label {
+            margin-bottom: 0;
+            min-width: max-content;
+            white-space: nowrap;
+          }
+
+          .select {
+            min-width: 120px;
+          }
         }
       }
     }

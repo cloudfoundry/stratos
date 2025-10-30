@@ -1,6 +1,6 @@
 @if (component) {
   <div class="cards {{'cards__columns-' + columns}}">
-    @for (item of dataSource.page$ | async; track dataSource.trackBy(i, item); let i = $index) {
+    @for (item of dataSource.page$ | async; let i = $index; track dataSource.trackBy(i, item)) {
       <app-card [item]="item" [component]="component" [dataSource]="dataSource">
       </app-card>
     }
