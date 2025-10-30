@@ -1,7 +1,5 @@
 form {
-  .form-field {
-    &:not(:last-of-type) {
-      @apply pr-2.5;
-    }
+  app-form-field {
+    @apply flex-1 max-w-xs;
   }
 }

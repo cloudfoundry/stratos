@@ -45,6 +45,7 @@ $usage-gauge-bar-height: 4px;
   }
 
   &__progress-bar {
+    background-color: #4caf50; /* Green color for normal state */
     box-shadow: none;
     float: left;
     height: $usage-gauge-bar-height;
@@ -54,9 +55,18 @@ $usage-gauge-bar-height: 4px;
   }
 
   &__progress-bar-background {
+    background-color: #e0e0e0; /* Light gray background */
     float: left;
     height: $usage-gauge-bar-height;
     position: absolute;
     width: 100%;
+  }
+
+  &__warning {
+    background-color: #ff9800; /* Orange color for warning state */
+  }
+
+  &__error {
+    background-color: #f44336; /* Red color for error state */
   }
 }

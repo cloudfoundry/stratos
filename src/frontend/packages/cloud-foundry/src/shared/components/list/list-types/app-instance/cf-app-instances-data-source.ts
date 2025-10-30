@@ -36,21 +36,58 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
         },
         paginationKey,
         transformEntities: [{ type: 'filter', field: 'value.state' }],
-        transformEntity: map((instancesObj: AppStats[]): ListAppInstance[] => {
-          if (!instancesObj || instancesObj.length === 0) {
+        transformEntity: map((instancesData: any): ListAppInstance[] => {
+          if (!instancesData) {
             return [];
           }
+
+          // Extract from array if needed
+          let data = Array.isArray(instancesData) ? instancesData[0] : instancesData;
+
+          if (!data || typeof data !== 'object') {
+            return [];
+          }
+
+          // Check if this is a single AppStat instance or a collection (AppStats)
+          // A single instance has 'state', 'stats', 'guid' properties
+          // A collection has numeric string keys like "0", "1", "2"
+          const isSingleInstance = 'state' in data && 'guid' in data;
+
           const res: ListAppInstance[] = [];
-          // AppStats is an object where each key is an instance ID
-          const instances = instancesObj[0];
-          Object.keys(instances || {}).forEach((key: string) => {
-            const instance: AppStat = instances[key];
-            res.push({
-              index: parseInt(key, 10),
-              usage: this.calcUsage(instance),
-              value: instance
+
+          if (isSingleInstance) {
+            // Handle single AppStat instance - extract index from guid
+            // guid format: "app-guid-instanceIndex" (e.g., "1c654b6c-f3bd-472e-ba23-7a0788cfa074-0")
+            const instance = data as AppStat;
+            const guidParts = instance.guid ? instance.guid.split('-') : [];
+            const indexStr = guidParts.length > 0 ? guidParts[guidParts.length - 1] : '0';
+            const indexNum = parseInt(indexStr, 10);
+
+            if (!isNaN(indexNum)) {
+              res.push({
+                index: indexNum,
+                usage: this.calcUsage(instance),
+                value: instance
+              });
+            }
+          } else {
+            // Handle AppStats collection (object with numeric keys)
+            const instances = data as AppStats;
+            Object.keys(instances).forEach((key: string) => {
+              const instance: AppStat = instances[key];
+              if (instance && typeof instance === 'object') {
+                const indexNum = parseInt(key, 10);
+                if (!isNaN(indexNum)) {
+                  res.push({
+                    index: indexNum,
+                    usage: this.calcUsage(instance),
+                    value: instance
+                  });
+                }
+              }
             });
-          });
+          }
+
           return res;
         }),
         isLocal: true,
