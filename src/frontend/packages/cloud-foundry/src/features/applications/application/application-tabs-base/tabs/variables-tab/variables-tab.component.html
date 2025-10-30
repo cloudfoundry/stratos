@@ -30,7 +30,7 @@
       </div>
       <div class="card-body">
         <app-code-block>
-          @for (envVar of (allEnvVars$ | async); track envVar) {
+          @for (envVar of (allEnvVars$ | async); track $index) {
             <div class="variables-tab__env-code-block--line"
               [ngClass]="{'variables-tab__env-code-block--section': envVar.section}">
               @if (envVar.section) {

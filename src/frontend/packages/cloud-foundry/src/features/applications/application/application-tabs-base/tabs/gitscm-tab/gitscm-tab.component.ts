@@ -42,7 +42,6 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
   standalone: true,
   imports: [
     CommonModule,
-    DatePipe,
     LoadingPageComponent,
     TileGridComponent,
     TileGroupComponent,
@@ -54,6 +53,7 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
     TruncatePipe
   ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useFactory: (

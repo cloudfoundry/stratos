@@ -143,6 +143,16 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     return null;
   }
 
+  handleSort(column: ITableColumn<T>): void {
+    if (column.sort && this.sort) {
+      this.sort.sort({
+        id: column.columnId,
+        start: this.sort.direction === 'asc' ? 'desc' : 'asc',
+        disableClear: true
+      });
+    }
+  }
+
   ngOnDestroy() {
     if (this.uberSub) {
       this.uberSub.unsubscribe();

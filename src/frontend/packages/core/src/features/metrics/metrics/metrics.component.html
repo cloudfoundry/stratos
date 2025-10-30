@@ -29,7 +29,7 @@
         }
         @if (infos.length > 0) {
           <div class="space-y-4">
-            @for (info of infos; track info) {
+            @for (info of infos; track info.url) {
               <div class="card">
                 @if (info.status) {
                   <app-card-status [status$]="info.status"></app-card-status>

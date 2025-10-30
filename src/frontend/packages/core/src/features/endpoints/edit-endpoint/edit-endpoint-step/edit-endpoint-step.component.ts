@@ -73,6 +73,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       clientID: new UntypedFormControl(''),
       clientSecret: new UntypedFormControl(''),
       allowSSO: new UntypedFormControl(false),
+      caCert: new UntypedFormControl(''),
     });
 
     this.clientRedirectURI = getSSOClientRedirectURI();
@@ -119,6 +120,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
         clientID: endpoint.client_id,
         clientSecret: '',
         allowSSO: endpoint.sso_allowed,
+        caCert: endpoint.caCert || '',
       });
       this.editEndpoint.controls.url.disable();
       this.updateControls();

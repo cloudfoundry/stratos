@@ -31,7 +31,7 @@
           <!-- Multi actions (those applied to selection) -->
           @if ((dataSource.isSelecting$ | async)) {
             <div class="list-component__header__left--multi-actions">
-              @for (action of multiActions; track action.label || $index) {
+              @for (action of multiActions; track $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionMultiple(action)"
                     [disabled]="!(action.enabled$ | async)" [title]="action.description">
@@ -125,7 +125,7 @@
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (change)="updateListSort(headerSort.value, headerSort.direction)">
-                @for (column of sortColumns; track column.columnId || $index) {
+                @for (column of sortColumns; track $index) {
                   <option [value]="column?.columnId">
                     {{column && column.headerCell ? column.headerCell() : ''}}
                   </option>
@@ -150,7 +150,7 @@
           <!-- Global actions (those not applied to specific rows) -->
           @if (!(isAddingOrSelecting$ | async) && globalActions?.length > 0) {
             <div>
-              @for (action of globalActions; track action.label || $index) {
+              @for (action of globalActions; track $index) {
                 @if (action.visible$ | async) {
                   <button class="btn btn-icon" (click)="executeActionGlobal(action)"
                     [disabled]="!(action.enabled$ | async)" [title]="action.description">

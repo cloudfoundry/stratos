@@ -21,7 +21,7 @@
             <!-- Breadcrumbs -->
             @if (breadcrumbDefinitions) {
               <div class="page-header-breadcrumbs flex items-center space-x-2">
-                @for (breadcrumbDef of breadcrumbDefinitions; track breadcrumbDef) {
+                @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
                   @if (breadcrumbDef.routerLink) {
                     <span class="page-header-breadcrumb text-white/90 hover:text-white cursor-pointer"
                     [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>

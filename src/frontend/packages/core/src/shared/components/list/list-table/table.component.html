@@ -38,7 +38,7 @@
             </div>
           </div>
           <div class="table-body" role="rowgroup">
-            @for (row of dataSource.connect(null) | async; track dataSource.trackBy($index, row); let i = $index) {
+            @for (row of dataSource.connect(null) | async; track $index; let i = $index) {
               <app-table-row class="app-table__row"
                 [columns]="columns"
                 [dataSource]="dataSource"
