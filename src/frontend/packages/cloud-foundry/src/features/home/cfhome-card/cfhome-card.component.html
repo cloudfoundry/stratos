@@ -13,7 +13,7 @@
         label="Routes" value="{{ (routeCount$ | async) }}"></app-card-number-metric>
     </app-tile>
   </app-tile-group>
-  <app-tile-group>
+  <app-tile-group class="tile-group-1-cols">
     <app-tile>
       <app-card-cf-recent-apps *ngIf="cardLoaded && recentAppsRows > 0" [hideWhenEmpty]="true" [noStats]="true"
         dateMode="subtle" [showDate]="layout.x === 1" [maxRows]="recentAppsRows" mode="plain" [endpoint]="guid">

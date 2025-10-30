@@ -37,7 +37,7 @@ import { CfPermissionCellDirective, ICellPermissionList } from '../cf-permission
 })
 export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<SpaceUserRoleNames> {
 
-  missingRoles$: Observable<boolean>;
+  missingRoles$: Observable<boolean | null>;
 
   constructor(
     public store: Store<CFAppState>,
@@ -48,16 +48,16 @@ export class CfSpacePermissionCellComponent extends CfPermissionCellDirective<Sp
     super(store, confirmDialog, cfUserService);
 
     const spaces$: Observable<APIResource<ISpace>[]> = this.config$.pipe(
-      switchMap(config => config.spaces$ as Observable<APIResource<ISpace>[]>)
+      switchMap(config => (config.spaces$ || observableOf([])) as Observable<APIResource<ISpace>[]>)
     );
     const isOrgLevel$: Observable<boolean> = this.config$.pipe(map(config => config.isOrgLevel));
-    this.chipsConfig$ = combineLatest(
+    this.chipsConfig$ = combineLatest([
       this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$)),
+      this.config$.pipe(switchMap(config => config.org$ || observableOf<APIResource<IOrganization> | null>(null))),
       spaces$,
       isOrgLevel$,
-    ).pipe(
-      switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization>, APIResource<ISpace>[], boolean]) => {
+    ]).pipe(
+      switchMap(([user, org, spaces, isOrgLevel]: [APIResource<CfUser>, APIResource<IOrganization> | null, APIResource<ISpace>[], boolean]) => {
         const permissionList = this.createPermissions(user, isOrgLevel, spaces);
         // If we're showing spaces from multiple orgs prefix the org name to the space name
         return org ? observableOf(this.getChipConfig(permissionList)) : this.prefixOrgName(permissionList);

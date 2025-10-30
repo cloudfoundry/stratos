@@ -32,11 +32,11 @@ export function paginationClearOfEntity(state: PaginationState, action: ClearPag
 
 function clearPaginationOfEntity(entityPaginationState: PaginationEntityState, guid: string) {
   // For each page in a pagination section
-  const pageWithEntity = Object.keys(entityPaginationState.ids).find(pageKey => {
+  const pageWithEntity = (entityPaginationState.ids && Object.keys(entityPaginationState.ids).find(pageKey => {
     // Does the entity exist in this page?
     const page = (entityPaginationState.ids as Record<string, any>)[pageKey];
-    return page.indexOf(guid) >= 0;
-  });
+    return page?.indexOf(guid) >= 0;
+  }));
 
   if (pageWithEntity) {
     const page = (entityPaginationState.ids as Record<string, any>)[pageWithEntity];

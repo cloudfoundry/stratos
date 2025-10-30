@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { MatChipsModule } from '@angular/material/chips';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
@@ -33,7 +32,6 @@ const REPO_FILTER_NAME = 'repository';
   imports: [
     CommonModule,
     FormsModule,
-    MatChipsModule,
     CustomFormFieldComponent,
     ListComponent
   ]

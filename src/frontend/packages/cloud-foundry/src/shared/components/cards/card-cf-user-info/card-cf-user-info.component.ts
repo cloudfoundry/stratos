@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
@@ -12,7 +11,6 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     MetadataItemComponent
   ]
 })

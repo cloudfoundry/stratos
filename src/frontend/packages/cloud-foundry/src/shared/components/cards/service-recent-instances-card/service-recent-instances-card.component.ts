@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -25,7 +24,6 @@ const RECENT_ITEMS_COUNT = 10;
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     StatefulIconComponent,
     CardWrapperComponent,
     CardHeaderComponent,

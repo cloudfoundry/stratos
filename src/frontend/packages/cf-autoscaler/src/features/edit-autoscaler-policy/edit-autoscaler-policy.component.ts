@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
@@ -30,8 +28,6 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
     CustomIconComponent,
     PageHeaderComponent,
     SteppersComponent,

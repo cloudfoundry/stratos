@@ -18,7 +18,6 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
-import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
@@ -39,7 +38,6 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatRadioModule,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,

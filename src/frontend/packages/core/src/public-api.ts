@@ -46,7 +46,7 @@ export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-sec
 // Custom Material Replacement Components
 export { CustomIconComponent } from './shared/components/custom-material/custom-material.component';
 export { CustomSpinnerComponent } from './shared/components/custom-material/custom-material.component';
-export { AppCustomSpinnerComponent } from './shared/components/custom-material/custom-material.component';
+// AppCustomSpinnerComponent removed - use AppSpinnerComponent from progress-spinner instead
 export { CustomProgressBarComponent } from './shared/components/custom-material/custom-material.component';
 export { CustomProgressBarSelectorComponent } from './shared/components/custom-material/custom-material.component';
 export { CustomDialogContentComponent } from './shared/components/custom-material/custom-material.component';

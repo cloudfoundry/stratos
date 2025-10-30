@@ -10,7 +10,7 @@
   <ul class="page-side-nav__items">
     <li tabindex="1" *ngFor="let tab of tabs">
       <div *ngIf="tab && !tab.link" class="page-side-nav__item-sep">{{ tab?.label }}</div>
-      <a *ngIf="tab && tab.link && (!tab.hidden$ || !(tab.hidden$ | async))" class="page-side-nav__item"
+      <a *ngIf="tab && tab.link && (tab.hidden$ | async) !== true" class="page-side-nav__item"
         [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
         <app-custom-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
         </app-custom-icon>

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
-import { MatSortModule } from '@angular/material/sort';
 import { ListSort } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -51,7 +50,6 @@ const tableColumnAction: ITableColumn<any> = {
   standalone: true,
   imports: [
     CommonModule,
-    MatSortModule,
     TableCellComponent,
     TableRowComponent
   ]

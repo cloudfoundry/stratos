@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -12,8 +11,7 @@ import { catchError, map } from 'rxjs/operators';
   styleUrls: ['./analysis-info-card.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule
+    CommonModule
   ]
 })
 export class AnalysisInfoCardComponent {

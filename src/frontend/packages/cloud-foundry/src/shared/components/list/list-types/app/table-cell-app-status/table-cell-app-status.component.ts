@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MatLineModule } from '@angular/material/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
@@ -16,7 +15,6 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   styleUrls: ['./table-cell-app-status.component.scss'],
   standalone: true,
   imports: [
-    MatLineModule,
     ApplicationStateComponent
   ]
 })

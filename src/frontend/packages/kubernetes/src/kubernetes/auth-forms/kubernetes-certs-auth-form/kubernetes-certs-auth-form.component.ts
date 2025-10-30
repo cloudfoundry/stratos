@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
@@ -14,7 +13,6 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatInputModule,
     CustomTabGroupComponent,
     CustomTabComponent,
     FileInputComponent,

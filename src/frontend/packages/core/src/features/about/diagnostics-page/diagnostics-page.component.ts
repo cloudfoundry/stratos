@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { MatCardModule } from '@angular/material/card';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -18,7 +17,6 @@ import { BooleanIndicatorComponent } from '../../../shared/components/boolean-in
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     PageHeaderComponent,
     MetadataItemComponent,
     BooleanIndicatorComponent

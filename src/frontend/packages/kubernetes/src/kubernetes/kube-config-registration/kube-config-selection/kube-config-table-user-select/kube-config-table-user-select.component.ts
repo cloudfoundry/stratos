@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
@@ -16,7 +15,6 @@ selector: 'app-kube-config-table-user-select',
   imports: [
     CommonModule,
     FormsModule,
-    MatFormFieldModule,
     CustomSelectComponent,
     CustomOptionComponent,
   ]

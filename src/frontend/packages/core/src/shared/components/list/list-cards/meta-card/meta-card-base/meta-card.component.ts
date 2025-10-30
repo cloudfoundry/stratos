@@ -1,8 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList } from '@angular/core';
-import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../shared/components/custom-card/custom-card.component';
-import { MatMenuModule } from '@angular/material/menu';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener } from '@angular/core';
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -40,12 +37,7 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   standalone: true,
   imports: [
     CommonModule,
-    CustomCardComponent,
-    CustomCardHeaderComponent,
-    CustomCardContentComponent,
     CustomIconComponent,
-    MatMenuModule,
-    CustomTooltipDirective,
     ApplicationStateIconComponent,
     CardStatusComponent,
     ClickStopPropagationDirective,
@@ -53,6 +45,8 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   ]
 })
 export class MetaCardComponent implements OnDestroy {
+
+  public menuOpen = false;
 
   @ContentChildren(MetaCardItemComponent)
   metaItems: QueryList<MetaCardItemComponent>;
@@ -147,5 +141,25 @@ export class MetaCardComponent implements OnDestroy {
 
   ngOnDestroy() {
     safeUnsubscribe(this.entityMonitorSub);
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  menuItemClick(menuItem: MenuItem): void {
+    menuItem.action();
+    this.menuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Close menu when clicking outside
+    if (this.menuOpen) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.meta-card__header-container__actions')) {
+        this.menuOpen = false;
+      }
+    }
   }
 }

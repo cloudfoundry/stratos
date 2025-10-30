@@ -7,7 +7,7 @@
     <div class="list-component__header"
       [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
       <div
-        [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}"
+        [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'table-header-row': (view$ | async) === 'table'}"
         class="card list-component__header-card">
         <div class="list-component__header__left">
           <!-- List Title -->
@@ -48,9 +48,9 @@
             <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
               <div class="form-field" *ngIf="!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)">
                 <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
-                <select class="select" id="{{multiFilterManager.filterKey}}" [(value)]="multiFilterManager.value"
+                <select class="select" id="{{multiFilterManager.filterKey}}" [value]="multiFilterManager.value"
                   [disabled]="!(multiFilterManager.filterIsReady$ | async)"
-                  (selectionChange)="multiFilterManager.selectItem($event.value)">
+                  (change)="multiFilterManager.selectItem($any($event.target).value)">
                   <option *ngIf="!multiFilterManager.hideAllOption" value="">{{ multiFilterManager.allLabel }}</option>
                   <option *ngFor="let selectItem of multiFilterManager.filterItems$ | async"
                     [value]="selectItem.value">
@@ -65,7 +65,7 @@
           <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
             <div class="form-field">
               <label class="label">{{entitySelectConfig.selectPlaceholder}}</label>
-              <select class="select" [value]="entitySelectValue$ | async" (selectionChange)="setEntityPage($event.value)">
+              <select class="select" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
                 <option value="">{{ entitySelectConfig.selectEmptyText }}</option>
                 <option *ngFor="let item of entitySelectConfig.entitySelectItems" [value]="item.page">
                   {{item.label}}
@@ -78,8 +78,8 @@
             [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field">
               <label class="label">Filter Selection</label>
-              <select class="select" [(value)]="filterSelected" (selectionChange)="updateListFilter($event.value)">
-                <option *ngFor="let filter of filterColumns" [value]="filter">
+              <select class="select" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
+                <option *ngFor="let filter of filterColumns" [ngValue]="filter">
                   {{ filter.label }}
                 </option>
               </select>
@@ -99,9 +99,9 @@
             <div class="form-field list-component__header__right-sort">
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
-                (selectionChange)="updateListSort($event.value, headerSort.direction)">
+                (change)="updateListSort(headerSort.value, headerSort.direction)">
                 <option *ngFor="let column of sortColumns" [value]="column?.columnId">
-                  {{column?.headerCell?.()}}
+                  {{column && column.headerCell ? column.headerCell() : ''}}
                 </option>
               </select>
             </div>
@@ -131,7 +131,7 @@
             <div class="spacer"></div>
             <ng-content select="[app-table-add]"></ng-content>
             <button id="addFormButtonAdd" class="btn btn-icon btn-success" (click)="dataSource.saveAdd()"
-              [disabled]="!safeAddForm().valid">
+              [disabled]="!addForm?.valid">
               <span class="material-icons">done</span>
             </button>
             <button id="addFormButtonCancel" class="btn btn-icon" (click)="dataSource.cancelAdd()">
@@ -141,7 +141,7 @@
           <!-- Add form button -->
           <div *ngIf="addForm && !(isAddingOrSelecting$ | async)">
             <button class="btn btn-icon" [disabled]="(dataSource.isLoadingPage$ | async)"
-              (click)="safeAddForm().reset();dataSource.startAdd();">
+              (click)="addForm?.reset();dataSource.startAdd();">
               <span class="material-icons">add</span>
             </button>
           </div>
@@ -192,36 +192,13 @@
         </app-table>
       </div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
-        <div class="paginator flex items-center justify-between p-4">
-          <div class="paginator-info text-sm text-gray-600">
-            Showing {{paginatorSettings.pageIndex * paginatorSettings.pageSize + 1}} to
-            {{getPageEndIndex()}}
-            of {{paginatorSettings.length}} entries
-          </div>
-          <div class="paginator-controls flex items-center gap-2">
-            <button class="btn btn-sm btn-secondary"
-              [disabled]="paginatorSettings.pageIndex === 0"
-              (click)="paginatorSettings.pageIndex = 0">
-              First
-            </button>
-            <button class="btn btn-sm btn-secondary"
-              [disabled]="paginatorSettings.pageIndex === 0"
-              (click)="paginatorSettings.pageIndex = paginatorSettings.pageIndex - 1">
-              Previous
-            </button>
-            <span class="px-3 text-sm">Page {{paginatorSettings.pageIndex + 1}}</span>
-            <button class="btn btn-sm btn-secondary"
-              [disabled]="(paginatorSettings.pageIndex + 1) * paginatorSettings.pageSize >= paginatorSettings.length"
-              (click)="paginatorSettings.pageIndex = paginatorSettings.pageIndex + 1">
-              Next
-            </button>
-            <button class="btn btn-sm btn-secondary"
-              [disabled]="(paginatorSettings.pageIndex + 1) * paginatorSettings.pageSize >= paginatorSettings.length"
-              (click)="paginatorSettings.pageIndex = getLastPageIndex()">
-              Last
-            </button>
-          </div>
-        </div>
+        <app-paginator
+          [length]="paginatorSettings.length"
+          [pageSize]="paginatorSettings.pageSize"
+          [pageSizeOptions]="paginatorSettings.pageSizeOptions"
+          [pageIndex]="paginatorSettings.pageIndex"
+          [showFirstLastButtons]="true">
+        </app-paginator>
       </div>
     </div>
     <ng-template #defaultNoEntries>

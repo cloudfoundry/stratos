@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MatListModule } from '@angular/material/list';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { AppState, getPreviousRoutingState } from '@stratosui/store';
@@ -12,7 +11,6 @@ import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
-import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../../../shared/components/custom-button-toggle/custom-button-toggle.component';
 
 export const eventReturnUrlParam = 'returnFromEvents';
 
@@ -30,10 +28,7 @@ export enum EventFilterValues {
   imports: [
     CommonModule,
     RouterModule,
-    CustomButtonToggleComponent,
-    CustomButtonToggleGroupComponent,
     CustomIconComponent,
-    MatListModule,
     CustomTooltipDirective,
     PageHeaderComponent,
     StatefulIconComponent

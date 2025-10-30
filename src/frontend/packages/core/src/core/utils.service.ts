@@ -65,7 +65,12 @@ export class UtilsService {
 
   constructor() { }
 
-  precisionIfUseful(size: number, precision: number = 1) {
+  precisionIfUseful(size: number, precision: number = 1): number {
+    // Type guard: ensure size is a valid number
+    if (size == null || typeof size !== 'number' || !isFinite(size)) {
+      return 0;
+    }
+
     const floored = Math.floor(size);
     const fixed = Number(size.toFixed(precision));
     if (floored === fixed) {
@@ -75,12 +80,26 @@ export class UtilsService {
   }
 
   mbToHumanSize(mb: number): string {
+    // Handle null/undefined
     if (mb == null) {
       return '';
     }
+
+    // Type guard: ensure mb is a valid number
+    if (typeof mb !== 'number' || isNaN(mb)) {
+      return '';
+    }
+
+    // Special case: unlimited
     if (mb === -1) {
       return '∞';
     }
+
+    // Ensure non-negative for size calculations
+    if (mb < 0) {
+      return '';
+    }
+
     if (mb >= 1048576) {
       return this.precisionIfUseful(mb / 1048576) + ' TB';
     }
@@ -91,35 +110,56 @@ export class UtilsService {
   }
 
   bytesToHumanSize(value: string): string {
-    const bytes = parseInt(value, 10);
-    let retBytes = '';
-    if (!bytes && bytes !== 0) {
+    // Handle null/undefined/empty string
+    if (value == null || value === '') {
       return '';
     }
+
+    const bytes = parseInt(value, 10);
+
+    // Type guard: ensure parsing succeeded
+    if (isNaN(bytes)) {
+      return '';
+    }
+
+    // Special case: unlimited
     if (bytes === -1) {
-      retBytes = '∞';
+      return '∞';
     }
+
+    // Ensure non-negative for size calculations
+    if (bytes < 0) {
+      return '';
+    }
+
+    // Calculate appropriate unit
     if (bytes >= 1099511627776) {
-      retBytes = this.precisionIfUseful(bytes / 1099511627776) + ' TB';
+      return this.precisionIfUseful(bytes / 1099511627776) + ' TB';
     } else if (bytes >= 1073741824) {
-      retBytes = this.precisionIfUseful(bytes / 1073741824) + ' GB';
+      return this.precisionIfUseful(bytes / 1073741824) + ' GB';
     } else if (bytes >= 1048576) {
-      retBytes = this.precisionIfUseful(bytes / 1048576) + ' MB';
+      return this.precisionIfUseful(bytes / 1048576) + ' MB';
     } else if (bytes >= 1024) {
-      retBytes = this.precisionIfUseful(bytes / 1024) + ' kB';
-    } else if (bytes >= 0) {
-      retBytes = this.precisionIfUseful(bytes) + ' B';
+      return this.precisionIfUseful(bytes / 1024) + ' kB';
+    } else {
+      return this.precisionIfUseful(bytes) + ' B';
     }
-    return retBytes;
   }
 
   usageBytes(usage: number[], usedPrecision?: number, totalPrecision?: number): string {
+    // Type guard: ensure usage is an array with at least 2 elements
+    if (!Array.isArray(usage) || usage.length < 2) {
+      return '-';
+    }
+
     const used = usage[0];
     const total = usage[1];
 
-    if (isNaN(parseFloat(used.toString())) || !isFinite(used) ||
-      isNaN(parseFloat(total.toString())) || !isFinite(total) ||
-      total === 0) {
+    // Type guard: ensure both values are valid numbers
+    if (used == null || total == null ||
+        typeof used !== 'number' || typeof total !== 'number' ||
+        !isFinite(used) || !isFinite(total) ||
+        total === 0) {
       return '-';
     }
 
@@ -175,9 +215,11 @@ export class UtilsService {
   }
 
   percent(value: number, decimals: number = 2): string {
-    if (!value && value !== 0) {
+    // Type guard: ensure value is a valid number
+    if (value == null || typeof value !== 'number' || isNaN(value)) {
       return '';
     }
+
     const val = (value * 100).toFixed(decimals);
     return val + '%';
   }

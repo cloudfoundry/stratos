@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatRadioModule } from '@angular/material/radio';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -42,7 +41,6 @@ export class SchemaFormConfig {
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatRadioModule,
     TailwindJsonSchemaFormModule
   ],
   providers: [

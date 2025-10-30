@@ -13,6 +13,7 @@ import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
   standalone: true,
   imports: [
     CommonModule,
+    // Note: CurrencyPipe is provided by CommonModule
   ]
 })
 export class ServicePlanPriceComponent {

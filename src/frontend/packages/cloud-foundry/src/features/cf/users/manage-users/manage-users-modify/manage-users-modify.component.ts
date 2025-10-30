@@ -197,7 +197,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         filter(orgs => orgs && !!orgs.length),
         first()
       ).subscribe(orgs => {
-        this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+        if (orgs[0]?.metadata?.guid && orgs[0]?.entity?.name) {
+          this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+        }
       });
     }
 

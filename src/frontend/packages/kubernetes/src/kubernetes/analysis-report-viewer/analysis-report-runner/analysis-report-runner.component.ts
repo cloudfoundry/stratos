@@ -1,6 +1,5 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,16 +15,14 @@ selector: 'app-analysis-report-runner',
   styleUrls: ['./analysis-report-runner.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem
+    AsyncPipe
   ]
 })
 export class AnalysisReportRunnerComponent implements OnInit {
 
   canShow$: Observable<boolean>;
   analyzers$: Observable<KubernetesAnalysisType[]>;
+  menuOpen = false;
   @Input() kubeId: string;
   @Input() namespace: string;
   @Input() app: string;

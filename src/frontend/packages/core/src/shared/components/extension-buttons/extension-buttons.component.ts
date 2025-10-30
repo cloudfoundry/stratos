@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { of } from 'rxjs';

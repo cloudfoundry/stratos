@@ -97,6 +97,7 @@
     display: flex;
     flex: 1;
     width: 100%;
+    padding: 0 24px;
 
     .mat-expansion-panel-body {
       padding: 0;
@@ -124,4 +125,23 @@
     // Remove the bottom border if there's an error underneath it
     border-bottom-width: 0;
   }
+}
+
+.table-row-cell {
+  flex: 1 1 200px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+
+  app-table-cell {
+    width: 100%;
+  }
+}
+
+.table-cell-expander {
+  flex: 0 0 48px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

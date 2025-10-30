@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
 
 import { PageNotFoundComponentComponent } from './page-not-found-component.component';
 import { CoreModule } from '../core.module';
@@ -11,12 +10,11 @@ describe('PageNotFoundComponentComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      
+
       imports: [
-        MatIconModule,
         PageNotFoundComponentComponent
       ]
-    
+
     })
     .compileComponents();
   }));

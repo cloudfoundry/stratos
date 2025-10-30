@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatMenuModule } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -49,7 +48,6 @@ const namespaceColumnId = 'namespace';
   standalone: true,
   imports: [
     CommonModule,
-    MatMenuModule,
     PageSubNavComponent,
     ListViewComponent
   ]
@@ -68,6 +66,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
   public isNamespacedView = true;
   public isWorkloadView = false;
+  public menuOpen = false;
 
   private sub: Subscription;
   private kubeId: string;

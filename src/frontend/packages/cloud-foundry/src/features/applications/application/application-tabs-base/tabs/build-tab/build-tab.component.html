@@ -49,7 +49,7 @@
 </app-page-sub-nav>
 <div class="summary" *ngIf="applicationService.application$ | async as applicationService">
   <app-tile-grid>
-    <app-tile-group>
+    <app-tile-group class="tile-group-3-cols">
       <app-tile>
         <app-card-app-status></app-card-app-status>
       </app-tile>
@@ -60,7 +60,7 @@
         <app-card-app-uptime></app-card-app-uptime>
       </app-tile>
     </app-tile-group>
-    <app-tile-group *ngIf="applicationService.app.entity.staging_failed_description as errorMsg">
+    <app-tile-group class="tile-group-1-cols" *ngIf="applicationService.app.entity.staging_failed_description as errorMsg">
       <app-tile>
         <div class="card bg-yellow-50 border-yellow-400 border-l-4 summary__staging-error">
           <span class="material-icons text-yellow-500">warning</span>
@@ -68,7 +68,7 @@
         </div>
       </app-tile>
     </app-tile-group>
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
         <div class="card">
           <div class="card-header">
@@ -136,7 +136,7 @@
     </app-tile-group>
 
     <!-- Misc -->
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
         <div class="card">
           <div class="card-header">
@@ -220,7 +220,7 @@
     </app-tile-group>
 
     <!-- Advanced info -->
-    <app-tile-group>
+    <app-tile-group class="tile-group-2-cols">
       <app-tile>
         <div class="card">
           <div class="card-header">

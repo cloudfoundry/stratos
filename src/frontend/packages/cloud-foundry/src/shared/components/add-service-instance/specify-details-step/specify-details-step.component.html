@@ -1,13 +1,10 @@
 <div class="specify-details">
   <div *ngIf="!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection">
-    <div>
-      <mat-radio-group [(ngModel)]="formMode" class="specify-details__radio-group"
-        [disabled]="(serviceInstances$ | async)?.length === 0">
-        <mat-radio-button *ngFor="let mode of formModes" [value]="mode.key" class="specify-details__radio-group__radio"
-          (click)="resetForms(mode.key)">
-          {{ mode.label }}
-        </mat-radio-button>
-      </mat-radio-group>
+    <div class="flex flex-col gap-3 mb-4">
+      <label *ngFor="let mode of formModes" class="inline-flex items-center cursor-pointer" [class.opacity-50]="(serviceInstances$ | async)?.length === 0" [class.pointer-events-none]="(serviceInstances$ | async)?.length === 0">
+        <input type="radio" [(ngModel)]="formMode" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(serviceInstances$ | async)?.length === 0">
+        <span class="ml-2 text-sm font-medium text-gray-900">{{ mode.label }}</span>
+      </label>
     </div>
   </div>
   <form class="stepper-form" *ngIf="(showModeSelection && formMode === 'create-service-instance') || !showModeSelection"
@@ -24,18 +21,20 @@
     </app-form-field>
     <app-form-field class="stepper-form__tags">
       <app-label>Tags</app-label>
-      <mat-chip-grid #chipGrid class="stepper-form__tags__chip-list">
-        <mat-chip-row *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip"
-          [removable]="tagsRemovable" (removed)="removeTag(tag)">
-          {{tag.label}}
-          <button matChipRemove *ngIf="tagsRemovable">
-            <span class="material-icons">cancel</span>
+      <div class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md min-h-[42px] bg-white">
+        <span *ngFor="let tag of tags" class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
+          {{tag}}
+          <button type="button" *ngIf="tagsRemovable" (click)="removeTag(tag)" class="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+            <span class="material-icons text-sm">cancel</span>
           </button>
-        </mat-chip-row>
-        <input [matChipInputFor]="chipGrid"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur"
-          (matChipInputTokenEnd)="addTag($event)" />
-      </mat-chip-grid>
+        </span>
+        <input type="text"
+          (keydown.enter)="addTagFromInput($event)"
+          (keydown.comma)="addTagFromInput($event)"
+          (keydown.space)="addTagFromInput($event)"
+          class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
+          placeholder="Add tag..." />
+      </div>
     </app-form-field>
     <div class="stepper-form__params">
       <div>Service Parameters</div>

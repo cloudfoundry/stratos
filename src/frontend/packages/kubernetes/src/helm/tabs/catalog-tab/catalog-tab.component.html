@@ -5,14 +5,16 @@
       <span class="material-symbols-outlined" *ngIf="collapsed">chevron_right</span>
       <span class="material-symbols-outlined" *ngIf="!collapsed">chevron_left</span>
     </button>
-    <mat-chip-set>
-      <mat-chip *ngIf="filteredRepo" [removable]="true">
-        {{filteredRepo}}
-        <button matChipRemove (click)="filterCharts()">
-          <span class="material-symbols-outlined">cancel</span>
+    <div class="flex flex-wrap gap-2">
+      <div *ngIf="filteredRepo"
+        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100">
+        <span>{{filteredRepo}}</span>
+        <button (click)="filterCharts()"
+          class="ml-1 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5">
+          <span class="material-symbols-outlined text-base">cancel</span>
         </button>
-      </mat-chip>
-    </mat-chip-set>
+      </div>
+    </div>
   </div>
 </ng-template>
 

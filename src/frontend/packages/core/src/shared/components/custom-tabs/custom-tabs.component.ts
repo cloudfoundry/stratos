@@ -7,7 +7,7 @@ export interface MatTabChangeEvent {
 }
 
 @Component({
-  selector: 'mat-tab',
+  selector: 'app-tab',
   template: '<ng-template><ng-content></ng-content></ng-template>',
   standalone: true
 })
@@ -22,7 +22,7 @@ export class CustomTabComponent {
 }
 
 @Component({
-  selector: 'mat-tab-group',
+  selector: 'app-tab-group',
   templateUrl: './custom-tabs.component.html',
   styleUrls: ['./custom-tabs.component.scss'],
   standalone: true,

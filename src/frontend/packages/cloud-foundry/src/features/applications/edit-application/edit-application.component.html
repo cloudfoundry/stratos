@@ -8,12 +8,12 @@
 </app-page-header>
 <app-steppers cancel="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
   <app-step [title]="'Edit Application'" [valid]="editAppForm.valid && editAppForm.dirty" [onNext]="updateApp">
-    <form [formGroup]="editAppForm" validate class="stepper-form edit-app">
-      <app-form-field class="mat-form-field__spinner">
+    <form [formGroup]="editAppForm" validate class="flex flex-col gap-6 p-6">
+      <app-form-field class="relative">
         <input appInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
         <app-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</app-error>
         <app-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</app-error>
-        <div class="inline-icon inline-icon__form">
+        <div class="absolute right-2 top-1/2 -translate-y-1/2">
           <app-stateful-icon [state]="uniqueNameValidator.appApplicationNameUnique.status"></app-stateful-icon>
         </div>
       </app-form-field>
@@ -26,7 +26,7 @@
       <app-form-field>
         <input appInput placeholder="Memory Quota (MB)" formControlName="memory" type="number" min="1">
       </app-form-field>
-      <app-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</app-slide-toggle>
+      <app-slide-toggle class="mt-2" formControlName="enable_ssh">Enable SSH to Application Instances</app-slide-toggle>
     </form>
   </app-step>
 </app-steppers>

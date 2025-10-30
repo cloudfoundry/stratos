@@ -10,13 +10,13 @@ import { ProgressBarComponent } from './progress-bar.component';
   standalone: true,
   imports: [ProgressBarComponent],
   template: `
-    <mat-progress-bar
+    <app-progress-bar
       [mode]="mode"
       [value]="value"
       [bufferValue]="bufferValue"
       [color]="color"
       [customHeight]="customHeight">
-    </mat-progress-bar>
+    </app-progress-bar>
   `
 })
 export class AppProgressBarComponent extends ProgressBarComponent {

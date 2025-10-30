@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { createBasicStoreModule } from '../../../../../../store/testing/public-api';
@@ -13,7 +12,6 @@ describe('MaxListMessageComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        MatIconModule,
         RouterTestingModule,
         createBasicStoreModule(),
         MaxListMessageComponent,

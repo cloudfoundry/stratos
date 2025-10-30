@@ -23,6 +23,7 @@ import { UserProfileService } from '../../../core/user-profile.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../custom-button-toggle/custom-button-toggle.component';
+import { CardTitleComponent } from '../cards/card-title/card-title.component';
 
 export enum ProfileSettingsTypes {
   GRAVATAR,
@@ -43,7 +44,8 @@ export enum ProfileSettingsTypes {
     CustomTooltipDirective,
     CustomButtonToggleComponent,
     CustomButtonToggleGroupComponent,
-    BytesToHumanSize
+    BytesToHumanSize,
+    CardTitleComponent
   ]
 })
 export class ProfileSettingsComponent {
@@ -102,6 +104,11 @@ export class ProfileSettingsComponent {
     const newVal = !(gravatarEnabled === 'true');
     this.setGravatarEnabled(newVal);
   }
+
+  public updateTheme(themeKey: string) {
+    this.themeService.setTheme(themeKey);
+  }
+
   private setSessionTimeout(timeoutSession: boolean) {
     this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
   }

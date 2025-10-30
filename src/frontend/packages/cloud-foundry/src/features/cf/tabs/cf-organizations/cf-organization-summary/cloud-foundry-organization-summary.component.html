@@ -17,14 +17,14 @@
 </app-page-sub-nav>
 <div>
   <app-tile-grid fit="true">
-    <app-tile-group>
+    <app-tile-group class="tile-group-1-cols">
       <app-tile>
         <app-card-cf-org-user-details>
         </app-card-cf-org-user-details>
       </app-tile>
     </app-tile-group>
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-      <app-tile-group>
+      <app-tile-group class="tile-group-4-cols">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" iconFont="stratos-icons" icon="virtual_space"
@@ -46,7 +46,7 @@
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
-      <app-tile-group>
+      <app-tile-group class="tile-group-auto">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person"
@@ -72,7 +72,7 @@
             limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
-      <app-tile-group>
+      <app-tile-group class="tile-group-1-cols">
         <app-tile>
           <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfOrgService.apps$"
             [endpoint]="cfEndpointService.cfGuid"

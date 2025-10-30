@@ -4,7 +4,6 @@ import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators }
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
-import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import {
   ActionState,
@@ -36,7 +35,6 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatInputModule,
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,

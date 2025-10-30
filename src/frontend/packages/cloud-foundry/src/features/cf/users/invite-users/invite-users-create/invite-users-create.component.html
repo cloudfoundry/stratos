@@ -1,19 +1,19 @@
-<div class="create-users">
-  <div class="create-users__intro">
+<div class="flex flex-col gap-6 p-6">
+  <div class="flex flex-col gap-4 text-sm">
     <p>Invite users to the <b>{{(org$ | async)?.entity.name}}</b> organization<span *ngIf="isSpace"> and the
         <b>{{(space$ | async)?.entity.name}}</b> space</span>.</p>
     <p>A verification email will be sent to each user you invite, they can then follow the link provided
       in the email to activate and set up their account.</p>
     <p>You are free to update the invited user's roles whilst waiting for their accounts to be activated.</p>
   </div>
-  <div class="create-users__roles">
-    <div *ngIf="isSpace" class="create-users__roles__space">
-      Please select the users initial space role:
-      <mat-radio-group class="create-users__roles__space__radio-buttons" [(ngModel)]="spaceRole">
-        <mat-radio-button *ngFor="let season of spaceRoles" [value]="season.value">
-          {{season.label}}
-        </mat-radio-button>
-      </mat-radio-group>
+  <div *ngIf="isSpace" class="flex flex-col gap-3">
+    <div class="font-medium">Please select the users initial space role:</div>
+    <div class="flex flex-col gap-2" [(ngModel)]="spaceRole">
+      <label *ngFor="let season of spaceRoles" class="flex items-center gap-2 cursor-pointer">
+        <input type="radio" [value]="season.value" [(ngModel)]="spaceRole"
+               class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+        <span>{{season.label}}</span>
+      </label>
     </div>
   </div>
   <app-stacked-input-actions [stateIn$]="stateIn.asObservable()" (stateOut)="stateOut($event)">

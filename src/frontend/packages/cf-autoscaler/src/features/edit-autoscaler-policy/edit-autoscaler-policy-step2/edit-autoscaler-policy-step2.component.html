@@ -23,11 +23,12 @@
                 <div *ngIf="metricTypes.length > 1" class="form-group min-w-0 flex-shrink-0">
                   <input type="text" name="metric_type" formControlName="metric_type"
                     placeholder="Metric Type" required class="input-sm"
-                    [matAutocomplete]="metricTypeAuto">
-                  <mat-autocomplete #metricTypeAuto="matAutocomplete">
-                    <mat-option *ngFor="let metricType of filteredMetricTypes$ | async" [value]="metricType">
-                      {{metricType}}</mat-option>
-                  </mat-autocomplete>
+                    list="metricTypeList">
+                  <datalist id="metricTypeList">
+                    <option *ngFor="let metricType of filteredMetricTypes$ | async" [value]="metricType">
+                      {{metricType}}
+                    </option>
+                  </datalist>
                 </div>
                 <div *ngIf="metricTypes.length > 1" class="form-group min-w-0 flex-shrink-0">
                   <select name="operator" formControlName="operator" required class="select-sm">

@@ -1,6 +1,8 @@
-<div *ngIf="busy | async" class="mat-card__progress-overlay">
-  <div class="mat-card__progress-overlay-inner">
-    <div class="mat-card__progress-text">{{ label }}</div>
-    <app-progress-bar mode="indeterminate"></app-progress-bar>
+<div *ngIf="busy | async" class="card-progress-overlay absolute inset-0 flex items-center justify-center bg-black/30 dark:bg-black/50 z-10 backdrop-blur-sm">
+  <div class="card-progress-overlay-inner flex flex-col items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+    <div class="card-progress-text text-base font-medium text-gray-900 dark:text-gray-100">{{ label }}</div>
+    <div class="progress-spinner inline-block w-12 h-12 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" role="status" aria-live="polite">
+      <span class="sr-only">Loading...</span>
+    </div>
   </div>
 </div>

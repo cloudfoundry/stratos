@@ -62,16 +62,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   ngOnInit() {
     this.loggedInService.init();
 
-    // Material design defines smaller sizes when on desktop but angular-material uses larger mobile sizes
-    // Add a style to the body if we detect a desktop browser, so we can adjust styling to match the MD Specification
-
-    // Approximation for detecting desktop browser - see: Stack Overflow: https://goo.gl/e1KuJR
-    const isTouchDevice = () => 'ontouchstart' in window || 'onmsgesturechange' in window;
-    const isDesktop = window.screenX !== 0 && !isTouchDevice() ? true : false;
-    if (isDesktop) {
-      this.document.body.classList.add('mat-desktop');
-    }
-
     // Desktop (Electron ?)
     if (environment.desktopMode) {
       this.document.body.classList.add('stratos-desktop');

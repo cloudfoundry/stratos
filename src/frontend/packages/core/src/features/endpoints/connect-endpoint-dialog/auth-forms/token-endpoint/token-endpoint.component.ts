@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 
 import { IAuthForm } from '../../../../../../../store/src/extension-types';
 import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
@@ -14,8 +13,7 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
   imports: [
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    CustomIconComponent,
-    MatInputModule
+    CustomIconComponent
   ]
 })
 export class TokenEndpointComponent implements IAuthForm {

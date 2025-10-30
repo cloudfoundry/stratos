@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  forwardRef,
   Input,
   NgZone,
   OnChanges,
@@ -89,6 +90,7 @@ import { TableComponent } from './list-table/table.component';
 import { PollingIndicatorComponent } from '../polling-indicator/polling-indicator.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MaxListMessageComponent } from './max-list-message/max-list-message.component';
+import { AppPaginatorComponent } from '../app-paginator/app-paginator.component';
 
 @Component({
 selector: 'app-list',
@@ -100,10 +102,11 @@ selector: 'app-list',
     CommonModule,
     FormsModule,
     CardsComponent,
-    TableComponent,
+    forwardRef(() => TableComponent),
     PollingIndicatorComponent,
     MetricsRangeSelectorComponent,
     MaxListMessageComponent,
+    AppPaginatorComponent,
   ],
   animations: [
     trigger('list', [

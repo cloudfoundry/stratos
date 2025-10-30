@@ -49,12 +49,12 @@
     <app-card-title class="user-profile__section">Theme</app-card-title>
     <div class="user-profile__option">
       <div class="user-profile__option-inner">
-        <mat-button-toggle-group [value]="(themeService.getTheme() | async).key"
-          (change)="themeService.setTheme($event.value)" name="theme" aria-label="Theme">
-          <mat-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key">
+        <app-button-toggle-group [value]="(themeService.getTheme() | async)?.key"
+          (change)="updateTheme($event.value)" name="theme" aria-label="Theme">
+          <app-button-toggle *ngFor="let theme of themeService.getThemes()" [value]="theme.key">
             {{ theme.label }}
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+          </app-button-toggle>
+        </app-button-toggle-group>
       </div>
     </div>
   </div>

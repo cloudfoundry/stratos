@@ -1,4 +1,4 @@
-<mat-card class="meta-card {{status$ && statusBackground? (status$ | async): '' }}"
+<div class="card meta-card {{status$ && statusBackground? (status$ | async): '' }}"
   [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}" (click)="clickAction ? clickAction() : null">
   <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
     <div class="meta-card__deleting-overlay-inner">
@@ -8,7 +8,7 @@
   </div>
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
-  <mat-card-header class="meta-card__header" *ngIf="title">
+  <div class="meta-card__header" *ngIf="title">
     <div
       [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
       <div
@@ -22,38 +22,42 @@
     <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite" *ngIf="favorite"
       [favorite]="favorite">
     </app-entity-favorite-star>
-    <div class="meta-card__header-container__actions" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
-      <button class="btn btn-icon meta-card__header__button" type="button" [matMenuTriggerFor]="menu"
+    <div class="meta-card__header-container__actions relative" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
+      <button class="btn btn-icon meta-card__header__button" type="button" (click)="toggleMenu()"
         [disabled]="isDeleting$ | async">
         <app-custom-icon>more_vert</app-custom-icon>
       </button>
-      <mat-menu class="meta-card__header__popup" #menu="matMenu" xPosition="before">
-        <ng-container *ngFor="let menuItem of actionMenu">
-          <ng-container *ngIf="menuItem.can | async">
-            <button *ngIf="!menuItem.separator" class="meta-card__header__popup__btn"
-              [disabled]="menuItem.disabled | async" mat-menu-item (click)="menuItem.action()">
-              <app-custom-icon *ngIf="menuItem.icon">{{menuItem.icon}}</app-custom-icon>
-              <span>{{menuItem.label}}</span>
-            </button>
-            <div *ngIf="menuItem.separator" class="meta-card__header__popup-separator"></div>
+      <div *ngIf="menuOpen" class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 min-w-[160px]">
+        <div class="py-1" role="menu">
+          <ng-container *ngFor="let menuItem of actionMenu">
+            <ng-container *ngIf="menuItem.can | async">
+              <button *ngIf="!menuItem.separator"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                [disabled]="menuItem.disabled | async"
+                (click)="menuItemClick(menuItem)">
+                <app-custom-icon *ngIf="menuItem.icon">{{menuItem.icon}}</app-custom-icon>
+                <span>{{menuItem.label}}</span>
+              </button>
+              <div *ngIf="menuItem.separator" class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+            </ng-container>
           </ng-container>
-        </ng-container>
-      </mat-menu>
+        </div>
+      </div>
     </div>
     <ng-container *ngIf="!statusIconByTitle">
       <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
     </ng-container>
-  </mat-card-header>
-  <mat-card-content>
+  </div>
+  <div class="meta-card__content">
     <div *ngFor="let metaItem of metaItems">
       <span *ngIf="metaItem?.content">
         <ng-container *ngTemplateOutlet="metaItem.content"></ng-container>
       </span>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>
 <ng-template #statusIconTmple>
   <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async"
-    matTooltip="{{statusIconTooltip}}">
+    [title]="statusIconTooltip">
   </app-application-state-icon>
 </ng-template>

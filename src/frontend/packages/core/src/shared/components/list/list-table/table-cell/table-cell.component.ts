@@ -97,7 +97,7 @@ export class TableCellComponent<T> implements OnInit {
     return this.rcRow;
   }
 
-  @Input() config: any;
+  @Input() config: object | undefined;
 
   private cellComponent: TableCellCustom<T>;
 

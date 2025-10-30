@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -17,8 +16,7 @@ import { waitForCFPermissions } from '../../cf.helpers';
   styleUrls: ['./cf-admin-add-user-warning.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule
+    CommonModule
   ]
 })
 export class CfAdminAddUserWarningComponent {

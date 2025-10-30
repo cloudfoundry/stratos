@@ -19,14 +19,14 @@
 
 <div>
   <app-tile-grid fit="true">
-    <app-tile-group>
+    <app-tile-group class="tile-group-1-cols">
       <app-tile>
         <app-card-cf-space-details>
         </app-card-cf-space-details>
       </app-tile>
     </app-tile-group>
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-      <app-tile-group>
+      <app-tile-group class="tile-group-3-cols">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps"
@@ -47,7 +47,7 @@
         </app-tile>
       </app-tile-group>
 
-      <app-tile-group>
+      <app-tile-group class="tile-group-auto">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users"
@@ -72,7 +72,7 @@
         </app-tile>
       </app-tile-group>
 
-      <app-tile-group>
+      <app-tile-group class="tile-group-1-cols">
         <app-tile>
           <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfSpaceService.apps$"
             [endpoint]="cfEndpointService.cfGuid"

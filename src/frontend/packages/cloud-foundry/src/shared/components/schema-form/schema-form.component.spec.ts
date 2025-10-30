@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
 import { generateCfBaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SchemaFormComponent } from './schema-form.component';
+import { TailwindJsonSchemaFormModule } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 
 describe('SchemaFormComponent', () => {
   let component: SchemaFormComponent;
@@ -10,12 +10,10 @@ describe('SchemaFormComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        SchemaFormComponent
-      ],
       imports: [
         ...generateCfBaseTestModulesNoShared(),
-        MaterialDesignFrameworkModule
+        SchemaFormComponent,
+        TailwindJsonSchemaFormModule
       ],
     })
       .compileComponents();

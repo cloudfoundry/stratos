@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatRadioModule } from '@angular/material/radio';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -35,7 +34,6 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
   imports: [
     CommonModule,
     FormsModule,
-    MatRadioModule,
     StackedInputActionsComponent
   ]
 })

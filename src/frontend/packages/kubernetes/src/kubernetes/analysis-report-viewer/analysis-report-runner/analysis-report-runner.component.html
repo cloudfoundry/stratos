@@ -1,15 +1,27 @@
 <ng-container *ngIf="canShow$ | async">
   <div *ngIf="analyzers$ | async as analyzers" class="report-runner">
-    <mat-menu #appMenu="matMenu">
-      <button (click)="runAnalysis(analyzer.id)" mat-menu-item
-        *ngFor="let analyzer of analyzers">{{ analyzer.name }}</button>
-      <mat-divider class="report-runner__divider"></mat-divider>
-      <button (click)="showAnalyzersInfo()" mat-menu-item>Analyzer Info</button>
-    </mat-menu>
-
-    <button class="btn btn-ghost report-runner__run" [matMenuTriggerFor]="appMenu" *ngIf="analyzers.length > 0">
-      <span>Analyze</span>
-      <span class="material-symbols-outlined">arrow_drop_down</span>
-    </button>
+    <div class="relative inline-block">
+      <button class="btn btn-ghost report-runner__run"
+        (click)="menuOpen = !menuOpen"
+        *ngIf="analyzers.length > 0">
+        <span>Analyze</span>
+        <span class="material-symbols-outlined">arrow_drop_down</span>
+      </button>
+      <div *ngIf="menuOpen"
+        class="absolute right-0 mt-1 w-56 bg-white dark:bg-neutral-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div class="py-1">
+          <button (click)="runAnalysis(analyzer.id); menuOpen = false"
+            *ngFor="let analyzer of analyzers"
+            class="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+            {{ analyzer.name }}
+          </button>
+          <div class="border-t border-neutral-200 dark:border-neutral-700 my-1 report-runner__divider"></div>
+          <button (click)="showAnalyzersInfo(); menuOpen = false"
+            class="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+            Analyzer Info
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </ng-container>

@@ -19,7 +19,7 @@
 </app-card>
 
 <app-tile-grid [fit]="false" class="cell-summary__usage">
-  <app-tile-group>
+  <app-tile-group class="tile-group-3-cols">
     <app-tile>
       <app-card-number-metric icon="memory" label="Memory" units="mb" value="{{ cfCellService.usageMemory$ | async}} " limit="{{ cfCellService.totalMemory$ | async}}"></app-card-number-metric>
     </app-tile>

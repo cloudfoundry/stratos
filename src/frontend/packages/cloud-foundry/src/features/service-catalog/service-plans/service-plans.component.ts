@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -15,6 +16,7 @@ import {
     ListComponent
   ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useClass: ServicePlansListConfigService

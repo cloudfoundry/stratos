@@ -40,7 +40,8 @@ export class CloudFoundryFirehoseComponent implements OnInit {
 
   ngOnInit() {
     const host = window.location.host;
-    const streamUrl = `wss://${host}/pp/${environment.proxyAPIVersion}/${
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const streamUrl = `${protocol}://${host}/pp/${environment.proxyAPIVersion}/${
       this.cfEndpointService.cfGuid
       }/firehose`;
 

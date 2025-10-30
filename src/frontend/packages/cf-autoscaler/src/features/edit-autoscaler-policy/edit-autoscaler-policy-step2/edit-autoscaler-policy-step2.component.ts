@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -39,7 +38,6 @@ import { TileComponent } from '../../../../../core/src/shared/components/tile/ti
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatAutocompleteModule,
     TileGridComponent,
     TileGroupComponent,
     TileComponent

@@ -156,6 +156,15 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     this.userRolesInOrg = role;
     const quotaDefinition = this.row.entity.quota_definition || { entity: createOrgQuotaDefinition(), metadata: null };
 
+    // Debug: Log quota definition data
+    if (!this.row.entity.quota_definition) {
+      console.warn(`[CfOrgCard] Missing quota_definition for org: ${this.row.entity.name}`, {
+        row: this.row,
+        hasQuotaGuid: !!this.row.entity.quota_definition_guid,
+        quotaGuid: this.row.entity.quota_definition_guid
+      });
+    }
+
     if (apps) {
       this.setAppsDependentCounts(apps);
       this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');

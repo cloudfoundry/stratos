@@ -1,9 +1,0 @@
-// Migrated from Material theming to Tailwind CSS custom properties
-
-@mixin page-404($theme, $app-theme) {
-  .page-not-found {
-    // Using Tailwind CSS custom properties instead of Material color functions
-    background-color: var(--color-primary-contrast, #ffffff);
-    color: var(--color-primary, #1976d2);
-  }
-}

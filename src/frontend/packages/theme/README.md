@@ -138,9 +138,9 @@ Components have been converted to use Tailwind classes:
 
 **Before:**
 ```html
-<mat-card class="example-card">
-  <mat-card-header>Title</mat-card-header>
-</mat-card>
+<app-card class="example-card">
+  <app-card-header>Title</app-card-header>
+</app-card>
 ```
 
 **After:**

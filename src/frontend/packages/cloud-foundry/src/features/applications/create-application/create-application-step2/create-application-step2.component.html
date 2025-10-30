@@ -1,12 +1,12 @@
-<b>Please select a unique name for your application</b>
-<form novalidate [formGroup]="form" class="stepper-form">
+<b class="block mb-4">Please select a unique name for your application</b>
+<form novalidate [formGroup]="form" class="flex flex-col gap-6">
   <div>
-    <app-form-field class="mat-form-field__spinner">
+    <app-form-field class="relative">
       <input required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
       <app-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
         This name has been taken, please try another.
       </app-error>
-      <div *ngIf="!form.controls.appName?.hasError('required')" class="inline-icon inline-icon__form">
+      <div *ngIf="!form.controls.appName?.hasError('required')" class="absolute right-2 top-1/2 -translate-y-1/2">
         <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
       </div>
     </app-form-field>

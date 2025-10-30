@@ -1,11 +1,10 @@
 <div class="add-route">
   <div>Create a new route or map an existing one. </div>
-  <div>
-    <mat-radio-group [(ngModel)]="addRouteMode" class="add-route__radios">
-      <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode" class="add-route__radios-btn">
-        {{ mode.label }}
-      </mat-radio-button>
-    </mat-radio-group>
+  <div class="flex flex-col gap-3 my-4">
+    <label *ngFor="let mode of addRouteModes" class="inline-flex items-center cursor-pointer">
+      <input type="radio" [(ngModel)]="addRouteMode" [value]="mode" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+      <span class="ml-2 text-sm font-medium text-gray-900">{{ mode.label }}</span>
+    </label>
   </div>
   <div class="add-route__form" *ngIf="addRouteMode?.id === 'create'">
     <div>
@@ -36,7 +35,6 @@
             <input appInput formControlName="path" placeholder="Path">
             <app-error *ngIf="addHTTPRoute.controls['path'].errors?.pattern">Invalid Path</app-error>
             <app-error *ngIf="addHTTPRoute.controls['path'].errors?.maxlength">Path cannot exceed 128 characters</app-error>
-            <span matPrefix>/&nbsp;</span>
           </app-form-field>
         </div>
       </div>

@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
-import { MatCardModule } from '@angular/material/card';
 
 import { PaginationObservables } from '../../../../../store/src/reducers/pagination-reducer/pagination-reducer.types';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -23,7 +22,6 @@ const RECENT_ITEMS_COUNT = 10;
   imports: [
     CommonModule,
     AsyncPipe,
-    MatCardModule,
     PollingIndicatorComponent,
     CompactAppCardComponent
   ]

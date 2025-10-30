@@ -10,6 +10,18 @@ module.exports = {
     "./src/frontend/packages/desktop-extensions/src/**/*.{html,ts}",
     "./src/frontend/packages/shared/src/**/*.{html,ts}"
   ],
+  safelist: [
+    // Progress bar colors (dynamically applied)
+    'bg-brand-400',
+    'bg-brand-500',
+    'bg-brand-600',
+    'bg-accent-shade-400',
+    'bg-accent-shade-500',
+    'bg-accent-shade-600',
+    'bg-danger-shade-400',
+    'bg-danger-shade-500',
+    'bg-danger-shade-600',
+  ],
   theme: {
     extend: {
       // ========================================

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { MatCardModule } from '@angular/material/card';
 import {
   CustomTooltipDirective,
   CardWrapperComponent,
@@ -32,7 +31,6 @@ import { ListComponent } from '../../../../../../../../core/src/shared/component
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     CustomTooltipDirective,
     CardWrapperComponent,
     CardContentComponent,

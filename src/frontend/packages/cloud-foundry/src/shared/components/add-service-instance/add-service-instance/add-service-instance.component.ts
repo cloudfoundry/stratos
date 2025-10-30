@@ -180,7 +180,15 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // initialisedService$ is now initialized in constructor using defer() for proper timing
+    // Trigger change detection after initialization to prevent NG0100
+    // This ensures initialisedService$ emissions happen in the next cycle
+    this.initialisedService$.pipe(
+      take(1),
+      takeUntil(this.destroyed$)
+    ).subscribe(() => {
+      this.cdr.detectChanges();
+    });
+
     // Initialize apps$ and skipApps$ observables for the stepper
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),

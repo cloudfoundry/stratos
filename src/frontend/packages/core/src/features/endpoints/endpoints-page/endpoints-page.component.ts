@@ -16,7 +16,7 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { delay, first, map, switchMap, tap } from 'rxjs/operators';
+import { delay, filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -98,6 +98,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Redirect to /applications if not enabled.
     endpointsService.disablePersistenceFeatures$.pipe(
+      filter(off => off !== undefined && off !== null),
       map(off => {
         if (off) {
           // User should only get here if url is manually entered
@@ -113,6 +114,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     ).subscribe();
 
     this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
+      filter(enabled => enabled !== undefined && enabled !== null),
       map(enabled => {
         if (enabled){
           return [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT];
@@ -124,13 +126,15 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Is the backup/restore plugin available on the backend?
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
+      filter(sessionData => !!sessionData),
       first(),
-      map(sessionData => sessionData?.plugins.backup),
+      map(sessionData => sessionData?.plugins?.backup || false),
       switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
 
     // Create an observable to track when endpoints are loaded and ready
     this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
+      filter(endpointState => !!endpointState),
       map(endpointState => !endpointState.loading),
       delay(500) // Increased delay to ensure proper loading sequence
     );
@@ -165,62 +169,98 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     ngOnInit() {
     // Fetch endpoints list on page load
     console.log('Endpoints page loaded - fetching endpoints list');
-    
+
     // Dispatch the GET_ENDPOINTS action which triggers system info fetch
     this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
     console.log('Dispatched GET_ENDPOINTS action');
-    
+
     // Also explicitly trigger system info
     this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
     console.log('Dispatched system info action');
 
-    this.subs.push(this.endpointsService.haveRegistered$.subscribe(haveRegistered => {
-      console.log('haveRegistered changed:', haveRegistered);
-      // Use custom component if specified
-      this.customNoEndpointsContainer.clear();
-      if (!haveRegistered && this.customizations.noEndpointsComponent) {
-        const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
-        this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
-      }
-    }));
+    // Subscribe to haveRegistered$ with proper null checks
+    this.subs.push(
+      this.endpointsService.haveRegistered$.pipe(
+        filter(haveRegistered => haveRegistered !== undefined && haveRegistered !== null)
+      ).subscribe(haveRegistered => {
+        console.log('haveRegistered changed:', haveRegistered);
+        // Use custom component if specified
+        if (this.customNoEndpointsContainer) {
+          this.customNoEndpointsContainer.clear();
+        }
+        if (!haveRegistered && this.customizations.noEndpointsComponent) {
+          const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
+          this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
+        }
+      })
+    );
 
-    // Debug: Also subscribe to the actual endpoints data to see what's there
-    this.subs.push(this.endpointsService.endpoints$.subscribe(endpoints => {
-      console.log('Endpoints in store:', endpoints);
-      console.log('Number of endpoints:', Object.keys(endpoints).length);
-    }));
+    // Debug: Subscribe to endpoints data with proper null checks
+    this.subs.push(
+      this.endpointsService.endpoints$.pipe(
+        filter(endpoints => !!endpoints)
+      ).subscribe(endpoints => {
+        console.log('Endpoints in store:', endpoints);
+        console.log('Number of endpoints:', Object.keys(endpoints).length);
+      })
+    );
 
-    // Debug: Check what the list data source is doing
-    // We need to get access to the list component somehow to debug its data source
+    // Debug: Check list component data source with proper null guards and subscription tracking
     setTimeout(() => {
       console.log('Checking if we can access list component data source...');
       if (this.listComponent) {
         console.log('List component found:', this.listComponent);
         console.log('Data source:', this.listComponent.dataSource);
         if (this.listComponent.dataSource) {
-          this.listComponent.dataSource.page$.subscribe(page => {
-            console.log('Data source page$:', page);
-          });
-          this.listComponent.dataSource.pagination$.subscribe(pagination => {
-            console.log('Data source pagination$:', pagination);
-          });
-          
+          // Safely subscribe to data source observables with null checks and tracking
+          if (this.listComponent.dataSource.page$) {
+            this.subs.push(
+              this.listComponent.dataSource.page$.pipe(
+                filter(page => !!page)
+              ).subscribe(page => {
+                console.log('Data source page$:', page);
+              })
+            );
+          }
+
+          if (this.listComponent.dataSource.pagination$) {
+            this.subs.push(
+              this.listComponent.dataSource.pagination$.pipe(
+                filter(pagination => !!pagination)
+              ).subscribe(pagination => {
+                console.log('Data source pagination$:', pagination);
+              })
+            );
+          }
+
           // Debug the specific observables that control hasRows$
-          this.listComponent.dataSource.maxedResults$.subscribe(maxedResults => {
-            console.log('Data source maxedResults$:', maxedResults);
-          });
-          
+          if (this.listComponent.dataSource.maxedResults$) {
+            this.subs.push(
+              this.listComponent.dataSource.maxedResults$.subscribe(maxedResults => {
+                console.log('Data source maxedResults$:', maxedResults);
+              })
+            );
+          }
+
           // Debug hasRows$ directly from the list component
-          this.listComponent.hasRows$.subscribe(hasRows => {
-            console.log('List component hasRows$:', hasRows);
-          });
-          
+          if (this.listComponent.hasRows$) {
+            this.subs.push(
+              this.listComponent.hasRows$.subscribe(hasRows => {
+                console.log('List component hasRows$:', hasRows);
+              })
+            );
+          }
+
           // Debug the view type and card component
-          this.listComponent.view$.subscribe(view => {
-            console.log('List component view$:', view);
-          });
-          
-          console.log('List config cardComponent:', this.listComponent.config.cardComponent);
+          if (this.listComponent.view$) {
+            this.subs.push(
+              this.listComponent.view$.subscribe(view => {
+                console.log('List component view$:', view);
+              })
+            );
+          }
+
+          console.log('List config cardComponent:', this.listComponent.config?.cardComponent);
         }
       } else {
         console.log('List component not found');
@@ -228,28 +268,35 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     }, 2000);
 
     this.endpointsService.checkAllEndpoints();
-    this.store.select(selectDashboardState).pipe(
-      first()
-    ).subscribe(dashboard => {
-      if (dashboard.pollingEnabled) {
-        this.startEndpointHealthCheckPulse();
-      }
-    });
+
+    // Subscribe to dashboard state with proper tracking
+    this.subs.push(
+      this.store.select(selectDashboardState).pipe(
+        filter(dashboard => !!dashboard),
+        first()
+      ).subscribe(dashboard => {
+        if (dashboard.pollingEnabled) {
+          this.startEndpointHealthCheckPulse();
+        }
+      })
+    );
   }
 
   ngAfterViewInit() {
     console.log('ngAfterViewInit - checking if list component is rendered');
-    
-    this.subs.push(combineLatest(
-      this.endpointsService.haveRegistered$,
-      this.endpointsService.haveConnected$,
-    ).pipe(
-      delay(1),
-      tap(([hasRegistered, hasConnected]) => {
-        console.log('hasRegistered:', hasRegistered, 'hasConnected:', hasConnected);
-        this.showSnackBar(hasRegistered && !hasConnected);
-      }),
-    ).subscribe());
+
+    this.subs.push(
+      combineLatest([
+        this.endpointsService.haveRegistered$.pipe(filter(val => val !== undefined && val !== null)),
+        this.endpointsService.haveConnected$.pipe(filter(val => val !== undefined && val !== null))
+      ]).pipe(
+        delay(1),
+        tap(([hasRegistered, hasConnected]) => {
+          console.log('hasRegistered:', hasRegistered, 'hasConnected:', hasConnected);
+          this.showSnackBar(hasRegistered && !hasConnected);
+        })
+      ).subscribe()
+    );
   }
 
   ngOnDestroy() {

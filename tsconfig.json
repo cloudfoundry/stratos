@@ -1,8 +1,7 @@
 {
+  "extends": "./src/tsconfig.json",
   "compilerOptions": {
     "downlevelIteration": true,
-    "module": "esnext",
-    "rootDir": ".",
-    "target": "ES2022"
+    "skipLibCheck": true
   }
 }

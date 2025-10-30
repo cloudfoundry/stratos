@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
@@ -11,6 +12,7 @@ import {
   templateUrl: './service-instances.component.html',
   styleUrls: ['./service-instances.component.scss'],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useClass: ServiceInstancesListConfigService

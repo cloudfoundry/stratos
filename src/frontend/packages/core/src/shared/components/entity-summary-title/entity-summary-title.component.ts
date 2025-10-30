@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
 @Component({

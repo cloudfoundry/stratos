@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -20,8 +19,7 @@ interface UserInviteStepperLink {
   styleUrls: ['./cloud-foundry-invite-user-link.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule
+    CommonModule
   ]
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {

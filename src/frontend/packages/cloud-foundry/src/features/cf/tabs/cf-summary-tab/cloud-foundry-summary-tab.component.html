@@ -6,13 +6,13 @@
 
 <div class="summary">
   <app-tile-grid fit="true">
-    <app-tile-group>
+    <app-tile-group class="tile-group-1-cols">
       <app-tile>
         <app-card-cf-info></app-card-cf-info>
       </app-tile>
     </app-tile-group>
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-      <app-tile-group>
+      <app-tile-group class="tile-group-4-cols">
         <app-tile>
           <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
             value="{{ (cfEndpointService.appsPagObs.totalEntities$ | async) }}"></app-card-number-metric>
@@ -31,7 +31,7 @@
             value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
-      <app-tile-group>
+      <app-tile-group class="tile-group-1-cols">
         <app-tile>
           <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)"
             [endpoint]="cfEndpointService.cfGuid"

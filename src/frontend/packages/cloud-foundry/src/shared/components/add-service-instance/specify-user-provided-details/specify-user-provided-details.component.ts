@@ -1,13 +1,9 @@
-import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { MatChipsModule } from '@angular/material/chips';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { MatRadioModule } from '@angular/material/radio';
 import { ActivatedRoute } from '@angular/router';
 
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
@@ -48,12 +44,10 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatChipsModule,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    MatRadioModule,
     AppNameUniqueDirective,
     StatefulIconComponent
   ]
@@ -85,7 +79,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
   public createEditServiceInstance: UntypedFormGroup;
   public bindExistingInstance: UntypedFormGroup;
-  public separatorKeysCodes = [ENTER, COMMA, SPACE];
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
@@ -362,17 +355,15 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
 
-  public addTag(event: MatChipInputEvent): void {
-    const input = event.input;
+  public addTagFromInput(event: KeyboardEvent): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const label = (input.value || '').trim();
 
-    const label = (event.value || '').trim();
     if (label) {
       this.tags.push({ label });
       this.updateTagsFormControl();
       this.tagsChanged.next(true);
-    }
-
-    if (input) {
       input.value = '';
     }
   }

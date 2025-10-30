@@ -1,15 +1,28 @@
 <app-page-sub-nav>
   <div class="sub-nav-menu-button" *ngIf="namespaces$">
-    <mat-menu #appMenu="matMenu" class="menu">
-      <button (click)="select('*')" mat-menu-item>All namespaces</button>
-      <button *ngFor="let ns of namespaces$ | async" (click)="select(ns)" mat-menu-item>{{ ns }}</button>
-    </mat-menu>
-    <button class="btn btn-ghost sub-nav-menu-button__btn" [matMenuTriggerFor]="appMenu"
-      [ngClass]="{'sub-nav-menu-button__not-allowed': !isNamespacedView}">
-      <span *ngIf="selectedNamespace" class="stratos-icons sub-nav-menu-button__icon">namespace</span>
-      <span class="sub-nav-menu-button__label">{{ selectedNamespace || 'All namespaces'}}</span>
-      <span class="material-symbols-outlined sub-nav-menu-button__arrow">arrow_drop_down</span>
-    </button>
+    <div class="relative inline-block">
+      <button class="btn btn-ghost sub-nav-menu-button__btn"
+        [class.sub-nav-menu-button__not-allowed]="!isNamespacedView"
+        (click)="menuOpen = !menuOpen">
+        <span *ngIf="selectedNamespace" class="stratos-icons sub-nav-menu-button__icon">namespace</span>
+        <span class="sub-nav-menu-button__label">{{ selectedNamespace || 'All namespaces'}}</span>
+        <span class="material-symbols-outlined sub-nav-menu-button__arrow">arrow_drop_down</span>
+      </button>
+      <div *ngIf="menuOpen"
+        class="absolute left-0 mt-1 w-56 bg-white dark:bg-neutral-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div class="py-1">
+          <button (click)="select('*'); menuOpen = false"
+            class="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+            All namespaces
+          </button>
+          <button *ngFor="let ns of namespaces$ | async"
+            (click)="select(ns); menuOpen = false"
+            class="block w-full text-left px-4 py-2 text-sm text-neutral-900 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+            {{ ns }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </app-page-sub-nav>
 

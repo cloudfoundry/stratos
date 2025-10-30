@@ -202,10 +202,10 @@ function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: Req
   // 6) The entity isn't in the process of being updated
   return !entityInfo.fetching &&
     !entityInfo.error &&
-    !entityInfo.deleting.busy &&
-    !entityInfo.deleting.deleted &&
+    !entityInfo.deleting?.busy &&
+    !entityInfo.deleting?.deleted &&
     // This is required to ensure that we don't continue trying to fetch missing relations when we're already fetching missing relations
-    !Object.keys(entityInfo.updating).find(key => entityInfo.updating[key].busy);
+    !(entityInfo.updating && Object.keys(entityInfo.updating).find(key => entityInfo.updating[key]?.busy));
 }
 
 export interface CFBasePipelineRequestActionMeta {
@@ -338,7 +338,11 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
       combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
         first(),
-      ).subscribe(newActions => newActions.forEach(newAction => store.dispatch(newAction)));
+      ).subscribe(newActions => newActions?.forEach(newAction => {
+        if (newAction) {
+          store.dispatch(newAction);
+        }
+      }));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,

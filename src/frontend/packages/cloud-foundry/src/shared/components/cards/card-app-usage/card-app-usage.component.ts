@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { map, share, startWith } from 'rxjs/operators';
 
@@ -21,7 +20,6 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
     CardStatusComponent,
     TableCellStatusDirective,
     PercentagePipe

@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter, Directive } from '@angular/core
 // Custom Icon Component
 @Component({
   selector: 'app-custom-icon',
-  template: `<i class="custom-icon" [class]="fontSet" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
+  template: `<i [class]="fontSet + ' custom-icon'" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
   standalone: true
 })
@@ -27,17 +27,7 @@ export class CustomSpinnerComponent {
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
 }
 
-// App Spinner Component (alias for custom spinner)
-@Component({
-  selector: 'app-spinner',
-  template: '<div class="custom-spinner" [style.width.px]="diameter" [style.height.px]="diameter"><div class="spinner-circle"></div></div>',
-  styleUrls: ['./custom-material.component.scss'],
-  standalone: true
-})
-export class AppCustomSpinnerComponent {
-  @Input() diameter = 40;
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
-}
+// App Spinner Component removed - use AppSpinnerComponent from progress-spinner package instead
 
 // Custom Progress Bar Component
 @Component({

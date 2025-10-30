@@ -12,7 +12,7 @@
   <!-- Main Row -->
   <div role="row" class="table-row"
     [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'has-error-row': errorMessage$ | async, 'table-row-wrapper__highlighted': isHighlighted$ | async}">
-    <div class="mat-row table-row__inner"
+    <div class="flex items-center table-row__inner"
       [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
 
       <!-- Expander Cell (if expandable) -->
@@ -27,14 +27,15 @@
 
       <!-- Data Cells - Manual rendering replacing cdkCellOutlet -->
       <div *ngFor="let column of columns"
-           class="table-cell"
+           class="table-row-cell"
            [ngClass]="column.class || ''"
-           [style.flex]="column.cellFlex">
+           [style.flex]="column.cellFlex"
+           role="cell">
         <app-table-cell
           [component]="column.cellComponent"
           [func]="column.cellDefinition?.getValue"
           [row]="row"
-          [config]="column"
+          [config]="column.cellConfig && (typeof column.cellConfig === 'function' ? column.cellConfig(row) : column.cellConfig)"
           [dataSource]="dataSource">
         </app-table-cell>
       </div>
@@ -47,7 +48,7 @@
   </div>
 
   <!-- Error Row -->
-  <div class="table-row__error mat-row" *ngIf="errorMessage$ | async">
+  <div class="table-row__error flex items-center" *ngIf="errorMessage$ | async">
     <div [ngClass]="{'table-row table-row__error-spacer__prominentErrorBar': prominentErrorBar}"
       class="table-row  table-row table-row__error-spacer"></div>
     <div class="table-row table-row__error-content">

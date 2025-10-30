@@ -3,7 +3,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 
 const UNLIMITED = -1;
 
@@ -22,7 +21,6 @@ const UNLIMITED = -1;
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatInputModule,
     CustomCheckboxComponent
   ]
 })

@@ -72,11 +72,13 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private _onTouched = () => {};
 
   ngAfterContentInit() {
-    this.options.forEach(option => {
-      option.onSelectionChange.subscribe(selectedOption => {
-        this.selectOption(selectedOption);
+    if (this.options) {
+      this.options.forEach(option => {
+        option.onSelectionChange.subscribe(selectedOption => {
+          this.selectOption(selectedOption);
+        });
       });
-    });
+    }
   }
 
   toggle() {
@@ -120,15 +122,21 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     } else if (this.multiple) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
-      const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
-      this.displayValue = selectedOption ? selectedOption.value : this.selectedValues[0];
+      if (this.options) {
+        const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
+        this.displayValue = selectedOption ? selectedOption.value : this.selectedValues[0];
+      } else {
+        this.displayValue = this.selectedValues[0];
+      }
     }
   }
 
   private updateOptions() {
-    this.options.forEach(option => {
-      option.selected = this.selectedValues.includes(option.value);
-    });
+    if (this.options) {
+      this.options.forEach(option => {
+        option.selected = this.selectedValues.includes(option.value);
+      });
+    }
   }
 
   // ControlValueAccessor implementation

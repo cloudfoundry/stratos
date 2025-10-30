@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
-import { MatRadioChange, MatRadioModule } from '@angular/material/radio';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
@@ -51,7 +50,6 @@ export class ManageUsersSetUsernamesHelper {
   imports: [
     CommonModule,
     FormsModule,
-    MatRadioModule,
     CustomFormFieldComponent,
     StackedInputActionsComponent
   ]
@@ -132,7 +130,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     this.stepValid.next(usernames.valid);
   }
 
-  setIsRemove(event: MatRadioChange) {
+  setIsRemove(event: {source: any, value: boolean}) {
     this.store.dispatch(new UsersRolesSetIsRemove(event.value));
     this.currentValue = event.value;
   }

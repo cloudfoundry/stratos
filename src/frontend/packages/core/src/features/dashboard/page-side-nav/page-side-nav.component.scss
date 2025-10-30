@@ -17,6 +17,8 @@
     font-size: 18px;
     height: 18px;
     width: 18px;
+    margin-right: 10px;
+    flex-shrink: 0;
   }
   &__item {
     align-items: center;

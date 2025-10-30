@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatChipsModule } from '@angular/material/chips';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 
 import { Store } from '@ngrx/store';
@@ -67,10 +63,8 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatRadioModule,
     CustomFormFieldComponent,
     MatLabelComponent,
-    MatChipsModule,
     CustomSelectComponent,
     CustomOptionComponent,
     SchemaFormComponent
@@ -112,7 +106,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   tagsSelectable = true;
   tagsRemovable = true;
   tagsAddOnBlur = true;
-  separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags: string[] = [];
   spaceScopeSub: Subscription;
   bindExistingInstance = false;
@@ -499,15 +492,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  addTag(event: MatChipInputEvent): void {
-    const input = event.input;
-    const value = event.value;
+  addTagFromInput(event: KeyboardEvent): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
     if ((value || '').trim()) {
       this.tags.push(value.trim());
       this.updateTagsFormControl();
-    }
-
-    if (input) {
       input.value = '';
     }
   }

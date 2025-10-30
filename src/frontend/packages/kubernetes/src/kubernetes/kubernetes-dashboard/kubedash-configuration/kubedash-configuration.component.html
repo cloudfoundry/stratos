@@ -29,8 +29,8 @@
 
     <app-card class="kubedash__card">
       <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
-      <div class="mat-card-header">
-        <div class="mat-card-title">Kubernetes Dashboard Installation</div>
+      <div class="card-header">
+        <div class="card-title">Kubernetes Dashboard Installation</div>
         <div class="kubedash__card-icon">
           <app-boolean-indicator *ngIf="status.service" [showText]="false" [isTrue]="true" type="yes-no">
           </app-boolean-indicator>
@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <div *ngIf="!status.service" class="mat-card-content">
+      <div *ngIf="!status.service" class="card-content">
         <p>No installation found</p>
         <h2 class="kubedash__option">Manually install the Kubernetes Dashboard</h2>
         <div class="kubedash__option-block">
@@ -58,7 +58,7 @@
         </div>
       </div>
 
-      <div *ngIf="status.service" class="mat-card-content">
+      <div *ngIf="status.service" class="card-content">
         <p>An installation of Kubernetes Dashboard was found:</p>
         <div class="kubedash__metadata">
           <app-metadata-item label="Version">{{ status.version }}</app-metadata-item>
@@ -74,8 +74,8 @@
 
     <app-card class="kubedash__card">
       <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
-      <div class="mat-card-header">
-        <div class="mat-card-title">Service Account</div>
+      <div class="card-header">
+        <div class="card-title">Service Account</div>
         <div class="kubedash__card-icon">
           <app-boolean-indicator *ngIf="status.serviceAccount" [showText]="false" [isTrue]="true" type="yes-no">
           </app-boolean-indicator>
@@ -83,7 +83,7 @@
         </div>
       </div>
 
-      <div *ngIf="!status.serviceAccount" class="mat-card-content">
+      <div *ngIf="!status.serviceAccount" class="card-content">
         <div *ngIf="(isAzure$ | async)">
           <p class="kubedash__warn">
             <span class="material-symbols-outlined">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
@@ -132,7 +132,7 @@
         </div>
       </div>
 
-      <div *ngIf="status.serviceAccount" class="mat-card-content">
+      <div *ngIf="status.serviceAccount" class="card-content">
         <p>A Service Account was found:</p>
         <div class="kubedash__metadata">
           <app-metadata-item label="Name">{{ status.serviceAccount.metadata.name }}</app-metadata-item>

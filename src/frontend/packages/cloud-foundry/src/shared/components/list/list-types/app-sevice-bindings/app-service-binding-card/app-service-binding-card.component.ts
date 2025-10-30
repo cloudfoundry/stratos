@@ -225,10 +225,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       .pipe(
         first(),
         map(([serviceLabel, serviceInstance, allEnvVars]) => {
-          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
-          const serviceInstanceName = serviceInstance.entity.entity.name;
+          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])?.[0]?.entity?.system_env_json;
+          const serviceInstanceName = serviceInstance?.entity?.entity?.name;
 
-          return systemEnvJson.VCAP_SERVICES[serviceLabel] ? {
+          return (systemEnvJson?.VCAP_SERVICES?.[serviceLabel] && serviceInstanceName) ? {
             key: serviceInstanceName,
             value: systemEnvJson.VCAP_SERVICES[serviceLabel].find((s: any) => s.name === serviceInstanceName)
           } : null;

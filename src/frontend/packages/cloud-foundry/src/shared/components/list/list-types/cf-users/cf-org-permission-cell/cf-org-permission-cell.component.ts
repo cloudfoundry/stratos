@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { RemoveCfUserRole } from '../../../../../../../../cloud-foundry/src/actions/users.actions';
@@ -43,10 +43,10 @@ export class CfOrgPermissionCellComponent extends CfPermissionCellDirective<OrgU
     confirmDialog: ConfirmationDialogService,
   ) {
     super(store, confirmDialog, cfUserService);
-    this.chipsConfig$ = combineLatest(
+    this.chipsConfig$ = combineLatest([
       this.rowSubject.asObservable(),
-      this.config$.pipe(switchMap(config => config.org$))
-    ).pipe(
+      this.config$.pipe(switchMap(config => config.org$ || observableOf(null)))
+    ]).pipe(
       map(([user, org]: [APIResource<CfUser>, APIResource<IOrganization>]) => this.setChipConfig(user, org))
     );
   }

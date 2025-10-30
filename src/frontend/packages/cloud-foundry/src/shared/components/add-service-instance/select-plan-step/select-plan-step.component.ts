@@ -8,7 +8,6 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -67,7 +66,6 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
     CustomFormFieldComponent,
     MatLabelComponent,
     CustomSelectComponent,

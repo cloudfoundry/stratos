@@ -1,7 +1,7 @@
 <app-loading-page [isLoading]="isLoading$" text="Retrieving Git Details">
   <div>
     <app-tile-grid class="gitscm-tab" *ngIf="hasRepo$ | async as hasRepo">
-      <app-tile-group>
+      <app-tile-group class="tile-group-3-cols">
         <app-tile *ngIf="appService.applicationStratProject$ | async as stratosProject">
           <div class="card">
             <div class="card-header">

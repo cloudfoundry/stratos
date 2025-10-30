@@ -6,8 +6,8 @@
       <app-card-status [status$]="status$"></app-card-status>
 
       <div class="flex items-start space-x-4">
-        <span *ngIf="icon" class="material-icons text-3xl text-gray-400 flex-shrink-0"
-              [class]="'material-icons-' + (iconFont || 'outlined')">{{ icon }}</span>
+        <span *ngIf="icon" class="text-3xl text-gray-400 flex-shrink-0"
+              [ngClass]="iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
 
         <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop, 'flex flex-col': !labelAtTop}">
           <div class="number-metric-card-value"

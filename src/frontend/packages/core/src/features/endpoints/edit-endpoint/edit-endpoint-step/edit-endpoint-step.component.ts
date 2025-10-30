@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
@@ -39,7 +38,6 @@ interface EndpointModelMap {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatInputModule,
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,

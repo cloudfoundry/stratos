@@ -91,7 +91,7 @@ export class AutoscalerEffects {
     private store: Store<AppState>,
   ) { }
 
-  
+
   fetchAutoscalerInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerInfoAction>(AUTOSCALER_INFO),
     mergeMap(action => {
@@ -112,9 +112,15 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch autoscaler info', err), action, actionType)
-          ]));
+          catchError(err => {
+            // 404 is expected when autoscaler plugin is not installed - suppress error message
+            const errorMessage = err.status === 404
+              ? 'Autoscaler plugin not available'
+              : createAutoscalerErrorMessage('fetch autoscaler info', err);
+            return [
+              new WrapperRequestActionFailed(errorMessage, action, actionType)
+            ];
+          }));
     })));
 
   

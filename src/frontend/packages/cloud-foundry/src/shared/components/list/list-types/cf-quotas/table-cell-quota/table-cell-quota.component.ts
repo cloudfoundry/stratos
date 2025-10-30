@@ -22,6 +22,11 @@ export class TableCellQuotaComponent extends TableCellCustom<APIResource<IQuotaD
   }
 
   ngOnInit() {
-    this.quotaUrl = [...this.config.baseUrl, this.row.metadata.guid];
+    if (this.config?.baseUrl && Array.isArray(this.config.baseUrl)) {
+      this.quotaUrl = [...this.config.baseUrl, this.row.metadata.guid];
+    } else {
+      // Fallback if config is not properly initialized
+      this.quotaUrl = [];
+    }
   }
 }

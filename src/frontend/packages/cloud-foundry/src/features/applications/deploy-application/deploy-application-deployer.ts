@@ -166,9 +166,10 @@ export class DeployApplicationDeployer {
         this.applicationSource = appDetail.applicationSource;
         this.applicationOverrides = appDetail.applicationOverrides;
         const host = window.location.host;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
-          `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
+          `${protocol}://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
           `?org=${org.entity.name}&space=${space.entity.name}${appId}`
         );
 

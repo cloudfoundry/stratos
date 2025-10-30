@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
@@ -8,7 +9,7 @@ selector: 'app-popeye-report-viewer',
   templateUrl: './popeye-report-viewer.component.html',
   styleUrls: ['./popeye-report-viewer.component.scss'],
   standalone: true,
-  imports: []
+  imports: [CommonModule]
 })
 export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
 

@@ -8,7 +8,7 @@ export interface MatButtonToggleChange {
 }
 
 @Component({
-  selector: 'mat-button-toggle',
+  selector: 'app-button-toggle',
   template: '<button class="custom-button-toggle" [class.selected]="checked" [class.disabled]="disabled" (click)="toggle()" [disabled]="disabled"><ng-content></ng-content></button>',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
@@ -28,7 +28,7 @@ export class CustomButtonToggleComponent {
 }
 
 @Component({
-  selector: 'mat-button-toggle-group',
+  selector: 'app-button-toggle-group',
   templateUrl: './custom-button-toggle-group.component.html',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,

@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-panel',
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.scss'],
   standalone: true,
-  imports: [NgClass, NgIf]
+  imports: [CommonModule]
 })
 export class PanelComponent {
   // Title of the panel

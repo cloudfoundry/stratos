@@ -15,7 +15,7 @@ import { ProgressSpinnerComponent } from './progress-spinner.component';
   selector: 'app-spinner',
   standalone: true,
   imports: [ProgressSpinnerComponent],
-  template: `<mat-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></mat-progress-spinner>`
+  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`
 })
 export class AppSpinnerComponent {
   /**

@@ -11,7 +11,7 @@ import {
   EntityMonitorFactory,
   endpointEntitiesSelector,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
 import { DataFunction, DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -164,14 +164,18 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       )),
       map(([errored]) => errored),
       pairwise(),
-      tap(([oldErrored, newErrored]) => Object.keys(oldErrored).forEach(oldId => {
-        if (!Object.keys(newErrored).find(newId => newId === oldId)) {
-          rowStateManager.updateRowState(oldId, {
-            error: false,
-            message: ''
+      tap(([oldErrored, newErrored]) => {
+        if (oldErrored) {
+          Object.keys(oldErrored).forEach(oldId => {
+            if (newErrored && !Object.keys(newErrored).find(newId => newId === oldId)) {
+              rowStateManager.updateRowState(oldId, {
+                error: false,
+                message: ''
+              });
+            }
           });
         }
-      })),
+      })
     ).subscribe();
   }
 

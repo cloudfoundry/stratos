@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
 
 import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
@@ -10,6 +9,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
+import { TailwindJsonSchemaFormModule } from '../../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -17,13 +17,11 @@ describe('SpecifyDetailsStepComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        SpecifyDetailsStepComponent,
-        SchemaFormComponent
-      ],
       imports: [
         generateCfBaseTestModulesNoShared(),
-        MaterialDesignFrameworkModule
+        SpecifyDetailsStepComponent,
+        SchemaFormComponent,
+        TailwindJsonSchemaFormModule
       ],
       providers: [
         CreateServiceInstanceHelperServiceFactory,

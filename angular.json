@@ -71,7 +71,14 @@
           },
           "configurations": {
             "development": {
-              "optimization": false,
+              "optimization": {
+                "scripts": false,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                },
+                "fonts": false
+              },
               "outputHashing": "none",
               "sourceMap": true,
               "namedChunks": true,
@@ -80,7 +87,14 @@
               "buildOptimizer": false
             },
             "production": {
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -116,7 +130,7 @@
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
             "buildTarget": "stratos:build:development",
-            "port": 5000
+            "port": 5440
           },
           "configurations": {
             "development": {

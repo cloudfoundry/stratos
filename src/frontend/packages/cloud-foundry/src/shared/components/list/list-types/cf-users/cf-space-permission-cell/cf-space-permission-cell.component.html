@@ -2,5 +2,5 @@
   <i>Not all roles could be discovered. Please navigate to a specific space to view them</i>
 </div>
 <ng-template #chips>
-  <app-chips [chips]="chipsConfig$ | async"></app-chips>
+  <app-chips *ngIf="chipsConfig$ | async as chipsConfig" [chips]="chipsConfig"></app-chips>
 </ng-template>

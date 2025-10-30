@@ -23,7 +23,7 @@ help:
 	@echo "Full Stack Development Workflow:"
 	@echo "  Terminal 1: make dev-frontend"
 	@echo "  Terminal 2: make dev-backend"
-	@echo "  Access at:  http://127.0.0.1:5000"
+	@echo "  Access at:  https://127.0.0.1:5440"
 	@echo ""
 
 # Build both frontend and backend
@@ -42,17 +42,18 @@ build-backend:
 
 # Start Angular dev server with source maps and hot reload
 dev-frontend:
-	@echo "Starting Angular dev server with source maps on http://127.0.0.1:5000"
+	@echo "Starting Angular dev server with source maps on https://127.0.0.1:5440"
 	@echo "✅ Source maps enabled (real TypeScript line numbers)"
 	@echo "✅ Hot reload enabled (instant updates on file save)"
+	@echo "✅ SSL enabled (WebSocket support via wss://)"
 	@echo "🔄 API requests will be proxied to Jetstream backend on :5443"
 	@echo ""
-	bun run start-http
+	bun run start
 
 # Start Jetstream backend API server
 dev-backend:
 	@echo "Starting Jetstream backend API server on https://127.0.0.1:5443"
-	@echo "✅ CORS enabled for dev server (http://127.0.0.1:4200)"
+	@echo "✅ CORS enabled for dev server (http://127.0.0.1:5440)"
 	@echo "✅ API endpoints: /pp/* and /api/*"
 	@echo "✅ Local admin user: admin/admin"
 	@echo ""

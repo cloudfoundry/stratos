@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatIcon } from '@stratosui/core';
 
 import { EntityInfo } from '../../../../../../store/src/types/api.types';
 import { TableCellAutoscalerEventChangeIconPipe } from './table-cell-autoscaler-event-change-icon.pipe';
@@ -11,7 +10,7 @@ describe('TableCellAutoscalerEventChangeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellAutoscalerEventChangeComponent, MatIcon, TableCellAutoscalerEventChangeIconPipe]
+      declarations: [TableCellAutoscalerEventChangeComponent, TableCellAutoscalerEventChangeIconPipe]
     })
       .compileComponents();
   }));

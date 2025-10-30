@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../components/custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
 
@@ -55,7 +54,6 @@ export interface StackedInputActionUpdate {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatInputModule,
     CustomIconComponent,
     CustomTooltipDirective,
     BooleanIndicatorComponent

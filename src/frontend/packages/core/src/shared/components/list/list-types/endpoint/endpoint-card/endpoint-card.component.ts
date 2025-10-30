@@ -10,7 +10,7 @@ import {
   ViewContainerRef,
   ChangeDetectorRef,
 } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -41,7 +41,6 @@ import { CurrentUserPermissionsService } from '../../../../../../core/permission
 import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
 import { MultilineTitleComponent } from '../../../../multiline-title/multiline-title.component';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
-import { MatCardModule } from '@angular/material/card';
 
 // Import non-standalone dependencies directly
 import { PageHeaderEventsComponent } from '../../../../page-header/page-header-events/page-header-events.component';
@@ -62,7 +61,6 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
     CommonModule,
     RouterModule,
     CustomTooltipDirective,
-    MatCardModule,
     PageHeaderEventsComponent,
     MetaCardComponent,
     MetaCardTitleComponent,

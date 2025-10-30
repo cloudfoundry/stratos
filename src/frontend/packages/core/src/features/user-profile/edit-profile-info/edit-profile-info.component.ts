@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
 import { UserProfileInfo, UserProfileInfoUpdates } from '@stratosui/store';
@@ -32,7 +31,6 @@ selector: 'app-edit-profile-info',
     RouterModule,
     CustomFormFieldComponent,
     CustomIconComponent,
-    MatInputModule,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,

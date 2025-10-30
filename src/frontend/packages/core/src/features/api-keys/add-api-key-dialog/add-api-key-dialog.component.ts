@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
-import { MatInputModule } from '@angular/material/input';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -21,7 +20,6 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatInputModule,
     AppProgressBarComponent,
     DialogErrorComponent
   ]

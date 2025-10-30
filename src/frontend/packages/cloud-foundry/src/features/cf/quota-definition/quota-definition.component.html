@@ -30,7 +30,7 @@
     <app-tile-grid fit="true">
       <h3 class="quota-definition-base__title">Quota Limits</h3>
       <h4 class="quota-definition-base__section-header">Memory</h4>
-      <app-tile-group>
+      <app-tile-group class="tile-group-2-cols">
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Memory Usage" units="mb"
             value="{{ quotaDefinition.entity?.memory_limit }}">
@@ -44,7 +44,7 @@
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Application</h4>
-      <app-tile-group>
+      <app-tile-group class="tile-group-2-cols">
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="application_instance" iconFont="stratos-icons"  label="Maximum Application Instances"
             value="{{ quotaDefinition.entity?.app_instance_limit }}">
@@ -58,7 +58,7 @@
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Service</h4>
-      <app-tile-group>
+      <app-tile-group class="tile-group-2-cols">
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
             value="{{ quotaDefinition.entity?.total_services }}">
@@ -72,7 +72,7 @@
       </app-tile-group>
 
       <h4 class="quota-definition-base__section-header">Routes & Domains</h4>
-      <app-tile-group>
+      <app-tile-group class="tile-group-2-cols">
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
             value="{{ quotaDefinition.entity?.total_routes }}">
@@ -84,7 +84,7 @@
           </app-card-number-metric>
         </app-tile>
       </app-tile-group>
-      <app-tile-group>
+      <app-tile-group class="tile-group-2-cols">
         <app-tile>
           <app-card-number-metric labelAtTop="true" icon="domain" label="Maximum Private Domains"
             value="{{ quotaDefinition.entity?.total_private_domains }}">

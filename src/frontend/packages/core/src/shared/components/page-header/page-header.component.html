@@ -61,16 +61,18 @@
             <!-- History button -->
             <div class="relative" *ngIf="showHistory">
               <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
-                      [matMenuTriggerFor]="history">
+                      (click)="toggleHistoryMenu()">
                 <span class="material-icons">schedule</span>
               </button>
-              <mat-menu #history="matMenu" [overlapTrigger]="false" class="page-header-menu">
+              <!-- History dropdown menu -->
+              <div *ngIf="isHistoryMenuOpen"
+                   class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                 <div class="page-header-history p-4 w-80">
                   <h3 class="page-header-history-title text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
                   <app-recent-entities mode="menu" class="page-header-history-list" history="true">
                   </app-recent-entities>
                 </div>
-              </mat-menu>
+              </div>
             </div>
 
             <!-- Notifications button -->
@@ -88,11 +90,13 @@
             <div class="relative" *ngIf="!hideMenu && !environment.hideUserMenu">
               <button id="userMenu"
                       class="page-header-menu-button page-header-usermenu p-1 hover:bg-white/10 rounded-md transition-colors"
-                      [matMenuTriggerFor]="menu">
+                      (click)="toggleUserMenu()">
                 <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                 </app-user-avatar>
               </button>
-              <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header-menu">
+              <!-- User dropdown menu -->
+              <div *ngIf="isUserMenuOpen"
+                   class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                 <div class="page-header-menu-inner p-4 w-64">
                   <!-- User info -->
                   <div class="page-header-username flex items-center space-x-3 pb-4 border-b border-gray-200 mb-4">
@@ -105,27 +109,30 @@
                   <!-- Menu items -->
                   <div class="space-y-1" *ngIf="!logoutOnly">
                     <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                            routerLink="/about">
+                            routerLink="/about"
+                            (click)="closeUserMenu()">
                       <span>About</span>
                     </button>
                     <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                            routerLink="/user-profile">
+                            routerLink="/user-profile"
+                            (click)="closeUserMenu()">
                       <span>Profile</span>
                     </button>
                     <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                             routerLink="/api-keys"
+                            (click)="closeUserMenu()"
                             *ngIf="canAPIKeys$ | async">
                       <span>API Keys</span>
                     </button>
                     <div class="page-header-menu-separator border-t border-gray-200 my-2" *ngIf="canLogout$ | async"></div>
                   </div>
                   <button class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                          (click)="logout()"
+                          (click)="logout(); closeUserMenu()"
                           *ngIf="canLogout$ | async">
                     <span>Logout</span>
                   </button>
                 </div>
-              </mat-menu>
+              </div>
             </div>
           </div>
         </div>

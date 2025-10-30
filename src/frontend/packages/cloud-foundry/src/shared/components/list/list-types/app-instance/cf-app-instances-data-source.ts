@@ -46,7 +46,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, Ap
           Object.keys(instances || {}).forEach((key: string) => {
             const instance: AppStat = instances[key];
             res.push({
-              index: parseInt(instance.guid, 10),
+              index: parseInt(key, 10),
               usage: this.calcUsage(instance),
               value: instance
             });

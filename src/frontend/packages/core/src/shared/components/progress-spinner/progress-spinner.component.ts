@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
  * - determinate: Shows progress as a percentage (0-100)
  */
 @Component({
-  selector: 'mat-progress-spinner',
+  selector: 'app-progress-spinner',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -155,7 +155,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
   selector: 'mat-spinner',
   standalone: true,
   imports: [ProgressSpinnerComponent],
-  template: `<mat-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></mat-progress-spinner>`
+  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`
 })
 export class MatSpinnerComponent {
   @Input() diameter: number = 40;

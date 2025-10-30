@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 
@@ -11,9 +10,8 @@ import moment from 'moment';
   selector: 'app-date-time',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatDatepickerModule,
-    MatInputModule
+    CommonModule,
+    ReactiveFormsModule
   ],
   templateUrl: './date-time.component.html',
   styleUrls: ['./date-time.component.scss']
@@ -26,7 +24,7 @@ export class DateTimeComponent implements OnDestroy {
   private changeSub: Subscription;
   private dateTimeValue: moment.Moment;
 
-  private dateObservable: Observable<Date>;
+  private dateObservable: Observable<string>;
   private timeObservable: Observable<string>;
 
   @Output()
@@ -58,12 +56,12 @@ export class DateTimeComponent implements OnDestroy {
     ).pipe(
       debounceTime(250),
       filter(([time, date]) => !!(time && date)),
-      map(([time, date]: [string, Date]) => {
+      map(([time, date]: [string, string]) => {
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),
           parseInt(minute, 10),
-          moment(date)
+          moment(date, 'YYYY-MM-DD')
         ];
       }),
       filter(([hour, minute]: [number, number, moment.Moment]) => {
@@ -104,7 +102,7 @@ export class DateTimeComponent implements OnDestroy {
           this.emptyDateTime();
         } else {
           this.stopInputSub();
-          this.date.setValue(dateTime);
+          this.date.setValue(dateTime.format('YYYY-MM-DD'));
           this.time.setValue(dateTime.format('HH:mm'));
           this.setupInputSub();
         }

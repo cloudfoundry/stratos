@@ -1,7 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -44,7 +43,6 @@ selector: 'app-page-header',
   imports: [
     CommonModule,
     RouterModule,
-    MatMenuModule,
     EntityFavoriteStarComponent,
     ExtensionButtonsComponent,
     RecentEntitiesComponent,
@@ -64,6 +62,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
   public environment = environment;
+
+  // Menu state for Tailwind dropdowns
+  public isHistoryMenuOpen = false;
+  public isUserMenuOpen = false;
 
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
@@ -231,6 +233,29 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     const portal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
     this.tabNavService.setPageHeader(portal);
+  }
+
+  // Tailwind dropdown menu methods
+  toggleHistoryMenu() {
+    this.isHistoryMenuOpen = !this.isHistoryMenuOpen;
+    if (this.isHistoryMenuOpen) {
+      this.isUserMenuOpen = false; // Close user menu when opening history
+    }
+  }
+
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+    if (this.isUserMenuOpen) {
+      this.isHistoryMenuOpen = false; // Close history menu when opening user menu
+    }
+  }
+
+  closeUserMenu() {
+    this.isUserMenuOpen = false;
+  }
+
+  closeHistoryMenu() {
+    this.isHistoryMenuOpen = false;
   }
 
 }

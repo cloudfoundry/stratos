@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
+import { TailwindJsonSchemaFormModule } from '../../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 
 import {
   ApplicationStateIconComponent,
@@ -127,7 +127,7 @@ describe('AddServiceInstanceComponent', () => {
         ...generateCfBaseTestModulesNoShared(),
         PageHeaderModule,
         SteppersModule,
-        MaterialDesignFrameworkModule,
+        TailwindJsonSchemaFormModule,
       ],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },

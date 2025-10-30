@@ -69,7 +69,7 @@ export const apiRequestPipelineFactory = (
   const catalogEntity = entityCatalog.getEntity(patchedAction);
   const recursivelyDelete = shouldRecursivelyDelete(requestType, patchedAction);
 
-  if (recursivelyDelete) {
+  if (recursivelyDelete && action?.guid) {
     store.dispatch(
       new RecursiveDelete(action.guid, catalogEntity.getSchema(patchedAction.schemaKey)),
     );

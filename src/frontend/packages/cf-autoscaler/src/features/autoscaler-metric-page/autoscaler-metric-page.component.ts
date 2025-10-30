@@ -1,7 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
@@ -23,8 +21,6 @@ import {
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
     CustomIconComponent,
     PageHeaderComponent,
     ListComponent,

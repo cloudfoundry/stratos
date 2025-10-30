@@ -20,10 +20,10 @@ export class LocalPaginationHelpers {
    */
   static getEntityPageRequest(pagination: PaginationEntityState, entityKey: string) {
     const { pageRequests } = pagination;
-    const pageNumber = Object.keys(pagination.pageRequests).find(key => {
-      const baseEntityKey = entityCatalog.getEntityKey(pageRequests[key].baseEntityConfig);
+    const pageNumber = (pageRequests && Object.keys(pageRequests).find(key => {
+      const baseEntityKey = entityCatalog.getEntityKey(pageRequests[key]?.baseEntityConfig);
       return baseEntityKey === entityKey;
-    }) || null;
+    })) || null;
     if (pageNumber) {
       return {
         pageNumber,

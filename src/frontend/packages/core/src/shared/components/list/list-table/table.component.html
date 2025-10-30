@@ -8,15 +8,17 @@
     [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}">
     <div class="card-content app-table__content">
       <div class="table-container app-table__inner" #table [hidden]="hideTable">
-        <table class="table w-full">
-          <thead>
-            <tr class="app-table__header-row"
+        <div class="table-wrapper" role="table">
+          <div class="table-header" role="rowgroup">
+            <div class="table-header-row flex items-center app-table__header-row"
               [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
-              [hidden]="hideTable">
-              <th *ngFor="let column of columns"
-                class="app-table__header-cell table-cell-header"
+              [hidden]="hideTable"
+              role="row">
+              <div *ngFor="let column of columns"
+                class="table-header-cell app-table__header-cell"
                 [ngClass]="[column.class || '', column.headerClass || '']"
-                [style.flex]="column.cellFlex">
+                [style.flex]="column.cellFlex"
+                role="columnheader">
                 <div class="flex items-center gap-1"
                   [class.cursor-pointer]="column.sort"
                   (click)="column.sort && handleSort(column)">
@@ -24,10 +26,10 @@
                     [dataSource]="dataSource"></app-table-cell>
                   <span *ngIf="column.sort" class="material-icons text-sm text-gray-400">sort</span>
                 </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </div>
+            </div>
+          </div>
+          <div class="table-body" role="rowgroup">
             <app-table-row class="app-table__row" *ngFor="let row of dataSource.connect(null) | async; let i = index; trackBy: dataSource.trackBy"
               [columns]="columns"
               [dataSource]="dataSource"
@@ -35,8 +37,8 @@
               [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
               [rowId]="dataSource.trackBy(i, row)" [prominentErrorBar]="prominentErrorBar">
             </app-table-row>
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>

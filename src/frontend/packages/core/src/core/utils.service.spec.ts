@@ -61,9 +61,9 @@ describe('UtilsService', () => {
 
   describe('#usageBytes', () => {
     it('should return empty value', () => {
-      expect(service.usageBytes(0)).toBe('-');
-      expect(service.usageBytes(Number.POSITIVE_INFINITY)).toBe('-');
-      expect(service.usageBytes(NaN)).toBe('-');
+      expect(service.usageBytes(0 as any)).toBe('-');
+      expect(service.usageBytes(Number.POSITIVE_INFINITY as any)).toBe('-');
+      expect(service.usageBytes(NaN as any)).toBe('-');
       expect(service.usageBytes([])).toBe('-');
     });
 

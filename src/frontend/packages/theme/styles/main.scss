@@ -4,10 +4,31 @@
 
 /* Icon font styles - supports both material-icons and custom icon fonts */
 .material-icons,
+.custom-icon,
 .icon {
+  font-family: 'Material Icons' !important;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -moz-font-feature-settings: 'liga';
   @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
   word-wrap: normal;
   direction: ltr;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.stratos-icons {
+  font-family: 'stratos-icons' !important;
+  font-feature-settings: 'liga';
+  -webkit-font-feature-settings: 'liga';
+  -moz-font-feature-settings: 'liga';
+  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+  word-wrap: normal;
+  direction: ltr;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* CSS Custom Properties for theme customization */
@@ -132,7 +153,7 @@
 
   /* Login page - dark theme */
   --login-bg: #0f172a;
-  --login-bg-image: url('/core/assets/login-bg-dark.jpg');
+  --login-bg-image: url('/core/assets/login-bg.jpg');
   --login-card-bg: #1e293b;
 
   /* Logo - dark theme */
@@ -414,11 +435,15 @@ body {
 
   /* Card styles */
   .card {
-    @apply bg-white rounded-lg shadow border border-gray-200;
+    @apply bg-white rounded-lg border border-gray-200 p-4;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--shadow-sm);
   }
 
   .card-header {
     @apply px-6 py-4 border-b border-gray-200;
+    background-color: var(--card-header-bg);
   }
 
   .card-body {
@@ -505,6 +530,41 @@ body {
   .icon {
     @apply text-[20px] w-5 h-5;
   }
+}
+
+/* Material Card compatibility */
+.mat-card,
+.mat-mdc-card {
+  @apply card;
+}
+
+mat-card,
+mat-mdc-card {
+  @apply card;
+  display: block;
+}
+
+.mat-card-content,
+.mat-mdc-card-content,
+mat-card-content,
+mat-mdc-card-content {
+  display: block;
+}
+
+.mat-card-title,
+.mat-mdc-card-title,
+mat-card-title,
+mat-mdc-card-title {
+  @apply text-lg font-semibold mb-2;
+  display: block;
+}
+
+.mat-card-subtitle,
+.mat-mdc-card-subtitle,
+mat-card-subtitle,
+mat-mdc-card-subtitle {
+  @apply text-sm text-gray-600 mb-3;
+  display: block;
 }
 
 /* Header styles */

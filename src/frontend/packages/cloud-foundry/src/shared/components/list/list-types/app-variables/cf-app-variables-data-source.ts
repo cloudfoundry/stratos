@@ -37,14 +37,14 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
       store,
       action: getAppEnvVarsAction,
       schema: cfEntityFactory(appEnvVarsEntityType),
-      getRowUniqueId: (resource: APIResource<AppEnvVarsState>) => resource.metadata.guid,
+      getRowUniqueId: (resource: APIResource<AppEnvVarsState>) => resource?.metadata?.guid ?? 'unknown',
       getEmptyType: () => ({ name: '', value: '', }),
       paginationKey: createEntityRelationPaginationKey(applicationEntityType, appService.appGuid),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env: Record<string, any> = (variables[0].entity.environment_json) ? variables[0].entity.environment_json : {};
+        const env: Record<string, any> = (variables[0]?.entity?.environment_json) ? variables[0].entity.environment_json : {};
         const rows = Object.keys(env).map(name => ({ name, value: env[name] as string }));
         return rows;
       }),
