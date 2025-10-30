@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
@@ -15,7 +16,7 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   viewProviders: [MatIconRegistry],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
-  imports: [CustomTooltipDirective]
+  imports: [AsyncPipe, CustomTooltipDirective]
 })
 export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart: Chart;

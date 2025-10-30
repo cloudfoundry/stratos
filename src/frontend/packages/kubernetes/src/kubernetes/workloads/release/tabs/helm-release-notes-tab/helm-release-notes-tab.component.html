@@ -1,6 +1,7 @@
-<div *ngIf="notes$ | async as notes; else noNotes" class="helm-release-notes">
-  <div [innerHtml]="notes"></div>
-</div>
-<ng-template #noNotes>
+@if (notes$ | async; as notes) {
+  <div class="helm-release-notes">
+    <div [innerHtml]="notes"></div>
+  </div>
+} @else {
   <app-no-content-message [icon]="'subject'" [firstLine]="'There are no release notes'"></app-no-content-message>
-</ng-template>
+}

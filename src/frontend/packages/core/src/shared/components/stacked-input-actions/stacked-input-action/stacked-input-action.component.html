@@ -3,25 +3,35 @@
     <app-form-field>
       <input appInput [placeholder]="config.text.placeholder" [formControl]="textFormControl" #inputElement
         [name]="position">
-      <app-error *ngIf="textFormControl.hasError('email') && !textFormControl.hasError('required')">
-        Please enter a valid email address
-      </app-error>
-      <app-error *ngIf="textFormControl.hasError('required')">
-        {{config.text.requiredError}}
-      </app-error>
-      <app-error *ngIf="textFormControl.hasError('notUnique') && !textFormControl.hasError('email')">
-        {{config.text.uniqueError}}
-      </app-error>
+      @if (textFormControl.hasError('email') && !textFormControl.hasError('required')) {
+        <app-error>
+          Please enter a valid email address
+        </app-error>
+      }
+      @if (textFormControl.hasError('required')) {
+        <app-error>
+          {{config.text.requiredError}}
+        </app-error>
+      }
+      @if (textFormControl.hasError('notUnique') && !textFormControl.hasError('email')) {
+        <app-error>
+          {{config.text.uniqueError}}
+        </app-error>
+      }
     </app-form-field>
   </form>
   <div class="input-action__detail">
-    <app-custom-icon *ngIf="showRemove" class="input-action__detail__remove" [ngClass]="{'disabled': textFormControl.disabled}"
+    @if (showRemove) {
+      <app-custom-icon class="input-action__detail__remove" [ngClass]="{'disabled': textFormControl.disabled}"
       (click)="!textFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</app-custom-icon>
-    <ng-container *ngIf="state && result && (state.result === result.SUCCEEDED || state.result === result.FAILED)"
-      class="input-action__detail__result">
-      <app-boolean-indicator [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false"
+    }
+    @if (state && result && (state.result === result.SUCCEEDED || state.result === result.FAILED)) {
+      <ng-container
+        class="input-action__detail__result">
+        <app-boolean-indicator [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false"
         [showText]="false"></app-boolean-indicator>
-      <span>{{ state.message }}</span>
-    </ng-container>
+        <span>{{ state.message }}</span>
+      </ng-container>
+    }
   </div>
 </div>

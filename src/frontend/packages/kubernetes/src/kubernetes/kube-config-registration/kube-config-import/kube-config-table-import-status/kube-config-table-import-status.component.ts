@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Observable } from 'rxjs';
 
 import {
@@ -15,9 +15,8 @@ selector: 'app-kube-config-table-import-status',
   styleUrls: ['./kube-config-table-import-status.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    AppActionMonitorIconComponent,
-  ]
+    AppActionMonitorIconComponent
+]
 })
 export class KubeConfigTableImportStatusComponent extends TableCellCustom<KubeConfigFileCluster> {
 

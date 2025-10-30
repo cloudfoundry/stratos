@@ -1,4 +1,6 @@
-<app-card *ngIf="show$ | async" class="user-warning">
-  <span class="material-icons user-warning__icon">warning</span>There are too many users to show those without roles. To add a
-  user to this {{isOrg ? 'organization' : 'space'}} please use the `Manage Roles By Username` button above
-</app-card>
+@if (show$ | async) {
+  <app-card class="user-warning">
+    <span class="material-icons user-warning__icon">warning</span>There are too many users to show those without roles. To add a
+    user to this {{isOrg ? 'organization' : 'space'}} please use the `Manage Roles By Username` button above
+  </app-card>
+}

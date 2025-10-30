@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -41,9 +41,8 @@ export function getGuids(type?: string) {
   styleUrls: ['./application-base.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule
-  ],
+],
   providers: [
     ApplicationService,
     {

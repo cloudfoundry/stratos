@@ -1,4 +1,4 @@
-import { AsyncPipe, NgIf, NgFor } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
@@ -14,10 +14,8 @@ selector: 'app-analysis-report-selector',
   styleUrls: ['./analysis-report-selector.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,
-    NgIf,
-    NgFor
-  ]
+    AsyncPipe
+]
 })
 export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
 

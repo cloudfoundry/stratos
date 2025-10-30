@@ -4,13 +4,19 @@
     <app-form-field>
       <app-label>App</app-label>
       <app-select class="form-control" formControlName="apps">
-        <app-option *ngIf="!boundAppId"></app-option>
-        <app-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</app-option>
+        @if (!boundAppId) {
+          <app-option></app-option>
+        }
+        @for (app of apps$ | async; track app) {
+          <app-option [value]="app.metadata.guid">{{ app.entity.name }}</app-option>
+        }
       </app-select>
     </app-form-field>
-    <div *ngIf="stepperForm.controls.apps.value" class="stepper-form__params">
-      <div>Binding Parameters</div>
-      <app-schema-form [config]="schemaFormConfig" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
-    </div>
+    @if (stepperForm.controls.apps.value) {
+      <div class="stepper-form__params">
+        <div>Binding Parameters</div>
+        <app-schema-form [config]="schemaFormConfig" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
+      </div>
+    }
   </form>
 </div>

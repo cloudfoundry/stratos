@@ -33,17 +33,19 @@
             icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}">
           </app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
-          <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
-            value="{{ (cfSpaceService.appInstances$ | async) }}"
+        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+          <app-tile>
+            <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
+              value="{{ (cfSpaceService.appInstances$ | async) }}"
             limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
-        </app-tile>
+          </app-tile>
+        }
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
             iconFont="stratos-icons" icon="route" label="Routes"
             value="{{ (cfSpaceService.routes$ | async)?.length }}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
 
@@ -59,24 +61,30 @@
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
             iconFont="stratos-icons" icon="service" label="Service Instances"
             value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
-        <app-tile *ngIf="(cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0">
-          <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+        @if ((cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0) {
+          <app-tile>
+            <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
             value="{{ (cfSpaceService.userProvidedServiceInstancesCount$ | async)}}"></app-card-number-metric>
-        </app-tile>
-        <app-tile *ngIf="cfEndpointService.appsPagObs.hasEntities$ | async">
-          <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
-            value="{{ (cfSpaceService.totalMem$ | async) }}"
+          </app-tile>
+        }
+        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+          <app-tile>
+            <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
+              value="{{ (cfSpaceService.totalMem$ | async) }}"
             limit="{{ (cfSpaceService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
-        </app-tile>
+          </app-tile>
+        }
       </app-tile-group>
 
       <app-tile-group class="tile-group-1-cols">
         <app-tile>
-          <app-card-cf-recent-apps *ngIf="!(detailsLoading$ | async)" [allApps$]="cfSpaceService.apps$"
-            [endpoint]="cfEndpointService.cfGuid"
-          [loading$]="cfSpaceService.loadingApps$" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>
+          @if (!(detailsLoading$ | async)) {
+            <app-card-cf-recent-apps [allApps$]="cfSpaceService.apps$"
+              [endpoint]="cfEndpointService.cfGuid"
+            [loading$]="cfSpaceService.loadingApps$" (refresh)="cfSpaceService.fetchApps()"></app-card-cf-recent-apps>
+          }
         </app-tile>
       </app-tile-group>
     </app-loading-page>

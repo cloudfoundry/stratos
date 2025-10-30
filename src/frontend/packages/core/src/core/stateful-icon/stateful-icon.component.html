@@ -1,9 +1,12 @@
-<div class="stateful-icon" *ngIf="selectedState || stateKey === allStateKeys.BUSY">
-  <app-custom-icon [inline]="inline"
-    [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
-    *ngIf="stateKey !== allStateKeys.BUSY; else spinner">
-    {{ selectedState.icon }}</app-custom-icon>
-</div>
-<ng-template #spinner>
-  <app-spinner [diameter]="20"></app-spinner>
-</ng-template>
+@if (selectedState || stateKey === allStateKeys.BUSY) {
+  <div class="stateful-icon">
+    @if (stateKey !== allStateKeys.BUSY) {
+      <app-custom-icon [inline]="inline"
+        [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
+        >
+      {{ selectedState.icon }}</app-custom-icon>
+    } @else {
+      <app-spinner [diameter]="20"></app-spinner>
+    }
+  </div>
+}

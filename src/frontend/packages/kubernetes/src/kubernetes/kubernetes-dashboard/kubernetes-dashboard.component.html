@@ -2,21 +2,31 @@
   <h1>Dashboard</h1>
   <div class="page-header-right" [ngClass]="{'hidden': isLoading$ | async }">
     <span>
-    <button (click)="toggle()" *ngIf="expanded" class="btn-icon" title="Collapse">
-        <span class="material-icons">expand_less</span>
-    </button>
-    <button (click)="toggle()" *ngIf="!expanded" class="btn-icon" title="Expand">
-        <span class="material-icons">expand_more</span>
-    </button>
+      @if (expanded) {
+        <button (click)="toggle()" class="btn-icon" title="Collapse">
+          <span class="material-icons">expand_less</span>
+        </button>
+      }
+      @if (!expanded) {
+        <button (click)="toggle()" class="btn-icon" title="Expand">
+          <span class="material-icons">expand_more</span>
+        </button>
+      }
     </span>
   </div>
 </app-page-header>
 
 <app-loading-page [isLoading]="isLoading$" text="Loading Kubernetes dashboard">
-  <iframe *ngIf="!(hasError$ | async) && source" #kubeDash (load)="iframeLoaded()" id="kubedash" [src]="source" class="w-full h-full border-0"></iframe>
-  <div class="flex flex-col items-center justify-center p-8 text-center" *ngIf="hasError$ | async">
-    <app-no-content-message *ngIf="errorMsg$ | async as message" icon="warning" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine">
-    </app-no-content-message>
-    <a [routerLink]="configUrl()" class="btn btn-primary mt-4">Check Dashboard Configuration</a>
-  </div>
+  @if (!(hasError$ | async) && source) {
+    <iframe #kubeDash (load)="iframeLoaded()" id="kubedash" [src]="source" class="w-full h-full border-0"></iframe>
+  }
+  @if (hasError$ | async) {
+    <div class="flex flex-col items-center justify-center p-8 text-center">
+      @if (errorMsg$ | async; as message) {
+        <app-no-content-message icon="warning" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine">
+        </app-no-content-message>
+      }
+      <a [routerLink]="configUrl()" class="btn btn-primary mt-4">Check Dashboard Configuration</a>
+    </div>
+  }
 </app-loading-page>

@@ -2,12 +2,14 @@
   [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__info': inInfoState$ | async, 'table-row-wrapper__warning': inWarningState$ | async,'table-row-wrapper__errored': inErrorState$ | async}">
 
   <!-- Deletion Progress Bar -->
-  <div *ngIf="isDeleting$ | async" class="table-row__deletion-bar-wrapper">
-    <div class="table-row__deletion-bar-inner">
-      <div class="table-row__deletion-bar-text">Deleting</div>
-      <app-progress-bar class="table-row__deletion-bar" mode="indeterminate"></app-progress-bar>
+  @if (isDeleting$ | async) {
+    <div class="table-row__deletion-bar-wrapper">
+      <div class="table-row__deletion-bar-inner">
+        <div class="table-row__deletion-bar-text">Deleting</div>
+        <app-progress-bar class="table-row__deletion-bar" mode="indeterminate"></app-progress-bar>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Main Row -->
   <div role="row" class="table-row"
@@ -16,45 +18,57 @@
       [ngStyle]="{'min-height': minRowHeight || defaultMinRowHeight }">
 
       <!-- Expander Cell (if expandable) -->
-      <div *ngIf="expandComponent"
-           class="table-cell table-cell-expander cursor-pointer"
-           (click)="toggleExpand()">
-        <span class="material-icons text-sm transition-transform"
-              [class.rotate-90]="isExpanded">
-          chevron_right
-        </span>
-      </div>
+      @if (expandComponent) {
+        <div
+          class="table-cell table-cell-expander cursor-pointer"
+          (click)="toggleExpand()">
+          <span class="material-icons text-sm transition-transform"
+            [class.rotate-90]="isExpanded">
+            chevron_right
+          </span>
+        </div>
+      }
 
       <!-- Data Cells - Manual rendering replacing cdkCellOutlet -->
-      <div *ngFor="let column of columns"
-           class="table-row-cell"
-           [ngClass]="column.class || ''"
-           [style.flex]="column.cellFlex"
-           role="cell">
-        <app-table-cell
-          [component]="column.cellComponent"
-          [func]="column.cellDefinition?.getValue"
-          [row]="row"
-          [config]="column.cellConfig && (typeof column.cellConfig === 'function' ? column.cellConfig(row) : column.cellConfig)"
-          [dataSource]="dataSource">
-        </app-table-cell>
-      </div>
+      @for (column of columns; track column) {
+        <div
+          class="table-row-cell"
+          [ngClass]="column.class || ''"
+          [style.flex]="column.cellFlex"
+          role="cell">
+          <app-table-cell
+            [component]="column.cellComponent"
+            [func]="column.cellDefinition?.getValue"
+            [row]="row"
+            [config]="column.cellConfig && (typeof column.cellConfig === 'function' ? column.cellConfig(row) : column.cellConfig)"
+            [dataSource]="dataSource">
+          </app-table-cell>
+        </div>
+      }
     </div>
   </div>
 
   <!-- Expanded Row -->
-  <div *ngIf="isExpanded && expandComponent" class="table-row__expanded">
-    <div #expandedComponent class="table-row__expanded-content"></div>
-  </div>
+  @if (isExpanded && expandComponent) {
+    <div class="table-row__expanded">
+      <div #expandedComponent class="table-row__expanded-content"></div>
+    </div>
+  }
 
   <!-- Error Row -->
-  <div class="table-row__error flex items-center" *ngIf="errorMessage$ | async">
-    <div [ngClass]="{'table-row table-row__error-spacer__prominentErrorBar': prominentErrorBar}"
+  @if (errorMessage$ | async) {
+    <div class="table-row__error flex items-center">
+      <div [ngClass]="{'table-row table-row__error-spacer__prominentErrorBar': prominentErrorBar}"
       class="table-row  table-row table-row__error-spacer"></div>
-    <div class="table-row table-row__error-content">
-      <app-custom-icon *ngIf="isWarningIcon$ | async" class="table-row__error-icon">warning</app-custom-icon>
-      <app-custom-icon *ngIf="!(isWarningIcon$ | async)" class="table-row__error-icon">info</app-custom-icon>
-      <div class="table-row__error-message" [innerHTML]="errorMessage$ | async"></div>
+      <div class="table-row table-row__error-content">
+        @if (isWarningIcon$ | async) {
+          <app-custom-icon class="table-row__error-icon">warning</app-custom-icon>
+        }
+        @if (!(isWarningIcon$ | async)) {
+          <app-custom-icon class="table-row__error-icon">info</app-custom-icon>
+        }
+        <div class="table-row__error-message" [innerHTML]="errorMessage$ | async"></div>
+      </div>
     </div>
-  </div>
+  }
 </div>

@@ -1,15 +1,25 @@
 <div class="app-no-content-container" [ngClass]="{'app-no-content-container__menu': mode === 'menu'}">
-  <div *ngIf="toolbarLink?.text" class="app-no-content-container__link" #toolBarLinkElement>
-    <div class="app-no-content-container__link-text">{{toolbarLink.text}}</div>
-    <app-custom-icon #toolbarRef class="app-no-content-container__link-icon">reply</app-custom-icon>
-  </div>
+  @if (toolbarLink?.text) {
+    <div class="app-no-content-container__link" #toolBarLinkElement>
+      <div class="app-no-content-container__link-text">{{toolbarLink.text}}</div>
+      <app-custom-icon #toolbarRef class="app-no-content-container__link-icon">reply</app-custom-icon>
+    </div>
+  }
   <app-custom-icon class="icon" [fontSet]="iconFont">{{icon}}</app-custom-icon>
-  <div *ngIf="firstLine" class="first-line">{{firstLine}}</div>
+  @if (firstLine) {
+    <div class="first-line">{{firstLine}}</div>
+  }
   <div class="second-line">
-    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}
-  </div>
-  <div class="second-line" *ngFor="let line of otherLines">
-    <a *ngIf="line?.link" [routerLink]="line?.link">{{line?.linkText}}</a>{{line?.text}}
-  </div>
-  <ng-content></ng-content>
-</div>
+    @if (secondLine?.link) {
+      <a [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>
+      }{{secondLine?.text}}
+    </div>
+    @for (line of otherLines; track line) {
+      <div class="second-line">
+        @if (line?.link) {
+          <a [routerLink]="line?.link">{{line?.linkText}}</a>
+          }{{line?.text}}
+        </div>
+      }
+      <ng-content></ng-content>
+    </div>

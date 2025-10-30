@@ -7,27 +7,32 @@
   </div>
 </app-page-header>
 
-<div class="keys-page__new" *ngIf="keyDetails$ | async as keyDetails">
+@if (keyDetails$ | async; as keyDetails) {
+  <div class="keys-page__new">
+    <app-card class="keys-page__card">
+      <app-card-header>
+        <app-custom-icon>vpn_key</app-custom-icon>New API Key
+      </app-card-header>
+      <app-card-content>
+        <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
+        <p><i>Please safely record these details, there is no later way to view them</i></p>
+        <ul>
+          <li id="apikey-secret">Secret: {{keyDetails.secret}}</li>
+        </ul>
+        <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
+      </app-card-content>
+    </app-card>
+  </div>
+}
 
-  <app-card class="keys-page__card">
-    <app-card-header>
-      <app-custom-icon>vpn_key</app-custom-icon>New API Key
-    </app-card-header>
-    <app-card-content>
-      <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
-      <p><i>Please safely record these details, there is no later way to view them</i></p>
-      <ul>
-        <li id="apikey-secret">Secret: {{keyDetails.secret}}</li>
-      </ul>
-      <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
-    </app-card-content>
-  </app-card>
-</div>
-
-<app-list *ngIf="(hasKeys$ | async) === true"></app-list>
-<app-no-content-message *ngIf="(hasKeys$ | async) === false" icon="vpn_key" [firstLine]="'You have no API keys'"
+@if ((hasKeys$ | async) === true) {
+  <app-list></app-list>
+}
+@if ((hasKeys$ | async) === false) {
+  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"
   [secondLine]="{
       text: ''
     }" [toolbarLink]="{
       text: 'Create an API key'
     }" toolbarAlign="stratos-api-key"></app-no-content-message>
+}

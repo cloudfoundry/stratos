@@ -1,4 +1,5 @@
-<app-list *ngIf="hasCellMetrics$ | async; else noCells"></app-list>
-<ng-template #noCells>
+@if (hasCellMetrics$ | async) {
+  <app-list></app-list>
+} @else {
   Cell information for this Cloud Foundry cannot be found.
-</ng-template>
+}

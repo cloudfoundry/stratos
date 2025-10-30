@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -14,10 +14,9 @@ import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.
   styleUrls: ['./dialog-confirm.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     A11yModule
-  ]
+]
 })
 export class DialogConfirmComponent {
   public textToMatch: string;

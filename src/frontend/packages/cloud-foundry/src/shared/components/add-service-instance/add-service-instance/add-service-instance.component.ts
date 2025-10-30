@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule, NgIf, TitleCasePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -76,7 +76,6 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
   imports: [
     CommonModule,
     AsyncPipe,
-    NgIf,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -86,7 +85,7 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
     BindAppsStepComponent,
     SpecifyDetailsStepComponent,
     SpecifyUserProvidedDetailsComponent
-  ]
+]
 })
 export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   initialisedService$: Observable<boolean>;

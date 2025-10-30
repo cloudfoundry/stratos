@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, Input, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -12,7 +12,7 @@ import { ListItemComponent } from '../list-item/list-item.component';
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
   standalone: true,
-  imports: [NgIf, RouterLink, ListItemComponent]
+  imports: [RouterLink, ListItemComponent]
 })
 export class ChartItemComponent implements OnInit {
   public iconUrl: string;

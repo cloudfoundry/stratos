@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
@@ -27,13 +27,12 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   ],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CustomCheckboxComponent,
     CustomFormFieldComponent,
     FocusDirective,
     UnlimitedInputComponent
-  ]
+]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;

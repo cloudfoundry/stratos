@@ -1,9 +1,11 @@
 <div class="list-component"
   [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  <div *ngIf="!(initialised$ | async) || (showProgressBar$ | async)" class="progress-bar">
-    <div class="progress-bar-indeterminate bg-primary-500"></div>
-  </div>
-  <ng-container *ngIf="initialised$ | async">
+  @if (!(initialised$ | async) || (showProgressBar$ | async)) {
+    <div class="progress-bar">
+      <div class="progress-bar-indeterminate bg-primary-500"></div>
+    </div>
+  }
+  @if (initialised$ | async) {
     <div class="list-component__header"
       [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
       <div
@@ -11,77 +13,100 @@
         class="card list-component__header-card">
         <div class="list-component__header__left">
           <!-- List Title -->
-          <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{
+          @if (!(isAddingOrSelecting$ | async) && config.text?.title) {
+            <div class="list-component__header__left--text">{{
             config.text?.title }}</div>
+          }
           <!-- Time range selector -->
-          <div class="list-component__header__left--metrics-range"
-            *ngIf="config.showCustomTime && !(isAddingOrSelecting$ | async)">
-            <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-              (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
-              [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
-              [validate]="config.customTimeValidation">
-            </app-metrics-range-selector>
-          </div>
-
+          @if (config.showCustomTime && !(isAddingOrSelecting$ | async)) {
+            <div class="list-component__header__left--metrics-range"
+              >
+              <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
+                (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
+                [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
+                [validate]="config.customTimeValidation">
+              </app-metrics-range-selector>
+            </div>
+          }
           <!-- Multi actions (those applied to selection) -->
-          <div class="list-component__header__left--multi-actions" *ngIf="(dataSource.isSelecting$ | async)">
-            <ng-container *ngFor="let action of multiActions">
-              <button class="btn btn-icon" *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)"
-                [disabled]="!(action.enabled$ | async)" [title]="action.description">
-                <span class="material-icons">{{action.icon}}</span>
-              </button>
-            </ng-container>
-          </div>
+          @if ((dataSource.isSelecting$ | async)) {
+            <div class="list-component__header__left--multi-actions">
+              @for (action of multiActions; track action) {
+                @if (action.visible$ | async) {
+                  <button class="btn btn-icon" (click)="executeActionMultiple(action)"
+                    [disabled]="!(action.enabled$ | async)" [title]="action.description">
+                    <span class="material-icons">{{action.icon}}</span>
+                  </button>
+                }
+              }
+            </div>
+          }
           <!-- Text to show when selecting rows -->
-          <div class="list-component__header__left--text"
-            *ngIf="!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)">
-            {{dataSource.selectedRows.size}} Selected
-          </div>
+          @if (!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)) {
+            <div class="list-component__header__left--text"
+              >
+              {{dataSource.selectedRows.size}} Selected
+            </div>
+          }
           <!-- Injected filters -->
-          <div *ngIf="customFilters">
-            <ng-container *ngTemplateOutlet="customFilters">
-            </ng-container>
-          </div>
+          @if (customFilters) {
+            <div>
+              <ng-container *ngTemplateOutlet="customFilters">
+              </ng-container>
+            </div>
+          }
           <!-- Multi filters, such as filter app wall by cf/org/space -->
           <div class="list-component__header__left--multi-filters"
             [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
-            <ng-container *ngFor="let multiFilterManager of multiFilterManagers; first as isFirst">
-              <div class="form-field" *ngIf="!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)">
-                <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
-                <select class="select" id="{{multiFilterManager.filterKey}}" [value]="multiFilterManager.value"
-                  [disabled]="!(multiFilterManager.filterIsReady$ | async)"
-                  (change)="multiFilterManager.selectItem($any($event.target).value)">
-                  <option *ngIf="!multiFilterManager.hideAllOption" value="">{{ multiFilterManager.allLabel }}</option>
-                  <option *ngFor="let selectItem of multiFilterManager.filterItems$ | async"
-                    [value]="selectItem.value">
-                    {{selectItem.label}}
-                  </option>
-                </select>
-              </div>
-            </ng-container>
+            @for (multiFilterManager of multiFilterManagers; track multiFilterManager; let isFirst = $first) {
+              @if (!isFirst || !(multiFilterManager.hasOneOrLessItems$ | async)) {
+                <div class="form-field">
+                  <label class="label">{{multiFilterManager.multiFilterConfig.label}}</label>
+                  <select class="select" id="{{multiFilterManager.filterKey}}" [value]="multiFilterManager.value"
+                    [disabled]="!(multiFilterManager.filterIsReady$ | async)"
+                    (change)="multiFilterManager.selectItem($any($event.target).value)">
+                    @if (!multiFilterManager.hideAllOption) {
+                      <option value="">{{ multiFilterManager.allLabel }}</option>
+                    }
+                    @for (selectItem of multiFilterManager.filterItems$ | async; track selectItem) {
+                      <option
+                        [value]="selectItem.value">
+                        {{selectItem.label}}
+                      </option>
+                    }
+                  </select>
+                </div>
+              }
+            }
           </div>
         </div>
         <div class="list-component__header__right">
-          <div class="filter" *ngIf="entitySelectConfig && !(dataSource.maxedResults$ | async)">
-            <div class="form-field">
-              <label class="label">{{entitySelectConfig.selectPlaceholder}}</label>
-              <select class="select" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
-                <option value="">{{ entitySelectConfig.selectEmptyText }}</option>
-                <option *ngFor="let item of entitySelectConfig.entitySelectItems" [value]="item.page">
-                  {{item.label}}
-                </option>
-              </select>
+          @if (entitySelectConfig && !(dataSource.maxedResults$ | async)) {
+            <div class="filter">
+              <div class="form-field">
+                <label class="label">{{entitySelectConfig.selectPlaceholder}}</label>
+                <select class="select" [value]="entitySelectValue$ | async" (change)="setEntityPage($any($event.target).value)">
+                  <option value="">{{ entitySelectConfig.selectEmptyText }}</option>
+                  @for (item of entitySelectConfig.entitySelectItems; track item) {
+                    <option [value]="item.page">
+                      {{item.label}}
+                    </option>
+                  }
+                </select>
+              </div>
             </div>
-          </div>
+          }
           <!-- Filter by text input -->
           <div class="filter" id="listFilterSelect"
             [hidden]="filterColumns.length < 1 || !config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
             <div class="form-field">
               <label class="label">Filter Selection</label>
               <select class="select" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
-                <option *ngFor="let filter of filterColumns" [ngValue]="filter">
-                  {{ filter.label }}
-                </option>
+                @for (filter of filterColumns; track filter) {
+                  <option [ngValue]="filter">
+                    {{ filter.label }}
+                  </option>
+                }
               </select>
             </div>
           </div>
@@ -100,96 +125,127 @@
               <select class="select" name="sort-field" [(ngModel)]="headerSort.value"
                 [disabled]="(disableActions$ | async)"
                 (change)="updateListSort(headerSort.value, headerSort.direction)">
-                <option *ngFor="let column of sortColumns" [value]="column?.columnId">
-                  {{column && column.headerCell ? column.headerCell() : ''}}
-                </option>
+                @for (column of sortColumns; track column) {
+                  <option [value]="column?.columnId">
+                    {{column && column.headerCell ? column.headerCell() : ''}}
+                  </option>
+                }
               </select>
             </div>
-            <button class="btn btn-icon" [title]="'Sort Order'"
-              (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)"
-              *ngIf="headerSort.direction==='asc'">
-              <span class="material-icons">sort</span>
-            </button>
-            <button class="btn btn-icon" [title]="'Sort Order'"
-              (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)"
-              *ngIf="headerSort.direction==='desc'">
-              <span class="material-icons rotate-180">sort</span>
-            </button>
+            @if (headerSort.direction==='asc') {
+              <button class="btn btn-icon" [title]="'Sort Order'"
+                (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)"
+                >
+                <span class="material-icons">sort</span>
+              </button>
+            }
+            @if (headerSort.direction==='desc') {
+              <button class="btn btn-icon" [title]="'Sort Order'"
+                (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)"
+                >
+                <span class="material-icons rotate-180">sort</span>
+              </button>
+            }
           </div>
           <!-- Global actions (those not applied to specific rows) -->
-          <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0">
-            <ng-container *ngFor="let action of globalActions">
-              <button class="btn btn-icon" *ngIf="action.visible$ | async" (click)="executeActionGlobal(action)"
-                [disabled]="!(action.enabled$ | async)" [title]="action.description">
-                <span class="material-icons">{{action.icon}}</span>
-              </button>
-            </ng-container>
-          </div>
+          @if (!(isAddingOrSelecting$ | async) && globalActions?.length > 0) {
+            <div>
+              @for (action of globalActions; track action) {
+                @if (action.visible$ | async) {
+                  <button class="btn btn-icon" (click)="executeActionGlobal(action)"
+                    [disabled]="!(action.enabled$ | async)" [title]="action.description">
+                    <span class="material-icons">{{action.icon}}</span>
+                  </button>
+                }
+              }
+            </div>
+          }
           <!-- Add new row form -->
-          <div *ngIf="addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)"
-            class="add-container">
-            <div class="spacer"></div>
-            <ng-content select="[app-table-add]"></ng-content>
-            <button id="addFormButtonAdd" class="btn btn-icon btn-success" (click)="dataSource.saveAdd()"
-              [disabled]="!addForm?.valid">
-              <span class="material-icons">done</span>
-            </button>
-            <button id="addFormButtonCancel" class="btn btn-icon" (click)="dataSource.cancelAdd()">
-              <span class="material-icons">clear</span>
-            </button>
-          </div>
+          @if (addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)) {
+            <div
+              class="add-container">
+              <div class="spacer"></div>
+              <ng-content select="[app-table-add]"></ng-content>
+              <button id="addFormButtonAdd" class="btn btn-icon btn-success" (click)="dataSource.saveAdd()"
+                [disabled]="!addForm?.valid">
+                <span class="material-icons">done</span>
+              </button>
+              <button id="addFormButtonCancel" class="btn btn-icon" (click)="dataSource.cancelAdd()">
+                <span class="material-icons">clear</span>
+              </button>
+            </div>
+          }
           <!-- Add form button -->
-          <div *ngIf="addForm && !(isAddingOrSelecting$ | async)">
-            <button class="btn btn-icon" [disabled]="(dataSource.isLoadingPage$ | async)"
-              (click)="addForm?.reset();dataSource.startAdd();">
-              <span class="material-icons">add</span>
-            </button>
-          </div>
-          <div
-            *ngIf="!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button [title]="'Reset Filters & Sort'" class="btn btn-icon"
-              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="resetFilteringAndSort();">
-              <span class="material-icons">highlight_off</span>
-            </button>
-          </div>
+          @if (addForm && !(isAddingOrSelecting$ | async)) {
+            <div>
+              <button class="btn btn-icon" [disabled]="(dataSource.isLoadingPage$ | async)"
+                (click)="addForm?.reset();dataSource.startAdd();">
+                <span class="material-icons">add</span>
+              </button>
+            </div>
+          }
+          @if (!(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
+            <div
+              >
+              <button [title]="'Reset Filters & Sort'" class="btn btn-icon"
+                [disabled]="(dataSource.isLoadingPage$ | async)" (click)="resetFilteringAndSort();">
+                <span class="material-icons">highlight_off</span>
+              </button>
+            </div>
+          }
           <!-- Select table or cards view button -->
-          <div id="list-card-toggle"
-            *ngIf="config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))">
-            <button class="btn btn-icon" [title]="'Card view'"
-              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
-              *ngIf="(view$ | async)==='table'">
-              <span class="material-icons">grid_on</span>
-            </button>
-            <button class="btn btn-icon" [title]="'Table view'"
-              [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
-              *ngIf="(view$ | async)==='cards'">
-              <span class="material-icons">list</span>
-            </button>
-          </div>
-          <app-polling-indicator id="app-list-refresh-button" *ngIf="dataSource.refresh"
-            [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
-            [isPolling]="(isRefreshing$ | async)">
-          </app-polling-indicator>
+          @if (config.viewType === 'both' && !(isAddingOrSelecting$ | async) && ((dataSource.isLoadingPage$ | async) || (hasRowsOrIsFiltering$ | async))) {
+            <div id="list-card-toggle"
+              >
+              @if ((view$ | async)==='table') {
+                <button class="btn btn-icon" [title]="'Card view'"
+                  [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');"
+                  >
+                  <span class="material-icons">grid_on</span>
+                </button>
+              }
+              @if ((view$ | async)==='cards') {
+                <button class="btn btn-icon" [title]="'Table view'"
+                  [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');"
+                  >
+                  <span class="material-icons">list</span>
+                </button>
+              }
+            </div>
+          }
+          @if (dataSource.refresh) {
+            <app-polling-indicator id="app-list-refresh-button"
+              [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+              [isPolling]="(isRefreshing$ | async)">
+            </app-polling-indicator>
+          }
         </div>
-
       </div>
     </div>
-    <div class="refresh-button__no-header"
-      *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
-      <app-polling-indicator id="app-list-refresh-button" *ngIf="!(isAddingOrSelecting$ | async)"
-        [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
-        [isPolling]="(isRefreshing$ | async)" [fabButton]="true">
-      </app-polling-indicator>
-    </div>
+    @if (dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)) {
+      <div class="refresh-button__no-header"
+        >
+        @if (!(isAddingOrSelecting$ | async)) {
+          <app-polling-indicator id="app-list-refresh-button"
+            [manualPoll]="!(dataSource.isLoadingPage$ | async) && !(isAddingOrSelecting$ | async)" (poll)="refresh()"
+            [isPolling]="(isRefreshing$ | async)" [fabButton]="true">
+          </app-polling-indicator>
+        }
+      </div>
+    }
     <div class="list-component__body">
       <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
-        <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource"
+        @if ((view$ | async) === 'cards') {
+          <app-cards #cards [dataSource]="dataSource"
           [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-        <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="hasSingleActions"
-          [addSelect]="config.allowSelection || (haveMultiActions | async)"
-          [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
-          [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
-        </app-table>
+        }
+        @if ((view$ | async) === 'table') {
+          <app-table #table [dataSource]="dataSource" [addActions]="hasSingleActions"
+            [addSelect]="config.allowSelection || (haveMultiActions | async)"
+            [paginationController]="paginationController" [columns]="columns" [minRowHeight]="config.minRowHeight"
+            [hidden]="!(hasRows$ | async)" [expandComponent]="config.expandComponent">
+          </app-table>
+        }
       </div>
       <div class="card list-component__paginator" [hidden]="(hidePaginator$ | async)">
         <app-paginator
@@ -210,21 +266,21 @@
     </ng-template>
     <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async) || (dataSource.isLoadingPage$ | async)"
       class="list-component__no-entries">
-      <ng-container *ngIf="dataSource.maxedResults$ | async">
+      @if (dataSource.maxedResults$ | async) {
         <app-max-list-message (showAllAfterMax)="showAllAfterMax()"
           [count]="entitySelectConfig ? null : paginatorSettings.length"
           [maxCount]="dataSource.maxedStateStartAt$ | async" [config]="config.text?.maxedResults"
           [catalogueEntity]="config.getDataSource().masterAction">
         </app-max-list-message>
-      </ng-container>
-      <ng-container *ngIf="(noRowsNotFiltering$ | async)">
+      }
+      @if ((noRowsNotFiltering$ | async)) {
         <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
         </ng-container>
-      </ng-container>
-      <ng-container *ngIf="(noRowsHaveFilter$ | async)">
+      }
+      @if ((noRowsHaveFilter$ | async)) {
         <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
         </ng-container>
-      </ng-container>
+      }
     </div>
-  </ng-container>
+  }
 </div>

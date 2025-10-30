@@ -1,9 +1,19 @@
-<div class="metrics-details" *ngIf="data$ | async as info">
-  <div class="metrics-details__line">
-    <app-custom-icon *ngIf="info.warning" class="metrics-details__icon text-warning">warning</app-custom-icon>
-    {{ info.ok }}
-    <ng-container *ngIf="info.total > 0"> / {{info.total}}</ng-container>
-    <ng-container *ngIf="info.plural"> sources</ng-container>
-    <ng-container *ngIf="!info.plural"> source</ng-container>
+@if (data$ | async; as info) {
+  <div class="metrics-details">
+    <div class="metrics-details__line">
+      @if (info.warning) {
+        <app-custom-icon class="metrics-details__icon text-warning">warning</app-custom-icon>
+      }
+      {{ info.ok }}
+      @if (info.total > 0) {
+        / {{info.total}}
+      }
+      @if (info.plural) {
+        sources
+      }
+      @if (!info.plural) {
+        source
+      }
+    </div>
   </div>
-</div>
+}

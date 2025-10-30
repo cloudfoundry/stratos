@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
@@ -13,11 +13,10 @@ selector: 'app-kube-config-table-user-select',
   styleUrls: ['./kube-config-table-user-select.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     CustomSelectComponent,
-    CustomOptionComponent,
-  ]
+    CustomOptionComponent
+]
 })
 export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 

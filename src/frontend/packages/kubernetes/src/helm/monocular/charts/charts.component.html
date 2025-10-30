@@ -6,8 +6,12 @@
           <h1 class="charts__header__title">
             Charts
             <div class="charts__header__filters" (click)="filtersOpen = !filtersOpen">
-              <app-custom-icon *ngIf="filtersOpen" svgIcon="close"></app-custom-icon>
-              <app-custom-icon *ngIf="!filtersOpen" svgIcon="menu"></app-custom-icon>
+              @if (filtersOpen) {
+                <app-custom-icon svgIcon="close"></app-custom-icon>
+              }
+              @if (!filtersOpen) {
+                <app-custom-icon svgIcon="menu"></app-custom-icon>
+              }
               Filters
             </div>
           </h1>

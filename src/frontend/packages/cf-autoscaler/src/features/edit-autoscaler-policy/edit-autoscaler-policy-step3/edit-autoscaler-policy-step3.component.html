@@ -1,165 +1,219 @@
-<div *ngIf="appAutoscalerPolicy$ | async as policy" class="p-6">
-  <p class="text-gray-700 mb-6">Add schedules that reoccur to overwrite the default instance limits for specific time periods. During these time
+@if (appAutoscalerPolicy$ | async; as policy) {
+  <div class="p-6">
+    <p class="text-gray-700 mb-6">Add schedules that reoccur to overwrite the default instance limits for specific time periods. During these time
     periods, all dynamic scaling rules are still effective.</p>
-  <app-tile-grid class="space-y-4">
-    <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.recurring_schedule; let index = index">
-      <app-tile>
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              Schedule {{index+1}}:
-            </h3>
-          </div>
-          <div class="card-content p-4">
-            <div *ngIf="editIndex!=index" class="text-gray-700">
-              <span *ngIf="rule.initial_min_instance_count">The initial number of application instances is
-                {{rule.initial_min_instance_count}}, and the range </span>
-              <span *ngIf="!rule.initial_min_instance_count">The number of application instances </span>
-              <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} during
-                {{rule.start_time}} ~ {{rule.end_time}} every </span>
-              <span *ngIf="rule.days_of_month">{{rule.days_of_month}} of the month</span>
-              <span *ngIf="rule.days_of_week">{{rule.days_of_week}} of the week</span>
-              <span *ngIf="rule.start_date">, effective from {{rule.start_date}} to {{rule.end_date}}.</span>
-              <span *ngIf="!rule.start_date">.</span>
-            </div>
-            <div *ngIf="editIndex==index" class="space-y-6">
-              <form [formGroup]="editRecurringScheduleForm" validate class="space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div class="space-y-4">
-                    <app-metadata-item label="Effective Duration">
-                      <div class="space-y-3" name="effective_type" formControlName="effective_type">
-                        <label class="radio-label">
-                          <input type="radio" value="always" (click)="resetEffectiveType('always')" class="radio">
-                          <span class="radio-text">Always</span>
-                        </label>
-                        <label class="radio-label">
-                          <input type="radio" value="custom" (click)="resetEffectiveType('custom')" class="radio">
-                          <span class="radio-text">Custom</span>
-                          <div *ngIf="editEffectiveType=='custom'" class="mt-2 grid grid-cols-2 gap-2">
-                            <div class="form-group">
-                              <input type="date" name="start_date" formControlName="start_date" required
-                                placeholder="From" class="input">
+    <app-tile-grid class="space-y-4">
+      @for (rule of policy.schedules && policy.schedules.recurring_schedule; track rule; let index = $index) {
+        <app-tile-group>
+          <app-tile>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Schedule {{index+1}}:
+                </h3>
+              </div>
+              <div class="card-content p-4">
+                @if (editIndex!=index) {
+                  <div class="text-gray-700">
+                    @if (rule.initial_min_instance_count) {
+                      <span>The initial number of application instances is
+                      {{rule.initial_min_instance_count}}, and the range </span>
+                    }
+                    @if (!rule.initial_min_instance_count) {
+                      <span>The number of application instances </span>
+                    }
+                    <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} during
+                    {{rule.start_time}} ~ {{rule.end_time}} every </span>
+                    @if (rule.days_of_month) {
+                      <span>{{rule.days_of_month}} of the month</span>
+                    }
+                    @if (rule.days_of_week) {
+                      <span>{{rule.days_of_week}} of the week</span>
+                    }
+                    @if (rule.start_date) {
+                      <span>, effective from {{rule.start_date}} to {{rule.end_date}}.</span>
+                    }
+                    @if (!rule.start_date) {
+                      <span>.</span>
+                    }
+                  </div>
+                }
+                @if (editIndex==index) {
+                  <div class="space-y-6">
+                    <form [formGroup]="editRecurringScheduleForm" validate class="space-y-6">
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                          <app-metadata-item label="Effective Duration">
+                            <div class="space-y-3" name="effective_type" formControlName="effective_type">
+                              <label class="radio-label">
+                                <input type="radio" value="always" (click)="resetEffectiveType('always')" class="radio">
+                                <span class="radio-text">Always</span>
+                              </label>
+                              <label class="radio-label">
+                                <input type="radio" value="custom" (click)="resetEffectiveType('custom')" class="radio">
+                                <span class="radio-text">Custom</span>
+                                @if (editEffectiveType=='custom') {
+                                  <div class="mt-2 grid grid-cols-2 gap-2">
+                                    <div class="form-group">
+                                      <input type="date" name="start_date" formControlName="start_date" required
+                                        placeholder="From" class="input">
+                                    </div>
+                                    <div class="form-group">
+                                      <input type="date" name="end_date" formControlName="end_date" required
+                                        placeholder="To" class="input">
+                                    </div>
+                                  </div>
+                                }
+                              </label>
                             </div>
-                            <div class="form-group">
-                              <input type="date" name="end_date" formControlName="end_date" required
-                                placeholder="To" class="input">
+                          </app-metadata-item>
+                          <app-metadata-item label="Repeat By">
+                            <div class="space-y-3" name="repeat_type" formControlName="repeat_type">
+                              <label class="radio-label">
+                                <input type="radio" value="week" class="radio">
+                                <span class="radio-text">Week</span>
+                              </label>
+                              <label class="radio-label">
+                                <input type="radio" value="month" class="radio">
+                                <span class="radio-text">Month</span>
+                              </label>
                             </div>
+                          </app-metadata-item>
+                          <div class="form-group">
+                            <label class="label">Repeat On</label>
+                            @if (editRepeatType=='week') {
+                              <select multiple name="days_of_week"
+                                formControlName="days_of_week" required class="select" size="4">
+                                @for (day of weekdayOptions; track day; let dayIndex = $index) {
+                                  <option [value]="dayIndex">
+                                    {{day}}
+                                  </option>
+                                }
+                              </select>
+                            }
+                            @if (editRepeatType=='month') {
+                              <select multiple name="days_of_month"
+                                formControlName="days_of_month" required class="select" size="4">
+                                @for (day of monthdayOptions; track day; let dayIndex = $index) {
+                                  <option [value]="dayIndex">
+                                    {{day}}
+                                  </option>
+                                }
+                              </select>
+                            }
                           </div>
-                        </label>
+                        </div>
+                        <div class="space-y-4">
+                          <app-metadata-item label="Repeat Time">
+                            <div class="grid grid-cols-2 gap-2">
+                              <div class="form-group">
+                                <input type="time" name="start_time" formControlName="start_time" required
+                                  placeholder="Start" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="time" name="end_time" formControlName="end_time" required
+                                  placeholder="End" class="input">
+                              </div>
+                            </div>
+                          </app-metadata-item>
+                          <app-metadata-item label="Instance Count">
+                            <div class="grid grid-cols-3 gap-2">
+                              <div class="form-group">
+                                <input type="number" name="instance_min_count" formControlName="instance_min_count" required
+                                  placeholder="Minimum" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="number" name="" formControlName="initial_min_instance_count"
+                                  placeholder="Initial Minimum" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="number" name="instance_max_count" formControlName="instance_max_count" required
+                                  placeholder="Maximum" class="input">
+                              </div>
+                            </div>
+                          </app-metadata-item>
+                        </div>
                       </div>
-                    </app-metadata-item>
-                    <app-metadata-item label="Repeat By">
-                      <div class="space-y-3" name="repeat_type" formControlName="repeat_type">
-                        <label class="radio-label">
-                          <input type="radio" value="week" class="radio">
-                          <span class="radio-text">Week</span>
-                        </label>
-                        <label class="radio-label">
-                          <input type="radio" value="month" class="radio">
-                          <span class="radio-text">Month</span>
-                        </label>
-                      </div>
-                    </app-metadata-item>
-                    <div class="form-group">
-                      <label class="label">Repeat On</label>
-                      <select *ngIf="editRepeatType=='week'" multiple name="days_of_week"
-                        formControlName="days_of_week" required class="select" size="4">
-                        <option *ngFor="let day of weekdayOptions; let dayIndex = index" [value]="dayIndex">
-                          {{day}}
-                        </option>
-                      </select>
-                      <select *ngIf="editRepeatType=='month'" multiple name="days_of_month"
-                        formControlName="days_of_month" required class="select" size="4">
-                        <option *ngFor="let day of monthdayOptions; let dayIndex = index" [value]="dayIndex">
-                          {{day}}
-                        </option>
-                      </select>
+                    </form>
+                    <div class="space-y-1">
+                      @if (editRecurringScheduleForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyMinimumRange}}
+                        </div>
+                      }
+                      @if (editRecurringScheduleForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyMaximumRange}}
+                        </div>
+                      }
+                      @if (editRecurringScheduleForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
+                        </div>
+                      }
+                      @if (editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleDateBeforeNow') || editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleDateBeforeNow')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleDateBeforeNow}}
+                        </div>
+                      }
+                      @if (editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
+                        </div>
+                      }
+                      @if (editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
+                        </div>
+                      }
+                      @if (editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
+                        </div>
+                      }
+                      @if (editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                        <div class="text-red-600 text-sm">
+                          days_of_week {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
+                        </div>
+                      }
+                      @if (editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
+                        </div>
+                      }
+                      @if (editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                        <div class="text-red-600 text-sm">
+                          days_of_month {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
+                        </div>
+                      }
                     </div>
                   </div>
-                  <div class="space-y-4">
-                    <app-metadata-item label="Repeat Time">
-                      <div class="grid grid-cols-2 gap-2">
-                        <div class="form-group">
-                          <input type="time" name="start_time" formControlName="start_time" required
-                            placeholder="Start" class="input">
-                        </div>
-                        <div class="form-group">
-                          <input type="time" name="end_time" formControlName="end_time" required
-                            placeholder="End" class="input">
-                        </div>
-                      </div>
-                    </app-metadata-item>
-                    <app-metadata-item label="Instance Count">
-                      <div class="grid grid-cols-3 gap-2">
-                        <div class="form-group">
-                          <input type="number" name="instance_min_count" formControlName="instance_min_count" required
-                            placeholder="Minimum" class="input">
-                        </div>
-                        <div class="form-group">
-                          <input type="number" name="" formControlName="initial_min_instance_count"
-                            placeholder="Initial Minimum" class="input">
-                        </div>
-                        <div class="form-group">
-                          <input type="number" name="instance_max_count" formControlName="instance_max_count" required
-                            placeholder="Maximum" class="input">
-                        </div>
-                      </div>
-                    </app-metadata-item>
-                  </div>
-                </div>
-              </form>
-              <div class="space-y-1">
-                <div *ngIf="editRecurringScheduleForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyMinimumRange}}
-                </div>
-                <div *ngIf="editRecurringScheduleForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyMaximumRange}}
-                </div>
-                <div *ngIf="editRecurringScheduleForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
-                </div>
-                <div *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleDateBeforeNow') || editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleDateBeforeNow')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleDateBeforeNow}}
-                </div>
-                <div *ngIf="editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
-                </div>
-                <div *ngIf="editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
-                </div>
-                <div *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
-                </div>
-                <div *ngIf="editRepeatType=='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')" class="text-red-600 text-sm">
-                  days_of_week {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
-                </div>
-                <div *ngIf="editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
-                </div>
-                <div *ngIf="editRepeatType=='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')" class="text-red-600 text-sm">
-                  days_of_month {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
-                </div>
+                }
+              </div>
+              <div class="card-actions flex justify-end space-x-2 p-4 border-t">
+                @if (editIndex!=index) {
+                  <button id="autoscaler-policy-edit-edit" (click)="editRecurringSchedule(index)"
+                    [disabled]="editIndex!=-1" class="btn-icon" title="Edit">
+                    <span class="material-icons">edit</span>
+                  </button>
+                }
+                @if (editIndex==index) {
+                  <button id="autoscaler-policy-edit-done" (click)="finishRecurringSchedule()"
+                    [disabled]="editRecurringScheduleForm.invalid" class="btn-icon text-green-600" title="Done">
+                    <span class="material-icons">done</span>
+                  </button>
+                }
+                <button id="autoscaler-policy-edit-delete" (click)="removeRecurringSchedule(index)"
+                  class="btn-icon text-red-600" title="Delete">
+                  <span class="material-icons">delete</span>
+                </button>
               </div>
             </div>
-          </div>
-          <div class="card-actions flex justify-end space-x-2 p-4 border-t">
-            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editRecurringSchedule(index)"
-              [disabled]="editIndex!=-1" class="btn-icon" title="Edit">
-              <span class="material-icons">edit</span>
-            </button>
-            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishRecurringSchedule()"
-              [disabled]="editRecurringScheduleForm.invalid" class="btn-icon text-green-600" title="Done">
-              <span class="material-icons">done</span>
-            </button>
-            <button id="autoscaler-policy-edit-delete" (click)="removeRecurringSchedule(index)"
-              class="btn-icon text-red-600" title="Delete">
-              <span class="material-icons">delete</span>
-            </button>
-          </div>
-        </div>
-      </app-tile>
-    </app-tile-group>
-  </app-tile-grid>
-  <button id="autoscaler-policy-edit-add" (click)="addRecurringSchedule()" [disabled]="editIndex!=-1"
+          </app-tile>
+        </app-tile-group>
+      }
+    </app-tile-grid>
+    <button id="autoscaler-policy-edit-add" (click)="addRecurringSchedule()" [disabled]="editIndex!=-1"
     class="btn btn-primary mt-4">Add</button>
-</div>
+  </div>
+}

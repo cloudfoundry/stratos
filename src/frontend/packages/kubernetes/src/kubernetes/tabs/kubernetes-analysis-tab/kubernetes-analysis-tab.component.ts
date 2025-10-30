@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
 import { AnalysisReportsListConfig } from '../../list-types/analysis-reports-list-config.service';
@@ -15,11 +15,10 @@ import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/anal
   styleUrls: ['./kubernetes-analysis-tab.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ListComponent,
     PageSubNavComponent,
     AnalysisReportRunnerComponent
-  ],
+],
   providers: [
     KubernetesAnalysisService,
     {

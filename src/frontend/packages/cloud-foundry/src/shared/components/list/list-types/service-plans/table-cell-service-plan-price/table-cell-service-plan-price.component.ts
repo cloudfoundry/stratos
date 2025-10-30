@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -13,9 +13,8 @@ import { ServicePlanPriceComponent } from '../../../../service-plan-price/servic
   styleUrls: ['./table-cell-service-plan-price.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    ServicePlanPriceComponent,
-  ]
+    ServicePlanPriceComponent
+]
 })
 export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIResource<IServicePlan>> {
   isFree: boolean;

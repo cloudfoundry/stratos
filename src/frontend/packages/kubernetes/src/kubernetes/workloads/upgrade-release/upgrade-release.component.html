@@ -3,7 +3,9 @@
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
   <app-step title="Version" [valid]="validate$ | async" [onNext]="onNext">
-    <app-list class="workload-upgrade__list" *ngIf="listConfig" [listConfig]="listConfig"></app-list>
+    @if (listConfig) {
+      <app-list class="workload-upgrade__list" [listConfig]="listConfig"></app-list>
+    }
   </app-step>
   <app-step title="Overrides" [onNext]="doUpgrade" finishButtonText="Upgrade" [onEnter]="onEnterOverrides">
     <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>

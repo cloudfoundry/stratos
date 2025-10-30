@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -17,9 +17,8 @@ import {
   styleUrls: ['./detach-apps.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ListComponent
-  ],
+],
   providers: [
     {
       provide: ListConfig,

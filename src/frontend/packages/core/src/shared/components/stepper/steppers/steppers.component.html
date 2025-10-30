@@ -1,114 +1,124 @@
 <div class="steppers-wrapper bg-white">
-  <div class="steppers" *ngIf="steps && steps.length">
-    <div class="steppers-inner">
-      <!-- Step headers -->
-      <div class="steppers-headers flex items-center justify-center mb-8" *ngIf="steps.length > 1">
-        <div *ngFor="let step of steps; let i = index; let isLast = last"
-             class="steppers-header flex items-center"
+  @if (steps && steps.length) {
+    <div class="steppers">
+      <div class="steppers-inner">
+        <!-- Step headers -->
+        @if (steps.length > 1) {
+          <div class="steppers-headers flex items-center justify-center mb-8">
+            @for (step of steps; track step; let i = $index; let isLast = $last) {
+              <div
+                class="steppers-header flex items-center"
              [ngClass]="{
                'steppers-header--active': step.active,
                'steppers-header--busy': step.blocked || step.showBusy
              }">
-          <div class="steppers-header-inner flex items-center" *ngIf="steps.length !== 1">
-            <!-- Step indicator -->
-            <div class="steppers-header-indicator relative flex items-center justify-center">
-              <!-- Loading spinner -->
-              <div *ngIf="(step.blocked || step.showBusy); else notBlocked"
-                   class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin">
-              </div>
-
-              <!-- Normal state -->
-              <ng-template #notBlocked>
-                <app-dot-content [disabled]="step.skip"
-                                 class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors"
+                @if (steps.length !== 1) {
+                  <div class="steppers-header-inner flex items-center">
+                    <!-- Step indicator -->
+                    <div class="steppers-header-indicator relative flex items-center justify-center">
+                      <!-- Loading spinner -->
+                      @if ((step.blocked || step.showBusy)) {
+                        <div
+                          class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin">
+                        </div>
+                      } @else {
+                        <app-dot-content [disabled]="step.skip"
+                          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors"
                                  [ngClass]="{
                                    'bg-primary text-white': step.active,
                                    'bg-success-500 text-white': step.complete,
                                    'bg-gray-200 text-gray-600': !step.active && !step.complete,
                                    'bg-gray-100 text-gray-400': step.skip
                                  }">
-                  <span class="material-icons text-sm" *ngIf="step.complete">{{ this.getIconLigature() }}</span>
-                  <div *ngIf="!step.complete">{{ i + 1 }}</div>
-                </app-dot-content>
-              </ng-template>
-            </div>
-
-            <!-- Step title -->
-            <span class="steppers-header-text ml-3 text-sm font-medium"
+                          @if (step.complete) {
+                            <span class="material-icons text-sm">{{ this.getIconLigature() }}</span>
+                          }
+                          @if (!step.complete) {
+                            <div>{{ i + 1 }}</div>
+                          }
+                        </app-dot-content>
+                      }
+                      <!-- Normal state -->
+                    </div>
+                    <!-- Step title -->
+                    <span class="steppers-header-text ml-3 text-sm font-medium"
                   [ngClass]="{
                     'text-primary': step.active,
                     'text-success-600': step.complete,
                     'text-gray-900': !step.active && !step.complete,
                     'text-gray-400': step.skip
                   }">
-              {{ step.title }}
-            </span>
-          </div>
-
-          <!-- Connector line -->
-          <div *ngIf="!isLast"
-               class="steppers-header-connector w-12 h-0.5 mx-4"
+                      {{ step.title }}
+                    </span>
+                  </div>
+                }
+                <!-- Connector line -->
+                @if (!isLast) {
+                  <div
+                    class="steppers-header-connector w-12 h-0.5 mx-4"
                [ngClass]="{
                  'bg-primary': step.complete,
                  'bg-gray-200': !step.complete
                }">
+                  </div>
+                }
+              </div>
+            }
           </div>
+        }
+        <!-- Step content -->
+        <div class="steppers-contents mb-8">
+          <span *ngTemplateOutlet="steps[currentIndex].content"></span>
         </div>
-      </div>
-
-      <!-- Step content -->
-      <div class="steppers-contents mb-8">
-        <span *ngTemplateOutlet="steps[currentIndex].content"></span>
-      </div>
-
-      <!-- Navigation buttons -->
-      <div class="steppers-navigation flex items-center justify-between border-t border-gray-200 pt-6">
-        <div class="steppers-navigation-left">
-          <button id="stepper_previous"
-                  *ngIf="steps.length !== 1 || basePreviousRedirect"
-                  class="btn btn-secondary"
-                  (click)="setActive(currentIndex - 1)"
-                  [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">
-            Previous
-          </button>
-        </div>
-
-        <div class="steppers-navigation-right flex items-center space-x-3">
-          <!-- Cancel button -->
-          <button id="stepper_cancel"
-                  class="btn btn-secondary"
-                  [routerLink]="cancel$ | async"
-                  [queryParams]="cancelQueryParams$ | async"
-                  [disabled]="!canCancel(currentIndex)"
-                  *ngIf="!steps[currentIndex].hideCloseButton && cancel"
-                  (click)="steps[currentIndex].onLeave(false)">
-            {{ this.getCancelButtonText(currentIndex) }}
-          </button>
-
-          <!-- Next/Submit button -->
-          <button id="stepper_next"
-                  *ngIf="!steps[currentIndex].hideNextButton"
-                  class="steppers-navigation-right-next btn flex items-center space-x-2"
+        <!-- Navigation buttons -->
+        <div class="steppers-navigation flex items-center justify-between border-t border-gray-200 pt-6">
+          <div class="steppers-navigation-left">
+            @if (steps.length !== 1 || basePreviousRedirect) {
+              <button id="stepper_previous"
+                class="btn btn-secondary"
+                (click)="setActive(currentIndex - 1)"
+                [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">
+                Previous
+              </button>
+            }
+          </div>
+          <div class="steppers-navigation-right flex items-center space-x-3">
+            <!-- Cancel button -->
+            @if (!steps[currentIndex].hideCloseButton && cancel) {
+              <button id="stepper_cancel"
+                class="btn btn-secondary"
+                [routerLink]="cancel$ | async"
+                [queryParams]="cancelQueryParams$ | async"
+                [disabled]="!canCancel(currentIndex)"
+                (click)="steps[currentIndex].onLeave(false)">
+                {{ this.getCancelButtonText(currentIndex) }}
+              </button>
+            }
+            <!-- Next/Submit button -->
+            @if (!steps[currentIndex].hideNextButton) {
+              <button id="stepper_next"
+                class="steppers-navigation-right-next btn flex items-center space-x-2"
                   [ngClass]="{
                     'btn-danger': steps[currentIndex].destructiveStep,
                     'btn-primary': !steps[currentIndex].destructiveStep
                   }"
-                  type="submit"
-                  (click)="goNext(currentIndex)"
-                  [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
-
-            <!-- Loading spinner -->
-            <div *ngIf="showNextButtonProgress; else nextButtonText"
-                 class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
-            </div>
-
-            <!-- Button text -->
-            <ng-template #nextButtonText>
-              <span>{{ this.getNextButtonText(currentIndex) }}</span>
-            </ng-template>
-          </button>
+                type="submit"
+                (click)="goNext(currentIndex)"
+                [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
+                <!-- Loading spinner -->
+                @if (showNextButtonProgress) {
+                  <div
+                    class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+                  </div>
+                } @else {
+                  <span>{{ this.getNextButtonText(currentIndex) }}</span>
+                }
+                <!-- Button text -->
+              </button>
+            }
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

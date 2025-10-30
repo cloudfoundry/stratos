@@ -1,15 +1,19 @@
 <div class="service-card__links">
-  <div class="service-card__link" *ngIf="hasDocumentationUrl()">
-    <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
-      <span class="material-icons">launch</span>
-    </a>
-    <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
-  </div>
-  <div class="service-card__link" *ngIf="hasSupportUrl()">
-    <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
-      <span class="material-icons">launch</span>
-    </a>
-    <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
-  </div>
+  @if (hasDocumentationUrl()) {
+    <div class="service-card__link">
+      <a class="service-card__icon-link" [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
+        <span class="material-icons">launch</span>
+      </a>
+      <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>Docs</a>
+    </div>
+  }
+  @if (hasSupportUrl()) {
+    <div class="service-card__link">
+      <a class="service-card__icon-link" [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
+        <span class="material-icons">launch</span>
+      </a>
+      <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>Support</a>
+    </div>
+  }
 </div>
 <!-- <div *ngIf="!hasDocumentationUrl() && !hasSupportUrl()">-</div> -->

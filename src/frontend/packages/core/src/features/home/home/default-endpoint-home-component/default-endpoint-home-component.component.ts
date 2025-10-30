@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Observable, of } from 'rxjs';
 
 import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-utils';
@@ -13,9 +13,8 @@ import { MetadataItemComponent } from '../../../../shared/components/metadata-it
   styleUrls: ['./default-endpoint-home-component.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MetadataItemComponent
-  ]
+]
 })
 export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
 

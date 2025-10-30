@@ -1,124 +1,162 @@
-<b *ngIf="stepperText$ | async as stepperText">{{ stepperText }}</b>
+@if (stepperText$ | async; as stepperText) {
+  <b>{{ stepperText }}</b>
+}
 <form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
-  <div *ngIf="(canDeployType$ | async) === true">
-    <div class="deploy-step2-form">
-      <div *ngIf="(sourceType$ | async) as sourceType">
-        <app-deploy-application-fs #fsChooser [hideTitle]='true'
-          *ngIf="sourceType.id === DEPLOY_TYPES_IDS.FILE || sourceType.id === DEPLOY_TYPES_IDS.FOLDER"
-          [sourceType]="sourceType.id" required name="fsLocalSource" [(ngModel)]="fsSourceData">
-        </app-deploy-application-fs>
-        <div *ngIf="sourceType.id.indexOf('git') === 0">
-          <div *ngIf="sourceType.group === 'gitscm'">
-            <div class="github-project-details">
+  @if ((canDeployType$ | async) === true) {
+    <div>
+      <div class="deploy-step2-form">
+        @if ((sourceType$ | async); as sourceType) {
+          <div>
+            @if (sourceType.id === DEPLOY_TYPES_IDS.FILE || sourceType.id === DEPLOY_TYPES_IDS.FOLDER) {
+              <app-deploy-application-fs #fsChooser [hideTitle]='true'
+                [sourceType]="sourceType.id" required name="fsLocalSource" [(ngModel)]="fsSourceData">
+              </app-deploy-application-fs>
+            }
+            @if (sourceType.id.indexOf('git') === 0) {
               <div>
-                <div class="form-field">
-                  <input type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
-                    placeholder="Project" name="projectName"
-                    [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required
-                    list="repo-suggestions">
-                  <!-- Repository suggestions datalist -->
-                  <datalist id="repo-suggestions">
-                    <option *ngFor="let repo of suggestedRepos$ | async" [value]="repo.name">
-                      {{repo.name}} <span *ngIf="repo.private">(Private)</span>
-                    </option>
-                  </datalist>
-
-                  <div class="text-red-500 text-sm mt-1"
-                    *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
-                    Project does not exist
-                  </div>
-                  <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.projectName?.errors?.githubProjectError">
-                    {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="projectInfo$ | async as projectInfo" class="deploy-step2-form__project-info-group">
-                <div>
-                  <img src="{{projectInfo.owner.avatar_url}}">
-                </div>
-                <div src="description">
+                @if (sourceType.group === 'gitscm') {
                   <div>
-                    <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
+                    <div class="github-project-details">
+                      <div>
+                        <div class="form-field">
+                          <input type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
+                            placeholder="Project" name="projectName"
+                            [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid" required
+                            list="repo-suggestions">
+                          <!-- Repository suggestions datalist -->
+                          <datalist id="repo-suggestions">
+                            @for (repo of suggestedRepos$ | async; track repo) {
+                              <option [value]="repo.name">
+                                {{repo.name}} @if (repo.private) {
+                                <span>(Private)</span>
+                              }
+                            </option>
+                          }
+                        </datalist>
+                        @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
+                          <div class="text-red-500 text-sm mt-1"
+                            >
+                            Project does not exist
+                          </div>
+                        }
+                        @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
+                          <div class="text-red-500 text-sm mt-1">
+                            {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    @if (projectInfo$ | async; as projectInfo) {
+                      <div class="deploy-step2-form__project-info-group">
+                        <div>
+                          <img src="{{projectInfo.owner.avatar_url}}">
+                        </div>
+                        <div src="description">
+                          <div>
+                            <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
+                          </div>
+                          <div class="centered">
+                            {{projectInfo.description}}
+                          </div>
+                        </div>
+                      </div>
+                    }
                   </div>
-                  <div class="centered">
-                    {{projectInfo.description}}
+                  <div class="form-field">
+                    <select class="input"
+                      [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
+                      [(ngModel)]="repositoryBranch" name="repositoryBranch"
+                      (change)="updateBranchName($event.target.value)" required>
+                      <option value="" disabled>Branch</option>
+                      @for (branch of repositoryBranches$ | async; track branch) {
+                        <option [value]="branch">
+                          {{ branch.name }}
+                        </option>
+                      }
+                    </select>
                   </div>
+                  @if (isRedeploy && commitInfo) {
+                    <div
+                      class="deploy-step2-form__project-info-group deploy-step2-form__commit">
+                      <div>
+                        <img src="{{commitInfo.author.avatar_url}}">
+                      </div>
+                      <div src="description">
+                        <div>
+                          <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
+                        </div>
+                        <div>
+                          {{commitInfo.commit.message}}
+                        </div>
+                        <div class="author-info">
+                          <div>
+                            {{commitInfo.commit.author.name}}
+                          </div>
+                          <div>
+                            {{commitInfo.commit.author.date | date: 'medium'}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
                 </div>
-              </div>
-            </div>
-            <div class="form-field">
-              <select class="input"
-                [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
-                [(ngModel)]="repositoryBranch" name="repositoryBranch"
-                (change)="updateBranchName($event.target.value)" required>
-                <option value="" disabled>Branch</option>
-                <option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
-                  {{ branch.name }}
-                </option>
-              </select>
-            </div>
-            <div *ngIf="isRedeploy && commitInfo"
-              class="deploy-step2-form__project-info-group deploy-step2-form__commit">
-              <div>
-                <img src="{{commitInfo.author.avatar_url}}">
-              </div>
-              <div src="description">
+              }
+              @if (sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
                 <div>
-                  <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
-                </div>
-                <div>
-                  {{commitInfo.commit.message}}
-                </div>
-                <div class="author-info">
-                  <div>
-                    {{commitInfo.commit.author.name}}
+                  <div class="form-field">
+                    <input class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
                   </div>
-                  <div>
-                    {{commitInfo.commit.author.date | date: 'medium'}}
+                  <div class="form-field">
+                    <input class="input" [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
                   </div>
                 </div>
+              }
+            </div>
+          }
+          @if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
+            <div>
+              <div class="form-field">
+                <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="Application Name"
+                  name="dockerAppName" required>
+                @if (sourceSelectionForm.controls.dockerAppName?.errors?.required) {
+                  <div class="text-red-500 text-sm mt-1">
+                    Application name is required
+                  </div>
+                }
+              </div>
+              <div class="form-field">
+                <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
+                  required>
+                @if (sourceSelectionForm.controls.dockerImg?.errors?.required) {
+                  <div class="text-red-500 text-sm mt-1">
+                    Image is required
+                  </div>
+                }
+                @if (sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid) {
+                  <div class="text-red-500 text-sm mt-1">
+                    Invalid Image
+                  </div>
+                }
+              </div>
+              <div class="form-field">
+                <input class="input" [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
+                <p class="mt-1 text-sm text-gray-500">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
               </div>
             </div>
-          </div>
-          <div *ngIf="sourceType.id === DEPLOY_TYPES_IDS.GIT_URL">
-            <div class="form-field">
-              <input class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
-            </div>
-            <div class="form-field">
-              <input class="input" [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
-            </div>
-          </div>
+          }
         </div>
-        <div *ngIf="sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG">
-          <div class="form-field">
-            <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="Application Name"
-              name="dockerAppName" required>
-            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerAppName?.errors?.required">
-              Application name is required
-            </div>
-          </div>
-          <div class="form-field">
-            <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
-              required>
-            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.required">
-              Image is required
-            </div>
-            <div class="text-red-500 text-sm mt-1" *ngIf="sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid">
-              Invalid Image
-            </div>
-          </div>
-          <div class="form-field">
-            <input class="input" [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
-            <p class="mt-1 text-sm text-gray-500">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
-          </div>
-        </div>
+      }
+    </div>
+  </div>
+}
+<!-- Boolean object type to avoid flashing negative message then positive -->
+@if ((canDeployType$ | async) === false) {
+  <div>
+    @if ((sourceType$ | async); as sourceType) {
+      <div>
+        {{ sourceType.disabledText || 'The selected Cloud Foundry cannot deploy this type.' }}
       </div>
-    </div>
+    }
   </div>
-  <!-- Boolean object type to avoid flashing negative message then positive -->
-  <div *ngIf="(canDeployType$ | async) === false">
-    <div *ngIf="(sourceType$ | async) as sourceType">
-      {{ sourceType.disabledText || 'The selected Cloud Foundry cannot deploy this type.' }}
-    </div>
-  </div>
+}
 </form>

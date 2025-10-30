@@ -1,20 +1,23 @@
 <div class="copy relative inline-flex items-center gap-2"
-     [ngClass]="{'copy__success': copySuccessWait}">
+  [ngClass]="{'copy__success': copySuccessWait}">
   <div class="copy__copied-div flex items-center gap-1"
-       [class.opacity-100]="copySuccessWait"
-       [class.opacity-0]="!copySuccessWait"
-       class="transition-opacity duration-300">
-    <span class="copy__copied-msg text-sm text-success-600" *ngIf="showSuccessText">Copied to clipboard</span>
+    [class.opacity-100]="copySuccessWait"
+    [class.opacity-0]="!copySuccessWait"
+    class="transition-opacity duration-300">
+    @if (showSuccessText) {
+      <span class="copy__copied-msg text-sm text-success-600">Copied to clipboard</span>
+    }
     <span class="material-icons copy__copied-icon text-success-600"
-          [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+      [ngClass]="{'text-sm': compact, 'text-base': !compact}">
       check_circle
     </span>
   </div>
-  <span class="material-icons copy__copy-icon cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
-        [ngClass]="{'text-sm': compact, 'text-base': !compact}"
-        *ngIf="canCopy"
-        (click)="copyToClipboard($event)"
-        [title]="tooltip">
-    content_copy
-  </span>
+  @if (canCopy) {
+    <span class="material-icons copy__copy-icon cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
+      [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+      (click)="copyToClipboard($event)"
+      [title]="tooltip">
+      content_copy
+    </span>
+  }
 </div>

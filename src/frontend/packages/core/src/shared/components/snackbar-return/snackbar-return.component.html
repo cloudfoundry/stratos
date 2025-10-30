@@ -1,7 +1,9 @@
 <div class="app-snackbar-return mat-simple-snackbar">
   <span>{{ message }}</span>
-  <div class="app-snackbar-return-action mat-simple-snackbar-action" *ngIf="returnUrl">
-    <button class="btn btn-ghost" type="button" (click)="return()">{{ returnLabel }}</button>
-    <button class="btn btn-ghost" type="button" (click)="dismiss()">Dismiss</button>
-  </div>
+  @if (returnUrl) {
+    <div class="app-snackbar-return-action mat-simple-snackbar-action">
+      <button class="btn btn-ghost" type="button" (click)="return()">{{ returnLabel }}</button>
+      <button class="btn btn-ghost" type="button" (click)="dismiss()">Dismiss</button>
+    </div>
+  }
 </div>

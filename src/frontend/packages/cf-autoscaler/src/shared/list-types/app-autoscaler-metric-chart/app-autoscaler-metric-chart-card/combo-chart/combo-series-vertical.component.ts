@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { CommonModule } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
@@ -18,35 +18,35 @@ function formatLabel(label: any): string {
 @Component({
   selector: 'g[ngx-combo-charts-series-vertical]',
   template: `
-    <svg:g ngx-charts-bar *ngFor="let bar of bars; trackBy: trackBy"
-      [@animationState]="'active'"
-      [width]="bar.width"
-      [height]="bar.height"
-      [x]="bar.x"
-      [y]="bar.y"
-      [fill]="bar.color"
-      [stops]="bar.gradientStops"
-      [data]="bar.data"
-      [orientation]="'vertical'"
-      [roundEdges]="bar.roundEdges"
-      [gradient]="gradient"
-      [isActive]="isActive(bar.data)"
-      [animations]="animations"
-      (select)="onClick($event)"
-      (activate)="activate.emit($event)"
-      (deactivate)="deactivate.emit($event)"
-      ngx-tooltip
-      [tooltipDisabled]="tooltipDisabled"
-      [tooltipPlacement]="'top'"
-      [tooltipType]="'tooltip'"
-      [tooltipTitle]="bar.tooltipText">
-    </svg:g>
-  `,
+    @for (bar of bars; track trackBy($index, bar)) {
+      <svg:g ngx-charts-bar
+        [@animationState]="'active'"
+        [width]="bar.width"
+        [height]="bar.height"
+        [x]="bar.x"
+        [y]="bar.y"
+        [fill]="bar.color"
+        [stops]="bar.gradientStops"
+        [data]="bar.data"
+        [orientation]="'vertical'"
+        [roundEdges]="bar.roundEdges"
+        [gradient]="gradient"
+        [isActive]="isActive(bar.data)"
+        [animations]="animations"
+        (select)="onClick($event)"
+        (activate)="activate.emit($event)"
+        (deactivate)="deactivate.emit($event)"
+        ngx-tooltip
+        [tooltipDisabled]="tooltipDisabled"
+        [tooltipPlacement]="'top'"
+        [tooltipType]="'tooltip'"
+        [tooltipTitle]="bar.tooltipText">
+        </svg:g>
+      }
+    `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    CommonModule
-  ],
+  imports: [],
   animations: [
     trigger('animationState', [
       transition('* => void', [

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, of, Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 import {
   DeleteDeployAppSection,
@@ -47,7 +47,6 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
   standalone: true,
   imports: [
     AsyncPipe,
-    NgIf,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -57,7 +56,7 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
     DeployApplicationStepSourceUploadComponent,
     DeployApplicationOptionsStepComponent,
     DeployApplicationStep3Component
-  ]
+]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 

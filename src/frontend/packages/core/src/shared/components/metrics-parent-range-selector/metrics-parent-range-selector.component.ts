@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -20,14 +20,13 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   ],
   standalone: true,
   imports: [
-    CommonModule,
     CardWrapperComponent,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     MomentModule,
     StartEndDateComponent
-  ]
+]
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;

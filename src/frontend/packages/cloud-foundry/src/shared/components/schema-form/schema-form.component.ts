@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -37,12 +37,11 @@ export class SchemaFormConfig {
   styleUrls: ['./schema-form.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     TailwindJsonSchemaFormModule
-  ],
+],
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]

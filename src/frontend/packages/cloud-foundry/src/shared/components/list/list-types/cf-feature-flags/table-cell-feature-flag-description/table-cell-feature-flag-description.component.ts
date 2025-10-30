@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -10,9 +10,7 @@ import { FeatureFlagDescriptions } from '../cf-feature-flags-data-source';
   templateUrl: './table-cell-feature-flag-description.component.html',
   styleUrls: ['./table-cell-feature-flag-description.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class TableCellFeatureFlagDescriptionComponent extends TableCellCustom<IFeatureFlag> {
 

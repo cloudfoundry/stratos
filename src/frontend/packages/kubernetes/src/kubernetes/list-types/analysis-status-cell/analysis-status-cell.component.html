@@ -1,8 +1,16 @@
-<div *ngIf="row.status === 'running'" class="status__running">
-  <app-progress-spinner diameter="20" mode="indeterminate"></app-progress-spinner> Running
-</div>
-<div *ngIf="row.status === 'completed'">Completed</div>
-<div *ngIf="row.status === 'error'" class="status__error">
-  <div>Error</div>
-   <span class="material-symbols-outlined text-warning" *ngIf="row.error" matTooltip="{{ row.error }}">warning</span>
-</div>
+@if (row.status === 'running') {
+  <div class="status__running">
+    <app-progress-spinner diameter="20" mode="indeterminate"></app-progress-spinner> Running
+  </div>
+}
+@if (row.status === 'completed') {
+  <div>Completed</div>
+}
+@if (row.status === 'error') {
+  <div class="status__error">
+    <div>Error</div>
+    @if (row.error) {
+      <span class="material-symbols-outlined text-warning" matTooltip="{{ row.error }}">warning</span>
+    }
+  </div>
+}

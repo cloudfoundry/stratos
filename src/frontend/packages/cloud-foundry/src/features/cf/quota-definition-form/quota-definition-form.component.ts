@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
@@ -39,13 +39,12 @@ export interface QuotaFormValues {
   ],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
     FocusDirective,
     UnlimitedInputComponent
-  ]
+]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   quotasSubscription: Subscription;

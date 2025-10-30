@@ -1,63 +1,89 @@
 <div class="card meta-card {{status$ && statusBackground? (status$ | async): '' }}"
   [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}" (click)="clickAction ? clickAction() : null">
-  <div *ngIf="isDeleting$ | async" class="meta-card__deleting-overlay">
-    <div class="meta-card__deleting-overlay-inner">
-      <div class="meta-card__deleting-text">Deleting</div>
-      <app-progress-bar mode="indeterminate"></app-progress-bar>
+  @if (isDeleting$ | async) {
+    <div class="meta-card__deleting-overlay">
+      <div class="meta-card__deleting-overlay-inner">
+        <div class="meta-card__deleting-text">Deleting</div>
+        <app-progress-bar mode="indeterminate"></app-progress-bar>
+      </div>
     </div>
-  </div>
-  <app-card-status *ngIf="status$" [status$]="status$">
-  </app-card-status>
-  <div class="meta-card__header" *ngIf="title">
-    <div
-      [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
+  }
+  @if (status$) {
+    <app-card-status [status$]="status$">
+    </app-card-status>
+  }
+  @if (title) {
+    <div class="meta-card__header">
       <div
-        [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
-        <ng-container *ngTemplateOutlet="title.content"></ng-container>
-      </div>
-      <div class="meta-card__header-container__title--with-icon__icon" *ngIf="statusIconByTitle">
-        <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
-      </div>
-    </div>
-    <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite" *ngIf="favorite"
-      [favorite]="favorite">
-    </app-entity-favorite-star>
-    <div class="meta-card__header-container__actions relative" *ngIf="actionMenu && (showMenu$ | async)" appClickStopPropagation>
-      <button class="btn btn-icon meta-card__header__button" type="button" (click)="toggleMenu()"
-        [disabled]="isDeleting$ | async">
-        <app-custom-icon>more_vert</app-custom-icon>
-      </button>
-      <div *ngIf="menuOpen" class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 min-w-[160px]">
-        <div class="py-1" role="menu">
-          <ng-container *ngFor="let menuItem of actionMenu">
-            <ng-container *ngIf="menuItem.can | async">
-              <button *ngIf="!menuItem.separator"
-                class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                [disabled]="menuItem.disabled | async"
-                (click)="menuItemClick(menuItem)">
-                <app-custom-icon *ngIf="menuItem.icon">{{menuItem.icon}}</app-custom-icon>
-                <span>{{menuItem.label}}</span>
-              </button>
-              <div *ngIf="menuItem.separator" class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
-            </ng-container>
-          </ng-container>
+        [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
+        <div
+          [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
+          <ng-container *ngTemplateOutlet="title.content"></ng-container>
         </div>
+        @if (statusIconByTitle) {
+          <div class="meta-card__header-container__title--with-icon__icon">
+            <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
+          </div>
+        }
       </div>
+      @if (favorite) {
+        <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite"
+          [favorite]="favorite">
+        </app-entity-favorite-star>
+      }
+      @if (actionMenu && (showMenu$ | async)) {
+        <div class="meta-card__header-container__actions relative" appClickStopPropagation>
+          <button class="btn btn-icon meta-card__header__button" type="button" (click)="toggleMenu()"
+            [disabled]="isDeleting$ | async">
+            <app-custom-icon>more_vert</app-custom-icon>
+          </button>
+          @if (menuOpen) {
+            <div class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 min-w-[160px]">
+              <div class="py-1" role="menu">
+                @for (menuItem of actionMenu; track menuItem) {
+                  @if (menuItem.can | async) {
+                    @if (!menuItem.separator) {
+                      <button
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        [disabled]="menuItem.disabled | async"
+                        (click)="menuItemClick(menuItem)">
+                        @if (menuItem.icon) {
+                          <app-custom-icon>{{menuItem.icon}}</app-custom-icon>
+                        }
+                        <span>{{menuItem.label}}</span>
+                      </button>
+                    }
+                    @if (menuItem.separator) {
+                      <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    }
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @if (!statusIconByTitle) {
+        <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
+      }
     </div>
-    <ng-container *ngIf="!statusIconByTitle">
-      <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
-    </ng-container>
-  </div>
+  }
   <div class="meta-card__content">
-    <div *ngFor="let metaItem of metaItems">
-      <span *ngIf="metaItem?.content">
-        <ng-container *ngTemplateOutlet="metaItem.content"></ng-container>
-      </span>
-    </div>
+    @for (metaItem of metaItems; track metaItem) {
+      <div>
+        @if (metaItem?.content) {
+          <span>
+            <ng-container *ngTemplateOutlet="metaItem.content"></ng-container>
+          </span>
+        }
+      </div>
+    }
   </div>
 </div>
 <ng-template #statusIconTmple>
-  <app-application-state-icon *ngIf="statusIcon && status$" [status]="status$ | async"
-    [title]="statusIconTooltip">
-  </app-application-state-icon>
+  @if (statusIcon && status$) {
+    <app-application-state-icon [status]="status$ | async"
+      [title]="statusIconTooltip">
+    </app-application-state-icon>
+  }
 </ng-template>

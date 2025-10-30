@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -28,10 +28,9 @@ import { ApplicationService } from '../../../../../application.service';
   styleUrls: ['./routes-tab.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ListComponent,
     NoContentMessageComponent
-  ],
+],
   providers: [
     DatePipe,
     {

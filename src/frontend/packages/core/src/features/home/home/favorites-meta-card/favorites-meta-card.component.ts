@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -17,9 +17,8 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   styleUrls: ['./favorites-meta-card.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     EntityFavoriteStarComponent
-  ]
+]
 })
 export class FavoritesMetaCardComponent {
 

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnInit } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -13,9 +13,8 @@ import { ServiceInstanceLastOpComponent } from '../../../../service-instance-las
   styleUrls: ['./table-cell-service-last-op.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ServiceInstanceLastOpComponent
-  ]
+]
 })
 export class TableCellServiceLastOpComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 

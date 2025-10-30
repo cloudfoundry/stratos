@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
@@ -84,9 +84,8 @@ selector: 'app-table-cell-favorite',
   styleUrls: ['./table-cell-favorite.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     EntityFavoriteStarComponent
-  ]
+]
 })
 export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
   TableCellCustom<T, TableCellFavoriteComponentConfig<T, Y>> {

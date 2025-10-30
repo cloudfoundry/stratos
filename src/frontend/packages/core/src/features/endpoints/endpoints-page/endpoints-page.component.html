@@ -9,38 +9,54 @@
         type="button"
         (click)="openRegisterModal()"
         matTooltip="Register Endpoint"
-      >
+        >
         <app-custom-icon>add</app-custom-icon>
       </button>
-      <button id="stratos-restore-backup" *ngIf="canBackupRestore$ | async" class="btn btn-icon" type="button"
-        [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
-        <app-custom-icon>settings_backup_restore</app-custom-icon>
-      </button>
+      @if (canBackupRestore$ | async) {
+        <button id="stratos-restore-backup" class="btn btn-icon" type="button"
+          [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
+          <app-custom-icon>settings_backup_restore</app-custom-icon>
+        </button>
+      }
     </div>
   </div>
 </app-page-header>
 
 <!-- Show loading while initializing -->
-<div *ngIf="!(isInitialised$ | async)" class="flex items-center justify-center p-8">
-  <div class="flex items-center space-x-3 text-gray-500">
-    <div class="spinner spinner-primary"></div>
-    <span>Loading endpoints...</span>
+@if (!(isInitialised$ | async)) {
+  <div class="flex items-center justify-center p-8">
+    <div class="flex items-center space-x-3 text-gray-500">
+      <div class="spinner spinner-primary"></div>
+      <span>Loading endpoints...</span>
+    </div>
   </div>
-</div>
+}
 
 <!-- Show content once loaded -->
-<ng-container *ngIf="isInitialised$ | async">
-  <app-list *ngIf="(endpointsService.haveRegistered$ | async); else noEndpointsContainer"></app-list>
-  <ng-template #noEndpointsContainer>
-    <app-endpoints-missing *ngIf="!customizations.noEndpointsComponent; else customNoEndpoints"
+@if (isInitialised$ | async) {
+  @if ((endpointsService.haveRegistered$ | async)) {
+    <app-list></app-list>
+  } @else {
+    @if (!customizations.noEndpointsComponent) {
+      <app-endpoints-missing
       [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+    } @else {
+    }
+  }
+  <ng-template #noEndpointsContainer>
+    @if (!customizations.noEndpointsComponent) {
+      <app-endpoints-missing
+      [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+    } @else {
+    }
   </ng-template>
-</ng-container>
+}
 <ng-template #customNoEndpoints></ng-template>
 
 <!-- Register Endpoint Modal -->
-<app-endpoint-register-modal 
-  *ngIf="showRegisterModal"
-  (closeModalEvent)="closeRegisterModal()"
-  (endpointRegistered)="onEndpointRegistered()"
-></app-endpoint-register-modal>
+@if (showRegisterModal) {
+  <app-endpoint-register-modal
+    (closeModalEvent)="closeRegisterModal()"
+    (endpointRegistered)="onEndpointRegistered()"
+  ></app-endpoint-register-modal>
+}

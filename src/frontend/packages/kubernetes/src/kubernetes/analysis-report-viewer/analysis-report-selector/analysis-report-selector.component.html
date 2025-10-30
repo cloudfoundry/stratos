@@ -1,24 +1,33 @@
-<ng-container *ngIf="canShow$ | async">
-  <div *ngIf="analyzers$ | async as analyzers" class="relative">
-    <div *ngIf="isMenuOpen" class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-48">
-      <button (click)="onSelected(analyzer); closeMenu()"
+@if (canShow$ | async) {
+  @if (analyzers$ | async; as analyzers) {
+    <div class="relative">
+      @if (isMenuOpen) {
+        <div class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-48">
+          @for (analyzer of analyzers; track analyzer) {
+            <button (click)="onSelected(analyzer); closeMenu()"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-md"
-              *ngFor="let analyzer of analyzers">{{ analyzer.title }}</button>
-      <div class="border-t border-gray-200 my-1" *ngIf="analyzers.length > 0"></div>
-      <button (click)="refreshReports($event); closeMenu()"
-              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Refresh</button>
-    </div>
-
-    <!--
+            >{{ analyzer.title }}</button>
+          }
+          @if (analyzers.length > 0) {
+            <div class="border-t border-gray-200 my-1"></div>
+          }
+          <button (click)="refreshReports($event); closeMenu()"
+          class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Refresh</button>
+        </div>
+      }
+      <!--
       See #417
       Note - it would be good to only show if there's no reports `*ngIf="analyzers.length > 0"`. However this causes
       issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and
       doesn't contain the new report. This leaves user with no way to see report/refresh reports list
-    -->
-    <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
-      <span class="text-gray-700">{{ prompt }}</span>
-      <span *ngIf="selection" class="text-gray-900">: {{ selection.title }}</span>
-      <span class="material-icons text-gray-400 ml-2">arrow_drop_down</span>
-    </button>
-  </div>
-</ng-container>
+      -->
+      <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+        <span class="text-gray-700">{{ prompt }}</span>
+        @if (selection) {
+          <span class="text-gray-900">: {{ selection.title }}</span>
+        }
+        <span class="material-icons text-gray-400 ml-2">arrow_drop_down</span>
+      </button>
+    </div>
+  }
+}

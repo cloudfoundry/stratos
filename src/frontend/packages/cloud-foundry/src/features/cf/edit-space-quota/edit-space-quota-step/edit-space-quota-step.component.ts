@@ -1,5 +1,5 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -26,9 +26,8 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
   ],
   standalone: true,
   imports: [
-    CommonModule,
     SpaceQuotaDefinitionFormComponent
-  ]
+]
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
 

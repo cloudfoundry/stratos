@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
@@ -18,11 +18,10 @@ const UNLIMITED = -1;
   ],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomCheckboxComponent
-  ]
+]
 })
 export class UnlimitedInputComponent implements OnInit {
 

@@ -1,3 +1,5 @@
-<div *ngIf="tabNavService.pageHeader$ | async as portal">
-  <ng-container [cdkPortalOutlet]="portal"></ng-container>
-</div>
+@if (tabNavService.pageHeader$ | async; as portal) {
+  <div>
+    <ng-container [cdkPortalOutlet]="portal"></ng-container>
+  </div>
+}

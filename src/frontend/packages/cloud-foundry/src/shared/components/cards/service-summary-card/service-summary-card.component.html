@@ -27,28 +27,34 @@
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="servicesService.getDocumentationUrl() | async as documentationUrl">
-    <app-meta-card-key>Documentation Link</app-meta-card-key>
-    <app-meta-card-value>
-      <a [href]="documentationUrl" target="_blank" appClickStopPropagation>
-        <span class="material-icons">launch</span>
-      </a>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item *ngIf="servicesService.getSupportUrl() | async as supportUrl">
-    <app-meta-card-key>Support Link</app-meta-card-key>
-    <app-meta-card-value>
-      <a [href]="supportUrl" target="_blank" appClickStopPropagation>
-        <span class="material-icons">launch</span>
-      </a>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item *ngIf="servicesService.getServiceProviderName() | async as providerName">
-    <app-meta-card-key>Provider</app-meta-card-key>
-    <app-meta-card-value>
+  @if (servicesService.getDocumentationUrl() | async; as documentationUrl) {
+    <app-meta-card-item>
+      <app-meta-card-key>Documentation Link</app-meta-card-key>
+      <app-meta-card-value>
+        <a [href]="documentationUrl" target="_blank" appClickStopPropagation>
+          <span class="material-icons">launch</span>
+        </a>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  }
+  @if (servicesService.getSupportUrl() | async; as supportUrl) {
+    <app-meta-card-item>
+      <app-meta-card-key>Support Link</app-meta-card-key>
+      <app-meta-card-value>
+        <a [href]="supportUrl" target="_blank" appClickStopPropagation>
+          <span class="material-icons">launch</span>
+        </a>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  }
+  @if (servicesService.getServiceProviderName() | async; as providerName) {
+    <app-meta-card-item>
+      <app-meta-card-key>Provider</app-meta-card-key>
+      <app-meta-card-value>
         {{ servicesService.getServiceProviderName() | async }}
-    </app-meta-card-value>
-  </app-meta-card-item>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  }
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>

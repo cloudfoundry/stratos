@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
@@ -17,11 +17,10 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
   styleUrls: ['./chart-details-info.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     CardWrapperComponent,
     ChartDetailsUsageComponent,
     ChartDetailsVersionsComponent
-  ]
+]
 })
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart: Chart;

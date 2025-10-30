@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -10,9 +10,8 @@ import { BaseChartDirective } from 'ng2-charts';
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
-    CommonModule,
     BaseChartDirective
-  ]
+]
 })
 export class RingChartComponent implements OnInit, OnChanges {
 

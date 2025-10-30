@@ -8,15 +8,25 @@
     <div class="page-side-nav__items-compact-tab-label"> {{ activeTab$ | async }}</div>
   </div>
   <ul class="page-side-nav__items">
-    <li tabindex="1" *ngFor="let tab of tabs">
-      <div *ngIf="tab && !tab.link" class="page-side-nav__item-sep">{{ tab?.label }}</div>
-      <a *ngIf="tab && tab.link && (tab.hidden$ | async) !== true" class="page-side-nav__item"
-        [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
-        <app-custom-icon class="page-side-nav__icon" *ngIf="tab.icon" [fontSet]="tab.iconFont">{{ tab.icon }}
-        </app-custom-icon>
-        <app-custom-icon class="page-side-nav__icon" *ngIf="!tab.icon"></app-custom-icon>
-        <span>{{ tab?.label }}</span>
-      </a>
-    </li>
+    @for (tab of tabs; track tab) {
+      <li tabindex="1">
+        @if (tab && !tab.link) {
+          <div class="page-side-nav__item-sep">{{ tab?.label }}</div>
+        }
+        @if (tab && tab.link && (tab.hidden$ | async) !== true) {
+          <a class="page-side-nav__item"
+            [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
+            @if (tab.icon) {
+              <app-custom-icon class="page-side-nav__icon" [fontSet]="tab.iconFont">{{ tab.icon }}
+              </app-custom-icon>
+            }
+            @if (!tab.icon) {
+              <app-custom-icon class="page-side-nav__icon"></app-custom-icon>
+            }
+            <span>{{ tab?.label }}</span>
+          </a>
+        }
+      </li>
+    }
   </ul>
 </nav>

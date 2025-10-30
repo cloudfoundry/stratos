@@ -2,13 +2,17 @@
 <form [formGroup]="setDomainHost" class="stepper-form">
   <app-form-field>
     <app-select placeholder="Domain" name="domain" formControlName="domain">
-      <app-option *ngFor="let domain of (domains$ | async)" [value]="domain.metadata.guid">
-        <span>{{ domain.entity.name }}</span>
-      </app-option>
+      @for (domain of (domains$ | async); track domain) {
+        <app-option [value]="domain.metadata.guid">
+          <span>{{ domain.entity.name }}</span>
+        </app-option>
+      }
     </app-select>
   </app-form-field>
   <app-form-field>
     <input required formControlName="host" appInput placeholder="Host" name="hostName">
-    <app-error *ngIf="setDomainHost.controls['host']?.errors?.maxlength">Host cannot exceed 63 characters</app-error>
+    @if (setDomainHost.controls['host']?.errors?.maxlength) {
+      <app-error>Host cannot exceed 63 characters</app-error>
+    }
   </app-form-field>
 </form>

@@ -1,9 +1,13 @@
-<div *ngIf="shortcuts && shortcuts.length > 0">
-  <div class="home-shortcut__title">Shortcuts</div>
-  <div class="home-shortcut__items">
-    <div *ngFor="let shortcut of shortcuts" class="home-shortcut__item">
-      <div class="home-shortcut__icon"><app-custom-icon [routerLink]="shortcut.link" [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</app-custom-icon></div>
-      <div><a [routerLink]="shortcut.link">{{ shortcut.title }}</a></div>
+@if (shortcuts && shortcuts.length > 0) {
+  <div>
+    <div class="home-shortcut__title">Shortcuts</div>
+    <div class="home-shortcut__items">
+      @for (shortcut of shortcuts; track shortcut) {
+        <div class="home-shortcut__item">
+          <div class="home-shortcut__icon"><app-custom-icon [routerLink]="shortcut.link" [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</app-custom-icon></div>
+          <div><a [routerLink]="shortcut.link">{{ shortcut.title }}</a></div>
+        </div>
+      }
     </div>
   </div>
-</div>
+}

@@ -4,38 +4,44 @@
     <h2 class="card-title">Instances</h2>
   </div>
   <div class="card-content card-app-instances__compact">
-    <div *ngIf="!isEditing" class="card-app-instances__large">
-      <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
-        [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
-      </app-running-instances>
-    </div>
+    @if (!isEditing) {
+      <div class="card-app-instances__large">
+        <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
+          [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
+        </app-running-instances>
+      </div>
+    }
     <form [hidden]="!isEditing" class="card-app-instances__form">
       <app-form-field>
         <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
       </app-form-field>
     </form>
   </div>
-  <ng-container *ngIf="canEditApp$ | async">
-    <div *ngIf="showActions && (appService.applicationRunning$ | async) && !isEditing"
-      class="card-actions card-app-instances__actions">
-      <button (click)="edit()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
-        <span class="material-icons">edit</span>
-      </button>
-      <button (click)="scaleDown()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
-        <span class="material-icons">remove_circle_outline</span>
-      </button>
-      <button (click)="scaleUp()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
-        <span class="material-icons">add_circle_outline</span>
-      </button>
-    </div>
-    <div *ngIf="showActions && isEditing" class="card-actions card-app-instances__actions">
-      <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
-        <span class="material-icons">clear</span>
-      </button>
-      <button (click)="finishEdit(true)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
-        <span class="material-icons">done</span>
-      </button>
-    </div>
-  </ng-container>
+  @if (canEditApp$ | async) {
+    @if (showActions && (appService.applicationRunning$ | async) && !isEditing) {
+      <div
+        class="card-actions card-app-instances__actions">
+        <button (click)="edit()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+          <span class="material-icons">edit</span>
+        </button>
+        <button (click)="scaleDown()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+          <span class="material-icons">remove_circle_outline</span>
+        </button>
+        <button (click)="scaleUp()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+          <span class="material-icons">add_circle_outline</span>
+        </button>
+      </div>
+    }
+    @if (showActions && isEditing) {
+      <div class="card-actions card-app-instances__actions">
+        <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+          <span class="material-icons">clear</span>
+        </button>
+        <button (click)="finishEdit(true)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+          <span class="material-icons">done</span>
+        </button>
+      </div>
+    }
+  }
 
 </div>

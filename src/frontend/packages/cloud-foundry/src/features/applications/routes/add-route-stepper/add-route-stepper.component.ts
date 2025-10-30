@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -11,11 +11,10 @@ selector: 'app-add-route-stepper',
   styleUrls: ['./add-route-stepper.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
     AddRoutesComponent
-  ]
+]
 })
 export class AddRouteStepperComponent { }

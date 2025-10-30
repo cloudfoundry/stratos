@@ -3,12 +3,16 @@
   <div>
     <app-form-field class="relative">
       <input required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
-      <app-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
-        This name has been taken, please try another.
-      </app-error>
-      <div *ngIf="!form.controls.appName?.hasError('required')" class="absolute right-2 top-1/2 -translate-y-1/2">
-        <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
-      </div>
+      @if (form.controls.appName?.hasError('appNameTaken')) {
+        <app-error>
+          This name has been taken, please try another.
+        </app-error>
+      }
+      @if (!form.controls.appName?.hasError('required')) {
+        <div class="absolute right-2 top-1/2 -translate-y-1/2">
+          <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
+        </div>
+      }
     </app-form-field>
   </div>
 </form>

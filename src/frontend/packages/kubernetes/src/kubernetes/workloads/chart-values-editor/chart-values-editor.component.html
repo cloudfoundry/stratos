@@ -1,27 +1,30 @@
 <div class="card editor-card">
-  <div *ngIf="initing || (loading$ | async)" class="editor-loading">
-    <div>
-      <div class="editor-loading__msg">Loading ...</div>
-      <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden editor-loading__progress-bar">
-        <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+  @if (initing || (loading$ | async)) {
+    <div class="editor-loading">
+      <div>
+        <div class="editor-loading__msg">Loading ...</div>
+        <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden editor-loading__progress-bar">
+          <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+        </div>
       </div>
     </div>
-  </div>
+  }
   <div class="toolbar editor-toolbar">
-    <div class="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="Edit Mode" *ngIf="schema; else editorOnly">
-      <button class="btn btn-toggle"
-              [class.btn-toggle-active]="mode === 'form'"
-              (click)="editModeChanged({value: 'form'})"
-              name="edit-mode-form">Form</button>
-      <button class="btn btn-toggle"
-              [class.btn-toggle-active]="mode === 'editor'"
-              (click)="editModeChanged({value: 'editor'})"
-              name="edit-mode-editor">YAML</button>
-    </div>
-
-    <ng-template #editorOnly>
+    @if (schema) {
+      <div class="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="Edit Mode">
+        <button class="btn btn-toggle"
+          [class.btn-toggle-active]="mode === 'form'"
+          (click)="editModeChanged({value: 'form'})"
+        name="edit-mode-form">Form</button>
+        <button class="btn btn-toggle"
+          [class.btn-toggle-active]="mode === 'editor'"
+          (click)="editModeChanged({value: 'editor'})"
+        name="edit-mode-editor">YAML</button>
+      </div>
+    } @else {
       <div class="editor-title">YAML Editor</div>
-    </ng-template>
+    }
+
 
     <div class="editor-spacer"></div>
 
@@ -31,53 +34,69 @@
           <span>Values</span>
           <span class="material-icons">arrow_drop_down</span>
         </button>
-        <div class="absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-48"
-             *ngIf="menuOpen" #appMenu>
-          <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyValues(); closeMenu()">Copy from chart values</button>
-          <button *ngIf="releaseValues" class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
-          <div *ngIf="mode === 'editor'" class="border-t border-gray-200 my-1"></div>
-          <button *ngIf="mode === 'editor'" class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="diff(); closeMenu()">Diff with chart values</button>
-          <div class="border-t border-gray-200 my-1"></div>
-          <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="clearFormValues(); closeMenu()">Clear</button>
-        </div>
+        @if (menuOpen) {
+          <div class="absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-48"
+            #appMenu>
+            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyValues(); closeMenu()">Copy from chart values</button>
+            @if (releaseValues) {
+              <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
+            }
+            @if (mode === 'editor') {
+              <div class="border-t border-gray-200 my-1"></div>
+            }
+            @if (mode === 'editor') {
+              <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="diff(); closeMenu()">Diff with chart values</button>
+            }
+            <div class="border-t border-gray-200 my-1"></div>
+            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="clearFormValues(); closeMenu()">Clear</button>
+          </div>
+        }
       </div>
     </div>
 
     <div class="editor-toolbar-buttons">
-      <button class="btn btn-toggle"
-              [class.btn-toggle-active]="lineNumbers"
-              (click)="toggleLineNumbers()"
-              *ngIf="mode === 'editor'">
-        <span class="material-icons">format_list_numbered</span>
-      </button>
-      <button class="btn btn-toggle"
-              [class.btn-toggle-active]="minimap"
-              (click)="toggleMinimap()"
-              *ngIf="mode === 'editor'">
-        <span class="material-icons">map</span>
-      </button>
+      @if (mode === 'editor') {
+        <button class="btn btn-toggle"
+          [class.btn-toggle-active]="lineNumbers"
+          (click)="toggleLineNumbers()"
+          >
+          <span class="material-icons">format_list_numbered</span>
+        </button>
+      }
+      @if (mode === 'editor') {
+        <button class="btn btn-toggle"
+          [class.btn-toggle-active]="minimap"
+          (click)="toggleMinimap()"
+          >
+          <span class="material-icons">map</span>
+        </button>
+      }
     </div>
 
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'form'}" class="editor-form">
-    <div class="editor-yaml-error" *ngIf="yamlError">
-      <div class="editor-yaml-error__msg">
-        <div>
-          <span class="material-icons editor-yaml-error__icon text-warning-600">warning</span>
-        </div>
-        <div class="editor-yaml-error__text">
-          <div>Error - YAML is not valid</div>
-          <div>Use the YAML editor to correct it so the values can be loaded into the form</div>
+    @if (yamlError) {
+      <div class="editor-yaml-error">
+        <div class="editor-yaml-error__msg">
+          <div>
+            <span class="material-icons editor-yaml-error__icon text-warning-600">warning</span>
+          </div>
+          <div class="editor-yaml-error__text">
+            <div>Error - YAML is not valid</div>
+            <div>Use the YAML editor to correct it so the values can be loaded into the form</div>
+          </div>
         </div>
       </div>
-    </div>
-    <json-schema-form *ngIf="hasSchema" (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
-      [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
-    </json-schema-form>
+    }
+    @if (hasSchema) {
+      <json-schema-form (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
+        [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
+      </json-schema-form>
+    }
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
     <ngx-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
-      [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
+    [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
   </div>
 
 </div>

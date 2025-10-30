@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TailwindDialogService } from '@stratosui/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -11,9 +11,7 @@ import { ListAppEnvVar } from '../cf-app-variables-data-source';
   templateUrl: './table-cell-edit-variable.component.html',
   styleUrls: ['./table-cell-edit-variable.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {
 

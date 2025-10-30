@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute } from '@angular/router';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
@@ -14,9 +14,8 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
   styleUrls: ['./kubernetes-namespaces-tab.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ListComponent
-  ],
+],
   providers: [{
     provide: ListConfig,
     useClass: KubernetesNamespacesListConfigService,

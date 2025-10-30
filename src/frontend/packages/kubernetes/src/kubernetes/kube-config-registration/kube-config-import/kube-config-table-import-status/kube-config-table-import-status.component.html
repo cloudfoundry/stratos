@@ -1,1 +1,3 @@
-<app-action-monitor-icon *ngIf="state" [state]="state"></app-action-monitor-icon>
+@if (state) {
+  <app-action-monitor-icon [state]="state"></app-action-monitor-icon>
+}

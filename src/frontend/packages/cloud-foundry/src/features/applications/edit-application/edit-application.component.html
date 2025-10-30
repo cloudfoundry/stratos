@@ -11,8 +11,12 @@
     <form [formGroup]="editAppForm" validate class="flex flex-col gap-6 p-6">
       <app-form-field class="relative">
         <input appInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
-        <app-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</app-error>
-        <app-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</app-error>
+        @if (editAppForm.controls.name.errors?.required) {
+          <app-error>Application name is required</app-error>
+        }
+        @if (editAppForm.controls.name.errors?.appNameTaken) {
+          <app-error>Application name already taken</app-error>
+        }
         <div class="absolute right-2 top-1/2 -translate-y-1/2">
           <app-stateful-icon [state]="uniqueNameValidator.appApplicationNameUnique.status"></app-stateful-icon>
         </div>

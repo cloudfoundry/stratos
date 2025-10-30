@@ -1,7 +1,15 @@
 <div class="monitor-icon">
-  <div *ngIf="currentState | async as state">
-    <app-custom-icon class="monitor-icon__error" *ngIf="state.error">error</app-custom-icon>
-    <app-progress-spinner *ngIf="!state.error && state.busy" diameter="20" mode="indeterminate"></app-progress-spinner>
-    <app-custom-icon class="monitor-icon__done" *ngIf="!state.error && !state.busy && state.completed">done</app-custom-icon>
-  </div>
+  @if (currentState | async; as state) {
+    <div>
+      @if (state.error) {
+        <app-custom-icon class="monitor-icon__error">error</app-custom-icon>
+      }
+      @if (!state.error && state.busy) {
+        <app-progress-spinner diameter="20" mode="indeterminate"></app-progress-spinner>
+      }
+      @if (!state.error && !state.busy && state.completed) {
+        <app-custom-icon class="monitor-icon__done">done</app-custom-icon>
+      }
+    </div>
+  }
 </div>

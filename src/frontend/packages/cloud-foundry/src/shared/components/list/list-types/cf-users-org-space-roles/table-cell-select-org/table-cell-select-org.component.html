@@ -1,14 +1,14 @@
-<div *ngIf="(singleOrg$ | async); then singleOrg else manyOrgs"></div>
-<ng-template #singleOrg>
+@if ((singleOrg$ | async)) {
   <div>{{(singleOrg$ | async)?.entity.name }}</div>
-</ng-template>
-<ng-template #manyOrgs>
+} @else {
   <app-form-field>
     <app-select #cfSelect="ngModel" [ngModel]="selectedOrgGuid" id="selectOrgGuid"
       (selectionChange)="updateOrg($event.value)" required>
-      <app-option *ngFor="let org of organizations$ | async;trackBy:org?.metadata?.guid" [value]="org.metadata.guid">
-        {{org.entity.name}}
-      </app-option>
+      @for (org of organizations$ | async; track org?.metadata?.guid($index, org)) {
+        <app-option [value]="org.metadata.guid">
+          {{org.entity.name}}
+        </app-option>
+      }
     </app-select>
   </app-form-field>
-</ng-template>
+}

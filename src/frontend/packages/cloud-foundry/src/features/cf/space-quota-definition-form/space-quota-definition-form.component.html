@@ -1,9 +1,11 @@
 <form [formGroup]="formGroup" class="stepper-form">
   <app-form-field>
     <input appInput formControlName="name" placeholder="Space Quota Name" required [appFocus]="true">
-    <app-error *ngIf="formGroup.controls.name?.hasError('nameTaken')">
-      A space quota with this name already exists. Please enter a different one.
-    </app-error>
+    @if (formGroup.controls.name?.hasError('nameTaken')) {
+      <app-error>
+        A space quota with this name already exists. Please enter a different one.
+      </app-error>
+    }
   </app-form-field>
   <app-form-field>
     <input type="number" appInput formControlName="memoryLimit" placeholder="Total amount of memory an space can have"
@@ -11,7 +13,7 @@
     <span matSuffix>MB</span>
   </app-form-field>
   <app-unlimited-input name="instanceMemoryLimit" placeholder="Max amount of memory an app instance can have"
-    suffix="MB" [required]="true"></app-unlimited-input>
+  suffix="MB" [required]="true"></app-unlimited-input>
 
   <app-unlimited-input name="appInstanceLimit" placeholder="Total number of application instances" [required]="true">
   </app-unlimited-input>
@@ -19,7 +21,7 @@
   </app-unlimited-input>
 
   <app-unlimited-input name="totalServices" placeholder="Total number of service instances an space can have"
-    [required]="true"></app-unlimited-input>
+  [required]="true"></app-unlimited-input>
   <app-unlimited-input name="totalServiceKeys" placeholder="Total number of service keys an space can have">
   </app-unlimited-input>
 

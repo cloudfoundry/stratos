@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, Subject } from 'rxjs';
@@ -18,11 +18,10 @@ import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatte
   styleUrls: ['./cloud-foundry-firehose.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     CustomCheckboxComponent,
-    LogViewerComponent,
-  ]
+    LogViewerComponent
+]
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;

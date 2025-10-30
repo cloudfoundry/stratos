@@ -17,52 +17,58 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="relative w-full overflow-hidden"
-         [class.h-1]="!customHeight"
-         [style.height]="customHeight"
-         role="progressbar"
-         [attr.aria-valuenow]="mode === 'determinate' ? value : null"
-         aria-valuemin="0"
-         aria-valuemax="100">
+      [class.h-1]="!customHeight"
+      [style.height]="customHeight"
+      role="progressbar"
+      [attr.aria-valuenow]="mode === 'determinate' ? value : null"
+      aria-valuemin="0"
+      aria-valuemax="100">
       <!-- Background track -->
       <div class="absolute inset-0 bg-gray-200 dark:bg-gray-800"></div>
-
+    
       <!-- Indeterminate animation (two bars for Material Design effect) -->
-      <ng-container *ngIf="mode === 'indeterminate'">
+      @if (mode === 'indeterminate') {
         <!-- Secondary bar (darker, behind) -->
         <div class="absolute h-full animate-progress-indeterminate-secondary z-10"
-             [ngClass]="progressBarSecondaryClass"></div>
+        [ngClass]="progressBarSecondaryClass"></div>
         <!-- Primary bar (lighter, in front) -->
         <div class="absolute h-full animate-progress-indeterminate-primary z-20 opacity-70"
-             [ngClass]="progressBarPrimaryClass"></div>
-      </ng-container>
-
+        [ngClass]="progressBarPrimaryClass"></div>
+      }
+    
       <!-- Determinate progress -->
-      <div *ngIf="mode === 'determinate'"
-           class="absolute h-full transition-all duration-300 ease-out"
-           [ngClass]="progressBarClass"
-           [style.width.%]="value"></div>
-
+      @if (mode === 'determinate') {
+        <div
+          class="absolute h-full transition-all duration-300 ease-out"
+          [ngClass]="progressBarClass"
+        [style.width.%]="value"></div>
+      }
+    
       <!-- Query animation (reverse indeterminate) -->
-      <div *ngIf="mode === 'query'"
-           class="absolute h-full animate-progress-query"
-           [ngClass]="progressBarClass"></div>
-
+      @if (mode === 'query') {
+        <div
+          class="absolute h-full animate-progress-query"
+        [ngClass]="progressBarClass"></div>
+      }
+    
       <!-- Buffer mode (shows two bars) -->
-      <ng-container *ngIf="mode === 'buffer'">
+      @if (mode === 'buffer') {
         <div class="absolute h-full transition-all duration-300 ease-out bg-gray-300"
-             [style.width.%]="bufferValue"></div>
+        [style.width.%]="bufferValue"></div>
         <div class="absolute h-full transition-all duration-300 ease-out"
-             [ngClass]="progressBarClass"
-             [style.width.%]="value"></div>
-      </ng-container>
-
+          [ngClass]="progressBarClass"
+        [style.width.%]="value"></div>
+      }
+    
       <!-- Solid mode (static bar at 100%) -->
-      <div *ngIf="mode === 'solid'"
-           class="absolute h-full"
-           [ngClass]="progressBarClass"
-           style="width: 100%"></div>
+      @if (mode === 'solid') {
+        <div
+          class="absolute h-full"
+          [ngClass]="progressBarClass"
+        style="width: 100%"></div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     :host {
       display: block;

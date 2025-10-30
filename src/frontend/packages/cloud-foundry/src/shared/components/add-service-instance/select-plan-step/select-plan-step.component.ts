@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule, NgFor, NgIf, TitleCasePipe } from '@angular/common';
+import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -70,16 +70,13 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
     MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-
     AsyncPipe,
-    NgFor,
-    NgIf,
     FocusDirective,
     MetadataItemComponent,
     CardStatusComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent
-  ]
+]
 })
 export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;

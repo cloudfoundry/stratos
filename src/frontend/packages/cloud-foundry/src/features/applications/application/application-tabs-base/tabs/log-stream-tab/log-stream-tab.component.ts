@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import moment from 'moment';
@@ -33,9 +33,8 @@ interface ConnectionError {
   styleUrls: ['./log-stream-tab.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     LogViewerComponent
-  ]
+]
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
   public messages: Observable<string>;

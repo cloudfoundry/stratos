@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
@@ -10,9 +10,8 @@ import moment from 'moment';
   selector: 'app-date-time',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule
-  ],
+],
   templateUrl: './date-time.component.html',
   styleUrls: ['./date-time.component.scss']
 })

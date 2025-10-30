@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -16,13 +16,12 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
   styleUrls: ['./backup-connection-cell.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CustomTooltipDirective
-  ]
+]
 })
 export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {
 

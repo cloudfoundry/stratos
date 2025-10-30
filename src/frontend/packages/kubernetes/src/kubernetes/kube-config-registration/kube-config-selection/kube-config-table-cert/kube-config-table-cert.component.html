@@ -1,6 +1,7 @@
-<app-progress-spinner *ngIf="!(initialValue$ | async); else haveInitialValue" diameter="20" mode="indeterminate">
-</app-progress-spinner>
-<ng-template #haveInitialValue>
+@if (!(initialValue$ | async)) {
+  <app-progress-spinner diameter="20" mode="indeterminate">
+  </app-progress-spinner>
+} @else {
   <app-checkbox [checked]="(initialValue$ | async).checked" (change)="valueChanged($event.checked)" color="primary">
   </app-checkbox>
-</ng-template>
+}

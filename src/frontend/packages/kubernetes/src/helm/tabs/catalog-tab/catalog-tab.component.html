@@ -1,43 +1,61 @@
 <ng-template #listRepoButton>
-  <div class="list-header" *ngIf="!hide">
-    <button class="btn btn-ghost" (click)="collapsed = !collapsed">
-      <span class="material-symbols-outlined">filter_list</span>
-      <span class="material-symbols-outlined" *ngIf="collapsed">chevron_right</span>
-      <span class="material-symbols-outlined" *ngIf="!collapsed">chevron_left</span>
-    </button>
-    <div class="flex flex-wrap gap-2">
-      <div *ngIf="filteredRepo"
-        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100">
-        <span>{{filteredRepo}}</span>
-        <button (click)="filterCharts()"
-          class="ml-1 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5">
-          <span class="material-symbols-outlined text-base">cancel</span>
-        </button>
+  @if (!hide) {
+    <div class="list-header">
+      <button class="btn btn-ghost" (click)="collapsed = !collapsed">
+        <span class="material-symbols-outlined">filter_list</span>
+        @if (collapsed) {
+          <span class="material-symbols-outlined">chevron_right</span>
+        }
+        @if (!collapsed) {
+          <span class="material-symbols-outlined">chevron_left</span>
+        }
+      </button>
+      <div class="flex flex-wrap gap-2">
+        @if (filteredRepo) {
+          <div
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100">
+            <span>{{filteredRepo}}</span>
+            <button (click)="filterCharts()"
+              class="ml-1 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5">
+              <span class="material-symbols-outlined text-base">cancel</span>
+            </button>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 </ng-template>
 
 <div class="charts">
-  <div class="charts__repos" *ngIf="!hide && repos$ | async as repos"
-    [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
-    <h3>Filter By Repository</h3>
-    <app-form-field>
-      <input appInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
-        (ngModelChange)="searchRepos($event)">
-    </app-form-field>
-    <div class="charts__repos__lists">
-      <div class="charts__repos__stratos" *ngIf="repos.stratosRepos.length">
-        <h4>Helm Repositories</h4>
-        <a *ngFor="let repo of repos.stratosRepos" (click)="filterCharts(repo)"
-          [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
-      </div>
-      <div class="charts__repos__artifact" *ngIf="repos.artifactHubRepos.length">
-        <h4>Artifact Hub Repositories</h4>
-        <a *ngFor="let repo of repos.artifactHubRepos" (click)="filterCharts(repo)"
-          [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+  @if (!hide && repos$ | async; as repos) {
+    <div class="charts__repos"
+      [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
+      <h3>Filter By Repository</h3>
+      <app-form-field>
+        <input appInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
+          (ngModelChange)="searchRepos($event)">
+      </app-form-field>
+      <div class="charts__repos__lists">
+        @if (repos.stratosRepos.length) {
+          <div class="charts__repos__stratos">
+            <h4>Helm Repositories</h4>
+            @for (repo of repos.stratosRepos; track repo) {
+              <a (click)="filterCharts(repo)"
+              [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+            }
+          </div>
+        }
+        @if (repos.artifactHubRepos.length) {
+          <div class="charts__repos__artifact">
+            <h4>Artifact Hub Repositories</h4>
+            @for (repo of repos.artifactHubRepos; track repo) {
+              <a (click)="filterCharts(repo)"
+              [ngClass]="{'charts__repos__selected': repo === filteredRepo}">{{repo}}</a>
+            }
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
   <app-list [customFilters]="listRepoButton"></app-list>
 </div>

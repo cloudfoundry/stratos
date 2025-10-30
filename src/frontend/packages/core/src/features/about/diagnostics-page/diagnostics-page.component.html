@@ -2,101 +2,125 @@
   <h1>Diagnostics</h1>
 </app-page-header>
 
-<div *ngIf="(sessionData$ | async) as session">
-  <app-card class="diagnostics-page__card">
-    <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-    <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
-    <div *ngIf="(this.userIsAdmin$ | async) as isAdminUser">
-      <app-metadata-item *ngIf="!isAdminUser" icon="person" label="User">{{ session.user.name }}</app-metadata-item>
-      <app-metadata-item class="about-page__mat-warning-icon" *ngIf="isAdminUser" icon="security" label="User">
-        {{ session.user.name }} (You have administrative privileges)</app-metadata-item>
-      <app-metadata-item *ngIf="session.config.enableTechPreview" class="about-page__mat-warning-icon" icon="whatshot"
-        label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
-      <app-metadata-item class="about-page__mat-warning-icon diagnostics-page__maxed" icon="list"
-        label="Lists - Jetstream Configuration">
-        <div class="diagnostics-page__maxed__content">
-          <span>List max size: {{session.config.listMaxSize || 'Not Set'}}</span>
-          <span>Allow fetch of all entities of a maxed list: {{!!session.config.listAllowLoadMaxed}}</span>
+@if ((sessionData$ | async); as session) {
+  <div>
+    <app-card class="diagnostics-page__card">
+      <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
+      <app-metadata-item icon="date_range" label="Build Date">{{ buildDate }}</app-metadata-item>
+      @if ((this.userIsAdmin$ | async); as isAdminUser) {
+        <div>
+          @if (!isAdminUser) {
+            <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
+          }
+          @if (isAdminUser) {
+            <app-metadata-item class="about-page__mat-warning-icon" icon="security" label="User">
+            {{ session.user.name }} (You have administrative privileges)</app-metadata-item>
+          }
+          @if (session.config.enableTechPreview) {
+            <app-metadata-item class="about-page__mat-warning-icon" icon="whatshot"
+            label="Tech Preview">Tech Preview features are enabled</app-metadata-item>
+          }
+          <app-metadata-item class="about-page__mat-warning-icon diagnostics-page__maxed" icon="list"
+            label="Lists - Jetstream Configuration">
+            <div class="diagnostics-page__maxed__content">
+              <span>List max size: {{session.config.listMaxSize || 'Not Set'}}</span>
+              <span>Allow fetch of all entities of a maxed list: {{!!session.config.listAllowLoadMaxed}}</span>
+            </div>
+          </app-metadata-item>
         </div>
-      </app-metadata-item>
-    </div>
-  </app-card>
-
-  <app-card class="diagnostics-page__card diagnostics-page__columns">
-    <div class="diagnostics-page__two-column">
-      <div *ngIf="!!gitHubRepository">
-        <app-metadata-item icon="storage" label="GitHub Repository">
-          <a [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
-        </app-metadata-item>
-        <app-metadata-item *ngIf="!!gitBranch" icon="storage" label="Branch">
-          <a *ngIf="!!gitBranch" [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
-          <span *ngIf="!gitBranch">Not available</span>
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Commit">
-          <a *ngIf="!!gitCommit" [href]="gitCommitLink" rel="noopener noreferrer"
-            target="_blank">{{ gitCommit | slice:0:8 }}</a>
-          <span *ngIf="!gitCommit">Not available</span>
-        </app-metadata-item>
-      </div>
-      <app-metadata-item icon="info_outline" label="Git Client Version">
+      }
+    </app-card>
+    <app-card class="diagnostics-page__card diagnostics-page__columns">
+      <div class="diagnostics-page__two-column">
+        @if (!!gitHubRepository) {
+          <div>
+            <app-metadata-item icon="storage" label="GitHub Repository">
+              <a [href]="gitHubRepositoryLink" rel="noopener noreferrer" target="_blank">{{ gitHubRepository }}</a>
+            </app-metadata-item>
+            @if (!!gitBranch) {
+              <app-metadata-item icon="storage" label="Branch">
+                @if (!!gitBranch) {
+                  <a [href]="gitBranchLink" rel="noopener noreferrer" target="_blank">{{ gitBranch }}</a>
+                }
+                @if (!gitBranch) {
+                  <span>Not available</span>
+                }
+              </app-metadata-item>
+            }
+            <app-metadata-item icon="storage" label="Commit">
+              @if (!!gitCommit) {
+                <a [href]="gitCommitLink" rel="noopener noreferrer"
+                target="_blank">{{ gitCommit | slice:0:8 }}</a>
+              }
+              @if (!gitCommit) {
+                <span>Not available</span>
+              }
+            </app-metadata-item>
+          </div>
+        }
+        <app-metadata-item icon="info_outline" label="Git Client Version">
         {{ session.diagnostics.gitClientVersion || 'N/A' }}</app-metadata-item>
-    </div>
-    <div class="diagnostics-page__two-column">
-      <app-metadata-item icon="storage" label="Deployment Type">{{ session.diagnostics.deploymentType }}
-      </app-metadata-item>
-      <div *ngIf="session.diagnostics.deploymentType === 'Kubernetes'">
-        <app-metadata-item icon="storage" label="Helm Chart Version">{{ session.diagnostics.helmChartVersion || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Helm Release">{{ session.diagnostics.helmName || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="storage" label="Helm Revision">{{ session.diagnostics.helmRevision || 'N/A' }}
-        </app-metadata-item>
-        <app-metadata-item icon="date_range" label="Helm Last Modified">{{ helmLastModified$ | async | date:'medium' }}
-        </app-metadata-item>
       </div>
-    </div>
-  </app-card>
-
-  <app-card class="diagnostics-page__card">
-    <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}
-    </app-metadata-item>
-    <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-800">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              ID
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Version
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Applied
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Timestamp
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr *ngFor="let row of session.diagnostics.databaseMigrations"
-              class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              {{row.id}}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              {{row.version_id}}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-              {{row.timestamp}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </app-card>
-</div>
+      <div class="diagnostics-page__two-column">
+        <app-metadata-item icon="storage" label="Deployment Type">{{ session.diagnostics.deploymentType }}
+        </app-metadata-item>
+        @if (session.diagnostics.deploymentType === 'Kubernetes') {
+          <div>
+            <app-metadata-item icon="storage" label="Helm Chart Version">{{ session.diagnostics.helmChartVersion || 'N/A' }}
+            </app-metadata-item>
+            <app-metadata-item icon="storage" label="Helm Release">{{ session.diagnostics.helmName || 'N/A' }}
+            </app-metadata-item>
+            <app-metadata-item icon="storage" label="Helm Revision">{{ session.diagnostics.helmRevision || 'N/A' }}
+            </app-metadata-item>
+            <app-metadata-item icon="date_range" label="Helm Last Modified">{{ helmLastModified$ | async | date:'medium' }}
+            </app-metadata-item>
+          </div>
+        }
+      </div>
+    </app-card>
+    <app-card class="diagnostics-page__card">
+      <app-metadata-item icon="storage" label="Database">{{ session.diagnostics.databaseBackend || 'N/A' }}
+      </app-metadata-item>
+      <app-metadata-item icon="storage" label="Database Migrations"></app-metadata-item>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                ID
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Version
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Applied
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Timestamp
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+            @for (row of session.diagnostics.databaseMigrations; track row) {
+              <tr
+                class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  {{row.id}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  {{row.version_id}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  <app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  {{row.timestamp}}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+}

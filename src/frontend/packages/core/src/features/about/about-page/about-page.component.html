@@ -1,41 +1,49 @@
 <app-page-header [showUnderFlow]="true">About</app-page-header>
-<div class="card mb-6" *ngIf="!customizations.aboutInfoComponent; else aboutInfoContainer">
-  <div class="card-body">
-    <app-stratos-title></app-stratos-title>
-    <div class="space-y-4">
-      <div class="text-lg font-semibold text-gray-600">{{ (versionNumber$ | async) }}</div>
-      <div class="text-base text-gray-700 leading-relaxed">
-        <app-product-name></app-product-name> provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments
+@if (!customizations.aboutInfoComponent) {
+  <div class="card mb-6">
+    <div class="card-body">
+      <app-stratos-title></app-stratos-title>
+      <div class="space-y-4">
+        <div class="text-lg font-semibold text-gray-600">{{ (versionNumber$ | async) }}</div>
+        <div class="text-base text-gray-700 leading-relaxed">
+          <app-product-name></app-product-name> provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments
+        </div>
       </div>
     </div>
   </div>
-</div>
-<ng-template #aboutInfoContainer></ng-template>
+} @else {
+}
 
-<div *ngIf="customizations.hasEula" class="card mb-6">
-  <div class="card-body">
-    <div class="mb-4 text-gray-700">Use of this software is subject to the End-User License Agreement</div>
-    <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
+@if (customizations.hasEula) {
+  <div class="card mb-6">
+    <div class="card-body">
+      <div class="mb-4 text-gray-700">Use of this software is subject to the End-User License Agreement</div>
+      <button [routerLink]="['eula']" class="btn btn-primary">View EULA</button>
+    </div>
   </div>
-</div>
+}
 
 <template #supportInfoContainer></template>
 
-<div *ngIf="(sessionData$ | async) as session" class="card mb-6">
-  <div class="card-body space-y-4">
-    <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
-    <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
+@if ((sessionData$ | async); as session) {
+  <div class="card mb-6">
+    <div class="card-body space-y-4">
+      <app-metadata-item icon="web_asset" label="Version">{{ session.version.proxy_version }}</app-metadata-item>
+      <app-metadata-item icon="person" label="User">{{ session.user.name }}</app-metadata-item>
+    </div>
   </div>
-</div>
+}
 
-<div *ngIf="(this.userIsAdmin$ | async)" class="card mb-6 border-orange-200 bg-orange-50">
-  <div class="card-body">
-    <div class="flex items-center space-x-4">
-      <span class="material-icons text-orange-600 text-2xl">security</span>
-      <div class="flex-1">
-        <div class="text-gray-800 font-medium mb-2">You have administrative privileges</div>
-        <button [routerLink]="['diagnostics']" class="btn btn-primary">View Diagnostics</button>
+@if ((this.userIsAdmin$ | async)) {
+  <div class="card mb-6 border-orange-200 bg-orange-50">
+    <div class="card-body">
+      <div class="flex items-center space-x-4">
+        <span class="material-icons text-orange-600 text-2xl">security</span>
+        <div class="flex-1">
+          <div class="text-gray-800 font-medium mb-2">You have administrative privileges</div>
+          <button [routerLink]="['diagnostics']" class="btn btn-primary">View Diagnostics</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+}

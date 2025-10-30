@@ -12,35 +12,43 @@
     <app-meta-card-key>Applications</app-meta-card-key>
     <app-meta-card-value>{{ appCount$ | async }}</app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="(cfEndpointService.appsPagObs.hasEntities$ | async) !== false; else noInstanceCount">
-    <app-meta-card-key>App Instances</app-meta-card-key>
-    <app-meta-card-value>
-      <ng-container *ngIf="appInstancesLimit; else noAppInstancesLimit">{{appInstancesCount }} /
-        {{ appInstancesLimit | infinityPipe }}</ng-container>
-      <ng-template #noAppInstancesLimit>{{ appInstancesCount }}</ng-template>
-    </app-meta-card-value>
-  </app-meta-card-item>
-  <ng-template #noInstanceCount>
+  @if ((cfEndpointService.appsPagObs.hasEntities$ | async) !== false) {
+    <app-meta-card-item>
+      <app-meta-card-key>App Instances</app-meta-card-key>
+      <app-meta-card-value>
+        @if (appInstancesLimit) {
+          {{appInstancesCount }} /
+          {{ appInstancesLimit | infinityPipe }}
+        } @else {
+          {{ appInstancesCount }}
+        }
+      </app-meta-card-value>
+    </app-meta-card-item>
+  } @else {
     <app-meta-card-item>
       <app-meta-card-key>App Instances Quota</app-meta-card-key>
       <app-meta-card-value>{{ appInstancesLimit | infinityPipe }}</app-meta-card-value>
     </app-meta-card-item>
-  </ng-template>
-  <app-meta-card-item *ngIf="(cfEndpointService.appsPagObs.hasEntities$ | async) !== false; else noMemoryTotal">
-    <app-meta-card-key>Memory</app-meta-card-key>
-    <app-meta-card-value>
-      <ng-container *ngIf="memoryLimit; else noMemoryLimit">{{ memoryTotal | mbToHumanSize }} /
-        {{ memoryLimit | mbToHumanSize }}</ng-container>
-      <ng-template #noMemoryLimit>{{ memoryTotal }}</ng-template>
-    </app-meta-card-value>
-    <div class="progress mt-2">
-      <div class="progress-bar" [style.width.%]="normalisedMemoryUsage"></div>
-    </div>
-  </app-meta-card-item>
-  <ng-template #noMemoryTotal>
+  }
+  @if ((cfEndpointService.appsPagObs.hasEntities$ | async) !== false) {
+    <app-meta-card-item>
+      <app-meta-card-key>Memory</app-meta-card-key>
+      <app-meta-card-value>
+        @if (memoryLimit) {
+          {{ memoryTotal | mbToHumanSize }} /
+          {{ memoryLimit | mbToHumanSize }}
+        } @else {
+          {{ memoryTotal }}
+        }
+      </app-meta-card-value>
+      <div class="progress mt-2">
+        <div class="progress-bar" [style.width.%]="normalisedMemoryUsage"></div>
+      </div>
+    </app-meta-card-item>
+  } @else {
     <app-meta-card-item>
       <app-meta-card-key>Memory Quota</app-meta-card-key>
       <app-meta-card-value>{{ memoryLimit | mbToHumanSize }}</app-meta-card-value>
     </app-meta-card-item>
-  </ng-template>
+  }
 </app-meta-card>

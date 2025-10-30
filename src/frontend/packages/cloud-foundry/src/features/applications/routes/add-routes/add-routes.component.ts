@@ -19,7 +19,7 @@ import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
@@ -35,7 +35,6 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
   styleUrls: ['./add-routes.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
@@ -44,7 +43,7 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
     CustomCheckboxComponent,
     FocusDirective,
     MapRoutesComponent
-  ]
+]
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];

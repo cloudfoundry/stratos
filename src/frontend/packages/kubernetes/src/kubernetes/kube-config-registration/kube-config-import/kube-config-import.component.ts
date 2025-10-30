@@ -1,5 +1,5 @@
 import { Component, ComponentFactoryResolver, Injector, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { UntypedFormBuilder } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -41,9 +41,8 @@ selector: 'app-kube-config-import',
   styleUrls: ['./kube-config-import.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    TableComponent,
-  ]
+    TableComponent
+]
 })
 export class KubeConfigImportComponent implements OnDestroy {
 

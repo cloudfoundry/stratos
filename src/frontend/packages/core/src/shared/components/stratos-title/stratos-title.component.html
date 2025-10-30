@@ -3,7 +3,9 @@
   <h1 class="stratos-title__header text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
     {{ title || (themeTitle$ | async) }}
   </h1>
-  <p class="stratos-title__subtitle text-gray-600 dark:text-gray-400 text-sm" *ngIf="themeSubtitle$ | async">
-    {{ themeSubtitle$ | async }}
-  </p>
+  @if (themeSubtitle$ | async) {
+    <p class="stratos-title__subtitle text-gray-600 dark:text-gray-400 text-sm">
+      {{ themeSubtitle$ | async }}
+    </p>
+  }
 </div>

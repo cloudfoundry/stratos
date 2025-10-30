@@ -1,1 +1,1 @@
-<app-entity-favorite-star class="table-cell-favorite" *ngIf="canFavorite" [favorite]="favorite"></app-entity-favorite-star>
+@if (canFavorite) {<app-entity-favorite-star class="table-cell-favorite" [favorite]="favorite"></app-entity-favorite-star>}

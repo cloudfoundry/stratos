@@ -6,26 +6,33 @@
       class="select select-sm"
       [value]="pageSize"
       (change)="changePageSize(+$any($event.target).value)">
-      <option *ngFor="let option of pageSizeOptions" [value]="option">
-        {{option}}
-      </option>
+      @for (option of pageSizeOptions; track option) {
+        <option [value]="option">
+          {{option}}
+        </option>
+      }
     </select>
   </div>
 
   <div class="paginator-info text-sm text-gray-600">
-    <span *ngIf="length > 0">{{getStartIndex()}} - {{getEndIndex()}} of {{length}}</span>
-    <span *ngIf="length === 0">0 of 0</span>
+    @if (length > 0) {
+      <span>{{getStartIndex()}} - {{getEndIndex()}} of {{length}}</span>
+    }
+    @if (length === 0) {
+      <span>0 of 0</span>
+    }
   </div>
 
   <div class="paginator-controls flex items-center gap-1">
-    <button
-      *ngIf="showFirstLastButtons"
-      class="btn btn-sm btn-icon"
-      [disabled]="!hasPreviousPage"
-      (click)="firstPage()"
-      title="First page">
-      <span class="material-icons">first_page</span>
-    </button>
+    @if (showFirstLastButtons) {
+      <button
+        class="btn btn-sm btn-icon"
+        [disabled]="!hasPreviousPage"
+        (click)="firstPage()"
+        title="First page">
+        <span class="material-icons">first_page</span>
+      </button>
+    }
     <button
       class="btn btn-sm btn-icon"
       [disabled]="!hasPreviousPage"
@@ -40,13 +47,14 @@
       title="Next page">
       <span class="material-icons">chevron_right</span>
     </button>
-    <button
-      *ngIf="showFirstLastButtons"
-      class="btn btn-sm btn-icon"
-      [disabled]="!hasNextPage"
-      (click)="lastPage()"
-      title="Last page">
-      <span class="material-icons">last_page</span>
-    </button>
+    @if (showFirstLastButtons) {
+      <button
+        class="btn btn-sm btn-icon"
+        [disabled]="!hasNextPage"
+        (click)="lastPage()"
+        title="Last page">
+        <span class="material-icons">last_page</span>
+      </button>
+    }
   </div>
 </div>

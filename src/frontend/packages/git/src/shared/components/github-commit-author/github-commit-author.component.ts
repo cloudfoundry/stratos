@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { GitCommit } from '@stratosui/git';
 
 @Component({
@@ -7,9 +7,7 @@ import { GitCommit } from '@stratosui/git';
   templateUrl: './github-commit-author.component.html',
   styleUrls: ['./github-commit-author.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class GithubCommitAuthorComponent {
   @Input() commit: GitCommit;

@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-expansion-panel',
   templateUrl: './custom-expansion-panel.component.html',
   styleUrls: ['./custom-expansion-panel.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class CustomExpansionPanelComponent {
   @Input() disabled = false;

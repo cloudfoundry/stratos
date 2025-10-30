@@ -1,6 +1,6 @@
 import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -8,7 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
   templateUrl: './custom-form-field.component.html',
   styleUrls: ['./custom-form-field.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class CustomFormFieldComponent implements AfterContentInit, OnDestroy {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';

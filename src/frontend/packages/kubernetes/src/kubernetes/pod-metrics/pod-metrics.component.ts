@@ -1,4 +1,4 @@
-import { AsyncPipe, NgFor } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -34,11 +34,10 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
   standalone: true,
   imports: [
     AsyncPipe,
-    NgFor,
     PageHeaderComponent,
     MetricsParentRangeSelectorComponent,
-    MetricsChartComponent,
-  ],
+    MetricsChartComponent
+],
   providers: [
     {
       provide: BaseKubeGuid,

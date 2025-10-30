@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
 import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
 import { Router } from '@angular/router';
@@ -13,9 +13,8 @@ import { AppProgressBarComponent } from '../../shared/components/progress-bar/ap
   styleUrls: ['./log-out-dialog.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     AppProgressBarComponent
-  ]
+]
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(

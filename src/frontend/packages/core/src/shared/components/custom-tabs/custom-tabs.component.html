@@ -1,22 +1,25 @@
 <div class="custom-tab-group">
   <div class="tab-header" [attr.data-background-color]="backgroundColor">
     <div class="tab-labels">
-      <div
-        *ngFor="let tab of getTabsArray(); let i = index"
-        class="tab-label"
-        [class.active]="tab.isActive"
-        [class.disabled]="tab.disabled"
-        [attr.data-color]="color"
-        (click)="selectTab(i)"
-      >
-        {{ tab.label || tab.textLabel }}
-      </div>
+      @for (tab of getTabsArray(); track tab; let i = $index) {
+        <div
+          class="tab-label"
+          [class.active]="tab.isActive"
+          [class.disabled]="tab.disabled"
+          [attr.data-color]="color"
+          (click)="selectTab(i)"
+          >
+          {{ tab.label || tab.textLabel }}
+        </div>
+      }
     </div>
   </div>
 
   <div class="tab-content">
-    <div *ngFor="let tab of getTabsArray(); let i = index" [hidden]="!tab.isActive">
-      <ng-container *ngTemplateOutlet="tab.content"></ng-container>
-    </div>
+    @for (tab of getTabsArray(); track tab; let i = $index) {
+      <div [hidden]="!tab.isActive">
+        <ng-container *ngTemplateOutlet="tab.content"></ng-container>
+      </div>
+    }
   </div>
 </div>

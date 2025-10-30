@@ -1,10 +1,13 @@
-<app-form-field *ngIf="connectable; else unConnectable">
-  <app-select [(value)]="service.state[row.guid][backupType.CONNECT]"
-    [disabled]="!service.state[row.guid][backupType.ENDPOINT]">
-    <app-option [value]="connectionTypes.NONE">None</app-option>
-    <app-option [value]="connectionTypes.CURRENT" [disabled]="!!userConnectionWarning"
+@if (connectable) {
+  <app-form-field>
+    <app-select [(value)]="service.state[row.guid][backupType.CONNECT]"
+      [disabled]="!service.state[row.guid][backupType.ENDPOINT]">
+      <app-option [value]="connectionTypes.NONE">None</app-option>
+      <app-option [value]="connectionTypes.CURRENT" [disabled]="!!userConnectionWarning"
       [matTooltip]="userConnectionWarning">Current User</app-option>
-    <app-option [value]="connectionTypes.ALL">All Users</app-option>
-  </app-select>
-</app-form-field>
-<ng-template #unConnectable>N/A</ng-template>
+      <app-option [value]="connectionTypes.ALL">All Users</app-option>
+    </app-select>
+  </app-form-field>
+} @else {
+  N/A
+}

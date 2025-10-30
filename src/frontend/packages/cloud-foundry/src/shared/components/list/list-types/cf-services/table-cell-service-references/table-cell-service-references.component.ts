@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -12,9 +12,8 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
   styleUrls: ['./table-cell-service-references.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ClickStopPropagationDirective
-  ]
+]
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
 

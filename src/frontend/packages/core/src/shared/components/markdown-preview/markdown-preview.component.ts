@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -15,10 +15,9 @@ import { MarkdownContentObserverDirective } from './markdown-content-observer.di
   styleUrls: ['./markdown-preview.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     SidepanelPreviewComponent,
     MarkdownContentObserverDirective
-  ]
+]
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 

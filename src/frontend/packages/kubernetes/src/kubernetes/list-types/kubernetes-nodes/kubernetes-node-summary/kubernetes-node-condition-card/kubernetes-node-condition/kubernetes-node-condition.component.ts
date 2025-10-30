@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -9,7 +10,8 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
   selector: 'app-kubernetes-node-condition',
   templateUrl: './kubernetes-node-condition.component.html',
   styleUrls: ['./kubernetes-node-condition.component.scss'],
-  standalone: true
+  standalone: true,
+  imports: [AsyncPipe]
 })
 export class KubernetesNodeConditionComponent implements OnInit {
 

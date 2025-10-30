@@ -1,12 +1,14 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
-  <div *ngIf="haveConnectedCf$ | async" class="page-header-right">
-    <ng-container *appCfUserPermission="canCreateApplication">
-      <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
-        <span class="material-icons">add</span>
-      </button>
-    </ng-container>
-  </div>
+  @if (haveConnectedCf$ | async) {
+    <div class="page-header-right">
+      <ng-container *appCfUserPermission="canCreateApplication">
+        <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
+          <span class="material-icons">add</span>
+        </button>
+      </ng-container>
+    </div>
+  }
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
@@ -23,15 +25,19 @@
 </ng-template>
 
 <!-- Show loading indicator -->
-<div *ngIf="!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)"
-     class="flex items-center justify-center p-8">
-  <div class="flex items-center space-x-3 text-gray-500">
-    <div class="spinner spinner-primary"></div>
-    <span>Loading applications...</span>
+@if (!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) || !(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <div
+    class="flex items-center justify-center p-8">
+    <div class="flex items-center space-x-3 text-gray-500">
+      <div class="spinner spinner-primary"></div>
+      <span>Loading applications...</span>
+    </div>
   </div>
-</div>
+}
 
-<app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-  (initialised)="cfOrgSpaceService.enableAutoSelectors()"
-  *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
-</app-list>
+@if (!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
+    (initialised)="cfOrgSpaceService.enableAutoSelectors()"
+    >
+  </app-list>
+}

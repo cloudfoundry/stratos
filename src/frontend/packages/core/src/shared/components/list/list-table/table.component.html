@@ -1,9 +1,13 @@
 <div class="app-table">
-  <div class="app-table__loading" *ngIf="dataSource.isTableLoading$">
-    <div *ngIf="dataSource.isTableLoading$ | async" class="progress-bar">
-      <div class="progress-bar-indeterminate bg-primary-500"></div>
+  @if (dataSource.isTableLoading$) {
+    <div class="app-table__loading">
+      @if (dataSource.isTableLoading$ | async) {
+        <div class="progress-bar">
+          <div class="progress-bar-indeterminate bg-primary-500"></div>
+        </div>
+      }
     </div>
-  </div>
+  }
   <div class="card app-table__card"
     [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent}">
     <div class="card-content app-table__content">
@@ -14,29 +18,35 @@
               [ngClass]="{'in-expanded-row': !!inExpandedRow, 'has-expanded-row': expandComponent, 'app-table__inner--has-expanded-columns': !!expandComponent}"
               [hidden]="hideTable"
               role="row">
-              <div *ngFor="let column of columns"
-                class="table-header-cell app-table__header-cell"
-                [ngClass]="[column.class || '', column.headerClass || '']"
-                [style.flex]="column.cellFlex"
-                role="columnheader">
-                <div class="flex items-center gap-1"
-                  [class.cursor-pointer]="column.sort"
-                  (click)="column.sort && handleSort(column)">
-                  <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
+              @for (column of columns; track column) {
+                <div
+                  class="table-header-cell app-table__header-cell"
+                  [ngClass]="[column.class || '', column.headerClass || '']"
+                  [style.flex]="column.cellFlex"
+                  role="columnheader">
+                  <div class="flex items-center gap-1"
+                    [class.cursor-pointer]="column.sort"
+                    (click)="column.sort && handleSort(column)">
+                    <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell"
                     [dataSource]="dataSource"></app-table-cell>
-                  <span *ngIf="column.sort" class="material-icons text-sm text-gray-400">sort</span>
+                    @if (column.sort) {
+                      <span class="material-icons text-sm text-gray-400">sort</span>
+                    }
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
           <div class="table-body" role="rowgroup">
-            <app-table-row class="app-table__row" *ngFor="let row of dataSource.connect(null) | async; let i = index; trackBy: dataSource.trackBy"
-              [columns]="columns"
-              [dataSource]="dataSource"
-              [rowState]="getRowState(row)"
-              [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
-              [rowId]="dataSource.trackBy(i, row)" [prominentErrorBar]="prominentErrorBar">
-            </app-table-row>
+            @for (row of dataSource.connect(null) | async; track dataSource.trackBy(i, row); let i = $index) {
+              <app-table-row class="app-table__row"
+                [columns]="columns"
+                [dataSource]="dataSource"
+                [rowState]="getRowState(row)"
+                [row]="row" [expandComponent]="expandComponent" [inExpandedRow]="inExpandedRow" [minRowHeight]="minRowHeight"
+                [rowId]="dataSource.trackBy(i, row)" [prominentErrorBar]="prominentErrorBar">
+              </app-table-row>
+            }
           </div>
         </div>
       </div>

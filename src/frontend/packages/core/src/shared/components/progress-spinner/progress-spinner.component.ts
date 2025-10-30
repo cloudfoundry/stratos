@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 /**
  * Custom progress spinner component using Tailwind CSS animations
@@ -12,55 +12,59 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-progress-spinner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="inline-flex items-center justify-center" [style.width.px]="diameter" [style.height.px]="diameter">
       <!-- Indeterminate spinner (continuous rotation) -->
-      <div *ngIf="mode === 'indeterminate'"
-           class="rounded-full border-solid border-current border-r-transparent animate-spin"
-           [style.width.px]="diameter"
-           [style.height.px]="diameter"
-           [style.border-width.px]="strokeWidth"
-           [attr.aria-label]="'Loading...'"
-           role="progressbar"
-           aria-valuemin="0"
-           aria-valuemax="100">
-      </div>
-
+      @if (mode === 'indeterminate') {
+        <div
+          class="rounded-full border-solid border-current border-r-transparent animate-spin"
+          [style.width.px]="diameter"
+          [style.height.px]="diameter"
+          [style.border-width.px]="strokeWidth"
+          [attr.aria-label]="'Loading...'"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100">
+        </div>
+      }
+    
       <!-- Determinate spinner (arc showing progress) -->
-      <svg *ngIf="mode === 'determinate'"
-           class="transform -rotate-90"
-           [attr.width]="diameter"
-           [attr.height]="diameter"
-           [attr.viewBox]="'0 0 ' + diameter + ' ' + diameter"
-           role="progressbar"
-           [attr.aria-valuenow]="value"
-           aria-valuemin="0"
-           aria-valuemax="100">
-        <!-- Background circle -->
-        <circle
-          [attr.cx]="diameter / 2"
-          [attr.cy]="diameter / 2"
-          [attr.r]="radius"
-          fill="none"
-          class="stroke-gray-200"
-          [attr.stroke-width]="strokeWidth">
-        </circle>
-        <!-- Progress arc -->
-        <circle
-          [attr.cx]="diameter / 2"
-          [attr.cy]="diameter / 2"
-          [attr.r]="radius"
-          fill="none"
-          class="stroke-current transition-all duration-300"
-          [attr.stroke-width]="strokeWidth"
-          [attr.stroke-dasharray]="circumference"
-          [attr.stroke-dashoffset]="dashOffset"
-          stroke-linecap="round">
-        </circle>
-      </svg>
+      @if (mode === 'determinate') {
+        <svg
+          class="transform -rotate-90"
+          [attr.width]="diameter"
+          [attr.height]="diameter"
+          [attr.viewBox]="'0 0 ' + diameter + ' ' + diameter"
+          role="progressbar"
+          [attr.aria-valuenow]="value"
+          aria-valuemin="0"
+          aria-valuemax="100">
+          <!-- Background circle -->
+          <circle
+            [attr.cx]="diameter / 2"
+            [attr.cy]="diameter / 2"
+            [attr.r]="radius"
+            fill="none"
+            class="stroke-gray-200"
+            [attr.stroke-width]="strokeWidth">
+          </circle>
+          <!-- Progress arc -->
+          <circle
+            [attr.cx]="diameter / 2"
+            [attr.cy]="diameter / 2"
+            [attr.r]="radius"
+            fill="none"
+            class="stroke-current transition-all duration-300"
+            [attr.stroke-width]="strokeWidth"
+            [attr.stroke-dasharray]="circumference"
+            [attr.stroke-dashoffset]="dashOffset"
+            stroke-linecap="round">
+          </circle>
+        </svg>
+      }
     </div>
-  `,
+    `,
   styles: [`
     :host {
       display: inline-block;

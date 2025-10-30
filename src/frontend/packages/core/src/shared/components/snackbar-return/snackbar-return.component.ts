@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
 import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
 import { Store } from '@ngrx/store';
@@ -10,9 +10,7 @@ import { RouterNav, AppState } from '@stratosui/store';
   templateUrl: './snackbar-return.component.html',
   styleUrls: ['./snackbar-return.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-  ]
+  imports: []
 })
 export class SnackBarReturnComponent extends SimpleSnackBar {
   returnLabel: string;

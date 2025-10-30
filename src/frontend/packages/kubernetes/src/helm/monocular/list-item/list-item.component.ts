@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -13,6 +13,7 @@ import { Chart } from '../shared/models/chart';
   styleUrls: ['./list-item.component.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     NgClass,
     RouterLink,
     CustomTooltipDirective,

@@ -10,16 +10,24 @@
     </app-metadata-item>
     <div class="grid grid-cols-2 gap-4">
       <app-metadata-item label="Minimum">
-        <div *ngIf="appAutoscalerPolicy$ | async as policy" class="text-lg font-semibold">
-          {{ policy.instance_min_count }}
-        </div>
-        <div *ngIf="!(appAutoscalerPolicy$ | async)" class="text-gray-500">-</div>
+        @if (appAutoscalerPolicy$ | async; as policy) {
+          <div class="text-lg font-semibold">
+            {{ policy.instance_min_count }}
+          </div>
+        }
+        @if (!(appAutoscalerPolicy$ | async)) {
+          <div class="text-gray-500">-</div>
+        }
       </app-metadata-item>
       <app-metadata-item label="Maximum">
-        <div *ngIf="appAutoscalerPolicy$ | async as policy" class="text-lg font-semibold">
-          {{ policy.instance_max_count }}
-        </div>
-        <div *ngIf="!(appAutoscalerPolicy$ | async)" class="text-gray-500">-</div>
+        @if (appAutoscalerPolicy$ | async; as policy) {
+          <div class="text-lg font-semibold">
+            {{ policy.instance_max_count }}
+          </div>
+        }
+        @if (!(appAutoscalerPolicy$ | async)) {
+          <div class="text-gray-500">-</div>
+        }
       </app-metadata-item>
     </div>
   </div>

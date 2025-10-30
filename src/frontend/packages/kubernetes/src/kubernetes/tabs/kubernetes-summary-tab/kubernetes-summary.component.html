@@ -1,80 +1,98 @@
 <div>
   <app-page-sub-nav>
-    <button *ngIf="kubeEndpointService.kubeDashboardConfigured$ | async" [routerLink]="dashboardLink" class="btn btn-primary">
-      <span class="material-icons">dashboard</span>
-      <span class="kube-details__button">View Dashboard</span>
-    </button>
-    <button *ngIf="kubeEndpointService.kubeTerminalEnabled$ | async" [routerLink]="kubeTerminalLink" class="btn btn-primary">
-      <span class="material-icons stratos-icons">terminal</span>
-      <span class="kube-details__button">Open Terminal</span>
-    </button>
+    @if (kubeEndpointService.kubeDashboardConfigured$ | async) {
+      <button [routerLink]="dashboardLink" class="btn btn-primary">
+        <span class="material-icons">dashboard</span>
+        <span class="kube-details__button">View Dashboard</span>
+      </button>
+    }
+    @if (kubeEndpointService.kubeTerminalEnabled$ | async) {
+      <button [routerLink]="kubeTerminalLink" class="btn btn-primary">
+        <span class="material-icons stratos-icons">terminal</span>
+        <span class="kube-details__button">Open Terminal</span>
+      </button>
+    }
   </app-page-sub-nav>
 
   <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">
-    <app-entity-summary-title *ngIf="endpointDetails$ | async as details" [imagePath]="details.imagePath"
-      [title]="details.name" [subTitle]="details.label">
-      <app-tile-grid class="kube-details__metrics">
-        <app-tile-group class="tile-group-3-cols">
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
-              icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-          <app-tile>
-            <app-card-number-metric class="kube-details__metrics--namespace" [textOnly]="true"
-              link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/namespaces" icon="language" label="Namespaces"
-              labelSingular="Node" value="{{ namespaceCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-          <app-tile>
-            <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
-              icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
-            </app-card-number-metric>
-          </app-tile>
-        </app-tile-group>
-      </app-tile-grid>
-
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="Node version">
-            {{ (kubeNodeVersions$ | async) }}
-          </app-metadata-item>
-        </div>
-        <div class="app-metadata__two-cols" *ngIf="kubeEndpointService.kubeDashboardEnabled$ | async">
-          <app-metadata-item label="Kubernetes Dashboard">
-            <div class="kube-details__dashboard-version">
-              <div *ngIf="kubeEndpointService.kubeDashboardStatus$ | async"
-                class="kube-details__dashboard-version-label">{{ (kubeEndpointService.kubeDashboardLabel$ | async) }}
-              </div>
-              <button class="btn btn-primary kube-details__dashboard-configure" *ngIf="kubeEndpointService.kubeDashboardStatus$ | async"
-                (click)="configureDashboard()">Configure</button>
-              <div *ngIf="!(kubeEndpointService.kubeDashboardStatus$ | async)" class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500">
-              </div>
-            </div>
-          </app-metadata-item>
-        </div>
-      </div>
-
-      <!-- Show CaaSP metadata -->
-      <div class="app-metadata" *ngIf="caaspData$ | async as data">
+    @if (endpointDetails$ | async; as details) {
+      <app-entity-summary-title [imagePath]="details.imagePath"
+        [title]="details.name" [subTitle]="details.label">
+        <app-tile-grid class="kube-details__metrics">
+          <app-tile-group class="tile-group-3-cols">
+            <app-tile>
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
+                icon="apps" label="Nodes" labelSingular="Node" value="{{ nodeCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+            <app-tile>
+              <app-card-number-metric class="kube-details__metrics--namespace" [textOnly]="true"
+                link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/namespaces" icon="language" label="Namespaces"
+                labelSingular="Node" value="{{ namespaceCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+            <app-tile>
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
+                icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
+              </app-card-number-metric>
+            </app-tile>
+          </app-tile-group>
+        </app-tile-grid>
+        <div class="app-metadata">
           <div class="app-metadata__two-cols">
-            <app-metadata-item label="CaaSP Version">
-              <div class="caasp-version">
-                <div>{{ data.version }}</div><span class="material-icons text-warning-600" title="Nodes report multiple versions" *ngIf="data.versionMismatch">warning</span>
+            <app-metadata-item label="Node version">
+              {{ (kubeNodeVersions$ | async) }}
+            </app-metadata-item>
+          </div>
+          @if (kubeEndpointService.kubeDashboardEnabled$ | async) {
+            <div class="app-metadata__two-cols">
+              <app-metadata-item label="Kubernetes Dashboard">
+                <div class="kube-details__dashboard-version">
+                  @if (kubeEndpointService.kubeDashboardStatus$ | async) {
+                    <div
+                      class="kube-details__dashboard-version-label">{{ (kubeEndpointService.kubeDashboardLabel$ | async) }}
+                    </div>
+                  }
+                  @if (kubeEndpointService.kubeDashboardStatus$ | async) {
+                    <button class="btn btn-primary kube-details__dashboard-configure"
+                    (click)="configureDashboard()">Configure</button>
+                  }
+                  @if (!(kubeEndpointService.kubeDashboardStatus$ | async)) {
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500">
+                    </div>
+                  }
+                </div>
+              </app-metadata-item>
+            </div>
+          }
+        </div>
+        <!-- Show CaaSP metadata -->
+        @if (caaspData$ | async; as data) {
+          <div class="app-metadata">
+            <div class="app-metadata__two-cols">
+              <app-metadata-item label="CaaSP Version">
+                <div class="caasp-version">
+                  <div>{{ data.version }}</div>@if (data.versionMismatch) {
+                  <span class="material-icons text-warning-600" title="Nodes report multiple versions">warning</span>
+                }
               </div>
             </app-metadata-item>
           </div>
-            <div class="app-metadata__two-cols">
-              <app-metadata-item label="Nodes with Updates">
-                <div class="caasp-updates">
-                  <div>{{ data.updates }}</div>
-                  <div *ngIf="data.securityUpdates > 0" class="caasp-updates__security">Security: <b>{{ data.securityUpdates }}</b></div>
-                  <div *ngIf="data.disruptiveUpdates > 0" class="caasp-updates__disruptive">Disruptive: <b>{{ data.disruptiveUpdates }}</b></div>
-                </div>
-              </app-metadata-item>
+          <div class="app-metadata__two-cols">
+            <app-metadata-item label="Nodes with Updates">
+              <div class="caasp-updates">
+                <div>{{ data.updates }}</div>
+                @if (data.securityUpdates > 0) {
+                  <div class="caasp-updates__security">Security: <b>{{ data.securityUpdates }}</b></div>
+                }
+                @if (data.disruptiveUpdates > 0) {
+                  <div class="caasp-updates__disruptive">Disruptive: <b>{{ data.disruptiveUpdates }}</b></div>
+                }
+              </div>
+            </app-metadata-item>
           </div>
-      </div>
-
+        </div>
+      }
       <div class="kube-details__graphs">
         <div class="kube-details__graphs-group">
           <div class="kube-details__graph">
@@ -112,14 +130,17 @@
             </div>
           </div>
           <div class="kube-details__graph">
-            <div class="card" *ngIf="(networkUnavailable$ | async)?.supported">
-              <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
-                chartTitle="Nodes With Network Available" [data]="networkUnavailable$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
+            @if ((networkUnavailable$ | async)?.supported) {
+              <div class="card">
+                <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
+                  chartTitle="Nodes With Network Available" [data]="networkUnavailable$ | async" height="{{chartHeight}}">
+                </app-simple-usage-chart>
+              </div>
+            }
           </div>
         </div>
       </div>
     </app-entity-summary-title>
-  </app-loading-page>
+  }
+</app-loading-page>
 </div>

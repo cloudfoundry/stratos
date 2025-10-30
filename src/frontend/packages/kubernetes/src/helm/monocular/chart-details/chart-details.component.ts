@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { finalize, first, switchMap, tap } from 'rxjs/operators';
@@ -21,13 +21,12 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
   styleUrls: ['./chart-details.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     EntitySummaryTitleComponent,
     LoaderComponent,
     PanelComponent,
     ChartDetailsInfoComponent,
     ChartDetailsReadmeComponent
-  ]
+]
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */

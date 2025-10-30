@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Store } from '@ngrx/store';
 import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
 
@@ -20,7 +20,6 @@ selector: 'app-setup-welcome',
   styleUrls: ['./setup-welcome.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     PageHeaderComponent,
     ShowPageHeaderComponent,
     SteppersComponent,
@@ -28,7 +27,7 @@ selector: 'app-setup-welcome',
     TileSelectorTileComponent,
     StratosTitleComponent,
     ProductNameComponent
-  ]
+]
 })
 export class SetupWelcomeComponent {
 

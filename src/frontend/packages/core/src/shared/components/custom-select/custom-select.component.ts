@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 export interface MatSelectChange {
   source: CustomSelectComponent;
@@ -31,7 +31,7 @@ export class CustomOptionComponent {
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

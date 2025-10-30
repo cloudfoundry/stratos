@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
@@ -10,9 +10,8 @@ import { DisplayValueComponent } from '../display-value/display-value.component'
   styleUrls: ['./editable-display-value.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     DisplayValueComponent
-  ]
+]
 })
 export class EditableDisplayValueComponent {
 

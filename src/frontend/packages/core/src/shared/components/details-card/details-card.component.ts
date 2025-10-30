@@ -1,12 +1,10 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-details-card',
   standalone: true,
-  imports: [
-    CommonModule
-  ],
+  imports: [],
   templateUrl: './details-card.component.html',
   styleUrls: ['./details-card.component.scss'],
   encapsulation: ViewEncapsulation.None

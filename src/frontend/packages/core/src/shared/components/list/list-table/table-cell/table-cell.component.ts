@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   ComponentFactoryResolver,
@@ -68,9 +68,7 @@ export const listTableCells: Type<TableCellCustom<any>>[] = [
   styleUrls: ['./table-cell.component.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef, static: true })

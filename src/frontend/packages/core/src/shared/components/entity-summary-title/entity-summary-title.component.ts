@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -7,10 +7,9 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
   selector: 'app-entity-summary-title',
   standalone: true,
   imports: [
-    CommonModule,
     CustomIconComponent,
     CustomTooltipDirective
-  ],
+],
   templateUrl: './entity-summary-title.component.html',
   styleUrls: ['./entity-summary-title.component.scss']
 })

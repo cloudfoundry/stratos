@@ -20,41 +20,51 @@
         <app-form-field>
           <input appInput placeholder="Primary Email Address" formControlName="emailAddress">
         </app-form-field>
-        <p *ngIf="!(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when
+        @if (!(canChangePassword | async) && needsPasswordForEmailChange) {
+          <p>Current password is required when
           changing email address</p>
-        <p *ngIf="(canChangePassword | async) && needsPasswordForEmailChange">Current password is required when changing
+        }
+        @if ((canChangePassword | async) && needsPasswordForEmailChange) {
+          <p>Current password is required when changing
           email address or password</p>
-        <app-form-field *ngIf="needsPasswordForEmailChange">
-          <input appInput placeholder="Current Password" [type]="!showPassword[1] ? 'password' : 'text'"
-            formControlName="currentPassword" [required]="passwordRequired">
-          <span matSuffix>
-            <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
-          </span>
-        </app-form-field>
-        <div *ngIf="(canChangePassword | async)" class="edit-profile__group">
-          <p>Change Password (Leave blank to keep current password)</p>
-          <app-form-field *ngIf="!needsPasswordForEmailChange">
-            <input appInput placeholder="Current Password" [type]="!showPassword[2] ? 'password' : 'text'"
+        }
+        @if (needsPasswordForEmailChange) {
+          <app-form-field>
+            <input appInput placeholder="Current Password" [type]="!showPassword[1] ? 'password' : 'text'"
               formControlName="currentPassword" [required]="passwordRequired">
             <span matSuffix>
-              <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+              <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
             </span>
           </app-form-field>
-          <app-form-field>
-            <input appInput placeholder="New Password" [type]="!showPassword[3] ? 'password' : 'text'"
-              formControlName="newPassword">
-            <span matSuffix>
-              <app-show-hide-button (changed)="showPassword[3] = $event"></app-show-hide-button>
-            </span>
-          </app-form-field>
-          <app-form-field>
-            <input appInput placeholder="Confirm New Password" [type]="!showPassword[4] ? 'password' : 'text'"
-              formControlName="confirmPassword">
-            <span matSuffix>
-              <app-show-hide-button (changed)="showPassword[4] = $event"></app-show-hide-button>
-            </span>
-          </app-form-field>
-        </div>
+        }
+        @if ((canChangePassword | async)) {
+          <div class="edit-profile__group">
+            <p>Change Password (Leave blank to keep current password)</p>
+            @if (!needsPasswordForEmailChange) {
+              <app-form-field>
+                <input appInput placeholder="Current Password" [type]="!showPassword[2] ? 'password' : 'text'"
+                  formControlName="currentPassword" [required]="passwordRequired">
+                <span matSuffix>
+                  <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
+                </span>
+              </app-form-field>
+            }
+            <app-form-field>
+              <input appInput placeholder="New Password" [type]="!showPassword[3] ? 'password' : 'text'"
+                formControlName="newPassword">
+              <span matSuffix>
+                <app-show-hide-button (changed)="showPassword[3] = $event"></app-show-hide-button>
+              </span>
+            </app-form-field>
+            <app-form-field>
+              <input appInput placeholder="Confirm New Password" [type]="!showPassword[4] ? 'password' : 'text'"
+                formControlName="confirmPassword">
+              <span matSuffix>
+                <app-show-hide-button (changed)="showPassword[4] = $event"></app-show-hide-button>
+              </span>
+            </app-form-field>
+          </div>
+        }
       </form>
     </div>
   </app-step>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import {
   EndpointListDetailsComponent,
@@ -13,9 +13,7 @@ import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
   templateUrl: './git-endpoint-details.component.html',
   styleUrls: ['./git-endpoint-details.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
 

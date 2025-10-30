@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
@@ -11,10 +11,9 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
   styleUrls: ['./breadcrumbs.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     CustomIconComponent
-  ]
+]
 })
 export class BreadcrumbsComponent {
   public breadcrumbDefinitions: IBreadcrumbLink[] = null;

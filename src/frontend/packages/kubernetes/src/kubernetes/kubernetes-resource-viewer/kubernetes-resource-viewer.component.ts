@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import {
   AfterViewInit,
@@ -64,6 +65,7 @@ selector: 'app-kubernetes-resource-viewer',
   styleUrls: ['./kubernetes-resource-viewer.component.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     SidepanelPreviewComponent
   ]
 })

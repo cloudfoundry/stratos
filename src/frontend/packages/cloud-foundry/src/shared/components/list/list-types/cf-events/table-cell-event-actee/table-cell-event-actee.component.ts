@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { CustomTooltipDirective, CustomIconComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
@@ -15,11 +15,10 @@ interface CellEVentActeeConfig {
   styleUrls: ['./table-cell-event-actee.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective
-  ]
+]
 })
 export class TableCellEventActeeComponent extends TableCellCustom<APIResource, CellEVentActeeConfig> {
 

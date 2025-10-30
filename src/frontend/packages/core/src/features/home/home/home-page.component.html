@@ -1,58 +1,70 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
   <div class="page-header-right">
-    <div *ngIf="layouts$ | async as layouts" class="relative inline-block">
-      <div class="dropdown">
-        <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
-          type="button" onclick="this.nextElementSibling.classList.toggle('hidden')">
-          <span class="material-icons">view_week</span>
-          <span class="material-icons">arrow_drop_down</span>
-        </button>
-        <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden">
-          <div class="py-1">
-            <div *ngFor="let layout of layouts">
-              <button *ngIf="layout" (click)="onChangeLayout(layout)"
+    @if (layouts$ | async; as layouts) {
+      <div class="relative inline-block">
+        <div class="dropdown">
+          <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
+            type="button" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <span class="material-icons">view_week</span>
+            <span class="material-icons">arrow_drop_down</span>
+          </button>
+          <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden">
+            <div class="py-1">
+              @for (layout of layouts; track layout) {
+                <div>
+                  @if (layout) {
+                    <button (click)="onChangeLayout(layout)"
+                      class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      <span>{{ layout.title }}</span>
+                      <span class="material-icons text-primary-600"
+                        [class.opacity-100]="layout.id === layoutID"
+                      [class.opacity-0]="layout.id !== layoutID">done</span>
+                    </button>
+                  }
+                  @if (!layout) {
+                    <div class="border-t border-gray-200 my-1"></div>
+                  }
+                </div>
+              }
+              <div class="border-t border-gray-200 my-1"></div>
+              <button (click)="toggleShowAllEndpoints()"
                 class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                <span>{{ layout.title }}</span>
+                <span>Show all endpoints</span>
                 <span class="material-icons text-primary-600"
-                  [class.opacity-100]="layout.id === layoutID"
-                  [class.opacity-0]="layout.id !== layoutID">done</span>
-              </button>
-              <div *ngIf="!layout" class="border-t border-gray-200 my-1"></div>
-            </div>
-            <div class="border-t border-gray-200 my-1"></div>
-            <button (click)="toggleShowAllEndpoints()"
-              class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-              <span>Show all endpoints</span>
-              <span class="material-icons text-primary-600"
-                [class.opacity-100]="showAllEndpoints"
+                  [class.opacity-100]="showAllEndpoints"
                 [class.opacity-0]="!showAllEndpoints">done</span>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </app-page-header>
-<div class="p-6" *ngIf="haveThingsToShow$ | async ; else noEndpoints">
-  <div class="home-grid"
-    [class.columns-1]="columns === 1"
-    [class.columns-2]="columns === 2"
-    [class.columns-3]="columns === 3"
-    #endpointsPanel>
-    <div *ngFor="let ep of endpoints$ | async" #endpointCard class="home-grid-item">
-      <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
-      </app-home-page-endpoint-card>
+@if (haveThingsToShow$ | async ) {
+  <div class="p-6">
+    <div class="home-grid"
+      [class.columns-1]="columns === 1"
+      [class.columns-2]="columns === 2"
+      [class.columns-3]="columns === 3"
+      #endpointsPanel>
+      @for (ep of endpoints$ | async; track ep) {
+        <div #endpointCard class="home-grid-item">
+          <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout$ | async" [endpoint]="ep">
+          </app-home-page-endpoint-card>
+        </div>
+      }
     </div>
   </div>
-</div>
-<ng-template #noEndpoints>
-  <div class="p-6" *ngIf="haveRegistered$ | async; else noneRegistered">
-    <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
+} @else {
+  @if (haveRegistered$ | async) {
+    <div class="p-6">
+      <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
       [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>
-  </div>
-</ng-template>
+    </div>
+  } @else {
+    <app-endpoints-missing class="p-6" [showToolbarHint]="false"></app-endpoints-missing>
+  }
+}
 
-<ng-template #noneRegistered>
-  <app-endpoints-missing class="p-6" [showToolbarHint]="false"></app-endpoints-missing>
-</ng-template>

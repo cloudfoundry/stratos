@@ -1,6 +1,12 @@
-<div class="deploy-app" *ngIf="showOverlay$ | async">
-  <div class="deploy-app__title">{{ deployer ? deployer.streamTitle : 'Pending' }}</div>
-  <div *ngIf="deployer && deployer.deploying" class="spinner spinner-primary w-5 h-5"></div>
-</div>
-<app-log-viewer class="deploy-app__log" *ngIf="deployer && deployer.messages" [logStream]="deployer.messages">
-</app-log-viewer>
+@if (showOverlay$ | async) {
+  <div class="deploy-app">
+    <div class="deploy-app__title">{{ deployer ? deployer.streamTitle : 'Pending' }}</div>
+    @if (deployer && deployer.deploying) {
+      <div class="spinner spinner-primary w-5 h-5"></div>
+    }
+  </div>
+}
+@if (deployer && deployer.messages) {
+  <app-log-viewer class="deploy-app__log" [logStream]="deployer.messages">
+  </app-log-viewer>
+}

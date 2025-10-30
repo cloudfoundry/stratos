@@ -1,18 +1,26 @@
 <div class="file-input" [ngClass]="{'file-input__disabled': disabled}">
   <input [accept]="accept" type="file" (change)="onNativeInputFileSelect($event)" #inputFile hidden />
-  <div class="form-field file-input__form-field" *ngIf="!buttonLabel">
-    <div class="file-input__field input flex items-center justify-between cursor-pointer"
-         [class.opacity-50]="disabled"
-         [class.cursor-not-allowed]="disabled"
-         (click)="!disabled && selectFile($event)">
-      <div *ngIf="!fileCount" class="file-input__input file-input__none text-gray-500">No file selected</div>
-      <div *ngIf="fileCount" class="file-input__input flex-1">{{ name }}</div>
-      <button class="file-input__button btn btn-sm btn-secondary ml-2" type="button" [disabled]="disabled">
-        <span class="material-icons text-sm">more_horiz</span>
-      </button>
+  @if (!buttonLabel) {
+    <div class="form-field file-input__form-field">
+      <div class="file-input__field input flex items-center justify-between cursor-pointer"
+        [class.opacity-50]="disabled"
+        [class.cursor-not-allowed]="disabled"
+        (click)="!disabled && selectFile($event)">
+        @if (!fileCount) {
+          <div class="file-input__input file-input__none text-gray-500">No file selected</div>
+        }
+        @if (fileCount) {
+          <div class="file-input__input flex-1">{{ name }}</div>
+        }
+        <button class="file-input__button btn btn-sm btn-secondary ml-2" type="button" [disabled]="disabled">
+          <span class="material-icons text-sm">more_horiz</span>
+        </button>
+      </div>
     </div>
-  </div>
-  <button *ngIf="buttonLabel" (click)="selectFile($event)" class="btn btn-primary" [disabled]="disabled">
-    {{ buttonLabel }}
-  </button>
+  }
+  @if (buttonLabel) {
+    <button (click)="selectFile($event)" class="btn btn-primary" [disabled]="disabled">
+      {{ buttonLabel }}
+    </button>
+  }
 </div>

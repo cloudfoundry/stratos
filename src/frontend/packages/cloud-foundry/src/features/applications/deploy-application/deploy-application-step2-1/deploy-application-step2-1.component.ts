@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   ComponentFactory,
@@ -23,9 +23,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   templateUrl: './deploy-application-step2-1.component.html',
   styleUrls: ['./deploy-application-step2-1.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-  ]
+  imports: []
 })
 export class DeployApplicationStep21Component {
 

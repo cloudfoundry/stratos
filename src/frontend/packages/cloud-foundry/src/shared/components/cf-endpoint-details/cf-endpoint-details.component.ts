@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { CustomTooltipDirective } from '@stratosui/core';
 
@@ -14,8 +14,7 @@ import {
   styleUrls: ['./cf-endpoint-details.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     CustomTooltipDirective
-  ]
+]
 })
 export class CfEndpointDetailsComponent extends EndpointListDetailsComponent { }

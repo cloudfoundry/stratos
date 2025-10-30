@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
@@ -11,9 +11,8 @@ import { CustomIconComponent } from '../../../../../../shared/components/custom-
   styleUrls: ['./table-cell-endpoint-status.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     CustomIconComponent
-  ]
+]
 })
 export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {
 

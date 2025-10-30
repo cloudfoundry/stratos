@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router } from '@angular/router';
@@ -20,12 +20,11 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
   viewProviders: [MatIconRegistry],
   standalone: true,
   imports: [
-    CommonModule,
     LoaderComponent,
     PanelComponent,
     ListFiltersComponent,
     ChartListComponent
-  ]
+]
 })
 export class ChartsComponent implements OnInit {
   charts: Chart[] = [];

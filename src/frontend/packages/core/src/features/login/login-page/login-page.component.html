@@ -2,7 +2,7 @@
   id="app-login-page"
   class="login-page min-h-screen flex items-center justify-center relative"
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
->
+  >
   <!-- Full-screen background -->
   <div
     class="absolute inset-0 z-0"
@@ -20,64 +20,71 @@
     [ngStyle]="{
       'background-color': loginCardBackground$ | async
     }"
-  >
+    >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
       <img
         class="login-logo h-12 w-12 flex-shrink-0"
         [src]="themeLogo$ | async"
         [alt]="(themeDisplayName$ | async) || 'Logo'"
-      />
+        />
       <div class="login-title-section flex-1">
         <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
           {{ (themeDisplayName$ | async) || (themeTitle$ | async) || 'Stratos' }}
         </h1>
-        <p class="login-subtitle text-sm text-gray-600" *ngIf="themeSubtitle$ | async">
-          {{ themeSubtitle$ | async }}
-        </p>
+        @if (themeSubtitle$ | async) {
+          <p class="login-subtitle text-sm text-gray-600">
+            {{ themeSubtitle$ | async }}
+          </p>
+        }
       </div>
     </div>
 
     <div class="login-body">
       <div class="login-form-outer" [ngClass]="{'login-sso': ssoLogin}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <div *ngIf="!ssoLogin" class="space-y-1">
-            <label for="username" class="sr-only">Username</label>
-            <input
-              id="username"
-              class="input w-full"
-              required
-              [(ngModel)]="username"
-              name="username"
-              placeholder="Username"
-              type="text"
-            >
-          </div>
-
-          <div *ngIf="!ssoLogin" class="space-y-1 relative">
-            <label for="password" class="sr-only">Password</label>
-            <input
-              id="password"
-              class="input w-full pr-12"
-              required
-              [type]="!showPassword ? 'password' : 'text'"
-              [(ngModel)]="password"
-              name="password"
-              placeholder="Password"
-            >
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-              <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+          @if (!ssoLogin) {
+            <div class="space-y-1">
+              <label for="username" class="sr-only">Username</label>
+              <input
+                id="username"
+                class="input w-full"
+                required
+                [(ngModel)]="username"
+                name="username"
+                placeholder="Username"
+                type="text"
+                >
             </div>
-          </div>
+          }
 
-          <button
-            class="btn btn-primary w-full py-3"
-            *ngIf="!loggedIn"
-            type="submit"
-            [disabled]="!ssoLogin && !loginForm.valid"
-          >
-            Sign In
-          </button>
+          @if (!ssoLogin) {
+            <div class="space-y-1 relative">
+              <label for="password" class="sr-only">Password</label>
+              <input
+                id="password"
+                class="input w-full pr-12"
+                required
+                [type]="!showPassword ? 'password' : 'text'"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Password"
+                >
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
+              </div>
+            </div>
+          }
+
+          @if (!loggedIn) {
+            <button
+              class="btn btn-primary w-full py-3"
+              type="submit"
+              [disabled]="!ssoLogin && !loginForm.valid"
+              >
+              Sign In
+            </button>
+          }
         </form>
       </div>
 
@@ -98,7 +105,7 @@
       'alert alert-danger': error,
       'alert alert-info': !error
     }"
-  >
+    >
     {{ message }}
   </div>
 </app-intro-screen>

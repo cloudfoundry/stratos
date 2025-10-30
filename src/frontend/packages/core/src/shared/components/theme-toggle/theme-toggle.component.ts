@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.servi
   templateUrl: './theme-toggle.component.html',
   styleUrls: ['./theme-toggle.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class ThemeToggleComponent implements OnInit, OnDestroy {
   isDarkMode = false;

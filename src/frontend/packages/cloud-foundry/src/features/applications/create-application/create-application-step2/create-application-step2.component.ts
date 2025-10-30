@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -22,13 +22,12 @@ selector: 'app-create-application-step2',
   ],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     AppNameUniqueDirective,
     StatefulIconComponent
-  ]
+]
 })
 export class CreateApplicationStep2Component implements OnInit {
 

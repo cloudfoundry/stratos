@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -19,13 +19,12 @@ import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-co
   styleUrls: ['./cloud-foundry-events-list.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     ListComponent
-  ]
+]
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
 

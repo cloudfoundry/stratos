@@ -1,7 +1,9 @@
-<div *ngIf="row.entity.status===0" class="flex items-center space-x-2">
-  <span>{{row.entity.old_instances}}</span>
-  <span class="material-icons text-sm" [ngClass]="row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'class'">
-    {{row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'icon'}}
-  </span>
-  <span>{{row.entity.new_instances}}</span>
-</div>
+@if (row.entity.status===0) {
+  <div class="flex items-center space-x-2">
+    <span>{{row.entity.old_instances}}</span>
+    <span class="material-icons text-sm" [ngClass]="row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'class'">
+      {{row.entity.new_instances-row.entity.old_instances | tableCellAutoscalerEventChangeIcon:'icon'}}
+    </span>
+    <span>{{row.entity.new_instances}}</span>
+  </div>
+}

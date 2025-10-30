@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-dialog-error',
@@ -7,9 +7,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./dialog-error.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    CommonModule
-  ]
+  imports: []
 })
 export class DialogErrorComponent implements OnInit {
 

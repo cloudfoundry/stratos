@@ -2,4 +2,6 @@
   <h1>Services Marketplace</h1>
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
-<app-list class="marketplace" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)"></app-list>
+@if (!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <app-list class="marketplace"></app-list>
+}

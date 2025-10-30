@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnInit } from '@angular/core';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -23,13 +23,12 @@ import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric
   styleUrls: ['./kubernetes-node-metrics.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     TileComponent,
     TileGroupComponent,
     KubernetesNodeMetricStatsCardComponent,
     MetricsParentRangeSelectorComponent,
     MetricsChartComponent
-  ]
+]
 })
 export class KubernetesNodeMetricsComponent implements OnInit {
   memoryMetric: KubeNodeMetric;

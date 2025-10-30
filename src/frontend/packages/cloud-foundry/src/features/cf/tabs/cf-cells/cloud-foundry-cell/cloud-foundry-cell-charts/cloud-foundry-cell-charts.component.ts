@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import {
@@ -17,10 +17,9 @@ import { MetricsParentRangeSelectorComponent } from '../../../../../../../../cor
   styleUrls: ['./cloud-foundry-cell-charts.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MetricsChartComponent,
     MetricsParentRangeSelectorComponent
-  ]
+]
 })
 export class CloudFoundryCellChartsComponent {
 

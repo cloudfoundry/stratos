@@ -1,39 +1,43 @@
 <div class="custom-checkbox-wrapper">
   <div class="custom-checkbox"
-       [class.disabled]="disabled"
-       [class.checked]="checked"
-       [class.indeterminate]="indeterminate"
-       [class.invalid]="invalid"
-       [class.color-primary]="color === 'primary'"
-       [class.color-accent]="color === 'accent'"
-       [class.color-warn]="color === 'warn'"
-       [attr.aria-invalid]="invalid || null"
-       [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null"
-       (click)="toggle()">
+    [class.disabled]="disabled"
+    [class.checked]="checked"
+    [class.indeterminate]="indeterminate"
+    [class.invalid]="invalid"
+    [class.color-primary]="color === 'primary'"
+    [class.color-accent]="color === 'accent'"
+    [class.color-warn]="color === 'warn'"
+    [attr.aria-invalid]="invalid || null"
+    [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null"
+    (click)="toggle()">
 
     <div class="checkbox-container">
       <input type="checkbox"
-             [id]="id"
-             [name]="name"
-             [checked]="checked"
-             [disabled]="disabled"
-             [required]="required"
-             [value]="value"
-             class="checkbox-input"
-             (click)="$event.stopPropagation()">
+        [id]="id"
+        [name]="name"
+        [checked]="checked"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        class="checkbox-input"
+        (click)="$event.stopPropagation()">
 
       <div class="checkbox-frame">
         <svg class="checkbox-checkmark"
-             [class.indeterminate]="indeterminate"
-             viewBox="0 0 24 24"
-             width="16"
-             height="16">
-          <path *ngIf="!indeterminate"
-                class="checkmark-path"
-                d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
-          <path *ngIf="indeterminate"
-                class="indeterminate-path"
-                d="M19,13H5V11H19V13Z"/>
+          [class.indeterminate]="indeterminate"
+          viewBox="0 0 24 24"
+          width="16"
+          height="16">
+          @if (!indeterminate) {
+            <path
+              class="checkmark-path"
+              d="M9,16.17L4.83,12l-1.42,1.41L9,19L21,7l-1.41-1.41L9,16.17z"/>
+          }
+          @if (indeterminate) {
+            <path
+              class="indeterminate-path"
+              d="M19,13H5V11H19V13Z"/>
+          }
         </svg>
       </div>
     </div>
@@ -41,9 +45,11 @@
     <ng-content></ng-content>
   </div>
 
-  <div class="checkbox-error" *ngIf="invalid && errorMessage">
-    <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
-      {{ errorMessage }}
+  @if (invalid && errorMessage) {
+    <div class="checkbox-error">
+      <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
+        {{ errorMessage }}
+      </div>
     </div>
-  </div>
+  }
 </div>

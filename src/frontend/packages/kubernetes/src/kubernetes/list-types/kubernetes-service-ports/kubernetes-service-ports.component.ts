@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 
 import { CardCell } from '../../../../../core/src/shared/components/list/list.types';
@@ -9,7 +9,7 @@ import { KubeService } from '../../store/kube.types';
   templateUrl: './kubernetes-service-ports.component.html',
   styleUrls: ['./kubernetes-service-ports.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class KubernetesServicePortsComponent extends CardCell<KubeService> {
   @Input()

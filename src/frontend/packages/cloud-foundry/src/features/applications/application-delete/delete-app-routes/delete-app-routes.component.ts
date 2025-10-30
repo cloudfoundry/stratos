@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Subscription } from 'rxjs';
 
 import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
@@ -14,9 +14,8 @@ import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-confi
   styleUrls: ['./delete-app-routes.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ListComponent
-  ],
+],
   providers: [
     {
       provide: ListConfig,

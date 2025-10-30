@@ -1,14 +1,15 @@
 <div class="edit flex gap-1" [ngClass]="{'edit--subtle': subtle}">
-  <button class="btn btn-icon btn-sm" *ngIf="!isEditing() else editing" (click)="dataSource.startEdit(row)"
-    [disabled]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
-    <span class="material-icons">edit</span>
-  </button>
-  <ng-template #editing>
+  @if (!isEditing()) {
+    <button class="btn btn-icon btn-sm" (click)="dataSource.startEdit(row)"
+      [disabled]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">
+      <span class="material-icons">edit</span>
+    </button>
+  } @else {
     <button id="table-cell-edit-done" class="btn btn-icon btn-sm btn-success" (click)="dataSource.saveEdit()">
       <span class="material-icons">done</span>
     </button>
     <button id="table-cell-edit-cancel" class="btn btn-icon btn-sm" (click)="dataSource.cancelEdit()">
       <span class="material-icons">clear</span>
     </button>
-  </ng-template>
+  }
 </div>

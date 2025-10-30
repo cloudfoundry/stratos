@@ -6,21 +6,33 @@
       <app-form-field>
         <input appInput id="name" name="name" formControlName="nameField" placeholder="Name"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
-        <app-error *ngIf="registerForm.controls.nameField.errors?.required">Name is required</app-error>
-        <app-error *ngIf="registerForm.controls.nameField.errors?.appUnique">Name is not unique</app-error>
+        @if (registerForm.controls.nameField.errors?.required) {
+          <app-error>Name is required</app-error>
+        }
+        @if (registerForm.controls.nameField.errors?.appUnique) {
+          <app-error>Name is not unique</app-error>
+        }
       </app-form-field>
       <app-form-field novalidate>
         <input appInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
           pattern="{{urlValidation}}"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
-        <app-error *ngIf="registerForm.controls.urlField.errors?.required">URL is required</app-error>
-        <app-error *ngIf="registerForm.controls.urlField.errors?.pattern">Invalid API URL</app-error>
-        <app-error *ngIf="registerForm.controls.urlField.errors?.appUnique">URL is not unique</app-error>
+        @if (registerForm.controls.urlField.errors?.required) {
+          <app-error>URL is required</app-error>
+        }
+        @if (registerForm.controls.urlField.errors?.pattern) {
+          <app-error>Invalid API URL</app-error>
+        }
+        @if (registerForm.controls.urlField.errors?.appUnique) {
+          <app-error>URL is not unique</app-error>
+        }
       </app-form-field>
-      <app-checkbox appInput *ngIf="userEndpointsAndIsAdmin | async" name="createSystemEndpoint"
-        formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
-        [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
-      </app-checkbox>
+      @if (userEndpointsAndIsAdmin | async) {
+        <app-checkbox appInput name="createSystemEndpoint"
+          formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
+          [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
+        </app-checkbox>
+      }
     </div>
 
     <!-- Right column: Checkbox options -->
@@ -28,8 +40,12 @@
       <h1 class="create-endpoint__section-title">Options</h1>
       <app-checkbox appInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</app-checkbox>
       <app-checkbox appInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
-      <app-checkbox appInput *ngIf="showAdvancedFields" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
-      <app-checkbox appInput *ngIf="endpointTypeSupportsSSO" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
+      @if (showAdvancedFields) {
+        <app-checkbox appInput (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+      }
+      @if (endpointTypeSupportsSSO) {
+        <app-checkbox appInput name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
+      }
     </div>
   </div>
 
@@ -44,7 +60,7 @@
       <h1>Advanced Options</h1>
       <p>Client ID and Client Secret do not normally need to be specified.</p>
       <p>Note that these are not administrator credentials and only need to be specified if your endpoint uses
-        non-standard configuration.</p>
+      non-standard configuration.</p>
       <app-form-field>
         <input appInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
       </app-form-field>
@@ -60,11 +76,13 @@
   </div>
 
   <div [ngClass]="{'hide': !endpointTypeSupportsSSO, 'show': endpointTypeSupportsSSO}" class="create-endpoint__sso">
-    <div *ngIf="!!registerForm.controls.ssoAllowedField.value">
-      <p>
-        Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
-      </p>
-      <pre>{{clientRedirectURI}}</pre>
-    </div>
+    @if (!!registerForm.controls.ssoAllowedField.value) {
+      <div>
+        <p>
+          Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
+        </p>
+        <pre>{{clientRedirectURI}}</pre>
+      </div>
+    }
   </div>
 </form>

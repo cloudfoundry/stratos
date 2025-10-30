@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 
 @Component({
@@ -6,7 +6,7 @@ import { Component, Input } from '@angular/core';
   templateUrl: './custom-card.component.html',
   styleUrls: ['./custom-card.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class CustomCardComponent {
   @Input() appearance: 'raised' | 'outlined' = 'raised';

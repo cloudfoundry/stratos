@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 export interface MatButtonToggleChange {
   source: CustomButtonToggleComponent | CustomButtonToggleGroupComponent;
@@ -12,7 +12,7 @@ export interface MatButtonToggleChange {
   template: '<button class="custom-button-toggle" [class.selected]="checked" [class.disabled]="disabled" (click)="toggle()" [disabled]="disabled"><ng-content></ng-content></button>',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class CustomButtonToggleComponent {
   @Input() value: any;
@@ -32,7 +32,7 @@ export class CustomButtonToggleComponent {
   templateUrl: './custom-button-toggle-group.component.html',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

@@ -1,9 +1,10 @@
-<ng-container *ngIf="errors.length; else noErrors">
-  <div *ngFor="let error of errors" class="pressure">
-    <span class="material-symbols-outlined pressure__icon">info</span>
-    {{ error }}
-  </div>
-</ng-container>
-<ng-template #noErrors>
+@if (errors.length) {
+  @for (error of errors; track error) {
+    <div class="pressure">
+      <span class="material-symbols-outlined pressure__icon">info</span>
+      {{ error }}
+    </div>
+  }
+} @else {
   None
-</ng-template>
+}

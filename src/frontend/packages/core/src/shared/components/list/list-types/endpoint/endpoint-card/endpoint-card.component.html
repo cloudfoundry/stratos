@@ -5,22 +5,24 @@
   [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
-      <div *ngIf="!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl"
-        class="endpoint-card__image-wrapper">
-        <img class="endpoint-card__image" src="{{endpointCatalogEntity.definition.logoUrl}}" />
-      </div>
+      @if (!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl) {
+        <div
+          class="endpoint-card__image-wrapper">
+          <img class="endpoint-card__image" src="{{endpointCatalogEntity.definition.logoUrl}}" />
+        </div>
+      }
       <div class="endpoint-card__title-text">
         <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
         <div class="endpoint-card__title-subtext">
           {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
           <!--
           <ng-container *ngIf="endpointParentType">
-            ({{ endpointParentType }})</ng-container>
+          ({{ endpointParentType }})</ng-container>
           -->
         </div>
       </div>
       <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard"
-        [showSuccessText]="false"></app-copy-to-clipboard>
+      [showSuccessText]="false"></app-copy-to-clipboard>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>
@@ -29,13 +31,15 @@
       <app-table-cell-endpoint-status [row]="row"></app-table-cell-endpoint-status>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="row.system_shared_token">
-    <app-meta-card-key>Shared Connection</app-meta-card-key>
-    <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="true" type="yes-no" [showText]="false"
+  @if (row.system_shared_token) {
+    <app-meta-card-item>
+      <app-meta-card-key>Shared Connection</app-meta-card-key>
+      <app-meta-card-value>
+        <app-boolean-indicator [isTrue]="true" type="yes-no" [showText]="false"
         matTooltip="This endpoint's connection is shared by the administrator"></app-boolean-indicator>
-    </app-meta-card-value>
-  </app-meta-card-item>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  }
   <app-meta-card-item>
     <app-meta-card-key>Address</app-meta-card-key>
     <app-meta-card-value>
@@ -44,12 +48,14 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="viewCreator$ | async">
-    <app-meta-card-key>Creator</app-meta-card-key>
-    <app-meta-card-value>
-      <div>{{ row.creator.name }}</div>
-    </app-meta-card-value>
-  </app-meta-card-item>
+  @if (viewCreator$ | async) {
+    <app-meta-card-item>
+      <app-meta-card-key>Creator</app-meta-card-key>
+      <app-meta-card-value>
+        <div>{{ row.creator.name }}</div>
+      </app-meta-card-value>
+    </app-meta-card-item>
+  }
   <app-meta-card-item [hidden]="!hasDetails">
     <app-meta-card-key>Details</app-meta-card-key>
     <app-meta-card-value>

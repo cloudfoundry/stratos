@@ -3,16 +3,24 @@
   <form [formGroup]="createSpaceForm" class="stepper-form">
     <app-form-field>
       <input appInput formControlName="spaceName" placeholder="Space Name" required [appFocus]="true">
-      <app-error *ngIf="spaceName.hasError('spaceNameTaken')">
-        A space with this name already exists. Please enter a different one.
-      </app-error>
+      @if (spaceName.hasError('spaceNameTaken')) {
+        <app-error>
+          A space with this name already exists. Please enter a different one.
+        </app-error>
+      }
     </app-form-field>
-    <app-form-field *ngIf="hasSpaceQuotas$ | async">
-      <app-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
-        <app-option [value]="0" *ngIf="hasSpaceQuotas$ | async">None</app-option>
-        <app-option *ngFor="let quota of quotaDefinitions$ | async" [value]="quota.metadata.guid">{{ quota.entity.name }}
-        </app-option>
-      </app-select>
-    </app-form-field>
+    @if (hasSpaceQuotas$ | async) {
+      <app-form-field>
+        <app-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
+          @if (hasSpaceQuotas$ | async) {
+            <app-option [value]="0">None</app-option>
+          }
+          @for (quota of quotaDefinitions$ | async; track quota) {
+            <app-option [value]="quota.metadata.guid">{{ quota.entity.name }}
+            </app-option>
+          }
+        </app-select>
+      </app-form-field>
+    }
   </form>
 </div>

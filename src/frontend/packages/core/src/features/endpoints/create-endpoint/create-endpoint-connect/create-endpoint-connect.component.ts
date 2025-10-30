@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -20,13 +20,12 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
   styleUrls: ['./create-endpoint-connect.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     CustomCheckboxComponent,
     CustomIconComponent,
     BlurDirective,
     ConnectEndpointComponent
-  ]
+]
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 

@@ -1,48 +1,64 @@
-<div class="edit-endpoint" *ngIf="endpoint$ | async as endpoint">
-  <form [formGroup]="editEndpoint" class="stepper-form" *ngIf="definition$ | async as definition">
-    <h1 class="edit-endpoint__section-title">{{definition.label}} Information</h1>
-    <app-form-field>
-      <input appInput id="name" name="name" formControlName="name" required placeholder="Name"
-        [appUnique]="(existingEndpoinNames$ | async)">
-      <app-error *ngIf="name.errors && name.errors.required">Name is required</app-error>
-      <app-error *ngIf="name.errors && name.errors.appUnique">Name is not unique</app-error>
-    </app-form-field>
-    <app-form-field novalidate>
-      <input appInput id="url" name="url" type="url" formControlName="url" rrequired placeholder="Endpoint Address">
-    </app-form-field>
-    <app-checkbox appInput name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
-    </app-checkbox>
-    <app-checkbox checked="showCACertField" appInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
-    <div [ngClass]="{'edit-endpoint__shown': showCACertField}" class="edit-endpoint__advanced" spellcheck=false>
-      <span class="edit-endpoint__cacert-title">Specify CA Certificate:</span>
-      <textarea rows="10" class="edit-endpoint__cacert" appInput formControlName="caCert" name="caCert"></textarea>
-    </div>
-    <div *ngIf="showAdvancedFields" class="edit-endpoint__section">
-      <h1 class="edit-endpoint__section-title">Advanced Information (Optional)</h1>
-      <app-checkbox appInput name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
-      </app-checkbox>
-      <app-form-field>
-        <input appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
-        <app-error *ngIf="clientID.errors && clientID.errors.required">Client ID is required</app-error>
-      </app-form-field>
-      <app-form-field>
-        <input appInput id="client_secret" name="client_secret" formControlName="clientSecret"
-          placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
-        <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
-          [attr.aria-pressed]="!show">
-          <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>
-        </button>
-      </app-form-field>
-    </div>
-    <div *ngIf="endpointTypeSupportsSSO" class="edit-endpoint__sso">
-      <app-checkbox appInput formControlName="allowSSO" name="ssoAllowed">Allow SSO login to this endpoint
-      </app-checkbox>
-      <div *ngIf="editEndpoint.value.allowSSO">
-        <p>
-          Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
-        </p>
-        <pre>{{clientRedirectURI}}</pre>
-      </div>
-    </div>
-  </form>
-</div>
+@if (endpoint$ | async; as endpoint) {
+  <div class="edit-endpoint">
+    @if (definition$ | async; as definition) {
+      <form [formGroup]="editEndpoint" class="stepper-form">
+        <h1 class="edit-endpoint__section-title">{{definition.label}} Information</h1>
+        <app-form-field>
+          <input appInput id="name" name="name" formControlName="name" required placeholder="Name"
+            [appUnique]="(existingEndpoinNames$ | async)">
+          @if (name.errors && name.errors.required) {
+            <app-error>Name is required</app-error>
+          }
+          @if (name.errors && name.errors.appUnique) {
+            <app-error>Name is not unique</app-error>
+          }
+        </app-form-field>
+        <app-form-field novalidate>
+          <input appInput id="url" name="url" type="url" formControlName="url" rrequired placeholder="Endpoint Address">
+        </app-form-field>
+        <app-checkbox appInput name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
+        </app-checkbox>
+        <app-checkbox checked="showCACertField" appInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+        <div [ngClass]="{'edit-endpoint__shown': showCACertField}" class="edit-endpoint__advanced" spellcheck=false>
+          <span class="edit-endpoint__cacert-title">Specify CA Certificate:</span>
+          <textarea rows="10" class="edit-endpoint__cacert" appInput formControlName="caCert" name="caCert"></textarea>
+        </div>
+        @if (showAdvancedFields) {
+          <div class="edit-endpoint__section">
+            <h1 class="edit-endpoint__section-title">Advanced Information (Optional)</h1>
+            <app-checkbox appInput name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
+            </app-checkbox>
+            <app-form-field>
+              <input appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
+              @if (clientID.errors && clientID.errors.required) {
+                <app-error>Client ID is required</app-error>
+              }
+            </app-form-field>
+            <app-form-field>
+              <input appInput id="client_secret" name="client_secret" formControlName="clientSecret"
+                placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+              <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
+                [attr.aria-pressed]="!show">
+                <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>
+              </button>
+            </app-form-field>
+          </div>
+        }
+        @if (endpointTypeSupportsSSO) {
+          <div class="edit-endpoint__sso">
+            <app-checkbox appInput formControlName="allowSSO" name="ssoAllowed">Allow SSO login to this endpoint
+            </app-checkbox>
+            @if (editEndpoint.value.allowSSO) {
+              <div>
+                <p>
+                  Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
+                </p>
+                <pre>{{clientRedirectURI}}</pre>
+              </div>
+            }
+          </div>
+        }
+      </form>
+    }
+  </div>
+}

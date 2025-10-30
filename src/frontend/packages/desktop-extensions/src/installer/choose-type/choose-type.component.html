@@ -2,8 +2,9 @@
   <h1>Install</h1>
 </app-page-header>
 <div class="choices">
-  <app-card *ngFor="let type of types">
-    <!-- <app-card-header>
+  @for (type of types; track type) {
+    <app-card>
+      <!-- <app-card-header>
       <app-card-title>{{ type.title }} </app-card-title>
     </app-card-header> -->
     <app-card-content>
@@ -24,4 +25,5 @@
       </div>
     </app-card-content>
   </app-card>
+}
 </div>

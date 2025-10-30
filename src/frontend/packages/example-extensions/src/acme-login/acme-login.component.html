@@ -4,13 +4,19 @@
     <div class="acme-login__body">
       <div class="acme-login__form-outer" [ngClass]="{'acme-login-sso': ssoLogin}">
         <form class="acme-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          <app-form-field *ngIf="!ssoLogin">
-            <input appInput required [(ngModel)]="username" name="username" placeholder="Username">
-          </app-form-field>
-          <app-form-field *ngIf="!ssoLogin">
-            <input appInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
-          </app-form-field>
-          <button class="login__submit btn btn-primary" *ngIf="!loggedIn" type="submit" [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+          @if (!ssoLogin) {
+            <app-form-field>
+              <input appInput required [(ngModel)]="username" name="username" placeholder="Username">
+            </app-form-field>
+          }
+          @if (!ssoLogin) {
+            <app-form-field>
+              <input appInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+            </app-form-field>
+          }
+          @if (!loggedIn) {
+            <button class="login__submit btn btn-primary" type="submit" [disabled]="!ssoLogin && !loginForm.valid">Login</button>
+          }
         </form>
       </div>
       <div class="acme-login__loading">
@@ -19,11 +25,13 @@
     </div>
   </app-card>
   <div class="acme-login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
-      {{ message }}
+    {{ message }}
   </div>
   <div class="acme-login__footer">
     <div class="acme-login__copyright">
-      <span *ngIf="config.copyright" [innerHTML]="config.copyright"></span>
+      @if (config.copyright) {
+        <span [innerHTML]="config.copyright"></span>
+      }
     </div>
     <div class="acme-login__logo">
       <img src="/core/assets/custom/acme_logo.png">

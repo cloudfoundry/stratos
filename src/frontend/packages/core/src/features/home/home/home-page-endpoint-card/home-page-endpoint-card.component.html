@@ -1,61 +1,91 @@
 <div class="card h-full">
-  <div class="card-header border-b border-gray-200" *ngIf="endpoint && definition">
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center space-x-4 cursor-pointer" [routerLink]="link">
-        <div class="flex-shrink-0">
-          <img class="h-12 w-12 object-contain" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
+  @if (endpoint && definition) {
+    <div class="card-header border-b border-gray-200">
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center space-x-4 cursor-pointer" [routerLink]="link">
+          <div class="flex-shrink-0">
+            @if (definition.logoUrl) {
+              <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" />
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 class="text-lg font-semibold text-gray-900 truncate">
+              @if (endpoint) {
+                <div>
+                  <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
+                </div>
+              }
+            </h2>
+            <div class="text-sm text-gray-500 mt-1">{{ definition.label }}</div>
+          </div>
         </div>
-        <div class="flex-1 min-w-0">
-          <h2 class="text-lg font-semibold text-gray-900 truncate">
-            <div *ngIf="endpoint">
-              <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
+        <div class="flex items-center space-x-2">
+          @if ((status$ | async); as status) {
+            <div>
+              @if (status === 1) {
+                <div class="animate-spin">
+                  <div class="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full"></div>
+                </div>
+              }
+              @if (status === 2) {
+                <div class="text-warning-500" title="Data for this endpoint took too long to load">
+                  <span class="material-icons">warning</span>
+                </div>
+              }
             </div>
-          </h2>
-          <div class="text-sm text-gray-500 mt-1">{{ definition.label }}</div>
+          }
+          <app-entity-favorite-star [confirmRemoval]="true" [favorite]="favorite"></app-entity-favorite-star>
         </div>
-      </div>
-      <div class="flex items-center space-x-2">
-        <div *ngIf="(status$ | async) as status">
-          <div *ngIf="status === 1" class="animate-spin">
-            <div class="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full"></div>
-          </div>
-          <div *ngIf="status === 2" class="text-warning-500" title="Data for this endpoint took too long to load">
-            <span class="material-icons">warning</span>
-          </div>
-        </div>
-        <app-entity-favorite-star [confirmRemoval]="true" [favorite]="favorite"></app-entity-favorite-star>
       </div>
     </div>
-  </div>
+  }
   <div class="card-body p-0">
     <div class="flex h-full" [class.flex-col]="fullView" [class.flex-row]="!fullView">
       <div class="flex-1 p-6">
         <div>
           <ng-template #customCard></ng-template>
         </div>
-        <div *ngIf="!showShortcutsOnSide" class="mt-6">
-          <app-home-shortcuts *ngIf="links$ | async as links" [shortcuts]="links.shortcuts"></app-home-shortcuts>
-        </div>
+        @if (!showShortcutsOnSide) {
+          <div class="mt-6">
+            @if (links$ | async; as links) {
+              <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+            }
+          </div>
+        }
       </div>
-      <div class="w-80 border-l border-gray-200 bg-gray-50" *ngIf="!fullView" [class.w-64]="layout && layout.x < 3">
-        <div *ngIf="links$ | async as links" class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-medium text-gray-900">Favorites</h3>
-            <div *ngIf="hiddenFavorites > 0" class="text-xs text-primary-600 cursor-pointer hover:text-primary-700" (click)="showFavoritesPanel()">
-              {{hiddenFavorites}} more ...
+      @if (!fullView) {
+        <div class="w-80 border-l border-gray-200 bg-gray-50" [class.w-64]="layout && layout.x < 3">
+          @if (links$ | async; as links) {
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-900">Favorites</h3>
+                @if (hiddenFavorites > 0) {
+                  <div class="text-xs text-primary-600 cursor-pointer hover:text-primary-700" (click)="showFavoritesPanel()">
+                    {{hiddenFavorites}} more ...
+                  </div>
+                }
+              </div>
+              @if (links.favs.length > 0) {
+                <div class="space-y-3">
+                  @for (entity of links.favs; track entity) {
+                    <app-favorites-meta-card [favoriteEntity]="entity"></app-favorites-meta-card>
+                  }
+                </div>
+              }
+              @if (links.favs.length === 0) {
+                <div class="text-center py-8 text-gray-500">
+                  <div class="text-sm">No favorites</div>
+                </div>
+              }
+              @if (showShortcutsOnSide) {
+                <div class="mt-6">
+                  <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+                </div>
+              }
             </div>
-          </div>
-          <div class="space-y-3" *ngIf="links.favs.length > 0">
-            <app-favorites-meta-card *ngFor="let entity of links.favs" [favoriteEntity]="entity"></app-favorites-meta-card>
-          </div>
-          <div class="text-center py-8 text-gray-500" *ngIf="links.favs.length === 0">
-            <div class="text-sm">No favorites</div>
-          </div>
-          <div class="mt-6" *ngIf="showShortcutsOnSide">
-            <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
   </div>
 </div>

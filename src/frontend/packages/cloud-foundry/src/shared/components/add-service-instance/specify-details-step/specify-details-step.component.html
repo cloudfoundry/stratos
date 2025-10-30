@@ -1,56 +1,74 @@
 <div class="specify-details">
-  <div *ngIf="!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection">
-    <div class="flex flex-col gap-3 mb-4">
-      <label *ngFor="let mode of formModes" class="inline-flex items-center cursor-pointer" [class.opacity-50]="(serviceInstances$ | async)?.length === 0" [class.pointer-events-none]="(serviceInstances$ | async)?.length === 0">
-        <input type="radio" [(ngModel)]="formMode" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(serviceInstances$ | async)?.length === 0">
-        <span class="ml-2 text-sm font-medium text-gray-900">{{ mode.label }}</span>
-      </label>
-    </div>
-  </div>
-  <form class="stepper-form" *ngIf="(showModeSelection && formMode === 'create-service-instance') || !showModeSelection"
-    [formGroup]="createNewInstanceForm">
-    <app-form-field>
-      <app-label>Name</app-label>
-      <input appInput class="form-control" formControlName="name" required>
-      <app-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
-        A service instance with this name already exists. Please enter a different one.
-      </app-error>
-      <app-error *ngIf="createNewInstanceForm.controls.name?.hasError('maxlength')">
-        A service instance name cannot exceed 50 characters.
-      </app-error>
-    </app-form-field>
-    <app-form-field class="stepper-form__tags">
-      <app-label>Tags</app-label>
-      <div class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md min-h-[42px] bg-white">
-        <span *ngFor="let tag of tags" class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
-          {{tag}}
-          <button type="button" *ngIf="tagsRemovable" (click)="removeTag(tag)" class="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none">
-            <span class="material-icons text-sm">cancel</span>
-          </button>
-        </span>
-        <input type="text"
-          (keydown.enter)="addTagFromInput($event)"
-          (keydown.comma)="addTagFromInput($event)"
-          (keydown.space)="addTagFromInput($event)"
-          class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
-          placeholder="Add tag..." />
+  @if (!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection) {
+    <div>
+      <div class="flex flex-col gap-3 mb-4">
+        @for (mode of formModes; track mode) {
+          <label class="inline-flex items-center cursor-pointer" [class.opacity-50]="(serviceInstances$ | async)?.length === 0" [class.pointer-events-none]="(serviceInstances$ | async)?.length === 0">
+            <input type="radio" [(ngModel)]="formMode" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(serviceInstances$ | async)?.length === 0">
+            <span class="ml-2 text-sm font-medium text-gray-900">{{ mode.label }}</span>
+          </label>
+        }
       </div>
-    </app-form-field>
-    <div class="stepper-form__params">
-      <div>Service Parameters</div>
-      <app-schema-form [config]="schemaFormConfig" (dataChange)="setServiceParams($event)"
-        (validChange)="setParamsValid($event)"></app-schema-form>
     </div>
-  </form>
-  <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'"
-    [formGroup]="selectExistingInstanceForm">
-    <app-form-field>
-      <app-label>Service Instance</app-label>
-      <app-select class="form-control" required formControlName="serviceInstances">
-        <app-option *ngFor="let sI of bindableServiceInstances$ | async" [disabled]="!sI.metadata.guid"
-          [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
-      </app-select>
-    </app-form-field>
-  </form>
+  }
+  @if ((showModeSelection && formMode === 'create-service-instance') || !showModeSelection) {
+    <form class="stepper-form"
+      [formGroup]="createNewInstanceForm">
+      <app-form-field>
+        <app-label>Name</app-label>
+        <input appInput class="form-control" formControlName="name" required>
+        @if (createNewInstanceForm.controls.name?.hasError('nameTaken')) {
+          <app-error>
+            A service instance with this name already exists. Please enter a different one.
+          </app-error>
+        }
+        @if (createNewInstanceForm.controls.name?.hasError('maxlength')) {
+          <app-error>
+            A service instance name cannot exceed 50 characters.
+          </app-error>
+        }
+      </app-form-field>
+      <app-form-field class="stepper-form__tags">
+        <app-label>Tags</app-label>
+        <div class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md min-h-[42px] bg-white">
+          @for (tag of tags; track tag) {
+            <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
+              {{tag}}
+              @if (tagsRemovable) {
+                <button type="button" (click)="removeTag(tag)" class="ml-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                  <span class="material-icons text-sm">cancel</span>
+                </button>
+              }
+            </span>
+          }
+          <input type="text"
+            (keydown.enter)="addTagFromInput($event)"
+            (keydown.comma)="addTagFromInput($event)"
+            (keydown.space)="addTagFromInput($event)"
+            class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
+            placeholder="Add tag..." />
+        </div>
+      </app-form-field>
+      <div class="stepper-form__params">
+        <div>Service Parameters</div>
+        <app-schema-form [config]="schemaFormConfig" (dataChange)="setServiceParams($event)"
+        (validChange)="setParamsValid($event)"></app-schema-form>
+      </div>
+    </form>
+  }
+  @if (showModeSelection && formMode === 'bind-service-instance') {
+    <form class="stepper-form"
+      [formGroup]="selectExistingInstanceForm">
+      <app-form-field>
+        <app-label>Service Instance</app-label>
+        <app-select class="form-control" required formControlName="serviceInstances">
+          @for (sI of bindableServiceInstances$ | async; track sI) {
+            <app-option [disabled]="!sI.metadata.guid"
+            [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
+          }
+        </app-select>
+      </app-form-field>
+    </form>
+  }
 
 </div>

@@ -9,9 +9,11 @@
     <h2 class="dialog-title">
       Connect to {{ data.name }}
     </h2>
-    <button *ngIf="helpDocument$ | async as link" [appBlur]="true" class="connection-dialog__help btn-icon" (click)="showHelp(link)">
-      <i class="material-icons">help</i>
-    </button>
+    @if (helpDocument$ | async; as link) {
+      <button [appBlur]="true" class="connection-dialog__help btn-icon" (click)="showHelp(link)">
+        <i class="material-icons">help</i>
+      </button>
+    }
   </div>
   <app-connect-endpoint (valid)="valid = $event" (authType)="setHelpLink($event.help)" [connectService]="connectService" [formSubmit]="true">
   </app-connect-endpoint>
@@ -20,7 +22,7 @@
   </app-dialog-error>
   <div class="dialog-actions connection-dialog__actions">
     <button (click)="dialogRef.close()" class="btn btn-warn"
-      [disabled]="(connectService.isBusy$ | async)">Cancel</button>
+    [disabled]="(connectService.isBusy$ | async)">Cancel</button>
     <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" class="btn btn-primary">Connect</button>
   </div>
 </div>

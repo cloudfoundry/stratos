@@ -1,4 +1,4 @@
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Subject } from 'rxjs';
 
@@ -20,13 +20,12 @@ selector: 'app-kubernetes-namespace-analysis-report-tab',
   standalone: true,
   imports: [
     AsyncPipe,
-    NgIf,
     PageSubNavComponent,
     AnalysisReportRunnerComponent,
     AnalysisReportSelectorComponent,
     AnalysisReportViewerComponent,
     NoContentMessageComponent
-  ],
+],
   providers: [
     KubernetesService,
     KubernetesEndpointService,

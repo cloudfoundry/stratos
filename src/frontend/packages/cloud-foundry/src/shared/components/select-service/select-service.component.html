@@ -4,7 +4,9 @@
     <app-form-field>
       <app-label>Service</app-label>
       <app-select class="form-control" formControlName="service">
-        <app-option *ngFor="let service of services$ | async" [value]="service.metadata.guid">{{ service.entity.label }}</app-option>
+        @for (service of services$ | async; track service) {
+          <app-option [value]="service.metadata.guid">{{ service.entity.label }}</app-option>
+        }
       </app-select>
     </app-form-field>
     <app-cf-service-card disableCardClick="true" [row]="selectedService$ | async"></app-cf-service-card>

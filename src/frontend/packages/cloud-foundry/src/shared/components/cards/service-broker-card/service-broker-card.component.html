@@ -25,8 +25,10 @@
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item *ngIf="(serviceBroker$ | async)?.entity.space_guid">
-    <app-meta-card-key>Space</app-meta-card-key>
-    <app-meta-card-value><a [routerLink]="spaceLink">{{ spaceName }}</a> </app-meta-card-value>
-  </app-meta-card-item>
+  @if ((serviceBroker$ | async)?.entity.space_guid) {
+    <app-meta-card-item>
+      <app-meta-card-key>Space</app-meta-card-key>
+      <app-meta-card-value><a [routerLink]="spaceLink">{{ spaceName }}</a> </app-meta-card-value>
+    </app-meta-card-item>
+  }
 </app-meta-card>

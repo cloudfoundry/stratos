@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   ComponentFactoryResolver,
@@ -28,13 +28,12 @@ import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } fr
   styleUrls: ['./connect-endpoint.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CustomCheckboxComponent
-  ]
+]
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;

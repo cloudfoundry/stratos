@@ -1,18 +1,20 @@
-<div class="custom-expansion-panel" 
-     [class.expanded]="expanded" 
-     [class.disabled]="disabled"
-     [class.toggle-before]="togglePosition === 'before'"
-     [class.toggle-after]="togglePosition === 'after'">
-  
+<div class="custom-expansion-panel"
+  [class.expanded]="expanded"
+  [class.disabled]="disabled"
+  [class.toggle-before]="togglePosition === 'before'"
+  [class.toggle-after]="togglePosition === 'after'">
+
   <div class="expansion-header" (click)="toggle()" [class.hide-toggle]="hideToggle">
     <ng-content select="app-expansion-panel-header"></ng-content>
-    <button *ngIf="!hideToggle" class="toggle-button" [class.before]="togglePosition === 'before'" [class.after]="togglePosition === 'after'">
-      <svg class="toggle-icon" [class.rotated]="expanded" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M7 10l5 5 5-5z"/>
-      </svg>
-    </button>
+    @if (!hideToggle) {
+      <button class="toggle-button" [class.before]="togglePosition === 'before'" [class.after]="togglePosition === 'after'">
+        <svg class="toggle-icon" [class.rotated]="expanded" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </button>
+    }
   </div>
-  
+
   <div class="expansion-content" [class.expanded]="expanded">
     <ng-content></ng-content>
   </div>

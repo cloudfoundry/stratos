@@ -1,103 +1,133 @@
-<div *ngIf="appAutoscalerPolicy$ | async as policy" class="p-6">
-  <p class="text-gray-700 mb-6">Add schedules for specific dates and times that overwrite the default instance limits. Like reoccuring schedules,
+@if (appAutoscalerPolicy$ | async; as policy) {
+  <div class="p-6">
+    <p class="text-gray-700 mb-6">Add schedules for specific dates and times that overwrite the default instance limits. Like reoccuring schedules,
     during these time periods all dynamic scaling rules are still effective.</p>
-  <app-tile-grid class="space-y-4">
-    <app-tile-group *ngFor="let rule of policy.schedules && policy.schedules.specific_date; let index = index">
-      <app-tile>
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              Schedule {{index+1}}:
-            </h3>
-          </div>
-          <div class="card-content p-4">
-            <div *ngIf="editIndex!=index" class="text-gray-700">
-              <span *ngIf="rule.initial_min_instance_count">The initial number of application instances is
-                {{rule.initial_min_instance_count}}, and the range </span>
-              <span *ngIf="!rule.initial_min_instance_count">The number of application instances </span>
-              <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} from
-                {{rule.start_date_time}} to {{rule.end_date_time}}.</span>
-            </div>
-            <div *ngIf="editIndex==index" class="space-y-4">
-              <form [formGroup]="editSpecificDateForm" validate class="space-y-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <app-tile-grid class="space-y-4">
+      @for (rule of policy.schedules && policy.schedules.specific_date; track rule; let index = $index) {
+        <app-tile-group>
+          <app-tile>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Schedule {{index+1}}:
+                </h3>
+              </div>
+              <div class="card-content p-4">
+                @if (editIndex!=index) {
+                  <div class="text-gray-700">
+                    @if (rule.initial_min_instance_count) {
+                      <span>The initial number of application instances is
+                      {{rule.initial_min_instance_count}}, and the range </span>
+                    }
+                    @if (!rule.initial_min_instance_count) {
+                      <span>The number of application instances </span>
+                    }
+                    <span>is limited from {{rule.instance_min_count}} to {{rule.instance_max_count}} from
+                    {{rule.start_date_time}} to {{rule.end_date_time}}.</span>
+                  </div>
+                }
+                @if (editIndex==index) {
                   <div class="space-y-4">
-                    <app-metadata-item label="Effective Date Time">
-                      <div class="grid grid-cols-2 gap-2">
-                        <div class="form-group">
-                          <input type="datetime-local" name="start_date_time" formControlName="start_date_time" required
-                            placeholder="Start" class="input">
+                    <form [formGroup]="editSpecificDateForm" validate class="space-y-4">
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                          <app-metadata-item label="Effective Date Time">
+                            <div class="grid grid-cols-2 gap-2">
+                              <div class="form-group">
+                                <input type="datetime-local" name="start_date_time" formControlName="start_date_time" required
+                                  placeholder="Start" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="datetime-local" name="end_date_time" formControlName="end_date_time" required
+                                  placeholder="End" class="input">
+                              </div>
+                            </div>
+                          </app-metadata-item>
                         </div>
-                        <div class="form-group">
-                          <input type="datetime-local" name="end_date_time" formControlName="end_date_time" required
-                            placeholder="End" class="input">
+                        <div class="space-y-4">
+                          <app-metadata-item label="Instance Count">
+                            <div class="grid grid-cols-3 gap-2">
+                              <div class="form-group">
+                                <input type="number" name="instance_min_count" formControlName="instance_min_count" required
+                                  placeholder="Minimum" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="number" name="initial_min_instance_count" formControlName="initial_min_instance_count"
+                                  placeholder="Initial Minimum" class="input">
+                              </div>
+                              <div class="form-group">
+                                <input type="number" name="instance_max_count" formControlName="instance_max_count" required
+                                  placeholder="Maximum" class="input">
+                              </div>
+                            </div>
+                          </app-metadata-item>
                         </div>
                       </div>
-                    </app-metadata-item>
+                    </form>
+                    <div class="space-y-1">
+                      @if (editSpecificDateForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyMinimumRange}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyMaximumRange}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleStartDateTimeBeforeNow')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleStartDateTimeBeforeNow}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleSpecificConflict')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleSpecificConflict}}
+                        </div>
+                      }
+                      @if (editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeNow')) {
+                        <div class="text-red-600 text-sm">
+                          {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeNow}}
+                        </div>
+                      }
+                    </div>
                   </div>
-                  <div class="space-y-4">
-                    <app-metadata-item label="Instance Count">
-                      <div class="grid grid-cols-3 gap-2">
-                        <div class="form-group">
-                          <input type="number" name="instance_min_count" formControlName="instance_min_count" required
-                            placeholder="Minimum" class="input">
-                        </div>
-                        <div class="form-group">
-                          <input type="number" name="initial_min_instance_count" formControlName="initial_min_instance_count"
-                            placeholder="Initial Minimum" class="input">
-                        </div>
-                        <div class="form-group">
-                          <input type="number" name="instance_max_count" formControlName="instance_max_count" required
-                            placeholder="Maximum" class="input">
-                        </div>
-                      </div>
-                    </app-metadata-item>
-                  </div>
-                </div>
-              </form>
-              <div class="space-y-1">
-                <div *ngIf="editSpecificDateForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyMinimumRange}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyMaximumRange}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleStartDateTimeBeforeNow')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleStartDateTimeBeforeNow}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeStartDateTime}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('start_date_time').hasError('alertInvalidPolicyScheduleSpecificConflict')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleSpecificConflict}}
-                </div>
-                <div *ngIf="editSpecificDateForm.get('end_date_time').hasError('alertInvalidPolicyScheduleEndDateTimeBeforeNow')" class="text-red-600 text-sm">
-                  {{policyAlert.alertInvalidPolicyScheduleEndDateTimeBeforeNow}}
-                </div>
+                }
+              </div>
+              <div class="card-actions flex justify-end space-x-2 p-4 border-t">
+                @if (editIndex!=index) {
+                  <button id="autoscaler-policy-edit-edit" (click)="editSpecificDate(index)"
+                    [disabled]="editIndex!=-1" class="btn-icon" title="Edit">
+                    <span class="material-icons">edit</span>
+                  </button>
+                }
+                @if (editIndex==index) {
+                  <button id="autoscaler-policy-edit-done" (click)="finishSpecificDate()"
+                    [disabled]="editSpecificDateForm.invalid" class="btn-icon text-green-600" title="Done">
+                    <span class="material-icons">done</span>
+                  </button>
+                }
+                <button id="autoscaler-policy-edit-delete" (click)="removeSpecificDate(index)"
+                  class="btn-icon text-red-600" title="Delete">
+                  <span class="material-icons">delete</span>
+                </button>
               </div>
             </div>
-          </div>
-          <div class="card-actions flex justify-end space-x-2 p-4 border-t">
-            <button id="autoscaler-policy-edit-edit" *ngIf="editIndex!=index" (click)="editSpecificDate(index)"
-              [disabled]="editIndex!=-1" class="btn-icon" title="Edit">
-              <span class="material-icons">edit</span>
-            </button>
-            <button id="autoscaler-policy-edit-done" *ngIf="editIndex==index" (click)="finishSpecificDate()"
-              [disabled]="editSpecificDateForm.invalid" class="btn-icon text-green-600" title="Done">
-              <span class="material-icons">done</span>
-            </button>
-            <button id="autoscaler-policy-edit-delete" (click)="removeSpecificDate(index)"
-              class="btn-icon text-red-600" title="Delete">
-              <span class="material-icons">delete</span>
-            </button>
-          </div>
-        </div>
-      </app-tile>
-    </app-tile-group>
-  </app-tile-grid>
-  <button id="autoscaler-policy-edit-add" (click)="addSpecificDate()" [disabled]="editIndex!=-1"
+          </app-tile>
+        </app-tile-group>
+      }
+    </app-tile-grid>
+    <button id="autoscaler-policy-edit-add" (click)="addSpecificDate()" [disabled]="editIndex!=-1"
     class="btn btn-primary mt-4">Add</button>
-</div>
+  </div>
+}

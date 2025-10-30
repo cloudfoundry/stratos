@@ -1,6 +1,10 @@
-<div class="cell-edit-variable" *ngIf="row.name === dataSource.editRow?.name">
-  <input class="input" name="envVarValue" [value]="dataSource.editRow?.value"
-    (input)="dataSource.editRow.value = $event.target.value" />
-</div>
-<span class="cell-value-variable" *ngIf="row.name !== dataSource.editRow?.name"
+@if (row.name === dataSource.editRow?.name) {
+  <div class="cell-edit-variable">
+    <input class="input" name="envVarValue" [value]="dataSource.editRow?.value"
+      (input)="dataSource.editRow.value = $event.target.value" />
+  </div>
+}
+@if (row.name !== dataSource.editRow?.name) {
+  <span class="cell-value-variable"
   (click)="showPopup()">{{row.value}}</span>
+}

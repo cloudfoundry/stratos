@@ -3,36 +3,45 @@
     <div class="metrics-range-parent-selector__dropdown-wrapper">
       <app-form-field>
         <app-select [(value)]="rangeSelectorManager.selectedTimeRange">
-          <app-option *ngFor="let time of rangeSelectorManager.times" [value]="time">
-            {{time.label}}
-          </app-option>
+          @for (time of rangeSelectorManager.times; track time) {
+            <app-option [value]="time">
+              {{time.label}}
+            </app-option>
+          }
         </app-select>
       </app-form-field>
 
-      <div class="metrics-range-parent-selector__selected-range" *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY">
-        <div class="metrics-range-parent-selector__selected-range-dates" *ngIf="rangeSelectorManager.committedStartEnd[0] && rangeSelectorManager.committedStartEnd[1] ; else noDatesSelected">
-          <div class="metrics-range-parent-selector__selected-range-date">{{ rangeSelectorManager.committedStartEnd[0] |
-            amDateFormat:'Do MMM YYYY,
-            HH:mm' }}
-          </div>
-          <div class="metrics-range-parent-selector__selected-range-to">to</div>
-          <div class="metrics-range-parent-selector__selected-range-date"> {{ rangeSelectorManager.committedStartEnd[1] |
-            amDateFormat:'Do MMM YYYY,
-            HH:mm' }}
-          </div>
+      @if (rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY) {
+        <div class="metrics-range-parent-selector__selected-range">
+          @if (rangeSelectorManager.committedStartEnd[0] && rangeSelectorManager.committedStartEnd[1] ) {
+            <div class="metrics-range-parent-selector__selected-range-dates">
+              <div class="metrics-range-parent-selector__selected-range-date">{{ rangeSelectorManager.committedStartEnd[0] |
+                amDateFormat:'Do MMM YYYY,
+                HH:mm' }}
+              </div>
+              <div class="metrics-range-parent-selector__selected-range-to">to</div>
+              <div class="metrics-range-parent-selector__selected-range-date"> {{ rangeSelectorManager.committedStartEnd[1] |
+                amDateFormat:'Do MMM YYYY,
+                HH:mm' }}
+              </div>
+            </div>
+          } @else {
+            No date range set
+          }
         </div>
-        <ng-template #noDatesSelected class="metrics-range-parent-selector__selected-range-date">No date range set</ng-template>
-      </div>
+      }
     </div>
 
-    <div *ngIf="rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY"
-      class="metrics-range-parent-selector__date-range">
-      <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start" [(end)]="rangeSelectorManager.end"></app-start-end-date>
-      <div class="metrics-range-parent-selector__date-range-buttons">
-        <button class="btn btn-primary metrics-range-parent-selector__date-set" type="button" (click)="rangeSelectorManager.commit()"
+    @if (rangeSelectorManager.selectedTimeRange && rangeSelectorManager.selectedTimeRange.queryType === rangeTypes.RANGE_QUERY) {
+      <div
+        class="metrics-range-parent-selector__date-range">
+        <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start" [(end)]="rangeSelectorManager.end"></app-start-end-date>
+        <div class="metrics-range-parent-selector__date-range-buttons">
+          <button class="btn btn-primary metrics-range-parent-selector__date-set" type="button" (click)="rangeSelectorManager.commit()"
           [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </app-card>
 

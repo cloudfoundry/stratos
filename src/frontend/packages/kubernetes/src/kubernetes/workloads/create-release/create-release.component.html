@@ -8,49 +8,57 @@
       <div class="form-group">
         <select class="select w-full" formControlName="endpoint" name="endpoint">
           <option value="" disabled>Select a Kubernetes cluster</option>
-          <option *ngFor="let kube of kubeEndpoints$ | async" [value]="kube.guid">
-            {{ kube.name }}
-          </option>
+          @for (kube of kubeEndpoints$ | async; track kube) {
+            <option [value]="kube.guid">
+              {{ kube.name }}
+            </option>
+          }
         </select>
       </div>
       <br>
-      <b>Specify name and namespace for the installation</b>
-      <div class="form-group">
-        <input #releaseNameInputField
-               class="input w-full"
-               placeholder="Name"
-               name="releaseName"
-               formControlName="releaseName"
-               autocomplete="off">
-      </div>
-
-      <div class="form-group relative">
-        <input type="text"
-               class="input w-full"
-               placeholder="Namespace"
-               formControlName="releaseNamespace"
-               #namespaceInput>
-        <div class="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-48 overflow-y-auto"
-             *ngIf="namespaceInput.value && (namespaces$ | async)?.length">
-          <div *ngFor="let namespace of namespaces$ | async"
-               class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-               (click)="details.patchValue({releaseNamespace: namespace})">
-            {{namespace}}
-          </div>
+        <b>Specify name and namespace for the installation</b>
+        <div class="form-group">
+          <input #releaseNameInputField
+            class="input w-full"
+            placeholder="Name"
+            name="releaseName"
+            formControlName="releaseName"
+            autocomplete="off">
         </div>
-        <div class="text-error-600 text-sm mt-1" *ngIf="details.controls.releaseNamespace.errors?.namespaceDoesNotExist">
-          Namespace does not exist
+
+        <div class="form-group relative">
+          <input type="text"
+            class="input w-full"
+            placeholder="Namespace"
+            formControlName="releaseNamespace"
+            #namespaceInput>
+          @if (namespaceInput.value && (namespaces$ | async)?.length) {
+            <div class="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-48 overflow-y-auto"
+              >
+              @for (namespace of namespaces$ | async; track namespace) {
+                <div
+                  class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  (click)="details.patchValue({releaseNamespace: namespace})">
+                  {{namespace}}
+                </div>
+              }
+            </div>
+          }
+          @if (details.controls.releaseNamespace.errors?.namespaceDoesNotExist) {
+            <div class="text-error-600 text-sm mt-1">
+              Namespace does not exist
+            </div>
+          }
         </div>
-      </div>
 
-      <label class="flex items-center space-x-2">
-        <input type="checkbox" class="checkbox" formControlName="createNamespace">
-        <span>Create Namespace</span>
-      </label>
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" class="checkbox" formControlName="createNamespace">
+          <span>Create Namespace</span>
+        </label>
 
-    </form>
-  </app-step>
-  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
-    <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
-  </app-step>
-</app-steppers>
+      </form>
+    </app-step>
+    <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
+      <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
+    </app-step>
+  </app-steppers>

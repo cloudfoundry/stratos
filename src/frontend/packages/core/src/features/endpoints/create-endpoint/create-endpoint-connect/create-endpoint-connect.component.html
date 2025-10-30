@@ -14,9 +14,11 @@
   <div>
     <div class="connect__title">
       <span class="connect__title-inner">Connection Credentials</span>
-      <button *ngIf="helpDocumentUrl" [appBlur]="true" class="connect__title-help btn btn-icon" type="button" (click)="showHelp()">
-        <app-custom-icon>help</app-custom-icon>
-      </button>
+      @if (helpDocumentUrl) {
+        <button [appBlur]="true" class="connect__title-help btn btn-icon" type="button" (click)="showHelp()">
+          <app-custom-icon>help</app-custom-icon>
+        </button>
+      }
     </div>
     <app-connect-endpoint [disabled]="!doConnect" class="stepper-form" (valid)="valid = $event"
       (authType)="helpDocumentUrl = $event.help" [connectService]="connectService">

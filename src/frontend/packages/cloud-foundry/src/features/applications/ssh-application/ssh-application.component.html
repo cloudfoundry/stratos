@@ -2,12 +2,16 @@
   <h1>SSH (#{{ instanceId }})</h1>
   <div class="page-header-right">
     <span>
-      <button class="btn btn-icon" matTooltip="Disconnect" name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
-        <span class="material-icons">stop</span>
-      </button>
-      <button class="btn btn-icon" matTooltip="Connect" name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
-        <span class="material-icons">play_arrow</span>
-      </button>
+      @if (sshViewer.isConnected) {
+        <button class="btn btn-icon" matTooltip="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
+          <span class="material-icons">stop</span>
+        </button>
+      }
+      @if (!sshViewer.isConnected) {
+        <button class="btn btn-icon" matTooltip="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
+          <span class="material-icons">play_arrow</span>
+        </button>
+      }
       <button class="btn btn-icon" matTooltip="Back to App" [routerLink]="appInstanceLink">
         <span class="material-icons">close</span>
       </button>

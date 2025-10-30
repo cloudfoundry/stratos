@@ -1,8 +1,10 @@
 <app-page-sub-nav>
-  <button class="btn btn-ghost" *ngIf="addRolesByUsernameLink$ | async as addRolesByUsernameLink"
-    [routerLink]="addRolesByUsernameLink.link" [queryParams]="addRolesByUsernameLink.params">
-    <span class="material-icons">people</span> Manage Roles
-  </button>
+  @if (addRolesByUsernameLink$ | async; as addRolesByUsernameLink) {
+    <button class="btn btn-ghost"
+      [routerLink]="addRolesByUsernameLink.link" [queryParams]="addRolesByUsernameLink.params">
+      <span class="material-icons">people</span> Manage Roles
+    </button>
+  }
 </app-page-sub-nav>
 
 <ng-template #noEntriesForCurrentFilter>

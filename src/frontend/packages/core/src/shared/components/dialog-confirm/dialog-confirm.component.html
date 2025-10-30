@@ -1,20 +1,28 @@
 <h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between">
   <span class="confirm-dialog__header-title">{{data.title}}</span>
-  <span class="material-icons text-warning-500 confirm-dialog__warn-icon" *ngIf="data.critical || textToMatch">warning</span>
+  @if (data.critical || textToMatch) {
+    <span class="material-icons text-warning-500 confirm-dialog__warn-icon">warning</span>
+  }
 </h1>
-<div class="confirm-dialog__message mb-4 text-gray-700" *ngIf="!textToMatch" [innerHtml]="data.message"></div>
-<div class="confirm-dialog__enter-text mb-4" *ngIf="textToMatch">
-  <span class="block mb-2">Please type <b class="font-semibold">{{textToMatch}}</b> to continue.</span>
-  <div class="form-field">
-    <input (paste)="handlePaste($event)" required class="input" id="typeToConfirm" [(ngModel)]="matchValue"
-      [pattern]="textToMatch">
+@if (!textToMatch) {
+  <div class="confirm-dialog__message mb-4 text-gray-700" [innerHtml]="data.message"></div>
+}
+@if (textToMatch) {
+  <div class="confirm-dialog__enter-text mb-4">
+    <span class="block mb-2">Please type <b class="font-semibold">{{textToMatch}}</b> to continue.</span>
+    <div class="form-field">
+      <input (paste)="handlePaste($event)" required class="input" id="typeToConfirm" [(ngModel)]="matchValue"
+        [pattern]="textToMatch">
+    </div>
   </div>
-</div>
+}
 <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
   <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
-  <button class="confirm-dialog__confirm" *ngIf="data.confirm"
-    [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
-    (click)="dialogRef.close(true)"
-    [disabled]="textToMatch && textToMatch !== matchValue">{{
+  @if (data.confirm) {
+    <button class="confirm-dialog__confirm"
+      [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
+      (click)="dialogRef.close(true)"
+      [disabled]="textToMatch && textToMatch !== matchValue">{{
     data.confirm }}</button>
+  }
 </div>

@@ -1,5 +1,6 @@
-<div *ngIf="(status$ | async) as status"
-     class="app-card-status absolute top-0 left-0 w-full h-1 rounded-t-lg"
+@if ((status$ | async); as status) {
+  <div
+    class="app-card-status absolute top-0 left-0 w-full h-1 rounded-t-lg"
      [ngClass]="{
        'bg-success-500': status === cardStatus.OK,
        'bg-warning-500': status === cardStatus.WARNING,
@@ -7,4 +8,5 @@
        'bg-blue-300': status === cardStatus.INCOMPLETE,
        'bg-danger-500': status === cardStatus.ERROR
      }">
-</div>
+  </div>
+}

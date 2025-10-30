@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
@@ -61,6 +61,7 @@ import { ApplicationService } from '../application.service';
   styleUrls: ['./application-delete.component.scss'],
   standalone: true,
   imports: [
+    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,

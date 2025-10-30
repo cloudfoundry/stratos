@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 
 import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -23,10 +23,9 @@ import { ApplicationService } from '../../../../application.service';
   styleUrls: ['./metrics-tab.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MetricsChartComponent,
-    MetricsParentRangeSelectorComponent,
-  ]
+    MetricsParentRangeSelectorComponent
+]
 })
 export class MetricsTabComponent {
   public instanceMetricConfigs: [
