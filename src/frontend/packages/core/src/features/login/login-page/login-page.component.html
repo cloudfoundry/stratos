@@ -7,8 +7,8 @@
   <div
     class="absolute inset-0 z-0"
     [ngStyle]="{
-      'background-image': loginBackground$ | async,
-      'background-color': loginBackgroundColor$ | async,
+      'background-image': loginBackground(),
+      'background-color': loginBackgroundColor(),
       'background-size': 'cover',
       'background-position': 'center',
       'background-repeat': 'no-repeat'
@@ -18,23 +18,23 @@
   <div
     class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
     [ngStyle]="{
-      'background-color': loginCardBackground$ | async
+      'background-color': loginCardBackground()
     }"
     >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
       <img
         class="login-logo h-12 w-12 flex-shrink-0"
-        [src]="themeLogo$ | async"
-        [alt]="(themeDisplayName$ | async) || 'Logo'"
+        [src]="themeLogo()"
+        [alt]="themeDisplayName() || 'Logo'"
         />
       <div class="login-title-section flex-1">
         <h1 class="login-title text-xl font-bold text-gray-900 mb-1">
-          {{ (themeDisplayName$ | async) || (themeTitle$ | async) || 'Stratos' }}
+          {{ themeDisplayName() || themeTitle() || 'Stratos' }}
         </h1>
-        @if (themeSubtitle$ | async) {
+        @if (themeSubtitle()) {
           <p class="login-subtitle text-sm text-gray-600">
-            {{ themeSubtitle$ | async }}
+            {{ themeSubtitle() }}
           </p>
         }
       </div>

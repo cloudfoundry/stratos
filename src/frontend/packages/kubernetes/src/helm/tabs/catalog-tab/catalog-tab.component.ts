@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith } from 'rxjs/operators';
 
 import { ListComponent } from '@stratosui/core';
@@ -43,7 +44,7 @@ export class CatalogTabComponent implements OnDestroy {
     stratosRepos: string[];
   }>;
 
-  private searchReposSub = new BehaviorSubject('');
+  private searchRepos = signal<string>('');
   public searchReposValue: string;
 
   public filteredRepo: string;
@@ -81,7 +82,7 @@ export class CatalogTabComponent implements OnDestroy {
     // Collect all unique repos in stratos and artifact hub repos
     this.repos$ = combineLatest([
       helmEntityCatalog.chart.store.getPaginationMonitor().currentPage$,
-      this.searchReposSub.asObservable()
+      toObservable(this.searchRepos)
     ]).pipe(
       distinctUntilChanged(),
       map(([repos, repoFilter]: [unknown[], string]) => {
@@ -143,8 +144,8 @@ export class CatalogTabComponent implements OnDestroy {
   /**
    * Filter the list of repos for those starting with the provided repo name
    */
-  public searchRepos(repoName: string) {
-    this.searchReposSub.next(repoName);
+  public searchReposChange(repoName: string) {
+    this.searchRepos.set(repoName);
   }
 
   ngOnDestroy(): void {

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, forwardRef, Input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
 import { BytesToHumanSize } from '../../../../../../../core/src/core/byte-formatters.pipe';
@@ -37,7 +36,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   @Input() hideTitle = false;
 
-  sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
+  sourceData = signal<FileScannerInfo | undefined>(undefined);
 
   // Handle result of a file input form field selection
   onFileChange(event: any) {
@@ -48,7 +47,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
       first()
     ).subscribe((res) => {
       this.propagateChange(res);
-      this.sourceData$.next(res);
+      this.sourceData.set(res);
     });
   }
 

@@ -95,13 +95,13 @@
   <div #sideHelp
     class="dashboard-side-help-outer fixed inset-y-0 right-0 z-50 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
        [ngClass]="{
-         'translate-x-0': (sidePanelService.opened$ | async) > 0,
-         'translate-x-full': (sidePanelService.opened$ | async) <= 0,
-         'dashboard-side-preview w-96': (sidePanelService.previewMode$ | async) >= 0
+         'translate-x-0': sidePanelService.opened(),
+         'translate-x-full': !sidePanelService.opened(),
+         'dashboard-side-preview w-96': sidePanelService.previewMode() >= 0
        }"
     (click)="sideHelpClosed()">
     <div class="dashboard-side-help h-full overflow-auto"
-      [ngClass]="{'dashboard-side-narrow w-80': (sidePanelService.previewMode$ | async) === 2, 'w-96': (sidePanelService.previewMode$ | async) !== 2}">
+      [ngClass]="{'dashboard-side-narrow w-80': sidePanelService.previewMode() === 2, 'w-96': sidePanelService.previewMode() !== 2}">
       <template #previewPanelContainer></template>
     </div>
   </div>

@@ -1,5 +1,4 @@
-import { Injectable, Optional } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, Optional, signal, computed, Signal } from '@angular/core';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -8,14 +7,14 @@ export type ThemeMode = 'light' | 'dark' | 'system';
   providedIn: 'root'
 })
 export class StratosThemeService {
-  private themeSubject = new BehaviorSubject<StratosTheme>(defaultTheme);
-  public theme$: Observable<StratosTheme> = this.themeSubject.asObservable();
+  private _theme = signal<StratosTheme>(defaultTheme);
+  public theme = this._theme.asReadonly();
 
-  private themeModeSubject = new BehaviorSubject<ThemeMode>('system');
-  public themeMode$: Observable<ThemeMode> = this.themeModeSubject.asObservable();
+  private _themeMode = signal<ThemeMode>('system');
+  public themeMode = this._themeMode.asReadonly();
 
-  private isDarkModeSubject = new BehaviorSubject<boolean>(false);
-  public isDarkMode$: Observable<boolean> = this.isDarkModeSubject.asObservable();
+  private _isDarkMode = signal<boolean>(false);
+  public isDarkMode = this._isDarkMode.asReadonly();
 
   private readonly THEME_MODE_KEY = 'stratos-theme-mode';
   private readonly THEME_STORAGE_KEY = 'stratos-theme';
@@ -37,15 +36,15 @@ export class StratosThemeService {
 
     // Load theme mode preference from localStorage
     const savedMode = this.loadThemeModeFromStorage();
-    this.themeModeSubject.next(savedMode);
+    this._themeMode.set(savedMode);
 
     // Load theme configuration
     await this.loadThemeFromConfig();
-    console.log('[StratosThemeService] Theme loaded:', this.themeSubject.value);
+    console.log('[StratosThemeService] Theme loaded:', this._theme());
 
     // Apply the theme based on mode
     this.applyThemeMode(savedMode);
-    this.updateBranding(this.themeSubject.value);
+    this.updateBranding(this._theme());
     console.log('[StratosThemeService] Theme applied to DOM');
 
     // Remove initializing class after a small delay to enable transitions
@@ -56,15 +55,15 @@ export class StratosThemeService {
   }
 
   setTheme(theme: Partial<StratosTheme>) {
-    const newTheme = { ...this.themeSubject.value, ...theme };
-    this.themeSubject.next(newTheme);
+    const newTheme = { ...this._theme(), ...theme };
+    this._theme.set(newTheme);
     this.applyTheme(newTheme);
     this.updateBranding(newTheme);
     this.saveThemeToStorage(newTheme);
   }
 
   getTheme(): StratosTheme {
-    return this.themeSubject.value;
+    return this._theme();
   }
 
   private applyTheme(theme: StratosTheme) {
@@ -134,7 +133,7 @@ export class StratosThemeService {
 
   // Company branding methods
   setCompanyBranding(branding: Partial<StratosTheme['branding']>) {
-    const currentTheme = this.themeSubject.value;
+    const currentTheme = this._theme();
     const updatedTheme = {
       ...currentTheme,
       branding: { ...currentTheme.branding, ...branding }
@@ -143,7 +142,7 @@ export class StratosThemeService {
   }
 
   setLoginCustomization(login: Partial<StratosTheme['login']>) {
-    const currentTheme = this.themeSubject.value;
+    const currentTheme = this._theme();
     const updatedTheme = {
       ...currentTheme,
       login: { ...currentTheme.login, ...login }
@@ -152,7 +151,7 @@ export class StratosThemeService {
   }
 
   setColors(colors: Partial<StratosTheme['colors']>) {
-    const currentTheme = this.themeSubject.value;
+    const currentTheme = this._theme();
     const updatedTheme = {
       ...currentTheme,
       colors: { ...currentTheme.colors, ...colors }
@@ -169,7 +168,7 @@ export class StratosThemeService {
       if (savedTheme) {
         console.log('[StratosThemeService] Found saved theme in localStorage');
         const theme = JSON.parse(savedTheme);
-        this.themeSubject.next(theme);
+        this._theme.set(theme);
         return;
       }
 
@@ -179,7 +178,7 @@ export class StratosThemeService {
       if (response.ok) {
         const themeConfig = await response.json();
         console.log('[StratosThemeService] Loaded theme config:', themeConfig);
-        this.themeSubject.next({ ...defaultTheme, ...themeConfig });
+        this._theme.set({ ...defaultTheme, ...themeConfig });
         return;
       } else {
         console.warn('[StratosThemeService] Failed to fetch theme config:', response.status, response.statusText);
@@ -190,7 +189,7 @@ export class StratosThemeService {
 
     // Fallback to default theme
     console.log('[StratosThemeService] Using default theme');
-    this.themeSubject.next(defaultTheme);
+    this._theme.set(defaultTheme);
   }
 
   private saveThemeToStorage(theme: StratosTheme) {
@@ -204,26 +203,26 @@ export class StratosThemeService {
   // Theme mode management methods
   setThemeMode(mode: ThemeMode) {
     console.log('[StratosThemeService] Setting theme mode to:', mode);
-    this.themeModeSubject.next(mode);
+    this._themeMode.set(mode);
     this.saveThemeModeToStorage(mode);
     this.applyThemeMode(mode);
   }
 
   getThemeMode(): ThemeMode {
-    return this.themeModeSubject.value;
+    return this._themeMode();
   }
 
   toggleTheme() {
-    const currentMode = this.themeModeSubject.value;
+    const currentMode = this._themeMode();
     // Toggle between light and dark (ignore system for toggle)
-    const isDark = this.isDarkModeSubject.value;
+    const isDark = this._isDarkMode();
     const newMode: ThemeMode = isDark ? 'light' : 'dark';
     this.setThemeMode(newMode);
   }
 
   private applyThemeMode(mode: ThemeMode) {
     const isDark = this.resolveThemeMode(mode);
-    this.isDarkModeSubject.next(isDark);
+    this._isDarkMode.set(isDark);
 
     // Apply dark class to body for CSS-based theming
     if (isDark) {
@@ -254,7 +253,7 @@ export class StratosThemeService {
   private onSystemThemeChange(event: MediaQueryListEvent) {
     console.log('[StratosThemeService] System theme changed to:', event.matches ? 'dark' : 'light');
     // Only update if current mode is 'system'
-    if (this.themeModeSubject.value === 'system') {
+    if (this._themeMode() === 'system') {
       this.applyThemeMode('system');
     }
   }
@@ -282,23 +281,23 @@ export class StratosThemeService {
 
   // Utility methods for components
   getPrimaryColor(): string {
-    return this.themeSubject.value.colors.primary;
+    return this._theme().colors.primary;
   }
 
   getSecondaryColor(): string {
-    return this.themeSubject.value.colors.secondary;
+    return this._theme().colors.secondary;
   }
 
   getNavBackground(): string {
-    return this.themeSubject.value.navigation.background;
+    return this._theme().navigation.background;
   }
 
   getBrandingInfo() {
-    return this.themeSubject.value.branding;
+    return this._theme().branding;
   }
 
   getLoginConfig() {
-    return this.themeSubject.value.login;
+    return this._theme().login;
   }
 
   // Reset to default theme
@@ -309,7 +308,7 @@ export class StratosThemeService {
 
   // Export/import theme configuration
   exportTheme(): string {
-    return JSON.stringify(this.themeSubject.value, null, 2);
+    return JSON.stringify(this._theme(), null, 2);
   }
 
   importTheme(themeJson: string): boolean {

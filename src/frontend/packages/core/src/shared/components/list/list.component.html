@@ -45,7 +45,7 @@
           @if (!(multiActions && multiActions.length) && (dataSource.isSelecting$ | async)) {
             <div class="list-component__header__left--text"
               >
-              {{dataSource.selectedRows.size}} Selected
+              {{dataSource.selectedRows().size}} Selected
             </div>
           }
           <!-- Injected filters -->

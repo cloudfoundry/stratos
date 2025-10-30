@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal } from '@angular/core';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { Store } from '@ngrx/store';
 import {
-  BehaviorSubject,
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
@@ -100,7 +100,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   cSIHelperService: CreateServiceInstanceHelper;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private _validate = signal<boolean>(false);
+  validate = toObservable(this._validate);
   allServiceInstanceNames: string[];
   tagsVisible = true;
   tagsSelectable = true;
@@ -110,7 +111,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   spaceScopeSub: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
-  serviceParamsValid = new BehaviorSubject(false);
+  private _serviceParamsValid = signal<boolean>(false);
+  serviceParamsValid = toObservable(this._serviceParamsValid);
   serviceParams: object = null;
   schemaFormConfig: SchemaFormConfig;
 
@@ -231,11 +233,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   setParamsValid(valid: boolean) {
-    this.serviceParamsValid.next(valid);
+    this._serviceParamsValid.set(valid);
   }
 
   resetForms = (mode: CreateServiceFormMode) => {
-    this.validate.next(false);
+    this._validate.set(false);
     this.createNewInstanceForm.reset();
     this.selectExistingInstanceForm.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
@@ -382,15 +384,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // For a new service instance the step is valid if the form and service params are both valid
     this.subscriptions.push(
       observableCombineLatest([
-        this.serviceParamsValid.asObservable(),
+        this.serviceParamsValid,
         this.createNewInstanceForm.statusChanges
       ]).pipe(
-        map(([serviceParamsValid, b]) => this.validate.next(serviceParamsValid && this.createNewInstanceForm.valid))
+        map(([serviceParamsValid, b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
       ).subscribe()
     );
     // For existing service instance the step is valid if the form is (there's no service params)
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.selectExistingInstanceForm.valid))
+      map(() => this._validate.set(this.selectExistingInstanceForm.valid))
     ).subscribe());
   }
 

@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ComponentFactoryResolver, OnDestroy } from '@angular/core';
+import { Component, ComponentFactoryResolver, OnDestroy, signal, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
 import { ClearPaginationOfType } from '@stratosui/store';
 import { RouterNav } from '@stratosui/store';
 import { AppState } from '@stratosui/store';
-import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import {
@@ -63,7 +64,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Confirmation dialogs
   deleteReleaseConfirmation: ConfirmationDialogConfig;
 
-  private busyDeletingSubject = new ReplaySubject<boolean>();
+  private busyDeleting = signal<boolean>(false);
   public isBusy$: Observable<boolean>;
   public hasResources$: Observable<boolean>;
   public hasAllResources$: Observable<boolean>;
@@ -115,8 +116,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Cached analysis report
   private analysisReport: any;
 
-  private analysisReportUpdated = new Subject<string>();
-  private analysisReportUpdated$ = this.analysisReportUpdated.pipe(startWith(null), distinctUntilChanged());
+  private analysisReportId = signal<string | null>(null);
+  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
@@ -128,15 +129,19 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     public analyzerService: KubernetesAnalysisService,
     private previewPanel: SidePanelService,
   ) {
-    this.isBusy$ = combineLatest([
+    // Convert isFetching$ to signal for computed
+    const isFetchingSignal = toSignal(
       this.helmReleaseHelper.isFetching$,
-      this.busyDeletingSubject.asObservable().pipe(
-        startWith(false)
-      )
-    ]).pipe(
-      map(([isFetching, isDeleting]: [boolean, boolean]) => isFetching || isDeleting),
-      startWith(true)
+      { initialValue: true }
     );
+
+    // Use computed for isBusy
+    const isBusyComputed = computed(() =>
+      isFetchingSignal() || this.busyDeleting()
+    );
+
+    // Provide as Observable for backward compatibility with template
+    this.isBusy$ = toObservable(isBusyComputed);
 
     this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
 
@@ -155,13 +160,20 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     // Can upgrade if the Chart is available
     this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
 
-    this.resources$ = combineLatest(
+    // Convert release graph to signal
+    const releaseGraphSignal = toSignal(
       this.helmReleaseHelper.fetchReleaseGraph(),
-      this.analysisReportUpdated$
-    ).pipe(
-      map(([graph, _]: [any, any]) => {
-        const resources: Record<string, any> = {};
-        // Collect the resources
+      { initialValue: { nodes: {} } as any }
+    );
+
+    // Compute resources based on graph and analysis report
+    const resourcesComputed = computed(() => {
+      const graph = releaseGraphSignal();
+      const _ = this.analysisReportId(); // Dependency on analysis report changes
+
+      const resources: Record<string, any> = {};
+      // Collect the resources
+      if (graph && graph.nodes) {
         Object.values(graph.nodes).forEach((node: any) => {
           if (!resources[node.data.kind]) {
             resources[node.data.kind] = {
@@ -175,27 +187,37 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           resources[node.data.kind].count++;
           resources[node.data.kind].statuses.push(node.data.status);
         });
-        this.applyAnalysis(resources, this.analysisReport);
-        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
-      }),
-      publishReplay(1),
-      refCount()
-    );
+      }
+      this.applyAnalysis(resources, this.analysisReport);
+      return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+    });
+
+    this.resources$ = toObservable(resourcesComputed);
 
 
-    this.hasResources$ = combineLatest([
+    // Convert chart data to signal
+    const chartDataSignal = toSignal(
       this.chartData$,
-      this.resources$
-    ]).pipe(
-      map(([chartData, resources]: [any, any]) => !!chartData && !!resources)
+      { initialValue: null as any }
     );
 
-    this.hasAllResources$ = combineLatest([
-      this.resources$,
-      this.hasResources$
-    ]).pipe(
-      map(([resources, hasSome]: [any, boolean]) => hasSome && resources && resources.length > 0)
-    );
+    // Compute hasResources
+    const hasResourcesComputed = computed(() => {
+      const chartData = chartDataSignal();
+      const resources = resourcesComputed();
+      return !!chartData && !!resources;
+    });
+
+    this.hasResources$ = toObservable(hasResourcesComputed);
+
+    // Compute hasAllResources
+    const hasAllResourcesComputed = computed(() => {
+      const resources = resourcesComputed();
+      const hasSome = hasResourcesComputed();
+      return hasSome && resources && resources.length > 0;
+    });
+
+    this.hasAllResources$ = toObservable(hasAllResourcesComputed);
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,
@@ -204,36 +226,29 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
       },
       'Delete'
     );
-
-    this.hasAllResources$ = combineLatest([
-      this.resources$,
-      this.hasResources$
-    ]).pipe(
-      map(([resources, hasSome]: [any, boolean]) => hasSome && resources && resources.length > 0)
-    );
   }
 
   public analysisChanged(report: any) {
     if (report === null) {
       // No report selected
       this.analysisReport = null;
-      this.analysisReportUpdated.next('');
+      this.analysisReportId.set(null);
     } else {
       this.analyzerService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((results: any) => {
         this.analysisReport = results;
-        this.analysisReportUpdated.next(report.id);
+        this.analysisReportId.set(report.id);
       });
     }
   }
 
   private startDelete() {
     this.loadingMessage = 'Deleting Release';
-    this.busyDeletingSubject.next(true);
+    this.busyDeleting.set(true);
   }
 
   private endDelete() {
     this.loadingMessage = this.DEFAULT_LOADING_MESSAGE;
-    this.busyDeletingSubject.next(false);
+    this.busyDeleting.set(false);
   }
 
   private completeDelete() {

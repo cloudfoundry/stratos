@@ -4,6 +4,7 @@ import {
   Component,
   ComponentFactoryResolver,
   OnDestroy,
+  signal,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
@@ -80,12 +81,13 @@ import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.co
 })
 export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$: Observable<APIResource<IServicePlan>>;
-  selectedPlanAccessibility$ = new BehaviorSubject<StratosStatus>(null);
+  private selectedPlanAccessibilitySignal = signal<StratosStatus>(null);
+  selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
   cSIHelperService: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef, static: true })
   noPlansDiv: ViewContainerRef;
 
-  validate = new BehaviorSubject<boolean>(false);
+  validate = signal<boolean>(false);
   subscription: Subscription;
   stepperForm: UntypedFormGroup;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
@@ -117,7 +119,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.stepperForm.controls.servicePlans.disable();
           this.clearNoPlans();
           this.createNoPlansComponent();
-          setTimeout(() => this.validate.next(false));
+          setTimeout(() => this.validate.set(false));
         }
         if (o.length > 0) {
           this.stepperForm.controls.servicePlans.enable();
@@ -144,7 +146,7 @@ export class SelectPlanStepComponent implements OnDestroy {
             this.cSIHelperService.servicePlanVisibilities$,
             this.cSIHelperService.serviceBroker$).pipe(
               first()
-            ).subscribe(cardStatus => this.selectedPlanAccessibility$.next(cardStatus));
+            ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
         })
       );
 
@@ -168,7 +170,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.stepperForm.controls.servicePlans.setValue(servicePlans[0].metadata.guid);
         }
         this.stepperForm.updateValueAndValidity();
-        this.validate.next(this.stepperForm.valid);
+        this.validate.set(this.stepperForm.valid);
       }),
     ).subscribe();
   }

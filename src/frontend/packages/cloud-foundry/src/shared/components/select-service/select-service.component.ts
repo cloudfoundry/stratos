@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 import { StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
@@ -43,10 +44,15 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
   ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
+  private store = inject(Store<CFAppState>);
+  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private csiGuidService = inject(CsiGuidsService);
+  private servicesWallService = inject(ServicesWallService);
+
   cfGuid: string;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: UntypedFormGroup;
-  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  validate = signal<boolean>(false);
   isFetching$: Observable<boolean>;
   selectedService$: Observable<APIResource<IService>>;
 
@@ -54,12 +60,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   private destroyed$ = new Subject<void>();
   public errorMessage: string | null = null;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private csiGuidService: CsiGuidsService,
-    private servicesWallService: ServicesWallService
-  ) {
+  constructor() {
     this.stepperForm = new UntypedFormGroup({
       service: new UntypedFormControl('', [Validators.required as any]),
     });
@@ -134,9 +135,16 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    // Validate step based on form status
+    // Validate step based on form status using effect
+    effect(() => {
+      // Track form status via signal
+      const isValid = this.stepperForm.controls.service.valid;
+      this.validate.set(isValid);
+    });
+
+    // Original observable subscription for validation
     this.stepperForm.controls.service.statusChanges.pipe(
-      map(() => this.validate.next(this.stepperForm.controls.service.valid)),
+      map(() => this.validate.set(this.stepperForm.controls.service.valid)),
       takeUntil(this.destroyed$)
     ).subscribe();
   }

@@ -23,7 +23,7 @@
           Folder</button>
         </div>
       }
-      @if ((sourceData$ | async); as source) {
+      @if (sourceData(); as source) {
         <div class="deploy-app-local__info">
           @if (source.summaryType === 'file') {
             <div>

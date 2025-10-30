@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -133,7 +133,9 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDeleteCache, CfCurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
@@ -142,11 +144,15 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     action: (item: APIResource<IServiceInstance>) => this.deleteServiceBinding(item),
     label: 'Unbind',
     description: 'Unbind Service Instance',
-    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length !== 0)),
+    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(
+      map(row => !!(row && row.entity && row.entity.service_bindings && row.entity.service_bindings.length !== 0))
+    ),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };
@@ -167,7 +173,9 @@ export class CfServiceInstancesListConfigBase implements IListConfig<APIResource
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
         switchMap(
-          row => this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+          row => row && row.entity && row.entity.cfGuid && row.entity.space_guid ?
+            this.can(this.canDetachCache, CfCurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid) :
+            observableOf(false)
         )
       )
   };

@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import { Type, WritableSignal } from '@angular/core';
 import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
 import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -135,7 +135,11 @@ export interface IListMultiFilterConfig {
   hideAllOption?: boolean;
   list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<any>;
+  // Phase 3: Updated to support both BehaviorSubject and Signal with compatibility methods
+  select: BehaviorSubject<any> | (WritableSignal<any> & {
+    next: (value: any) => void;
+    asObservable: () => Observable<any>;
+  });
   autoSelectFirst?: boolean;
 }
 
@@ -273,7 +277,11 @@ export class MultiFilterManager<T> {
       // Ensure we actually have the item. Could be from storage and invalid
       if (itemValue === undefined || items.find(i => i.value === itemValue)) {
         this.value = itemValue;
-        this.multiFilterConfig.select.next(itemValue);
+        // Handle both BehaviorSubject (has .next) and Signal wrappers (have .next for compatibility)
+        const select = this.multiFilterConfig.select as any;
+        if (select && typeof select.next === 'function') {
+          select.next(itemValue);
+        }
       }
     });
   }

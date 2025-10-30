@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { PermissionConfig } from '../../../../../../../core/src/core/permissions/current-user-permissions.config';
 import {
@@ -56,8 +57,8 @@ export class ManageUsersSetUsernamesHelper {
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
 
-  public stepValid = new BehaviorSubject<boolean>(false);
-  public valid$: Observable<boolean> = this.stepValid.asObservable();
+  public stepValid = signal<boolean>(false);
+  public valid$: Observable<boolean> = toObservable(this.stepValid);
   private usernames: StackedInputActionsUpdate;
   public origin: string;
   public canAdd$: Observable<boolean>;
@@ -74,13 +75,15 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     }
   };
 
-  public stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
+  public stateIn = signal<StackedInputActionsState[]>([]);
+  public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor(
     private store: Store<CFAppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     userPerms: CurrentUserPermissionsService,
   ) {
+    this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
     this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
@@ -122,12 +125,12 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     //     result: StackedInputActionResult.PROCESSING,
     //   });
     // });
-    this.stateIn.next(processingState);
+    this.stateIn.set(processingState);
   }
 
   stateOut(usernames: StackedInputActionsUpdate) {
     this.usernames = usernames;
-    this.stepValid.next(usernames.valid);
+    this.stepValid.set(usernames.valid);
   }
 
   setIsRemove(event: {source: any, value: boolean}) {

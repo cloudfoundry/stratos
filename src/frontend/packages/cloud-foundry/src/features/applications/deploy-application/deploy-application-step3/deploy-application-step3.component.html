@@ -7,6 +7,6 @@
   </div>
 }
 @if (deployer && deployer.messages) {
-  <app-log-viewer class="deploy-app__log" [logStream]="deployer.messages">
+  <app-log-viewer class="deploy-app__log" [logStream]="deployer.messages.asObservable()">
   </app-log-viewer>
 }

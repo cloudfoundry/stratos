@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -10,7 +10,7 @@ import {
   UAASetupState,
   InternalAppState,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
@@ -57,7 +57,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
   validateUAAForm: Observable<boolean>;
   uaaScopes: string[] = [];
   selectedScope = '';
-  applyingSetup$ = new BehaviorSubject<boolean>(false);
+  applyingSetup = signal<boolean>(false);
 
   public show = false;
   public showPassword = false;
@@ -106,7 +106,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_admin_scope: this.selectedScope
     }));
 
-    this.applyingSetup$.next(true);
+    this.applyingSetup.set(true);
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
@@ -127,7 +127,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
           const reload = loc.protocol + '//' + loc.host;
           window.location.assign(reload);
         } else {
-          this.applyingSetup$.next(false);
+          this.applyingSetup.set(false);
         }
         return {
           success: !state[0].error,

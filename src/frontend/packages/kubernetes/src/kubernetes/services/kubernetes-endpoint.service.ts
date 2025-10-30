@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { filter, first, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../store/src/actions/endpoint.actions';
@@ -199,14 +200,23 @@ export class KubernetesEndpointService {
   }
 
   getPodCapacity(nodes$: Observable<KubernetesNode[]> = this.nodes$, pods$: Observable<KubernetesPod[]> = this.pods$) {
-    return combineLatest(nodes$, pods$).pipe(
-      map(([nodes, pods]) => ({
+    // Convert to signals
+    const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
+    const podsSignal = toSignal(pods$, { initialValue: [] as KubernetesPod[] });
+
+    // Compute capacity
+    const capacityComputed = computed(() => {
+      const nodes = nodesSignal();
+      const pods = podsSignal();
+      return {
         total: nodes.reduce((cap, node) => {
           return cap + parseInt(node.status.capacity.pods, 10);
         }, 0),
         used: pods.length
-      }))
-    );
+      };
+    });
+
+    return toObservable(capacityComputed);
   }
 
   getNodeStatusCount(

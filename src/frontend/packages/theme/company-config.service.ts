@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { CompanyConfig } from './company-config.interface';
 import { StratosThemeService } from './theme.service';
 
@@ -55,8 +54,8 @@ const defaultCompanyConfig: CompanyConfig = {
   providedIn: 'root'
 })
 export class CompanyConfigService {
-  private configSubject = new BehaviorSubject<CompanyConfig>(defaultCompanyConfig);
-  public config$: Observable<CompanyConfig> = this.configSubject.asObservable();
+  private _config = signal<CompanyConfig>(defaultCompanyConfig);
+  public config = this._config.asReadonly();
 
   constructor(
     private http: HttpClient,
@@ -89,19 +88,19 @@ export class CompanyConfigService {
     }
 
     // Fallback to default
-    this.configSubject.next(defaultCompanyConfig);
+    this._config.set(defaultCompanyConfig);
     this.applyConfigToTheme(defaultCompanyConfig);
   }
 
   setCompanyConfig(config: Partial<CompanyConfig>) {
-    const newConfig = { ...this.configSubject.value, ...config };
-    this.configSubject.next(newConfig);
+    const newConfig = { ...this._config(), ...config };
+    this._config.set(newConfig);
     this.applyConfigToTheme(newConfig);
     this.saveConfigToStorage(newConfig);
   }
 
   getCompanyConfig(): CompanyConfig {
-    return this.configSubject.value;
+    return this._config();
   }
 
   private applyConfigToTheme(config: CompanyConfig) {
@@ -146,40 +145,40 @@ export class CompanyConfigService {
 
   // Utility methods for easy access to common config values
   getCompanyName(): string {
-    return this.configSubject.value.company.name;
+    return this._config().company.name;
   }
 
   getMainLogo(): string {
-    return this.configSubject.value.logos.main;
+    return this._config().logos.main;
   }
 
   getNavigationLogo(): string {
-    return this.configSubject.value.logos.navigation;
+    return this._config().logos.navigation;
   }
 
   getNavigationIcon(): string {
-    return this.configSubject.value.logos.navigationIcon;
+    return this._config().logos.navigationIcon;
   }
 
   getPrimaryColor(): string {
-    return this.configSubject.value.theme.primary;
+    return this._config().theme.primary;
   }
 
   getLoginTitle(): string {
-    return this.configSubject.value.login.title;
+    return this._config().login.title;
   }
 
   getLoginSubtitle(): string | undefined {
-    return this.configSubject.value.login.subtitle;
+    return this._config().login.subtitle;
   }
 
   getCopyrightText(): string | undefined {
-    return this.configSubject.value.footer.copyright;
+    return this._config().footer.copyright;
   }
 
   // Methods for updating specific parts of the config
   updateCompanyInfo(company: Partial<CompanyConfig['company']>) {
-    const currentConfig = this.configSubject.value;
+    const currentConfig = this._config();
     this.setCompanyConfig({
       ...currentConfig,
       company: { ...currentConfig.company, ...company }
@@ -187,7 +186,7 @@ export class CompanyConfigService {
   }
 
   updateLogos(logos: Partial<CompanyConfig['logos']>) {
-    const currentConfig = this.configSubject.value;
+    const currentConfig = this._config();
     this.setCompanyConfig({
       ...currentConfig,
       logos: { ...currentConfig.logos, ...logos }
@@ -195,7 +194,7 @@ export class CompanyConfigService {
   }
 
   updateThemeColors(theme: Partial<CompanyConfig['theme']>) {
-    const currentConfig = this.configSubject.value;
+    const currentConfig = this._config();
     this.setCompanyConfig({
       ...currentConfig,
       theme: { ...currentConfig.theme, ...theme }
@@ -203,7 +202,7 @@ export class CompanyConfigService {
   }
 
   updateLoginConfig(login: Partial<CompanyConfig['login']>) {
-    const currentConfig = this.configSubject.value;
+    const currentConfig = this._config();
     this.setCompanyConfig({
       ...currentConfig,
       login: { ...currentConfig.login, ...login }
@@ -212,7 +211,7 @@ export class CompanyConfigService {
 
   // Export/import functionality
   exportConfig(): string {
-    return JSON.stringify(this.configSubject.value, null, 2);
+    return JSON.stringify(this._config(), null, 2);
   }
 
   importConfig(configJson: string): boolean {

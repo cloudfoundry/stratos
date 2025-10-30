@@ -1,6 +1,8 @@
+import { signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import moment from 'moment';
-import { BehaviorSubject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
@@ -21,6 +23,32 @@ import { MonocularVersion } from '../../../helm/store/helm.types';
 import { HelmReleaseVersionsDataSource } from './release-version-data-source';
 
 const typeFilterKey = 'versionType';
+
+// Helper function to create a signal wrapper compatible with IListMultiFilterConfig
+// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
+// while being backed by a Signal
+function createSignalWrapper<T>(initialValue: T) {
+  const _signal = signal<T>(initialValue);
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => toObservable(_signal),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
 
 export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVersion> {
 
@@ -106,7 +134,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
         }
       ]),
       loading$: of(false),
-      select: new BehaviorSubject(undefined)
+      select: createSignalWrapper<any>(undefined)
     }];
 
     // Auto-select first non-development version

@@ -127,7 +127,9 @@ export abstract class CfRoutesListConfigBase implements IListConfig<APIResource>
     label: 'Unmap',
     description: 'Unmap route',
     createVisible: this.canEditRoute,
-    createEnabled: (row$: Observable<APIResource>) => row$.pipe(map(row => row.entity.apps && row.entity.apps.length))
+    createEnabled: (row$: Observable<APIResource>) => row$.pipe(
+      map(row => !!(row && row.entity && row.entity.apps && row.entity.apps.length))
+    )
   };
 
   private dispatchDeleteAction(route: APIResource<ListCfRoute>): void {

@@ -1,4 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
+import { Signal } from '@angular/core';
 import { Action } from '@ngrx/store';
 import {
   IRequestEntityTypeState,
@@ -11,7 +12,7 @@ import {
   ListSort,
   EntityCatalogEntityConfig,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export interface IEntitySelectItem {
   page: number;
@@ -73,8 +74,8 @@ interface ICoreTableListDataSource<T> extends ICoreListDataSource<T> {
 
   selectAllChecked?: boolean; // Select items - remove once ng-content can exist in md-table
   selectAllIndeterminate?: boolean; // Select all checkbox as indeterminate
-  selectedRows?: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  selectedRows$?: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectedRows?: Signal<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$?: Observable<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   selectAllFilteredRows?: () => void; // Select items - remove once ng-content can exist in md-table
   selectedRowToggle?: (row: T, multiMode?: boolean) => void; // Select items - remove once ng-content can exist in md-table
   selectClear?: () => void;
@@ -107,8 +108,10 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   isMultiAction$?: Observable<boolean>;
 
   addItem: T;
-  isAdding$: BehaviorSubject<boolean>;
-  isSelecting$: BehaviorSubject<boolean>;
+  isAdding: Signal<boolean>;
+  isAdding$: Observable<boolean>;
+  isSelecting: Signal<boolean>;
+  isSelecting$: Observable<boolean>;
   isLoadingPage$: Observable<boolean>;
 
   maxedResults$: Observable<boolean>;

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, computed, signal } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../../../cloud-foundry/src/actions/user-provided-service.actions';
@@ -83,9 +83,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string, }[] = [];
-  public validate = new BehaviorSubject(false);
+  public validate = signal(false);
   private subscriptions: Subscription[] = [];
-  private tagsChanged = new BehaviorSubject(true);
+  private tagsChangedSignal = signal(true);
 
   @Input()
   public cfGuid: string;
@@ -123,26 +123,30 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private setupValidate() {
     const obs = obsCombineLatest([
       this.createEditServiceInstance.statusChanges.pipe(startWith('INVALID')),
-      this.bindExistingInstance.statusChanges.pipe(startWith('INVALID')),
-      this.tagsChanged
+      this.bindExistingInstance.statusChanges.pipe(startWith('INVALID'))
     ]).pipe(
       map(([createValid, bindValid]) =>
         this.formStatusToBool(this.formMode === CreateServiceFormMode.CreateServiceInstance ? createValid : bindValid)
       ),
       map(valid => this.validAndChanged(valid)),
     );
-    this.subscriptions.push(this.tagsChanged.subscribe(() => {
-      if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
-        this.createEditServiceInstance.markAsTouched();
-        this.createEditServiceInstance.markAsDirty();
-        this.createEditServiceInstance.updateValueAndValidity();
-      } else {
-        this.bindExistingInstance.markAsTouched();
-        this.bindExistingInstance.markAsDirty();
-        this.bindExistingInstance.updateValueAndValidity();
+
+    // Trigger form validation when tags change using signal
+    this.subscriptions.push(obs.subscribe(valid => {
+      // Combine with tagsChanged signal
+      if (this.tagsChangedSignal()) {
+        if (this.formMode === CreateServiceFormMode.CreateServiceInstance) {
+          this.createEditServiceInstance.markAsTouched();
+          this.createEditServiceInstance.markAsDirty();
+          this.createEditServiceInstance.updateValueAndValidity();
+        } else {
+          this.bindExistingInstance.markAsTouched();
+          this.bindExistingInstance.markAsDirty();
+          this.bindExistingInstance.updateValueAndValidity();
+        }
       }
+      this.validate.set(valid);
     }));
-    this.subscriptions.push(obs.subscribe(valid => this.validate.next(valid)));
   }
 
   private validAndChanged(isValid = false): boolean {
@@ -179,7 +183,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
   resetForms = (mode: CreateServiceFormMode) => {
-    this.validate.next(false);
+    this.validate.set(false);
     this.createEditServiceInstance.reset();
     this.bindExistingInstance.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
@@ -363,7 +367,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (label) {
       this.tags.push({ label });
       this.updateTagsFormControl();
-      this.tagsChanged.next(true);
+      this.tagsChangedSignal.set(true);
       input.value = '';
     }
   }
@@ -374,7 +378,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     if (index >= 0) {
       this.tags.splice(index, 1);
       this.updateTagsFormControl();
-      this.tagsChanged.next(true);
+      this.tagsChangedSignal.set(true);
     }
   }
 

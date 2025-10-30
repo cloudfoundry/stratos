@@ -168,7 +168,12 @@ import { CfUser } from './store/types/cf-user.types';
 import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
-  return populatePaginationFromParent(store, action).pipe(
+  const result$ = populatePaginationFromParent(store, action);
+  // Guard against null/undefined Observable from populatePaginationFromParent
+  if (!result$) {
+    return of(action);
+  }
+  return result$.pipe(
     map(newAction => newAction || action)
   );
 }

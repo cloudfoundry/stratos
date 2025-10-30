@@ -1,26 +1,25 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EndpointModalService {
-  private isModalOpenSubject = new BehaviorSubject<boolean>(false);
-  public isModalOpen$ = this.isModalOpenSubject.asObservable();
+  private _isModalOpen = signal<boolean>(false);
+  public isModalOpen = this._isModalOpen.asReadonly();
 
   openModal() {
-    this.isModalOpenSubject.next(true);
+    this._isModalOpen.set(true);
     // Prevent body scroll when modal is open
     document.body.classList.add('modal-open');
   }
 
   closeModal() {
-    this.isModalOpenSubject.next(false);
+    this._isModalOpen.set(false);
     // Restore body scroll
     document.body.classList.remove('modal-open');
   }
 
   get isOpen(): boolean {
-    return this.isModalOpenSubject.value;
+    return this._isModalOpen();
   }
 }

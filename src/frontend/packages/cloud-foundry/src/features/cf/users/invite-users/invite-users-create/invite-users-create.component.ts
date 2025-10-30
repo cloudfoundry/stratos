@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   StackedInputActionResult,
@@ -39,9 +40,10 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
 })
 export class InviteUsersCreateComponent implements OnInit {
 
+  public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean>;
-  public stepValid = new BehaviorSubject<boolean>(false);
-  public stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
+  public stateIn = signal<StackedInputActionsState[]>([]);
+  public stateIn$: Observable<StackedInputActionsState[]>;
   public org$: Observable<APIResource<IOrganization>>;
   public space$: Observable<APIResource<ISpace>>;
   public madeChanges = false;
@@ -55,7 +57,8 @@ export class InviteUsersCreateComponent implements OnInit {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userInviteService: UserInviteService
   ) {
-    this.valid$ = this.stepValid.asObservable();
+    this.valid$ = toObservable(this.stepValid);
+    this.stateIn$ = toObservable(this.stateIn);
     this.spaceRoles.push(
       {
         label: UserRoleLabels.space.short[SpaceUserRoleNames.AUDITOR],
@@ -71,7 +74,7 @@ export class InviteUsersCreateComponent implements OnInit {
 
   stateOut(users: StackedInputActionsUpdate) {
     this.users = users;
-    this.stepValid.next(users.valid);
+    this.stepValid.set(users.valid);
   }
 
   ngOnInit() {
@@ -102,7 +105,7 @@ export class InviteUsersCreateComponent implements OnInit {
         result: StackedInputActionResult.PROCESSING,
       });
     });
-    this.stateIn.next(processingState);
+    this.stateIn.set(processingState);
 
     // Kick off the invites
     return this.userInviteService.invite(
@@ -147,8 +150,8 @@ export class InviteUsersCreateComponent implements OnInit {
               });
             });
             // We've just come from a valid state, so form should be valid again
-            this.stepValid.next(true);
-            this.stateIn.next(newState);
+            this.stepValid.set(true);
+            this.stateIn.set(newState);
             res.errorMessage = 'Failed to invite one or more users. Please address per user message and try again';
           }
           return res;

@@ -1,6 +1,5 @@
 
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, Input } from '@angular/core';
 
 import { DisplayValueComponent } from '../display-value/display-value.component';
 

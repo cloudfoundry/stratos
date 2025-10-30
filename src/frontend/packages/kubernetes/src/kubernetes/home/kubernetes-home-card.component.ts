@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, computed } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
@@ -111,8 +112,20 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    return combineLatest([this.podCount$, this.nodeCount$, this.namespaceCount$]).pipe(
-      map(() => true)
-    );
+    // Convert counts to signals
+    const podCountSignal = toSignal(this.podCount$, { initialValue: 0 });
+    const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: 0 });
+    const namespaceCountSignal = toSignal(this.namespaceCount$, { initialValue: 0 });
+
+    // Compute loaded state - true when all counts are available
+    const loadedComputed = computed(() => {
+      // Access all signals to create dependency
+      podCountSignal();
+      nodeCountSignal();
+      namespaceCountSignal();
+      return true;
+    });
+
+    return toObservable(loadedComputed);
   }
 }

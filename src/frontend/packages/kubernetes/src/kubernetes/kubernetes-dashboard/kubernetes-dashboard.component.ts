@@ -1,8 +1,8 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -58,8 +58,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   source: SafeResourceUrl;
   href = '';
-  isLoading$ = new BehaviorSubject<boolean>(true);
-  hasError$ = new BehaviorSubject<boolean>(false);
+  isLoading = signal<boolean>(true);
+  hasError = signal<boolean>(false);
   expanded = true;
 
   private loadCheckTries = 0;
@@ -67,10 +67,10 @@ export class KubernetesDashboardTabComponent implements OnInit {
   private hasIframeLoaded = false;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  public errorMsg$ = new BehaviorSubject<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
+  public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
   constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) {
-    this.hasError$.next(false);
+    this.hasError.set(false);
   }
 
   ngOnInit() {
@@ -110,11 +110,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
     const errMsg = this.getStratosError();
     if (!!errMsg) {
       hasLoaded = true;
-      this.errorMsg$.next({
+      this.errorMsg.set({
         firstLine: errMsg,
         secondLine: { text: '' }
       });
-      this.hasError$.next(true);
+      this.hasError.set(true);
     }
 
     const kdToolbar = this.getKubeDashToolbar();
@@ -135,7 +135,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
     }
 
     if (hasLoaded) {
-      this.isLoading$.next(false);
+      this.isLoading.set(false);
       this.toggle(true);
     }
 

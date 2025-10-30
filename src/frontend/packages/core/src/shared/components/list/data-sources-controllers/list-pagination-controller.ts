@@ -1,4 +1,4 @@
-import { NgZone } from '@angular/core';
+import { NgZone, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   ListFilter,
@@ -44,21 +44,72 @@ function onPaginationEntityState(
 }
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
+  pagination$: Observable<ListPagination>;
+  sort$: Observable<ListSort>;
+  filter$: Observable<ListFilter>;
+  private multiFilterStream = signal<ListPaginationMultiFilterChange>(null);
+  private multiFilterSubject = new BehaviorSubject<ListPaginationMultiFilterChange>(null);
+
+  // Define handleMultiFilter before multiFilterChanges$ to ensure proper initialization order
+  handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (!paginationEntityState) {
+        return;
+      }
+
+      // Changes may include multiple updates for the same key, so only use the very latest
+      const uniqueChanges: ListPaginationMultiFilterChange[] = [];
+      for (let i = changes.length - 1; i >= 0; i--) {
+        const change = changes[i];
+        if (!uniqueChanges.find(e => e.key === change.key)) {
+          uniqueChanges.push(change);
+        }
+      }
+      // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
+      // chained actions from firing.
+      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, any>, change: ListPaginationMultiFilterChange) => {
+        const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
+        const newFilterParamValue = valueOrCommonFalsy(change.value);
+        if (storeFilterParamValue !== newFilterParamValue) {
+          newCleanChanges[change.key] = change.value;
+        }
+        return newCleanChanges;
+      }, {});
+
+      if (Object.keys(cleanChanges).length > 0) {
+        const currentFilter = paginationEntityState.clientPagination.filter;
+        const newFilter = {
+          ...currentFilter,
+          items: {
+            ...currentFilter.items,
+            ...cleanChanges
+          }
+        };
+        this.store.dispatch(new SetClientFilter(
+          this.dataSource,
+          this.dataSource.paginationKey,
+          newFilter
+        ));
+      }
+
+      if (paginationEntityState.maxedState.isMaxedMode && !paginationEntityState.maxedState.ignoreMaxed) {
+        this.dataSource.setMultiFilter(changes, paginationEntityState.params);
+      }
+
+    });
+  };
+
+  // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
+  // filter resets other filters.
+  multiFilterChanges$: Observable<any>;
+
   constructor(
     private store: Store<GeneralAppState>,
     public dataSource: IListDataSource<T>,
     private ngZone: NgZone
   ) {
-
-    this.pagination$ = this.createPaginationObservable(dataSource);
-
-    this.sort$ = this.dataSource.sort$;
-
-    this.filter$ = this.dataSource.filter$;
-
-    // Listen to changes to the multi filters and batch them up together. This avoids situations when there are multiple changes when one
-    // filter resets other filters.
-    this.multiFilterChanges$ = this.multiFilterStream.asObservable().pipe(
+    // Initialize multiFilterChanges$ using BehaviorSubject to avoid injection context requirement
+    this.multiFilterChanges$ = this.multiFilterSubject.asObservable().pipe(
       filter(change => !!change),
       bufferTime(50, leaveZone(this.ngZone, asyncScheduler)),
       filter(changes => !!changes.length),
@@ -66,12 +117,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       tap(this.handleMultiFilter),
     );
 
+    this.pagination$ = this.createPaginationObservable(dataSource);
+
+    this.sort$ = this.dataSource.sort$;
+
+    this.filter$ = this.dataSource.filter$;
+
   }
-  pagination$: Observable<ListPagination>;
-  sort$: Observable<ListSort>;
-  filter$: Observable<ListFilter>;
-  private multiFilterStream = new BehaviorSubject<ListPaginationMultiFilterChange>(null);
-  multiFilterChanges$: Observable<any>;
 
   page(pageIndex: number) {
     const page = pageIndex + 1;
@@ -139,59 +191,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     });
   };
 
-  handleMultiFilter = (changes: ListPaginationMultiFilterChange[]) => {
-    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
-      if (!paginationEntityState) {
-        return;
-      }
-
-      // Changes may include multiple updates for the same key, so only use the very latest
-      const uniqueChanges: ListPaginationMultiFilterChange[] = [];
-      for (let i = changes.length - 1; i >= 0; i--) {
-        const change = changes[i];
-        if (!uniqueChanges.find(e => e.key === change.key)) {
-          uniqueChanges.push(change);
-        }
-      }
-      // We don't want to dispatch actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
-      // chained actions from firing.
-      const cleanChanges = uniqueChanges.reduce((newCleanChanges: Record<string, any>, change: ListPaginationMultiFilterChange) => {
-        const storeFilterParamValue = valueOrCommonFalsy(paginationEntityState.clientPagination.filter.items[change.key]);
-        const newFilterParamValue = valueOrCommonFalsy(change.value);
-        if (storeFilterParamValue !== newFilterParamValue) {
-          newCleanChanges[change.key] = change.value;
-        }
-        return newCleanChanges;
-      }, {});
-
-      if (Object.keys(cleanChanges).length > 0) {
-        const currentFilter = paginationEntityState.clientPagination.filter;
-        const newFilter = {
-          ...currentFilter,
-          items: {
-            ...currentFilter.items,
-            ...cleanChanges
-          }
-        };
-        this.store.dispatch(new SetClientFilter(
-          this.dataSource,
-          this.dataSource.paginationKey,
-          newFilter
-        ));
-      }
-
-      if (paginationEntityState.maxedState.isMaxedMode && !paginationEntityState.maxedState.ignoreMaxed) {
-        this.dataSource.setMultiFilter(changes, paginationEntityState.params);
-      }
-
-    });
-  };
-
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
     if (!this.dataSource.isLocal) {
       return;
     }
-    this.multiFilterStream.next({ key: filterConfig.key, value: filterValue });
+    const change = { key: filterConfig.key, value: filterValue };
+    this.multiFilterStream.set(change);
+    this.multiFilterSubject.next(change);
   };
 
   private cloneMultiFilter(paginationClientFilter: PaginationClientFilter) {

@@ -6,6 +6,8 @@ import {
   Component,
   EventEmitter,
   forwardRef,
+  inject,
+  Injector,
   Input,
   NgZone,
   OnChanges,
@@ -16,7 +18,9 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewChild,
+  signal,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
 export type SortDirection = 'asc' | 'desc' | '';
@@ -141,8 +145,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   // List config when supplied as an attribute rather than a dependency
   @Input() listConfig: ListConfig<T>;
 
-  entitySelectValue = new BehaviorSubject(undefined);
-  entitySelectValue$: Observable<number> = this.entitySelectValue.asObservable();
+  private entitySelectValue = signal<number | undefined>(undefined);
+  private entitySelectValueSubject = new BehaviorSubject<number | undefined>(undefined);
+  entitySelectValue$ = this.entitySelectValueSubject.asObservable();
 
   pPaginator: MatPaginator;
   private filterString: string;
@@ -219,7 +224,9 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
-  haveMultiActions = new BehaviorSubject(false);
+  private haveMultiActionsSignal = signal<boolean>(false);
+  private haveMultiActionsSubject = new BehaviorSubject<boolean>(false);
+  haveMultiActions = this.haveMultiActionsSubject.asObservable();
   hasSingleActions: boolean;
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
@@ -265,6 +272,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     private cd: ChangeDetectorRef,
     @Optional() public config: ListConfig<T>,
     private ngZone: NgZone,
+    private injector: Injector,
   ) { }
 
   ngOnInit() {
@@ -327,7 +335,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.dataSource.pagination$.pipe(
       first(),
     ).subscribe(pag => {
-      this.entitySelectValue.next(pag.forcedLocalPage);
+      this.entitySelectValue.set(pag.forcedLocalPage);
+      this.entitySelectValueSubject.next(pag.forcedLocalPage);
     });
 
 
@@ -493,7 +502,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       tap(() => {
         Object.values(this.multiFilterManagers).forEach((filterManager: MultiFilterManager<T>, index: number) => {
           // Pipe changes in the widgets to the store
-          const sub = filterManager.multiFilterConfig.select.asObservable().pipe(tap((filterItem: string) => {
+          // Handle both BehaviorSubject and Signal wrappers
+          const select$ = 'asObservable' in filterManager.multiFilterConfig.select
+            ? filterManager.multiFilterConfig.select.asObservable()
+            : toObservable(filterManager.multiFilterConfig.select, { injector: this.injector });
+          const sub = select$.pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
           }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
@@ -530,7 +543,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     const haveMultiActions = observableCombineLatest(visibles$).pipe(
       map(visibles => visibles.some(visible => visible)),
       tap(allowSelection => {
-        this.haveMultiActions.next(allowSelection);
+        this.haveMultiActionsSignal.set(allowSelection);
+        this.haveMultiActionsSubject.next(allowSelection);
       })
     );
 
@@ -666,7 +680,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
 
     // Reset the multi-entity filter
-    this.entitySelectValue.next(undefined);
+    this.entitySelectValue.set(undefined);
+    this.entitySelectValueSubject.next(undefined);
     this.setEntityPage(undefined);
   }
 
@@ -692,7 +707,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
+    const result = listActionConfig.action(Array.from(this.dataSource.selectedRows().values()));
     if (isObservable(result)) {
       const sub = this.getActionSub(result);
       this.pendingActions.set(result, sub);

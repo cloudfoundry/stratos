@@ -1,9 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, Input, computed } from '@angular/core';
 import { StratosThemeService } from '../../../../../theme/theme.service';
-import { StratosTheme } from '../../../../../theme/theme.config';
 
 @Component({
   selector: 'app-stratos-title',
@@ -14,33 +11,25 @@ import { StratosTheme } from '../../../../../theme/theme.config';
     CommonModule
   ]
 })
-export class StratosTitleComponent implements OnInit {
+export class StratosTitleComponent {
 
   // Optional title
   @Input() title: string;
-  
-  public themeTitle$: Observable<string>;
-  public themeSubtitle$: Observable<string>;
-  public themeLogo$: Observable<string>;
+
+  // Theme-related signals (computed from theme service)
+  public themeTitle = computed(() =>
+    this.themeService.theme()?.branding?.companyName ||
+    this.themeService.theme()?.branding?.loginTitle ||
+    'Stratos'
+  );
+
+  public themeSubtitle = computed(() =>
+    this.themeService.theme()?.branding?.loginSubtitle || ''
+  );
+
+  public themeLogo = computed(() =>
+    this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
+  );
 
   constructor(private themeService: StratosThemeService) {}
-
-  ngOnInit() {
-    // Show company name as primary title, fallback to loginTitle, then default
-    this.themeTitle$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => 
-        theme?.branding?.companyName || 
-        theme?.branding?.loginTitle || 
-        'Stratos'
-      )
-    );
-    
-    this.themeSubtitle$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || '')
-    );
-    
-    this.themeLogo$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png')
-    );
-  }
 }

@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Injector, Input, OnDestroy, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
-  BehaviorSubject,
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
@@ -41,7 +40,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   showOverlay$: Observable<boolean>;
 
-  error$ = new BehaviorSubject<boolean>(false);
+  error = signal<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
 
@@ -57,23 +56,24 @@ export class DeployApplicationStep3Component implements OnDestroy {
   constructor(
     private store: Store<CFAppState>,
     private snackBarService: SnackBarService,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private injector: Injector
   ) {
     this.valid$ = observableOf(false);
     this.closeable$ = observableOf(false);
   }
 
   private initDeployer() {
-    this.deploySub = this.deployer.status$.pipe(
+    this.deploySub = this.deployer.status$.asObservable().pipe(
       filter(status => status.deploying),
     ).subscribe();
 
     // Observables
-    this.errorSub = this.deployer.status$.pipe(
+    this.errorSub = this.deployer.status$.asObservable().pipe(
       filter((status) => status.error)
     ).subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'));
 
-    const appGuid$ = this.deployer.applicationGuid$.pipe(
+    const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
       filter((appGuid) => appGuid !== null),
       first(),
     );
@@ -96,15 +96,15 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.closeable$ = observableCombineLatest(
       this.valid$.pipe(startWith(false)),
-      this.deployer.status$).pipe(
+      this.deployer.status$.asObservable()).pipe(
         map(([validated, status]) => {
           return validated || status.error;
         })
       );
 
-    this.busySub = this.deployer.status$.subscribe(status => this.busy = status.deploying);
+    this.busySub = this.deployer.status$.asObservable().subscribe(status => this.busy = status.deploying);
 
-    this.showOverlay$ = this.deployer.status$.pipe(
+    this.showOverlay$ = this.deployer.status$.asObservable().pipe(
       map(status => {
         return !status.deploying || status.deploying && !this.deployer.streamTitle;
       })
@@ -128,7 +128,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   private setupCompletionNotification() {
-    this.deployer.status$.pipe(
+    this.deployer.status$.asObservable().pipe(
       filter(status => !status.deploying),
       first()
     ).subscribe(status => {
@@ -147,7 +147,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     if (fsDeployer) {
       this.deployer = fsDeployer;
     } else {
-      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService);
+      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService, this.injector);
     }
 
     this.initDeployer();

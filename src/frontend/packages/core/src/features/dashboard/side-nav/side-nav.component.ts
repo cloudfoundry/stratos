@@ -1,10 +1,9 @@
-import { Component, EventEmitter, InjectionToken, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ToggleSideNav, AppState, Logout } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { StratosThemeService } from '../../../../../theme/theme.service';
 import { StratosTheme } from '../../../../../theme/theme.config';
@@ -43,9 +42,21 @@ export interface SideNavItem extends TabNavItem {
 export class SideNavComponent implements OnInit {
 
   public customizations: CustomizationsMetadata;
-  public navLogo$: Observable<string>;
-  public navLogoIcon$: Observable<string>;
-  public displayName$: Observable<string>;
+
+  // Theme-related signals (computed from theme service)
+  public navLogo = computed(() =>
+    this.themeService.theme()?.branding?.navLogo || '/core/assets/logo.png'
+  );
+
+  public navLogoIcon = computed(() =>
+    this.themeService.theme()?.branding?.navLogoIcon || '/core/assets/logo.png'
+  );
+
+  public displayName = computed(() =>
+    this.themeService.theme()?.branding?.displayName ||
+    this.themeService.theme()?.branding?.companyName ||
+    'Stratos'
+  );
 
   public environment = environment;
   public showAllMenuItems = false;
@@ -61,23 +72,6 @@ export class SideNavComponent implements OnInit {
     private themeService: StratosThemeService
   ) {
     this.customizations = cs.get();
-    
-    // Get logo paths from theme service
-    this.navLogo$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.navLogo || '/core/assets/logo.png')
-    );
-    
-    this.navLogoIcon$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.navLogoIcon || '/core/assets/logo.png')
-    );
-
-    this.displayName$ = this.themeService.theme$.pipe(
-      map((theme: StratosTheme) =>
-        theme?.branding?.displayName ||
-        theme?.branding?.companyName ||
-        'Stratos'
-      )
-    );
   }
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {

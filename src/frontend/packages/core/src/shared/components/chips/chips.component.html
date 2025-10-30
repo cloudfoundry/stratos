@@ -5,7 +5,7 @@
   <div class="app-chips flex flex-wrap gap-2"
     [ngClass]="{'flex-col': stacked, 'flex-row-reverse': orientation==='rtl'}"
     >
-    @for (chip of chips | slice:0:limit; track chip) {
+    @for (chip of chips | slice:0:limit; track chip.key ?? chip.value; let i = $index) {
       <div class="chip app-chip inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full border"
         [ngClass]="getChipClasses(chip.color)">
         <div class="app-chip__container flex items-center gap-1">

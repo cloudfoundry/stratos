@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
@@ -92,17 +93,28 @@ export class KubernetesAnalysisService {
       map(engines => engines.split(',').map(e => allEngines[e.trim()]).filter(e => !!e))
     );
 
-    this.namespaceAnalyzers$ = combineLatest(
+    // Convert to signals for computed
+    const analyzersSignal = toSignal(
       this.analyzers$,
-      this.enabled$
-    ).pipe(
-      map(([a, enabled]) => {
-        if (!enabled) {
-          return null;
-        }
-        return a.filter(v => v.namespaceAware);
-      })
+      { initialValue: [] as KubernetesAnalysisType[] }
     );
+
+    const enabledSignal = toSignal(
+      this.enabled$,
+      { initialValue: false }
+    );
+
+    // Compute namespace analyzers
+    const namespaceAnalyzersComputed = computed(() => {
+      const analyzers = analyzersSignal();
+      const enabled = enabledSignal();
+      if (!enabled) {
+        return null;
+      }
+      return analyzers.filter(v => v.namespaceAware);
+    });
+
+    this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
 
     this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }

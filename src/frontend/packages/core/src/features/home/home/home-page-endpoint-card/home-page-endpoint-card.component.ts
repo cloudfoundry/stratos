@@ -13,9 +13,11 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
+  signal,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { filter, first, map, timeout } from 'rxjs/operators';
 
 import {
@@ -86,7 +88,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   favorites$: Observable<any>;
 
-  layout$ = new BehaviorSubject<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout>(null);
+  public layoutSignal = this._layout.asReadonly();
+  public layout$: Observable<HomePageCardLayout>;
 
   links$: Observable<LinkMetadata>;
 
@@ -99,8 +103,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   public link: string;
 
   // Status = 0 OK, 1 Loading, 2 Error
-  status$: Observable<Status>;
-  status = new BehaviorSubject<Status>(Status.OK);
+  private _status = signal<Status>(Status.OK);
+  public statusSignal = this._status.asReadonly();
+  public status$: Observable<Status>;
 
   private ref: ComponentRef<HomePageEndpointCard>;
   private sub: Subscription;
@@ -125,7 +130,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     private injector: Injector,
     private componentFactoryResolver: ComponentFactoryResolver,
   ) {
-    this.status$ = this.status.asObservable();
+    this.layout$ = toObservable(this._layout);
+    this.status$ = toObservable(this._status);
   }
 
   ngAfterViewInit() {
@@ -150,7 +156,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this.link = this.favorite.getLink();
     }
 
-    this.links$ = combineLatest([this.favorites$, this.layout$.asObservable()]).pipe(
+    this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
       filter(([favs, layout]) => !!layout),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
@@ -210,7 +216,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   // Layout has changed
   public updateLayout() {
-    this.layout$.next(this.layout);
+    this._layout.set(this.layout);
     if (this.ref && this.ref.instance) {
       this.ref.instance.layout = this.pLayout;
     }
@@ -241,16 +247,16 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   // Ask the card to load itself
   loadCardIfReady() {
     if (this.canLoad && this.ref && this.ref.instance && this.ref.instance.load) {
-      this.status.next(Status.Loading);
+      this._status.set(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
       // Timeout after 15 seconds
       this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
         this.loaded.next(void 0);
-        setTimeout(() => this.status.next(Status.OK), 0);
+        setTimeout(() => this._status.set(Status.OK), 0);
       }, () => {
         this.loaded.next(void 0);
-        this.status.next(Status.Error);
+        this._status.set(Status.Error);
         this.sub.unsubscribe();
       });
     }

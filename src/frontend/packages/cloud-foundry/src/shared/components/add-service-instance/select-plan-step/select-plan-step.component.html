@@ -12,8 +12,8 @@
   </form>
   @if (selectedPlan$ | async; as selPlan) {
     <app-card class="select-plan__details">
-      @if ((selectedPlanAccessibility$ | async)) {
-        <app-card-status [status$]="selectedPlanAccessibility$"></app-card-status>
+      @if (selectedPlanAccessibility()) {
+        <app-card-status [status]="selectedPlanAccessibility()"></app-card-status>
       }
       <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
       <app-metadata-item label="Description"> {{selPlan.entity.description}} </app-metadata-item>

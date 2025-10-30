@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { AppState } from '../../../../../../store/src/app-state';
@@ -56,10 +57,14 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   formattedLimit: string;
   usage: string;
 
-  status$ = new BehaviorSubject<StratosStatus>(StratosStatus.NONE);
+  private _status = signal<StratosStatus>(StratosStatus.NONE);
+  public status = this._status.asReadonly();
+  public status$: Observable<StratosStatus>;
   isUnlimited: boolean;
 
-  constructor(private utils: UtilsService, private store: Store<AppState>) { }
+  constructor(private utils: UtilsService, private store: Store<AppState>) {
+    this.status$ = toObservable(this._status);
+  }
 
   ngOnInit() {
     this.format();
@@ -97,7 +102,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
 
     const status = determineCardStatus(parseInt(this.value, 10), parseInt(this.limit, 10));
-    this.status$.next(status);
+    this._status.set(status);
 
     const limit = parseInt(this.limit, 10);
     if (limit === -1) {

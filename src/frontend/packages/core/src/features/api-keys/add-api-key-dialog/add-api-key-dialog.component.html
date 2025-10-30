@@ -1,7 +1,7 @@
 <div class="key-dialog__loading-wrapper">
   <app-progress-bar class="key-dialog__loading"
-    [color]="(hasErrored$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
-    [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
+    [color]="hasErrored() && !isBusy() ? 'warn' : 'primary'"
+    [mode]="isBusy() ? 'indeterminate' : 'solid'">
   </app-progress-bar>
 </div>
 <div class="key-dialog">
@@ -18,11 +18,11 @@
     </app-form-field>
   </div>
 
-  <app-dialog-error message="{{hasErrored$ | async}}" [show]="(hasErrored$ | async) && !(isBusy$ | async)">
+  <app-dialog-error [message]="hasErrored()" [show]="hasErrored() && !isBusy()">
   </app-dialog-error>
   <div class="key-dialog__actions flex justify-end gap-2 mt-4">
-    <button (click)="dialogRef.close()" class="btn btn-danger" type="button" [disabled]="(isBusy$ | async)">Cancel</button>
-    <button (click)="submit()" [disabled]="(isBusy$ | async) || !formGroup.valid" class="btn btn-primary"
+    <button (click)="dialogRef.close()" class="btn btn-danger" type="button" [disabled]="isBusy()">Cancel</button>
+    <button (click)="submit()" [disabled]="isBusy() || !formGroup.valid" class="btn btn-primary"
       type="button">Create</button>
   </div>
 </div>

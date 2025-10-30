@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { BooleanIndicatorComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
 
@@ -82,14 +82,15 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   // Removed Angular Material snackbar dependency
 
-  public serviceAccountBusy$ = new BehaviorSubject<boolean>(false);
+  // Signals for busy state tracking
+  public serviceAccountBusy = signal<boolean>(false);
   public serviceAccountMsg = '';
 
-  public dashboardUIBusy$ = new BehaviorSubject<boolean>(false);
+  public dashboardUIBusy = signal<boolean>(false);
   public dashboardUIMsg = '';
 
   // Are we busy with an operation - disable buttons if we are
-  public isBusy$ = new BehaviorSubject<boolean>(false);
+  public isBusy = signal<boolean>(false);
 
   // Is the status loading
   public isUpdatingStatus = false;
@@ -145,7 +146,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'serviceAccount',
       'Creating Service Account ...',
       'Service Account created', 'An error occurred creating the Service Account',
-      this.serviceAccountBusy$,
+      this.serviceAccountBusy,
       (msg) => this.serviceAccountMsg = msg
     );
   }
@@ -160,7 +161,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
     this.makeRequest('delete', 'serviceAccount',
       'Deleting Service Account ...',
       'Service Account deleted',
-      'An error occurred deleting the Service Account', this.serviceAccountBusy$,
+      'An error occurred deleting the Service Account', this.serviceAccountBusy,
       (msg => this.serviceAccountMsg = msg));
   }
 
@@ -175,7 +176,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'installation',
       'Installing Kubernetes Dashboard ...',
       'Kubernetes Dashboard installed', 'An error occurred installing the Kubernetes Dashboard',
-      this.dashboardUIBusy$,
+      this.dashboardUIBusy,
       (msg) => this.dashboardUIMsg = msg
     );
   }
@@ -191,7 +192,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'installation',
       'Deleting Kubernetes Dashboard ...',
       'Kubernetes Dashboard deleted', 'An error occurred deleting the Kubernetes Dashboard',
-      this.dashboardUIBusy$,
+      this.dashboardUIBusy,
       (msg) => this.dashboardUIMsg = msg
     );
   }
@@ -202,14 +203,14 @@ export class KubedashConfigurationComponent implements OnDestroy {
     busyMsg: string,
     okMsg: string,
     errorMsg: string,
-    busy: BehaviorSubject<boolean>,
+    busy: ReturnType<typeof signal<boolean>>,
     msgUpdater: MessageUpdater) {
     const guid = this.kubeEndpointService.kubeGuid;
     const url = `/pp/v1/kubedash/${guid}/${op}`;
     let obs;
     msgUpdater(busyMsg);
-    busy.next(true);
-    this.isBusy$.next(true);
+    busy.set(true);
+    this.isBusy.set(true);
     if (method === 'post') {
       obs = this.httpClient.post(url, {});
     } else if (method === 'delete') {
@@ -222,7 +223,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
     obs.subscribe(() => {
       console.log(okMsg); // Replace with proper notification system if needed
       msgUpdater(okMsg);
-      busy.next(false);
+      busy.set(false);
       this.refresh();
     }, (e) => {
       let msg = errorMsg;
@@ -231,7 +232,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       }
       console.error(msg); // Replace with proper notification system if needed
       msgUpdater(msg);
-      busy.next(false);
+      busy.set(false);
       this.refresh();
     });
   }
@@ -239,6 +240,6 @@ export class KubedashConfigurationComponent implements OnDestroy {
   private refresh() {
     this.isUpdatingStatus = true;
     this.kubeEndpointService.refreshKubernetesDashboardStatus();
-    this.isBusy$.next(false);
+    this.isBusy.set(false);
   }
 }

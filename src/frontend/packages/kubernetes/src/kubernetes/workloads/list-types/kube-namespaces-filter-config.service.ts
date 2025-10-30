@@ -1,10 +1,11 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal, computed } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { safeUnsubscribe } from 'frontend/packages/core/src/core/utils.service';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { connectedEndpointsOfTypesSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
 import { EndpointModel } from 'frontend/packages/store/src/types/endpoint.types';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -22,10 +23,36 @@ import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
 
+// Helper function to create a signal wrapper compatible with IListMultiFilterConfig
+// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
+// while being backed by a Signal
+function createSignalWrapper<T>(initialValue: T) {
+  const _signal = signal<T>(initialValue);
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => toObservable(_signal),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
+
 export interface KubernetesNamespacesFilterItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<string>;
+  select: ReturnType<typeof createSignalWrapper<string>>;
 }
 
 /**
@@ -59,13 +86,14 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     return kubeEntityCatalog.namespace.store.getPaginationService(null);
   }
 
-  private createKube() {
+  private createKube(): KubernetesNamespacesFilterItem<EndpointModel> {
     const list$ = this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
       // Ensure we have endpoints
       filter(endpoints => endpoints && !!Object.keys(endpoints).length),
       publishReplay(1),
       refCount(),
     );
+
     return {
       list$: list$.pipe(
         map(endpoints => Object.values(endpoints)),
@@ -75,50 +103,66 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         }),
       ),
       loading$: list$.pipe(map(kubes => !kubes)),
-      select: new BehaviorSubject(undefined)
+      select: createSignalWrapper<string>(undefined)
     };
   }
 
-  private createNamespace() {
-    const namespaceList$ = combineLatest(
+  private createNamespace(): KubernetesNamespacesFilterItem<KubernetesNamespace> {
+    // Convert kube.select Observable to signal for computed
+    const kubeSelectSignal = toSignal(
       this.kube.select.asObservable(),
-      this.allNamespaces.entities$
-    ).pipe(map(([selectedKubeId, entities]) => {
+      { initialValue: undefined as string | undefined }
+    );
+
+    const allNamespacesSignal = toSignal(
+      this.allNamespaces.entities$,
+      { initialValue: [] as KubernetesNamespace[] }
+    );
+
+    // Use computed for derived list
+    const namespaceListComputed = computed(() => {
+      const selectedKubeId = kubeSelectSignal();
+      const entities = allNamespacesSignal();
       if (selectedKubeId && entities) {
         return entities
           .filter(namespace => namespace.metadata.kubeId === selectedKubeId)
           .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
       }
       return [];
-    }));
+    });
+
+    // Convert computed to Observable for backward compatibility
+    const namespaceList$ = toObservable(namespaceListComputed);
 
     return {
       list$: namespaceList$,
       loading$: this.allNamespacesLoading$,
-      select: new BehaviorSubject(undefined)
+      select: createSignalWrapper<string>(undefined)
     };
   }
 
   private setupAutoSelectors() {
-    const namespaceResetSub = this.kube.select.asObservable().pipe(
+    // Convert kube.select Observable to signal for reactive auto-selection
+    const kubeSelectObservable$ = this.kube.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),
       withLatestFrom(this.namespace.list$),
       tap(([, namespaces]) => {
-        if (!!namespaces.length && namespaces.length === 1
-        ) {
+        if (!!namespaces.length && namespaces.length === 1) {
           this.selectSet(this.namespace.select, namespaces[0].metadata.name);
         } else {
           this.selectSet(this.namespace.select, undefined);
         }
       }),
-    ).subscribe();
+    );
+
+    const namespaceResetSub = kubeSelectObservable$.subscribe();
     this.subs.push(namespaceResetSub);
   }
 
-  private selectSet(select: BehaviorSubject<string>, newValue: string) {
-    if (select.getValue() !== newValue) {
-      select.next(newValue);
+  private selectSet(selectWrapper: ReturnType<typeof createSignalWrapper<string>>, newValue: string) {
+    if (selectWrapper() !== newValue) {
+      selectWrapper.set(newValue);
     }
   }
 

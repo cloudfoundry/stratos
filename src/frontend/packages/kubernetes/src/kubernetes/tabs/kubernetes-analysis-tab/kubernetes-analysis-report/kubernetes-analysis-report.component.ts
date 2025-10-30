@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { IHeaderBreadcrumbLink } from 'frontend/packages/core/src/shared/components/page-header/page-header.types';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { catchError, first, map, startWith } from 'rxjs/operators';
 
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
@@ -36,8 +37,12 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   endpointID: string;
   id: string;
 
-  private breadcrumbsSubject: BehaviorSubject<IHeaderBreadcrumbLink[]>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumbLink[]>;
+  // Signal for tracking breadcrumbs
+  private breadcrumbsSignal = signal<IHeaderBreadcrumbLink[]>([
+    { value: 'Analysis', routerLink: '' },
+    { value: 'Report' },
+  ]);
+  public breadcrumbs$ = toObservable(this.breadcrumbsSignal);
 
   constructor(
     private analysisService: KubernetesAnalysisService,
@@ -46,9 +51,8 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   ) {
     this.id = route.snapshot.params.id;
 
-    this.breadcrumbsSubject = new BehaviorSubject<IHeaderBreadcrumbLink[]>(undefined);
-    this.breadcrumbs$ = this.breadcrumbsSubject.asObservable();
-    this.breadcrumbsSubject.next([
+    // Initialize breadcrumbs with actual route
+    this.breadcrumbsSignal.set([
       { value: 'Analysis', routerLink: getParentURL(route, 2) },
       { value: 'Report' },
     ]);
@@ -81,7 +85,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
 
     // When the report has loaded, update the name in the breadcrumbs
     this.report$.pipe(first()).subscribe(report => {
-      this.breadcrumbsSubject.next([
+      this.breadcrumbsSignal.set([
         { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
         { value: report.name },
       ]);

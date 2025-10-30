@@ -1,9 +1,10 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
-import { BehaviorSubject, combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, fromEvent, Observable, of, Subscription } from 'rxjs';
 import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -113,8 +114,8 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   public initing = true;
 
-  // Observable for tracking if the Monaco editor has loaded
-  private monacoLoaded$ = new BehaviorSubject<boolean>(false);
+  // Signal for tracking if the Monaco editor has loaded
+  private monacoLoaded = signal<boolean>(false);
 
   private resizeSub: Subscription;
   private themeSub: Subscription;
@@ -176,7 +177,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
-    this.loading$ = combineLatest(schema$, values$, this.monacoLoaded$).pipe(
+    this.loading$ = combineLatest(schema$, values$, toObservable(this.monacoLoaded)).pipe(
       filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
       tap(([schema, values, loaded]: [any, any, boolean]) => {
         this.schema = schema;
@@ -299,7 +300,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     req(['vs/language/yaml/monaco.contribution'], () => {
       // Set the model now that YAML support is loaded - this will update the editor correctly
       this.updateModel();
-      this.monacoLoaded$.next(true);
+      this.monacoLoaded.set(true);
     });
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes

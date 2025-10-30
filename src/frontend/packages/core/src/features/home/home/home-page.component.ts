@@ -10,7 +10,10 @@ import {
   QueryList,
   ViewChild,
   ViewChildren,
+  signal,
+  computed,
 } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   IUserFavoritesGroups,
@@ -24,7 +27,7 @@ import {
   SetHomeCardLayoutAction,
   SetDashboardStateValueAction,
 } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -67,10 +70,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   public layouts$: Observable<HomePageCardLayout[]>;
 
-  private layout = new BehaviorSubject<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout>(null);
+  public layout = this._layout.asReadonly();
   public layout$: Observable<HomePageCardLayout>;
 
-  private showMode = new BehaviorSubject<boolean>(null);
+  private _showMode = signal<boolean>(null);
   public showAllEndpoints = false;
 
   public haveThingsToShow$: Observable<boolean>;
@@ -100,7 +104,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private viewMonitorSub: Subscription;
   private cardChangesSub: Subscription;
-  private checkLayout = new BehaviorSubject<boolean>(true);
+  private _checkLayout = signal<boolean>(true);
+  private check$ = toObservable(this._checkLayout).pipe(
+    filter(v => v),
+    debounceTime(100) // Debounce the check signal itself
+  );
 
   constructor(
     public endpointsService: EndpointsService,
@@ -124,13 +132,13 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     ).subscribe();
 
     this.layouts$ = of(this.layouts);
-    this.layout$ = this.layout.asObservable();
+    this.layout$ = toObservable(this._layout);
     this.allEndpointIds$ = this.endpointsService.connectedEndpoints$.pipe(
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
     const connected$ = this.endpointsService.connectedEndpoints$;
-    const showMode$ = this.showMode.asObservable();
+    const showMode$ = toObservable(this._showMode);
 
     // Default value from backend
     const sessionData$ = this.store.select(s => s.auth).pipe(
@@ -170,7 +178,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.haveThingsToShow$ = this.endpoints$.pipe(map(eps => eps.length > 0), startWith(true));
 
     // Set an initial layout
-    this.layout.next(this.getLayout(1, 1));
+    this._layout.set(this.getLayout(1, 1));
 
     this.store.select(selectDashboardState).pipe(
       map(dashboardState => dashboardState.homeLayout || 0),
@@ -182,10 +190,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const check$ = this.checkLayout.asObservable().pipe(
-      filter(v => v),
-      debounceTime(100) // Debounce the check signal itself
-    );
     const scroll$ = this.scrollDispatcher.scrolled().pipe(
       map((e: any) => {
         const el = e.elementRef.nativeElement;
@@ -196,7 +200,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     );
 
     // Load cards as they come into view
-    this.viewMonitorSub = combineLatest([scroll$, check$]).pipe(
+    this.viewMonitorSub = combineLatest([scroll$, this.check$]).pipe(
       debounceTime(150) // Reduce debounce time for better responsiveness
     ).subscribe(([scrollTop]) => {
       // Skip if already processing or no cards to check
@@ -205,7 +209,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Reset check signal
-      this.checkLayout.next(false);
+      this._checkLayout.set(false);
 
       // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
       const remaining: number[] = [];
@@ -309,11 +313,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Check the cards in view
   checkCardsInView() {
-    this.checkLayout.next(true);
+    this._checkLayout.set(true);
   }
 
   public toggleShowAllEndpoints() {
-    this.showMode.next(!this.showAllEndpoints);
+    this._showMode.set(!this.showAllEndpoints);
   }
 
   // The layout was changed
@@ -323,7 +327,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     // If the layout is automatic, then adjust based on number of things to show
     const lay$ = layout.id === 0 ? this.automaticLayout() : of(layout);
     lay$.pipe(first()).subscribe(lo => {
-      this.layout.next(lo);
+      this._layout.set(lo);
 
       // Update the grid columns based on the layout
       this.columns = lo.x;

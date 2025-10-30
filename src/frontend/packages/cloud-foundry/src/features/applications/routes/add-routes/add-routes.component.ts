@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
@@ -57,12 +58,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   spaceGuid: string;
   createTCPRoute = false;
   selectedDomain: APIResource<any>;
-  selectedRoute$ = new BehaviorSubject<any>({
+  private _selectedRoute = signal<any>({
     entity: {},
     metadata: {}
   });
+  // Expose as writable object for child component compatibility
+  selectedRoute$ = {
+    next: (value: any) => this._selectedRoute.set(value),
+    subscribe: (fn: any) => toObservable(this._selectedRoute).subscribe(fn)
+  } as any;
   appUrl: string;
-  isRouteSelected$ = new BehaviorSubject<boolean>(false);
+  isRouteSelected = signal<boolean>(false);
   addRouteModes: RouteMode[] = [
     { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
     { id: 'map', label: 'Map existing route', submitLabel: 'Map' }
@@ -141,9 +147,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(space$.subscribe());
 
-    const selRoute$ = this.selectedRoute$.subscribe(x => {
+    const selRoute$ = toObservable(this._selectedRoute).subscribe(x => {
       if (x.metadata.guid) {
-        this.isRouteSelected$.next(true);
+        this.isRouteSelected.set(true);
       }
     });
     this.subscriptions.push(selRoute$);
@@ -164,7 +170,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         : this.addHTTPRoute.valid;
     } else {
       try {
-        return this.isRouteSelected$.getValue();
+        return this.isRouteSelected();
       } catch (e) { }
 
       return false;
@@ -258,7 +264,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   private mapRouteSubmit(): Observable<StepOnNextResult> {
-    return this.selectedRoute$.pipe(
+    return toObservable(this._selectedRoute).pipe(
       switchMap(route => this.mapRoute(route.metadata.guid))
     );
   }

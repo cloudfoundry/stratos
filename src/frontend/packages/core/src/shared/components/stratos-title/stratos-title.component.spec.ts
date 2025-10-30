@@ -1,23 +1,25 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { signal } from '@angular/core';
 
 import { StratosTitleComponent } from './stratos-title.component';
 import { StratosThemeService } from '../../../../../theme/theme.service';
-import { of } from 'rxjs';
 
 describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
   let fixture: ComponentFixture<StratosTitleComponent>;
 
   beforeEach(waitForAsync(() => {
+    const mockTheme = signal({
+      branding: {
+        companyName: 'Test Company',
+        loginTitle: 'Test Title',
+        loginSubtitle: 'Test Subtitle',
+        logo: '/test-logo.png'
+      }
+    } as any);
+
     const mockThemeService = {
-      theme$: of({
-        branding: {
-          companyName: 'Test Company',
-          loginTitle: 'Test Title',
-          loginSubtitle: 'Test Subtitle',
-          logo: '/test-logo.png'
-        }
-      })
+      theme: mockTheme.asReadonly()
     };
 
     TestBed.configureTestingModule({

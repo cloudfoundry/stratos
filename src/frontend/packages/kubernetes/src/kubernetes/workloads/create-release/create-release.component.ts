@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -52,7 +53,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   details: UntypedFormGroup;
   namespaces$: Observable<string[]>;
 
-  private endpointChanged = new BehaviorSubject(null);
+  private endpointChangedSignal: WritableSignal<string | null> = signal(null);
+  private endpointChanged = toObservable(this.endpointChangedSignal);
 
   @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
@@ -100,7 +102,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
-      this.endpointChanged.asObservable(),
+      this.endpointChanged,
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
@@ -156,7 +158,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.subs.push(
       this.details.controls.endpoint.valueChanges.subscribe(val => {
-        this.endpointChanged.next(val);
+        this.endpointChangedSignal.set(val);
       })
     );
 
@@ -182,7 +184,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.kubeEndpoints$.pipe(first()).subscribe(ep => {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
-        this.endpointChanged.next(ep[0].guid);
+        this.endpointChangedSignal.set(ep[0].guid);
         setTimeout(() => {
           this.releaseNameInputField.nativeElement.focus();
         }, 1);

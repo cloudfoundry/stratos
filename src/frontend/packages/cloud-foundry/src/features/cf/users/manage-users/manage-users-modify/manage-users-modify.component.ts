@@ -10,11 +10,12 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
+  signal,
 } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -28,6 +29,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   ITableListDataSource,
@@ -130,8 +132,8 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private snackBarRef: TailwindSnackBarRef<any>;
 
   usersNames$: Observable<string[]>;
-  blocked = new BehaviorSubject<boolean>(true);
-  blocked$: Observable<boolean> = this.blocked.asObservable().pipe(delay(0));
+  blocked = signal<boolean>(true);
+  blocked$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0));
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
   selectedOrgGuid: string;
@@ -153,9 +155,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (this.setUsernames) {
-      this.blocked.next(false);
+      this.blocked.set(false);
     } else {
-      this.cfRolesService.loading$.subscribe(loading => this.blocked.next(loading));
+      this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading));
     }
 
     const orgEntity$ = this.store.select(selectCfUsersRolesOrgGuid).pipe(

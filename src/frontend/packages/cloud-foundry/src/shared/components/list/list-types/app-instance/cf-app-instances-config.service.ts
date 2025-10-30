@@ -183,10 +183,18 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         return this.appService.app$.pipe(
           combineLatest(this.appService.appSpace$),
           map(([app, space]) => {
-            return row.value &&
+            return !!(
+              row &&
+              row.value &&
               row.value.state === 'RUNNING' &&
+              app &&
+              app.entity &&
+              app.entity.entity &&
               app.entity.entity.enable_ssh &&
-              space.entity.allow_ssh;
+              space &&
+              space.entity &&
+              space.entity.allow_ssh
+            );
           })
         );
       })),

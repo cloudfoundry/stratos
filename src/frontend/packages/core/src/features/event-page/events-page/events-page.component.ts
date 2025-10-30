@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AppState, getPreviousRoutingState } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
@@ -43,7 +44,9 @@ export class EventsPageComponent implements OnInit {
   public filterValues = EventFilterValues;
   public selectedFilter = EventFilterValues.UNREAD;
   public endpointOnly: boolean;
-  public selectedFilterSubject = new BehaviorSubject<EventFilterValues>(this.selectedFilter);
+  private _selectedFilter = signal<EventFilterValues>(this.selectedFilter);
+  public selectedFilterSignal = this._selectedFilter.asReadonly();
+  public selectedFilterSubject$: Observable<EventFilterValues>;
   constructor(
     private eventService: GlobalEventService,
     private store: Store<AppState>,
@@ -52,6 +55,7 @@ export class EventsPageComponent implements OnInit {
     const pathSegment = this.activatedRoute.snapshot.url[0];
     const path = pathSegment ? pathSegment.path : null;
     this.endpointOnly = path === 'endpoints';
+    this.selectedFilterSubject$ = toObservable(this._selectedFilter);
   }
 
   ngOnInit() {
@@ -69,7 +73,7 @@ export class EventsPageComponent implements OnInit {
     this.readEvents$ = events$.pipe(
       map((events: IGlobalEvent[]) => events.filter((event: IGlobalEvent) => event.read))
     );
-    this.events$ = this.selectedFilterSubject.pipe(
+    this.events$ = this.selectedFilterSubject$.pipe(
       switchMap((filter: EventFilterValues) => {
         switch (filter) {
           case EventFilterValues.READ:
@@ -86,7 +90,7 @@ export class EventsPageComponent implements OnInit {
       distinctUntilChanged(),
       tap((hasRead: boolean) => {
         if (!hasRead) {
-          this.selectedFilterSubject.next(EventFilterValues.UNREAD);
+          this._selectedFilter.set(EventFilterValues.UNREAD);
         }
       }),
       share()

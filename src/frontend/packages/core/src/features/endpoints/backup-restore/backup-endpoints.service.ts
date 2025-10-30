@@ -1,9 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, signal, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   BackupEndpointConfigUI,
@@ -23,18 +24,23 @@ interface BackupRequest {
 })
 export class BackupEndpointsService {
 
-  hasChanges = new BehaviorSubject<boolean>(false);
-  hasChanges$ = this.hasChanges.asObservable();
-  allChanged = new BehaviorSubject<boolean>(false);
-  allChanged$ = this.allChanged.asObservable();
+  private _hasChanges = signal<boolean>(false);
+  public hasChanges = this._hasChanges.asReadonly();
+  public hasChanges$: Observable<boolean>;
+  private _allChanged = signal<boolean>(false);
+  public allChanged = this._allChanged.asReadonly();
+  public allChanged$: Observable<boolean>;
 
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
   password: string;
 
   constructor(
     private store: Store<GeneralEntityAppState>,
-    private http: HttpClient
+    private http: HttpClient,
+    private injector: Injector
   ) {
+    this.hasChanges$ = toObservable(this._hasChanges, { injector: this.injector });
+    this.allChanged$ = toObservable(this._allChanged, { injector: this.injector });
   }
 
   // State Related
@@ -61,7 +67,7 @@ export class BackupEndpointsService {
       endpoint[BackupEndpointTypes.ENDPOINT] ||
       endpoint[BackupEndpointTypes.CONNECT] !== BackupEndpointConnectionTypes.NONE
     );
-    this.hasChanges.next(hasChanges);
+    this._hasChanges.set(hasChanges);
     const allChanged = endpoints.every((endpoint: BackupEndpointConfigUI) => {
       const e = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.ENDPOINT) || endpoint[BackupEndpointTypes.ENDPOINT];
       const c = !this.canBackupEndpoint(endpoint.entity, BackupEndpointTypes.CONNECT) ||
@@ -70,7 +76,7 @@ export class BackupEndpointsService {
     }
 
     );
-    this.allChanged.next(allChanged);
+    this._allChanged.set(allChanged);
   }
 
   canBackupEndpoint(endpoint: EndpointModel, type: BackupEndpointTypes): boolean {

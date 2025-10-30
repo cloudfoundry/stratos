@@ -1,11 +1,11 @@
-import { Component, OnDestroy, Inject } from '@angular/core';
+import { Component, OnDestroy, Inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { entityCatalog, stratosEntityCatalog, NormalizedResponse, ApiKey, RequestInfoState } from '@stratosui/store';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -26,10 +26,8 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
 
-  private hasErrored = new BehaviorSubject<string | null>(null);
-  public hasErrored$ = this.hasErrored.asObservable();
-  private isBusy = new BehaviorSubject<boolean>(false);
-  public isBusy$ = this.isBusy.asObservable();
+  public hasErrored = signal<string | null>(null);
+  public isBusy = signal<boolean>(false);
 
   private sub: Subscription;
 
@@ -51,16 +49,16 @@ export class AddApiKeyDialogComponent implements OnDestroy {
   submit() {
     this.sub = stratosEntityCatalog.apiKey.api.create<RequestInfoState>(this.formGroup.controls.comment.value).pipe(
       tap(() => {
-        this.isBusy.next(true);
-        this.hasErrored.next(null);
+        this.isBusy.set(true);
+        this.hasErrored.set(null);
       }),
       pairwise(),
       filter(([oldR, newR]) => oldR.creating && !newR.creating),
       map(([, newR]) => newR),
       tap(state => {
         if (state.error) {
-          this.hasErrored.next(`Failed to create key: ${state.message}`);
-          this.isBusy.next(false);
+          this.hasErrored.set(`Failed to create key: ${state.message}`);
+          this.isBusy.set(false);
         } else {
           const response: NormalizedResponse<ApiKey> = state.response;
           const entityKey = entityCatalog.getEntityKey(stratosEntityCatalog.apiKey.actions.create(''));

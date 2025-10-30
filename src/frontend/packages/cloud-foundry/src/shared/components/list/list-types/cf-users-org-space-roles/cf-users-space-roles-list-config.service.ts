@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -74,14 +74,15 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
       getValue: (_row: APIResource<ISpace>) => ' '
     },
   }];
-  initialised = new BehaviorSubject<boolean>(false);
+  // Use BehaviorSubject instead of signal + toObservable to avoid NG0203
+  private initialised$ = new BehaviorSubject<boolean>(false);
 
   constructor(private store: Store<CFAppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectCfUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {
       this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, userPerms, this);
-      this.initialised.next(true);
+      this.initialised$.next(true);
     });
   }
 
@@ -91,5 +92,5 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   getSingleActions = (): IListAction<APIResource<ISpace>>[] => [];
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getDataSource = (): CfUsersSpaceRolesDataSourceService => this.dataSource;
-  public getInitialised = () => this.initialised;
+  public getInitialised = (): Observable<boolean> => this.initialised$.asObservable();
 }

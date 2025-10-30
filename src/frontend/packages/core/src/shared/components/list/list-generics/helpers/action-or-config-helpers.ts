@@ -1,3 +1,4 @@
+import { inject, Injector, runInInjectionContext } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { EntityCatalogEntityConfig } from 'frontend/packages/store/src/entity-catalog/entity-catalog.types';
 
@@ -106,14 +107,27 @@ export class ListActionOrConfigHelpers {
     store: Store<any>,
     actionOrConfig: ListActionOrConfig,
     listConfig: IListConfig<T>,
-    dsOverrides?: Partial<IListDataSourceConfig<A, T>>
+    dsOverrides?: Partial<IListDataSourceConfig<A, T>>,
+    injector?: Injector
   ): ListDataSource<T, A> {
+    // If injector is provided, run data source instantiation within that injection context
+    // Otherwise, create the data source directly (assumes no injection context is needed)
+    if (injector) {
+      return runInInjectionContext(injector, () =>
+        new ListDataSourceFromActionOrConfig<A, T>(
+          actionOrConfig,
+          listConfig,
+          store,
+          dsOverrides
+        )
+      );
+    }
+
     return new ListDataSourceFromActionOrConfig<A, T>(
       actionOrConfig,
       listConfig,
       store,
       dsOverrides
     );
-
   }
 }

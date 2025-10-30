@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentFactoryResolver, OnDestroy, OnInit } from '@angular/core';
+import { Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
 import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
-import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
@@ -84,9 +85,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   public nodes: CustomHelmReleaseGraphNode[] = [];
   public links: Edge[] = [];
 
-  update$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
+  update$ = toObservable(this.updateSignal);
 
-  fit$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private fitSignal: WritableSignal<boolean> = signal<boolean>(false);
+  fit$ = toObservable(this.fitSignal);
 
   public layout = 'dagre';
 
@@ -159,7 +162,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
         });
       });
       this.links = newLinks;
-      this.update$.next(true);
+      this.updateSignal.set(true);
 
       if (!this.didInitialFit) {
         this.didInitialFit = true;
@@ -226,7 +229,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public fitGraph() {
-    this.fit$.next(true);
+    this.fitSignal.set(true);
   }
 
   public toggleLayout() {

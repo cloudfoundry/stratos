@@ -1,13 +1,30 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Injector, Input, OnInit, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
+
+// Signal wrapper to provide BehaviorSubject-like API for dynamic creation
+function createSignalWrapper<T>(initialValue: T, injector: Injector) {
+  const _signal = signal<T>(initialValue);
+
+  return Object.assign(
+    () => _signal(),
+    {
+      set: (value: T) => _signal.set(value),
+      update: (fn: (v: T) => T) => _signal.update(fn),
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => toObservable(_signal, { injector }),
+    }
+  );
+}
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -42,9 +59,13 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     enabled: { [action: string]: Observable<boolean>; };
   };
 
-  private subjects: BehaviorSubject<T>[] = [];
+  private subjects: Array<ReturnType<typeof createSignalWrapper<T>>> = [];
 
-  constructor(private store: Store<AppState>, public listConfig: ListConfig<T>) {
+  constructor(
+    private store: Store<AppState>,
+    public listConfig: ListConfig<T>,
+    private injector: Injector
+  ) {
     super();
     this.actions = listConfig.getSingleActions();
   }
@@ -63,12 +84,15 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
       visible: {},
       enabled: {}
     };
-    const subject = new BehaviorSubject(row);
+    const subject = createSignalWrapper(row, this.injector);
     this.subjects.push(subject);
 
+    // Convert signal wrapper to Observable for action creators
+    const row$ = subject.asObservable();
+
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : observableOf(true);
-      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : observableOf(true);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row$) : observableOf(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row$) : observableOf(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(

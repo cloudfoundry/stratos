@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -27,62 +27,41 @@ selector: 'app-login-page',
 })
 export class LoginPageComponent implements OnInit, OnDestroy {
 
-  public loginBackground$: Observable<string>;
-  public loginBackgroundColor$: Observable<string>;
-  public loginCardBackground$: Observable<string>;
-  public themeLogo$: Observable<string>;
-  public themeTitle$: Observable<string>;
-  public themeDisplayName$: Observable<string>;
-  public themeSubtitle$: Observable<string>;
+  // Theme-related signals (computed from theme service)
+  public loginBackground = computed(() => {
+    const theme = this.themeService.theme();
+    const bgImage = theme?.login?.backgroundImage;
+    return bgImage ? `url(${bgImage})` : 'none';
+  });
+
+  public loginBackgroundColor = computed(() =>
+    this.themeService.theme()?.login?.backgroundColor || '#ffffff'
+  );
+
+  public loginCardBackground = computed(() =>
+    this.themeService.theme()?.login?.cardBackground || '#ffffff'
+  );
+
+  public themeLogo = computed(() =>
+    this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
+  );
+
+  public themeTitle = computed(() =>
+    this.themeService.theme()?.branding?.loginTitle || 'Stratos'
+  );
+
+  public themeDisplayName = computed(() =>
+    this.themeService.theme()?.branding?.displayName || ''
+  );
+
+  public themeSubtitle = computed(() =>
+    this.themeService.theme()?.branding?.loginSubtitle || ''
+  );
 
   constructor(
     private store: Store<Pick<InternalAppState, 'endpoints' | 'auth'>>,
     private themeService: StratosThemeService
-  ) {
-    // Set up login background observables from theme with shareReplay to prevent multiple subscriptions
-    const sharedTheme$ = this.themeService.theme$.pipe(
-      distinctUntilChanged(),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
-
-    this.loginBackground$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => {
-        const bgImage = theme?.login?.backgroundImage;
-        return bgImage ? `url(${bgImage})` : 'none';
-      }),
-      distinctUntilChanged()
-    );
-
-    this.loginBackgroundColor$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.login?.backgroundColor || '#ffffff'),
-      distinctUntilChanged()
-    );
-
-    this.loginCardBackground$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.login?.cardBackground || '#ffffff'),
-      distinctUntilChanged()
-    );
-
-    this.themeLogo$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.logo || '/core/assets/logo.png'),
-      distinctUntilChanged()
-    );
-
-    this.themeTitle$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.loginTitle || 'Stratos'),
-      distinctUntilChanged()
-    );
-
-    this.themeDisplayName$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.displayName || ''),
-      distinctUntilChanged()
-    );
-
-    this.themeSubtitle$ = sharedTheme$.pipe(
-      map((theme: StratosTheme) => theme?.branding?.loginSubtitle || ''),
-      distinctUntilChanged()
-    );
-  }
+  ) {}
 
   loginForm: NgForm;
 

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Component, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { JsonViewerComponent } from '../../../../../../../core/src/shared/components/json-viewer/json-viewer.component';
@@ -25,18 +26,15 @@ export class HelmReleaseValuesTabComponent {
 
   public values$: Observable<any>;
 
-  private viewTypeSubject = new Subject<string>();
-
-  public viewType$: Observable<string>;
+  private viewType = signal<string>('user');
+  public viewType$ = toObservable(this.viewType);
 
   constructor(public helmReleaseHelper: HelmReleaseHelperService) {
 
-    this.viewType$ = this.viewTypeSubject.asObservable().pipe(startWith('user'));
-
-    this.values$ = combineLatest(
+    this.values$ = combineLatest([
       this.viewType$,
       helmReleaseHelper.release$
-    ).pipe(
+    ]).pipe(
       map(([vtype, release]: [string, any]) => {
         switch (vtype) {
           case 'user':
@@ -54,7 +52,7 @@ export class HelmReleaseValuesTabComponent {
   }
 
   public viewTypeChange(viewType: string) {
-    this.viewTypeSubject.next(viewType);
+    this.viewType.set(viewType);
   }
 
   private isObject(item: any): boolean {

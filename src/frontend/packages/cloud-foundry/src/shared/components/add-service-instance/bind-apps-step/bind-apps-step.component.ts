@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, of as observableOf, Subject } from 'rxjs';
+import { Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SetCreateServiceInstanceApp } from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
@@ -39,7 +39,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   @Input()
   apps$: Observable<APIResource<IApp>[]>;
 
-  validate = new BehaviorSubject<boolean>(true);
+  validate = signal<boolean>(true);
   serviceInstanceGuid: string;
   stepperForm: UntypedFormGroup;
   guideText = 'Specify the application to bind (Optional)';
@@ -75,7 +75,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     ).subscribe(app => {
       if (!app) {
         // If there's no app selected the step will always be valid
-        this.validate.next(true);
+        this.validate.set(true);
       }
     });
   }
@@ -106,7 +106,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   setParamValid(valid: boolean) {
-    this.validate.next(valid);
+    this.validate.set(valid);
   }
 
   submit = (): Observable<StepOnNextResult> => {

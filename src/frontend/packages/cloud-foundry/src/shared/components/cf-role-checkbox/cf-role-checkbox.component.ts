@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { combineLatest as combineLatestOp, filter, first, map } from 'rxjs/operators';
 
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../../../cloud-foundry/src/actions/users-roles.actions';
@@ -52,7 +53,9 @@ enum CfRoleCheckboxMode {
   ]
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
-
+  private store = inject(Store<CFAppState>);
+  private cfRolesService = inject(CfRolesService);
+  private userPerms = inject(CurrentUserPermissionsService);
 
   @Input() cfGuid: string;
   @Input() orgGuid: string;
@@ -60,9 +63,26 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   @Input() orgName: string;
   @Input() spaceName: string;
   @Input() role: string;
-  @Output() changed = new BehaviorSubject(false);
+  // Note: This output is currently unused - keeping for API compatibility
+  // @Output() changed = new EventEmitter<boolean>();
 
-  mode$: Observable<CfRoleCheckboxMode>;
+  // Convert mode$ to signal-based computed
+  private isSetByUsernameSignal = toSignal(
+    this.store.select(selectCfUsersIsSetByUsername),
+    { initialValue: false }
+  );
+  private isRemoveSignal = toSignal(
+    this.store.select(selectCfUsersIsRemove),
+    { initialValue: false }
+  );
+
+  mode = computed(() => {
+    if (!this.isSetByUsernameSignal()) {
+      return CfRoleCheckboxMode.DEFAULT;
+    }
+    return this.isRemoveSignal() ? CfRoleCheckboxMode.REMOVE : CfRoleCheckboxMode.ADD;
+  });
+
   modes = CfRoleCheckboxMode;
 
   checked = false;
@@ -251,12 +271,6 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  constructor(
-    private cfRolesService: CfRolesService,
-    private store: Store<CFAppState>,
-    private userPerms: CurrentUserPermissionsService
-  ) { }
-
   ngOnInit() {
     this.isOrgRole = !this.spaceGuid;
     const users$ = this.store.select(selectCfUsersRolesPicked);
@@ -292,17 +306,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
         );
     });
 
-    this.mode$ = combineLatest([
-      this.store.select(selectCfUsersIsSetByUsername),
-      this.store.select(selectCfUsersIsRemove)
-    ]).pipe(
-      map(([isSetByUsername, isRemove]) => {
-        if (!isSetByUsername) {
-          return CfRoleCheckboxMode.DEFAULT;
-        }
-        return isRemove ? CfRoleCheckboxMode.REMOVE : CfRoleCheckboxMode.ADD;
-      })
-    );
+    // Note: mode$ has been converted to a computed signal (see class properties above)
   }
 
   ngOnDestroy() {

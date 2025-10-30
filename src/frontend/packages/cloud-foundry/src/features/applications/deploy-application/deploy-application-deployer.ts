@@ -1,5 +1,7 @@
+import { Injector, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, of as observableOf, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { catchError, combineLatest, filter, first, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
 
@@ -19,6 +21,31 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
+// Helper function to create a signal wrapper compatible with BehaviorSubject API
+// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
+// while being backed by a Signal for fine-grained reactivity
+function createSignalWrapper<T>(initialValue: T, injector: Injector) {
+  const _signal = signal<T>(initialValue);
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: (value: T) => _signal.set(value),
+      update: (fn: (value: T) => T) => _signal.update(fn),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: (value: T) => _signal.set(value),
+      getValue: () => _signal(),
+      asObservable: () => toObservable(_signal, { injector }),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -81,18 +108,17 @@ export class DeployApplicationDeployer {
   applicationSource: any;
   applicationOverrides: OverrideAppDetails;
 
-  status$ = new BehaviorSubject<DeployApplicationDeployerStatus>({
-    error: false,
-    deploying: false
-  });
+  // Signal wrappers with BehaviorSubject-compatible API for backward compatibility
+  // These provide both Signal reactivity and Observable API via .asObservable()
+  status$: ReturnType<typeof createSignalWrapper<DeployApplicationDeployerStatus>>;
 
   // Observable on the application GUID of the application being deployed
-  applicationGuid$ = new BehaviorSubject<string>(null);
+  applicationGuid$: ReturnType<typeof createSignalWrapper<string | null>>;
 
   // Status of file transfers
-  fileTransferStatus$ = new BehaviorSubject<FileTransferStatus>(undefined);
+  fileTransferStatus$: ReturnType<typeof createSignalWrapper<FileTransferStatus | undefined>>;
 
-  public messages = new BehaviorSubject<string>('');
+  public messages: ReturnType<typeof createSignalWrapper<string>>;
 
   // Are we deploying?
   deploying = false;
@@ -110,7 +136,19 @@ export class DeployApplicationDeployer {
   constructor(
     private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-  ) { }
+    private injector: Injector,
+  ) {
+    this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
+      error: false,
+      deploying: false
+    }, this.injector);
+
+    this.applicationGuid$ = createSignalWrapper<string | null>(null, this.injector);
+
+    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, this.injector);
+
+    this.messages = createSignalWrapper<string>('', this.injector);
+  }
 
   updateStatus(error = false, errorMsg?: string) {
     this.status$.next({

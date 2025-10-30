@@ -35,7 +35,7 @@
           </div>
         }
         <app-card class="kubedash__card">
-          <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Kubernetes Dashboard Installation</div>
             <div class="kubedash__card-icon">
@@ -62,7 +62,7 @@
               <div class="kubedash__option-block">
                 <p><app-product-name></app-product-name> will download the Dashboard yaml from the Dashboard GitHub repository and install it for you.</p>
                 <div class="kubedash__buttons">
-                  <button (click)="installDashboard()" [disabled]="isBusy$ | async" class="btn btn-primary">Install
+                  <button (click)="installDashboard()" [disabled]="isBusy()" class="btn btn-primary">Install
                   Dashboard</button>
                 </div>
               </div>
@@ -78,7 +78,7 @@
               </div>
               @if (status.stratosInstalled) {
                 <div class="kubedash__buttons">
-                  <button (click)="deleteDashboard()" [disabled]="isBusy$ | async" class="btn btn-primary">Delete
+                  <button (click)="deleteDashboard()" [disabled]="isBusy()" class="btn btn-primary">Delete
                   Dashboard</button>
                 </div>
               }
@@ -86,7 +86,7 @@
           }
         </app-card>
         <app-card class="kubedash__card">
-          <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Service Account</div>
             <div class="kubedash__card-icon">
@@ -147,7 +147,7 @@
                     <span class="material-symbols-outlined">warning</span>Please make sure you understand the risks involved
                   </p>
                   <div class="kubedash__buttons">
-                    <button (click)="createServiceAccount()" [disabled]="isBusy$ | async" class="btn btn-primary">Create
+                    <button (click)="createServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Create
                     Service Account</button>
                   </div>
                 </div>
@@ -164,7 +164,7 @@
           <app-metadata-item label="Name">{{ status.serviceAccount.metadata.name }}</app-metadata-item>
           <app-metadata-item label="Namespace">{{ status.serviceAccount.metadata.namespace }}</app-metadata-item>
           <div class="kubedash__buttons">
-            <button (click)="deleteServiceAccount()" [disabled]="isBusy$ | async" class="btn btn-primary">Delete
+            <button (click)="deleteServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Delete
             Service Account</button>
           </div>
         </div>

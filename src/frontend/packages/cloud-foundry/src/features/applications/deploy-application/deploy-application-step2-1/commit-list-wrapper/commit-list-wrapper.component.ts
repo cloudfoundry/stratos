@@ -45,7 +45,7 @@ export class CommitListWrapperComponent {
     );
     this.selectedCommit$ = initialised$.pipe(
       mergeMap(() => this.listConfig.getDataSource().isSelecting$),
-      map(() => this.listConfig.getDataSource().selectedRows),
+      map(() => this.listConfig.getDataSource().selectedRows()),
       map(selectedRows => {
         const rows = Array.from(selectedRows.values());
         return rows.length > 0 ? rows[0] as GitCommit : null;

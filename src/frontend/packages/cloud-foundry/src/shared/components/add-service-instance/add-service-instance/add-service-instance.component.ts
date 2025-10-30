@@ -1,8 +1,9 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
+import { defer, EMPTY, Observable, of as observableOf, Subject } from 'rxjs';
 import {
   catchError,
   delay,
@@ -95,9 +96,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   cSIHelperService: CreateServiceInstanceHelper;
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
-  // Use BehaviorSubject for imperative title updates without change detection errors
-  private titleSubject = new BehaviorSubject<string>('');
-  title$: Observable<string> = this.titleSubject.asObservable();
+  // Use signal for imperative title updates without change detection errors
+  private _title = signal<string>('');
+  title$ = toObservable(this._title);
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
@@ -110,7 +111,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // Lifecycle management for subscriptions - must be declared before use in property initializers
   private destroyed$ = new Subject<void>();
   // Loading state for applications - used to track async app fetching
-  private appsLoadingSubject$ = new BehaviorSubject<boolean>(false);
+  private _appsLoading = signal<boolean>(false);
 
   public cfGuid$: Observable<string>;
   public spaceGuid$ = this.cfDetails$.pipe(
@@ -158,7 +159,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         if (this.modeService.isServicesWallMode()) {
           this.servicesWallCreateInstance = true;
           // Use setTimeout to schedule title update outside current change detection cycle
-          setTimeout(() => this.titleSubject.next('Create Service Instance'), 0);
+          setTimeout(() => this._title.set('Create Service Instance'), 0);
           return observableOf(true);
         }
         return observableOf(true);
@@ -192,18 +193,18 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
-      tap(() => this.appsLoadingSubject$.next(true)),
+      tap(() => this._appsLoading.set(true)),
       switchMap(csi => {
         const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
         return cfEntityCatalog.application.store.getAllInSpace.getPaginationService(
           csi.spaceGuid, csi.cfGuid, paginationKey
         ).entities$;
       }),
-      tap(() => this.appsLoadingSubject$.next(false)),
+      tap(() => this._appsLoading.set(false)),
       catchError(error => {
         console.error('Error fetching applications for space:', error);
         this.errorMessage = 'Failed to fetch applications. Please try again.';
-        this.appsLoadingSubject$.next(false);
+        this._appsLoading.set(false);
         return observableOf([]);
       }),
       shareReplay({ bufferSize: 1, refCount: true }),
@@ -248,7 +249,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       return observableOf({ success: false });
     }
 
-    return this.appsLoadingSubject$.asObservable().pipe(
+    return toObservable(this._appsLoading).pipe(
       filter(loading => !loading),
       delay(1),
       map(() => ({ success: true })),
@@ -318,7 +319,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         );
         // Use setTimeout to schedule title update outside current change detection cycle
         setTimeout(() => {
-          this.titleSubject.next(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
+          this._title.set(`Create and/or Bind Service Instance to '${app?.entity?.entity?.name || 'Application'}'`);
         }, 0);
       }),
       take(1),
@@ -354,7 +355,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     if (this.serviceType === this.serviceTypes.USER_SERVICE) {
       this.serviceInstanceId = serviceInstanceId;
       // Use setTimeout to schedule title update outside current change detection cycle
-      setTimeout(() => this.titleSubject.next('Edit User Provided Service Instance'), 0);
+      setTimeout(() => this._title.set('Edit User Provided Service Instance'), 0);
       return observableOf(true);
     } else {
       return cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, endpointId).waitForEntity$.pipe(
@@ -372,7 +373,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           this.csiGuidsService.cfGuid = endpointId;
           // Use setTimeout to schedule title update outside current change detection cycle
           setTimeout(() => {
-            this.titleSubject.next(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+            this._title.set(`Edit Service Instance: ${serviceInstanceEntity.name}`);
           }, 0);
           const serviceGuid = serviceInstanceEntity.service_guid;
 
@@ -459,8 +460,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed$.next();
     this.destroyed$.complete();
-    this.titleSubject.complete();
-    this.appsLoadingSubject$.complete();
     try {
       this.store.dispatch(new ResetCreateServiceInstanceState());
     } catch (error) {
@@ -522,7 +521,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       }),
       takeUntil(this.destroyed$)
     ).subscribe(title => {
-      setTimeout(() => this.titleSubject.next(title), 0);
+      setTimeout(() => this._title.set(title), 0);
     });
     this.marketPlaceMode = true;
     return this.cfOrgSpaceService.cf.list$.pipe(

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { PageSubNavComponent, NoContentMessageComponent } from '@stratosui/core';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -27,7 +27,8 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
 })
 export class HelmReleaseAnalysisTabComponent {
 
-  public report$ = new Subject<AnalysisReport>();
+  private reportSignal = signal<AnalysisReport | null>(null);
+  public report$ = toObservable(this.reportSignal);
 
   path: string;
 
@@ -45,7 +46,7 @@ export class HelmReleaseAnalysisTabComponent {
   public analysisChanged(report: any) {
     if (report.id !== this.currentReport) {
       this.currentReport = report.id;
-      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.report$.next(r));
+      this.analaysisService.getByID(this.helmReleaseHelper.endpointGuid, report.id).subscribe((r: any) => this.reportSignal.set(r));
     }
   }
 

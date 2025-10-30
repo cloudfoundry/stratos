@@ -4,12 +4,12 @@
     type="button"
     class="theme-toggle-button"
     (click)="toggleTheme()"
-    [attr.aria-label]="'Toggle theme to ' + (isDarkMode ? 'light' : 'dark') + ' mode'"
-    [attr.aria-pressed]="isDarkMode"
+    [attr.aria-label]="'Toggle theme to ' + (isDarkMode() ? 'light' : 'dark') + ' mode'"
+    [attr.aria-pressed]="isDarkMode()"
     title="Toggle theme ({{ getLabel() }})"
     >
     <!-- Sun icon for light mode -->
-    @if (!isDarkMode) {
+    @if (!isDarkMode()) {
       <svg
         class="theme-icon"
         xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@
     }
 
     <!-- Moon icon for dark mode -->
-    @if (isDarkMode) {
+    @if (isDarkMode()) {
       <svg
         class="theme-icon"
         xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +60,7 @@
     aria-live="polite"
     aria-atomic="true"
     >
-    {{ isDarkMode ? 'Dark mode activated' : 'Light mode activated' }}
+    {{ isDarkMode() ? 'Dark mode activated' : 'Light mode activated' }}
   </div>
 
   <!-- Optional: Dropdown menu for system/light/dark selection -->
@@ -70,7 +70,7 @@
         type="button"
         class="theme-option"
         (click)="setMode('light')"
-        [class.active]="currentMode === 'light'"
+        [class.active]="currentMode() === 'light'"
         >
         Light
       </button>
@@ -78,7 +78,7 @@
         type="button"
         class="theme-option"
         (click)="setMode('dark')"
-        [class.active]="currentMode === 'dark'"
+        [class.active]="currentMode() === 'dark'"
         >
         Dark
       </button>
@@ -86,7 +86,7 @@
         type="button"
         class="theme-option"
         (click)="setMode('system')"
-        [class.active]="currentMode === 'system'"
+        [class.active]="currentMode() === 'system'"
         >
         System
       </button>

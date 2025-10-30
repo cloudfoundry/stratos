@@ -87,7 +87,7 @@
     </div>
   </app-step>
   <app-step title="Admin Scope" [onNext]="uaaScopeNext">
-    <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
+    <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
         <p class="text-gray-700">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>

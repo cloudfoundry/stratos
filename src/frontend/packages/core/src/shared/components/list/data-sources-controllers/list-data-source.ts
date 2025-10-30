@@ -1,5 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
+import { signal, Signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,
@@ -24,7 +25,6 @@ import {
   of as observableOf,
   of,
   OperatorFunction,
-  ReplaySubject,
   Subscription,
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
@@ -90,12 +90,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Add item
   public addItem: T;
-  public isAdding$ = new BehaviorSubject<boolean>(false);
+  private _isAdding = signal<boolean>(false);
+  public isAdding = this._isAdding.asReadonly();
+  private _isAddingSubject = new BehaviorSubject<boolean>(false);
+  public isAdding$ = this._isAddingSubject.asObservable();
 
   // Select item/s
-  public selectedRows$ = new ReplaySubject<Map<string, T>>();
-  public selectedRows = new Map<string, T>();
-  public isSelecting$ = new BehaviorSubject(false);
+  private _selectedRows = signal<Map<string, T>>(new Map<string, T>());
+  public selectedRows = this._selectedRows.asReadonly();
+  private _selectedRowsSubject = new BehaviorSubject<Map<string, T>>(new Map<string, T>());
+  public selectedRows$ = this._selectedRowsSubject.asObservable();
+  private _isSelecting = signal<boolean>(false);
+  public isSelecting = this._isSelecting.asReadonly();
+  private _isSelectingSubject = new BehaviorSubject<boolean>(false);
+  public isSelecting$ = this._isSelectingSubject.asObservable();
   public selectAllChecked = false;
 
   // Edit item
@@ -348,6 +356,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   disconnect() {
     this.transformedEntitiesSubscription.unsubscribe();
     if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
+    this._isAddingSubject.complete();
+    this._selectedRowsSubject.complete();
+    this._isSelectingSubject.complete();
     this.externalDestroy();
   }
 
@@ -357,13 +368,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   startAdd() {
     this.addItem = this.getEmptyType();
-    this.isAdding$.next(true);
+    this._isAdding.set(true);
+    this._isAddingSubject.next(true);
   }
   saveAdd() {
-    this.isAdding$.next(false);
+    this._isAdding.set(false);
+    this._isAddingSubject.next(false);
   }
   cancelAdd() {
-    this.isAdding$.next(false);
+    this._isAdding.set(false);
+    this._isAddingSubject.next(false);
   }
 
   selectedRowToggle(row: T, multiMode: boolean = true) {
@@ -374,19 +388,23 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       if (rowState.disabled) {
         return;
       }
-      const exists = this.selectedRows.has(this.getRowUniqueId(row));
+      const currentSelection = new Map(this._selectedRows());
+      const exists = currentSelection.has(this.getRowUniqueId(row));
       if (exists) {
-        this.selectedRows.delete(this.getRowUniqueId(row));
+        currentSelection.delete(this.getRowUniqueId(row));
         this.selectAllChecked = false;
       } else {
         if (!multiMode) {
-          this.selectedRows.clear();
+          currentSelection.clear();
         }
-        this.selectedRows.set(this.getRowUniqueId(row), row);
-        this.selectAllChecked = multiMode && this.selectedRows.size === filteredRows.length;
+        currentSelection.set(this.getRowUniqueId(row), row);
+        this.selectAllChecked = multiMode && currentSelection.size === filteredRows.length;
       }
-      this.selectedRows$.next(this.selectedRows);
-      this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
+      this._selectedRows.set(currentSelection);
+      this._selectedRowsSubject.next(currentSelection);
+      const isSelecting = multiMode && currentSelection.size > 0;
+      this._isSelecting.set(isSelecting);
+      this._isSelectingSubject.next(isSelecting);
     });
   }
 
@@ -394,6 +412,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.selectAllChecked = !this.selectAllChecked;
 
     const updatedAllRows$ = this.page$.pipe(switchMap((filterEntities: T[]) => {
+      const currentSelection = new Map(this._selectedRows());
       return combineLatest(filterEntities.reduce((obs: Observable<RowState>[], row: T) => {
         obs.push(this.getRowState(row).pipe(
           first(),
@@ -402,29 +421,38 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
               return;
             }
             if (this.selectAllChecked) {
-              this.selectedRows.set(this.getRowUniqueId(row), row);
+              currentSelection.set(this.getRowUniqueId(row), row);
             } else {
-              this.selectedRows.delete(this.getRowUniqueId(row));
+              currentSelection.delete(this.getRowUniqueId(row));
             }
           })
         ));
         return obs;
-      }, [] as Observable<RowState>[]));
+      }, [] as Observable<RowState>[])).pipe(
+        tap(() => {
+          this._selectedRows.set(currentSelection);
+          this._selectedRowsSubject.next(currentSelection);
+        })
+      );
     }));
 
     updatedAllRows$.pipe(
       first()
     ).subscribe(() => {
-      this.selectedRows$.next(this.selectedRows);
-      this.isSelecting$.next(this.selectedRows.size > 0);
+      const currentSelection = this._selectedRows();
+      const isSelecting = currentSelection.size > 0;
+      this._isSelecting.set(isSelecting);
+      this._isSelectingSubject.next(isSelecting);
     });
 
   }
 
   selectClear() {
-    this.selectedRows.clear();
-    this.selectedRows$.next(this.selectedRows);
-    this.isSelecting$.next(false);
+    const emptyMap = new Map<string, T>();
+    this._selectedRows.set(emptyMap);
+    this._selectedRowsSubject.next(emptyMap);
+    this._isSelecting.set(false);
+    this._isSelectingSubject.next(false);
   }
 
   startEdit(rowClone: T) {

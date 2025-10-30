@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, Injector } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import moment from 'moment';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
@@ -87,6 +88,7 @@ export class BackupEndpointsComponent implements OnDestroy {
   constructor(
     public service: BackupEndpointsService,
     private confirmDialog: ConfirmationDialogService,
+    private injector: Injector,
   ) {
     this.setupSelectStep();
     this.setupPasswordStep();
@@ -113,12 +115,12 @@ export class BackupEndpointsComponent implements OnDestroy {
       trackBy: (index: number, row: EndpointModel) => row.guid
     };
 
-    this.disableSelectAll$ = this.service.allChanged$;
-    this.disableSelectNone$ = this.service.hasChanges$.pipe(
+    this.disableSelectAll$ = toObservable(this.service.allChanged, { injector: this.injector });
+    this.disableSelectNone$ = toObservable(this.service.hasChanges, { injector: this.injector }).pipe(
       map(hasChanges => !hasChanges)
     );
 
-    this.selectValid$ = this.service.hasChanges$;
+    this.selectValid$ = toObservable(this.service.hasChanges, { injector: this.injector });
   }
 
   setupPasswordStep() {

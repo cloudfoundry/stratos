@@ -1,8 +1,9 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
@@ -69,7 +70,9 @@ export class DetachServiceInstanceComponent {
 
   deletingState = AppMonitorComponentTypes.DELETE;
 
-  public selectedBindings$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
+  private _selectedBindings = signal<APIResource<IServiceBinding>[]>([]);
+  // Convert signal to Observable for component expecting Observable input
+  public selectedBindings$ = toObservable(this._selectedBindings);
 
   constructor(
     private store: Store<CFAppState>,
@@ -88,7 +91,7 @@ export class DetachServiceInstanceComponent {
   getId = (el: APIResource) => el.metadata.guid;
   setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
     this.selectedBindings = selectedBindings;
-    this.selectedBindings$.next(selectedBindings);
+    this._selectedBindings.set(selectedBindings);
   }
 
   public startDelete = () => {

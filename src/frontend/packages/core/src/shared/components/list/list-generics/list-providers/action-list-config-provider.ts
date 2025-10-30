@@ -1,3 +1,4 @@
+import { Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
@@ -9,11 +10,13 @@ import { ActionOrConfigListConfigProvider } from './action-or-entity-config-list
 export class ActionListConfigProvider<T, A = T> extends ActionOrConfigListConfigProvider<T, A> {
   constructor(
     store: Store<any>,
-    paginatedAction: PaginatedAction
+    paginatedAction: PaginatedAction,
+    injector?: Injector
   ) {
     super(
       store,
-      paginatedAction
+      paginatedAction,
+      injector
     );
   }
 }

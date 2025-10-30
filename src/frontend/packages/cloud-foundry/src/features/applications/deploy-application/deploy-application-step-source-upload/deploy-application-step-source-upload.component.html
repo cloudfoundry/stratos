@@ -1,6 +1,6 @@
 <h1>Uploading Source files</h1>
 
-@if ((deployer.fileTransferStatus$ | async); as fsStatus) {
+@if ((deployer.fileTransferStatus$.asObservable() | async); as fsStatus) {
   <div class="source-upload">
     <div class="source-upload__fileSize">{{ fsStatus.totalFiles }} files, {{ fsStatus.totalBytes | bytesToHumanSize }} data</div>
     <app-upload-progress-indicator value="{{ 100 * fsStatus.filesSent / fsStatus.totalFiles }}"></app-upload-progress-indicator>

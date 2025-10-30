@@ -10,8 +10,11 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
+  signal,
+  Signal,
 } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -60,7 +63,8 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private wrapperFactory: ComponentFactory<StackedInputActionComponent>;
   private components: {
     [key: string]: {
-      stateIn: Subject<StackedInputActionsState>,
+      stateInSignal: Signal<StackedInputActionsState>,
+      stateInUpdate: (state: StackedInputActionsState) => void,
       stackedAction: StackedInputActionComponent,
       update: StackedInputActionUpdate
     }
@@ -97,13 +101,14 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       }
     }));
 
-    // Track how we push state into the component
-    const stateIn = new BehaviorSubject<StackedInputActionsState>(null);
-    stackedAction.stateIn$ = stateIn.asObservable();
+    // Track how we push state into the component using signals
+    const stateInSignal = signal<StackedInputActionsState>(null);
+    stackedAction.stateIn$ = toObservable(stateInSignal);
 
     // Track them all together in one pot
     this.components[stackedAction.key] = {
-      stateIn,
+      stateInSignal: stateInSignal.asReadonly(),
+      stateInUpdate: (state: StackedInputActionsState) => stateInSignal.set(state),
       stackedAction,
       update: null
     };
@@ -151,7 +156,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private updateOtherValues(): void {
     // Ensure components are aware of each others values
     Object.entries(this.components).forEach(([key, component]) => {
-      component.stateIn.next({
+      component.stateInUpdate({
         key,
         result: StackedInputActionResult.OTHER_VALUES_UPDATED,
         otherValues: Object.values(this.components)
@@ -169,8 +174,8 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.subs.push(this.stateIn$.subscribe(states => {
       // Disable the 'add new' button
       this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
-      // Push state
-      states.forEach((state, index) => this.components[state.key].stateIn.next(state));
+      // Push state using signal update function
+      states.forEach((state, index) => this.components[state.key].stateInUpdate(state));
     }));
   }
 

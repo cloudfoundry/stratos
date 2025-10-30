@@ -1,7 +1,5 @@
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Component, computed } from '@angular/core';
 import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.service';
 
 @Component({
@@ -11,33 +9,11 @@ import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.servi
   standalone: true,
   imports: []
 })
-export class ThemeToggleComponent implements OnInit, OnDestroy {
-  isDarkMode = false;
-  currentMode: ThemeMode = 'system';
-  private destroy$ = new Subject<void>();
+export class ThemeToggleComponent {
+  isDarkMode = computed(() => this.themeService.isDarkMode());
+  currentMode = computed(() => this.themeService.themeMode());
 
   constructor(private themeService: StratosThemeService) {}
-
-  ngOnInit() {
-    // Subscribe to theme mode changes
-    this.themeService.themeMode$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((mode: ThemeMode) => {
-        this.currentMode = mode;
-      });
-
-    // Subscribe to actual dark/light state
-    this.themeService.isDarkMode$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((isDark: boolean) => {
-        this.isDarkMode = isDark;
-      });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   toggleTheme() {
     this.themeService.toggleTheme();
@@ -48,13 +24,13 @@ export class ThemeToggleComponent implements OnInit, OnDestroy {
   }
 
   getIcon(): string {
-    return this.isDarkMode ? 'moon' : 'sun';
+    return this.isDarkMode() ? 'moon' : 'sun';
   }
 
   getLabel(): string {
-    if (this.currentMode === 'system') {
+    if (this.currentMode() === 'system') {
       return 'System';
     }
-    return this.isDarkMode ? 'Dark' : 'Light';
+    return this.isDarkMode() ? 'Dark' : 'Light';
   }
 }

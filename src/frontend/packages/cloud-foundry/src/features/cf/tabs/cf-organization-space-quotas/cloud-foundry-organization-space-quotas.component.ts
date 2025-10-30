@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -26,6 +26,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
     ListComponent
   ],
   providers: [
+    DatePipe,
     {
       provide: ListConfig,
       useClass: CfSpaceQuotasListConfigService

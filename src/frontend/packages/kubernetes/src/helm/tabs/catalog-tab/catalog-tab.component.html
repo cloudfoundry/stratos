@@ -33,7 +33,7 @@
       <h3>Filter By Repository</h3>
       <app-form-field>
         <input appInput placeholder="Search Repositories" name="searchReposValue" [(ngModel)]="searchReposValue"
-          (ngModelChange)="searchRepos($event)">
+          (ngModelChange)="searchReposChange($event)">
       </app-form-field>
       <div class="charts__repos__lists">
         @if (repos.stratosRepos.length) {

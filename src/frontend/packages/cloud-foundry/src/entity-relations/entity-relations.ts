@@ -485,19 +485,39 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
   if (!eicAction || !action.flattenPagination) {
     return observableOf(action);
   }
+
+  // Defensive null checks for Angular 20 DI compatibility
+  if (!store) {
+    console.warn('populatePaginationFromParent: Store is null or undefined, returning action');
+    return observableOf(action);
+  }
+
   const parentEntitySchema = entityCatalog.getEntity(eicAction.parentEntityConfig).getSchema(eicAction.parentEntityConfig.schemaKey);
   const parentGuid = eicAction.parentGuid;
 
   // What the hell is going on here hey? Well I'll tell you...
   // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
   const parentEntityKey = entityCatalog.getEntityKey(eicAction.parentEntityConfig);
-  return store.select(selectEntity(parentEntityKey, parentGuid)).pipe(
+  const selectEntity$ = store.select(selectEntity(parentEntityKey, parentGuid));
+
+  // Guard against null/undefined Observable
+  if (!selectEntity$) {
+    console.warn('populatePaginationFromParent: selectEntity returned null/undefined, returning action');
+    return observableOf(action);
+  }
+
+  return selectEntity$.pipe(
     first(),
     mergeMap(entity => {
       if (!entity) {
         return observableOf(null);
       }
-      return store.select(selectRequestInfo(parentEntityKey, parentGuid));
+      const selectRequestInfo$ = store.select(selectRequestInfo(parentEntityKey, parentGuid));
+      // Guard against null/undefined Observable
+      if (!selectRequestInfo$) {
+        return observableOf(null);
+      }
+      return selectRequestInfo$;
     }),
     filter((entityInfo: RequestInfoState) => {
       return !isEntityBlocked(entityInfo);
@@ -510,7 +530,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
     ),
     map(([entityInfo, entity, allEntities]: [RequestInfoState, any, GeneralEntityAppState]) => {
       if (!entity) {
-        return;
+        return action; // Return action instead of undefined
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
       /* tslint:disable-next-line:no-string-literal  */
@@ -523,7 +543,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
         if (arraySafeEntitySchema.entityType === action.entityType) {
           // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
-            return;
+            return action; // Return action instead of undefined
           }
 
           const catalogEntity = entityCatalog.getEntity(eicAction);
@@ -555,7 +575,7 @@ export function populatePaginationFromParent(store: Store<GeneralEntityAppState>
           return createActionsForExistingEntities(config);
         }
       }
-      return;
+      return action; // Return action instead of undefined
     })
   );
 }

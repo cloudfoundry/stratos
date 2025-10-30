@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
@@ -10,7 +10,7 @@ import {
   VerifySession,
   SetupSaveConfig,
 } from '@stratosui/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { delay, filter, map, take, tap } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
@@ -44,7 +44,7 @@ export class LocalAccountWizardComponent implements OnInit {
 
   passwordForm: UntypedFormGroup;
   validateLocalAuthForm: Observable<boolean>;
-  applyingSetup$ = new BehaviorSubject<boolean>(false);
+  applyingSetup = signal<boolean>(false);
 
   showPassword: boolean[] = [];
 
@@ -69,7 +69,7 @@ export class LocalAccountWizardComponent implements OnInit {
       local_admin_password: this.passwordForm.get('adminPassword').value,
     };
 
-    this.applyingSetup$.next(true);
+    this.applyingSetup.set(true);
     this.store.dispatch(new SetupSaveConfig(data));
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
       filter(([uaa, auth]: [UAASetupState, AuthState]) => {
@@ -91,7 +91,7 @@ export class LocalAccountWizardComponent implements OnInit {
           const reload = loc.protocol + '//' + loc.host;
           window.location.assign(reload);
         } else {
-          this.applyingSetup$.next(false);
+          this.applyingSetup.set(false);
         }
         return {
           success: !state[0].error,

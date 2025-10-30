@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
@@ -52,7 +52,7 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
 export class UsersRolesSelectComponent {
 
   selectedUsers$: Observable<CfUser[]>;
-  valid$ = new BehaviorSubject<boolean>(false);
+  valid$ = signal<boolean>(false);
 
   constructor(
     private store: Store<CFAppState>,
@@ -66,7 +66,7 @@ export class UsersRolesSelectComponent {
       switchMap(() => listConfig.getDataSource().selectedRows$),
       map(users => {
         const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
-        this.valid$.next(!!arrayUsers.length);
+        this.valid$.set(!!arrayUsers.length);
         return arrayUsers;
       }),
       publishReplay(1),

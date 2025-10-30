@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, Injector, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -28,10 +28,13 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
   public valid$: Observable<boolean>;
 
-  constructor(store: Store<CFAppState>, public cfOrgSpaceService: CfOrgSpaceDataService,
+  constructor(
+    store: Store<CFAppState>,
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private injector: Injector
   ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
-    this.valid$ = this.deployer.fileTransferStatus$.pipe(
+    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, injector);
+    this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
       filter(status => !!status),
       map((status: FileTransferStatus) => status.filesSent === status.totalFiles),
     );

@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
@@ -132,8 +133,8 @@ export class KubeConfigSelectionComponent {
   ];
 
   // Is the import data valid?
-  valid = new BehaviorSubject<boolean>(false);
-  valid$ = this.valid.asObservable();
+  private _valid = signal<boolean>(false);
+  valid$ = toObservable(this._valid);
 
   canSetIntermediate = false;
 
@@ -212,7 +213,7 @@ export class KubeConfigSelectionComponent {
     });
 
     // Must be at least one selected and they all must be okay to import
-    this.valid.next(selected > 0 && selected === okay);
+    this._valid.set(selected > 0 && selected === okay);
   }
 
 }
