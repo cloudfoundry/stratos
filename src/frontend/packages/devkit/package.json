@@ -9,12 +9,12 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@angular-devkit/core": "20.1.6",
-    "@angular-devkit/schematics": "20.1.6",
+    "@angular-devkit/core": "20.3.8",
+    "@angular-devkit/schematics": "20.3.8",
     "typescript": "5.9.2"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "0.2001.6"
+    "@angular-devkit/architect": "0.2003.8"
   },
   "builders": "builders/builders.json",
   "schematics": "./schematics/collection.json"

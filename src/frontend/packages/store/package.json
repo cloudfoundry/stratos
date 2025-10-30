@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/cloudfoundry/stratos",
   "peerDependencies": {
-    "@angular/common": "20.1.7",
-    "@angular/core": "20.1.7"
+    "@angular/common": "20.3.9",
+    "@angular/core": "20.3.9"
   }
 }

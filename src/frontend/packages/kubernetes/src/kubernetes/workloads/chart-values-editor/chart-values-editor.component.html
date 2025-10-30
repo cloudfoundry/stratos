@@ -95,8 +95,8 @@
     }
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
-    <ngx-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
-    [(ngModel)]="code" (onInit)="onMonacoInit($event)"></ngx-monaco-editor>
+    <app-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
+    [(ngModel)]="code" (onInit)="onMonacoInit($event)"></app-monaco-editor>
   </div>
 
 </div>

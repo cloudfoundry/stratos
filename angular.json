@@ -48,8 +48,8 @@
               "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor/assets/monaco",
-                "output": "/core/assets/monaco"
+                "input": "node_modules/monaco-editor/min/vs",
+                "output": "/core/assets/monaco/vs"
               },
               {
                 "glob": "**/*",

@@ -81,6 +81,9 @@ export { CustomCheckboxComponent } from './shared/components/custom-checkbox/cus
 // Custom Slide Toggle Component
 export { CustomSlideToggleComponent } from './shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
+// Monaco Editor Component
+export { MonacoEditorComponent, MonacoEditorModel, MonacoEditorOptions } from './shared/components/monaco-editor/monaco-editor.component';
+
 // Tile Components
 export { TileGridComponent } from './shared/components/tile/tile-grid/tile-grid.component';
 export { TileGroupComponent } from './shared/components/tile/tile-group/tile-group.component';

@@ -51,14 +51,14 @@
   "author": "",
   "license": "Apache-2.0",
   "overrides": {
-    "ngx-monaco-editor": {
-      "@angular/core": "14.3.0",
-      "@angular/common": "14.3.0",
-      "tslib": "2.6.2"
-    },
     "jasmine-protractor-browser-log-reporter": {
-      "jasmine-core": "3.8.0",
+      "jasmine-core": "5.9.0",
       "protractor": "7.0.0"
+    },
+    "@swimlane/ngx-graph": {
+      "@angular/core": "20.3.9",
+      "@angular/common": "20.3.9",
+      "@angular/animations": "20.3.9"
     },
     "@swimlane/ngx-charts": {
       "d3-color": "^3.1.0"
@@ -70,15 +70,15 @@
     "ajv": "8.17.1"
   },
   "dependencies": {
-    "@angular/animations": "20.3.7",
-    "@angular/cdk": "^20.2.4",
-    "@angular/common": "20.3.7",
-    "@angular/core": "20.3.7",
-    "@angular/forms": "20.3.7",
-    "@angular/platform-browser": "20.3.7",
-    "@angular/platform-browser-dynamic": "20.3.7",
-    "@angular/platform-server": "20.3.7",
-    "@angular/router": "20.3.7",
+    "@angular/animations": "20.3.9",
+    "@angular/cdk": "^20.2.10",
+    "@angular/common": "20.3.9",
+    "@angular/core": "20.3.9",
+    "@angular/forms": "20.3.9",
+    "@angular/platform-browser": "20.3.9",
+    "@angular/platform-browser-dynamic": "20.3.9",
+    "@angular/platform-server": "20.3.9",
+    "@angular/router": "20.3.9",
     "@cfstratos/monaco-yaml": "2.5.0",
     "@ngrx/effects": "20.0.0",
     "@ngrx/router-store": "20.0.0",
@@ -88,7 +88,6 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@types/moment-timezone": "0.5.13",
-    "angular2-virtual-scroll": "0.4.14",
     "chart.js": "^4.5.0",
     "core-js": "3.45.0",
     "immer": "10.1.1",
@@ -100,10 +99,10 @@
     "marked": "16.1.2",
     "moment": "2.30.1",
     "moment-timezone": "0.6.0",
+    "monaco-editor": "^0.52.2",
     "ng2-charts": "^8.0.0",
     "ngrx-store-localstorage": "20.0.0",
     "ngx-moment": "6.0.2",
-    "ngx-monaco-editor": "12.0.0",
     "normalizr": "3.6.2",
     "reselect": "5.1.1",
     "rxjs": "7.8.2",
@@ -117,21 +116,21 @@
     "zone.js": "0.15.1"
   },
   "engines": {
-    "node": "^20.6",
+    "node": "^24.0",
     "npm": ">=8.3"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "^20.0.0",
-    "@angular-devkit/architect": "0.2003.7",
-    "@angular-devkit/build-angular": "20.3.7",
-    "@angular-devkit/core": "20.3.7",
-    "@angular-devkit/schematics": "20.3.7",
-    "@angular/cli": "20.3.7",
-    "@angular/compiler": "20.3.7",
-    "@angular/compiler-cli": "20.3.7",
-    "@angular/language-service": "20.3.7",
+    "@angular-devkit/architect": "0.2003.8",
+    "@angular-devkit/build-angular": "20.3.8",
+    "@angular-devkit/core": "20.3.8",
+    "@angular-devkit/schematics": "20.3.8",
+    "@angular/cli": "20.3.8",
+    "@angular/compiler": "20.3.9",
+    "@angular/compiler-cli": "20.3.9",
+    "@angular/language-service": "20.3.9",
     "@cypress/request": "3.0.9",
-    "@schematics/angular": "20.3.7",
+    "@schematics/angular": "20.3.8",
     "@types/d3-dispatch": "^3.0.7",
     "@types/d3-drag": "^3.0.7",
     "@types/d3-scale": "^4.0.9",
