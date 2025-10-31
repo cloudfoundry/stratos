@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';

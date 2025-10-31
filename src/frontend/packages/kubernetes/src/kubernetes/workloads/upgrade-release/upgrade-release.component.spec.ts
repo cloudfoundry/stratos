@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { MockChartService } from '../../../helm/monocular/shared/services/chart.service.mock';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';

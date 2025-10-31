@@ -109,7 +109,7 @@ describe('ActionDispatcher', () => {
         })
       } as unknown as PaginationMonitorFactory
     } as EntityCatalogHelper);
-    const storeDispatchSpy = spyOn(store, 'dispatch');
+    const storeDispatchSpy = vi.spyOn(store, 'dispatch');
 
     expect(entityActionDispatcher.get).toBeDefined();
     expect(entityActionDispatcher.get(testGuid, testEndpointGuid)).toBeDefined();

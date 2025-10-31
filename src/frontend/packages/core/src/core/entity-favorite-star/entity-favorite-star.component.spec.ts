@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
@@ -61,7 +62,7 @@ describe('EntityFavoriteStarComponent', () => {
   });
 
   it('should set isFavorite based on favorite', () => {
-    spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(true));
+    vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(true));
     component.favorite = favorite;
     fixture.detectChanges();
 
@@ -69,7 +70,7 @@ describe('EntityFavoriteStarComponent', () => {
   });
 
   it('should set isFavorite based on favorite [2]', () => {
-    spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(false));
+    vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(false));
     component.favorite = favorite;
     fixture.detectChanges();
 
@@ -78,8 +79,8 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should toggle favorite if clicked', () => {
     const isFavorite$ = new BehaviorSubject<boolean>(false);
-    spyOn(userFavoriteManager, 'toggleFavorite').and.callFake(() => isFavorite$.next(!isFavorite$.getValue()));
-    spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(isFavorite$);
+    vi.spyOn(userFavoriteManager, 'toggleFavorite').mockImplementation(() => isFavorite$.next(!isFavorite$.getValue()));
+    vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(isFavorite$);
     component.favorite = favorite;
     fixture.detectChanges();
 
@@ -92,8 +93,8 @@ describe('EntityFavoriteStarComponent', () => {
   });
 
   xit('should toggle even through confirmation dialog if confirm removal', () => {
-    spyOn(userFavoriteManager, 'toggleFavorite');
-    spyOn(userFavoriteManager, 'getIsFavoriteObservable').and.returnValue(of(true));
+    vi.spyOn(userFavoriteManager, 'toggleFavorite');
+    vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(true));
     component.confirmRemoval = true;
     component.favorite = favorite;
     fixture.detectChanges();

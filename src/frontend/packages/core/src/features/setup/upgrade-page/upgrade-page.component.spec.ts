@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UpgradePageComponent } from './upgrade-page.component';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';

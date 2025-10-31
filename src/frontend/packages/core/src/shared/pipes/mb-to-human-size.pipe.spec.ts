@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { MbToHumanSizePipe } from './mb-to-human-size.pipe';
@@ -25,7 +26,7 @@ describe('MbToHumanSizePipe', () => {
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'mbToHumanSize');
+    vi.spyOn(utilsService, 'mbToHumanSize');
     pipe.transform(1024);
 
     expect(utilsService.mbToHumanSize).toHaveBeenCalledWith(1024);

@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { UsageBytesPipe } from './usage-bytes.pipe';
@@ -25,7 +26,7 @@ describe('UsageBytesPipe', () => {
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'usageBytes');
+    vi.spyOn(utilsService, 'usageBytes');
     pipe.transform([100, 1024]);
 
     expect(utilsService.usageBytes).toHaveBeenCalledWith([100, 1024]);

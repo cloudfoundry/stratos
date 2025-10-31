@@ -1,5 +1,6 @@
 import { StoreTestingModule } from '../testing/src/store-test.module';
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { createBasicStoreModule } from '../testing/src/store-test-helper';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';

@@ -1,4 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { CsiGuidsService } from './csi-guids.service';
 

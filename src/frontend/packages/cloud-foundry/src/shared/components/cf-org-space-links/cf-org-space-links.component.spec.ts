@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 
@@ -33,12 +34,12 @@ describe('CfOrgSpaceLinksComponent', () => {
       'getSpaceURL'
     ]);
     service.multipleConnectedEndpoints$ = of(false);
-    service.getCfName.and.returnValue(of('CfName'));
-    service.getCfURL.and.returnValue(['/cf/path']);
-    service.getOrgName.and.returnValue(of('OrgName'));
-    service.getOrgURL.and.returnValue(['/org/path']);
-    service.getSpaceName.and.returnValue(of('SpaceName'));
-    service.getSpaceURL.and.returnValue(['/space/path']);
+    service.getCfName.mockReturnValue(of('CfName'));
+    service.getCfURL.mockReturnValue(['/cf/path']);
+    service.getOrgName.mockReturnValue(of('OrgName'));
+    service.getOrgURL.mockReturnValue(['/org/path']);
+    service.getSpaceName.mockReturnValue(of('SpaceName'));
+    service.getSpaceURL.mockReturnValue(['/space/path']);
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
     component.service = service;

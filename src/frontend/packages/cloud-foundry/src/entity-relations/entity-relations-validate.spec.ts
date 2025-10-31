@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Store } from '@ngrx/store';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity } from '@stratosui/store/testing';
 
@@ -67,7 +68,7 @@ describe('Entity Relations - validate -', () => {
 
 
   function noOp(iStore: Store<CFAppState>, includeRelations: string[], done: () => void) {
-    const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+    const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
     const res = validateEntityRelations({
       cfGuid,
       action: new GetOrganization(orgGuid, cfGuid, includeRelations, true),
@@ -126,7 +127,7 @@ describe('Entity Relations - validate -', () => {
     );
 
     inject([Store], (iStore: Store<CFAppState>) => {
-      const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+      const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
       const res = validateEntityRelations({
         cfGuid,
@@ -188,7 +189,7 @@ describe('Entity Relations - validate -', () => {
     );
 
     inject([Store], (iStore: Store<InternalAppState>) => {
-      const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+      const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
       const res = validateEntityRelations({
         cfGuid,
@@ -323,7 +324,7 @@ describe('Entity Relations - validate -', () => {
       );
 
       inject([Store], (iStore: Store<InternalAppState>) => {
-        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
         const res = validateEntityRelations({
           cfGuid,
@@ -356,7 +357,7 @@ describe('Entity Relations - validate -', () => {
         populateMissing);
       advancedSetup();
       inject([Store], (iStore: Store<CFAppState>) => {
-        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
         const res = validateEntityRelations({
           cfGuid,
@@ -390,7 +391,7 @@ describe('Entity Relations - validate -', () => {
         true);
       advancedSetup();
       inject([Store], (iStore: Store<CFAppState>) => {
-        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
         const res = validateEntityRelations({
           cfGuid,
@@ -460,7 +461,7 @@ describe('Entity Relations - validate -', () => {
 
 
       inject([Store], (iStore: Store<InternalAppState>) => {
-        const dispatchSpy = spyOn(iStore, 'dispatch').and.callThrough();
+        const dispatchSpy = vi.spyOn(iStore, 'dispatch').mockImplementation();
 
         const res = validateEntityRelations({
           cfGuid,

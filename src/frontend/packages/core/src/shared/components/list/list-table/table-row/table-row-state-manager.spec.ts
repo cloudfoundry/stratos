@@ -1,7 +1,8 @@
 import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
 import { Observable, Subscription } from 'rxjs';
-import { waitForAsync } from '@angular/core/testing';
+import {  } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TableRowStateManager } from './table-row-state-manager';
 
 

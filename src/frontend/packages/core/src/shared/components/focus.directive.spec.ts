@@ -1,5 +1,6 @@
 import { FocusDirective } from './focus.directive';
 import { inject, TestBed, ComponentFixture } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
 import { By, BrowserModule } from '@angular/platform-browser';
 import { CoreModule } from '../../core/core.module';

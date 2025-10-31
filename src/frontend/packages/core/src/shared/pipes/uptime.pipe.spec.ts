@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { UptimePipe } from './uptime.pipe';
@@ -25,7 +26,7 @@ describe('UptimePipe', () => {
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'formatUptime');
+    vi.spyOn(utilsService, 'formatUptime');
     pipe.transform(1024);
 
     expect(utilsService.formatUptime).toHaveBeenCalledWith(1024);

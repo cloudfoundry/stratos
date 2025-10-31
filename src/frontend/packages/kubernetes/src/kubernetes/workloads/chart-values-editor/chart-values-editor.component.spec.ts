@@ -1,6 +1,7 @@
 import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 
 import { MDAppModule } from '../../../../../core/src/public-api';

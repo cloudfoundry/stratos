@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './custom-expansion-panel.component';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';

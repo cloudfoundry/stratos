@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
 
@@ -160,8 +161,8 @@ describe('UtilsService', () => {
 
   describe('#safeUnsubscribe', () => {
     it('should call unsubscribe method from objects', () => {
-      const spy = jasmine.createSpyObj('subscriber', ['unsubscribe']);
-      const spy2 = jasmine.createSpyObj('subscriber', ['unsubscribe']);
+      const spy = { unsubscribe: vi.fn() };
+      const spy2 = { unsubscribe: vi.fn() };
       safeUnsubscribe(spy, spy2);
 
       expect(spy.unsubscribe).toHaveBeenCalled();

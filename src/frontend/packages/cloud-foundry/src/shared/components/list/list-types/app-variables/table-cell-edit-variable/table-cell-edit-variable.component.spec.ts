@@ -1,5 +1,6 @@
 import { ListAppEnvVar } from '../cf-app-variables-data-source';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
 import { CoreModule } from '../../../../../../../../core/src/core/core.module';

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';

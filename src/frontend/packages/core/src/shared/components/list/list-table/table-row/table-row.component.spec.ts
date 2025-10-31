@@ -1,6 +1,7 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { Component, DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of as observableOf } from 'rxjs';
@@ -136,7 +137,7 @@ describe('TableRowComponent', () => {
 
     it('should evaluate cellConfig function with row data', () => {
       // Arrange
-      const configFunction = jasmine.createSpy('configFunction').and.callFake((row: any) => ({
+      const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `dynamic-${row.id}`,
         enabled: row.active
       }));
@@ -220,7 +221,7 @@ describe('TableRowComponent', () => {
 
     it('should re-evaluate function config when row changes', () => {
       // Arrange
-      const configFunction = jasmine.createSpy('configFunction').and.callFake((row: any) => ({
+      const configFunction = vi.fn().mockImplementation((row: any) => ({
         testValue: `row-${row.id}`
       }));
 

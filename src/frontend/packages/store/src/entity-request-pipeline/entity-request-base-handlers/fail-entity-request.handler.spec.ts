@@ -14,7 +14,7 @@ describe('failedEntityHandlers', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    const spyDispatcher = jasmine.createSpy();
+    const spyDispatcher = vi.fn();
     failedEntityHandler(
       spyDispatcher,
       catalogEntity,
@@ -41,7 +41,7 @@ describe('failedEntityHandlers', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    const spyDispatcher = jasmine.createSpy();
+    const spyDispatcher = vi.fn();
     failedEntityHandler(
       spyDispatcher,
       catalogEntity,

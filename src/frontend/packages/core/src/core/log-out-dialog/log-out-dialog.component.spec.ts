@@ -1,4 +1,5 @@
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
@@ -56,7 +57,7 @@ describe('LogOutDialogComponent', () => {
   });
 
   it('should navigate after countdown', fakeAsync(() => {
-    const spy = spyOn(router, 'navigate');
+    const spy = vi.spyOn(router, 'navigate');
 
     component.data = {
       expiryDate: Date.now() + 1000,

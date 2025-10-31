@@ -38,15 +38,15 @@ export function getStoreTestProviders(...additionalProviders: Provider[]): Provi
  * Mock factory creators for tests that need spy objects
  */
 export function createMockEntityServiceFactory(): jasmine.SpyObj<EntityServiceFactory> {
-  return jasmine.createSpyObj('EntityServiceFactory', ['create']);
+  return { create: vi.fn() };
 }
 
 export function createMockEntityMonitorFactory(): jasmine.SpyObj<EntityMonitorFactory> {
-  return jasmine.createSpyObj('EntityMonitorFactory', ['create', 'getMonitor']);
+  return { create: vi.fn(), getMonitor: vi.fn() };
 }
 
 export function createMockPaginationMonitorFactory(): jasmine.SpyObj<PaginationMonitorFactory> {
-  return jasmine.createSpyObj('PaginationMonitorFactory', ['create', 'getMonitor']);
+  return { create: vi.fn(), getMonitor: vi.fn() };
 }
 
 /**

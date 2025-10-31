@@ -30,6 +30,6 @@ export class EntityCatalogTestHelper {
     return `${baseString}${config.schemaKey ? '-' + config.schemaKey : ''}${config.subType ? '-' + config.subType : ''}`;
   }
   public mockGetEntityResponses() {
-    return this.spyOn(entityCatalog, 'getEntity').and.callFake(this.fakeGetEntity);
+    return this.vi.spyOn(entityCatalog, 'getEntity').mockImplementation(this.fakeGetEntity);
   }
 }

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { parseISO } from 'date-fns';
 
@@ -38,8 +39,8 @@ describe('StartEndDateComponent', () => {
   });
 
   it('should emit changes if valid dates', () => {
-    spyOn(component.startChange, 'emit');
-    spyOn(component.endChange, 'emit');
+    vi.spyOn(component.startChange, 'emit');
+    vi.spyOn(component.endChange, 'emit');
     component.start = parseISO('2019-01-01T03:00:00.000Z');
     component.end = parseISO('2019-01-03T03:00:00.000Z');
     component.start = parseISO('2019-01-02T03:00:00.000Z');
@@ -50,7 +51,7 @@ describe('StartEndDateComponent', () => {
   });
 
   it('should be able to use custom validate method', () => {
-    const customValidate = jasmine.createSpy().and.returnValue(null);
+    const customValidate = vi.fn().mockReturnValue(null);
     component.validate = customValidate;
     component.start = parseISO('2019-01-02T03:00:00.000Z');
 

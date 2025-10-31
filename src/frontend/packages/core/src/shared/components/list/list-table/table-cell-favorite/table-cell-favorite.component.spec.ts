@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/core-test.helper';
@@ -96,7 +97,7 @@ describe('TableCellFavoriteComponent', () => {
 
     it('should call config function with correct row data', () => {
       const testEntity: TestEntity = { id: 'test-456', name: 'Another Test' };
-      const createUserFavoriteSpy = jasmine.createSpy('createUserFavorite').and.returnValue(
+      const createUserFavoriteSpy = vi.fn().mockReturnValue(
         new UserFavorite<TestMetadata>(
           'endpoint-2',
           'k8s',
@@ -203,7 +204,7 @@ describe('TableCellFavoriteComponent', () => {
             { name: entity.name, entityId: entity.id }
           );
           // Mock canFavorite to return a specific value
-          spyOn(favorite, 'canFavorite').and.returnValue(true);
+          vi.spyOn(favorite, 'canFavorite').mockReturnValue(true);
           return favorite;
         }
       };

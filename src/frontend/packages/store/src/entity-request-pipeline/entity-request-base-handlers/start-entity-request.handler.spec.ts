@@ -14,7 +14,7 @@ describe('startEntityHandler', () => {
       label: 'Entity',
       labelPlural: 'Entities',
     });
-    const spyDispatcher = jasmine.createSpy();
+    const spyDispatcher = vi.fn();
     startEntityHandler(
       spyDispatcher,
       catalogEntity,

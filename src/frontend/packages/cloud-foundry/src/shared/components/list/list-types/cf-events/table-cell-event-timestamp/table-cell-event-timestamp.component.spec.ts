@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
 import { TableCellEventTimestampComponent } from './table-cell-event-timestamp.component';

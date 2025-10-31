@@ -1,4 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { PercentagePipe } from './percentage.pipe';
@@ -25,7 +26,7 @@ describe('PercentagePipe', () => {
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'percent');
+    vi.spyOn(utilsService, 'percent');
     pipe.transform(1024);
 
     expect(utilsService.percent).toHaveBeenCalledWith(1024);

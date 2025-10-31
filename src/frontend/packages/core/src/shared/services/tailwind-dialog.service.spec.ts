@@ -1,4 +1,5 @@
 import { TestBed, ComponentFixture, fakeAsync, tick, flush } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Component } from '@angular/core';
 import { TailwindDialogService, TailwindDialogRef, MAT_DIALOG_DATA } from './tailwind-dialog.service';
 import { ApplicationRef, Injector, EnvironmentInjector } from '@angular/core';

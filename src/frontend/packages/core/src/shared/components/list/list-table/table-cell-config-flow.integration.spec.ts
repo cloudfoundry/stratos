@@ -1,7 +1,8 @@
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { EMPTY, of as observableOf } from 'rxjs';
@@ -409,7 +410,7 @@ describe('Table CellConfig Integration Flow', () => {
     }));
 
     it('should render favorite column end-to-end without console errors', waitForAsync(() => {
-      spyOn(console, 'error');
+      vi.spyOn(console, 'error');
 
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
         createTestUserFavorite
@@ -432,7 +433,7 @@ describe('Table CellConfig Integration Flow', () => {
     }));
 
     it('should handle createUserFavorite function correctly in cellConfig', waitForAsync(() => {
-      const createFavoriteSpy = jasmine.createSpy('createFavorite').and.callFake(
+      const createFavoriteSpy = vi.fn().mockImplementation(
         createTestUserFavorite
       );
 
@@ -686,7 +687,7 @@ describe('Table CellConfig Integration Flow', () => {
     }));
 
     it('should render table even with invalid favorite cellConfig', waitForAsync(() => {
-      spyOn(console, 'error');
+      vi.spyOn(console, 'error');
 
       // Create column with invalid cellConfig (missing createUserFavorite function)
       const invalidFavoriteColumn: ITableColumn<TestEntity> = {
@@ -762,7 +763,7 @@ describe('Table CellConfig Integration Flow', () => {
     });
 
     it('should complete full rendering chain without console errors', waitForAsync(() => {
-      spyOn(console, 'error');
+      vi.spyOn(console, 'error');
 
       const favoriteColumn = createTableColumnFavorite<TestEntity, TestFavoriteMetadata>(
         createTestUserFavorite

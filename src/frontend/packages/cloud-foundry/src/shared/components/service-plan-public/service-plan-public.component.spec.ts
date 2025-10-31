@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { EntityService } from '../../../../../store/src/entity-service';
@@ -68,7 +69,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('should display if service plan is reachable', () => {
     const planAccessibility$ = of(StratosStatus.WARNING);
-    const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
+    const s0 = vi.spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').mockReturnValue(planAccessibility$);
     component.servicePlan = servicesService.servicePlan;
     fixture.detectChanges();
 
@@ -78,7 +79,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('should display if service plan is not reachable', () => {
     const planAccessibility$ = of(StratosStatus.ERROR);
-    const s0 = spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').and.returnValue(planAccessibility$);
+    const s0 = vi.spyOn(servicesHelpers, 'getServicePlanAccessibilityCardStatus').mockReturnValue(planAccessibility$);
     component.servicePlan = servicesService.servicePlan;
     fixture.detectChanges();
 

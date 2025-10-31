@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -53,7 +54,7 @@ describe('DialogConfirmComponent', () => {
   });
 
   it('should close when clicked on cancel', () => {
-    const spy = spyOn(component.dialogRef, 'close');
+    const spy = vi.spyOn(component.dialogRef, 'close');
     element.querySelector('button').click();
 
     expect(spy).toHaveBeenCalled();

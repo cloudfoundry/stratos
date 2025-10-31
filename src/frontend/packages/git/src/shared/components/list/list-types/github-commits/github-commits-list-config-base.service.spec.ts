@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { inject, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { ApplicationService } from '../../../../../../../cloud-foundry/src/features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../../../cloud-foundry/test-framework/application-service-helper';
