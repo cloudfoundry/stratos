@@ -8,7 +8,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -55,6 +55,10 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
+interface SelectPlanForm {
+  servicePlans: FormControl<string>;
+}
+
 @Component({
   selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
@@ -89,7 +93,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   validate = signal<boolean>(false);
   subscription: Subscription;
-  stepperForm: UntypedFormGroup;
+  stepperForm: FormGroup<SelectPlanForm>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   displayNames: { [guid: string]: string } = {};
 
@@ -101,8 +105,8 @@ export class SelectPlanStepComponent implements OnDestroy {
     private modeService: CsiModeService
 
   ) {
-    this.stepperForm = new UntypedFormGroup({
-      servicePlans: new UntypedFormControl('', Validators.required),
+    this.stepperForm = new FormGroup<SelectPlanForm>({
+      servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
     });
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(

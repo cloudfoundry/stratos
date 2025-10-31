@@ -3,6 +3,10 @@ import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
 
+interface ServiceAccountAuthForm {
+  token: FormControl<string>;
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-serviceaccount-auth-form',
@@ -12,5 +16,5 @@ import { IAuthForm } from '../../../../../store/src/extension-types';
   imports: [ReactiveFormsModule]
 })
 export class KubernetesSATokenAuthFormComponent implements IAuthForm {
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup: FormGroup<ServiceAccountAuthForm>;
 }

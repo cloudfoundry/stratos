@@ -21,6 +21,15 @@ import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
 
+/**
+ * Base interface for the endpoint form structure.
+ * The authValues field will be typed dynamically based on the selected auth type.
+ */
+interface EndpointForm {
+  authType: FormControl<string>;
+  systemShared: FormControl<boolean>;
+}
+
 @Component({
   selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',
@@ -68,7 +77,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
   public container: ViewContainerRef;
 
-  public endpointForm: UntypedFormGroup;
+  public endpointForm: TypedFormGroup<EndpointForm>;
 
   private bodyContent = '';
 
@@ -83,7 +92,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private resolver: ComponentFactoryResolver,
   ) { }
 
@@ -111,11 +120,12 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     this.cachedAuthTypeFormFields = Object.keys(this.autoSelected.form || {});
-    this.endpointForm = this.fb.group({
-      authType: [this.autoSelected.value || '', Validators.required],
-      authValues: this.fb.group(this.autoSelected.form || {}),
-      systemShared: false
+    this.endpointForm = this.fb.group<EndpointForm>({
+      authType: new FormControl(this.autoSelected.value || '', { nonNullable: true, validators: Validators.required }),
+      systemShared: new FormControl(false, { nonNullable: true })
     });
+    // Add authValues as a separate group to handle dynamic auth type switching
+    this.endpointForm.addControl('authValues', this.fb.group(this.autoSelected.form || {}));
     this.authChanged();
 
     // Template container reference is not available at construction
@@ -138,9 +148,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (!this.endpointForm) {
       // Ensure there's something for the html to bind to
-      this.endpointForm = this.fb.group({
-        authType: null,
-        systemShared: false
+      this.endpointForm = this.fb.group<EndpointForm>({
+        authType: new FormControl('', { nonNullable: true }),
+        systemShared: new FormControl(false, { nonNullable: true })
       });
     }
   }

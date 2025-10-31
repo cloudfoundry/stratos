@@ -222,7 +222,7 @@ export class CustomButtonDirective {
   }
 })
 export class MatInputDirective {
-  @Input() formControl: FormControl;
+  @Input() formControl: FormControl<any>;
   @Input() formControlName: string;
 }
 

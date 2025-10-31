@@ -4,7 +4,9 @@ import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
-
+interface GKEAuthForm {
+  gkeconfig: FormControl<string>;
+}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,7 +20,7 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   ]
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup: FormGroup<GKEAuthForm>;
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
     return {};

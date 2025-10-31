@@ -5,6 +5,10 @@ import { FileInputComponent } from '../../../../../core/src/shared/components/fi
 import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
 
+interface CertsAuthForm {
+  cert: FormControl<string>;
+  certKey: FormControl<string>;
+}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +24,7 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup: FormGroup<CertsAuthForm>;
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

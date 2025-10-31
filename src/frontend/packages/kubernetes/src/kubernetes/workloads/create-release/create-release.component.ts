@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, pairwise, startWith, switchMap } from 'rxjs/operators';
@@ -23,6 +23,13 @@ import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
+
+interface CreateReleaseForm {
+  endpoint: FormControl<string>;
+  releaseName: FormControl<string>;
+  releaseNamespace: FormControl<string>;
+  createNamespace: FormControl<boolean>;
+}
 
 @Component({
   selector: 'app-create-release',
@@ -51,7 +58,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   kubeEndpoints$: Observable<any>;
   validate$: Observable<boolean>;
 
-  details: UntypedFormGroup;
+  details: FormGroup<CreateReleaseForm>;
   namespaces$: Observable<string[]>;
 
   private endpointChangedSignal: WritableSignal<string | null> = signal(null);
@@ -92,11 +99,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   private setupDetailsStep() {
-    this.details = new UntypedFormGroup({
-      endpoint: new UntypedFormControl('', Validators.required),
-      releaseName: new UntypedFormControl('', Validators.required),
-      releaseNamespace: new UntypedFormControl('', Validators.required),
-      createNamespace: new UntypedFormControl(false),
+    this.details = new FormGroup<CreateReleaseForm>({
+      endpoint: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      releaseName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      releaseNamespace: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      createNamespace: new FormControl(false, { nonNullable: true }),
     });
     this.details.controls.createNamespace.disable();
 

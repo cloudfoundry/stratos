@@ -1,6 +1,11 @@
 import { Component, Inject, InjectionToken , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+
+interface UserInviteConfigForm {
+  clientID: FormControl<string>;
+  clientSecret: FormControl<string>;
+}
 import { AppProgressBarComponent } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { TailwindDialogRef } from '@stratosui/core';
@@ -43,7 +48,7 @@ export class UserInviteConfigurationDialogComponent {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm: UntypedFormGroup;
+  public endpointForm: FormGroup<UserInviteConfigForm>;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
   // If we don't do this and if we're quick enough, we can navigate to the application page
@@ -54,7 +59,7 @@ export class UserInviteConfigurationDialogComponent {
   public showSecret = false;
 
   constructor(
-    public fb: UntypedFormBuilder,
+    public fb: FormBuilder,
     @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<UserInviteConfigurationDialogComponent>,
     public snackBar: TailwindSnackBarService,
     public userInviteConfigureService: UserInviteConfigureService,
@@ -62,9 +67,9 @@ export class UserInviteConfigurationDialogComponent {
       guid: string
     }
   ) {
-    this.endpointForm = this.fb.group({
-      clientID: ['', Validators.required],
-      clientSecret: ['', Validators.required],
+    this.endpointForm = this.fb.group<UserInviteConfigForm>({
+      clientID: this.fb.nonNullable.control('', Validators.required),
+      clientSecret: this.fb.nonNullable.control('', Validators.required),
     });
   }
 

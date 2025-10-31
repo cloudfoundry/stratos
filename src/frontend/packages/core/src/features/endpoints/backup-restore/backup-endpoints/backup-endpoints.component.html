@@ -47,7 +47,7 @@
         <div class="form-field">
           <label class="form-label">Confirm Password</label>
           <input class="form-input" formControlName="password2" name="password2" required
-            [type]="!showPassword[2] ? 'password' : 'text'" [pattern]="passwordForm.controls.password2.value">
+            [type]="!showPassword[2] ? 'password' : 'text'">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
           </span>
@@ -55,7 +55,7 @@
             <div class="form-error">
             Password is required</div>
           }
-          @if (passwordForm.controls.password2.errors && passwordForm.controls.password2.errors.pattern) {
+          @if (passwordForm.errors && passwordForm.errors.passwordMismatch) {
             <div class="form-error">
               Passwords must match
             </div>

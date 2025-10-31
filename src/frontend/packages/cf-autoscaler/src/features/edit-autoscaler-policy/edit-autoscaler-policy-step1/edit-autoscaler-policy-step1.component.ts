@@ -14,6 +14,12 @@ import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helper
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
+interface EditLimitForm {
+  instance_min_count: FormControl<number>;
+  instance_max_count: FormControl<number>;
+  timezone: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step1',
   templateUrl: './edit-autoscaler-policy-step1.component.html',
@@ -32,22 +38,22 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
 
   policyAlert = PolicyAlert;
   timezoneOptions = Intl.supportedValuesOf('timeZone');
-  editLimitForm: UntypedFormGroup;
+  editLimitForm: FormGroup<EditLimitForm>;
 
   private editLimitValid = true;
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editLimitForm = this.fb.group({
-      instance_min_count: [0, [Validators.required, this.validateGlobalLimitMin()]],
-      instance_max_count: [0, [Validators.required, this.validateGlobalLimitMax()]],
-      timezone: [0, [Validators.required]]
+    this.editLimitForm = this.fb.group<EditLimitForm>({
+      instance_min_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMin()]),
+      instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),
+      timezone: this.fb.nonNullable.control('', [Validators.required])
     });
   }
 

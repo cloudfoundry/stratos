@@ -26,6 +26,17 @@ import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
+interface CreateEndpointForm {
+  nameField: FormControl<string>;
+  urlField: FormControl<string>;
+  skipSSLField: FormControl<boolean>;
+  ssoAllowedField: FormControl<boolean>;
+  clientIDField: FormControl<string>;
+  clientSecretField: FormControl<string>;
+  createSystemEndpointField: FormControl<boolean>;
+  caCertField: FormControl<string>;
+}
+
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
@@ -44,7 +55,7 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
-  registerForm: UntypedFormGroup;
+  registerForm: FormGroup<CreateEndpointForm>;
 
   @Input() finalStep: boolean;
   private pFixedUrl: string;
@@ -78,7 +89,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   lastSkipSSLValue = false;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     activatedRoute: ActivatedRoute,
     private snackBarService: SnackBarService,
     sessionService: SessionService,
@@ -87,16 +98,16 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   ) {
     super(sessionService, currentUserPermissionsService, userProfileService);
 
-    this.registerForm = this.fb.group({
-      nameField: ['', [Validators.required]],
-      urlField: ['', [Validators.required]],
-      skipSSLField: [false, []],
-      ssoAllowedField: [false, []],
+    this.registerForm = this.fb.group<CreateEndpointForm>({
+      nameField: this.fb.nonNullable.control('', [Validators.required]),
+      urlField: this.fb.nonNullable.control('', [Validators.required]),
+      skipSSLField: this.fb.nonNullable.control(false, []),
+      ssoAllowedField: this.fb.nonNullable.control(false, []),
       // Optional Client ID and Client Secret
-      clientIDField: ['', []],
-      clientSecretField: ['', []],
-      createSystemEndpointField: [true, []],
-      caCertField: ['', []],
+      clientIDField: this.fb.nonNullable.control('', []),
+      clientSecretField: this.fb.nonNullable.control('', []),
+      createSystemEndpointField: this.fb.nonNullable.control(true, []),
+      caCertField: this.fb.nonNullable.control('', []),
     });
 
     const epType = getIdFromRoute(activatedRoute, 'type');

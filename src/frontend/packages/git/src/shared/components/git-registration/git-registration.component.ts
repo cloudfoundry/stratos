@@ -54,6 +54,14 @@ enum GitTypeKeys {
   GITLAB_ENTERPRISE = 'githubenterprize',
 }
 
+interface GitRegistrationForm {
+  selectedType: FormControl<string>;
+  nameField: FormControl<string>;
+  urlField: FormControl<string>;
+  skipSSLField: FormControl<boolean>;
+  createSystemEndpointField: FormControl<boolean>;
+}
+
 @Component({
   selector: 'app-git-registration',
   templateUrl: './git-registration.component.html',
@@ -75,7 +83,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   public epSubType: GIT_ENDPOINT_SUB_TYPES;
 
-  registerForm: UntypedFormGroup;
+  registerForm: FormGroup<GitRegistrationForm>;
 
   private sub: Subscription;
 
@@ -88,7 +96,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   constructor(
     gitSCMService: GitSCMService,
     activatedRoute: ActivatedRoute,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private snackBarService: SnackBarService,
     private endpointsService: EndpointsService,
     public sessionService: SessionService,
@@ -170,12 +178,12 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       return !item.exists;
     });
 
-    this.registerForm = this.fb.group({
-      selectedType: [defaultSelection, []],
-      nameField: ['', [Validators.required]],
-      urlField: ['', [Validators.required]],
-      skipSSLField: [false, []],
-      createSystemEndpointField: [true, []],
+    this.registerForm = this.fb.group<GitRegistrationForm>({
+      selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
+      nameField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      urlField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      skipSSLField: new FormControl(false, { nonNullable: true, validators: [] }),
+      createSystemEndpointField: new FormControl(true, { nonNullable: true, validators: [] }),
     });
     this.updateType();
 

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, Inject, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
@@ -10,6 +10,10 @@ import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
+
+interface AddApiKeyForm {
+  comment: FormControl<string>;
+}
 
 @Component({
   selector: 'app-add-api-key-dialog',
@@ -32,14 +36,14 @@ export class AddApiKeyDialogComponent implements OnDestroy {
 
   private sub: Subscription;
 
-  public formGroup: UntypedFormGroup;
+  public formGroup: FormGroup<AddApiKeyForm>;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<ApiKey>,
   ) {
-    this.formGroup = this.fb.group({
-      comment: ['', Validators.required],
+    this.formGroup = this.fb.group<AddApiKeyForm>({
+      comment: new FormControl('', { nonNullable: true, validators: [Validators.required] })
     });
   }
 

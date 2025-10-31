@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -23,6 +23,13 @@ import {
 } from '../../../store/selectors/create-service-instance.selectors';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
+
+/**
+ * Typed form interface for service selection
+ */
+interface SelectServiceForm {
+  service: FormControl<string>;
+}
 
 
 @Component({
@@ -52,7 +59,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
   cfGuid: string;
   services$: Observable<APIResource<IService>[]>;
-  stepperForm: UntypedFormGroup;
+  stepperForm: FormGroup<SelectServiceForm>;
   validate = signal<boolean>(false);
   isFetching$: Observable<boolean>;
   selectedService$: Observable<APIResource<IService>>;
@@ -69,8 +76,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   });
 
   constructor() {
-    this.stepperForm = new UntypedFormGroup({
-      service: new UntypedFormControl('', [Validators.required as any]),
+    this.stepperForm = new FormGroup<SelectServiceForm>({
+      service: new FormControl<string>('', { validators: [Validators.required], nonNullable: true }),
     });
 
     const cfSpaceGuid$ =

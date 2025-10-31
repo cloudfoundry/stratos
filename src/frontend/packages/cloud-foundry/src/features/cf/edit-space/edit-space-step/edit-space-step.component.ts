@@ -18,6 +18,12 @@ import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 
+interface EditSpaceForm {
+  spaceName: FormControl<string>;
+  toggleSsh: FormControl<boolean>;
+  quotaDefinition: FormControl<string | number | null>;
+}
+
 
 @Component({
   selector: 'app-edit-space-step',
@@ -43,7 +49,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   space: string;
   space$: Observable<any>;
   spaceGuid: string;
-  editSpaceForm: UntypedFormGroup;
+  editSpaceForm: FormGroup<EditSpaceForm>;
   originalSpaceQuotaGuid: string;
   spaceName: string;
 
@@ -55,10 +61,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   ) {
     super(store, activatedRoute, activeRouteCfOrgSpace);
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
-    this.editSpaceForm = new UntypedFormGroup({
-      spaceName: new UntypedFormControl('', this.spaceNameTakenValidator()),
-      toggleSsh: new UntypedFormControl(false),
-      quotaDefinition: new UntypedFormControl(),
+    this.editSpaceForm = new FormGroup<EditSpaceForm>({
+      spaceName: new FormControl('', { nonNullable: true, validators: [this.spaceNameTakenValidator()] }),
+      toggleSsh: new FormControl(false, { nonNullable: true }),
+      quotaDefinition: new FormControl<string | number | null>(null),
     });
     this.space$ = this.cfSpaceService.space$.pipe(
       map(o => o.entity.entity),
@@ -130,7 +136,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   updateSpaceQuota() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
     const mon = spaceQuotaGuid ?
-      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
+      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, String(spaceQuotaGuid)) :
       cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
     return mon.pipe(
       pairwise(),

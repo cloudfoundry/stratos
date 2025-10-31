@@ -24,6 +24,26 @@ import {
 } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
+interface DeployOptionsForm {
+  name: FormControl<string | null>;
+  instances: FormControl<number | null>;
+  disk_quota: FormControl<number | null>;
+  memory: FormControl<number | null>;
+  host: FormControl<string | null>;
+  domain: FormControl<string | null>;
+  path: FormControl<string | null>;
+  buildpack: FormControl<string | null>;
+  no_route: FormControl<boolean>;
+  random_route: FormControl<boolean>;
+  no_start: FormControl<boolean>;
+  startCmd: FormControl<string | null>;
+  healthCheckType: FormControl<string | null>;
+  stack: FormControl<string | null>;
+  time: FormControl<number | null>;
+  dockerImage: FormControl<string | null>;
+  dockerUsername: FormControl<string | null>;
+}
+
 @Component({
   selector: 'app-deploy-application-options-step',
   templateUrl: './deploy-application-options-step.component.html',
@@ -43,7 +63,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   valid$: Observable<boolean>;
   domains$: Observable<APIResource<IDomain>[]>;
   stacks$: Observable<APIResource<IDomain>[]>;
-  deployOptionsForm: UntypedFormGroup;
+  deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
   appGuid: string;
   stepOpts: any;
@@ -53,37 +73,37 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor(
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private store: Store<CFAppState>,
     private appEnvVarsService: ApplicationEnvVarsHelper,
     private activatedRoute: ActivatedRoute
   ) {
-    this.deployOptionsForm = this.fb.group({
-      name: null,
-      instances: [null, [
+    this.deployOptionsForm = this.fb.group<DeployOptionsForm>({
+      name: new FormControl<string | null>(null),
+      instances: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      disk_quota: [null, [
+      ]),
+      disk_quota: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      memory: [null, [
+      ]),
+      memory: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      host: null,
-      domain: null,
-      path: null,
-      buildpack: null,
-      no_route: false,
-      random_route: false,
-      no_start: false,
-      startCmd: null,
-      healthCheckType: null,
-      stack: null,
-      time: [null, [
+      ]),
+      host: new FormControl<string | null>(null),
+      domain: new FormControl<string | null>(null),
+      path: new FormControl<string | null>(null),
+      buildpack: new FormControl<string | null>(null),
+      no_route: new FormControl<boolean>(false),
+      random_route: new FormControl<boolean>(false),
+      no_start: new FormControl<boolean>(false),
+      startCmd: new FormControl<string | null>(null),
+      healthCheckType: new FormControl<string | null>(null),
+      stack: new FormControl<string | null>(null),
+      time: new FormControl<number | null>(null, [
         Validators.min(0)
-      ]],
-      dockerImage: null,
-      dockerUsername: null
+      ]),
+      dockerImage: new FormControl<string | null>(null),
+      dockerUsername: new FormControl<string | null>(null)
     });
     this.valid$ = this.deployOptionsForm.valueChanges.pipe(
       map(() => this.deployOptionsForm.valid),
@@ -186,9 +206,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     this.subs.forEach(sub => sub.unsubscribe());
   }
 
-  formToObj(controls: {
-    [key: string]: AbstractControl;
-  }): OverrideAppDetails {
+  formToObj(controls: DeployOptionsForm): OverrideAppDetails {
     return {
       name: controls.name.value,
       buildpack: controls.buildpack.value,
@@ -217,8 +235,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.name.disable();
     controls.buildpack.setValue(overrides.buildpack);
     controls.instances.setValue(overrides.instances);
-    controls.disk_quota.setValue(overrides.diskQuota.replace('MB', ''));
-    controls.memory.setValue(overrides.memQuota.replace('MB', ''));
+    controls.disk_quota.setValue(parseInt(overrides.diskQuota.replace('MB', ''), 10));
+    controls.memory.setValue(parseInt(overrides.memQuota.replace('MB', ''), 10));
     controls.no_start.setValue(overrides.doNotStart);
     controls.no_route.setValue(overrides.noRoute);
     // Random route has no affect on redeploy, so disable.

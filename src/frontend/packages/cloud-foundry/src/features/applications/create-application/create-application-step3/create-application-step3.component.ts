@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -25,6 +25,10 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
 
+interface DomainHostForm {
+  domain: FormControl<string>;
+  host: FormControl<string>;
+}
 
 @Component({
   selector: 'app-create-application-step3',
@@ -46,7 +50,7 @@ import { createGetApplicationAction } from '../../application.service';
 export class CreateApplicationStep3Component implements OnInit {
   private store = inject(Store<CFAppState>);
 
-  setDomainHost: UntypedFormGroup;
+  setDomainHost: FormGroup<DomainHostForm>;
 
   constructor() {
     this.setDomainHost = new UntypedFormGroup({

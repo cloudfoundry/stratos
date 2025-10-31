@@ -23,6 +23,12 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
+// Typed form interface for local account password form
+interface LocalAccountForm {
+  adminPassword: FormControl<string>;
+  adminPasswordConfirm: FormControl<string>;
+}
+
 @Component({
 selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
@@ -53,15 +59,12 @@ export class LocalAccountWizardComponent implements OnInit {
   showPassword: boolean[] = [];
 
   ngOnInit() {
-    this.passwordForm = new UntypedFormGroup({
-      adminPassword: new UntypedFormControl('', [Validators.required as any]),
-      adminPasswordConfirm: new UntypedFormControl('', [Validators.required as any])
-    });
+    this.passwordForm = new FormGroup<LocalAccountForm>({
+      adminPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      adminPasswordConfirm: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+    }, { validators: this.passwordMatchValidator });
 
-    this.validateLocalAuthForm = this.passwordForm.valueChanges.pipe(
-      tap(() => {
-        this.passwordForm.controls.adminPasswordConfirm.setValidators([Validators.required, this.confirmPasswordValidator()]);
-      }),
+    this.validateLocalAuthForm = this.passwordForm.statusChanges.pipe(
       map(() => this.passwordForm.valid)
     );
   }
@@ -102,10 +105,4 @@ export class LocalAccountWizardComponent implements OnInit {
       }));
   };
 
-  confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
-      const same = control.value === this.passwordForm.value.adminPassword;
-      return same ? null : { passwordMatch: { value: control.value } };
-    };
-  }
 }

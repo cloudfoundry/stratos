@@ -54,6 +54,17 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 
+interface SelectExistingInstanceForm {
+  serviceInstance: string;
+}
+
+interface CreateNewInstanceForm {
+  name: string;
+  servicePlan: string;
+  spaceGuid: string;
+  params: object;
+  tags: string;
+}
 
 @Component({
   selector: 'app-specify-details-step',
@@ -96,8 +107,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   formMode: CreateServiceFormMode;
 
-  selectExistingInstanceForm: UntypedFormGroup;
-  createNewInstanceForm: UntypedFormGroup;
+  selectExistingInstanceForm: FormGroup<{
+    serviceInstance: FormControl<string>;
+  }>;
+  createNewInstanceForm: FormGroup<{
+    name: FormControl<string>;
+    servicePlan: FormControl<string>;
+    spaceGuid: FormControl<string>;
+    params: FormControl<object>;
+    tags: FormControl<string>;
+  }>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   cSIHelperService: CreateServiceInstanceHelper;
@@ -272,12 +291,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private setupForms() {
-    this.createNewInstanceForm = new UntypedFormGroup({
-      name: new UntypedFormControl('', [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)]),
-      tags: new UntypedFormControl(''),
+    this.createNewInstanceForm = new FormGroup({
+      name: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator(), Validators.maxLength(50)] }),
+      servicePlan: new FormControl('', { nonNullable: true }),
+      spaceGuid: new FormControl('', { nonNullable: true }),
+      params: new FormControl({}, { nonNullable: true }),
+      tags: new FormControl('', { nonNullable: true }),
     });
-    this.selectExistingInstanceForm = new UntypedFormGroup({
-      serviceInstances: new UntypedFormControl('', [Validators.required]),
+    this.selectExistingInstanceForm = new FormGroup({
+      serviceInstance: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     });
   }
 
@@ -380,7 +402,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   };
 
   private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response?.result?.[0];
+    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : request.response?.result?.[0];
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid

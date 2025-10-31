@@ -25,6 +25,20 @@ import { TileGroupComponent } from '../../../../../core/src/shared/components/ti
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
+interface EditRecurringScheduleForm {
+  days_of_week: FormControl<number[]>;
+  days_of_month: FormControl<number[]>;
+  instance_min_count: FormControl<number>;
+  instance_max_count: FormControl<number>;
+  initial_min_instance_count: FormControl<number>;
+  start_date: FormControl<string>;
+  end_date: FormControl<string>;
+  start_time: FormControl<string>;
+  end_time: FormControl<string>;
+  effective_type: FormControl<string>;
+  repeat_type: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step3',
   templateUrl: './edit-autoscaler-policy-step3.component.html',
@@ -48,7 +62,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   policyAlert = PolicyAlert;
   weekdayOptions = AutoscalerConstants.WeekdayOptions;
   monthdayOptions = AutoscalerConstants.MonthdayOptions;
-  editRecurringScheduleForm: UntypedFormGroup;
+  editRecurringScheduleForm: FormGroup<EditRecurringScheduleForm>;
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
   private editIndex = -1;
@@ -62,24 +76,24 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editRecurringScheduleForm = this.fb.group({
-      days_of_week: [0],
-      days_of_month: [0],
-      instance_min_count: [0],
-      instance_max_count: [0],
-      initial_min_instance_count: [0, [this.validateRecurringScheduleInitialMin()]],
-      start_date: [0, [this.validateRecurringScheduleGlobal()]],
-      end_date: [0, [this.validateRecurringScheduleGlobal()]],
-      start_time: [0, [Validators.required, this.validateRecurringScheduleTime('end_time'), this.validateRecurringScheduleGlobal()]],
-      end_time: [0, [Validators.required, this.validateRecurringScheduleTime('start_time'), this.validateRecurringScheduleGlobal()]],
-      effective_type: [0, [Validators.required, this.validateRecurringScheduleGlobal()]],
-      repeat_type: [0, [Validators.required, this.validateRecurringScheduleGlobal('repeat_type')]],
+    this.editRecurringScheduleForm = this.fb.group<EditRecurringScheduleForm>({
+      days_of_week: this.fb.control<number[]>([], { nonNullable: true }),
+      days_of_month: this.fb.control<number[]>([], { nonNullable: true }),
+      instance_min_count: this.fb.control<number>(0, { nonNullable: true }),
+      instance_max_count: this.fb.control<number>(0, { nonNullable: true }),
+      initial_min_instance_count: this.fb.control<number>(0, { nonNullable: true, validators: [this.validateRecurringScheduleInitialMin()] }),
+      start_date: this.fb.control<string>('', { nonNullable: true, validators: [this.validateRecurringScheduleGlobal()] }),
+      end_date: this.fb.control<string>('', { nonNullable: true, validators: [this.validateRecurringScheduleGlobal()] }),
+      start_time: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required, this.validateRecurringScheduleTime('end_time'), this.validateRecurringScheduleGlobal()] }),
+      end_time: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required, this.validateRecurringScheduleTime('start_time'), this.validateRecurringScheduleGlobal()] }),
+      effective_type: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required, this.validateRecurringScheduleGlobal()] }),
+      repeat_type: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required, this.validateRecurringScheduleGlobal('repeat_type')] }),
     });
   }
 
@@ -256,8 +270,11 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   mutualValidate(inputName: string, lastValid: boolean, currentValid: boolean) {
-    if (this.editRecurringScheduleForm && lastValid !== currentValid && this.editRecurringScheduleForm.controls[inputName]) {
-      this.editRecurringScheduleForm.controls[inputName].updateValueAndValidity();
+    if (this.editRecurringScheduleForm && lastValid !== currentValid) {
+      const control = this.editRecurringScheduleForm.get(inputName);
+      if (control) {
+        control.updateValueAndValidity();
+      }
     }
   }
 }

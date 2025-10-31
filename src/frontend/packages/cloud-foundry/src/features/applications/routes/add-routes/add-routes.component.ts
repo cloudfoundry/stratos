@@ -30,6 +30,20 @@ import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
+
+interface DomainFormModel {
+  domain: APIResource<IDomain> | '';
+}
+
+interface HTTPRouteFormModel {
+  host: string;
+  path: string;
+}
+
+interface TCPRouteFormModel {
+  port: string;
+  useRandomPort: boolean;
+}
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -51,9 +65,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   model: Route;
   domains: APIResource<IDomain>[] = [];
-  addTCPRoute: UntypedFormGroup;
-  addHTTPRoute: UntypedFormGroup;
-  domainFormGroup: UntypedFormGroup;
+  addTCPRoute: FormGroup<{
+    port: FormControl<string>;
+    useRandomPort: FormControl<boolean>;
+  }>;
+  addHTTPRoute: FormGroup<{
+    host: FormControl<string>;
+    path: FormControl<string>;
+  }>;
+  domainFormGroup: FormGroup<{
+    domain: FormControl<APIResource<IDomain> | ''>;
+  }>;
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
@@ -84,21 +106,33 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
     this.addRouteMode = this.addRouteModes[0];
-    this.domainFormGroup = new UntypedFormGroup({
-      domain: new UntypedFormControl('', [Validators.required as any])
+    this.domainFormGroup = new FormGroup({
+      domain: new FormControl<APIResource<IDomain> | ''>('', {
+        nonNullable: true,
+        validators: [Validators.required]
+      })
     });
 
-    this.addHTTPRoute = new UntypedFormGroup({
-      host: new UntypedFormControl('', [Validators.required as any, Validators.pattern(hostPattern), Validators.maxLength(63)]),
-      path: new UntypedFormControl('', [Validators.pattern(pathPattern), Validators.maxLength(128)])
+    this.addHTTPRoute = new FormGroup({
+      host: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]
+      }),
+      path: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.pattern(pathPattern), Validators.maxLength(128)]
+      })
     });
 
-    this.addTCPRoute = new UntypedFormGroup({
-      port: new UntypedFormControl('', [
-        Validators.required,
-        Validators.pattern('[0-9]*')
-      ]),
-      useRandomPort: new UntypedFormControl(false)
+    this.addTCPRoute = new FormGroup({
+      port: new FormControl('', {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.pattern('[0-9]*')
+        ]
+      }),
+      useRandomPort: new FormControl(false, { nonNullable: true })
     });
   }
 
@@ -179,7 +213,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   isTCPRouteCreation(): boolean {
-    return this.domainFormGroup.value.domain && this.domainFormGroup.value.domain.entity.router_group_type === 'tcp';
+    const domain = this.domainFormGroup.value.domain;
+    return !!domain && typeof domain !== 'string' && domain.entity.router_group_type === 'tcp';
   }
 
   submit: StepOnNextFunction = () => {
@@ -192,13 +227,14 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   };
 
   onSubmit(): Observable<StepOnNextResult> {
-    const domainGuid = this.domainFormGroup.value.domain.metadata.guid;
+    const domain = this.domainFormGroup.value.domain;
+    const domainGuid = typeof domain !== 'string' ? domain.metadata.guid : '';
     const isTcpRoute = this.isTCPRouteCreation();
     const formGroup = isTcpRoute ? this.addTCPRoute : this.addHTTPRoute;
 
     // Set port to -1 to indicate that we should generate a random port number
     let port = this._getValue('port', formGroup);
-    if (isTcpRoute && formGroup.value.useRandomPort) {
+    if (isTcpRoute && this.addTCPRoute.value.useRandomPort) {
       port = -1;
     }
 

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-material-replacements';
@@ -16,6 +16,15 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { StepComponent, StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+
+interface EditProfileForm {
+  givenName: FormControl<string>;
+  familyName: FormControl<string>;
+  emailAddress: FormControl<string>;
+  currentPassword: FormControl<string>;
+  newPassword: FormControl<string>;
+  confirmPassword: FormControl<string>;
+}
 
 @Component({
   selector: 'app-edit-profile-info',
@@ -40,23 +49,23 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 })
 export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
-  editProfileForm: UntypedFormGroup;
+  editProfileForm: FormGroup<EditProfileForm>;
   showPassword: boolean[] = [];
 
   needsPasswordForEmailChange: boolean;
 
   constructor(
     private userProfileService: UserProfileService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
-    this.editProfileForm = this.fb.group({
-      givenName: '',
-      familyName: '',
-      emailAddress: '',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
+    this.editProfileForm = this.fb.group<EditProfileForm>({
+      givenName: new FormControl('', { nonNullable: true }),
+      familyName: new FormControl('', { nonNullable: true }),
+      emailAddress: new FormControl('', { nonNullable: true }),
+      currentPassword: new FormControl('', { nonNullable: true }),
+      newPassword: new FormControl('', { nonNullable: true }),
+      confirmPassword: new FormControl('', { nonNullable: true }),
     });
 
     this.needsPasswordForEmailChange = false;
@@ -83,7 +92,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       this.needsPasswordForEmailChange = (profile.origin === 'uaa');
       this.profile = profile;
       this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
-      this.editProfileForm.setValue({
+      this.editProfileForm.patchValue({
         givenName: profile.name.givenName,
         familyName: profile.name.familyName,
         emailAddress: this.userProfileService.getPrimaryEmailAddress(profile),
@@ -104,20 +113,20 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       // Old password is required if either email or new pw is specified (uaa)
       // or only if new pw is specified (local account)
       const required = this.needsPasswordForEmailChange ?
-        values.emailAddress !== this.emailAddress || values.newPassword.length : values.newPassword.length;
-      this.passwordRequired = !!required;
+        (values.emailAddress !== this.emailAddress || !!values.newPassword.length) : !!values.newPassword.length;
+      this.passwordRequired = required;
       if (required !== this.lastRequired) {
         this.lastRequired = required;
         const validators = required ? [Validators.required] : [];
-        this.editProfileForm.controls.currentPassword.setValidators(validators);
-        this.editProfileForm.controls.currentPassword.updateValueAndValidity();
+        this.editProfileForm.get('currentPassword')?.setValidators(validators);
+        this.editProfileForm.get('currentPassword')?.updateValueAndValidity();
       }
       const havePassword = !!values.newPassword.length;
       if (havePassword !== this.lastHavePassword) {
         this.lastHavePassword = havePassword;
         const confirmValidator = havePassword ? [Validators.required, this.confirmPasswordValidator()] : [];
-        this.editProfileForm.controls.confirmPassword.setValidators(confirmValidator);
-        this.editProfileForm.controls.confirmPassword.updateValueAndValidity();
+        this.editProfileForm.get('confirmPassword')?.setValidators(confirmValidator);
+        this.editProfileForm.get('confirmPassword')?.updateValueAndValidity();
       }
     });
   }
@@ -134,8 +143,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
     const updates: UserProfileInfoUpdates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editProfileForm.value)) {
-      if (!this.editProfileForm.controls[key].pristine) {
-        (updates as any)[key] = this.editProfileForm.value[key];
+      const control = this.editProfileForm.get(key);
+      if (control && !control.pristine) {
+        (updates as any)[key] = this.editProfileForm.value[key as keyof EditProfileForm];
       }
     }
     return this.userProfileService.updateProfile(this.profile, updates).pipe(
