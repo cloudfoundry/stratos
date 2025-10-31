@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
 
-import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
 import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns';
@@ -17,8 +17,8 @@ import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns'
 })
 export class DateTimeComponent implements OnDestroy {
 
-  public date = new UntypedFormControl();
-  public time = new UntypedFormControl();
+  public date = new FormControl<string | null>(null);
+  public time = new FormControl<string | null>(null);
   private sub: Subscription;
   private changeSub: Subscription;
   private dateTimeValue: Date;

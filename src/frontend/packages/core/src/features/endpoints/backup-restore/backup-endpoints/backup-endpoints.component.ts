@@ -23,6 +23,12 @@ import { BackupConnectionCellComponent } from '../backup-connection-cell/backup-
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
+// Typed form interface for password form
+interface BackupPasswordForm {
+  password: FormControl<string>;
+  password2: FormControl<string>;
+}
+
 @Component({
   selector: 'app-backup-endpoints',
   templateUrl: './backup-endpoints.component.html',
@@ -83,8 +89,16 @@ export class BackupEndpointsComponent implements OnDestroy {
 
   // Step 2
   passwordValid$: Observable<boolean>;
-  passwordForm: UntypedFormGroup;
+  passwordForm: FormGroup<BackupPasswordForm>;
   showPassword: boolean[] = [];
+
+  // Custom validator for password matching
+  private readonly passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const group = control as FormGroup<BackupPasswordForm>;
+    const password = group.controls.password.value;
+    const password2 = group.controls.password2.value;
+    return password === password2 ? null : { passwordMismatch: true };
+  };
 
   constructor(
     public service: BackupEndpointsService,
@@ -125,13 +139,20 @@ export class BackupEndpointsComponent implements OnDestroy {
   }
 
   setupPasswordStep() {
-    this.passwordForm = new UntypedFormGroup({
-      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
-      password2: new UntypedFormControl(''),
-    });
-    this.sub = this.passwordForm.controls.password.valueChanges.subscribe(value => this.passwordForm.controls.password2.setValidators(
-      [Validators.required, Validators.pattern(value)]
-    ));
+    this.passwordForm = new FormGroup<BackupPasswordForm>(
+      {
+        password: new FormControl('', {
+          validators: [Validators.required, Validators.minLength(6)],
+          nonNullable: true
+        }),
+        password2: new FormControl('', {
+          validators: [Validators.required],
+          nonNullable: true
+        }),
+      },
+      { validators: this.passwordMatchValidator }
+    );
+
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
         this.service.password = this.passwordForm.controls.password.value;

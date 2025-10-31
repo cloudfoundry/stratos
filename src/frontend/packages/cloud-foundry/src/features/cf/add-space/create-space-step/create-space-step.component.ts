@@ -16,6 +16,11 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
+interface CreateSpaceForm {
+  spaceName: FormControl<string>;
+  quotaDefinition: FormControl<number | string | null>;
+}
+
 
 @Component({
   selector: 'app-create-space-step',
@@ -35,19 +40,21 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
   cfUrl: string;
-  createSpaceForm: UntypedFormGroup;
+  createSpaceForm: FormGroup<CreateSpaceForm>;
   quotaSubscription: Subscription;
 
-  get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
+  get spaceName(): FormControl<string> {
+    return this.createSpaceForm ? this.createSpaceForm.get('spaceName') as FormControl<string> : new FormControl('', { nonNullable: true });
+  }
 
-  get quotaDefinition(): any {
-    const control = this.createSpaceForm.get('quotaDefinition');
-    const nil: { value: null } = { value: null };
+  get quotaDefinition(): FormControl<number | string | null> {
+    const control = this.createSpaceForm.get('quotaDefinition') as FormControl<number | string | null>;
+    const nil: FormControl<null> = new FormControl<null>(null, { nonNullable: false });
 
     if (this.createSpaceForm) {
-      return (control.value === 0) ? nil : control;
+      return (control.value === 0) ? nil as any : control;
     } else {
-      return nil;
+      return nil as any;
     }
   }
 
@@ -55,14 +62,15 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private fb: FormBuilder,
   ) {
     super(store, activatedRoute, activeRouteCfOrgSpace);
   }
 
   ngOnInit() {
-    this.createSpaceForm = new UntypedFormGroup({
-      spaceName: new UntypedFormControl('', [Validators.required as any, this.spaceNameTakenValidator()]),
-      quotaDefinition: new UntypedFormControl(),
+    this.createSpaceForm = this.fb.group<CreateSpaceForm>({
+      spaceName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.spaceNameTakenValidator()] }),
+      quotaDefinition: new FormControl<number | string | null>(null),
     });
 
     this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {

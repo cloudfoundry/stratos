@@ -33,6 +33,12 @@ const enum OrgStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended'
 }
+
+interface EditOrganizationForm {
+  orgName: FormControl<string>;
+  quotaDefinition: FormControl<string | null>;
+}
+
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
@@ -56,30 +62,35 @@ const enum OrgStatus {
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
   fetchOrgsSub: Subscription;
-  allOrgsInEndpoint: any;
-  allOrgsInEndpoint$: Observable<any>;
+  allOrgsInEndpoint: string[];
+  allOrgsInEndpoint$: Observable<string[]>;
   orgSubscription: Subscription;
   currentStatus: string;
   originalName: string;
   org$: Observable<IOrganization>;
-  editOrgName: UntypedFormGroup;
+  editOrgName: FormGroup<EditOrganizationForm>;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
   quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
 
+  get orgName(): FormControl<string> { return this.editOrgName ? this.editOrgName.get('orgName') as FormControl<string> : new FormControl(''); }
+
+  get quotaDefinition(): FormControl<string | null> { return this.editOrgName ? this.editOrgName.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
+
   constructor(
     private store: Store<CFAppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private cfOrgService: CloudFoundryOrganizationService
+    private cfOrgService: CloudFoundryOrganizationService,
+    private fb: FormBuilder
   ) {
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
-    this.editOrgName = new UntypedFormGroup({
-      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new UntypedFormControl(),
-      // toggleStatus: new FormControl(false),
+    this.allOrgsInEndpoint = [];
+    this.editOrgName = this.fb.group<EditOrganizationForm>({
+      orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
+      quotaDefinition: new FormControl<string | null>(null),
     });
     this.org$ = this.cfOrgService.org$.pipe(
       map(o => o.entity.entity),
@@ -138,15 +149,15 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
         .filter((o: string) => o !== this.originalName)
-        .indexOf(value ? value : this.editOrgName.value.orgName) === -1;
+        .indexOf(value ? value : this.orgName.value) === -1;
     }
     return true;
   }
 
   submit: StepOnNextFunction = () => {
     return cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
-      name: this.editOrgName.value.orgName,
-      quota_definition_guid: this.editOrgName.value.quotaDefinition,
+      name: this.orgName.value,
+      quota_definition_guid: this.quotaDefinition.value,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
     }).pipe(
       pairwise(),

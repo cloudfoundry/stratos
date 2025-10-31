@@ -17,6 +17,10 @@ import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 
+interface BindAppsForm {
+  apps: FormControl<string | null>;
+}
+
 @Component({
   selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
@@ -43,7 +47,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   validate = signal<boolean>(true);
   serviceInstanceGuid: string;
-  stepperForm: UntypedFormGroup;
+  stepperForm: FormGroup<BindAppsForm>;
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan: APIResource<IServicePlan>;
   bindingParams: object = {};
@@ -52,18 +56,23 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   // Lifecycle management for subscriptions
   private destroyed$ = new Subject<void>();
 
+  get apps(): FormControl<string | null> {
+    return this.stepperForm.get('apps') as FormControl<string | null>;
+  }
+
   constructor(
     private store: Store<CFAppState>,
+    private fb: FormBuilder,
   ) {
-    this.stepperForm = new UntypedFormGroup({
-      apps: new UntypedFormControl(''),
+    this.stepperForm = this.fb.group<BindAppsForm>({
+      apps: new FormControl<string | null>(null),
     });
   }
 
   private setBoundApp() {
     if (this.boundAppId) {
-      this.stepperForm.controls.apps.setValue(this.boundAppId);
-      this.stepperForm.controls.apps.disable();
+      this.apps.setValue(this.boundAppId);
+      this.apps.disable();
       this.guideText = 'Specify binding params (optional)';
     }
   }
@@ -72,7 +81,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.setBoundApp();
 
     // Validate step based on app selection
-    this.stepperForm.controls.apps.valueChanges.pipe(
+    this.apps.valueChanges.pipe(
       takeUntil(this.destroyed$)
     ).subscribe(app => {
       if (!app) {
@@ -112,7 +121,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   submit = (): Observable<StepOnNextResult> => {
-    this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.bindingParams));
+    this.store.dispatch(new SetCreateServiceInstanceApp(this.apps.value, this.bindingParams));
     return observableOf({
       success: true,
       data: this.selectedServicePlan

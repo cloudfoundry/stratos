@@ -88,7 +88,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @ViewChild('inputElement', { static: true }) inputElement: ElementRef;
 
   public result = StackedInputActionResult;
-  public textFormControl = new UntypedFormControl('', [Validators.required, this.uniqueValidator.bind(this)]);
+  public textFormControl = new FormControl<string>('', [Validators.required, this.uniqueValidator.bind(this)]);
   public state: StackedInputActionsState;
   private subs: Subscription[] = [];
   private otherValues: string[];
@@ -98,7 +98,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     if (this.config.isEmailInput) {
       validators.push(Validators.email);
     }
-    this.textFormControl = new UntypedFormControl('', validators);
+    this.textFormControl = new FormControl<string>('', validators);
 
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
@@ -122,7 +122,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     this.inputElement.nativeElement.focus();
   }
 
-  uniqueValidator(control: UntypedFormControl) {
+  uniqueValidator(control: FormControl<string>) {
     // custom unique validator that has quick access to the recently changed otherValues array
     if (!this.otherValues ||
       !this.otherValues.find(otherValue => otherValue === control.value)) {

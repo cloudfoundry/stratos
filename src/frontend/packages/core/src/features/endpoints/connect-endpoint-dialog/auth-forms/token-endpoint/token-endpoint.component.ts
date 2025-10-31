@@ -5,6 +5,10 @@ import { CustomFormFieldComponent } from '../../../../../shared/components/custo
 import { IAuthForm } from '../../../../../../../store/src/extension-types';
 import { CustomIconComponent } from '../../../../../shared/components/custom-material/custom-material.component';
 
+interface TokenAuthForm {
+  token: FormControl<string>;
+}
+
 @Component({
   selector: 'app-token-endpoint',
   templateUrl: './token-endpoint.component.html',
@@ -20,7 +24,7 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;
 
-  @Input() formGroup: UntypedFormGroup;
+  @Input() formGroup: TypedFormGroup<TokenAuthForm>;
 
   @Input() config: any = {};
 }

@@ -25,6 +25,10 @@ import { createEntityRelationPaginationKey } from '../../../../entity-relations/
 import { selectCfRequestInfo } from '../../../../store/selectors/api.selectors';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
+interface CreateOrganizationForm {
+  orgName: FormControl<string>;
+  quotaDefinition: FormControl<string | null>;
+}
 
 @Component({
   selector: 'app-create-organization-step',
@@ -50,24 +54,25 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   orgs$: Observable<APIResource<IOrganization>[]>;
   quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
   cfUrl: string;
-  addOrg: UntypedFormGroup;
+  addOrg: FormGroup<CreateOrganizationForm>;
 
-  get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
+  get orgName(): FormControl<string> { return this.addOrg ? this.addOrg.get('orgName') as FormControl<string> : new FormControl(''); }
 
-  get quotaDefinition(): any { return this.addOrg ? this.addOrg.get('quotaDefinition') : { value: '' }; }
+  get quotaDefinition(): FormControl<string | null> { return this.addOrg ? this.addOrg.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
   constructor(
     private store: Store<CFAppState>,
     activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private fb: FormBuilder,
   ) {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
   }
 
   ngOnInit() {
-    this.addOrg = new UntypedFormGroup({
-      orgName: new UntypedFormControl('', [Validators.required as any, this.nameTakenValidator()]),
-      quotaDefinition: new UntypedFormControl(),
+    this.addOrg = this.fb.group<CreateOrganizationForm>({
+      orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
+      quotaDefinition: new FormControl<string | null>(null),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
