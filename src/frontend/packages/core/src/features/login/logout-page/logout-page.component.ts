@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -23,13 +23,11 @@ selector: 'app-logout-page',
 })
 export class LogoutPageComponent implements OnInit {
 
-  public error$: Observable<boolean>;
+  private store = inject(Store<AppState>);
 
-  constructor(private store: Store<AppState>) {
-    this.error$ = this.store.select(s => s.auth).pipe(
-      map(auth => auth.error)
-    );
-  }
+  public error$: Observable<boolean> = this.store.select(s => s.auth).pipe(
+    map(auth => auth.error)
+  );
 
   ngOnInit() {
     // Dispatch the logout action after 1 second - give the logging out screen time to show

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -23,9 +23,7 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
   ]
 })
 export class CardCfOrgUserDetailsComponent {
-  constructor(
-    public cfOrgService: CloudFoundryOrganizationService,
-    public cfUserService: CfUserService,
-    public cfEndpointService: CloudFoundryEndpointService
-  ) { }
+  public cfOrgService = inject(CloudFoundryOrganizationService);
+  public cfUserService = inject(CfUserService);
+  public cfEndpointService = inject(CloudFoundryEndpointService);
 }

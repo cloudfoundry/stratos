@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
@@ -25,8 +25,7 @@ selector: 'app-loading-page',
   ]
 })
 export class LoadingPageComponent implements OnInit {
-
-  constructor(private entityMonitorFactory: EntityMonitorFactory) { }
+  private entityMonitorFactory = inject(EntityMonitorFactory);
 
   @Input()
   isLoading: Observable<boolean>;

@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, Injector } from '@angular/core';
+import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { StratosStatus, GeneralEntityAppState } from '@stratosui/store';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -224,10 +224,10 @@ export class GlobalEventService {
     );
   }
 
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private injector: Injector
-  ) {
+  private store = inject(Store<GeneralEntityAppState>);
+  private injector = inject(Injector);
+
+  constructor() {
     const eventsAndPriority$ = combineLatest([
       this.getEventsAndPriorityType(),
       toObservable(this._readEvents, { injector: this.injector })

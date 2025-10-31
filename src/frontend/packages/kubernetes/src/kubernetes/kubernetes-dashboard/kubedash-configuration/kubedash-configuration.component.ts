@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, signal } from '@angular/core';
+import {Component, OnDestroy, signal, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -100,13 +100,16 @@ export class KubedashConfigurationComponent implements OnDestroy {
   public isAzure$: Observable<boolean>;
 
   public dashboardLink: string;
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  private httpClient = inject(HttpClient);
+  private confirmDialog = inject(ConfirmationDialogService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    private httpClient: HttpClient,
-    private confirmDialog: ConfirmationDialogService,
-  ) {
-    this.kubeDashboardStatus$ = kubeEndpointService.kubeDashboardStatus$;
+
+
+  constructor() {
+
+
+    this.kubeDashboardStatus$ = this.kubeEndpointService.kubeDashboardStatus$;
     // Clear the updating status when we get back new dashboard status
     this.sub = this.kubeDashboardStatus$.pipe(distinctUntilChanged()).subscribe(status => {
       if (status !== null) {
@@ -114,7 +117,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       }
     });
 
-    this.dashboardLink = `/kubernetes/${kubeEndpointService.kubeGuid}/dashboard`;
+    this.dashboardLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/dashboard`;
 
     this.isAzure$ = this.kubeDashboardStatus$.pipe(
       filter(status => status !== null),
@@ -122,11 +125,13 @@ export class KubedashConfigurationComponent implements OnDestroy {
       map(status => status.version.indexOf('azure') !== -1)
     );
 
-    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [{ value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` }]
       }]))
     );
+
+
   }
 
   ngOnDestroy() {

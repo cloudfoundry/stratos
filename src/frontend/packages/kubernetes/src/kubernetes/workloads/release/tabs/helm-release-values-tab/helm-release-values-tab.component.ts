@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import {Component, signal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -27,13 +27,16 @@ export class HelmReleaseValuesTabComponent {
   public values$: Observable<any>;
 
   private viewType = signal<string>('user');
-  public viewType$ = toObservable(this.viewType);
+  public viewType$ = toObservable(this.viewType);  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  constructor(public helmReleaseHelper: HelmReleaseHelperService) {
+
+
+  constructor() {
+
 
     this.values$ = combineLatest([
       this.viewType$,
-      helmReleaseHelper.release$
+      this.helmReleaseHelper.release$
     ]).pipe(
       map(([vtype, release]: [string, any]) => {
         switch (vtype) {
@@ -49,6 +52,8 @@ export class HelmReleaseValuesTabComponent {
         }
       })
     );
+
+
   }
 
   public viewTypeChange(viewType: string) {

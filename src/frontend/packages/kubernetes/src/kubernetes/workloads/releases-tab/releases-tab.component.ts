@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
 import { endpointOfTypeSelector } from 'frontend/packages/store/src/selectors/endpoint.selectors';
@@ -31,8 +31,7 @@ selector: 'app-releases-tab',
 })
 export class HelmReleasesTabComponent implements OnInit {
   public helmIds$: Observable<string[]>;
-
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   ngOnInit() {
     this.helmIds$ = this.store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)).pipe(

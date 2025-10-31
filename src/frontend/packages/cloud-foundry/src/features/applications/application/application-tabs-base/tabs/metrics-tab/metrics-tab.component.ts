@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -28,17 +28,20 @@ import { ApplicationService } from '../../../../application.service';
 ]
 })
 export class MetricsTabComponent {
+  public applicationService = inject(ApplicationService);
+
   public instanceMetricConfigs: [
     MetricsConfig<IMetricMatrixResult<IMetricApplication>>,
     MetricsLineChartConfig
   ][];
-  constructor(public applicationService: ApplicationService) {
+
+  constructor() {
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance_index}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
         new FetchApplicationChartMetricsAction(
-          applicationService.appGuid,
-          applicationService.cfGuid,
+          this.applicationService.appGuid,
+          this.applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_cpu_percentage')
         ),
         'CPU Usage (%)',
@@ -46,8 +49,8 @@ export class MetricsTabComponent {
       ),
       chartConfigBuilder(
         new FetchApplicationChartMetricsAction(
-          applicationService.appGuid,
-          applicationService.cfGuid,
+          this.applicationService.appGuid,
+          this.applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_memory_bytes')
         ),
         'Memory Usage (MB)',
@@ -55,8 +58,8 @@ export class MetricsTabComponent {
       ),
       chartConfigBuilder(
         new FetchApplicationChartMetricsAction(
-          applicationService.appGuid,
-          applicationService.cfGuid,
+          this.applicationService.appGuid,
+          this.applicationService.cfGuid,
           new MetricQueryConfig('firehose_container_metric_disk_bytes')
         ),
         'Disk Usage (MB)',

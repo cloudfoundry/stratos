@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -64,14 +64,17 @@ export class PodMetricsComponent {
     MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
     MetricsLineChartConfig
   ][] = [];
+  public activatedRoute = inject(ActivatedRoute);
+  public kubeEndpointService = inject(KubernetesEndpointService);
 
-  constructor(
-    public activatedRoute: ActivatedRoute,
-    public kubeEndpointService: KubernetesEndpointService
-  ) {
-    this.podName = activatedRoute.snapshot.params.podName;
-    this.namespaceName = getIdFromRoute(activatedRoute, 'namespaceName');
-    const namespace = getIdFromRoute(activatedRoute, 'namespace') ? getIdFromRoute(activatedRoute, 'namespace') : this.namespaceName;
+
+
+  constructor() {
+
+
+    this.podName = this.activatedRoute.snapshot.params.podName;
+    this.namespaceName = getIdFromRoute(this.activatedRoute, 'namespaceName');
+    const namespace = getIdFromRoute(this.activatedRoute, 'namespace') ? getIdFromRoute(this.activatedRoute, 'namespace') : this.namespaceName;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(result => `${result.metric.container || ''}`);
     const cpuChartConfigBuilder = getMetricsChartConfigBuilder<IKubernetesMetric>(
       result => result.metric.cpu ? `${result.metric.container || ''}:${result.metric.cpu}` : `${result.metric.container || ''}`
@@ -83,7 +86,7 @@ export class PodMetricsComponent {
       chartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          kubeEndpointService.kubeGuid,
+          this.kubeEndpointService.kubeGuid,
           `container_memory_usage_bytes{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Memory Usage (MB)',
@@ -101,7 +104,7 @@ export class PodMetricsComponent {
       cpuChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          kubeEndpointService.kubeGuid,
+          this.kubeEndpointService.kubeGuid,
           `container_cpu_usage_seconds_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'CPU Usage',
@@ -118,7 +121,7 @@ export class PodMetricsComponent {
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          kubeEndpointService.kubeGuid,
+          this.kubeEndpointService.kubeGuid,
           `container_network_transmit_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
@@ -130,7 +133,7 @@ export class PodMetricsComponent {
       networkChartConfigBuilder(
         new FetchKubernetesMetricsAction(
           this.podName,
-          kubeEndpointService.kubeGuid,
+          this.kubeEndpointService.kubeGuid,
           `container_network_receive_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
@@ -142,11 +145,11 @@ export class PodMetricsComponent {
     ];
 
 
-    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => {
 
         // check if this is being invoked from the node path
-        const nodeName = getIdFromRoute(activatedRoute, 'nodeName');
+        const nodeName = getIdFromRoute(this.activatedRoute, 'nodeName');
         if (!!nodeName) {
           return [{
             breadcrumbs: [
@@ -165,7 +168,7 @@ export class PodMetricsComponent {
           }];
         }
         // Finally, check if this is being invoked from the helm-release path
-        const releaseName = getIdFromRoute(activatedRoute, 'releaseName');
+        const releaseName = getIdFromRoute(this.activatedRoute, 'releaseName');
         if (!!releaseName) {
           return [{
             breadcrumbs: [
@@ -184,5 +187,7 @@ export class PodMetricsComponent {
     this.podEntity$ = kubeEntityCatalog.pod.store.getEntityService(this.podName, this.kubeEndpointService.kubeGuid, {
       namespace: this.namespaceName
     }).entityObs$;
+
+
   }
 }

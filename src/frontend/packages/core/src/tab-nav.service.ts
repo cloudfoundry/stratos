@@ -1,5 +1,5 @@
 import { Portal } from '@angular/cdk/portal';
-import { Injectable, signal, Signal, computed } from '@angular/core';
+import { Injectable, signal, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
@@ -12,6 +12,7 @@ import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-head
   providedIn: 'root'
 })
 export class TabNavService {
+  private router = inject(Router);
 
   static TabsNoLinkValue: string = null;
 
@@ -92,7 +93,4 @@ export class TabNavService {
     }
     return activeTab;
   };
-
-  constructor(private router: Router) {
-  }
 }

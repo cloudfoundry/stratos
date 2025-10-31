@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -56,16 +56,13 @@ export class ChartsComponent implements OnInit {
 
   // Repos
   repoName: string;
-
-  constructor(
-    private chartsService: ChartsService,
-    private reposService: ReposService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private config: ConfigService,
-    private mdIconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer
-  ) { }
+  private chartsService = inject(ChartsService);
+  private reposService = inject(ReposService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private config = inject(ConfigService);
+  private mdIconRegistry = inject(MatIconRegistry);
+  private sanitizer = inject(DomSanitizer);
 
   ngOnInit() {
     this.mdIconRegistry.addSvgIcon(

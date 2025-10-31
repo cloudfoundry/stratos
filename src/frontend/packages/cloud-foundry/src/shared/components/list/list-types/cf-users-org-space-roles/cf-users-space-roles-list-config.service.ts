@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -76,8 +77,9 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }];
   // Use BehaviorSubject instead of signal + toObservable to avoid NG0203
   private initialised$ = new BehaviorSubject<boolean>(false);
+  private store = inject(Store<CFAppState>);
 
-  constructor(private store: Store<CFAppState>, cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
+  constructor(cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
     this.store.select(selectCfUsersRolesRoles).pipe(
       first()
     ).subscribe(newRoles => {

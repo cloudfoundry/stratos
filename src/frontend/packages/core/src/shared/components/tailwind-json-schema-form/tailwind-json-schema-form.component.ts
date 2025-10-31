@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
 
 
@@ -16,6 +16,8 @@ export interface TailwindJsonSchemaFormConfig {
 ]
 })
 export class TailwindJsonSchemaFormComponent implements OnInit {
+  private fb = inject(UntypedFormBuilder);
+
   @Input() schema: any;
   @Input() data: any;
   @Input() framework: string = 'tailwind';
@@ -28,8 +30,6 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   form: UntypedFormGroup;
   formFields: any[] = [];
   formData: any = {};
-
-  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit() {
     this.buildForm();

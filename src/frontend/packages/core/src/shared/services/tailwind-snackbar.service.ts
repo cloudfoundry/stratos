@@ -1,4 +1,4 @@
-import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef } from '@angular/core';
+import { Injectable, ComponentRef, ApplicationRef, Injector, EmbeddedViewRef, inject } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 
 export interface TailwindSnackBarConfig {
@@ -57,10 +57,8 @@ export class TailwindSimpleSnackBar {
 export class TailwindSnackBarService {
   private snackbars: HTMLElement[] = [];
 
-  constructor(
-    private appRef: ApplicationRef,
-    private injector: Injector
-  ) {}
+  private appRef = inject(ApplicationRef);
+  private injector = inject(Injector);
 
   open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     const snackbarElement = this.createSnackbarElement(message, action, config);

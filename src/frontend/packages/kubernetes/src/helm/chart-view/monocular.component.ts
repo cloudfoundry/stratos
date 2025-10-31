@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { PageHeaderComponent } from '@stratosui/core';
@@ -25,12 +25,8 @@ export class MonocularChartViewComponent implements OnInit {
 
   public breadcrumbs: Array<{ breadcrumbs: Array<{ value: string; routerLink?: string }> }> = [];
 
-  public title = '';
-
-  constructor(
-    private route: ActivatedRoute,
-    private chartService: ChartsService
-  ) { }
+  public title = '';  private route = inject(ActivatedRoute);
+  private chartService = inject(ChartsService);
 
   public ngOnInit() {
 

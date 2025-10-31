@@ -35,8 +35,8 @@ export class CfEndpointsMissingComponent extends EndpointsMissingComponent {
   showToolbarHint = false;
   showNoConnected = true;
 
-  constructor(cloudFoundryService: CloudFoundryService, endpointsService: EndpointsService) {
-    super(endpointsService);
+  constructor(cloudFoundryService: CloudFoundryService) {
+    super();
     this.haveConnected$ = cloudFoundryService.hasConnectedCFEndpoints$;
     this.haveRegistered$ = cloudFoundryService.hasRegisteredCFEndpoints$;
   }

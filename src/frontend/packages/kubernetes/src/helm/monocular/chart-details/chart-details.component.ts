@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { finalize, first, switchMap, tap } from 'rxjs/operators';
 
@@ -39,13 +39,18 @@ export class ChartDetailsComponent implements OnInit {
   chartSubTitle: string;
 
   loadingDelay: ReturnType<typeof setTimeout>;
+  private route = inject(ActivatedRoute);
+  private chartsService = inject(ChartsService);
+  private config = inject(ConfigService);
 
-  constructor(
-    private route: ActivatedRoute,
-    private chartsService: ChartsService,
-    private config: ConfigService,
-  ) {
+
+
+  constructor() {
+
+
     this.loadingDelay = setTimeout(() => this.loading = true, 100);
+
+
   }
 
   ngOnInit() {

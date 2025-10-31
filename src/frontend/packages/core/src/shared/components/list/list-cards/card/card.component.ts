@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -49,8 +49,7 @@ export class CardComponent<T> {
   @ViewChild('target', { read: ViewContainerRef, static: true }) target: ViewContainerRef;
 
   cardComponent: CardCell<T>;
-
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+  private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private componentCreator = (() => {
     let completeSetupData: Partial<ISetupData<T>> = {};

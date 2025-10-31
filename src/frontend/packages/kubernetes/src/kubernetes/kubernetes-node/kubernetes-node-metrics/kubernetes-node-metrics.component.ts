@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
@@ -40,12 +40,17 @@ export class KubernetesNodeMetricsComponent implements OnInit {
     MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
     MetricsLineChartConfig
   ][] = [];
+  public kubeNodeService = inject(KubernetesNodeService);
 
-  constructor(
-    public kubeNodeService: KubernetesNodeService
-  ) {
+
+
+  constructor() {
+
+
     this.memoryMetric = KubeNodeMetric.MEMORY;
     this.cpuMetric = KubeNodeMetric.CPU;
+
+
   }
 
   ngOnInit() {

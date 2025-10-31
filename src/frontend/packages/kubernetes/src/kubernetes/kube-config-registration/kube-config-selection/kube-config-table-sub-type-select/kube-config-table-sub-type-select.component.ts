@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
@@ -23,8 +23,9 @@ export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeC
   selected: string;
 
   subTypes: Array<{ id: string; name: string }>;
+  private helper = inject(KubeConfigHelper);
 
-  constructor(private helper: KubeConfigHelper) {
+  constructor() {
     super();
 
     this.subTypes = new KubeConfigAuthHelper().subTypes;

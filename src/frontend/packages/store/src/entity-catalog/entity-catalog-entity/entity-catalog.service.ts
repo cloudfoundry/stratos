@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../app-state';
@@ -14,12 +14,7 @@ export class EntityCatalogHelper {
 
   // Remove cyclic dependency by accessing this here instead of in entity catalog entity
   public getPaginationObservables = getPaginationObservables;
-
-  constructor(
-    @Inject(ENTITY_SERVICE_FACTORY_TOKEN) public esf: EntityServiceFactory,
-    @Inject(PAGINATION_MONITOR_FACTORY_TOKEN) public pmf: PaginationMonitorFactory,
-    public store: Store<AppState>,
-  ) {
-
-  }
+  public esf = inject(ENTITY_SERVICE_FACTORY_TOKEN) as EntityServiceFactory;
+  public pmf = inject(PAGINATION_MONITOR_FACTORY_TOKEN) as PaginationMonitorFactory;
+  public store = inject(Store<AppState>);
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { AnsiColors } from 'frontend/packages/core/src/shared/components/log-viewer/ansi-colors';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -22,18 +22,23 @@ export class HelmReleaseNotesTabComponent {
 
   public notes$: Observable<string>;
 
-  private colorizer = new AnsiColors();
+  private colorizer = new AnsiColors();  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  constructor(public helmReleaseHelper: HelmReleaseHelperService) {
 
-    this.notes$ = helmReleaseHelper.release$.pipe(
-      map(release => {
-        if (release.info.notes) {
+
+  constructor() {
+
+
+    this.notes$ = this.helmReleaseHelper.release$.pipe(
+      map((release: any) => {
+        if (release?.info?.notes) {
           return this.colorizer.ansiColorsToHtml(release.info.notes);
         } else {
           return '';
         }
       })
     );
+
+
   }
 }

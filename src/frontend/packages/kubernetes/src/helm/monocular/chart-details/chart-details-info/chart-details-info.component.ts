@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { catchError, first } from 'rxjs/operators';
@@ -40,7 +40,7 @@ export class ChartDetailsInfoComponent implements OnInit {
     }
   }
 
-  constructor(private chartsService: ChartsService) { }
+  private chartsService = inject(ChartsService);
 
   ngOnInit() {
     this.loadVersions(this.chart);

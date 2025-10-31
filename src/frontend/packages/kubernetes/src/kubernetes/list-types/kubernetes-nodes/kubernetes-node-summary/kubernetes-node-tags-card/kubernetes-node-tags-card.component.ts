@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, inject} from '@angular/core';
 import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -30,11 +30,7 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
   @Input()
   title: string;
 
-  chipTags$: Observable<AppChip[]>;
-
-  constructor(
-    public kubeNodeService: KubernetesNodeService
-  ) { }
+  chipTags$: Observable<AppChip[]>;  public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit(): void {
     this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(

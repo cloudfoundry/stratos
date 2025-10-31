@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 
 import { UtilsService } from '../../core/utils.service';
 
@@ -7,8 +7,7 @@ name: 'mbToHumanSize',
 standalone: true
 })
 export class MbToHumanSizePipe implements PipeTransform {
-  constructor(private utilsService: UtilsService) {
-  }
+  private utilsService = inject(UtilsService);
 
   transform(mb: number): string {
     return this.utilsService.mbToHumanSize(mb);

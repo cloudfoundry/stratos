@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import {Component, Input, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
@@ -32,11 +32,17 @@ export class AnalysisInfoCardComponent {
 
   get analyzer() {
     return this.mAanalyzer;
-  }
+  }  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {
+
+
+  constructor() {
+
+
     this.renderer.link = ({ href, title, tokens }: { href: string; title?: string; tokens: any }) => `<a target="_blank" title="${title || ''}" href="${href}">${this.parser.parseInline(tokens)}</a>`;
     this.renderer.code = ({ text }: { text: string }) => `<code>${text}</code>`;
+
+
   }
 
   private getDescription(url: string): Observable<any> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 
@@ -18,7 +18,7 @@ export class TailwindIconRegistry {
   private _svgIconSets = new Set<string>();
   private _defaultFontSetClass = 'material-icons';
 
-  constructor(private _sanitizer: DomSanitizer) {}
+  private _sanitizer = inject(DomSanitizer);
 
   addSvgIcon(name: string, url: SafeResourceUrl | string): this {
     // In a full implementation, this would fetch and cache the SVG

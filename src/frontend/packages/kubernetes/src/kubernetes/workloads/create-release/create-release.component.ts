@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal } from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -64,12 +64,15 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   private chart: HelmChartReference;
   public config: ChartValuesConfig;
+  private route = inject(ActivatedRoute);
+  public endpointsService = inject(EndpointsService);
+  private chartsService = inject(ChartsService);
 
-  constructor(
-    private route: ActivatedRoute,
-    public endpointsService: EndpointsService,
-    private chartsService: ChartsService,
-  ) {
+
+
+  constructor() {
+
+
     const chart = this.route.snapshot.params as HelmChartReference;
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
@@ -83,6 +86,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
 
     this.setupDetailsStep();
+
+
   }
 
   private setupDetailsStep() {

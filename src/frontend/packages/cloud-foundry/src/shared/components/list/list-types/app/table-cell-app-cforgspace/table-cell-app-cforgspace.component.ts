@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -26,8 +26,8 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
     }
   }
 
-  constructor(store: Store<CFAppState>) {
-    super(store);
+  constructor() {
+    super(inject(Store<CFAppState>));
   }
 
 }

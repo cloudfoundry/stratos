@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -16,12 +16,7 @@ import { KubernetesNode } from '../../../store/kube.types';
 })
 export class NodePodCountComponent extends TableCellCustom<KubernetesNode> implements OnInit {
   podCount$: Observable<string>;
-
-  constructor(
-    private kubeEndpointService: KubernetesEndpointService
-  ) {
-    super();
-  }
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
 

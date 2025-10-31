@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../app-state';
@@ -10,10 +10,8 @@ import { PaginationMonitor } from './pagination-monitor';
 @Injectable()
 export class PaginationMonitorFactory {
 
-  constructor(
-    private store: Store<AppState>,
-    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog
-  ) { }
+  private store = inject(Store<AppState>);
+  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
 
   private monitorCache: {
     [key: string]: PaginationMonitor

@@ -1,5 +1,5 @@
 
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.service';
 
 @Component({
@@ -10,10 +10,10 @@ import { StratosThemeService, ThemeMode } from '../../../../../theme/theme.servi
   imports: []
 })
 export class ThemeToggleComponent {
+  private themeService = inject(StratosThemeService);
+
   isDarkMode = computed(() => this.themeService.isDarkMode());
   currentMode = computed(() => this.themeService.themeMode());
-
-  constructor(private themeService: StratosThemeService) {}
 
   toggleTheme() {
     this.themeService.toggleTheme();

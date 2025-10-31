@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   selectSessionData,
@@ -77,7 +78,9 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  constructor(private store: Store<GeneralEntityAppState>) {
+  private store = inject(Store<GeneralEntityAppState>);
+
+  constructor() {
     super();
   }
 

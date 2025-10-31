@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -16,12 +16,7 @@ import { KubernetesNamespace } from '../../../store/kube.types';
 })
 export class KubeNamespacePodCountComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   podCount$: Observable<number>;
-
-  constructor(
-    private kubeEndpointService: KubernetesEndpointService
-  ) {
-    super();
-  }
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
 

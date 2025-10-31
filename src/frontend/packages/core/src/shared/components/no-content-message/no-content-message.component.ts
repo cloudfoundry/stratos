@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -34,8 +34,7 @@ export class NoContentMessageComponent implements AfterViewInit {
   @Input() mode: string;
 
   @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement: ElementRef;
-
-  constructor(private renderer: Renderer2) { }
+  private renderer = inject(Renderer2);
 
   ngAfterViewInit() {
     // Align the prompt with the toolbar item ...

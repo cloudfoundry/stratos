@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -24,6 +24,7 @@ const UNLIMITED = -1;
 ]
 })
 export class UnlimitedInputComponent implements OnInit {
+  public ctrlContainer = inject(FormGroupDirective);
 
   @Input() name: string;
   @Input() value: any;
@@ -36,8 +37,6 @@ export class UnlimitedInputComponent implements OnInit {
   unlimited: boolean;
   formControl: AbstractControl;
   initialValue: any;
-
-  constructor(public ctrlContainer: FormGroupDirective) { }
 
   onChange() {
     if (this.unlimited) {

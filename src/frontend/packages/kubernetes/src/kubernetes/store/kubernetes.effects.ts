@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
@@ -104,7 +104,9 @@ export interface KubeDashboardStatus {
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
-  constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>) { }
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private store = inject(Store<AppState>);
 
   
   fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(

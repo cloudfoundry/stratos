@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -64,14 +64,14 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   viewType = ListViewTypes.BOTH;
   pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   getInitialised: () => Observable<boolean>;
+  private cfOrgSpaceService = inject(CfOrgSpaceDataService);
 
-  constructor(
-    store: Store<CFAppState>,
-    datePipe: DatePipe,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
-    currentUserPermissionsService: CurrentUserPermissionsService,
-    serviceActionHelperService: ServiceActionHelperService
-  ) {
+  constructor() {
+    const store = inject(Store<CFAppState>);
+    const datePipe = inject(DatePipe);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const serviceActionHelperService = inject(ServiceActionHelperService);
+
     super(
       store,
       datePipe,
@@ -95,9 +95,9 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
 
     this.cfOrgSpaceService.setInitialValuesFromAction(this.dataSource.masterAction, 'cf', 'org', 'space');
     this.getInitialised = () => combineLatest(
-      cfOrgSpaceService.cf.list$,
-      cfOrgSpaceService.org.list$,
-      cfOrgSpaceService.space.list$,
+      this.cfOrgSpaceService.cf.list$,
+      this.cfOrgSpaceService.org.list$,
+      this.cfOrgSpaceService.space.list$,
     ).pipe(
       map(loading => !loading),
       startWith(true)

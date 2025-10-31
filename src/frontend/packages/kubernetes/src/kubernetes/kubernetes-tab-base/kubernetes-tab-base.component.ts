@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -50,14 +50,16 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   public isFetching$: Observable<boolean>;
   public favorite$: Observable<UserFavoriteEndpoint>;
-  public endpointIds$: Observable<string[]>;
+  public endpointIds$: Observable<string[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public userFavoriteManager = inject(UserFavoriteManager);
+  public analysisService = inject(KubernetesAnalysisService);
+  private route = inject(ActivatedRoute);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public userFavoriteManager: UserFavoriteManager,
-    public analysisService: KubernetesAnalysisService,
-    private route: ActivatedRoute,
-  ) {
+
+
+  constructor() {
+
+
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'kubernetes', iconFont: 'stratos-icons' },
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
@@ -67,6 +69,8 @@ export class KubernetesTabBaseComponent implements OnInit {
       { link: '-', label: 'Resources' },
       ...this.getTabsFromEntityConfig(true)
     ];
+
+
   }
 
 

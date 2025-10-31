@@ -1,5 +1,5 @@
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import {Component, Input, inject} from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
@@ -54,12 +54,7 @@ export class HelmReleaseCardComponent extends CardCell<HelmRelease> {
   }
   get row(): HelmRelease {
     return super.row;
-  }
-
-
-  constructor(private datePipe: DatePipe) {
-    super();
-  }
+  }  private datePipe = inject(DatePipe);
 
   loadImageError() {
     this.icon = null;

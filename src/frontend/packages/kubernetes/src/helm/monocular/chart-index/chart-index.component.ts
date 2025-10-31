@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { first } from 'rxjs/operators';
 
 import { Chart } from '../shared/models/chart';
@@ -22,10 +22,7 @@ export class ChartIndexComponent implements OnInit {
   charts: Chart[];
   loading = true;
   totalChartsNumber: number;
-
-  constructor(
-    private chartsService: ChartsService,
-  ) { }
+  private chartsService = inject(ChartsService);
 
   ngOnInit() {
     this.loadCharts();

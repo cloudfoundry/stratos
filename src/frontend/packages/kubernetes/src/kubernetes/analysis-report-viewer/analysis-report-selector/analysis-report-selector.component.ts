@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject} from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -37,9 +37,16 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
 
   subs: Subscription[] = [];
+  public analysisService = inject(KubernetesAnalysisService);
 
-  constructor(public analysisService: KubernetesAnalysisService) {
-    this.canShow$ = analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
+  constructor() {
+
+
+    this.canShow$ = this.analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
   }
 
   ngOnInit() {

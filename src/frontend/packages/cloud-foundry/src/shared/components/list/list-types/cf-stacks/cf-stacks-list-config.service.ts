@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -13,6 +13,9 @@ import { CfStacksDataSource } from './cf-stacks-data-source';
   providedIn: 'root'
 })
 export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
   dataSource: CfStacksDataSource;
   cardComponent = CfStacksCardComponent;
   enableTextFilter = true;
@@ -39,9 +42,9 @@ export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>
     },
   }];
 
-  constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor() {
     super();
-    this.dataSource = new CfStacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfStacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
   }
 
   getDataSource = () => this.dataSource;

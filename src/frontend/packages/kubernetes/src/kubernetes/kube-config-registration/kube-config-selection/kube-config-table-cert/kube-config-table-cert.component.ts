@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, Input, signal } from '@angular/core';
+import {Component, Input, signal, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
@@ -59,14 +59,8 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
   }
   get row(): KubeConfigFileCluster {
     return super.row;
-  }
-
-  constructor(
-    private helper: KubeConfigHelper,
-    private http: HttpClient
-  ) {
-    super();
-  }
+  }  private helper = inject(KubeConfigHelper);
+  private http = inject(HttpClient);
 
   private update(checked: boolean) {
     this._initialValue.set({ checked });

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -13,6 +13,9 @@ import { CfSecurityGroupsDataSource } from './cf-security-groups-data-source';
   providedIn: 'root'
 })
 export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResource> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
   dataSource: CfSecurityGroupsDataSource;
   cardComponent = CfSecurityGroupsCardComponent;
   enableTextFilter = true;
@@ -39,9 +42,9 @@ export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResou
     },
   }];
 
-  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor() {
     super();
-    this.dataSource = new CfSecurityGroupsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfSecurityGroupsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
   }
 
   getColumns = () => this.columns;

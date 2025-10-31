@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -57,6 +57,8 @@ class RenderableRecent {
   ]
 })
 export class RecentEntitiesComponent {
+  private store = inject(Store<AppState>);
+
   @Input()
   public history = false;
 
@@ -64,22 +66,22 @@ export class RecentEntitiesComponent {
 
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
-  constructor(store: Store<AppState>) {
-    const recentEntities$ = store.select(recentlyVisitedSelector);
+
+  constructor() {
+    const recentEntities$ = this.store.select(recentlyVisitedSelector);
     this.recentEntities$ = recentEntities$.pipe(
       map(entities => Object.values(entities)),
       map((entities: IRecentlyVisitedEntity[]) => {
         // Sort them - most recent first
         // Cap the list at the maximum we can display
         const sorted = entities.sort((a, b) => b.date - a.date).slice(0, MAX_RECENT_COUNT);
-        return sorted.map(entity => new RenderableRecent(entity, store));
+        return sorted.map(entity => new RenderableRecent(entity, this.store));
       })
     );
 
     this.hasHits$ = this.recentEntities$.pipe(
       map(recentEntities => recentEntities && recentEntities.length > 0)
     );
-
   }
 }
 

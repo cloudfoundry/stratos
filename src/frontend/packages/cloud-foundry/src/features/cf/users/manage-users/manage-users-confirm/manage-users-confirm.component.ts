@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit } from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -43,6 +43,8 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
   ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
+  private store = inject(Store<CFAppState>);
+  private cfUserService = inject(CfUserService);
 
   @Input() setUsernames = false;
 
@@ -104,8 +106,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       getId: () => guid
     };
   }
-
-  constructor(private store: Store<CFAppState>, private cfUserService: CfUserService) { }
 
   ngOnInit() {
     this.createCfObs();

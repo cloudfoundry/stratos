@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { first } from 'rxjs/operators';
 
 import { SnackBarReturnComponent } from '../components/snackbar-return/snackbar-return.component';
@@ -13,10 +13,9 @@ import { TailwindSnackBarService, TailwindSnackBarRef } from './tailwind-snackba
   providedIn: 'root',
 })
 export class SnackBarService {
-
   private snackBars: TailwindSnackBarRef<any>[] = [];
 
-  constructor(public snackBar: TailwindSnackBarService) { }
+  public snackBar = inject(TailwindSnackBarService);
 
   // Show a snack bar with the given message
   // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored

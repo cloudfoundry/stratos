@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy, inject} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
@@ -72,19 +72,22 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private kubeId: string;
   private workloadTitle: string;
   private workloadNamespace: string;
+  private store = inject(Store<GeneralAppState>);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private baseKubeGuid = inject(BaseKubeGuid);
+  private uiConfigService = inject(KubernetesUIConfigService);
 
-  constructor(
-    private store: Store<GeneralAppState>,
-    private route: ActivatedRoute,
-    router: Router,
-    kubeId: BaseKubeGuid,
-    private uiConfigService: KubernetesUIConfigService
-  ) {
+
+
+  constructor() {
+
+
     // Entity Catalog Key can be specified in the route config
-    this.entityCatalogKey = route.snapshot.data.entityCatalogKey;
+    this.entityCatalogKey = this.route.snapshot.data.entityCatalogKey;
     if (!this.entityCatalogKey) {
       // Default is to use the last part of the route
-      const routeParts = router.url.split('/');
+      const routeParts = this.router.url.split('/');
       this.entityCatalogKey = routeParts[routeParts.length - 1];
     }
 
@@ -95,7 +98,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
 
     // Workload
-    if (route.snapshot.data?.isWorkload) {
+    if (this.route.snapshot.data?.isWorkload) {
       this.isWorkloadView = true;
       const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.route.snapshot.parent.parent.params.guid);
       this.kubeId = endpointId;
@@ -103,8 +106,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
       this.workloadTitle = releaseTitle;
     } else {
       // Namespaced
-      this.kubeId = kubeId.guid;
-      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(kubeId.guid);
+      this.kubeId = this.baseKubeGuid.guid;
+      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(this.baseKubeGuid.guid);
       this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
 
       // Watch for namespace changes
@@ -120,6 +123,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
 
     this.createProvider(catalogEntity as any);
+
+
   }
 
   ngOnDestroy() {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, inject} from '@angular/core';
 import { CustomSlideToggleComponent } from '@stratosui/core';
 
 import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-socket-service';
@@ -14,10 +14,7 @@ import { HelmReleaseSocketService } from '../helm-release-tab-base/helm-release-
 })
 export class WorkloadLiveReloadComponent implements OnInit {
   public checked = false;
-
-  constructor(
-    private socketService: HelmReleaseSocketService
-  ) { }
+  private socketService = inject(HelmReleaseSocketService);
 
   ngOnInit(): void {
     this.checked = this.socketService.isStarted();

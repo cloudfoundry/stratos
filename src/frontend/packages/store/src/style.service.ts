@@ -5,15 +5,6 @@ import { Injectable } from '@angular/core';
 })
 export class StyleService {
 
-  private rules: string[] = [];
-  constructor() {
-    this.rules = this.getAllSelectors();
-  }
-
-  hasSelector = (selector: string): boolean => {
-    return !!this.rules.find((ruleSelector: string) => ruleSelector === selector);
-  }
-
   private getAllSelectors = (): string[] => {
     const ret = [];
     // tslint:disable-next-line:prefer-for-of
@@ -41,6 +32,12 @@ export class StyleService {
       }
     }
     return ret;
+  }
+
+  private rules: string[] = this.getAllSelectors();
+
+  hasSelector = (selector: string): boolean => {
+    return !!this.rules.find((ruleSelector: string) => ruleSelector === selector);
   }
 
 }

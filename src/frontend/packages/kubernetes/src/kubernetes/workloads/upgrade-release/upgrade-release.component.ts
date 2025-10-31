@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import {Component, ViewChild, inject} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -68,12 +68,14 @@ export class UpgradeReleaseComponent {
   public showAdvancedOptions = false;
 
   private chartUrl: string;
+  private store = inject(Store<any>);
+  public helper = inject(HelmReleaseHelperService);
+  private chartsService = inject(ChartsService);
 
-  constructor(
-    store: Store<any>,
-    public helper: HelmReleaseHelperService,
-    private chartsService: ChartsService,
-  ) {
+
+
+  constructor() {
+
 
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
@@ -84,7 +86,7 @@ export class UpgradeReleaseComponent {
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
-      this.listConfig = new ReleaseUpgradeVersionsListConfig(store, repoName, name, version, chart.monocularEndpointId);
+      this.listConfig = new ReleaseUpgradeVersionsListConfig(this.store, repoName, name, version, chart.monocularEndpointId);
       this.monocularEndpointId = chart.monocularEndpointId;
 
       // First step is valid when a version has been selected
@@ -98,6 +100,8 @@ export class UpgradeReleaseComponent {
         })
       );
     });
+
+
   }
 
   // Ensure the editor is resized when the overrides step becomes visible

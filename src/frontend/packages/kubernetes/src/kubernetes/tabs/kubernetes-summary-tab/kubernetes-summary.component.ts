@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, NgZone, OnDestroy, OnInit, computed } from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit, computed, inject} from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
@@ -60,6 +60,14 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     domain: ['#00af00', '#00af002e']
   };
   public chartHeight = '150px';
+
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  public httpClient = inject(HttpClient);
+  public paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private store = inject(Store<AppState>);
+  private ngZone = inject(NgZone);
+  private router = inject(Router);
+
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
       const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
@@ -110,16 +118,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private polls: Subscription[] = [];
 
   public isLoading$: Observable<boolean>;
-
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public httpClient: HttpClient,
-    public paginationMonitorFactory: PaginationMonitorFactory,
-    private store: Store<AppState>,
-    private ngZone: NgZone,
-    private router: Router,
-  ) {
-  }
 
   // Go the Kubernetes Dashboard configuration page
   public configureDashboard() {

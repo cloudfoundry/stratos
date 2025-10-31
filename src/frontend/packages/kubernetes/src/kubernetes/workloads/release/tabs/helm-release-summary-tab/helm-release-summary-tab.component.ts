@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ComponentFactoryResolver, OnDestroy, signal, computed } from '@angular/core';
+import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -117,18 +117,20 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReport: any;
 
   private analysisReportId = signal<string | null>(null);
-  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
+  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());  private componentFactoryResolver = inject(ComponentFactoryResolver);
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
+  private store = inject(Store<AppState>);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private httpClient = inject(HttpClient);
+  private snackbarService = inject(SnackBarService);
+  public analyzerService = inject(KubernetesAnalysisService);
+  private previewPanel = inject(SidePanelService);
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    public helmReleaseHelper: HelmReleaseHelperService,
-    private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService,
-    private httpClient: HttpClient,
-    private snackbarService: SnackBarService,
-    public analyzerService: KubernetesAnalysisService,
-    private previewPanel: SidePanelService,
-  ) {
+
+
+  constructor() {
+
+
     // Convert isFetching$ to signal for computed
     const isFetchingSignal = toSignal(
       this.helmReleaseHelper.isFetching$,
@@ -222,10 +224,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,
       {
-        textToMatch: helmReleaseHelper.releaseTitle
+        textToMatch: this.helmReleaseHelper.releaseTitle
       },
       'Delete'
     );
+
+
   }
 
   public analysisChanged(report: any) {

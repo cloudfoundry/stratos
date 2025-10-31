@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -18,10 +18,12 @@ import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-st
   providedIn: 'root'
 })
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFlag> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
-  constructor(private store: Store<CFAppState>, activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor() {
     super();
-    this.dataSource = new CfFeatureFlagsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfFeatureFlagsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
   }
 
   dataSource: CfFeatureFlagsDataSource;

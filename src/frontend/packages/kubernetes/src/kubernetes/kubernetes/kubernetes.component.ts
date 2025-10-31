@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -37,11 +37,13 @@ import { KubernetesService } from '../services/kubernetes.service';
 export class KubernetesComponent {
 
   connectedEndpoints$: Observable<number>;
-  constructor(
-    private store: Store<AppState>,
-    kubeService: KubernetesService
-  ) {
-    this.connectedEndpoints$ = kubeService.kubeEndpoints$.pipe(
+  private store = inject(Store<AppState>);
+  private kubeService = inject(KubernetesService);
+
+
+  constructor() {
+
+    this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
       map(kubeEndpoints => {
         const connectedEndpoints = kubeEndpoints.filter(
           c => c.connectionStatus === 'connected'
@@ -57,5 +59,6 @@ export class KubernetesComponent {
       filter(connectedEndpointsCount => connectedEndpointsCount > 1),
       first()
     );
+
   }
 }

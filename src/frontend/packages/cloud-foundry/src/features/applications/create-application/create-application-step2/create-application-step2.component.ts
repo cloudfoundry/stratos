@@ -1,6 +1,6 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
@@ -30,8 +30,8 @@ selector: 'app-create-application-step2',
 ]
 })
 export class CreateApplicationStep2Component implements OnInit {
-
-  constructor(private store: Store<CFAppState>, private fb: UntypedFormBuilder) { }
+  private store = inject(Store<CFAppState>);
+  private fb = inject(UntypedFormBuilder);
 
   form: UntypedFormGroup;
 

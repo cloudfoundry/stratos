@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
@@ -22,8 +22,7 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 export class MonocularTabBaseComponent implements OnInit {
 
   public endpointIds$: Observable<string[]>;
-
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   ngOnInit() {
     this.endpointIds$ = this.store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)).pipe(

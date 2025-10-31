@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -18,8 +18,9 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   ]
 })
 export class CardAppStatusComponent implements OnInit {
+  public applicationService = inject(ApplicationService);
+
   status$: Observable<StratosStatus>;
-  constructor(public applicationService: ApplicationService) { }
 
   ngOnInit() {
     this.status$ = this.applicationService.applicationState$.pipe(

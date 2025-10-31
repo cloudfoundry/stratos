@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -17,6 +17,8 @@ import { EventWatcherService } from '../../../core/event-watcher/event-watcher.s
   ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
+  private changeDetector = inject(ChangeDetectorRef);
+  private resizer = inject(EventWatcherService);
 
   @Input()
   errorMessage: string;
@@ -44,8 +46,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private msgSubscription: Subscription;
   private connectSubscription: Subscription;
   private resizeSubscription: Subscription;
-
-  constructor(private changeDetector: ChangeDetectorRef, private resizer: EventWatcherService) { }
 
   ngOnInit() {
     if (!this.connectionStatus) {

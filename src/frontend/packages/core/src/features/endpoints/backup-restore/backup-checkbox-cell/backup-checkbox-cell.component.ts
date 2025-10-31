@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { EndpointModel } from '@stratosui/store';
@@ -23,9 +23,7 @@ interface BackupCheckboxConfig {
 })
 export class BackupCheckboxCellComponent extends TableCellCustom<EndpointModel, BackupCheckboxConfig> {
 
-  constructor(public service: BackupEndpointsService) {
-    super();
-  }
+  public service = inject(BackupEndpointsService);
 
   validate() {
     this.service.stateUpdated();

@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -23,15 +23,17 @@ export class KubernetesNodeSummaryCardComponent {
   public caaspNode$: Observable<CaaspNodeData>;
   public caaspNodeUpdates$: Observable<boolean>;
   public caaspNodeDisruptive$: Observable<boolean>;
-  public caaspNodeSecurity$: Observable<boolean>;
+  public caaspNodeSecurity$: Observable<boolean>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public kubeNodeService = inject(KubernetesNodeService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public kubeNodeService: KubernetesNodeService
-  ) {
+
+
+  constructor() {
+
+
     this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
       map(node => {
-        const nodeData = kubeEndpointService.getCaaspNodeData(node);
+        const nodeData = this.kubeEndpointService.getCaaspNodeData(node);
         return !!nodeData.version ? nodeData : null;
       }),
     );
@@ -47,5 +49,7 @@ export class KubernetesNodeSummaryCardComponent {
     this.caaspNodeSecurity$ = this.caaspNode$.pipe(
       map(node => node.securityUpdates)
     );
+
+
   }
 }

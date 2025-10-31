@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -26,16 +26,16 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
   ]
 })
 export class CardCfSpaceDetailsComponent implements OnDestroy {
+  public cfSpaceService = inject(CloudFoundrySpaceService);
+  private store = inject(Store<AppState>);
+  private router = inject(Router);
+  private snackBarService = inject(SnackBarService);
+
   allowSshStatus$: Observable<string>;
   quotaLinkSub: Subscription;
 
-  constructor(
-    public cfSpaceService: CloudFoundrySpaceService,
-    private store: Store<AppState>,
-    private router: Router,
-    private snackBarService: SnackBarService
-  ) {
-    this.allowSshStatus$ = cfSpaceService.allowSsh$.pipe(
+  constructor() {
+    this.allowSshStatus$ = this.cfSpaceService.allowSsh$.pipe(
       map(status => status === 'false' ? 'Disabled' : 'Enabled')
     );
   }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -36,7 +36,7 @@ interface IGroupedFavorites {
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  constructor(private store: Store<GeneralEntityAppState>) { }
+  private store = inject(Store<GeneralEntityAppState>);
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();

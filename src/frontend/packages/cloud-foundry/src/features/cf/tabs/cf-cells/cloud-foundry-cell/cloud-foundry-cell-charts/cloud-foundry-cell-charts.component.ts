@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -22,13 +22,14 @@ import { MetricsParentRangeSelectorComponent } from '../../../../../../../../cor
 ]
 })
 export class CloudFoundryCellChartsComponent {
+  public cfCellService = inject(CloudFoundryCellService);
 
   public metricConfigs: [
     MetricsConfig<IMetricMatrixResult<IMetricCell>>,
     MetricsLineChartConfig
   ][];
 
-  constructor(public cfCellService: CloudFoundryCellService) {
+  constructor() {
     this.metricConfigs = [
       [
         this.cfCellService.buildMetricConfig('firehose_value_metric_rep_capacity_remaining_containers', MetricQueryType.RANGE_QUERY),

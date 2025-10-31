@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, inject} from '@angular/core';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,12 +26,17 @@ export class AnalysisReportRunnerComponent implements OnInit {
   @Input() kubeId: string;
   @Input() namespace: string;
   @Input() app: string;
+  public analysisService = inject(KubernetesAnalysisService);
+  private sidePanelService = inject(SidePanelService);
 
-  constructor(
-    public analysisService: KubernetesAnalysisService,
-    private sidePanelService: SidePanelService,
-  ) {
-    this.canShow$ = analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
+  constructor() {
+
+
+    this.canShow$ = this.analysisService.hideAnalysis$.pipe(map(h => !h));
+
+
   }
 
   public runAnalysis(id: string) {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
@@ -19,6 +19,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   ]
 })
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
+  private appStateService = inject(ApplicationStateService);
 
   applicationState: ApplicationStateData;
   @Input('config')
@@ -34,10 +35,6 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   public fetchAppState$: Observable<ApplicationStateData>;
   public hideIcon = false;
   public initialStateOnly = false;
-
-  constructor(private appStateService: ApplicationStateService) {
-    super();
-  }
 
   ngOnInit() {
     const applicationState = this.appStateService.get(this.row.entity, null);

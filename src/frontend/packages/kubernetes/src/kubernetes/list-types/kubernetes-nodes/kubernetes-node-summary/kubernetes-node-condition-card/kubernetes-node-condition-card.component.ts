@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -24,15 +24,16 @@ import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/ku
 export class KubernetesNodeConditionCardComponent {
   public caaspNode$: Observable<CaaspNodeData>;
   public caaspNodeDisruptive$: Observable<boolean>;
-  public caaspNodSecurity$: Observable<boolean>;
+  public caaspNodSecurity$: Observable<boolean>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public kubeNodeService = inject(KubernetesNodeService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public kubeNodeService: KubernetesNodeService
-  ) {
+
+
+  constructor() {
+
 
     this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
-      map(node => kubeEndpointService.getCaaspNodeData(node)),
+      map(node => this.kubeEndpointService.getCaaspNodeData(node)),
     );
 
     this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
@@ -42,5 +43,7 @@ export class KubernetesNodeConditionCardComponent {
     this.caaspNodSecurity$ = this.caaspNode$.pipe(
       map(node => node.securityUpdates)
     );
+
+
   }
 }

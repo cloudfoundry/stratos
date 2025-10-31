@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -23,7 +23,9 @@ import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../st
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
   public appLinkUrlParam$: Observable<any>;
 
-  constructor(private store: Store<CFAppState>) {
+  private store = inject(Store<CFAppState>);
+
+  constructor() {
     super();
   }
 

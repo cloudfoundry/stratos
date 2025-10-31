@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -54,8 +54,10 @@ export class CatalogTabComponent implements OnDestroy {
 
   private initStateSet = false;
   private sub: Subscription;
+  private store = inject(Store<AppState>);
+  private activatedRoute = inject(ActivatedRoute);
 
-  constructor(private store: Store<AppState>, private activatedRoute: ActivatedRoute) {
+  constructor() {
     // Determine the starting state of the filter by repo section
     stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
       filter(entities => !!entities),

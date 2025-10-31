@@ -6,7 +6,7 @@ import {
   HttpResponse,
   HttpXsrfTokenExtractor,
 } from '@angular/common/http';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ export class HttpXsrfHeaderExtractor implements HttpXsrfTokenExtractor {
   // XSRF Token
   public static stratosXSRFToken = '';
 
-  constructor(@Inject(PLATFORM_ID) private platform: string) { }
+  private platform = inject<string>(PLATFORM_ID);
 
   getToken(): string | null {
     if (this.platform === 'server') {

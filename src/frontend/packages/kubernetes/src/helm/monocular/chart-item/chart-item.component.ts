@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -25,8 +25,7 @@ export class ChartItemComponent implements OnInit {
 
   @Input() artifactHubAndHelmRepoTypes$: Observable<boolean>;
 
-  constructor(private chartsService: ChartsService) {
-  }
+  private chartsService = inject(ChartsService);
 
   ngOnInit() {
     this.iconUrl = this.chartsService.getChartIconURL(this.chart);

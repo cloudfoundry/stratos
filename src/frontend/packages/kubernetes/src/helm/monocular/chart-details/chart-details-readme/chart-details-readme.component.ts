@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -30,8 +30,9 @@ export class ChartDetailsReadmeComponent {
   public readmeContent$: Observable<string>;
   private renderer = new marked.Renderer();
   private loadingDelay: ReturnType<typeof setTimeout>;
+  private chartsService = inject(ChartsService);
 
-  constructor(private chartsService: ChartsService) {
+  constructor() {
     this.renderer.link = ({ href, title, text }) => `<a target="_blank" title="${title}" href="${href}">${text}</a>`;
     this.renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => `<code>${text}</code>`;
     this.loadingDelay = setTimeout(() => this.loading = true, 100);

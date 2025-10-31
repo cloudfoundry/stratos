@@ -1,5 +1,5 @@
 // Removed Angular CDK overlay dependency - using custom theme system
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -31,6 +31,9 @@ const osTheme: StratosTheme = {
 })
 export class ThemeService {
 
+  private store = inject(Store<DashboardOnlyAppState>);
+  private styleService = inject(StyleService);
+
   private osThemeInfo = {
     supports: false,
     isDarkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
@@ -39,9 +42,7 @@ export class ThemeService {
   };
   private themes: StratosTheme[] = [lightTheme];
 
-  constructor(
-    private store: Store<DashboardOnlyAppState>,
-    private styleService: StyleService) {
+  constructor() {
     this.initialiseStratosThemeInfo();
   }
 

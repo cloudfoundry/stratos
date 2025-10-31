@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -14,6 +14,9 @@ import { CfBuildpacksDataSource } from './cf-buildpacks-data-source';
   providedIn: 'root'
 })
 export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
   cardComponent = CfBuildpackCardComponent;
   dataSource: CfBuildpacksDataSource;
   isLocal = true;
@@ -48,9 +51,9 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
       field: 'metadata.created_at'
     },
   }];
-  constructor(private store: Store<CFAppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+  constructor() {
     super();
-    this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this as BaseCfListConfig<APIResource<IBuildpack>>);
+    this.dataSource = new CfBuildpacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this as BaseCfListConfig<APIResource<IBuildpack>>);
   }
   getColumns = () => this.columns;
   getDataSource = () => this.dataSource;

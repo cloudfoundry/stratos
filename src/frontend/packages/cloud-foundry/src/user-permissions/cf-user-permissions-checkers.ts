@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
@@ -35,8 +36,8 @@ import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types
 export const cfCurrentUserPermissionsService = [
   {
     provide: CUSTOM_USER_PERMISSION_CHECKERS,
-    useFactory: (store: Store<GeneralEntityAppState>) => [new CfUserPermissionsChecker(store)],
-    deps: [Store]
+    useFactory: () => [new CfUserPermissionsChecker()],
+    deps: [] as any[]
   },
   CurrentUserPermissionsService,
 ];
@@ -179,8 +180,9 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
+  private store = inject(Store<GeneralEntityAppState>);
 
-  constructor(private store: Store<GeneralEntityAppState>) {
+  constructor() {
     super();
   }
 

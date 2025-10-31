@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, computed } from '@angular/core';
+import { Component, Input, OnInit, computed, inject } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -53,7 +53,7 @@ export class KubernetesHomeCardComponent implements OnInit {
   public nodeCount$: Observable<number>;
   public namespaceCount$: Observable<number>;
 
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   ngOnInit() {
     const guid = this.endpoint.guid;

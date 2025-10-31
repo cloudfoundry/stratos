@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { MetadataItemComponent, CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
@@ -19,5 +19,5 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   ]
 })
 export class KubernetesNodeInfoCardComponent {
-  constructor( public kubeNodeService: KubernetesNodeService ) {}
+  public kubeNodeService = inject(KubernetesNodeService);
 }

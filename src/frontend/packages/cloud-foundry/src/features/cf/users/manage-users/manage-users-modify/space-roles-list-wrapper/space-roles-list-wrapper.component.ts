@@ -24,12 +24,11 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
     {
       provide: ListConfig,
       useFactory: (
-        store: Store<CFAppState>,
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
         userPerms: CurrentUserPermissionsService) => {
-        return new CfUsersSpaceRolesListConfigService(store, activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.spaceGuid, userPerms);
+        return new CfUsersSpaceRolesListConfigService(activeRouteCfOrgSpace.cfGuid, activeRouteCfOrgSpace.spaceGuid, userPerms);
       },
-      deps: [Store, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
+      deps: [ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
     }
   ]
 })

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
@@ -10,6 +10,7 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
+  private entityServiceFactory = inject(EntityServiceFactory);
 
   private initialState: AppAutoscalerPolicyLocal = autoscalerTransformArrayToMap({
     instance_min_count: 1,
@@ -23,9 +24,6 @@ export class EditAutoscalerPolicyService {
   });
 
   private stateSubject = new BehaviorSubject(this.initialState);
-
-
-  constructor(private entityServiceFactory: EntityServiceFactory) { }
 
   updateFromStore(appGuid: string, cfGuid: string) {
     const appAutoscalerPolicyService = this.entityServiceFactory.create<EntityInfo<AppAutoscalerPolicyLocal>>(

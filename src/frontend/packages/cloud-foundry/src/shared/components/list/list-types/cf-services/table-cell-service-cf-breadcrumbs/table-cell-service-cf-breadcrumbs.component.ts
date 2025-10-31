@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -27,10 +27,12 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
     if (!pService || !!this.cfOrgSpace) {
       return;
     }
-    this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, pService.entity.cfGuid);
+    this.cfOrgSpace = new CfOrgSpaceLabelService(pService.entity.cfGuid);
   }
 
-  constructor(private store: Store<CFAppState>) {
+  private store = inject(Store<CFAppState>);
+
+  constructor() {
     super();
   }
 

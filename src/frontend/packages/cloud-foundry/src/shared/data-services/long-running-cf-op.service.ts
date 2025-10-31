@@ -12,10 +12,9 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 export class LongRunningCfOperationsService extends LongRunningOperationsService {
 
   constructor(
-    store: Store<AppState>,
     private snackBarService: SnackBarService
   ) {
-    super(store);
+    super();
   }
 
   handleLongRunningCreateService(bindApp: boolean) {

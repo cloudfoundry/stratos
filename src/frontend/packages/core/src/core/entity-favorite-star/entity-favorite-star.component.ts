@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -42,13 +42,9 @@ export class EntityFavoriteStarComponent {
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
 
   private pFavourite: UserFavorite<IFavoriteMetadata>;
-
-  constructor(
-    private confirmDialog: ConfirmationDialogService,
-    public endpointsService: EndpointsService,
-    private userFavoriteManager: UserFavoriteManager,
-  ) {
-  }
+  private confirmDialog = inject(ConfirmationDialogService);
+  public endpointsService = inject(EndpointsService);
+  private userFavoriteManager = inject(UserFavoriteManager);
 
   public toggleFavorite(event: Event) {
     event.cancelBubble = true;

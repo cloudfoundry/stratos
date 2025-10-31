@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { ListComponent } from '../../../../../../core/src/shared/components/list/list.component';
@@ -29,7 +29,9 @@ export class DeleteAppServiceInstancesComponent implements OnDestroy {
 
   private selectedSub: Subscription;
 
-  constructor(private config: ListConfig<APIResource>) {
+  private config = inject(ListConfig<APIResource>);
+
+  constructor() {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selected) => {
         this.selected.emit(Array.from(selected.values()));

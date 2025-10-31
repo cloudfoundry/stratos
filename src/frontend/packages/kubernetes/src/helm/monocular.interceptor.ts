@@ -1,5 +1,5 @@
 import { HttpBackend, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -11,7 +11,7 @@ import { stratosMonocularEndpointGuid } from './monocular/stratos-monocular.help
 @Injectable()
 export class MonocularInterceptor implements HttpInterceptor {
 
-  constructor(private route: ActivatedRoute) { }
+  private route = inject(ActivatedRoute);
 
   /**
    * The interceptor should only run for http clients provided in the helm module, but just in case only apply self for specific urls..
@@ -36,7 +36,10 @@ export class MonocularInterceptor implements HttpInterceptor {
 }
 
 class HttpInterceptorHandler implements HttpHandler {
-  constructor(private next: HttpHandler, private interceptor: HttpInterceptor) { }
+  constructor(
+    private next: HttpHandler,
+    private interceptor: HttpInterceptor
+  ) { }
 
   handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     return this.interceptor.intercept(req, this.next);

@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal } from '@angular/core';
+import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
@@ -122,15 +122,11 @@ export class KubeConfigImportComponent implements OnDestroy {
   private iteration = 0;
 
   private connectService: ConnectEndpointService;
-
-  constructor(
-    public store: Store<AppState>,
-    public resolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private fb: UntypedFormBuilder,
-    private endpointsService: EndpointsService,
-  ) {
-  }
+  public store = inject(Store<AppState>);
+  public resolver = inject(ComponentFactoryResolver);
+  private injector = inject(Injector);
+  private fb = inject(UntypedFormBuilder);
+  private endpointsService = inject(EndpointsService);
 
   // Process the next action in the list
   private processAction(actions: KubeConfigImportAction[]) {

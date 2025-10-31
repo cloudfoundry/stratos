@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {Component, Input, OnInit, ViewEncapsulation, inject} from '@angular/core';
 import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -22,14 +22,11 @@ export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart: Chart;
   @Input() currentVersion: string;
   installing: boolean;
-
-  constructor(
-    private mdIconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer,
-    public snackBar: TailwindSnackBarService,
-    public endpointsService: EndpointsService,
-    private route: ActivatedRoute,
-  ) { }
+  private mdIconRegistry = inject(MatIconRegistry);
+  private sanitizer = inject(DomSanitizer);
+  public snackBar = inject(TailwindSnackBarService);
+  public endpointsService = inject(EndpointsService);
+  private route = inject(ActivatedRoute);
 
   ngOnInit() {
     this.mdIconRegistry.addSvgIcon(

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -56,15 +56,13 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   formattedValue: string;
   formattedLimit: string;
   usage: string;
+  private utils = inject(UtilsService);
+  private store = inject(Store<AppState>);
 
   private _status = signal<StratosStatus>(StratosStatus.NONE);
   public status = this._status.asReadonly();
-  public status$: Observable<StratosStatus>;
+  public status$: Observable<StratosStatus> = toObservable(this._status);
   isUnlimited: boolean;
-
-  constructor(private utils: UtilsService, private store: Store<AppState>) {
-    this.status$ = toObservable(this._status);
-  }
 
   ngOnInit() {
     this.format();

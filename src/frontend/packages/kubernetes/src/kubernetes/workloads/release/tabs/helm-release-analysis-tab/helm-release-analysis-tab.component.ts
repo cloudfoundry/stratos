@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import {Component, signal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { PageSubNavComponent, NoContentMessageComponent } from '@stratosui/core';
@@ -34,13 +34,17 @@ export class HelmReleaseAnalysisTabComponent {
 
   currentReport: AnalysisReport | null = null;
 
-  noReportsAvailable = false;
+  noReportsAvailable = false;  public analaysisService = inject(KubernetesAnalysisService);
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  constructor(
-    public analaysisService: KubernetesAnalysisService,
-    public helmReleaseHelper: HelmReleaseHelperService
-  ) {
+
+
+  constructor() {
+
+
     this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
+
+
   }
 
   public analysisChanged(report: any) {

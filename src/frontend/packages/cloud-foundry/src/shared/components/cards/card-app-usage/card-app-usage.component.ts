@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { map, share, startWith } from 'rxjs/operators';
 
@@ -26,8 +26,8 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   ]
 })
 export class CardAppUsageComponent implements OnInit {
-
-  constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  private appService = inject(ApplicationService);
+  private appMonitor = inject(ApplicationMonitorService);
 
   appData$: Observable<any>;
   status$: Observable<StratosStatus>;

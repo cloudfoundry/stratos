@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -64,7 +64,10 @@ export class ServiceTabsBaseComponent {
     }
   ];
 
-  constructor(private servicesService: ServicesService, private store: Store<CFAppState>) {
+  private servicesService = inject(ServicesService);
+  private store = inject(Store<CFAppState>);
+
+  constructor() {
     this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
     this.canCreateServiceInstance = CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
@@ -15,5 +15,5 @@ import { ApplicationPollingService } from '../application-polling.service';
   ]
 })
 export class ApplicationPollComponent {
-  constructor(public appPollingService: ApplicationPollingService) { }
+  public appPollingService = inject(ApplicationPollingService);
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CustomCheckboxComponent, TableCellCustom } from '@stratosui/core';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
@@ -14,7 +14,9 @@ selector: 'app-kube-config-table-select',
 })
 export class KubeConfigTableSelectComponent extends TableCellCustom<KubeConfigFileCluster> {
 
-  constructor(private helper: KubeConfigHelper) {
+  private helper = inject(KubeConfigHelper);
+
+  constructor() {
     super();
   }
   changed(v: { checked: boolean }): void {

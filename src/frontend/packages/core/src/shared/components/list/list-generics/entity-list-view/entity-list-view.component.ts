@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListEntityConfig } from '../helpers/action-or-config-helpers';
@@ -21,7 +21,7 @@ export class EntityListViewComponent implements OnInit {
 
   provider: ListConfigProvider;
 
-  constructor(private store: Store<any>) { }
+  private store = inject(Store<any>);
 
   ngOnInit() {
     this.provider = new EntityConfigListConfigProvider(this.store, this.config);

@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {Component, OnInit, ViewChild, inject} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
@@ -59,10 +59,7 @@ export class KubeConsoleComponent implements OnInit {
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   @ViewChild('sshViewer', { static: false }) sshViewer: SshViewerComponent;
-
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-  ) { }
+  public kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
     this.connectionStatus.next(0);

@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, Directive, Input, Output } from '@angular/core';
+import { Injectable, EventEmitter, Directive, Input, Output, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export type TailwindSortDirection = 'asc' | 'desc' | '';
@@ -68,7 +68,7 @@ export class TailwindSortHeaderDirective {
   @Input() disabled = false;
   @Input() disableClear = false;
 
-  constructor(private _sort: TailwindSortDirective) {}
+  private _sort = inject(TailwindSortDirective);
 
   _handleClick(): void {
     if (this.disabled) {
@@ -100,8 +100,10 @@ export class TailwindSortService {
     return new TailwindSortDirective();
   }
 
-  createSortHeader(sort: TailwindSortDirective, id: string): TailwindSortHeaderDirective {
-    const header = new TailwindSortHeaderDirective(sort);
+  // Note: TailwindSortHeaderDirective should be used declaratively in templates,
+  // not instantiated programmatically, as it uses inject() for dependencies
+  createSortHeader(id: string): TailwindSortHeaderDirective {
+    const header = new TailwindSortHeaderDirective();
     header.id = id;
     return header;
   }

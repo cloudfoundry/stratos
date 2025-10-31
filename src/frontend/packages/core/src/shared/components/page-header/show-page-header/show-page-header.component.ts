@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
 
@@ -15,7 +15,5 @@ import { TabNavService } from '../../../../tab-nav.service';
   ]
 })
 export class ShowPageHeaderComponent {
-
-  constructor(public tabNavService: TabNavService) { }
-
+  public tabNavService = inject(TabNavService);
 }

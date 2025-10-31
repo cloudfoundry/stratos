@@ -267,13 +267,11 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     return this.addForm || {};
   }
 
-  constructor(
-    private store: Store<GeneralAppState>,
-    private cd: ChangeDetectorRef,
-    @Optional() public config: ListConfig<T>,
-    private ngZone: NgZone,
-    private injector: Injector,
-  ) { }
+  private store = inject(Store<GeneralAppState>);
+  private cd = inject(ChangeDetectorRef);
+  public config = inject(ListConfig<T>, { optional: true });
+  private ngZone = inject(NgZone);
+  private injector = inject(Injector);
 
   ngOnInit() {
     // null list means we have list bound but no value available yet

@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -27,12 +27,14 @@ import {
   ]
 })
 export class DetachAppsComponent implements OnDestroy {
+  private config = inject(ListConfig<APIResource>);
 
   validate$: Observable<boolean>;
   @Output()
   public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
   selectedSub: Subscription;
-  constructor(private config: ListConfig<APIResource>) {
+
+  constructor() {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selectedApps) => {
         this.selectedApps.emit(Array.from(selectedApps.values()));

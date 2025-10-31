@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { interval, Observable, of as observableOf } from 'rxjs';
@@ -14,11 +14,14 @@ import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
   ]
 })
 export class RoutingIndicatorComponent {
+  private router = inject(Router);
+
   public value$: Observable<number>;
 
   public HIDE_VALUE = 101;
   private started = false;
-  constructor(private router: Router) {
+
+  constructor() {
     this.value$ = this.router.events.pipe(
       filter(event => {
         return (event instanceof NavigationStart && !this.started) ||

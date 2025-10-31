@@ -1,6 +1,6 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
@@ -154,15 +154,11 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     'Clear Values?',
     'Are you sure you want to clear the form values?',
     'Overwrite'
-  );
-
-  constructor(
-    private elRef: ElementRef,
-    private renderer: Renderer2,
-    private httpClient: HttpClient,
-    private themeService: ThemeService,
-    private confirmDialog: ConfirmationDialogService,
-  ) { }
+  );  private elRef = inject(ElementRef);
+  private renderer = inject(Renderer2);
+  private httpClient = inject(HttpClient);
+  private themeService = inject(ThemeService);
+  private confirmDialog = inject(ConfirmationDialogService);
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens

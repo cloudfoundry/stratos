@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
@@ -50,8 +50,8 @@ export class SetupWelcomeComponent {
     )
 
   ];
-
-  constructor(private store: Store<GeneralEntityAppState>, @Inject(APP_TITLE) public title: string) { }
+  private store = inject(Store<GeneralEntityAppState>);
+  public title = inject(APP_TITLE);
 
   public selectionChange(tile: ITileConfig<ITileData>) {
     if (tile) {

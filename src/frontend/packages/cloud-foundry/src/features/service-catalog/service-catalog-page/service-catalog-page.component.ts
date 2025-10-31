@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -36,8 +36,10 @@ export class ServiceCatalogPageComponent {
 
   public cfIds$: Observable<string[]>;
 
-  constructor(public cloudFoundryService: CloudFoundryService) {
-    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
+  public cloudFoundryService = inject(CloudFoundryService);
+
+  constructor() {
+    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints
         .filter(endpoint => endpoint.connectionStatus === 'connected')
         .map(endpoint => endpoint.guid)

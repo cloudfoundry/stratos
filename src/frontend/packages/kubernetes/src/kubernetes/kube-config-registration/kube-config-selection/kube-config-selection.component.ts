@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import {Component, Input, signal, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -136,14 +136,18 @@ export class KubeConfigSelectionComponent {
   private _valid = signal<boolean>(false);
   valid$ = toObservable(this._valid);
 
-  canSetIntermediate = false;
+  canSetIntermediate = false;  private store = inject(Store<AppState>);
+  public helper = inject(KubeConfigHelper);
+  private snackbarService = inject(SnackBarService);
 
-  constructor(
-    private store: Store<AppState>,
-    public helper: KubeConfigHelper,
-    private snackbarService: SnackBarService
-  ) {
+
+
+  constructor() {
+
+
     this.helper.clustersChanged = () => this.clustersChanged();
+
+
   }
 
   // Save data for the next step to know the list of clusters to import

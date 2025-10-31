@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
@@ -23,7 +23,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
   formattedValue: string;
 
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   ngOnInit() {
     this.format();

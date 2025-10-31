@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
@@ -51,8 +52,7 @@ export class TableCellComponent<T> implements OnInit {
   @Input() config: object | undefined;
 
   private cellComponent: TableCellCustom<T>;
-
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+  private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private getComponent() {
     if (this.cellDefinition) {

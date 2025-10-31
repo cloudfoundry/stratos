@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import {Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
@@ -107,14 +107,19 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
-  );
+  );  private componentFactoryResolver = inject(ComponentFactoryResolver);
+  private helper = inject(HelmReleaseHelperService);
+  public analyzerService = inject(KubernetesAnalysisService);
+  private previewPanel = inject(SidePanelService);
 
-  constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
-    private helper: HelmReleaseHelperService,
-    public analyzerService: KubernetesAnalysisService,
-    private previewPanel: SidePanelService) {
+
+
+  constructor() {
+
+
     this.path = `${this.helper.namespace}/${this.helper.releaseTitle}`;
+
+
   }
 
   ngOnInit() {

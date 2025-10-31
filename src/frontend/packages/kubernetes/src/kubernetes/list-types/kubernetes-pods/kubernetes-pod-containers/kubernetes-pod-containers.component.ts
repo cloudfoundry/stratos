@@ -1,5 +1,5 @@
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import {Component, Input, inject} from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { isBefore, isAfter } from 'date-fns';
 import { Observable } from 'rxjs';
@@ -56,13 +56,7 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
   }
   get row(): KubernetesPod {
     return super.row;
-  }
-
-  constructor(
-    private titleCase: TitleCasePipe,
-  ) {
-    super();
-  }
+  }  private titleCase = inject(TitleCasePipe);
 
   private getState(containerStatus: ContainerStatus) {
     if (!containerStatus.state) {

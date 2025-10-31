@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -69,7 +69,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
 
   public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
-  constructor(public kubeEndpointService: KubernetesEndpointService, private sanitizer: DomSanitizer, public renderer: Renderer2) {
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  private sanitizer = inject(DomSanitizer);
+  public renderer = inject(Renderer2);
+
+  constructor() {
     this.hasError.set(false);
   }
 

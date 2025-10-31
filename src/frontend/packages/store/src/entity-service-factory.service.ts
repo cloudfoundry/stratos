@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { GeneralEntityAppState } from './app-state';
@@ -13,17 +13,16 @@ import { EntityRequestAction } from './types/request.types';
   providedIn: 'root'
 })
 export class EntityServiceFactory {
+  private store = inject(Store<GeneralEntityAppState>);
+  private entityMonitorFactory = inject(EntityMonitorFactory);
+  private entityCatalog = inject<IEntityCatalog>(ENTITY_CATALOG_TOKEN);
+
   private isConfig(config: string | EntityActionBuilderEntityConfig) {
     if (config) {
       return !!(config as EntityActionBuilderEntityConfig).entityGuid;
     }
     return false;
   }
-  constructor(
-    private store: Store<GeneralEntityAppState>,
-    private entityMonitorFactory: EntityMonitorFactory,
-    @Inject(ENTITY_CATALOG_TOKEN) private entityCatalog: IEntityCatalog,
-  ) { }
 
   // FIXME: See #3833. Improve typing of action passed to entity service factory create
   create<T>(

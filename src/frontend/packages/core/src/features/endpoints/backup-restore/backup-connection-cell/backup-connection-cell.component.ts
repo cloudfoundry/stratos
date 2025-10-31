@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
@@ -25,15 +25,13 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
 })
 export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel> implements OnInit {
 
+  public service = inject(BackupEndpointsService);
+
   connectable = false;
   backupType = BackupEndpointTypes;
   connectionTypes = BackupEndpointConnectionTypes;
   selected: BackupEndpointConnectionTypes;
   userConnectionWarning: string;
-
-  constructor(public service: BackupEndpointsService) {
-    super();
-  }
 
   ngOnInit() {
     const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, inject} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ChartAttributes } from '../../shared/models/chart';
@@ -15,11 +15,8 @@ export class ChartDetailsVersionsComponent {
   @Input() versions: ChartVersion[];
   @Input() currentVersion: ChartVersion;
   showAllVersions: boolean;
-
-  constructor(
-    private route: ActivatedRoute,
-    private chartService: ChartsService
-  ) { }
+  private route = inject(ActivatedRoute);
+  private chartService = inject(ChartsService);
 
   goToVersionUrl(version: ChartVersion): string {
     const chart: ChartAttributes = version.relationships.chart.data;

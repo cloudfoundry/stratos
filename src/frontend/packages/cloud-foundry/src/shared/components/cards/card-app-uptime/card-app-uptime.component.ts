@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -22,8 +22,8 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
   ]
 })
 export class CardAppUptimeComponent implements OnInit {
-
-  constructor(public appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  public appService = inject(ApplicationService);
+  private appMonitor = inject(ApplicationMonitorService);
 
   appData$: Observable<{
     maxUptime: number,

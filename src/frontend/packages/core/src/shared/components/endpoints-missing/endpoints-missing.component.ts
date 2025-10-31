@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, inject } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
@@ -52,7 +52,9 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
   protected haveRegistered$: Observable<boolean>;
   protected haveConnected$: Observable<boolean>;
 
-  constructor(public endpointsService: EndpointsService) {
+  public endpointsService = inject(EndpointsService);
+
+  constructor() {
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
     this.haveConnected$ = this.endpointsService.haveConnected$;
   }

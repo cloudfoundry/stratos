@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { Subject } from 'rxjs';
 
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
@@ -46,12 +46,15 @@ export class KubernetesNamespaceAnalysisReportComponent {
   noReportsAvailable = false;
 
   breadcrumbs: Array<{ value: string }> = [];
+  public analyzerService = inject(KubernetesAnalysisService);
+  public endpointService = inject(KubernetesEndpointService);
+  public kubeNamespaceService = inject(KubernetesNamespaceService);
 
-  constructor(
-    public analyzerService: KubernetesAnalysisService,
-    public endpointService: KubernetesEndpointService,
-    public kubeNamespaceService: KubernetesNamespaceService,
-  ) {
+
+
+  constructor() {
+
+
     this.endpointID = this.endpointService.kubeGuid;
     this.path = `${this.kubeNamespaceService.namespaceName}`;
     this.report$.next(null);
@@ -60,6 +63,7 @@ export class KubernetesNamespaceAnalysisReportComponent {
       { value: 'Analysis' },
       { value: this.path },
     ];
+
 
   }
 

@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
@@ -47,13 +47,15 @@ export class KubernetesNodeComponent {
     { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  public kubeNodeService = inject(KubernetesNodeService);
+  public endpointsService = inject(EndpointsService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    public kubeNodeService: KubernetesNodeService,
-    public endpointsService: EndpointsService
-  ) {
+
+
+  constructor() {
+
+
     this.endpointsService.hasMetrics(this.kubeEndpointService.kubeGuid).pipe(
       first(),
       tap(haveMetrics => {
@@ -64,7 +66,7 @@ export class KubernetesNodeComponent {
       })
     ).subscribe();
 
-    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [
           { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
@@ -72,5 +74,7 @@ export class KubernetesNodeComponent {
       }])
       )
     );
+
+
   }
 }

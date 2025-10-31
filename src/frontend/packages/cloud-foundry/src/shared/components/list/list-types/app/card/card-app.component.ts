@@ -68,7 +68,6 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(applicationEntityType));
     this.cfOrgSpace = new CfOrgSpaceLabelService(
-      this.store,
       this.row.entity.cfGuid,
       (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,
       this.row.entity.space_guid

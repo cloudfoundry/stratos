@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { WindowRef } from '../window-ref/window-ref.service';
 
@@ -14,7 +14,7 @@ export class ResizeEventData {
   providedIn: 'root'
 })
 export class EventWatcherService {
-  constructor(private windowRef: WindowRef) { }
+  private windowRef = inject(WindowRef);
 
   resizeEvent$ = observableFromEvent(this.windowRef.nativeWindow, 'resize').pipe(debounceTime(250), map(() => {
     const { innerWidth } = this.windowRef.nativeWindow;

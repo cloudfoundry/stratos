@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
@@ -39,9 +39,16 @@ export class KubernetesNamespacePreviewComponent implements PreviewableComponent
   showAnalysis$: Observable<boolean>;
 
   link: string;
+  private store = inject(Store<AppState>);
 
-  constructor(store: Store<AppState>) {
-    this.showAnalysis$ = KubernetesAnalysisService.isAnalysisEnabled(store);
+
+
+  constructor() {
+
+
+    this.showAnalysis$ = KubernetesAnalysisService.isAnalysisEnabled(this.store);
+
+
   }
 
   setProps(props: { [key: string]: any; }): void {

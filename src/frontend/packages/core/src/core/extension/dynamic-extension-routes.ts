@@ -69,7 +69,7 @@ export const dynamicExtensionRoutesGuard: CanActivateFn = (
 // @deprecated Use dynamicExtensionRoutesGuard functional guard instead
 @Injectable()
 export class DynamicExtensionRoutes {
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
   canActivate(
     route: ActivatedRouteSnapshot,

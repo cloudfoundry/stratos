@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { selectSessionData, GeneralEntityAppState } from '@stratosui/store';
 import { UserEndpointsEnabled } from 'frontend/packages/store/src/types/auth.types';
@@ -9,8 +9,7 @@ import { first, map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class SessionService {
-
-  constructor(private store: Store<GeneralEntityAppState>) { }
+  private store = inject(Store<GeneralEntityAppState>);
 
   isTechPreview(): Observable<boolean> {
     return this.store.select(selectSessionData()).pipe(

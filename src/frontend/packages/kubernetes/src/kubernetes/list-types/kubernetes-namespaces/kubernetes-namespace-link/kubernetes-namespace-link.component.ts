@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
@@ -15,7 +15,9 @@ import { KubernetesNamespace } from '../../../store/kube.types';
 export class KubernetesNamespaceLinkComponent extends TableCellCustom<KubernetesNamespace> implements OnInit {
   routerLink: string;
   dashboardLink: string;
-  constructor(public kubeEndpointService: KubernetesEndpointService) {
+  public kubeEndpointService = inject(KubernetesEndpointService);
+
+  constructor() {
     super();
   }
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { format } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -43,8 +43,12 @@ export class HelmReleaseHistoryTabComponent {
   public columns: ITableColumn<any>[] = [];
 
   public dataSource: ITableListDataSource<any>;
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  constructor(public helmReleaseHelper: HelmReleaseHelperService) {
+
+
+  constructor() {
+
 
     // Use the ame column layout as the Helm CLI
     this.columns = [
@@ -108,6 +112,8 @@ export class HelmReleaseHistoryTabComponent {
     );
 
     this.dataSource = new HelmReleaseHistoryDataSource(data$, isTableLoading$);
+
+
   }
 
 }

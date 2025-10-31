@@ -1,4 +1,4 @@
-import { Directive, forwardRef, Input } from '@angular/core';
+import { Directive, forwardRef, Input, inject } from '@angular/core';
 import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
@@ -29,7 +29,8 @@ export class GithubProjectExistsDirective implements Validator {
 
   private lastValue = '';
 
-  constructor(private store: Store<CFAppState>, private scmService: GitSCMService) { }
+  private store = inject(Store<CFAppState>);
+  private scmService = inject(GitSCMService);
 
   // Reduce API calls trying to validate until we have a valid name
   // Must be of the form USER/NAME - where NAME must be at least 2 charts in length

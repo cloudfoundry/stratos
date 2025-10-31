@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -21,7 +21,5 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
     useClass: KubernetesNamespacesListConfigService,
   }]
 })
-export class KubernetesNamespacesTabComponent {
-
-  constructor(private activatedRoute: ActivatedRoute) { }
+export class KubernetesNamespacesTabComponent {  private activatedRoute = inject(ActivatedRoute);
 }

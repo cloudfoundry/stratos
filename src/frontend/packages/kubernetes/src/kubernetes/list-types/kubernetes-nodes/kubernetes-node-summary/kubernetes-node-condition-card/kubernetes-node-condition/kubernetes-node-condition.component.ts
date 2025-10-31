@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Input, OnInit, inject} from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -49,10 +49,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     CaaspDisruptive: ['warning', 'material-icons'],
     CaaspSecurity: ['security', 'material-icons']
   };
-
-  constructor(
-    public kubeNodeService: KubernetesNodeService
-  ) { }
+  public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit() {
     this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(

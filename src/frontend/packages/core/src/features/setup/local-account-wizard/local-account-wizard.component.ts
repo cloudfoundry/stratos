@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
@@ -42,13 +42,14 @@ selector: 'app-local-account-wizard',
 })
 export class LocalAccountWizardComponent implements OnInit {
 
+  private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
+  public title = inject(APP_TITLE);
+
   passwordForm: UntypedFormGroup;
   validateLocalAuthForm: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
 
   showPassword: boolean[] = [];
-
-  constructor(private store: Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>, @Inject(APP_TITLE) public title: string) { }
 
   ngOnInit() {
     this.passwordForm = new UntypedFormGroup({

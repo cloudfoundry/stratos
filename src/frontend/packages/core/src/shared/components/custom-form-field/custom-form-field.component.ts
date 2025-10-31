@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
@@ -30,7 +30,7 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   private destroy$ = new Subject<void>();
   private isInitialized = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  private cdr = inject(ChangeDetectorRef);
 
   ngAfterContentInit() {
     if (this.inputElement) {

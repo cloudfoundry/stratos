@@ -120,7 +120,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       ];
       if (!this.cfOrgSpace && row.entity.space && row.entity.space.entity) {
         this.cfOrgSpace = new CfOrgSpaceLabelService(
-          this.store,
           this.cfGuid,
           row.entity.space.entity.organization_guid,
           row.entity.space_guid);

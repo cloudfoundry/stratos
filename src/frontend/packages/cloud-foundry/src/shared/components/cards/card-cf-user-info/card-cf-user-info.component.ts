@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
@@ -15,7 +15,7 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
   ]
 })
 export class CardCfUserInfoComponent implements OnInit {
-  constructor(public cfEndpointService: CloudFoundryEndpointService) { }
+  public cfEndpointService = inject(CloudFoundryEndpointService);
 
   ngOnInit() { }
 

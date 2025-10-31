@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { filter, first, tap } from 'rxjs/operators';
@@ -35,7 +35,9 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 
   paginationStateSub: Subscription;
-  constructor(private store: Store<CFAppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
+
+  private store = inject(Store<CFAppState>);
+  public cfOrgSpaceService = inject(CfOrgSpaceDataService);
 
   ngOnInit() {
     // We will auto select endpoint/org/space that have been selected on the app wall.

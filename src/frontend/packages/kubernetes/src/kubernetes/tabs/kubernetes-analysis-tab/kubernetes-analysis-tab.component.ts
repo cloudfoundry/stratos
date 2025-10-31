@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 
 import { ListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
@@ -27,8 +27,6 @@ import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/anal
     }
   ]
 })
-export class KubernetesAnalysisTabComponent {
-
-  constructor(public kubeEndpointService: KubernetesEndpointService) { }
+export class KubernetesAnalysisTabComponent {  public kubeEndpointService = inject(KubernetesEndpointService);
 
 }

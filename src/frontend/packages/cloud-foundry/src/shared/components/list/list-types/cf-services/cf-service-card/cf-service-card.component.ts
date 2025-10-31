@@ -83,7 +83,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       }
 
       if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.serviceEntity.entity.cfGuid);
       }
     }
   }

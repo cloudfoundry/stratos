@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -15,6 +15,8 @@ import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
   providedIn: 'root'
 })
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
+  private store = inject(Store<CFAppState>);
+  private activeRouteCfCell = inject(ActiveRouteCfCell);
 
   dataSource: CfCellAppsDataSource;
   defaultView = 'table' as ListView;
@@ -25,9 +27,9 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
     noEntries: 'There are no applications'
   };
 
-  constructor(store: Store<CFAppState>, private activeRouteCfCell: ActiveRouteCfCell) {
+  constructor() {
     super();
-    this.dataSource = new CfCellAppsDataSource(store, activeRouteCfCell.cfGuid, activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
+    this.dataSource = new CfCellAppsDataSource(this.store, this.activeRouteCfCell.cfGuid, this.activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
   }
 
   getColumns = (): ITableColumn<CfCellApp>[] => [

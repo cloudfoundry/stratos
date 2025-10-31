@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -47,8 +47,10 @@ export class DetachAppsListConfigService implements IListConfig<APIResource<ISer
       field: 'metadata.created_at'
     },
   }];
+  private store = inject(Store<CFAppState>);
+  private datePipe = inject(DatePipe);
 
-  constructor(private store: Store<CFAppState>, activatedRoute: ActivatedRoute, private datePipe: DatePipe) {
+  constructor(activatedRoute: ActivatedRoute) {
     const { serviceInstanceId, endpointId } = activatedRoute.snapshot.params;
     this.dataSource = new DetachAppsDataSource(endpointId, serviceInstanceId, this.store, this);
   }

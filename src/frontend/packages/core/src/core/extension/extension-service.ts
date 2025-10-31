@@ -1,4 +1,4 @@
-import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
+import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
@@ -132,8 +132,7 @@ export class ExtEmptyModule { }
 export class ExtensionService {
 
   public metadata = extensionMetadata;
-
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components

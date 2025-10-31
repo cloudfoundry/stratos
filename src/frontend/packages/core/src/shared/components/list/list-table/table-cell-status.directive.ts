@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2, inject } from '@angular/core';
 
 @Directive({
 selector: '[appTableCellStatus]',
@@ -8,8 +8,8 @@ export class TableCellStatusDirective implements OnChanges {
 
   @Input() appTableCellStatus: string;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {
-  }
+  private el = inject(ElementRef);
+  private renderer = inject(Renderer2);
 
   ngOnChanges(changes: SimpleChanges) {
     const change = changes.appTableCellStatus;

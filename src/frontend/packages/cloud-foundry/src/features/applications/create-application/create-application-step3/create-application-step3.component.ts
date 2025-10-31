@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
@@ -43,10 +43,11 @@ import { createGetApplicationAction } from '../../application.service';
   ]
 })
 export class CreateApplicationStep3Component implements OnInit {
+  private store = inject(Store<CFAppState>);
 
   setDomainHost: UntypedFormGroup;
 
-  constructor(private store: Store<CFAppState>) {
+  constructor() {
     this.setDomainHost = new UntypedFormGroup({
       domain: new UntypedFormControl('', [Validators.required]),
       host: new UntypedFormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),

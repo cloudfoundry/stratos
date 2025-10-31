@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, inject } from '@angular/core';
 import { StratosThemeService } from '../../../../../theme/theme.service';
 
 @Component({
@@ -12,6 +12,7 @@ import { StratosThemeService } from '../../../../../theme/theme.service';
   ]
 })
 export class StratosTitleComponent {
+  private themeService = inject(StratosThemeService);
 
   // Optional title
   @Input() title: string;
@@ -30,6 +31,4 @@ export class StratosTitleComponent {
   public themeLogo = computed(() =>
     this.themeService.theme()?.branding?.logo || '/core/assets/logo.png'
   );
-
-  constructor(private themeService: StratosThemeService) {}
 }

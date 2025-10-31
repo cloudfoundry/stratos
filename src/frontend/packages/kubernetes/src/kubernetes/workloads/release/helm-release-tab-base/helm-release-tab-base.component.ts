@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy, inject} from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -53,14 +53,17 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   public title = '';
 
   tabLinks: IPageSideNavTab[];
+  public helmReleaseHelper = inject(HelmReleaseHelperService);
+  private analysisService = inject(KubernetesAnalysisService);
+  private snackbarService = inject(SnackBarService);
+  private sessionService = inject(SessionService);
+  private socketService = inject(HelmReleaseSocketService);
 
-  constructor(
-    public helmReleaseHelper: HelmReleaseHelperService,
-    private analysisService: KubernetesAnalysisService,
-    private snackbarService: SnackBarService,
-    sessionService: SessionService,
-    private socketService: HelmReleaseSocketService
-  ) {
+
+
+  constructor() {
+
+
     this.title = this.helmReleaseHelper.releaseTitle;
 
     this.tabLinks = [
@@ -70,11 +73,13 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       { link: 'history', label: 'History', icon: 'schedule' },
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
       { link: '-', label: 'Resources' },
-      { link: 'graph', label: 'Overview', icon: 'share', hidden$: sessionService.isTechPreview().pipe(map((tp: boolean) => !tp)) },
+      { link: 'graph', label: 'Overview', icon: 'share', hidden$: this.sessionService.isTechPreview().pipe(map((tp: boolean) => !tp)) },
       ...this.getTabsFromEntityConfig()
     ];
 
     this.socketService.start();
+
+
   }
 
   ngOnDestroy() {

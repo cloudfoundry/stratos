@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -50,9 +50,9 @@ import { ApplicationService } from '../../../../../application.service';
   ]
 })
 export class RoutesTabComponent implements OnInit {
+  private appService = inject(ApplicationService);
 
   paginationSubscription: Subscription;
-  constructor(private appService: ApplicationService) { }
 
   ngOnInit() {
     this.appService.orgDomains$.pipe(

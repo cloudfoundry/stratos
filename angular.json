@@ -65,20 +65,24 @@
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
+                }
+              ]
             },
             "desktop": {
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,
-              "fileReplacements": [{
-                "replace": "src/frontend/packages/core/src/environments/environment.ts",
-                "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
-              }]
+              "fileReplacements": [
+                {
+                  "replace": "src/frontend/packages/core/src/environments/environment.ts",
+                  "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
+                }
+              ]
             }
           }
         },
@@ -182,33 +186,6 @@
               "buildOptimizer": true
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "preserveSymlinks": true,
-            "main": "src/frontend/packages/core/src/test.ts",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
-            "tsConfig": "src/frontend/packages/core/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/core/karma.conf.js",
-            "styles": [
-              "src/frontend/packages/core/src/styles.css"
-            ],
-            "scripts": [],
-            "assets": [
-              "src/frontend/packages/core/src/favicon.ico",
-              {
-                "glob": "**/*",
-                "input": "src/frontend/packages/core/assets",
-                "output": "/core/assets/custom"
-              },
-              {
-                "glob": "**/*",
-                "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
-              }
-            ]
-          }
         }
       }
     },
@@ -228,14 +205,6 @@
             "production": {
               "tsConfig": "src/frontend/packages/store/tsconfig.lib.prod.json"
             }
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/store/src/test.ts",
-            "tsConfig": "src/frontend/packages/store/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/store/karma.conf.js"
           }
         }
       }
@@ -258,14 +227,6 @@
             }
           }
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/extension/src/test.ts",
-            "tsConfig": "src/frontend/packages/extension/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/extension/karma.conf.js"
-          }
-        },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
@@ -279,7 +240,7 @@
           }
         }
       }
-    },    
+    },
     "shared": {
       "root": "src/frontend/packages/shared",
       "sourceRoot": "src/frontend/packages/shared/src",
@@ -291,14 +252,6 @@
           "options": {
             "tsConfig": "src/frontend/packages/shared/tsconfig.lib.json",
             "project": "src/frontend/packages/shared/ng-package.json"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/shared/src/test.ts",
-            "tsConfig": "src/frontend/packages/shared/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/shared/karma.conf.js"
           }
         }
       }
@@ -320,14 +273,6 @@
               "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.lib.prod.json"
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/cloud-foundry/src/test.ts",
-            "tsConfig": "src/frontend/packages/cloud-foundry/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/cloud-foundry/karma.conf.js"
-          }
         }
       }
     },
@@ -348,14 +293,6 @@
               "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.lib.prod.json"
             }
           }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/cf-autoscaler/src/test.ts",
-            "tsConfig": "src/frontend/packages/cf-autoscaler/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/cf-autoscaler/karma.conf.js"
-          }
         }
       }
     },
@@ -364,34 +301,15 @@
       "sourceRoot": "src/frontend/packages/kubernetes/src",
       "projectType": "library",
       "prefix": "lib",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/kubernetes/src/test.ts",
-            "tsConfig": "src/frontend/packages/kubernetes/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/kubernetes/karma.conf.js"
-          }
-        }
-      }
+      "architect": {}
     },
     "git": {
       "root": "src/frontend/packages/git",
       "sourceRoot": "src/frontend/packages/git/src",
       "projectType": "library",
       "prefix": "lib",
-      "architect": {
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "src/frontend/packages/git/src/test.ts",
-            "tsConfig": "src/frontend/packages/git/tsconfig.spec.json",
-            "karmaConfig": "src/frontend/packages/git/karma.conf.js"
-          }
-        }
-      }
+      "architect": {}
     }
-
   },
   "schematics": {
     "@schematics/angular:component": {
@@ -403,7 +321,9 @@
     }
   },
   "cli": {
-  "analytics": false,
-  "cache": { "enabled": true }
+    "analytics": false,
+    "cache": {
+      "enabled": true
+    }
   }
 }

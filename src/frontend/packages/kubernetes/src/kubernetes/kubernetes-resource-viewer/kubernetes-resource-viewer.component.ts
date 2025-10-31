@@ -10,7 +10,7 @@ import {
   TemplateRef,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+  inject} from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -69,18 +69,14 @@ selector: 'app-kubernetes-resource-viewer',
     SidepanelPreviewComponent
   ]
 })
-export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
-
-  constructor(
-    private endpointsService: EndpointsService,
-    private kubeEndpointService: KubernetesEndpointService,
-    private resolver: ComponentFactoryResolver,
-    private userFavoriteManager: UserFavoriteManager,
-    private viewContainerRef: ViewContainerRef,
-    private confirmDialog: ConfirmationDialogService,
-    private sidePanelService: SidePanelService,
-    private snackBarService: SnackBarService,
-  ) { }
+export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {  private endpointsService = inject(EndpointsService);
+  private kubeEndpointService = inject(KubernetesEndpointService);
+  private resolver = inject(ComponentFactoryResolver);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private viewContainerRef = inject(ViewContainerRef);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private sidePanelService = inject(SidePanelService);
+  private snackBarService = inject(SnackBarService);
 
   public title: string;
   public resource$: Observable<KubernetesResourceViewerResource>;

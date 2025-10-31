@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
@@ -79,7 +79,7 @@ export class MaxListMessageComponent implements OnDestroy {
   private configSubject = new BehaviorSubject<ITableTextMaxed | null>(null);
   private config$ = this.configSubject.asObservable();
 
-  constructor(private store: Store<AppState>) { }
+  private store = inject(Store<AppState>);
 
   public state$: Observable<{
     icon: string;

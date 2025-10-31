@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
@@ -25,17 +25,15 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
   ]
 })
 export class CardCfInfoComponent implements OnInit, OnDestroy {
+  public cfEndpointService = inject(CloudFoundryEndpointService);
+  public userInviteService = inject(UserInviteService);
+  public userInviteConfigureService = inject(UserInviteConfigureService);
+  private dialog = inject(TailwindDialogService);
+  private esf = inject(EntityServiceFactory);
+
   public apiUrl: string;
   private subs: Subscription[] = [];
   public autoscalerVersion$: Observable<string>;
-
-  constructor(
-    public cfEndpointService: CloudFoundryEndpointService,
-    public userInviteService: UserInviteService,
-    public userInviteConfigureService: UserInviteConfigureService,
-    private dialog: TailwindDialogService,
-    private esf: EntityServiceFactory
-  ) { }
 
   description$: Observable<string>;
 

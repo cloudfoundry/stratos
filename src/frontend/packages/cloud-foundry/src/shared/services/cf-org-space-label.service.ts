@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -19,6 +20,7 @@ export class CfOrgSpaceLabelService {
   private cf$: Observable<EndpointModel>;
   private org$: Observable<APIResource<IOrganization>>;
   private space$: Observable<APIResource<ISpace>>;
+  private store = inject(Store<CFAppState>);
 
   /**
    * @param cfGuid Only important if using getValue
@@ -26,7 +28,6 @@ export class CfOrgSpaceLabelService {
    * @param spaceGuid Only important if using getValue
    */
   constructor(
-    private store: Store<CFAppState>,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {

@@ -31,7 +31,7 @@ export class CurrentUserPermissionsService {
     // Cannot set default value for parameter as the Optional decorator sets it to null
     const nullSafeCustomCheckers = customCheckers || [];
     this.allCheckers = [
-      new StratosUserPermissionsChecker(store),
+      new StratosUserPermissionsChecker(),
       ...nullSafeCustomCheckers
     ];
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {Component, OnInit, signal, inject} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -42,20 +42,24 @@ export class KubernetesAnalysisReportComponent implements OnInit {
     { value: 'Analysis', routerLink: '' },
     { value: 'Report' },
   ]);
-  public breadcrumbs$ = toObservable(this.breadcrumbsSignal);
+  public breadcrumbs$ = toObservable(this.breadcrumbsSignal);  private analysisService = inject(KubernetesAnalysisService);
+  private route = inject(ActivatedRoute);
+  private kubeEndpointService = inject(KubernetesEndpointService);
 
-  constructor(
-    private analysisService: KubernetesAnalysisService,
-    private route: ActivatedRoute,
-    private kubeEndpointService: KubernetesEndpointService,
-  ) {
-    this.id = route.snapshot.params.id;
+
+
+  constructor() {
+
+
+    this.id = this.route.snapshot.params.id;
 
     // Initialize breadcrumbs with actual route
     this.breadcrumbsSignal.set([
-      { value: 'Analysis', routerLink: getParentURL(route, 2) },
+      { value: 'Analysis', routerLink: getParentURL(this.route, 2) },
       { value: 'Report' },
     ]);
+
+
   }
 
   ngOnInit() {
