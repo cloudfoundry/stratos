@@ -64,6 +64,7 @@
         "@types/d3-scale": "^4.0.9",
         "@types/d3-timer": "^3.0.2",
         "@types/hammerjs": "^2.0.46",
+        "@types/intersect": "^1.0.3",
         "@types/jasmine": "^5.1.9",
         "@types/jasminewd2": "2.0.13",
         "@types/js-yaml": "4.0.9",
@@ -787,6 +788,8 @@
     "@types/http-errors": ["@types/http-errors@2.0.5", "", {}, "sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg=="],
 
     "@types/http-proxy": ["@types/http-proxy@1.17.16", "", { "dependencies": { "@types/node": "*" } }, "sha512-sdWoUajOB1cd0A8cRRQ1cfyWNbmFKLAqBB89Y8x5iYyG/mkJHc0YUH8pdWBy2omi9qtCpiIgGjuwO0dQST2l5w=="],
+
+    "@types/intersect": ["@types/intersect@1.0.3", "", {}, "sha512-hkSb60ZvGifBa2x36VpjMDS08wZfc8f4QTXfdf3QWLAxcegMKiF2o1gh3jfaHv07I4W7HwNpheAX98HRK9Nkzg=="],
 
     "@types/jasmine": ["@types/jasmine@5.1.12", "", {}, "sha512-1BzPxNsFDLDfj9InVR3IeY0ZVf4o9XV+4mDqoCfyPkbsA7dYyKAPAb2co6wLFlHcvxPlt1wShm7zQdV7uTfLGA=="],
 

@@ -131,6 +131,7 @@
     "@types/d3-scale": "^4.0.9",
     "@types/d3-timer": "^3.0.2",
     "@types/hammerjs": "^2.0.46",
+    "@types/intersect": "^1.0.3",
     "@types/jasmine": "^5.1.9",
     "@types/jasminewd2": "2.0.13",
     "@types/js-yaml": "4.0.9",
