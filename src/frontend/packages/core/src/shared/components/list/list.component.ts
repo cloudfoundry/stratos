@@ -706,6 +706,20 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     ));
   }
 
+  onPaginateChange(pageEvent: PageEvent) {
+    const pageSizeChanged = this.paginatorSettings.pageSize !== pageEvent.pageSize;
+    const pageChanged = this.paginatorSettings.pageIndex !== pageEvent.pageIndex;
+
+    if (pageSizeChanged) {
+      this.paginationController.pageSize(pageEvent.pageSize);
+      if (this.dataSource.isLocal) {
+        this.paginationController.page(0);
+      }
+    } else if (pageChanged) {
+      this.paginationController.page(pageEvent.pageIndex);
+    }
+  }
+
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
     const result = listActionConfig.action(Array.from(this.dataSource.selectedRows().values()));
     if (isObservable(result)) {

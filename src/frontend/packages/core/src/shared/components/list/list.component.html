@@ -253,7 +253,8 @@
           [pageSize]="paginatorSettings.pageSize"
           [pageSizeOptions]="paginatorSettings.pageSizeOptions"
           [pageIndex]="paginatorSettings.pageIndex"
-          [showFirstLastButtons]="true">
+          [showFirstLastButtons]="true"
+          (page)="onPaginateChange($event)">
         </app-paginator>
       </div>
     </div>
