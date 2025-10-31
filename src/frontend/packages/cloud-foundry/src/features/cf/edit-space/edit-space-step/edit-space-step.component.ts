@@ -136,7 +136,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDe
   updateSpaceQuota() {
     const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
     const mon = spaceQuotaGuid ?
-      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, spaceQuotaGuid) :
+      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, String(spaceQuotaGuid)) :
       cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
     return mon.pipe(
       pairwise(),

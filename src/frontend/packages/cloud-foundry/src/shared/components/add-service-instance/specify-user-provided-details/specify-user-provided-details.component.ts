@@ -6,6 +6,19 @@ import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup,
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 
+// Form interfaces
+interface CreateEditServiceInstanceForm {
+  name: FormControl<string>;
+  syslog_drain_url: FormControl<string>;
+  credentials: FormControl<string>;
+  route_service_url: FormControl<string>;
+  tags: FormControl<any[]>;
+}
+
+interface BindExistingInstanceForm {
+  serviceInstances: FormControl<string>;
+}
+
 import { StatefulIconComponent } from '../../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
@@ -65,21 +78,21 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       route && route.snapshot ? route.snapshot.params : { endpointId: null, serviceInstanceId: null };
     this.isUpdate = endpointId && serviceInstanceId;
 
-    this.createEditServiceInstance = new UntypedFormGroup({
-      name: new UntypedFormControl('', [Validators.required, Validators.maxLength(50)]),
-      syslog_drain_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
-      credentials: new UntypedFormControl('', isValidJsonValidator()),
-      route_service_url: new UntypedFormControl('', [Validators.pattern(urlValidationExpression)]),
-      tags: new UntypedFormControl([]),
+    this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
+      name: new FormControl('', { validators: [Validators.required, Validators.maxLength(50)], nonNullable: true }),
+      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
+      route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      tags: new FormControl<any[]>([], { nonNullable: true }),
     });
-    this.bindExistingInstance = new UntypedFormGroup({
-      serviceInstances: new UntypedFormControl('', [Validators.required]),
+    this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
+      serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
   }
-  public createEditServiceInstance: UntypedFormGroup;
-  public bindExistingInstance: UntypedFormGroup;
+  public createEditServiceInstance: FormGroup<CreateEditServiceInstanceForm>;
+  public bindExistingInstance: FormGroup<BindExistingInstanceForm>;
   public allServiceInstanceNames: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
@@ -339,15 +352,16 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     );
   }
 
-  private getServiceData() {
-    const data = {
-      ...this.createEditServiceInstance.value,
-      spaceGuid: this.spaceGuid || null
+  private getServiceData(): IUserProvidedServiceInstanceData {
+    const formValue = this.createEditServiceInstance.value;
+    return {
+      spaceGuid: this.spaceGuid,
+      name: formValue.name!,
+      route_service_url: formValue.route_service_url || undefined,
+      syslog_drain_url: formValue.syslog_drain_url || undefined,
+      tags: this.getTagsArray(),
+      credentials: formValue.credentials ? JSON.parse(formValue.credentials) : undefined
     };
-    data.credentials = data.credentials ? JSON.parse(data.credentials) : {};
-
-    data.tags = this.getTagsArray();
-    return data;
   }
 
 

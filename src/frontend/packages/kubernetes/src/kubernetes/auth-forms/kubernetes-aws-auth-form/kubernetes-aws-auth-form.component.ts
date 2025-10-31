@@ -25,5 +25,5 @@ interface AWSAuthForm {
 })
 export class KubernetesAWSAuthFormComponent implements IAuthForm {
   showPassword = false;
-  @Input() formGroup: TypedFormGroup<AWSAuthForm>;
+  @Input() formGroup: FormGroup<AWSAuthForm>;
 }

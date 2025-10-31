@@ -27,6 +27,17 @@ import { TileGridComponent } from '../../../../../core/src/shared/components/til
 import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 
+interface EditTriggerForm {
+  metric_type: FormControl<string>;
+  operator: FormControl<string>;
+  threshold: FormControl<number>;
+  unit: FormControl<string>;
+  adjustment: FormControl<number>;
+  breach_duration_secs: FormControl<number>;
+  cool_down_secs: FormControl<number>;
+  adjustment_type: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
@@ -52,7 +63,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   private metricUnitSubject = new BehaviorSubject(this.metricTypes[0]);
   metricUnit$: Observable<string>;
   operatorTypes = AutoscalerConstants.UpperOperators.concat(AutoscalerConstants.LowerOperators);
-  editTriggerForm: UntypedFormGroup;
+  editTriggerForm: FormGroup<EditTriggerForm>;
   // appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
@@ -65,27 +76,27 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editTriggerForm = this.fb.group({
-      metric_type: [0, [Validators.required, this.validateTriggerMetricType()]],
-      operator: [0, this.validateTriggerOperator()],
-      threshold: [0, [Validators.required, Validators.min(1), this.validateTriggerThreshold()]],
-      unit: [0],
-      adjustment: [0, [Validators.required, Validators.min(1), this.validateTriggerAdjustment()]],
-      breach_duration_secs: [0, [
+    this.editTriggerForm = this.fb.group<EditTriggerForm>({
+      metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),
+      operator: this.fb.control('', { validators: [this.validateTriggerOperator()], nonNullable: true }),
+      threshold: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerThreshold()], nonNullable: true }),
+      unit: this.fb.control('', { nonNullable: true }),
+      adjustment: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerAdjustment()], nonNullable: true }),
+      breach_duration_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min),
         Validators.max(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_max)
-      ]],
-      cool_down_secs: [0, [
+      ], nonNullable: true }),
+      cool_down_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_min),
         Validators.max(AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_max)
-      ]],
-      adjustment_type: [0, this.validateTriggerAdjustmentType()]
+      ], nonNullable: true }),
+      adjustment_type: this.fb.control('', { validators: [this.validateTriggerAdjustmentType()], nonNullable: true })
     });
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();

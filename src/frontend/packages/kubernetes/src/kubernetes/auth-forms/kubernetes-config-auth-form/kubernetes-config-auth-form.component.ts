@@ -20,7 +20,7 @@ interface ConfigAuthForm {
   ]
 })
 export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: TypedFormGroup<ConfigAuthForm>;
+  @Input() formGroup: FormGroup<ConfigAuthForm>;
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
     return {};

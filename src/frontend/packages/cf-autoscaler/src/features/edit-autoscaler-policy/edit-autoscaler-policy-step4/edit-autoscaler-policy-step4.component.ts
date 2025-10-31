@@ -34,6 +34,14 @@ import { TileGroupComponent } from '../../../../../core/src/shared/components/ti
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { MetadataItemComponent } from '../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 
+interface EditSpecificDateForm {
+  instance_min_count: FormControl<number>;
+  instance_max_count: FormControl<number>;
+  initial_min_instance_count: FormControl<number>;
+  start_date_time: FormControl<string>;
+  end_date_time: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
@@ -55,7 +63,7 @@ import { MetadataItemComponent } from '../../../../../core/src/shared/components
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
-  editSpecificDateForm: UntypedFormGroup;
+  editSpecificDateForm: FormGroup<EditSpecificDateForm>;
 
   private updateAppAutoscalerPolicyService: EntityService;
   public declare currentPolicy: AppAutoscalerPolicyLocal;
@@ -70,19 +78,19 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   constructor(
     public applicationService: ApplicationService,
     private store: Store<AppState>,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private entityServiceFactory: EntityServiceFactory,
     service: EditAutoscalerPolicyService,
     route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     super(service, route);
-    this.editSpecificDateForm = this.fb.group({
-      instance_min_count: [0],
-      instance_max_count: [0],
-      initial_min_instance_count: [0, [this.validateSpecificDateInitialMin()]],
-      start_date_time: [0, [Validators.required, this.validateSpecificDateStartDateTime()]],
-      end_date_time: [0, [Validators.required, this.validateSpecificDateEndDateTime()]]
+    this.editSpecificDateForm = this.fb.group<EditSpecificDateForm>({
+      instance_min_count: new FormControl<number>(0, { nonNullable: true }),
+      instance_max_count: new FormControl<number>(0, { nonNullable: true }),
+      initial_min_instance_count: new FormControl<number>(0, { validators: [this.validateSpecificDateInitialMin()], nonNullable: true }),
+      start_date_time: new FormControl<string>('', { validators: [Validators.required, this.validateSpecificDateStartDateTime()], nonNullable: true }),
+      end_date_time: new FormControl<string>('', { validators: [Validators.required, this.validateSpecificDateEndDateTime()], nonNullable: true })
     });
   }
 
@@ -267,7 +275,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   }
 }
 
-export function validateRecurringSpecificMin(editForm: UntypedFormGroup, editMutualValidation: { limit: boolean }): ValidatorFn {
+export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm &&
       numberWithFractionOrExceedRange(control.value, 1, editForm.get('instance_max_count').value - 1, true);
@@ -283,7 +291,7 @@ export function validateRecurringSpecificMin(editForm: UntypedFormGroup, editMut
   };
 }
 
-export function validateRecurringSpecificMax(editForm: UntypedFormGroup, editMutualValidation: { limit: boolean }): ValidatorFn {
+export function validateRecurringSpecificMax(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any, } => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
       editForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true);

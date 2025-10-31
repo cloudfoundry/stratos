@@ -24,7 +24,7 @@ interface CertsAuthForm {
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: TypedFormGroup<CertsAuthForm>;
+  @Input() formGroup: FormGroup<CertsAuthForm>;
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

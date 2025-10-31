@@ -13,6 +13,10 @@ import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
+interface CreateApplicationForm {
+  appName: FormControl<string | null>;
+}
+
 @Component({
 selector: 'app-create-application-step2',
   templateUrl: './create-application-step2.component.html',
@@ -33,11 +37,11 @@ export class CreateApplicationStep2Component implements OnInit {
   private store = inject(Store<CFAppState>);
   private fb = inject(UntypedFormBuilder);
 
-  form: UntypedFormGroup;
+  form: FormGroup<CreateApplicationForm>;
 
   validate: Observable<boolean>;
 
-  appName = new UntypedFormControl();
+  appName = new FormControl<string | null>(null);
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   onNext: StepOnNextFunction = () => {
@@ -50,7 +54,7 @@ export class CreateApplicationStep2Component implements OnInit {
   }
 
   ngOnInit() {
-    this.form = new UntypedFormGroup({ appName: this.appName });
+    this.form = new FormGroup<CreateApplicationForm>({ appName: this.appName });
     this.validate = this.form.statusChanges.pipe(
       map(() => {
         return this.form.valid;

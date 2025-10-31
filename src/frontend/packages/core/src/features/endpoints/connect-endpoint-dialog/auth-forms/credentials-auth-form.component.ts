@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 import { ReactiveFormsModule, TypedFormGroup, FormControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
-import { IAuthForm } from '@stratosui/store';
+import { IAuthForm } from '../../../../../../../store/src/extension-types';
 
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 

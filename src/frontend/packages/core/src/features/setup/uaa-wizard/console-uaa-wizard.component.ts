@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewEncapsulation, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   VerifySession,
@@ -12,6 +12,16 @@ import {
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
+
+interface UAAWizardForm {
+  apiUrl: FormControl<string>;
+  clientId: FormControl<string>;
+  adminPassword: FormControl<string>;
+  adminUsername: FormControl<string>;
+  clientSecret: FormControl<string>;
+  useSSO: FormControl<boolean>;
+  skipSSL: FormControl<boolean>;
+}
 
 import { APP_TITLE } from '../../../core/core.types';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -54,7 +64,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
     this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
-  uaaForm: UntypedFormGroup;
+  uaaForm: FormGroup<UAAWizardForm>;
   validateUAAForm: Observable<boolean>;
   uaaScopes: string[] = [];
   selectedScope = '';
@@ -137,14 +147,14 @@ export class ConsoleUaaWizardComponent implements OnInit {
       });
   }
   ngOnInit() {
-    this.uaaForm = new UntypedFormGroup({
-      apiUrl: new UntypedFormControl('', [Validators.required as any]),
-      skipSSL: new UntypedFormControl(false),
-      clientId: new UntypedFormControl('', [Validators.required as any]),
-      clientSecret: new UntypedFormControl(''),
-      adminUsername: new UntypedFormControl('', [Validators.required as any]),
-      adminPassword: new UntypedFormControl('', [Validators.required as any]),
-      useSSO: new UntypedFormControl(false),
+    this.uaaForm = new FormGroup<UAAWizardForm>({
+      apiUrl: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      skipSSL: new FormControl(false, { nonNullable: true }),
+      clientId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      clientSecret: new FormControl('', { nonNullable: true }),
+      adminUsername: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      adminPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      useSSO: new FormControl(false, { nonNullable: true }),
     });
 
     let observer: any;

@@ -61,7 +61,7 @@
       [formGroup]="selectExistingInstanceForm">
       <app-form-field>
         <app-label>Service Instance</app-label>
-        <app-select class="form-control" required formControlName="serviceInstances">
+        <app-select class="form-control" required formControlName="serviceInstance">
           @for (sI of bindableServiceInstances$ | async; track sI) {
             <app-option [disabled]="!sI.metadata.guid"
             [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>

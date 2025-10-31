@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -28,6 +28,17 @@ interface EndpointModelMap {
   [id: string]: EndpointModel;
 }
 
+interface EditEndpointForm {
+  name: FormControl<string>;
+  url: FormControl<string>;
+  skipSSL: FormControl<boolean>;
+  setClientInfo: FormControl<boolean>;
+  clientID: FormControl<string>;
+  clientSecret: FormControl<string>;
+  allowSSO: FormControl<boolean>;
+  caCert: FormControl<string>;
+}
+
 @Component({
   selector: 'app-edit-endpoint-step',
   templateUrl: './edit-endpoint-step.component.html',
@@ -48,7 +59,7 @@ interface EndpointModelMap {
 export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
   endpointID: string;
-  editEndpoint: UntypedFormGroup;
+  editEndpoint: FormGroup<EditEndpointForm>;
   showAdvancedFields = false;
   clientRedirectURI: string;
   endpointTypeSupportsSSO = false;
@@ -66,15 +77,15 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   constructor(
     activatedRoute: ActivatedRoute,
   ) {
-    this.editEndpoint = new UntypedFormGroup({
-      name: new UntypedFormControl('', [Validators.required as any]),
-      url: new UntypedFormControl('', [Validators.required as any]),
-      skipSSL: new UntypedFormControl(false),
-      setClientInfo: new UntypedFormControl(false),
-      clientID: new UntypedFormControl(''),
-      clientSecret: new UntypedFormControl(''),
-      allowSSO: new UntypedFormControl(false),
-      caCert: new UntypedFormControl(''),
+    this.editEndpoint = new FormGroup<EditEndpointForm>({
+      name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      url: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      skipSSL: new FormControl(false, { nonNullable: true }),
+      setClientInfo: new FormControl(false, { nonNullable: true }),
+      clientID: new FormControl('', { nonNullable: true }),
+      clientSecret: new FormControl('', { nonNullable: true }),
+      allowSSO: new FormControl(false, { nonNullable: true }),
+      caCert: new FormControl('', { nonNullable: true }),
     });
 
     this.clientRedirectURI = getSSOClientRedirectURI();

@@ -1,7 +1,11 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
+
+interface SchemaJsonForm {
+  json: FormControl<string>;
+}
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -86,7 +90,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   cleanSchema: object;
 
   jsonData: object;
-  jsonForm: UntypedFormGroup;
+  jsonForm: FormGroup<SchemaJsonForm>;
 
   formData: object = {};
   formInitialData: object;
@@ -96,8 +100,8 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   subs: Subscription[] = [];
 
   ngOnInit() {
-    this.jsonForm = new UntypedFormGroup({
-      json: new UntypedFormControl('', isValidJsonValidator()),
+    this.jsonForm = new FormGroup<SchemaJsonForm>({
+      json: new FormControl('', { nonNullable: true, validators: [isValidJsonValidator()] }),
     });
   }
 

@@ -13,6 +13,14 @@ import { ListConfig } from '../../../../../core/src/shared/components/list/list.
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
 
+/**
+ * Typed form interface for CF Events list filters
+ */
+interface EventsFilterForm {
+  actee: FormControl<string | null>;
+  type: FormControl<string[] | null>;
+}
+
 @Component({
   selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
@@ -34,7 +42,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
    */
   @Input() typeMustContain: string;
 
-  filtersFormGroup: UntypedFormGroup;
+  filtersFormGroup: FormGroup<EventsFilterForm>;
   typeValues: string[] = [
     'app.crash',
     'audit.app.copy-bits',
@@ -128,9 +136,9 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   constructor(
     listConfig: ListConfig<APIResource>,
   ) {
-    this.filtersFormGroup = new UntypedFormGroup({
-      actee: new UntypedFormControl(null, []),
-      type: new UntypedFormControl(null, []),
+    this.filtersFormGroup = new FormGroup<EventsFilterForm>({
+      actee: new FormControl<string | null>(null),
+      type: new FormControl<string[] | null>(null),
     });
     this.config = (listConfig as any as CfEventsConfigService);
 
@@ -143,7 +151,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
           this.updateType(params.type);
           this.updateActee(params.actee);
           this.initialSet = true;
-        } else if (this.filtersFormGroup.controls.actee.value !== params.actee) {
+        } else if (this.filtersFormGroup.get('actee')?.value !== params.actee) {
           this.updateActee(params.actee);
         }
       })
@@ -154,7 +162,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
       this.filtersFormGroup.valueChanges.pipe(
         debounceTime(250)
       ).subscribe(values => {
-        this.config.setEventFilters(values);
+        this.config.setEventFilters(values as { actee: string; type: string[] });
         this.hasActeeFilter = !!values.actee;
       })
     );
@@ -178,13 +186,13 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   }
 
   private updateType(type: string[]) {
-    this.filtersFormGroup.controls.type.setValue(type);
-    this.filtersFormGroup.controls.type.markAsDirty();
+    this.filtersFormGroup.get('type')?.setValue(type);
+    this.filtersFormGroup.get('type')?.markAsDirty();
   }
 
   private updateActee(actee: string) {
-    this.filtersFormGroup.controls.actee.setValue(actee);
-    this.filtersFormGroup.controls.actee.markAsDirty();
+    this.filtersFormGroup.get('actee')?.setValue(actee);
+    this.filtersFormGroup.get('actee')?.markAsDirty();
     this.hasActeeFilter = !!actee;
   }
 

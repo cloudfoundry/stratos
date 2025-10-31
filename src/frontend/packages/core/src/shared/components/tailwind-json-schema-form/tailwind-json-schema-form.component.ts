@@ -28,7 +28,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   @Output() onChanges = new EventEmitter<any>();
   @Output() validationErrors = new EventEmitter<any[]>();
 
-  form: UntypedFormGroup;
+  form: FormGroup<any>;
   formFields: any[] = [];
   formData: any = {};
 
@@ -69,7 +69,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
         validators.push(Validators.required);
       }
 
-      const control = new UntypedFormControl('', validators);
+      const control = new FormControl('', validators);
       formGroup[key] = control;
 
       this.formFields.push({

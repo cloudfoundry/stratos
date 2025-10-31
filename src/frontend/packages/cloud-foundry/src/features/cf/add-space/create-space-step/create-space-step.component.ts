@@ -95,11 +95,12 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   submit: StepOnNextFunction = () => {
     const id = `${this.orgGuid}-${this.spaceName.value}`;
+    const quotaValue = this.quotaDefinition.value;
     return cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
       createSpace: {
         name: this.spaceName.value,
         organization_guid: this.orgGuid,
-        space_quota_definition_guid: this.quotaDefinition.value
+        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
       },
       orgGuid: this.orgGuid
     }).pipe(

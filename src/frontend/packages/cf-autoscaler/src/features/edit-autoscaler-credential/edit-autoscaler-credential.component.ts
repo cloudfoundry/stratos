@@ -46,7 +46,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   parentUrl: string;
   applicationName$: Observable<string>;
 
-  public editCredentialForm: UntypedFormGroup;
+  public editCredentialForm: FormGroup<AutoscalerCredentialForm>;
   public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
 
   private appAutoscalerCredentialErrorSub: Subscription;
@@ -60,7 +60,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
   constructor(
     public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appAutoscalerCredentialSnackBar: TailwindSnackBarService,
@@ -68,10 +68,10 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
-    this.editCredentialForm = this.fb.group({
-      actype: new UntypedFormControl({ value: true }),
-      acusername: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
-      acpassword: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
+    this.editCredentialForm = this.fb.group<AutoscalerCredentialForm>({
+      actype: this.fb.nonNullable.control({ value: true, disabled: false }),
+      acusername: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required),
+      acpassword: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required),
     });
   }
 

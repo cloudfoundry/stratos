@@ -25,6 +25,13 @@ import {
 } from '../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
 
+interface EditApplicationForm {
+  name: FormControl<string>;
+  instances: FormControl<number>;
+  disk_quota: FormControl<number>;
+  memory: FormControl<number>;
+  enable_ssh: FormControl<boolean>;
+}
 
 @Component({
   selector: 'app-edit-application',
@@ -50,7 +57,7 @@ import { ApplicationService } from '../application.service';
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 
-  editAppForm: UntypedFormGroup;
+  editAppForm: FormGroup<EditApplicationForm>;
 
   uniqueNameValidator: AppNameUniqueDirective;
 
@@ -59,28 +66,29 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   constructor(
     public applicationService: ApplicationService,
     private store: Store<CFAppState>,
-    private fb: UntypedFormBuilder,
+    private fb: FormBuilder,
     private http: HttpClient,
   ) {
     this.uniqueNameValidator = new AppNameUniqueDirective(this.store, this.http);
-    this.editAppForm = this.fb.group({
-      name: ['',
-        [Validators.required],
-        [this.uniqueNameValidator],
-      ],
-      instances: [0, [
-        Validators.required,
-        Validators.min(0)
-      ]],
-      disk_quota: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      memory: [0, [
-        Validators.required,
-        Validators.min(1)
-      ]],
-      enable_ssh: false
+    this.editAppForm = this.fb.group<EditApplicationForm>({
+      name: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+        asyncValidators: [this.uniqueNameValidator as any]
+      }),
+      instances: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(0)]
+      }),
+      disk_quota: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(1)]
+      }),
+      memory: new FormControl(0, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.min(1)]
+      }),
+      enable_ssh: new FormControl(false, { nonNullable: true })
     });
   }
 
@@ -121,9 +129,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   updateApp: StepOnNextFunction = () => {
     const updates: { [key: string]: any } = {};
     // We will only send the values that were actually edited
-    for (const key of Object.keys(this.editAppForm.value)) {
-      if (!this.editAppForm.controls[key].pristine) {
-        updates[key] = this.editAppForm.value[key];
+    const formValue = this.editAppForm.value;
+    for (const key of Object.keys(formValue)) {
+      const control = (this.editAppForm.controls as any)[key];
+      if (control && !control.pristine) {
+        updates[key] = (formValue as any)[key];
       }
     }
 
