@@ -37,6 +37,8 @@
     ],
     "preserveSymlinks": true,
     "paths": {
+      "rxjs-spy": ["../node_modules/rxjs-spy/cjs/index.d.ts"],
+      "rxjs-spy/operators": ["../node_modules/rxjs-spy/cjs/operators/index.d.ts"],
       "@stratosui/core": ["frontend/packages/core/src/public-api.ts"],
       "@stratosui/extension": ["frontend/packages/extension/src/public-api.ts"],
       "@stratosui/store": ["frontend/packages/store/src/public-api.ts"],
