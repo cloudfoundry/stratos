@@ -1,5 +1,4 @@
-import {
-  AfterContentInit,
+import { ChangeDetectionStrategy, AfterContentInit,
   Component,
   ContentChildren,
   Input,
@@ -7,7 +6,7 @@ import {
   OnInit,
   QueryList,
   ViewEncapsulation,
-} from '@angular/core';
+ } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
@@ -33,7 +32,8 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
     CommonModule,
     RouterModule,
     DotContentComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
@@ -102,8 +102,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.allSteps.forEach((step => {
       this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
         this.filterSteps();
-      }));
-    }));
+      });
+    });
     this.filterSteps();
   }
 
@@ -154,7 +154,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
           }
           return observableOf(undefined);
-        })).subscribe();
+        }).subscribe();
     }
   }
 

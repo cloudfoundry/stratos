@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -37,6 +37,7 @@ import { ServiceIconComponent } from '../../service-icon/service-icon.component'
   templateUrl: './service-summary-card.component.html',
   styleUrls: ['./service-summary-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MetaCardComponent,

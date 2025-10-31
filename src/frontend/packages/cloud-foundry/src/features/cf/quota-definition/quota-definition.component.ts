@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -39,6 +39,7 @@ export const QUOTA_ORG_GUID = 'org';
     getActiveRouteCfOrgSpaceProvider
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

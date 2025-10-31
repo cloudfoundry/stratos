@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
@@ -12,6 +12,7 @@ import {
   templateUrl: './service-plans.component.html',
   styleUrls: ['./service-plans.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ListComponent
   ],

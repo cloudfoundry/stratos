@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { ProgressBarComponent } from './progress-bar.component';
 
 /**
@@ -17,7 +17,8 @@ import { ProgressBarComponent } from './progress-bar.component';
       [color]="color"
       [customHeight]="customHeight">
     </app-progress-bar>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppProgressBarComponent extends ProgressBarComponent {
 }

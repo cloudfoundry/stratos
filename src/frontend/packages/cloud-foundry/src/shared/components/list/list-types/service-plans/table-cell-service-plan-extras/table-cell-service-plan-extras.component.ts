@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -10,6 +10,7 @@ import { IServicePlan } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-plan-extras.component.html',
   styleUrls: ['./table-cell-service-plan-extras.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class TableCellAServicePlanExtrasComponent extends TableCellCustom<APIResource<IServicePlan>> { }

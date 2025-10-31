@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   EntityMonitor,
@@ -122,6 +122,7 @@ export class ActionMonitorComponentState {
   selector: 'app-action-monitor-icon',
   templateUrl: './app-action-monitor-icon.component.html',
   styleUrls: ['./app-action-monitor-icon.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

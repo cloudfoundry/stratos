@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -21,6 +21,7 @@ import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/car
   selector: 'app-cloud-foundry-summary-tab',
   templateUrl: './cloud-foundry-summary-tab.component.html',
   styleUrls: ['./cloud-foundry-summary-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

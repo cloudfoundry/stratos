@@ -33,6 +33,7 @@ import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
     ServicesWallService
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

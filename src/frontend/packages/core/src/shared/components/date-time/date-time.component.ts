@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
 
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -12,7 +12,8 @@ import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns'
     ReactiveFormsModule
 ],
   templateUrl: './date-time.component.html',
-  styleUrls: ['./date-time.component.scss']
+  styleUrls: ['./date-time.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateTimeComponent implements OnDestroy {
 

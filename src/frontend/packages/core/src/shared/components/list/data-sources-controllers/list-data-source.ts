@@ -1,6 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
-import { signal, Signal } from '@angular/core';
+import { ApplicationRef, signal, Signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   entityCatalog,
@@ -153,10 +153,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 
+  // ZONELESS: ApplicationRef injected for manual change detection on async operations
+  private appRef: ApplicationRef;
+
   constructor(
     private config: IListDataSourceConfig<A, T>,
   ) {
     super();
+    // ZONELESS: Inject ApplicationRef from config store's injector
+    this.appRef = config.store['injector']?.get(ApplicationRef);
     this.init(config);
     const paginationMonitor = new PaginationMonitor(
       this.store,
@@ -475,6 +480,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const isSelecting = multiMode && currentSelection.size > 0;
       this._isSelecting.set(isSelecting);
       this._isSelectingSubject.next(isSelecting);
+      // ZONELESS: Trigger change detection after async selection state update
+      this.appRef?.tick();
     });
   }
 
@@ -513,6 +520,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       const isSelecting = currentSelection.size > 0;
       this._isSelecting.set(isSelecting);
       this._isSelectingSubject.next(isSelecting);
+      // ZONELESS: Trigger change detection after async bulk selection update
+      this.appRef?.tick();
     });
 
   }

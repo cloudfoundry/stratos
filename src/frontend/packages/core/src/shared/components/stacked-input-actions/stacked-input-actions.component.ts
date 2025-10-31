@@ -1,5 +1,4 @@
-import {
-  ChangeDetectorRef,
+import { ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
@@ -12,7 +11,7 @@ import {
   ViewContainerRef,
   signal,
   Signal,
-} from '@angular/core';
+ } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -44,7 +43,8 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
   standalone: true,
   imports: [
     CustomIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
@@ -90,7 +90,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.subs.push(stackedAction.remove.subscribe(() => {
       this.removeComponent(stackedAction);
       this.emitState();
-    }));
+    });
     // Handle updates of state from the compnent
     this.subs.push(stackedAction.stateOut.subscribe((update: StackedInputActionUpdate) => {
       const updateRecord = update as Record<string, any>;
@@ -99,7 +99,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
         this.components[update.key].update = update;
         this.emitState();
       }
-    }));
+    });
 
     // Track how we push state into the component using signals
     const stateInSignal = signal<StackedInputActionsState>(null);
@@ -176,7 +176,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
       // Push state using signal update function
       states.forEach((state, index) => this.components[state.key].stateInUpdate(state));
-    }));
+    });
   }
 
   ngOnDestroy(): void {

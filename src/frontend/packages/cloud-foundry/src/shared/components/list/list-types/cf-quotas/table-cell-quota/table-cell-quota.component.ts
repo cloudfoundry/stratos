@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -10,6 +10,7 @@ import { IQuotaDefinition } from '../../../../../../cf-api.types';
   templateUrl: './table-cell-quota.component.html',
   styleUrls: ['./table-cell-quota.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule
   ]

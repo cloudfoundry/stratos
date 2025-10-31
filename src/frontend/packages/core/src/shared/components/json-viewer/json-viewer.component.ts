@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Segment {
@@ -17,7 +17,8 @@ export interface Segment {
   imports: [
     CommonModule,
     JsonViewerComponent // Self-import for recursive rendering
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JsonViewerComponent implements OnChanges {
 

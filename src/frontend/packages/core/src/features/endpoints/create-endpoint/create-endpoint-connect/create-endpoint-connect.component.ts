@@ -1,5 +1,5 @@
 
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -25,7 +25,8 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
     CustomIconComponent,
     BlurDirective,
     ConnectEndpointComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
@@ -55,7 +56,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
       success: res.success,
       message: res.errorMessage,
       redirect: res.success
-    }))
+    })
   ) : of({
     success: true,
     redirect: true

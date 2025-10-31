@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { StepComponent } from '../../../../core/src/shared/components/stepper/step/step.component';
@@ -9,6 +9,7 @@ import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catal
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../helm-entity-factory';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-helm-hub-registration',
   templateUrl: './helm-hub-registration.component.html',
   styleUrls: ['./helm-hub-registration.component.scss'],

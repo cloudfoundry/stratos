@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
@@ -21,6 +21,7 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   templateUrl: './instances-tab.component.html',
   styleUrls: ['./instances-tab.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     TileGridComponent,
     TileGroupComponent,

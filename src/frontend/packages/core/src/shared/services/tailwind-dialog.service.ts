@@ -73,6 +73,7 @@ export class TailwindDialogRefImpl<T = any, R = any> extends TailwindDialogRef<T
     this._afterClosed.complete();
 
     // Restore focus to previously focused element
+    // Note: Focus restoration is handled by the service with appRef.tick()
     if (this._previouslyFocusedElement) {
       setTimeout(() => {
         this._previouslyFocusedElement?.focus();
@@ -156,6 +157,8 @@ export class TailwindDialogService {
       this.setupFocusTrap(dialogContainer);
       this.focusFirstElement(dialogContainer);
       dialogRef._emitOpened();
+      // ZONELESS: Trigger change detection after dialog is fully opened
+      this.appRef.tick();
     }, 0);
 
     return dialogRef;
@@ -449,6 +452,8 @@ export class TailwindDialogService {
       if (dialogContainer.parentNode) {
         dialogContainer.parentNode.removeChild(dialogContainer);
       }
+      // ZONELESS: Trigger change detection after dialog removal
+      this.appRef.tick();
     }, 300);
   }
 

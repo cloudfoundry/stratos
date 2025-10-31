@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomCheckboxComponent, TableCellCustom } from '@stratosui/core';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
@@ -7,6 +7,7 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 selector: 'app-kube-config-table-select',
   templateUrl: './kube-config-table-select.component.html',
   styleUrls: ['./kube-config-table-select.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CustomCheckboxComponent,

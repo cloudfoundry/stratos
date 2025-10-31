@@ -1,6 +1,6 @@
-import { Component, Injector, Input, OnInit, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Injector, Input, OnInit, Signal, signal, WritableSignal } from '@angular/core';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
@@ -30,6 +30,7 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
   selector: 'app-table-cell-actions',
   templateUrl: './table-cell-actions.component.html',
   styleUrls: ['./table-cell-actions.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule
@@ -49,7 +50,9 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  public busy$: Observable<boolean>;
+  // Convert observables to signals
+  private rowStateSignal: Signal<RowState | undefined>;
+  public busy: Signal<boolean | undefined>;
   public show$: Observable<boolean>;
   public menuOpen = false;
 
@@ -71,9 +74,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   }
 
   ngOnInit() {
-    this.busy$ = this.rowState.pipe(
-      map(state => state.busy)
-    );
+    this.rowStateSignal = toSignal(this.rowState);
+    this.busy = computed(() => this.rowStateSignal()?.busy);
   }
 
   initialise(row: any) {

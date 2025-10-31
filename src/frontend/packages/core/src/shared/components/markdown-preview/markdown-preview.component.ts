@@ -1,6 +1,6 @@
 
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Input, SecurityContext, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, SecurityContext, ViewChild  } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
@@ -17,7 +17,8 @@ import { MarkdownContentObserverDirective } from './markdown-content-observer.di
   imports: [
     SidepanelPreviewComponent,
     MarkdownContentObserverDirective
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 

@@ -225,6 +225,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TableComponent, // Now standalone - moved to imports
     DisableRouterLinkDirective, // Now standalone - moved to imports
     TableCellEndpointStatusComponent, // Now standalone - moved to imports
+    TableCellEndpointNameComponent, // Now standalone - moved to imports
+    TableCellStatusDirective, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,

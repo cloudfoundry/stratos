@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { EndpointModel, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,7 +16,8 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
   imports: [
     CommonModule,
     CopyToClipboardComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
   public endpointAddress$: Observable<any>;

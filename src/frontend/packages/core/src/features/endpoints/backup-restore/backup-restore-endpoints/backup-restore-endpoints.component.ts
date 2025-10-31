@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState, RouterNav } from '@stratosui/store';
 
@@ -13,7 +13,7 @@ interface IAppTileData extends ITileData {
 }
 
 @Component({
-selector: 'app-backup-restore-endpoints',
+  selector: 'app-backup-restore-endpoints',
   templateUrl: './backup-restore-endpoints.component.html',
   styleUrls: ['./backup-restore-endpoints.component.scss'],
   standalone: true,
@@ -22,7 +22,8 @@ selector: 'app-backup-restore-endpoints',
     SteppersComponent,
     StepComponent,
     TileSelectorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreEndpointsComponent {
 
@@ -32,7 +33,7 @@ export class BackupRestoreEndpointsComponent {
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
-      this.store.dispatch(new RouterNav({ path: url }));
+      this.store.dispatch(new RouterNav({ path: url });
     }
   }
 

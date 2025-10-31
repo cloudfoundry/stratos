@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
@@ -14,6 +14,7 @@ selector: 'app-cf-endpoints-missing',
   templateUrl: './cf-endpoints-missing.component.html',
   styleUrls: ['./cf-endpoints-missing.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, NoContentMessageComponent]
 })
 export class CfEndpointsMissingComponent extends EndpointsMissingComponent {

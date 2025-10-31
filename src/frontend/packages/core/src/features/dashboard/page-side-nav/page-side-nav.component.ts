@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
@@ -29,7 +29,8 @@ export interface IPageSideNavTab extends StratosTabMetadata {
     CommonModule,
     RouterModule,
     CustomIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageSideNavComponent implements OnInit {
 
@@ -45,7 +46,7 @@ export class PageSideNavComponent implements OnInit {
     this.pTabs = tabs.map(tab => ({
       ...tab,
       hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
-    }));
+    });
   }
   get tabs(): IPageSideNavTab[] {
     return this.pTabs;

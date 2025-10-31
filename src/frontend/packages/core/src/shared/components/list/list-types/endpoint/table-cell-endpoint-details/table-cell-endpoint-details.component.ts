@@ -1,5 +1,4 @@
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
   ComponentRef,
   Input,
@@ -7,7 +6,7 @@ import {
   Type,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
@@ -18,7 +17,8 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
   templateUrl: './table-cell-endpoint-details.component.html',
   styleUrls: ['./table-cell-endpoint-details.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
 

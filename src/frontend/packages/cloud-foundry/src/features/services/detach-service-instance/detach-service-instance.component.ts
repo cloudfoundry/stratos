@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -32,6 +32,7 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
   templateUrl: './detach-service-instance.component.html',
   styleUrls: ['./detach-service-instance.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
     PageHeaderComponent,

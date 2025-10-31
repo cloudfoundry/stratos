@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -10,6 +10,7 @@ import { EventMetadataComponent } from '../event-metadata/event-metadata.compone
   templateUrl: './table-cell-event-detail.component.html',
   styleUrls: ['./table-cell-event-detail.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     EventMetadataComponent
   ]

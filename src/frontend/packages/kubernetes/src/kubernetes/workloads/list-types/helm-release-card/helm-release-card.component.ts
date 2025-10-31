@@ -1,5 +1,5 @@
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import {Component, Input, inject} from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CardCell } from '../../../../../../core/src/shared/components/list/list.types';
@@ -16,6 +16,7 @@ import { HelmRelease } from '../../workload.types';
   selector: 'app-helm-release-card',
   templateUrl: './helm-release-card.component.html',
   styleUrls: ['./helm-release-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     RouterModule,

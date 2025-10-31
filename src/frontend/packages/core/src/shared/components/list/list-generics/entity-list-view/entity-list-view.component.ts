@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ListEntityConfig } from '../helpers/action-or-config-helpers';
@@ -10,6 +10,7 @@ import { ListViewComponent } from '../list-view/list-view.component';
   selector: 'app-entity-list-view',
   templateUrl: './entity-list-view.component.html',
   styleUrls: ['./entity-list-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListViewComponent

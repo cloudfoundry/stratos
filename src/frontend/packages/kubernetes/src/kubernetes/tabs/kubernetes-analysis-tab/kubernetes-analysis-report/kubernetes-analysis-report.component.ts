@@ -1,4 +1,4 @@
-import {Component, OnInit, signal, inject} from '@angular/core';
+import {Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -18,6 +18,7 @@ import { AnalysisReportViewerComponent } from '../../../analysis-report-viewer/a
   selector: 'app-kubernetes-analysis-report',
   templateUrl: './kubernetes-analysis-report.component.html',
   styleUrls: ['./kubernetes-analysis-report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

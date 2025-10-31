@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -31,6 +31,7 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
   selector: 'app-pod-metrics',
   templateUrl: './pod-metrics.component.html',
   styleUrls: ['./pod-metrics.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

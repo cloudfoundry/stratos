@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserProfileInfo } from '@stratosui/store';
 
@@ -11,7 +11,8 @@ import { MD5 } from './md5';
   standalone: true,
   imports: [
     CommonModule
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserAvatarComponent {
 

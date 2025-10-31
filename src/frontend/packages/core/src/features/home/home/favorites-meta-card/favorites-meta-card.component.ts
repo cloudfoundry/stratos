@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -18,7 +18,8 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   standalone: true,
   imports: [
     EntityFavoriteStarComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoritesMetaCardComponent {
 

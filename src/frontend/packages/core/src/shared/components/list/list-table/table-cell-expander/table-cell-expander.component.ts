@@ -1,6 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../list.types';
 import { TableRowExpandedService } from '../table-row/table-row-expanded-service';
@@ -14,6 +14,7 @@ export interface TableCellExpanderConfig {
   selector: 'app-table-cell-expander',
   templateUrl: './table-cell-expander.component.html',
   styleUrls: ['./table-cell-expander.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],
   animations: [

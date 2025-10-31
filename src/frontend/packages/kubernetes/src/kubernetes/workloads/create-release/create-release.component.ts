@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -28,6 +28,7 @@ import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values
   selector: 'app-create-release',
   templateUrl: './create-release.component.html',
   styleUrls: ['./create-release.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
@@ -16,6 +16,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kubernetes-node',
   templateUrl: './kubernetes-node.component.html',
   styleUrls: ['./kubernetes-node.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

@@ -1,4 +1,4 @@
-import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject} from '@angular/core';
+import {Component, ComponentFactoryResolver, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
@@ -68,6 +68,7 @@ function createSignalWrapper<T>(initialValue: T) {
 selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
   styleUrls: ['./kube-config-import.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     TableComponent

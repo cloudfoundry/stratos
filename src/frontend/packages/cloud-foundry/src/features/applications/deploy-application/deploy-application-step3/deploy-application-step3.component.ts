@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, Input, OnDestroy, signal } from '@angular/core';
+import { Component, Injector, Input, OnDestroy, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
@@ -26,6 +26,7 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
   templateUrl: './deploy-application-step3.component.html',
   styleUrls: ['./deploy-application-step3.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     LogViewerComponent,

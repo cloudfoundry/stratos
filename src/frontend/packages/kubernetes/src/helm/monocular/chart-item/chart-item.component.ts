@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -11,6 +11,7 @@ import { ListItemComponent } from '../list-item/list-item.component';
   selector: 'app-chart-item',
   templateUrl: './chart-item.component.html',
   styleUrls: ['./chart-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink, ListItemComponent]
 })

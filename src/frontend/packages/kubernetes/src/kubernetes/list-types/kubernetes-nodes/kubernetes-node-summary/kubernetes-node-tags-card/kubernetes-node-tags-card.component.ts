@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject} from '@angular/core';
+import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CardWrapperComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,6 +11,7 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
   selector: 'app-kubernetes-node-tags-card',
   templateUrl: './kubernetes-node-tags-card.component.html',
   styleUrls: ['./kubernetes-node-tags-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

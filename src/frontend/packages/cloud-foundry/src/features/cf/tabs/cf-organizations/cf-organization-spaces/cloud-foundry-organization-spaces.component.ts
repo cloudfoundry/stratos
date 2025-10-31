@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -19,6 +19,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   templateUrl: './cloud-foundry-organization-spaces.component.html',
   styleUrls: ['./cloud-foundry-organization-spaces.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule,
     CustomTooltipDirective,

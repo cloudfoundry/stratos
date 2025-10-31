@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { first, map, startWith } from 'rxjs/operators';
@@ -20,6 +20,7 @@ import { kubeEntityCatalog } from './../kubernetes-entity-generator';
   selector: 'app-kubernetes-tab-base',
   templateUrl: './kubernetes-tab-base.component.html',
   styleUrls: ['./kubernetes-tab-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

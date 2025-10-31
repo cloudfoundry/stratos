@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -17,6 +17,7 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
   selector: 'app-card-autoscaler-default',
   templateUrl: './card-autoscaler-default.component.html',
   styleUrls: ['./card-autoscaler-default.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -32,6 +33,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
     public appService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory,
     private applicationService: ApplicationService,
+    private cdr: ChangeDetectorRef
   ) {
   }
 
@@ -57,6 +59,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
 }

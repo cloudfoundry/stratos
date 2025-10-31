@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, signal  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
@@ -26,7 +26,8 @@ interface MetricsDetailsInfo {
   imports: [
     CommonModule,
     CustomIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponent {
 

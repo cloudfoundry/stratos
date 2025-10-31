@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 
-import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { TabNavService } from '../../../tab-nav.service';
 import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
@@ -9,6 +9,7 @@ import { IHeaderBreadcrumbLink } from '../page-header/page-header.types';
   selector: 'app-page-sub-nav',
   templateUrl: './page-sub-nav.component.html',
   styleUrls: ['./page-sub-nav.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []
 })

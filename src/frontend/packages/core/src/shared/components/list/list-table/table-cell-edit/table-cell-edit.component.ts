@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list.types';
@@ -8,6 +8,7 @@ import { TableCellCustom } from '../../list.types';
   selector: 'app-table-cell-edit',
   templateUrl: './table-cell-edit.component.html',
   styleUrls: ['./table-cell-edit.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule

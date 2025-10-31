@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
@@ -17,6 +17,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
   templateUrl: './space-roles-list-wrapper.component.html',
   styleUrls: ['./space-roles-list-wrapper.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ListComponent
   ],

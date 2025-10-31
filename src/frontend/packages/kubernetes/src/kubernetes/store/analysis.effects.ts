@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -34,6 +34,7 @@ export class AnalysisEffects {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
+    private appRef: ApplicationRef
   ) { }
 
   
@@ -59,17 +60,21 @@ export class AnalysisEffects {
             res.entities[entityKey][id] = item;
             res.result.push(id);
           });
+          this.appRef.tick();
           return [new WrapperRequestActionSuccess(res, action)];
         }),
-        catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, 'fetch', {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Analysis Report request error',
-            error
-          })
-        ])
+        catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Analysis Report request error',
+              error
+            })
+          ];
+        })
       );
     })
   ));
@@ -99,17 +104,21 @@ export class AnalysisEffects {
             },
             result: [action.guid]
           };
+          this.appRef.tick();
           return [new WrapperRequestActionSuccess(res, action)];
         }),
-        catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, 'fetch', {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Analysis Report request error',
-            error
-          })
-        ])
+        catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Analysis Report request error',
+              error
+            })
+          ];
+        })
       );
     })
   ));
@@ -140,17 +149,21 @@ export class AnalysisEffects {
             res.entities[entityKey][guid] = report;
             res.result.push(guid);
           });
+          this.appRef.tick();
           return [new WrapperRequestActionSuccess(res, action)];
         }),
-        catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, 'fetch', {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Analysis Report request error',
-            error
-          })
-        ])
+        catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Analysis Report request error',
+              error
+            })
+          ];
+        })
       );
     })
   ));
@@ -176,17 +189,21 @@ export class AnalysisEffects {
             entities: { [entityCatalog.getEntityKey(action)]: {} },
             result: []
           };
+          this.appRef.tick();
           return [new WrapperRequestActionSuccess(res, action, type)];
         }),
-        catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, type, {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Analysis Report request error',
-            error
-          })
-        ])
+        catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, type, {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Analysis Report request error',
+              error
+            })
+          ];
+        })
       );
     })
   ));
@@ -218,17 +235,21 @@ export class AnalysisEffects {
             entities: { [entityCatalog.getEntityKey(action)]: { [response.id]: response } },
             result: [response.id]
           };
+          this.appRef.tick();
           return [new WrapperRequestActionSuccess(res, action, type)];
         }),
-        catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, type, {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Analysis Report request error',
-            error
-          })
-        ])
+        catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, type, {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Analysis Report request error',
+              error
+            })
+          ];
+        })
       );
 
     })

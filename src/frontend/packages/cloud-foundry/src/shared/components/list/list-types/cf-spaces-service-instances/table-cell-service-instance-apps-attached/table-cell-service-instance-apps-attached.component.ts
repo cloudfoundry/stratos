@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, first, map, switchMap } from 'rxjs/operators';
@@ -20,6 +20,7 @@ import { getCfServiceInstance } from '../../../../../../features/service-catalog
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
   styleUrls: ['./table-cell-service-instance-apps-attached.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     AppChipsComponent

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, computed, signal } from '@angular/core';
+import { Component, Input, OnDestroy, computed, signal , ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -40,6 +40,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
   templateUrl: './specify-user-provided-details.component.html',
   styleUrls: ['./specify-user-provided-details.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, InjectionToken, Input, OnInit, Output, computed  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -36,7 +36,8 @@ export interface SideNavItem extends TabNavItem {
   imports: [
     CommonModule,
     RouterModule
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class SideNavComponent implements OnInit {

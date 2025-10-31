@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnDestroy, inject} from '@angular/core';
+import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
@@ -45,6 +45,7 @@ const namespaceColumnId = 'namespace';
   selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
   styleUrls: ['./kubernetes-resource-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

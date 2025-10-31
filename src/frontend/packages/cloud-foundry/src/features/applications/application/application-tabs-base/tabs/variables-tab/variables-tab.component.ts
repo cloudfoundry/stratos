@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -32,11 +32,12 @@ export interface VariableTabAllEnvVarType {
   selector: 'app-variables-tab',
   templateUrl: './variables-tab.component.html',
   styleUrls: ['./variables-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: ListConfig,
     useClass: CfAppVariablesListConfigService,
   }],
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,

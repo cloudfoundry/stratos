@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
@@ -23,7 +23,8 @@ import {
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExtensionButtonsComponent implements OnInit {
 
@@ -39,6 +40,6 @@ export class ExtensionButtonsComponent implements OnInit {
     this.extensionActions = getActionsFromExtensions(this.type).map(value => ({
       ...value,
       visible$: value.visible$ || value.visible ? value.visible(this.store) : of(true)
-    }));
+    });
   }
 }

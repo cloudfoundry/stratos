@@ -1,16 +1,17 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 import { isValid, isBefore, isEqual } from 'date-fns';
 
 import { DateTimeComponent } from '../date-time/date-time.component';
 
 @Component({
-selector: 'app-start-end-date',
+  selector: 'app-start-end-date',
   templateUrl: './start-end-date.component.html',
   styleUrls: ['./start-end-date.component.scss'],
   standalone: true,
   imports: [
     DateTimeComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StartEndDateComponent {
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -11,6 +11,7 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   selector: 'app-card-app-status',
   templateUrl: './card-app-status.component.html',
   styleUrls: ['./card-app-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CardStatusComponent,

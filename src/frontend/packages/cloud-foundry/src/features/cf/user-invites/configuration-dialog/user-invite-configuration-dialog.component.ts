@@ -1,4 +1,4 @@
-import { Component, Inject, InjectionToken } from '@angular/core';
+import { Component, Inject, InjectionToken , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AppProgressBarComponent } from '@stratosui/core';
@@ -20,6 +20,7 @@ import { UserInviteConfigureService } from '../user-invite.service';
   templateUrl: './user-invite-configuration-dialog.component.html',
   styleUrls: ['./user-invite-configuration-dialog.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

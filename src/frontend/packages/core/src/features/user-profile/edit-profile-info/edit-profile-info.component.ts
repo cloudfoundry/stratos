@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
@@ -18,9 +18,10 @@ import { SteppersComponent } from '../../../shared/components/stepper/steppers/s
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
-selector: 'app-edit-profile-info',
+  selector: 'app-edit-profile-info',
   templateUrl: './edit-profile-info.component.html',
   styleUrls: ['./edit-profile-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],

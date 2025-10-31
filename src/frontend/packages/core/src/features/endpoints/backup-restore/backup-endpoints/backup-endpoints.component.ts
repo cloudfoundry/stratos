@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, Injector } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Injector  } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
@@ -24,7 +24,7 @@ import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
 @Component({
-selector: 'app-backup-endpoints',
+  selector: 'app-backup-endpoints',
   templateUrl: './backup-endpoints.component.html',
   styleUrls: ['./backup-endpoints.component.scss'],
   providers: [
@@ -39,7 +39,8 @@ selector: 'app-backup-endpoints',
     StepComponent,
     TableComponent,
     ShowHideButtonComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupEndpointsComponent implements OnDestroy {
 

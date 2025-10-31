@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 
 import { ClickStopPropagationDirective } from '../../../../../../../../core/src/core/click-stop-propagation.directive';
@@ -11,6 +11,7 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-references.component.html',
   styleUrls: ['./table-cell-service-references.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ClickStopPropagationDirective
 ]

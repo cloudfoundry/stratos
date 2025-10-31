@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, inject} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
 import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';

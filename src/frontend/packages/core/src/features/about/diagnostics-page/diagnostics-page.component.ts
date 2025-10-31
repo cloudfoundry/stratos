@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
@@ -20,7 +20,8 @@ import { BooleanIndicatorComponent } from '../../../shared/components/boolean-in
     PageHeaderComponent,
     MetadataItemComponent,
     BooleanIndicatorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiagnosticsPageComponent implements OnInit {
 

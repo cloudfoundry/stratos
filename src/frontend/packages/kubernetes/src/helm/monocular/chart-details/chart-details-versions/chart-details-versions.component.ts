@@ -1,4 +1,4 @@
-import {Component, Input, inject} from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ChartAttributes } from '../../shared/models/chart';

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -24,6 +24,7 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
   templateUrl: './manage-users-select.component.html',
   styleUrls: ['./manage-users-select.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     EnumerateComponent,
     ListComponent,

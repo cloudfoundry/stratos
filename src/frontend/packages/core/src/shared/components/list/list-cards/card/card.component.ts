@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Input, Type, ViewChild, ViewContainerRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -20,6 +20,7 @@ interface ISetupData<T> {
   selector: 'app-card',
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []
 })

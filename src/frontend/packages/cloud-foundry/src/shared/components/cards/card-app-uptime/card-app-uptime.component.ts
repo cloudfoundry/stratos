@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import { MetadataItemComponent } from '../../../../../../core/src/shared/compone
   selector: 'app-card-app-uptime',
   templateUrl: './card-app-uptime.component.html',
   styleUrls: ['./card-app-uptime.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

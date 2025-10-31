@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
@@ -29,7 +29,8 @@ import { TileSelectorComponent } from '../../../../shared/components/tile-select
     SteppersComponent,
     StepComponent,
     TileSelectorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 
@@ -41,7 +42,7 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
         query: {
           [BASE_REDIRECT_QUERY]: 'endpoints/new'
         }
-      }));
+      });
     }
   }
 

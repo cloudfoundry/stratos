@@ -1,6 +1,6 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { ActivatedRoute } from '@angular/router';
@@ -26,6 +26,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
     getActiveRouteCfOrgSpaceProvider
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     CustomCheckboxComponent,

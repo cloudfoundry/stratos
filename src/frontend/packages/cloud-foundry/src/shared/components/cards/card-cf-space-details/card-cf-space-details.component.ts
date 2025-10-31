@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, inject } from '@angular/core';
+import { Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
@@ -17,6 +17,7 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
   selector: 'app-card-cf-space-details',
   templateUrl: './card-cf-space-details.component.html',
   styleUrls: ['./card-cf-space-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

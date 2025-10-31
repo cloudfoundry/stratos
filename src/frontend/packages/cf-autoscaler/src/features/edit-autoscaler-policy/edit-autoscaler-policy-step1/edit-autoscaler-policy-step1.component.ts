@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -18,6 +18,7 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
   selector: 'app-edit-autoscaler-policy-step1',
   templateUrl: './edit-autoscaler-policy-step1.component.html',
   styleUrls: ['./edit-autoscaler-policy-step1.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
@@ -39,7 +40,8 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
     public applicationService: ApplicationService,
     private fb: UntypedFormBuilder,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
     this.editLimitForm = this.fb.group({
@@ -62,6 +64,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
         this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
         this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
         this.editLimitForm.controls.instance_max_count.setValidators([Validators.required, this.validateGlobalLimitMax()]);
+        this.cdr.markForCheck();
         return this.currentPolicy;
       })
     );

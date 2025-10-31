@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -29,6 +29,7 @@ import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
   selector: 'app-edit-autoscaler-credential',
   templateUrl: './edit-autoscaler-credential.component.html',
   styleUrls: ['./edit-autoscaler-credential.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher },
   ],
@@ -64,6 +65,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     private entityServiceFactory: EntityServiceFactory,
     private appAutoscalerCredentialSnackBar: TailwindSnackBarService,
     private confirmDialog: ConfirmationDialogService,
+    private cdr: ChangeDetectorRef
   ) {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
     this.editCredentialForm = this.fb.group({
@@ -79,6 +81,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy(): void {

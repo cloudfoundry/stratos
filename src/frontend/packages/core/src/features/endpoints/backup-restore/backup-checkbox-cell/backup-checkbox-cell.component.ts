@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { EndpointModel } from '@stratosui/store';
@@ -15,6 +15,7 @@ interface BackupCheckboxConfig {
   selector: 'app-backup-checkbox-cell',
   templateUrl: './backup-checkbox-cell.component.html',
   styleUrls: ['./backup-checkbox-cell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     FormsModule,

@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
@@ -11,7 +10,7 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -34,7 +33,8 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
   imports: [
     CommonModule,
     TileSelectorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
   @Output() closeModalEvent = new EventEmitter<void>();

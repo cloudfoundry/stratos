@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -33,7 +33,8 @@ export enum EventFilterValues {
     CustomTooltipDirective,
     PageHeaderComponent,
     StatefulIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventsPageComponent implements OnInit {
   public unreadEvents$: Observable<IGlobalEvent[]>;

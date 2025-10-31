@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from 'frontend/packages/store/src/actions/pagination.actions';
@@ -104,9 +104,13 @@ export interface KubeDashboardStatus {
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
+<<<<<<< HEAD
   private http = inject(HttpClient);
   private actions$ = inject(Actions);
   private store = inject(Store<AppState>);
+=======
+  constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>, private appRef: ApplicationRef) { }
+>>>>>>> 74f779c6b ([Angular 20] Migrate to zoneless change detection)
 
   
   fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(
@@ -133,18 +137,22 @@ export class KubernetesEffects {
           };
           result.entities[dashboardEntityConfig.entityKey][action.guid] = status;
           result.result.push(action.guid);
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(result, action)
           ];
-        }), catchError(error => [
-          new WrapperRequestActionFailed(error.message, action, 'fetch', {
-            endpointIds: [action.kubeGuid],
-            url: error.url || url,
-            eventCode: error.status ? error.status + '' : '500',
-            message: 'Kubernetes Dashboard request error',
-            error
-          })
-        ]));
+        }), catchError(error => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(error.message, action, 'fetch', {
+              endpointIds: [action.kubeGuid],
+              url: error.url || url,
+              eventCode: error.status ? error.status + '' : '500',
+              message: 'Kubernetes Dashboard request error',
+              error
+            })
+          ];
+        }));
     })
   ));
 
@@ -427,11 +435,13 @@ export class KubernetesEffects {
         //   }
         // });
 
+        this.appRef.tick();
         return [
           new WrapperRequestActionSuccess(processesData, action)
         ];
       }),
       catchError(error => {
+        this.appRef.tick();
         const { status, message } = this.createKubeError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {
@@ -480,9 +490,11 @@ export class KubernetesEffects {
           if (requestType === 'create') {
             actions.push(new ClearPaginationOfType(action));
           }
+          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, requestType, {
@@ -524,9 +536,11 @@ export class KubernetesEffects {
           ];
           // actions.push(new ClearPaginationOfType(action));
           actions.push(new ClearPaginationOfEntity(action, action.guid));
+          this.appRef.tick();
           return actions;
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = this.createKubeError(error);
           return [
             new WrapperRequestActionFailed(message, action, 'delete', {

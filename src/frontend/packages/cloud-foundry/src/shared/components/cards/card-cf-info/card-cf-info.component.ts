@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
 import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
@@ -18,6 +18,7 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
   selector: 'app-card-cf-info',
   templateUrl: './card-cf-info.component.html',
   styleUrls: ['./card-cf-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

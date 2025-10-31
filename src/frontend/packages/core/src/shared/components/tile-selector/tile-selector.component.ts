@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 
 import { ITileConfig } from '../tile/tile-selector.types';
 import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
@@ -12,7 +12,8 @@ import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-t
     TileSelectorTileComponent
   ],
   templateUrl: './tile-selector.component.html',
-  styleUrls: ['./tile-selector.component.scss']
+  styleUrls: ['./tile-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];

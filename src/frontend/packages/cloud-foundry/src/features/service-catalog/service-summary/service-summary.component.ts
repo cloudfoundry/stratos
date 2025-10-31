@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -22,6 +22,7 @@ import { ServiceRecentInstancesCardComponent } from '../../../shared/components/
   templateUrl: './service-summary.component.html',
   styleUrls: ['./service-summary.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     TileGridComponent,

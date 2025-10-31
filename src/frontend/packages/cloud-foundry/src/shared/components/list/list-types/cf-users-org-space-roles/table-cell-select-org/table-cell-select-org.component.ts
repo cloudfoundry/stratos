@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatInputDirective } from '@stratosui/core';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -21,6 +21,7 @@ import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-
   templateUrl: './table-cell-select-org.component.html',
   styleUrls: ['./table-cell-select-org.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

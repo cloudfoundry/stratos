@@ -1,6 +1,6 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
 
@@ -18,6 +18,7 @@ import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-co
   templateUrl: './cloud-foundry-events-list.component.html',
   styleUrls: ['./cloud-foundry-events-list.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     CustomFormFieldComponent,

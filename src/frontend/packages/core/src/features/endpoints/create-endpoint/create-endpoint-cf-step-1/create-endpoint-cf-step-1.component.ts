@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Input  } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
@@ -39,7 +39,8 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
     CustomIconComponent,
     UniqueDirective,
     ProductNameComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
 
@@ -157,7 +158,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.validate = this.registerForm.statusChanges.pipe(
       map(() => {
         return this.registerForm.valid;
-      }));
+      });
   }
 
   setUrlValidation(endpoint: StratosCatalogEndpointEntity) {

@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TabNavItem } from '../../../tab-nav.types';
@@ -11,7 +11,8 @@ import { TabNavItem } from '../../../tab-nav.types';
   standalone: true,
   imports: [
     RouterModule
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NestedTabsComponent implements OnInit {
 

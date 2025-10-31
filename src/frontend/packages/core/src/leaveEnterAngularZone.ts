@@ -1,64 +1,42 @@
-import { NgZone } from '@angular/core';
-import { SchedulerLike, SchedulerAction, Subscription } from 'rxjs';
+/**
+ * Zoneless Migration: Zone.js-free scheduler utilities
+ *
+ * In zoneless mode (Angular 20+), there is no NgZone, so zone-related
+ * scheduler operations are pass-through. These functions maintain API
+ * compatibility while operating in a zoneless environment.
+ */
+import { SchedulerLike } from 'rxjs';
 
-class LeaveZoneScheduler implements SchedulerLike {
-  constructor(private zone: NgZone, private scheduler: SchedulerLike) { }
-
-  now(): number {
-    return this.scheduler.now();
-  }
-
-  schedule<T>(
-    work: (this: SchedulerAction<T>, state?: T) => void,
-    delay?: number,
-    state?: T
-  ): Subscription {
-    return this.zone.runOutsideAngular(() =>
-      this.scheduler.schedule(work, delay, state)
-    );
-  }
-}
-
-class EnterZoneScheduler implements SchedulerLike {
-  constructor(private zone: NgZone, private scheduler: SchedulerLike) { }
-
-  now(): number {
-    return this.scheduler.now();
-  }
-
-  schedule<T>(
-    work: (this: SchedulerAction<T>, state?: T) => void,
-    delay?: number,
-    state?: T
-  ): Subscription {
-    return this.zone.run(() =>
-      this.scheduler.schedule(work, delay, state)
-    );
-  }
-}
-
-export function leaveZone(zone: NgZone, scheduler: SchedulerLike): SchedulerLike {
-  // Defensive null checks for Angular 20 DI compatibility
-  if (!zone) {
-    console.warn('leaveZone: NgZone is null or undefined, returning scheduler directly');
-    return scheduler;
-  }
+/**
+ * Pass-through function for zoneless mode.
+ * In zone-based apps, this would run work outside Angular's zone.
+ * In zoneless mode, schedulers run normally without zone context.
+ *
+ * @param _zone Ignored in zoneless mode (kept for API compatibility)
+ * @param scheduler The scheduler to use
+ * @returns The scheduler unchanged (no zone wrapping needed)
+ */
+export function leaveZone(_zone: any, scheduler: SchedulerLike): SchedulerLike {
   if (!scheduler) {
-    console.warn('leaveZone: Scheduler is null or undefined');
     throw new Error('leaveZone requires a valid scheduler');
   }
-  return new LeaveZoneScheduler(zone, scheduler);
+  // In zoneless mode, just return the scheduler directly
+  return scheduler;
 }
 
-export function enterZone(zone: NgZone, scheduler: SchedulerLike): SchedulerLike {
-  // Defensive null checks for Angular 20 DI compatibility
-  if (!zone) {
-    console.warn('enterZone: NgZone is null or undefined, returning scheduler directly');
-    return scheduler;
-  }
+/**
+ * Pass-through function for zoneless mode.
+ * In zone-based apps, this would run work inside Angular's zone.
+ * In zoneless mode, schedulers run normally without zone context.
+ *
+ * @param _zone Ignored in zoneless mode (kept for API compatibility)
+ * @param scheduler The scheduler to use
+ * @returns The scheduler unchanged (no zone wrapping needed)
+ */
+export function enterZone(_zone: any, scheduler: SchedulerLike): SchedulerLike {
   if (!scheduler) {
-    console.warn('enterZone: Scheduler is null or undefined');
     throw new Error('enterZone requires a valid scheduler');
   }
-  return new EnterZoneScheduler(zone, scheduler);
+  // In zoneless mode, just return the scheduler directly
+  return scheduler;
 }

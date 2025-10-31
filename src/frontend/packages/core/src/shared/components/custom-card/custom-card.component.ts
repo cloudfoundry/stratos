@@ -1,12 +1,13 @@
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 @Component({
   selector: 'mat-card',
   templateUrl: './custom-card.component.html',
   styleUrls: ['./custom-card.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardComponent {
   @Input() appearance: 'raised' | 'outlined' = 'raised';
@@ -16,7 +17,8 @@ export class CustomCardComponent {
   selector: 'mat-card-header',
   template: '<div class="custom-card-header"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardHeaderComponent {
 }
@@ -25,7 +27,8 @@ export class CustomCardHeaderComponent {
   selector: 'mat-card-title',
   template: '<div class="custom-card-title"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardTitleComponent {
 }
@@ -34,7 +37,8 @@ export class CustomCardTitleComponent {
   selector: 'mat-card-subtitle',
   template: '<div class="custom-card-subtitle"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardSubtitleComponent {
 }
@@ -43,7 +47,8 @@ export class CustomCardSubtitleComponent {
   selector: 'mat-card-content',
   template: '<div class="custom-card-content"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardContentComponent {
 }
@@ -52,7 +57,8 @@ export class CustomCardContentComponent {
   selector: 'mat-card-actions',
   template: '<div class="custom-card-actions"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardActionsComponent {
   @Input() align: 'start' | 'end' = 'start';
@@ -62,7 +68,8 @@ export class CustomCardActionsComponent {
   selector: 'mat-card-footer',
   template: '<div class="custom-card-footer"><ng-content></ng-content></div>',
   styleUrls: ['./custom-card.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomCardFooterComponent {
 }

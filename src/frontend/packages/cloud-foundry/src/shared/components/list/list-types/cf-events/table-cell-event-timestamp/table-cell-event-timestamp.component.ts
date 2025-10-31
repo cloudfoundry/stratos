@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 
@@ -8,6 +8,7 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
   templateUrl: './table-cell-event-timestamp.component.html',
   styleUrls: ['./table-cell-event-timestamp.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule
   ]

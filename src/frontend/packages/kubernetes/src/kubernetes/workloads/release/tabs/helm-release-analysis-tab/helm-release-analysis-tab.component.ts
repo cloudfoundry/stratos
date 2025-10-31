@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, signal, inject} from '@angular/core';
+import {Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { PageSubNavComponent, NoContentMessageComponent } from '@stratosui/core';
@@ -15,6 +15,7 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   selector: 'app-helm-release-analysis-tab',
   templateUrl: './helm-release-analysis-tab.component.html',
   styleUrls: ['./helm-release-analysis-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

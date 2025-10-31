@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ProductNameComponent } from '../../shared/components/product-name.ccomponent';
@@ -15,6 +15,7 @@ import { NoContentMessageComponent } from '../../shared/components/no-content-me
     ProductNameComponent,
     ShowPageHeaderComponent,
     NoContentMessageComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoEndpointsNonAdminComponent { }

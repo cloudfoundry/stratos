@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ElementRef,
   EventEmitter,
   Host,
@@ -11,7 +10,7 @@ import {
   Output,
   SkipSelf,
   ViewChild,
-} from '@angular/core';
+ } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -25,7 +24,8 @@ import { safeUnsubscribe } from '../../../core/utils.service';
   standalone: true,
   imports: [
     CommonModule,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FileInputComponent implements OnInit, OnDestroy {
 

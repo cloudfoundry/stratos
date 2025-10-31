@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { filter, first, map, startWith } from 'rxjs/operators';
 selector: 'app-loading-page',
   templateUrl: './loading-page.component.html',
   styleUrls: ['./loading-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

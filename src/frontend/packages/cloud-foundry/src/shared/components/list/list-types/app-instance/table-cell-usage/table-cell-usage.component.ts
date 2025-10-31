@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/components/usage-gauge/usage-gauge.component';
@@ -8,6 +8,7 @@ import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/com
   templateUrl: './table-cell-usage.component.html',
   styleUrls: ['./table-cell-usage.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     UsageGaugeComponent
   ]

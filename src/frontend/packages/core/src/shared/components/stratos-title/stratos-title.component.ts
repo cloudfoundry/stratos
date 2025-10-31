@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, computed, inject } from '@angular/core';
+import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { StratosThemeService } from '../../../../../theme/theme.service';
 
 @Component({
   selector: 'app-stratos-title',
   templateUrl: './stratos-title.component.html',
   styleUrls: ['./stratos-title.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule

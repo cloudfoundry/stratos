@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -35,7 +35,8 @@ export class AppChip<T = string> implements IAppChip<T> {
     ClickStopPropagationDirective
   ],
   templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss']
+  styleUrls: ['./chips.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppChipsComponent implements OnInit {
 

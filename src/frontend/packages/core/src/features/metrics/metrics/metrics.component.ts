@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MetricsAPIAction, MetricsAPITargets, MetricsStratosAction, AppState } from '@stratosui/store';
@@ -49,7 +49,8 @@ interface PrometheusJobs {
     CardStatusComponent,
     MetadataItemComponent,
     ProductNameComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsComponent {
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;
@@ -82,7 +83,7 @@ export class MetricsComponent {
         this.error = true;
       }
       return mapMetricsData(ep);
-    }));
+    });
 
     // Breadcrumbs
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -11,6 +11,7 @@ selector: 'app-table-cell-commit-author',
   standalone: true,
   imports: [
     GithubCommitAuthorComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellCommitAuthorComponent<T> extends TableCellCustom<T> { }

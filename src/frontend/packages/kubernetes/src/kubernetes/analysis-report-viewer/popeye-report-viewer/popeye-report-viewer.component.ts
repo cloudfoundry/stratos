@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 
 
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
-selector: 'app-popeye-report-viewer',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-popeye-report-viewer',
   templateUrl: './popeye-report-viewer.component.html',
   styleUrls: ['./popeye-report-viewer.component.scss'],
   standalone: true,

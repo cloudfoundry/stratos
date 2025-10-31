@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges , ChangeDetectionStrategy } from '@angular/core';
 
 
 @Component({
@@ -6,6 +6,7 @@ import { Component, OnInit, Input, OnChanges } from '@angular/core';
   templateUrl: './view-buildpack.component.html',
   styleUrls: ['./view-buildpack.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class ViewBuildpackComponent implements OnInit, OnChanges {

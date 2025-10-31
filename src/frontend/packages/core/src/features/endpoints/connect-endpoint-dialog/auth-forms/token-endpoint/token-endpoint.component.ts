@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../../shared/components/custom-form-field/custom-form-field.component';
 
@@ -14,7 +14,8 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
     ReactiveFormsModule,
     CustomFormFieldComponent,
     CustomIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;

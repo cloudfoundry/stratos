@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -9,6 +9,7 @@ import { ChartItemComponent } from '../../monocular/chart-item/chart-item.compon
 import { MonocularChart } from '../../store/helm.types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-monocular-chart-card',
   templateUrl: './monocular-chart-card.component.html',
   styleUrls: ['./monocular-chart-card.component.scss'],

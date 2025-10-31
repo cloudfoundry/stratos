@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of as observableOf, throwError as observableThrowError } from 'rxjs';
@@ -19,7 +19,8 @@ export class CreateAppPageEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) {
     this.proxyAPIVersion = environment.proxyAPIVersion;
     this.cfAPIVersion = environment.cfAPIVersion;
@@ -44,9 +45,11 @@ export class CreateAppPageEffects {
           if (ourCfApps.total_results) {
             throw observableThrowError('Taken');
           }
+          this.appRef.tick();
           return new AppNameFree(action.name);
         }),
         catchError((_err: unknown) => {
+          this.appRef.tick();
           return observableOf(new AppNameTaken(action.name));
         }));
     })));

@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { UserProfileInfo } from '@stratosui/store';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
@@ -10,7 +10,8 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
   standalone: true,
   imports: [
     UserAvatarComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserProfileBannerComponent {
 

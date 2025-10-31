@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -36,6 +36,7 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
   selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
   styleUrls: ['./manage-users-confirm.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

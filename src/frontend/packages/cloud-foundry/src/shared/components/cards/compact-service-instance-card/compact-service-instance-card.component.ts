@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
 import { AppChipsComponent, AppChip } from '../../../../../../core/src/shared/components/chips/chips.component';
 import { APIResource } from '../../../../../../store/src/types/api.types';
@@ -10,6 +10,7 @@ import { IServiceInstance } from '../../../../cf-api-svc.types';
   templateUrl: './compact-service-instance-card.component.html',
   styleUrls: ['./compact-service-instance-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     AppChipsComponent

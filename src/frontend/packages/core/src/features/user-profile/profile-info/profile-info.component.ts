@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -35,7 +35,8 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
     MetadataItemComponent,
     ProfileSettingsComponent,
     AppChipsComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileInfoComponent {
 

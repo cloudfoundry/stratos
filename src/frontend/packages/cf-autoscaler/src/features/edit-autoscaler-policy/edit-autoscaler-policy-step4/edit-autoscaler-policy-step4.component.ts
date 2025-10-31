@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -38,6 +38,7 @@ import { MetadataItemComponent } from '../../../../../core/src/shared/components
   selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
   styleUrls: ['./edit-autoscaler-policy-step4.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -72,7 +73,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
     private fb: UntypedFormBuilder,
     private entityServiceFactory: EntityServiceFactory,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
     this.editSpecificDateForm = this.fb.group({

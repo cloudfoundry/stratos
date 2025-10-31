@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
@@ -18,6 +18,7 @@ export class EndpointApiError {
   constructor(
     private actions$: Actions,
     private store: Store<InternalAppState>,
+    private appRef: ApplicationRef,
   ) { }
 
    endpointApiError$ = createEffect(() => this.actions$.pipe(
@@ -43,6 +44,7 @@ export class EndpointApiError {
             }),
           ),
         );
+        this.appRef.tick();
       }
     })), { dispatch: false });
 }

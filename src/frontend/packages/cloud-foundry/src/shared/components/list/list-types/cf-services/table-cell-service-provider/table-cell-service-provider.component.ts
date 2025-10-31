@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -9,6 +9,7 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-service-provider.component.html',
   styleUrls: ['./table-cell-service-provider.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class TableCellServiceProviderComponent extends TableCellCustom<APIResource<IService>>  {

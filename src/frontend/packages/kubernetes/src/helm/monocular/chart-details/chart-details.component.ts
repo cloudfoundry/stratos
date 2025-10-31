@@ -1,5 +1,5 @@
 
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { finalize, first, switchMap, tap } from 'rxjs/operators';
 
@@ -19,6 +19,7 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
   selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
   styleUrls: ['./chart-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     EntitySummaryTitleComponent,

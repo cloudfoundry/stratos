@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject  } from '@angular/core';
 
 import { TailwindSnackBarRef } from '../../services/tailwind-snackbar.service';
 import { MAT_SNACK_BAR_DATA, SimpleSnackBar } from '../../../shared/services/tailwind-material-replacements';
@@ -10,7 +10,8 @@ import { RouterNav, AppState } from '@stratosui/store';
   templateUrl: './snackbar-return.component.html',
   styleUrls: ['./snackbar-return.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SnackBarReturnComponent extends SimpleSnackBar {
   returnLabel: string;
@@ -30,7 +31,7 @@ export class SnackBarReturnComponent extends SimpleSnackBar {
 
   return() {
     if (this.returnUrl) {
-      this.store.dispatch(new RouterNav({ path: this.returnUrl }));
+      this.store.dispatch(new RouterNav({ path: this.returnUrl });
     }
     this.dismiss();
   }

@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -12,6 +12,7 @@ import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space
   selector: 'app-table-cell-service-cf-breadcrumbs',
   templateUrl: './table-cell-service-cf-breadcrumbs.component.html',
   styleUrls: ['./table-cell-service-cf-breadcrumbs.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CfOrgSpaceLinksComponent

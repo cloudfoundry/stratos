@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { ApplicationRef, Injectable, NgZone } from '@angular/core';
 import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
@@ -47,6 +47,7 @@ export class MetricsRangeSelectorManagerService {
   constructor(
     public metricRangeService: MetricsRangeSelectorService,
     private ngZone: NgZone,
+    private appRef: ApplicationRef
     ) { }
 
   private commitDate(date: Date, type: 'start' | 'end') {
@@ -145,7 +146,12 @@ export class MetricsRangeSelectorManagerService {
     this.endWindowPoll();
     this.ngZone.runOutsideAngular(() => {
       this.pollIndex = window.setInterval(
-        () => this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value)),
+        () => {
+          this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
+          // ZONELESS: Trigger change detection after periodic metrics update
+          // This runs outside Angular zone but needs to notify Angular of state changes
+          this.ngZone.run(() => this.appRef.tick());
+        },
         this.pollInterval
       );
     });

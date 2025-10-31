@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewEncapsulation, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnInit, ViewEncapsulation, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -25,7 +25,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
 @Component({
-selector: 'app-console-uaa-wizard',
+  selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -41,7 +41,8 @@ selector: 'app-console-uaa-wizard',
     ProductNameComponent,
     ShowHideButtonComponent,
     LoadingPageComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit {
 
@@ -72,7 +73,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_client_secret: this.uaaForm.get('clientSecret').value,
       use_sso: this.uaaForm.get('useSSO').value,
       console_admin_scope: ''
-    }));
+    });
     return this.store.select('uaaSetup').pipe(
       skipWhile((state: UAASetupState) => {
         return state.settingUp;
@@ -91,7 +92,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success,
           message: state.message
         };
-      }));
+      });
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
@@ -104,7 +105,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_client_secret: this.uaaForm.get('clientSecret').value,
       use_sso: this.uaaForm.get('useSSO').value,
       console_admin_scope: this.selectedScope
-    }));
+    });
 
     this.applyingSetup.set(true);
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
@@ -133,7 +134,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success: !state[0].error,
           message: state[0].message
         };
-      }));
+      });
   }
   ngOnInit() {
     this.uaaForm = new UntypedFormGroup({

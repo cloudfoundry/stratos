@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 
 @Component({
@@ -6,7 +6,8 @@ import { Component, Input } from '@angular/core';
   templateUrl: './display-value.component.html',
   styleUrls: ['./display-value.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DisplayValueComponent {
 

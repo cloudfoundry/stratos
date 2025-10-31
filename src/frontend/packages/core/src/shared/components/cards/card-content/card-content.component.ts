@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 /**
  * Card content component using Tailwind CSS
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-card-content',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="px-6 py-4">
       <ng-content></ng-content>

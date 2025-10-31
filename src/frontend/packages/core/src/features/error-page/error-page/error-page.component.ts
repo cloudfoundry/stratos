@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -33,7 +33,8 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
     PageHeaderComponent,
     StatefulIconComponent,
     MetadataItemComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ErrorPageComponent implements OnInit {
   public back$: Observable<string>;

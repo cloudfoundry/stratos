@@ -1,4 +1,4 @@
-import {Component, Input, signal, inject} from '@angular/core';
+import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -36,6 +36,7 @@ selector: 'app-kube-config-selection',
   providers: [
     KubeConfigHelper
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

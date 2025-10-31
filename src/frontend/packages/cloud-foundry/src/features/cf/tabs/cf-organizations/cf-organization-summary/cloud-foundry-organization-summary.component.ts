@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -33,6 +33,7 @@ import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-u
   templateUrl: './cloud-foundry-organization-summary.component.html',
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     CustomTooltipDirective,

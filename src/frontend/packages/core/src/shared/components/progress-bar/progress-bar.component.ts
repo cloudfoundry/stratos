@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -33,8 +33,9 @@ import { CommonModule } from '@angular/common';
         [ngClass]="progressBarSecondaryClass"></div>
         <!-- Primary bar (lighter, in front) -->
         <div class="absolute h-full animate-progress-indeterminate-primary z-20 opacity-70"
-        [ngClass]="progressBarPrimaryClass"></div>
-      }
+        [ngClass]="progressBarPrimaryClass"></div>,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
     
       <!-- Determinate progress -->
       @if (mode === 'determinate') {

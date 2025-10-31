@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { ProgressSpinnerComponent } from './progress-spinner.component';
 
 /**
@@ -15,7 +15,8 @@ import { ProgressSpinnerComponent } from './progress-spinner.component';
   selector: 'app-spinner',
   standalone: true,
   imports: [ProgressSpinnerComponent],
-  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`
+  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppSpinnerComponent {
   /**

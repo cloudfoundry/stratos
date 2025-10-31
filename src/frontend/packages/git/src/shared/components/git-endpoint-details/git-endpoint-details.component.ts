@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 
 import {
@@ -13,7 +13,8 @@ import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
   templateUrl: './git-endpoint-details.component.html',
   styleUrls: ['./git-endpoint-details.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
 

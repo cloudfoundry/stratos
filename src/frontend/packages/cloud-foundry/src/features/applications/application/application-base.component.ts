@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -40,6 +40,7 @@ export function getGuids(type?: string) {
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule
 ],

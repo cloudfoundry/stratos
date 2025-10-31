@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
@@ -8,7 +7,7 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
@@ -22,7 +21,7 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
 
 @Component({
-selector: 'app-about-page',
+  selector: 'app-about-page',
   templateUrl: './about-page.component.html',
   styleUrls: ['./about-page.component.scss'],
   standalone: true,
@@ -33,7 +32,8 @@ selector: 'app-about-page',
     StratosTitleComponent,
     ProductNameComponent,
     MetadataItemComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
 

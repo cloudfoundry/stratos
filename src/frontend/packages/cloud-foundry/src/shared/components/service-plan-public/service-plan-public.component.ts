@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -17,6 +17,7 @@ import { cfEntityCatalog } from '../../../cf-entity-catalog';
   templateUrl: './service-plan-public.component.html',
   styleUrls: ['./service-plan-public.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule
   ]

@@ -36,6 +36,7 @@ export class SchemaFormConfig {
   templateUrl: './schema-form.component.html',
   styleUrls: ['./schema-form.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     ReactiveFormsModule,

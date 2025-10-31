@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 
@@ -7,7 +7,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
-selector: 'app-eula-page',
+  selector: 'app-eula-page',
   templateUrl: './eula-page.component.html',
   styleUrls: ['./eula-page.component.scss'],
   standalone: true,
@@ -16,7 +16,8 @@ selector: 'app-eula-page',
     CustomTooltipDirective,
     RouterModule,
     PageHeaderComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EulaPageComponent {
 

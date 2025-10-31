@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy, signal, Injector } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, signal, Injector  } from '@angular/core';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { Observable, Subscription } from 'rxjs';
@@ -26,7 +26,8 @@ import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.servic
     BlurDirective,
     ConnectEndpointComponent,
     DialogErrorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectEndpointDialogComponent implements OnDestroy {
 

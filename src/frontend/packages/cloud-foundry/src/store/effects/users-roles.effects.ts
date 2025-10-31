@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, combineLatest, EMPTY, Observable, of as observableOf, of } from 'rxjs';
@@ -37,14 +37,21 @@ export class UsersRolesEffects {
     private actions$: Actions,
     private store: Store<CFAppState>,
     private cfUserService: CfUserService,
+    private appRef: ApplicationRef
   ) { }
 
   getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
     ofType<GetCurrentCfUserRelations>(GET_CURRENT_CF_USER_RELATION),
     switchMap(action => {
       return fetchCfUserRole(this.store, action, this.httpClient).pipe(
-        map(() => ({ type: action.actions[1] })),
-        catchError(() => [{ type: action.actions[2] }])
+        map(() => {
+          this.appRef.tick();
+          return { type: action.actions[1] };
+        }),
+        catchError(() => {
+          this.appRef.tick();
+          return [{ type: action.actions[2] }];
+        })
       );
     })
   ));
@@ -65,6 +72,7 @@ export class UsersRolesEffects {
         };
         actions.push(new UpdateCfAction(apiAction, false, ''));
       });
+      this.appRef.tick();
       return actions;
     })
   ));
@@ -136,12 +144,15 @@ export class UsersRolesEffects {
         }),
         mergeMap((listActions: PaginatedAction[]) => {
           if (listActions && listActions.length) {
+            this.appRef.tick();
             return listActions.map(listAction => new ResetPagination(listAction, listAction.paginationKey));
           }
+          this.appRef.tick();
           return EMPTY;
         }),
         catchError((_error: unknown) => {
           // Swallow the error so it doesn't print in the console
+          this.appRef.tick();
           return EMPTY;
         })
       );

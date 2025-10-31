@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -12,7 +12,8 @@ export interface MatButtonToggleChange {
   template: '<button class="custom-button-toggle" [class.selected]="checked" [class.disabled]="disabled" (click)="toggle()" [disabled]="disabled"><ng-content></ng-content></button>',
   styleUrls: ['./custom-button-toggle.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleComponent {
   @Input() value: any;
@@ -37,8 +38,9 @@ export class CustomButtonToggleComponent {
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CustomButtonToggleGroupComponent),
-      multi: true
-    }
+      multi: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
   ]
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {

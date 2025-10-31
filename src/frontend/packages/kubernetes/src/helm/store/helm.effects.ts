@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
@@ -110,6 +110,7 @@ export class HelmEffects {
     private actions$: Actions,
     private store: Store<AppState>,
     public snackBar: TailwindSnackBarService,
+    private appRef: ApplicationRef
   ) { }
 
   // Endpoints that we know are synchronizing
@@ -165,8 +166,12 @@ export class HelmEffects {
         this.createHelmHubRequest(helmHubEndpoint as EndpointModel)
       ]).pipe(
         map(res => mergeMonocularChartResponses(entityKey, res, action.entity[0])),
-        mergeMap((response: NormalizedResponse) => [new WrapperRequestActionSuccess(response, action)]),
+        mergeMap((response: NormalizedResponse) => {
+          this.appRef.tick();
+          return [new WrapperRequestActionSuccess(response, action)];
+        }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
           const endpointIds = helmEndpoints.map(e => (e as EndpointModel).guid);
           if (helmHubEndpoint) {
@@ -256,12 +261,14 @@ export class HelmEffects {
       this.store.dispatch(new StartRequestAction(action, requestType));
       return this.httpClient.post(url, action.values).pipe(
         mergeMap(() => {
+          this.appRef.tick();
           return [
             new ClearPaginationOfType(action),
             new WrapperRequestActionSuccess(null, action)
           ];
         }),
         catchError(error => {
+          this.appRef.tick();
           const { status, message } = HelmEffects.createHelmError(error);
           const errorMessage = `Failed to install helm chart: ${message}`;
           return [
@@ -307,6 +314,7 @@ export class HelmEffects {
         if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
           return [];
         }
+        this.appRef.tick();
         return [
           new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
           new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()),
@@ -322,6 +330,7 @@ export class HelmEffects {
     flatMap(action => {
       const endpoint: EndpointModel = action.endpoint as EndpointModel;
       if (endpoint && endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE) {
+        this.appRef.tick();
         return [
           new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
         ];
@@ -395,8 +404,12 @@ export class HelmEffects {
       params: null
     };
     return this.httpClient.get(url, requestArgs).pipe(
-      mergeMap((response: unknown) => [new WrapperRequestActionSuccess(mapResult(response), action)]),
+      mergeMap((response: unknown) => {
+        this.appRef.tick();
+        return [new WrapperRequestActionSuccess(mapResult(response), action)];
+      }),
       catchError(error => {
+        this.appRef.tick();
         const { status, message } = HelmEffects.createHelmError(error);
         return [
           new WrapperRequestActionFailed(message, action, 'fetch', {

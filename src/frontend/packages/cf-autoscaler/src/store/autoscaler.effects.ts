@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -89,6 +89,7 @@ export class AutoscalerEffects {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
+    private appRef: ApplicationRef
   ) { }
 
 
@@ -108,11 +109,13 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entityKey, mappedData, action.endpointGuid, autoscalerInfo);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
           catchError(err => {
+            this.appRef.tick();
             // 404/503 are expected when autoscaler is not configured or unavailable
             // Don't show error message to user, just mark as unavailable
             const isExpectedError = err.status === 404 || err.status === 503;
@@ -142,11 +145,13 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.endpointGuid, healthInfo);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
           catchError(err => {
+            this.appRef.tick();
             // Gracefully handle autoscaler unavailability
             const isUnavailable = err.status === 404 || err.status === 503;
             const errorMessage = isUnavailable
@@ -183,13 +188,17 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -215,13 +224,17 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.guid, { enabled: false });
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('detach policy', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -250,13 +263,17 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.guid, credentialInfo);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -276,13 +293,17 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.guid, { enabled: false });
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -328,13 +349,17 @@ export class AutoscalerEffects {
             } else {
               this.transformEventData(entity.entityKey, mappedData, action.guid, histories);
             }
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType, histories.total_results, histories.total_pages)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch scaling history', err), action, actionType)
+            ];
+          }));
     })));
 
   
@@ -359,13 +384,17 @@ export class AutoscalerEffects {
             this.addMetric(
               entity.entityKey, mappedData, action.guid, action.metricName, data, parseInt(action.initialParams['start-time'], 10),
               parseInt(action.initialParams['end-time'], 10), action.skipFormat, action.trigger);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch metrics', err), action, actionType)
+            ];
+          }));
     })));
 
   private createUpdatePolicy(
@@ -388,13 +417,17 @@ export class AutoscalerEffects {
               result: []
             } as NormalizedResponse;
             this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
-          ]));
+          catchError(err => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
+            ];
+          }));
   }
 
   private fetchPolicy(
@@ -441,9 +474,11 @@ export class AutoscalerEffects {
                 1)
             );
           }
+          this.appRef.tick();
           return res;
         }),
         catchError(err => {
+          this.appRef.tick();
           const noPolicy = err.status === 404;
           if (noPolicy) {
             err._body = 'No policy is defined for this application.';

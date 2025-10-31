@@ -1,11 +1,12 @@
-import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding  } from '@angular/core';
 
 @Component({
   selector: 'app-tile',
   templateUrl: './tile.component.html',
   styleUrls: ['./tile.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileComponent implements OnInit, AfterContentInit {
 

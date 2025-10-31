@@ -1,5 +1,5 @@
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
-import {Component, Input, inject} from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { isBefore, isAfter } from 'date-fns';
 import { Observable } from 'rxjs';
@@ -23,6 +23,7 @@ export interface ContainerForTable {
   providers: [
     TitleCasePipe
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [AsyncPipe, CustomTooltipDirective]
 })

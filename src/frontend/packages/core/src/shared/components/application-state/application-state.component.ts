@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -14,7 +14,8 @@ import { ApplicationStateIconComponent } from './application-state-icon/applicat
   imports: [
     CommonModule,
     ApplicationStateIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ApplicationStateComponent implements OnInit {
 

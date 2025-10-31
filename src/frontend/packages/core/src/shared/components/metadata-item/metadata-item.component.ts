@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 
@@ -15,7 +15,8 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CustomIconComponent,
     CustomTooltipDirective,
     CopyToClipboardComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataItemComponent {
 

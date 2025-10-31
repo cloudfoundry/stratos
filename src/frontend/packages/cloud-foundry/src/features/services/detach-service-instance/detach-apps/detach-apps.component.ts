@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -15,6 +15,7 @@ import {
   selector: 'app-detach-apps',
   templateUrl: './detach-apps.component.html',
   styleUrls: ['./detach-apps.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListComponent

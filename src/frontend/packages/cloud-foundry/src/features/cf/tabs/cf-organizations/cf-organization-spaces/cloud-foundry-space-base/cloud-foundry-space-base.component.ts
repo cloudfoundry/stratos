@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -40,6 +40,7 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   templateUrl: './cloud-foundry-space-base.component.html',
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

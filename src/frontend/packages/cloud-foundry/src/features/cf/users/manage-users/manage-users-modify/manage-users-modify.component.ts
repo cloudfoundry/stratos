@@ -11,7 +11,7 @@ import {
   ViewChild,
   ViewContainerRef,
   signal,
-} from '@angular/core';
+  ChangeDetectionStrategy} from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { Store } from '@ngrx/store';
 import { getRowMetadata } from '@stratosui/store';
@@ -69,6 +69,7 @@ interface CfUserWithWarning extends CfUser {
   templateUrl: './manage-users-modify.component.html',
   styleUrls: ['./manage-users-modify.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     EnumerateComponent,

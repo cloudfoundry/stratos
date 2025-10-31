@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 import { DisplayValueComponent } from '../display-value/display-value.component';
 
@@ -10,7 +10,8 @@ import { DisplayValueComponent } from '../display-value/display-value.component'
   standalone: true,
   imports: [
     DisplayValueComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditableDisplayValueComponent {
 

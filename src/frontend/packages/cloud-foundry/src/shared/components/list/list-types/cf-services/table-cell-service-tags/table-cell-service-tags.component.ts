@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { of } from 'rxjs';
 
 import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
@@ -12,6 +12,7 @@ import { ServiceTag } from '../cf-service-card/cf-service-card.component';
   templateUrl: './table-cell-service-tags.component.html',
   styleUrls: ['./table-cell-service-tags.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AppChipsComponent
   ]

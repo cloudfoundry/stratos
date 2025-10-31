@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import {
-  AfterViewInit,
+import { ChangeDetectionStrategy, AfterViewInit,
   Component,
   ElementRef,
   HostListener,
@@ -12,7 +11,7 @@ import {
   ViewChildren,
   signal,
   computed,
-} from '@angular/core';
+ } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
@@ -60,7 +59,8 @@ const noFavoritesMsg = {
     NoContentMessageComponent,
     EndpointsMissingComponent,
     HomePageEndpointCardComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   public allEndpointIds$: Observable<string[]>;
@@ -125,7 +125,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
             extras: {
               replaceUrl: true
             }
-          }));
+          });
         }
       }),
       first()
@@ -389,7 +389,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       map(eps => eps.filter(ep => {
         const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
         return !!defn.definition.homeCard;
-      })),
+      }),
       map(eps => {
         switch (eps.length) {
           case 1:

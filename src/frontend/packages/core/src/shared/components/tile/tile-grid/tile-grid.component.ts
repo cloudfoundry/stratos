@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, HostBinding, Input  } from '@angular/core';
 
 @Component({
   selector: 'app-tile-grid',
@@ -6,7 +6,8 @@ import { Component, OnInit, ViewEncapsulation, HostBinding, Input } from '@angul
   styleUrls: ['./tile-grid.component.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileGridComponent {
   @HostBinding('class.app-tile-grid-fit')

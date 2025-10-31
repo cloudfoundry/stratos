@@ -1,11 +1,12 @@
-import { Component, Input, Output, EventEmitter, Directive } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, Directive  } from '@angular/core';
 
 // Custom Icon Component
 @Component({
   selector: 'app-custom-icon',
   template: `<i [class]="fontSet + ' custom-icon'" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomIconComponent {
   @Input() fontSet = 'material-icons';
@@ -20,7 +21,8 @@ export class CustomIconComponent {
   selector: 'mat-spinner',
   template: '<div class="custom-spinner" [style.width.px]="diameter" [style.height.px]="diameter"><div class="spinner-circle"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomSpinnerComponent {
   @Input() diameter = 40;
@@ -34,7 +36,8 @@ export class CustomSpinnerComponent {
   selector: 'mat-progress-bar',
   template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomProgressBarComponent {
   @Input() value = 0;
@@ -47,7 +50,8 @@ export class CustomProgressBarComponent {
   selector: 'custom-progress-bar',
   template: '<div class="custom-progress-bar" [class.indeterminate]="mode === \'indeterminate\'"><div class="progress-fill" [style.width.%]="value"></div></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomProgressBarSelectorComponent {
   @Input() value = 0;
@@ -60,7 +64,8 @@ export class CustomProgressBarSelectorComponent {
   selector: 'mat-dialog-content',
   template: '<div class="custom-dialog-content"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDialogContentComponent {
 }
@@ -70,7 +75,8 @@ export class CustomDialogContentComponent {
   selector: 'mat-dialog-actions',
   template: '<div class="custom-dialog-actions" [class.align-end]="align === \'end\'"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDialogActionsComponent {
   @Input() align: 'start' | 'center' | 'end' = 'start';
@@ -81,7 +87,8 @@ export class CustomDialogActionsComponent {
   selector: 'mat-dialog-title',
   template: '<div class="custom-dialog-title"><ng-content></ng-content></div>',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDialogTitleComponent {
 }
@@ -100,7 +107,8 @@ export class MatDatepickerDirective {
   selector: 'mat-datepicker',
   template: '<input type="date" class="custom-datepicker" [value]="selected" (change)="onDateChange($event)">',
   styleUrls: ['./custom-material.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerComponent {
   @Input() selected: Date;
@@ -119,7 +127,8 @@ export class CustomDatepickerComponent {
   template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker" [value]="value" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
-  imports: [MatDatepickerDirective]
+  imports: [MatDatepickerDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerInputComponent {
   @Input() matDatepicker: any;
@@ -147,7 +156,8 @@ export class CustomDatepickerInputComponent {
   template: '<button class="custom-datepicker-toggle" (click)="toggle()"><app-custom-icon>calendar_today</app-custom-icon></button>',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
-  imports: [CustomIconComponent]
+  imports: [CustomIconComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerToggleComponent {
   @Input() for: any;

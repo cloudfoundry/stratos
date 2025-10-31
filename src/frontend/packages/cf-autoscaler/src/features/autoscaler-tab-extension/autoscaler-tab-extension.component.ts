@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
@@ -133,7 +133,8 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
     MetadataItemComponent,
     PollingIndicatorComponent,
     NoContentMessageComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 

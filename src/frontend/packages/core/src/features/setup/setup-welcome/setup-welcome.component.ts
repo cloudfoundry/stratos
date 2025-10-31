@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
@@ -18,6 +18,7 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 selector: 'app-setup-welcome',
   templateUrl: './setup-welcome.component.html',
   styleUrls: ['./setup-welcome.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     PageHeaderComponent,

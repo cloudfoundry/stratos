@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from 'frontend/packages/store/src/app-state';
@@ -13,6 +13,7 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
   selector: 'app-monocular-tab-base',
   templateUrl: './monocular-tab-base.component.html',
   styleUrls: ['./monocular-tab-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     PageHeaderComponent,

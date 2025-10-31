@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal, inject} from '@angular/core';
+import {Component, ComponentFactoryResolver, OnDestroy, OnInit, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
@@ -65,6 +65,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   selector: 'app-helm-release-resource-graph',
   templateUrl: './helm-release-resource-graph.component.html',
   styleUrls: ['./helm-release-resource-graph.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

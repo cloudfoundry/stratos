@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
@@ -13,6 +13,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
   selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ApplicationStateComponent

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import { CloudFoundryEventsListComponent } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
@@ -10,11 +10,12 @@ import {
   selector: 'app-events-tab',
   templateUrl: './events-tab.component.html',
   styleUrls: ['./events-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: ListConfig,
     useClass: CfAppEventsConfigService,
   }],
-  standalone: true,
   imports: [
     CloudFoundryEventsListComponent
   ]

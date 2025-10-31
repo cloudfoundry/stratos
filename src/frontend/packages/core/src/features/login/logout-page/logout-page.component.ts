@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -13,6 +13,7 @@ import { StratosTitleComponent } from '../../../shared/components/stratos-title/
 selector: 'app-logout-page',
   templateUrl: './logout-page.component.html',
   styleUrls: ['./logout-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

@@ -1,12 +1,11 @@
-import {
-  AfterContentInit,
+import { ChangeDetectionStrategy, AfterContentInit,
   Component,
   ContentChildren,
   HostBinding,
   OnInit,
   QueryList,
   ViewEncapsulation,
-} from '@angular/core';
+ } from '@angular/core';
 
 import { TileComponent } from '../tile/tile.component';
 
@@ -16,7 +15,8 @@ import { TileComponent } from '../tile/tile.component';
   styleUrls: ['./tile-group.component.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileGroupComponent implements OnInit, AfterContentInit {
 

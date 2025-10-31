@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { ListConfig } from '../../../../../../core/src/shared/components/list/list.component.types';
 import {
@@ -15,6 +15,7 @@ import { CloudFoundryEventsListComponent } from '../../../../shared/components/c
     useClass: CfAllEventsConfigService,
   }],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CloudFoundryEventsListComponent
   ]

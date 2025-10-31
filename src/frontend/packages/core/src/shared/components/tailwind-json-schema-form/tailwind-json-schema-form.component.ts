@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
 
 
@@ -10,6 +10,7 @@ export interface TailwindJsonSchemaFormConfig {
   selector: 'json-schema-form',
   templateUrl: './tailwind-json-schema-form.component.html',
   styleUrls: ['./tailwind-json-schema-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ReactiveFormsModule

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -13,6 +13,7 @@ import {
   templateUrl: './cf-endpoint-details.component.html',
   styleUrls: ['./cf-endpoint-details.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CustomTooltipDirective
 ]

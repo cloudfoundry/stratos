@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { ListConfig } from 'frontend/packages/core/src/shared/components/list/list.component.types';
 
@@ -13,6 +13,7 @@ import { AnalysisReportRunnerComponent } from '../../analysis-report-viewer/anal
   selector: 'app-kubernetes-analysis-tab',
   templateUrl: './kubernetes-analysis-tab.component.html',
   styleUrls: ['./kubernetes-analysis-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListComponent,

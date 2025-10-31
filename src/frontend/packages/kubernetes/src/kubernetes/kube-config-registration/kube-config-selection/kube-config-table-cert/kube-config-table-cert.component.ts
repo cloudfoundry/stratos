@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {Component, Input, signal, inject} from '@angular/core';
+import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
@@ -20,6 +20,7 @@ type CertResponse = {
 selector: 'app-kube-config-table-cert',
   templateUrl: './kube-config-table-cert.component.html',
   styleUrls: ['./kube-config-table-cert.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

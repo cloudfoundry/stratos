@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -39,6 +39,7 @@ export interface ServiceTag {
   styleUrls: ['./cf-service-card.component.scss'],
   providers: [EntityServiceFactory],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MetaCardComponent,

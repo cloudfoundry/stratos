@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 
 @Component({
-selector: 'app-resource-alert-preview',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-resource-alert-preview',
   templateUrl: './resource-alert-preview.component.html',
   styleUrls: ['./resource-alert-preview.component.scss'],
   standalone: true,

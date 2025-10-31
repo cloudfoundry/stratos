@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
@@ -12,7 +12,8 @@ import { CustomIconComponent } from '../../../../../../shared/components/custom-
   standalone: true,
   imports: [
     CustomIconComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {
 

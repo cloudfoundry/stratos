@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
@@ -27,6 +27,7 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
   templateUrl: './cloud-foundry-tabs-base.component.html',
   styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

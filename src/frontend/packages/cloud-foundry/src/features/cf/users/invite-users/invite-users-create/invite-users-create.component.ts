@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
@@ -32,6 +32,7 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
   templateUrl: './invite-users-create.component.html',
   styleUrls: ['./invite-users-create.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

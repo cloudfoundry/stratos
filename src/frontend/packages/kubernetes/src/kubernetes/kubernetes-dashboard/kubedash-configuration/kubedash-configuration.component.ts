@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, OnDestroy, signal, inject} from '@angular/core';
+import {Component, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -22,6 +22,7 @@ type MessageUpdater = (msg: string) => void;
   selector: 'app-kubedash-configuration',
   templateUrl: './kubedash-configuration.component.html',
   styleUrls: ['./kubedash-configuration.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

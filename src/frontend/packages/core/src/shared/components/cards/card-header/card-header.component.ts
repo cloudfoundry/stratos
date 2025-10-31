@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 /**
  * Card header component using Tailwind CSS
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-card-header',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
       <ng-content></ng-content>

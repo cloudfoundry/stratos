@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -26,6 +26,7 @@ import { ApplicationService } from '../../../../../application.service';
   selector: 'app-routes-tab',
   templateUrl: './routes-tab.component.html',
   styleUrls: ['./routes-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListComponent,

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
 import { MetricsChartComponent } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -15,6 +15,7 @@ import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actio
   templateUrl: './application-instance-chart.component.html',
   styleUrls: ['./application-instance-chart.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     MetricsChartComponent,
     MetricsRangeSelectorComponent

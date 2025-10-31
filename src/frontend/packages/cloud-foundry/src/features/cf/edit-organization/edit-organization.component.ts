@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { PageHeaderComponent, SteppersComponent, StepComponent } from '@stratosui/core';
 
 import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
@@ -11,6 +11,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
   styleUrls: ['./edit-organization.component.scss'],
   providers: [getActiveRouteCfOrgSpaceProvider],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageHeaderComponent,
     SteppersComponent,

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
@@ -12,7 +12,8 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
   imports: [
     ReactiveFormsModule,
     ProductNameComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SSOAuthFormComponent implements IAuthForm {
   @Input() formGroup: UntypedFormGroup;

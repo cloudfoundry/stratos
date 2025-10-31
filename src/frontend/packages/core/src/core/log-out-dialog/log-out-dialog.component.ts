@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Optional } from '@angular/core';
 
 import { MAT_DIALOG_DATA } from '../../shared/services/tailwind-material-replacements';
 import { TailwindDialogRef } from '../../shared/services/tailwind-dialog.service';
@@ -14,13 +14,15 @@ import { AppProgressBarComponent } from '../../shared/components/progress-bar/ap
   standalone: true,
   imports: [
     AppProgressBarComponent
-]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
     @Inject('TailwindDialogRef') public dialogRef: TailwindDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   private autoLogout: Subscription;
@@ -42,6 +44,7 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
             this.dialogRef.close(false);
           } else {
             this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
+            this.cdr.markForCheck();
           }
         })
       ).subscribe();

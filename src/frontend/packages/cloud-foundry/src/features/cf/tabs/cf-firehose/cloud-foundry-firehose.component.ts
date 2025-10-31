@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
@@ -17,6 +17,7 @@ import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatte
   templateUrl: './cloud-foundry-firehose.component.html',
   styleUrls: ['./cloud-foundry-firehose.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     CustomCheckboxComponent,

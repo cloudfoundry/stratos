@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -25,6 +25,7 @@ import { MultilineTitleComponent } from '../../../../../../../../core/src/shared
   templateUrl: './cf-stacks-card.component.html',
   styleUrls: ['./cf-stacks-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe,
     MetaCardComponent,

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { GitSCMService } from '@stratosui/git';
@@ -25,7 +25,8 @@ export class DeployAppEffects {
     private actions$: Actions,
     private store: Store<CFAppState>,
     private httpClient: HttpClient,
-    private gitSCMService: GitSCMService
+    private gitSCMService: GitSCMService,
+    private appRef: ApplicationRef
   ) { }
 
   
@@ -37,11 +38,17 @@ export class DeployAppEffects {
     }),
     switchMap(([action, state]: [CheckProjectExists, any]) => {
       return action.scm.getRepository(this.httpClient, action.projectName).pipe(
-        map(res => new ProjectExists(action.projectName, res)),
-        catchError(err => observableOf(err.status === 404 ?
-          new ProjectDoesntExist(action.projectName) :
-          new ProjectFetchFail(action.projectName, action.scm.parseErrorAsString(err))
-        ))
+        map(res => {
+          this.appRef.tick();
+          return new ProjectExists(action.projectName, res);
+        }),
+        catchError(err => {
+          this.appRef.tick();
+          return observableOf(err.status === 404 ?
+            new ProjectDoesntExist(action.projectName) :
+            new ProjectFetchFail(action.projectName, action.scm.parseErrorAsString(err))
+          );
+        })
       );
     })
   ));

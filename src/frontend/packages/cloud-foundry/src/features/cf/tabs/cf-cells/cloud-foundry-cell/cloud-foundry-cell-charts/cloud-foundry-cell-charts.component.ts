@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -15,6 +15,7 @@ import { MetricsParentRangeSelectorComponent } from '../../../../../../../../cor
   selector: 'app-cloud-foundry-cell-charts',
   templateUrl: './cloud-foundry-cell-charts.component.html',
   styleUrls: ['./cloud-foundry-cell-charts.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     MetricsChartComponent,

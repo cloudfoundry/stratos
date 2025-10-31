@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -20,6 +20,7 @@ import { ApplicationService } from '../application.service';
   templateUrl: './ssh-application.component.html',
   styleUrls: ['./ssh-application.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

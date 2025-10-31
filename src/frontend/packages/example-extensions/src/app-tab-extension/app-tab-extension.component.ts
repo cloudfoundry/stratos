@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { StratosTab, StratosTabType } from '@stratosui/core';
 
 @StratosTab({
@@ -11,7 +11,8 @@ import { StratosTab, StratosTabType } from '@stratosui/core';
 selector: 'app-app-tab-extension',
   templateUrl: './app-tab-extension.component.html',
   styleUrls: ['./app-tab-extension.component.scss'],
-  standalone: false
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppTabExtensionComponent implements OnInit {
 

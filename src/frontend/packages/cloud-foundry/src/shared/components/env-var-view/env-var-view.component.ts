@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject , ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
 
@@ -9,6 +9,7 @@ import { CodeBlockComponent } from '../../../../../core/src/shared/components/co
   templateUrl: './env-var-view.component.html',
   styleUrls: ['./env-var-view.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     CodeBlockComponent

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../shared/components/custom-select/custom-select.component';
@@ -14,6 +14,7 @@ import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-re
   selector: 'app-backup-connection-cell',
   templateUrl: './backup-connection-cell.component.html',
   styleUrls: ['./backup-connection-cell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     FormsModule,

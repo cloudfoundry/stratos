@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterNav, AppState } from '@stratosui/store';
@@ -7,6 +7,7 @@ import { RouterNav, AppState } from '@stratosui/store';
   selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
   styleUrls: ['./card-boolean-metric.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -34,6 +34,7 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   templateUrl: './cli-info-cloud-foundry.component.html',
   styleUrls: ['./cli-info-cloud-foundry.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     CustomTooltipDirective,

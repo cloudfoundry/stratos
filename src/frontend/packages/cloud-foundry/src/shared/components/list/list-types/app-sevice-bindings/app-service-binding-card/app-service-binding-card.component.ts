@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindDialogService } from '@stratosui/core';
@@ -57,6 +57,7 @@ interface EnvVarData {
   templateUrl: './app-service-binding-card.component.html',
   styleUrls: ['./app-service-binding-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnumerateComponent {
   @Input() collection: Observable<any[]>;

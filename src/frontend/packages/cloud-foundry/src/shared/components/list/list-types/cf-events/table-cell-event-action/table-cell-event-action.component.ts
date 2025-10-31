@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { CustomIconComponent, CustomTooltipDirective } from '@stratosui/core';
 
@@ -11,6 +11,7 @@ import { EventTabActorIconPipe } from './event-tab-actor-icon.pipe';
   templateUrl: './table-cell-event-action.component.html',
   styleUrls: ['./table-cell-event-action.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CustomIconComponent,
     CustomTooltipDirective,

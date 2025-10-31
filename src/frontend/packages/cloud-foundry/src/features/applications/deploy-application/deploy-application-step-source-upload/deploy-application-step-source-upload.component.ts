@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, OnDestroy } from '@angular/core';
+import { Component, Injector, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -16,6 +16,7 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
   templateUrl: './deploy-application-step-source-upload.component.html',
   styleUrls: ['./deploy-application-step-source-upload.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     UploadProgressIndicatorComponent,

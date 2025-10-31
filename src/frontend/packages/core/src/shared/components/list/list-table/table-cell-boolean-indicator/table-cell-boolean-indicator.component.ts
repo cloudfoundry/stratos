@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../list.types';
@@ -14,6 +14,7 @@ export interface TableCellBooleanIndicatorComponentConfig<T> {
 selector: 'app-table-cell-boolean-indicator',
   templateUrl: './table-cell-boolean-indicator.component.html',
   styleUrls: ['./table-cell-boolean-indicator.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     BooleanIndicatorComponent
@@ -21,12 +22,17 @@ selector: 'app-table-cell-boolean-indicator',
 })
 export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom<T, TableCellBooleanIndicatorComponentConfig<T>> {
 
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
+
   @Input('row')
   get row() { return super.row; }
   set row(row: T) {
     super.row = row;
     if (this.config) {
       this.enabled = this.config.isEnabled(row);
+      this.cdr.markForCheck();
     }
   }
 

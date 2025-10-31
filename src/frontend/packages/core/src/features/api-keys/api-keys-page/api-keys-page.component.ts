@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
@@ -16,13 +16,12 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
-selector: 'app-api-keys-page',
+  selector: 'app-api-keys-page',
   templateUrl: './api-keys-page.component.html',
   styleUrls: ['./api-keys-page.component.scss'],
   providers: [{
     provide: ListConfig,
-    useClass: ApiKeyListConfigService,
-  }],
+    useClass: ApiKeyListConfigService}], changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

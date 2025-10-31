@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CustomIconComponent } from '@stratosui/core';
@@ -10,6 +10,7 @@ import { IService, IServiceExtra } from '../../../cf-api-svc.types';
   templateUrl: './service-icon.component.html',
   styleUrls: ['./service-icon.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     CustomIconComponent

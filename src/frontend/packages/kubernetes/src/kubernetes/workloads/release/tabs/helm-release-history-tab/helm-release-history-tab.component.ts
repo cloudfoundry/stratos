@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { format } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -33,6 +33,7 @@ class HelmReleaseHistoryDataSource implements ITableListDataSource<any> {
   selector: 'app-helm-release-history-tab',
   templateUrl: './helm-release-history-tab.component.html',
   styleUrls: ['./helm-release-history-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     TableComponent

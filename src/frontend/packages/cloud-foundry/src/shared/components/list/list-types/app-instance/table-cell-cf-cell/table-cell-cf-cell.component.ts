@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { ListAppInstance } from '../app-instance-types';
   templateUrl: './table-cell-cf-cell.component.html',
   styleUrls: ['./table-cell-cf-cell.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule

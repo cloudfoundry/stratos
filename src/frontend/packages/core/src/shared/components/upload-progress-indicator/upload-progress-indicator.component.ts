@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomProgressBarSelectorComponent } from '../custom-material/custom-material.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -12,7 +12,8 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
     CommonModule,
     CustomIconComponent,
     CustomProgressBarSelectorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UploadProgressIndicatorComponent {
 

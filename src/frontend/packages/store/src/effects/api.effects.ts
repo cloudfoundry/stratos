@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { mergeMap, withLatestFrom } from 'rxjs/operators';
@@ -20,7 +20,8 @@ export class APIEffect {
   constructor(
     private actions$: Actions,
     private store: Store<InternalAppState>,
-    private httpClient: PipelineHttpClient
+    private httpClient: PipelineHttpClient,
+    private appRef: ApplicationRef,
   ) { }
 
   
@@ -28,6 +29,7 @@ export class APIEffect {
     ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START),
     withLatestFrom(this.store),
     mergeMap(([action, appState]: [ICFAction | PaginatedAction, InternalAppState]) => {
+      this.appRef.tick();
       if (!(action as PaginatedAction).paginationKey) {
         return apiRequestPipelineFactory(baseRequestPipelineFactory, {
           store: this.store,

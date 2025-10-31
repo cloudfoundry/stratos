@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -17,6 +17,7 @@ import { CustomIconComponent } from '@stratosui/core';
   selector: 'app-autoscaler-scale-history-page',
   templateUrl: './autoscaler-scale-history-page.component.html',
   styleUrls: ['./autoscaler-scale-history-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{
     provide: ListConfig,
     useClass: CfAppAutoscalerEventsConfigService,
@@ -37,6 +38,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
 
   constructor(
     public applicationService: ApplicationService,
+    private cdr: ChangeDetectorRef
   ) {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
@@ -47,6 +49,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
 }

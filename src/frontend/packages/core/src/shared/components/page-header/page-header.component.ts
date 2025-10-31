@@ -1,6 +1,6 @@
 import { TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild  } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -36,7 +36,7 @@ import { PageHeaderEventsComponent } from './page-header-events/page-header-even
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 
 @Component({
-selector: 'app-page-header',
+  selector: 'app-page-header',
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss'],
   standalone: true,
@@ -49,7 +49,8 @@ selector: 'app-page-header',
     UserAvatarComponent,
     PageHeaderEventsComponent,
     ThemeToggleComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public canAPIKeys$: Observable<boolean>;
@@ -86,7 +87,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         link: tab.link === '-' ?
           TabNavService.TabsNoLinkValue :
           this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
-      }));
+      });
       this.tabNavService.setTabs(this.pTabs);
     }
   }
@@ -128,7 +129,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
           prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
           metadata: { name: favorite.metadata.name },
-        }));
+        });
       }
     }
   }

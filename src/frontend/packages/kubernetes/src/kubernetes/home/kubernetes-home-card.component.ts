@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, computed, inject } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -21,6 +21,7 @@ import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
   styleUrls: ['./kubernetes-home-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

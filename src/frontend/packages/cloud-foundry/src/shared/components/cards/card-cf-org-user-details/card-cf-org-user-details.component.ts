@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
   selector: 'app-card-cf-org-user-details',
   templateUrl: './card-cf-org-user-details.component.html',
   styleUrls: ['./card-cf-org-user-details.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

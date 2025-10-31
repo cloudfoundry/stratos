@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { CodeBlockComponent } from '../../../../../../core/src/shared/components/code-block/code-block.component';
 
@@ -7,6 +7,7 @@ import { CodeBlockComponent } from '../../../../../../core/src/shared/components
   templateUrl: './cli-command.component.html',
   styleUrls: ['./cli-command.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CodeBlockComponent
   ]

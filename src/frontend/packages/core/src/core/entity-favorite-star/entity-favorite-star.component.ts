@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -14,6 +14,7 @@ import { CustomIconComponent } from '../../shared/components/custom-material/cus
   selector: 'app-entity-favorite-star',
   templateUrl: './entity-favorite-star.component.html',
   styleUrls: ['./entity-favorite-star.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

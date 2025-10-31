@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
@@ -20,6 +20,7 @@ export interface EndpointMissingMessageParts {
   selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

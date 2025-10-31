@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -32,6 +32,7 @@ interface ConnectionError {
   templateUrl: './log-stream-tab.component.html',
   styleUrls: ['./log-stream-tab.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     LogViewerComponent
 ]
@@ -46,6 +47,9 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   private retryDelayMs = 2000;
   private lastError: ConnectionError | null = null;
 
+  // Signal for connection status tracking
+  connectionStatusSignal = signal<number>(0);
+
   @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
 
   filter;
@@ -55,6 +59,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   constructor(
     private applicationService: ApplicationService,
     private store: Store<CFAppState>,
+    private cdr: ChangeDetectorRef
   ) {
     this.filter = this.jsonFilter.bind(this);
   }
@@ -66,6 +71,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.connectionStatusSubject.next(0);
+    this.connectionStatusSignal.set(0);
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
       this.messages = NEVER;
       this.connectionStatus = of(-1); // Indicate invalid configuration
@@ -74,6 +80,8 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         retryable: false,
         timestamp: Date.now()
       };
+      this.connectionStatusSignal.set(-1);
+      this.cdr.markForCheck();
     } else {
       // Use window.location.protocol to construct proper WebSocket URL
       // This ensures we use the correct protocol (ws/wss) based on page protocol
@@ -92,6 +100,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
           this.socketError = false;
           this.lastError = null;
           console.log('WebSocket connected successfully');
+          this.cdr.markForCheck();
         }),
         retryWhen(errors => errors.pipe(
           tap(error => {
@@ -111,12 +120,16 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             if (this.connectionAttempts >= this.maxRetries) {
               this.socketError = true;
               this.connectionStatusSubject.next(-1);
+              this.connectionStatusSignal.set(-1);
               console.error(
                 `WebSocket connection failed after ${this.maxRetries} attempts. Reason: ${errorMessage}`
               );
+              this.cdr.markForCheck();
             } else {
               // Inform user of retry attempt
               this.connectionStatusSubject.next(-2); // -2 indicates retrying
+              this.connectionStatusSignal.set(-2);
+              this.cdr.markForCheck();
             }
           }),
           delayWhen(() => {
@@ -139,6 +152,8 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
+          this.connectionStatusSignal.set(-1);
+          this.cdr.markForCheck();
           // Return EMPTY to complete the stream gracefully
           return EMPTY;
         }),
@@ -163,7 +178,13 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
+          this.connectionStatusSignal.set(-1);
+          this.cdr.markForCheck();
           return EMPTY;
+        }),
+        tap(() => {
+          // Mark for check on each message for real-time streaming
+          this.cdr.markForCheck();
         })
       );
 
@@ -171,7 +192,9 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         first(),
         map(() => {
           this.connectionStatusSubject.next(1);
+          this.connectionStatusSignal.set(1);
           console.log('WebSocket connection status: Connected');
+          this.cdr.markForCheck();
           return 1;
         }),
         startWith(0),
@@ -179,6 +202,8 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         debounceTime(250),
         catchError(() => {
           this.connectionStatusSubject.next(-1);
+          this.connectionStatusSignal.set(-1);
+          this.cdr.markForCheck();
           return of(-1);
         })
       );

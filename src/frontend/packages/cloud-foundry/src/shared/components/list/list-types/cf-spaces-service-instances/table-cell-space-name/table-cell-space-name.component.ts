@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -11,6 +11,7 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
   templateUrl: './table-cell-space-name.component.html',
   styleUrls: ['./table-cell-space-name.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule
   ]

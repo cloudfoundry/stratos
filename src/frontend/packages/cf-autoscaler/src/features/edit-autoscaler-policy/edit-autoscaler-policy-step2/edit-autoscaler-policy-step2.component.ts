@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -31,6 +31,7 @@ import { TileComponent } from '../../../../../core/src/shared/components/tile/ti
   selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
   styleUrls: ['./edit-autoscaler-policy-step2.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
@@ -66,7 +67,8 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
     public applicationService: ApplicationService,
     private fb: UntypedFormBuilder,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
     this.editTriggerForm = this.fb.group({
@@ -90,7 +92,10 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
     this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
       map(value => this.getMetricUnit(value)),
-    ).subscribe(unit => this.metricUnitSubject.next(unit)));
+    ).subscribe(unit => {
+      this.metricUnitSubject.next(unit);
+      this.cdr.markForCheck();
+    }));
 
     this.filteredMetricTypes$ = this.editTriggerForm.controls.metric_type.valueChanges.pipe(
       startWith(''),

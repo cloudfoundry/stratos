@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MatIconRegistry } from '@stratosui/core';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -18,6 +18,7 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.scss'],
   viewProviders: [MatIconRegistry],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     LoaderComponent,

@@ -210,7 +210,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
-      }));
+      });
 
     const addedLogs$ = stoppableLogStream$.pipe(
       buffer(buffer$))
@@ -286,7 +286,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           // Silently fail scroll operations, don't break the stream
           console.warn('Error auto-scrolling log viewer:', scrollErr);
         }
-      }))
+      })
       .subscribe({
         next: () => {
           // Successfully processing logs

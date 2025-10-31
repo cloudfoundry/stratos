@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 /**
  * Card title component using Tailwind CSS
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-card-title',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
       <ng-content></ng-content>

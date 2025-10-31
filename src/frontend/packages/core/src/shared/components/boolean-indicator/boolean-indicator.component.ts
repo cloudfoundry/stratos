@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -36,7 +36,8 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
   standalone: true,
   imports: [
     CommonModule
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
   public booleanOutput: IBooleanOutput;

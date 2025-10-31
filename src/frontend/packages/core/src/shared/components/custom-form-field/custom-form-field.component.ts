@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
@@ -7,6 +7,7 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'app-form-field',
   templateUrl: './custom-form-field.component.html',
   styleUrls: ['./custom-form-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []
 })

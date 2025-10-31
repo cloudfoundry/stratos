@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective, CustomIconComponent } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -14,6 +14,7 @@ interface CellEVentActeeConfig {
   templateUrl: './table-cell-event-actee.component.html',
   styleUrls: ['./table-cell-event-actee.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule,
     CustomIconComponent,

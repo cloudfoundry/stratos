@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute } from '@angular/router';
@@ -24,6 +24,7 @@ import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.ser
   templateUrl: './edit-space-step.component.html',
   styleUrls: ['./edit-space-step.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

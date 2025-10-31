@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, NgZone, OnDestroy, OnInit, computed, inject} from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
@@ -39,6 +39,7 @@ interface IEndpointDetails {
   selector: 'app-kubernetes-summary',
   templateUrl: './kubernetes-summary.component.html',
   styleUrls: ['./kubernetes-summary.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

@@ -1,5 +1,5 @@
 
-import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChildren, OnDestroy, QueryList  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '@stratosui/core';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -26,7 +26,8 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
     CustomSelectComponent,
     CustomOptionComponent,
     StartEndDateComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
   private actionSub: Subscription;

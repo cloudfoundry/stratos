@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { StepComponent } from '@stratosui/core';
@@ -18,6 +18,7 @@ import { InviteUsersCreateComponent } from './invite-users-create/invite-users-c
   templateUrl: './invite-users.component.html',
   styleUrls: ['./invite-users.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     PageHeaderComponent,

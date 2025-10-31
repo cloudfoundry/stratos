@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgModule } from '@angular/core';
+import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -151,6 +151,8 @@ class AppStoreDebugModule { }
     CustomImportModule,
   ],
   providers: [
+    // Enable zoneless change detection (Angular 20+ - Zone.js removed)
+    provideZonelessChangeDetection(),
     CustomizationService,
     TabNavService,
     LoggedInService,

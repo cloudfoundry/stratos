@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDrawer } from '../../../shared/services/tailwind-material-replacements';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
@@ -45,7 +45,8 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
     PageSideNavComponent,
     ShowPageHeaderComponent,
     RoutingIndicatorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {

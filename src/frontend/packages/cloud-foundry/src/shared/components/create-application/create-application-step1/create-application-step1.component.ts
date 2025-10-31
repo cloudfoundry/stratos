@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, ViewChild,
+  ChangeDetectionStrategy} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -22,6 +23,7 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

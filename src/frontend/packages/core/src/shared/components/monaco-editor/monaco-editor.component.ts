@@ -1,5 +1,4 @@
-import {
-  AfterViewInit,
+import { ChangeDetectionStrategy, AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -8,7 +7,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
-} from '@angular/core';
+ } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 declare const monaco: typeof import('monaco-editor');
@@ -37,13 +36,14 @@ export interface MonacoEditorOptions {
   templateUrl: './monaco-editor.component.html',
   styleUrls: ['./monaco-editor.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => MonacoEditorComponent),
-      multi: true,
-    },
-  ],
+      multi: true
+    }
+  ]
 })
 export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef<HTMLDivElement>;

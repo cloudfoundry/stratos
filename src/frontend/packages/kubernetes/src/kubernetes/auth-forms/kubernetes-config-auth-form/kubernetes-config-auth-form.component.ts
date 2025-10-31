@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
@@ -7,6 +7,7 @@ import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store
 
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-config-auth-form',
   templateUrl: './kubernetes-config-auth-form.component.html',
   styleUrls: ['./kubernetes-config-auth-form.component.scss'],

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { interval, Observable, of as observableOf } from 'rxjs';
@@ -8,6 +8,7 @@ import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
   selector: 'app-routing-indicator',
   templateUrl: './routing-indicator.component.html',
   styleUrls: ['./routing-indicator.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule

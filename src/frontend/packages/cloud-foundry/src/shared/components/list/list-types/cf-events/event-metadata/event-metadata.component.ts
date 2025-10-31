@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
+import { Component, Inject, Input, OnInit, Optional , ChangeDetectionStrategy } from '@angular/core';
 import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
 
 @Component({
@@ -7,6 +7,7 @@ import { TailwindDialogService, MAT_DIALOG_DATA } from '@stratosui/core';
   templateUrl: './event-metadata.component.html',
   styleUrls: ['./event-metadata.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule
   ]

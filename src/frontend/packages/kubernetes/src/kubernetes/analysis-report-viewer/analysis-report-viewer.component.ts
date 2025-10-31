@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ComponentRef,
   Input,
@@ -20,7 +22,8 @@ export interface IReportViewer {
 selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
   styleUrls: ['./analysis-report-viewer.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
 
@@ -30,6 +33,8 @@ export class AnalysisReportViewerComponent implements OnDestroy {
   private reportComponentRef: ComponentRef<IReportViewer>;
 
   private id: string;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   @Input('report')
   set report(report: AnalysisReport) {
@@ -63,6 +68,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     this.reportComponentRef = this.container.createComponent<IReportViewer>(component);
     // this.reportComponentRef.instance.setReport(report);
     this.reportComponentRef.instance.report = report;
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy() {

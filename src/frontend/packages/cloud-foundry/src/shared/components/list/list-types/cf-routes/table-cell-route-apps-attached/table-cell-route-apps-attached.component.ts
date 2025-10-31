@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   templateUrl: './table-cell-route-apps-attached.component.html',
   styleUrls: ['./table-cell-route-apps-attached.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     AppChipsComponent

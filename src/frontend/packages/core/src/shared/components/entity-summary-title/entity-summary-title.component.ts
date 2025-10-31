@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
@@ -11,7 +11,8 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CustomTooltipDirective
 ],
   templateUrl: './entity-summary-title.component.html',
-  styleUrls: ['./entity-summary-title.component.scss']
+  styleUrls: ['./entity-summary-title.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntitySummaryTitleComponent {
   @Input() title: string;

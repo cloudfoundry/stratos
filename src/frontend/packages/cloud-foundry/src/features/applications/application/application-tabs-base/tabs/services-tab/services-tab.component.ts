@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
@@ -12,6 +12,8 @@ import {
   selector: 'app-services-tab',
   templateUrl: './services-tab.component.html',
   styleUrls: ['./services-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     DatePipe,
     {
@@ -19,7 +21,6 @@ import {
       useClass: AppServiceBindingListConfigService
     }
   ],
-  standalone: true,
   imports: [
     ListComponent,
     NoContentMessageComponent

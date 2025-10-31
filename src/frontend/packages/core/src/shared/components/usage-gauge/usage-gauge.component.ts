@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, Input  } from '@angular/core';
 
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 
@@ -11,7 +11,8 @@ import { PercentagePipe } from '../../pipes/percentage.pipe';
     PercentagePipe
   ],
   templateUrl: './usage-gauge.component.html',
-  styleUrls: ['./usage-gauge.component.scss']
+  styleUrls: ['./usage-gauge.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UsageGaugeComponent implements OnInit {
 

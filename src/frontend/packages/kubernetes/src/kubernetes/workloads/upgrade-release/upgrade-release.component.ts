@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, ViewChild, inject} from '@angular/core';
+import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -28,6 +28,7 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   selector: 'app-upgrade-release',
   templateUrl: './upgrade-release.component.html',
   styleUrls: ['./upgrade-release.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

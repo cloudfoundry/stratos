@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, TemplateRef } from '@angular/core';
 
 import { StratosStatus } from '@stratosui/store';
 import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
@@ -23,7 +23,8 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
   imports: [
     CommonModule,
     CustomIconComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class StatefulIconComponent {

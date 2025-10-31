@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { map, share, startWith } from 'rxjs/operators';
 
@@ -17,6 +17,7 @@ import { StratosStatus } from '../../../../../../store/src/types/shared.types';
   selector: 'app-card-app-usage',
   templateUrl: './card-app-usage.component.html',
   styleUrls: ['./card-app-usage.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

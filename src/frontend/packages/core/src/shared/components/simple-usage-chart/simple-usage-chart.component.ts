@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild  } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -17,7 +17,8 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CustomIconComponent,
     CustomTooltipDirective,
     BaseChartDirective
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleUsageChartComponent {
   static BASE_COLOR_SELECTOR = 'simple-usage-graph-color';

@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { AnalysisReport } from '../../store/kube.types';
 selector: 'app-analysis-report-selector',
   templateUrl: './analysis-report-selector.component.html',
   styleUrls: ['./analysis-report-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe

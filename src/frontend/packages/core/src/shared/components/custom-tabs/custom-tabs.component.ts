@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, ViewChild, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, ViewChild, TemplateRef  } from '@angular/core';
 
 
 export interface MatTabChangeEvent {
@@ -9,7 +9,8 @@ export interface MatTabChangeEvent {
 @Component({
   selector: 'app-tab',
   template: '<ng-template><ng-content></ng-content></ng-template>',
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomTabComponent {
   @Input() label = '';
@@ -26,7 +27,8 @@ export class CustomTabComponent {
   templateUrl: './custom-tabs.component.html',
   styleUrls: ['./custom-tabs.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomTabGroupComponent implements AfterContentInit {
   @Input() selectedIndex = 0;

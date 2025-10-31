@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
+import { ChangeDetectionStrategy, AfterViewInit,
   Compiler,
   Component,
   ComponentFactoryResolver,
@@ -14,7 +13,7 @@ import {
   ViewChild,
   ViewContainerRef,
   signal,
-} from '@angular/core';
+ } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -63,7 +62,8 @@ enum Status {
     EntityFavoriteStarComponent,
     HomeShortcutsComponent,
     FavoritesMetaCardComponent,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 

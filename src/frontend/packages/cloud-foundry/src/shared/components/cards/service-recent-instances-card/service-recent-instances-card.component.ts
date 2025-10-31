@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
@@ -22,6 +22,7 @@ const RECENT_ITEMS_COUNT = 10;
   templateUrl: './service-recent-instances-card.component.html',
   styleUrls: ['./service-recent-instances-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     StatefulIconComponent,

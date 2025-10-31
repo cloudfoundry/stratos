@@ -10,7 +10,7 @@ import {
   TemplateRef,
   ViewChild,
   ViewContainerRef,
-  inject} from '@angular/core';
+  inject, ChangeDetectionStrategy } from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
@@ -63,6 +63,7 @@ interface KubernetesResourceViewerResource {
 selector: 'app-kubernetes-resource-viewer',
   templateUrl: './kubernetes-resource-viewer.component.html',
   styleUrls: ['./kubernetes-resource-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

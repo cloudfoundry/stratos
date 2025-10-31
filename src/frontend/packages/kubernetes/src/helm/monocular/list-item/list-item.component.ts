@@ -1,5 +1,5 @@
 import { AsyncPipe, NgClass } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Observable, of } from 'rxjs';
@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { Chart } from '../shared/models/chart';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-list-item',
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],

@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '@stratosui/store';
@@ -15,6 +15,7 @@ import { KubernetesService } from '../../services/kubernetes.service';
   selector: 'app-kubernetes-namespace-preview',
   templateUrl: './kubernetes-namespace-preview.component.html',
   styleUrls: ['./kubernetes-namespace-preview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   providers: [
     {

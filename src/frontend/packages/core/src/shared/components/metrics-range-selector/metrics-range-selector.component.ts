@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -25,7 +25,8 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
     CustomSelectComponent,
     CustomOptionComponent,
     StartEndDateComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsRangeSelectorComponent implements OnDestroy {
   private rangeSelectorSub: Subscription;

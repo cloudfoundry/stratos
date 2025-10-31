@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterContentInit,
+import { ChangeDetectionStrategy, AfterContentInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -9,7 +8,7 @@ import {
   OnInit,
   Output,
   ViewChild,
-} from '@angular/core';
+ } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
@@ -57,7 +56,8 @@ export interface StackedInputActionUpdate {
     CustomIconComponent,
     CustomTooltipDirective,
     BooleanIndicatorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StackedInputActionComponent implements OnInit, OnDestroy, AfterContentInit {
 
@@ -108,7 +108,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
         // Component is valid if form is ok OR it's already succeeded
         valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });
-    }));
+    });
 
     // Handle change of state from outside
     this.subs.push(this.stateIn$.subscribe(this.handleStateIn.bind(this)));

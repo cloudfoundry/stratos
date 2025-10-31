@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-simple-metric',
   templateUrl: './kubernetes-node-simple-metric.component.html',
   styleUrls: ['./kubernetes-node-simple-metric.component.scss'],

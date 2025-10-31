@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
@@ -18,7 +18,8 @@ import { EditEndpointStepComponent } from './edit-endpoint-step/edit-endpoint-st
     StepComponent,
     PageHeaderComponent,
     EditEndpointStepComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditEndpointComponent {
   cancelUrl = '/endpoints';

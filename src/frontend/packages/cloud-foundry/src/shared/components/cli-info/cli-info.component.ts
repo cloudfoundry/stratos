@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { CodeBlockComponent } from '../../../../../core/src/shared/components/code-block/code-block.component';
 
@@ -17,6 +17,7 @@ export interface CFAppCLIInfoContext {
   templateUrl: './cli-info.component.html',
   styleUrls: ['./cli-info.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CodeBlockComponent
 ]

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild  } from '@angular/core';
 
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
@@ -11,7 +11,8 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
     CopyToClipboardComponent
   ],
   templateUrl: './code-block.component.html',
-  styleUrls: ['./code-block.component.scss']
+  styleUrls: ['./code-block.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 

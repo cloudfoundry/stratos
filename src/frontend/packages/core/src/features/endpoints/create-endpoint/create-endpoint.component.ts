@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
@@ -8,7 +7,7 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
 
@@ -31,7 +30,8 @@ import { CreateEndpointConnectComponent } from './create-endpoint-connect/create
     StepComponent,
     CreateEndpointCfStep1Component,
     CreateEndpointConnectComponent,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointComponent implements OnInit, OnDestroy {
 

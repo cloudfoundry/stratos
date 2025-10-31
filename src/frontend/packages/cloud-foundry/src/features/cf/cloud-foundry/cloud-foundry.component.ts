@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -20,6 +20,7 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
   templateUrl: './cloud-foundry.component.html',
   styleUrls: ['./cloud-foundry.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     PageHeaderComponent,

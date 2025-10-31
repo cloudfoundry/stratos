@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
@@ -9,6 +9,7 @@ import { KubernetesNamespace } from '../../../store/kube.types';
   selector: 'app-kubernetes-namespace-link',
   templateUrl: './kubernetes-namespace-link.component.html',
   styleUrls: ['./kubernetes-namespace-link.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink]
 })

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -24,6 +24,7 @@ interface ICreateServiceTilesData extends ITileData {
   templateUrl: './add-service-instance-base-step.component.html',
   styleUrls: ['./add-service-instance-base-step.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageHeaderComponent,
     SteppersComponent,

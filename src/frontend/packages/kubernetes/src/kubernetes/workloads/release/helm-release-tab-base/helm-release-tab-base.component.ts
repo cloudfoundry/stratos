@@ -1,4 +1,4 @@
-import {Component, OnDestroy, inject} from '@angular/core';
+import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -20,6 +20,7 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
   selector: 'app-helm-release-tab-base',
   templateUrl: './helm-release-tab-base.component.html',
   styleUrls: ['./helm-release-tab-base.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     RouterModule,

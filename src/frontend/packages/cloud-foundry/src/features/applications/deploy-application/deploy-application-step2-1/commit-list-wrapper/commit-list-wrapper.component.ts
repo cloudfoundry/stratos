@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GitCommit, GitSCMService } from '@stratosui/git';
 import { Observable } from 'rxjs';
@@ -17,6 +17,7 @@ import {
   templateUrl: './commit-list-wrapper.component.html',
   styleUrls: ['./commit-list-wrapper.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ListComponent
   ],

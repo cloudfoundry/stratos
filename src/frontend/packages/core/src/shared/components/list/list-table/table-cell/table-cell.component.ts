@@ -7,8 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
-  inject,
-} from '@angular/core';
+  inject,, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
@@ -21,6 +20,7 @@ import { ICellDefinition } from '../table.types';
   templateUrl: './table-cell.component.html',
   styleUrls: ['./table-cell.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []
 })

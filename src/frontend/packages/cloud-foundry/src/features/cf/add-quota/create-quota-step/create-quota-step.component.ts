@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
@@ -19,6 +19,7 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
     getActiveRouteCfOrgSpaceProvider
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     QuotaDefinitionFormComponent
   ]

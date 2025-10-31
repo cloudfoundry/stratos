@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { TailwindDialogService } from '@stratosui/core';
 
@@ -11,6 +11,7 @@ import { ListAppEnvVar } from '../cf-app-variables-data-source';
   templateUrl: './table-cell-edit-variable.component.html',
   styleUrls: ['./table-cell-edit-variable.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVar> {

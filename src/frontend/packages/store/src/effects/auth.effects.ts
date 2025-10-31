@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
@@ -44,6 +44,7 @@ export class AuthEffect {
     private http: HttpClient,
     private actions$: Actions,
     private store: Store<DispatchOnlyAppState>,
+    private appRef: ApplicationRef,
   ) { }
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
@@ -63,8 +64,14 @@ export class AuthEffect {
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers,
       }).pipe(
-        map(data => new VerifySession()),
-        catchError((err, caught) => [new LoginFailed(err)]));
+        map(data => {
+          this.appRef.tick();
+          return new VerifySession();
+        }),
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new LoginFailed(err)];
+        }));
     })));
 
    verifyAuth$ = createEffect(() => this.actions$.pipe(
@@ -85,11 +92,13 @@ export class AuthEffect {
             const ssoOptions = response.headers.get(SSO_HEADER) as string;
             // Check for cookie domain mismatch with the requesting URL
             const isDomainMismatch = this.isDomainMismatch(response.headers);
+            this.appRef.tick();
             return action.login ? [new InvalidSession(false, false, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
           } else {
             const sessionData = envelope.data;
             sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
             LocalStorageService.localStorageToStore(this.store, sessionData);
+            this.appRef.tick();
             return [
               stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
               new VerifiedSession(sessionData, action.updateEndpoints)
@@ -107,6 +116,7 @@ export class AuthEffect {
 
           // Check for cookie domain mismatch with the requesting URL
           const isDomainMismatch = this.isDomainMismatch(err.headers);
+          this.appRef.tick();
           return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
         }));
     })));
@@ -115,6 +125,7 @@ export class AuthEffect {
     ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
     mergeMap(action => {
       if (action.login) {
+        this.appRef.tick();
         return [new LoginSuccess()];
       }
       return [];
@@ -123,6 +134,7 @@ export class AuthEffect {
    invalidSessionAuth$ = createEffect(() => this.actions$.pipe(
     ofType<VerifySession>(SESSION_INVALID),
     map(() => {
+      this.appRef.tick();
       return new LoginFailed('Invalid session');
     })));
 
@@ -131,13 +143,17 @@ export class AuthEffect {
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
         mergeMap((data: any) => {
+          this.appRef.tick();
           if (data.isSSO) {
             return [new LogoutSuccess(), new ResetSSOAuth()];
           } else {
             return [new LogoutSuccess(), new ResetAuth()];
           }
         }),
-        catchError((err, caught) => [new LogoutFailed(err)]));
+        catchError((err, caught) => {
+          this.appRef.tick();
+          return [new LogoutFailed(err)];
+        }));
     })));
 
    resetAuth$ = createEffect(() => this.actions$.pipe(
@@ -145,6 +161,7 @@ export class AuthEffect {
     tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
+      this.appRef.tick();
     })), { dispatch: false });
 
    resetSSOAuth$ = createEffect(() => this.actions$.pipe(
@@ -153,6 +170,7 @@ export class AuthEffect {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       const returnUrl = encodeURI(window.location.origin);
       window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
+      this.appRef.tick();
     })), { dispatch: false });
 
   private isDomainMismatch(headers: any): boolean {

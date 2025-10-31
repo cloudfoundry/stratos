@@ -1,5 +1,5 @@
 
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { A11yModule } from '@angular/cdk/a11y';
 import { MAT_DIALOG_DATA } from '../../services/tailwind-material-replacements';
@@ -16,7 +16,8 @@ import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.
   imports: [
     FormsModule,
     A11yModule
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogConfirmComponent {
   public textToMatch: string;

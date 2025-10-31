@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -11,6 +11,7 @@ import { UserInviteConfigureService, UserInviteService } from '../user-invites/u
   templateUrl: './cloud-foundry-base.component.html',
   styleUrls: ['./cloud-foundry-base.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterModule
   ],

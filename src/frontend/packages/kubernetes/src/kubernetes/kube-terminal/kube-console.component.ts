@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, ViewChild, inject} from '@angular/core';
+import {Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
@@ -18,6 +18,7 @@ import { KubernetesService } from '../services/kubernetes.service';
   selector: 'app-kube-console',
   templateUrl: './kube-console.component.html',
   styleUrls: ['./kube-console.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

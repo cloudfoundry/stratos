@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, OnDestroy, QueryList, HostListener  } from '@angular/core';
 import {
   EntityMonitorFactory,
   MenuItem,
@@ -42,7 +42,8 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
     CardStatusComponent,
     ClickStopPropagationDirective,
     EntityFavoriteStarComponent,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardComponent implements OnDestroy {
 

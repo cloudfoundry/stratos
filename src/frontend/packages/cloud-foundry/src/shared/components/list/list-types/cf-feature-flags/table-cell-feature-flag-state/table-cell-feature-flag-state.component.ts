@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -9,6 +9,7 @@ import { IFeatureFlag } from '../../../../../../cf-api.types';
   templateUrl: './table-cell-feature-flag-state.component.html',
   styleUrls: ['./table-cell-feature-flag-state.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     BooleanIndicatorComponent
   ]

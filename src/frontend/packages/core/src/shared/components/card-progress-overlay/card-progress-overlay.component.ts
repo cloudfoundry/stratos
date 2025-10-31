@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
     CommonModule
   ],
   templateUrl: './card-progress-overlay.component.html',
-  styleUrls: ['./card-progress-overlay.component.scss']
+  styleUrls: ['./card-progress-overlay.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardProgressOverlayComponent {
 

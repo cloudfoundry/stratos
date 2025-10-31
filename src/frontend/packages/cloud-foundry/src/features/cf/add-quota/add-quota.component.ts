@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { StepComponent, SteppersComponent } from '@stratosui/core';
@@ -15,6 +15,7 @@ import { CreateQuotaStepComponent } from './create-quota-step/create-quota-step.
     getActiveRouteCfOrgSpaceProvider
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageHeaderComponent,
     SteppersComponent,

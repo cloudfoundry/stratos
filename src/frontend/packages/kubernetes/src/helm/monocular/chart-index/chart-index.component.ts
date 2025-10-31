@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { first } from 'rxjs/operators';
 
 import { Chart } from '../shared/models/chart';
@@ -11,6 +11,7 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
   selector: 'app-chart-index',
   templateUrl: './chart-index.component.html',
   styleUrls: ['./chart-index.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     PanelComponent,

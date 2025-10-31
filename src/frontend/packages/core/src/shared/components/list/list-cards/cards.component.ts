@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
@@ -15,7 +15,8 @@ import { CardTypes } from './card/card.component';
   imports: [
     CommonModule,
     CardComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardsComponent<T> {
   public columns = CardCell.columns;

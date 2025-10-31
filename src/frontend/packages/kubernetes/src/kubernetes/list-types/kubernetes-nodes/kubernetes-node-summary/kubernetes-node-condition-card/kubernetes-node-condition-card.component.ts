@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/ku
   selector: 'app-kubernetes-node-condition-card',
   templateUrl: './kubernetes-node-condition-card.component.html',
   styleUrls: ['./kubernetes-node-condition-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CardWrapperComponent,

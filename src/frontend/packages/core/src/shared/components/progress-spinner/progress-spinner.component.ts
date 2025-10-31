@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
 
 
 /**
@@ -26,8 +26,9 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
           role="progressbar"
           aria-valuemin="0"
           aria-valuemax="100">
-        </div>
-      }
+        </div>,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
     
       <!-- Determinate spinner (arc showing progress) -->
       @if (mode === 'determinate') {
@@ -159,7 +160,8 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
   selector: 'mat-spinner',
   standalone: true,
   imports: [ProgressSpinnerComponent],
-  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`
+  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MatSpinnerComponent {
   @Input() diameter: number = 40;

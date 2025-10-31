@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, forwardRef, Input, signal } from '@angular/core';
+import { Component, forwardRef, Input, signal , ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { filter, first } from 'rxjs/operators';
 
@@ -21,6 +21,7 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
     }
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     BytesToHumanSize,

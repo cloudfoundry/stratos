@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { PageHeaderComponent } from '@stratosui/core';
@@ -15,6 +15,7 @@ import { createMonocularProviders } from '../monocular/stratos-monocular-provide
   providers: [
     ...createMonocularProviders()
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     PageHeaderComponent,

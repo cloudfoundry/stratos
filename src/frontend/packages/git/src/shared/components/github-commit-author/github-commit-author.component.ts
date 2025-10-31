@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { GitCommit } from '@stratosui/git';
 
@@ -7,7 +7,8 @@ import { GitCommit } from '@stratosui/git';
   templateUrl: './github-commit-author.component.html',
   styleUrls: ['./github-commit-author.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GithubCommitAuthorComponent {
   @Input() commit: GitCommit;

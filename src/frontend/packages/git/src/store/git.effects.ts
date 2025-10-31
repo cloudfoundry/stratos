@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, mergeMap } from 'rxjs/operators';
@@ -34,7 +34,8 @@ export class GitEffects {
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    private appRef: ApplicationRef
   ) { }
 
   
@@ -56,13 +57,17 @@ export class GitEffects {
           repoDetails.endpointGuid = action.meta.scm.endpointGuid;
           mappedData.entities[entityConfig.entityKey][repoDetails.guid] = repoDetails;
           mappedData.result.push(repoDetails.guid);
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
-        catchError(err => [
-          new WrapperRequestActionFailed(action.meta.scm.parseErrorAsString(err), action, actionType)
-        ]
+        catchError(err => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(action.meta.scm.parseErrorAsString(err), action, actionType)
+          ];
+        }
         ));
     })));
 
@@ -88,13 +93,17 @@ export class GitEffects {
             mappedData.entities[entityKey][b.guid] = b;
             mappedData.result.push(b.guid);
           });
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
-        catchError(err => [
-          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
-        ]));
+        catchError(err => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
+          ];
+        }));
     })));
 
   
@@ -116,13 +125,17 @@ export class GitEffects {
           branch.endpointGuid = action.scm.endpointGuid;
           mappedData.entities[entityKey][branch.guid] = branch;
           mappedData.result.push(branch.guid);
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
-        catchError(err => [
-          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
-        ]));
+        catchError(err => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
+          ];
+        }));
     })));
 
   
@@ -143,13 +156,17 @@ export class GitEffects {
             mappedData,
             this.updateCommit(action.scm.getType(), action.projectName, commit, action.scm.endpointGuid, action)
           );
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
-        catchError(err => [
-          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
-        ]));
+        catchError(err => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
+          ];
+        }));
     })));
 
   
@@ -173,13 +190,17 @@ export class GitEffects {
               action
             ));
           });
+          this.appRef.tick();
           return [
             new WrapperRequestActionSuccess(mappedData, action, actionType)
           ];
         }),
-        catchError(err => [
-          new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
-        ]));
+        catchError(err => {
+          this.appRef.tick();
+          return [
+            new WrapperRequestActionFailed(action.scm.parseErrorAsString(err), action, actionType)
+          ];
+        }));
     })));
 
   updateCommit(scmType: string, projectName: string, commit: GitCommit, endpointGuid: string, action: EntityRequestAction): GitCommit {

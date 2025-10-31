@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, TemplateRef, ContentChild  } from '@angular/core';
 
 
 @Component({
@@ -6,7 +6,8 @@ import { Component, Input, Output, EventEmitter, TemplateRef, ContentChild } fro
   templateUrl: './custom-expansion-panel.component.html',
   styleUrls: ['./custom-expansion-panel.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomExpansionPanelComponent {
   @Input() disabled = false;
@@ -35,7 +36,8 @@ export class CustomExpansionPanelComponent {
   selector: 'app-expansion-panel-header',
   template: '<ng-content></ng-content>',
   styleUrls: ['./custom-expansion-panel.component.scss'],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomExpansionPanelHeaderComponent {
   @Input() collapsedHeight = 'auto';

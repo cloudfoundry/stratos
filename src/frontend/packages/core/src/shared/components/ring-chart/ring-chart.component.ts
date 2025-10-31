@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, ViewEncapsulation  } from '@angular/core';
 
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -11,7 +11,8 @@ import { BaseChartDirective } from 'ng2-charts';
   standalone: true,
   imports: [
     BaseChartDirective
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RingChartComponent implements OnInit, OnChanges {
 

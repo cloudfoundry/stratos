@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 
@@ -13,7 +13,8 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
   imports: [
     RouterModule,
     CustomIconComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeShortcutsComponent {
 

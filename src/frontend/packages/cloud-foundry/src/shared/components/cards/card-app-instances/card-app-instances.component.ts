@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +25,7 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
   templateUrl: './card-app-instances.component.html',
   styleUrls: ['./card-app-instances.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

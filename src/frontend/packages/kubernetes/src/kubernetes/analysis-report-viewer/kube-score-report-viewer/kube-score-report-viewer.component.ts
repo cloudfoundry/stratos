@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
 @Component({
-selector: 'app-kube-score-report-viewer',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-kube-score-report-viewer',
   templateUrl: './kube-score-report-viewer.component.html',
   styleUrls: ['./kube-score-report-viewer.component.scss',],
   standalone: true

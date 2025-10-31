@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { KubernetesNodeService } from '../../../services/kubernetes-node.service';
 import { TileGridComponent } from 'frontend/packages/core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from 'frontend/packages/core/src/shared/components/tile/tile-group/tile-group.component';
@@ -12,6 +12,7 @@ import { KubernetesNodeTagsCardComponent } from './kubernetes-node-tags-card/kub
   selector: 'app-kubernetes-node-summary',
   templateUrl: './kubernetes-node-summary.component.html',
   styleUrls: ['./kubernetes-node-summary.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     TileGridComponent,

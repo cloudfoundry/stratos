@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
@@ -23,7 +23,8 @@ export class CloudFoundryEffects {
   constructor(
     private http: HttpClient,
     private actions$: Actions,
-    private store: Store<CFAppState>
+    private store: Store<CFAppState>,
+    private appRef: ApplicationRef
   ) { }
 
   
@@ -53,19 +54,23 @@ export class CloudFoundryEffects {
               metadata: {}
             };
             mappedData.result.push(id);
+            this.appRef.tick();
             return [
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(error => [
-            new WrapperRequestActionFailed(error.message, action, actionType, {
-              endpointIds: [action.guid],
-              url: error.url || url,
-              eventCode: error.status ? error.status + '' : '500',
-              message: 'Cloud Foundry Info request error',
-              error
-            })
-          ])
+          catchError(error => {
+            this.appRef.tick();
+            return [
+              new WrapperRequestActionFailed(error.message, action, actionType, {
+                endpointIds: [action.guid],
+                url: error.url || url,
+                eventCode: error.status ? error.status + '' : '500',
+                message: 'Cloud Foundry Info request error',
+                error
+              })
+            ];
+          })
         );
     })
   ));

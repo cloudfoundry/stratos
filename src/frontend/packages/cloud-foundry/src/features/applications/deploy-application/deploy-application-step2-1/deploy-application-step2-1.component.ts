@@ -7,7 +7,7 @@ import {
   Injector,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+  ChangeDetectionStrategy} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { GitCommit } from '@stratosui/git';
 import { Observable } from 'rxjs';
@@ -23,6 +23,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   templateUrl: './deploy-application-step2-1.component.html',
   styleUrls: ['./deploy-application-step2-1.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
 })
 export class DeployApplicationStep21Component {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 
 /**
  * Simple card wrapper component using Tailwind CSS
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-card',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <ng-content></ng-content>

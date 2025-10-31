@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { FormsModule } from '@angular/forms';
@@ -48,6 +48,7 @@ export class ManageUsersSetUsernamesHelper {
   templateUrl: './manage-users-set-usernames.component.html',
   styleUrls: ['./manage-users-set-usernames.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,

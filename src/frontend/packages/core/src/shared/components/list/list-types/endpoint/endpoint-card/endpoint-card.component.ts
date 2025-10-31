@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
   ComponentRef,
   Input,
@@ -9,7 +8,7 @@ import {
   ViewChild,
   ViewContainerRef,
   ChangeDetectorRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -72,7 +71,8 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
     MultilineTitleComponent,
     CopyToClipboardComponent,
     BooleanIndicatorComponent,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
 
@@ -261,7 +261,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   editEndpoint() {
     const routerLink = `/endpoints/edit/${this.row.guid}`;
-    this.store.dispatch(new RouterNav({ path: routerLink }));
+    this.store.dispatch(new RouterNav({ path: routerLink });
   }
 
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -48,6 +48,7 @@ selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
   styleUrls: ['./cf-org-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MetaCardComponent,

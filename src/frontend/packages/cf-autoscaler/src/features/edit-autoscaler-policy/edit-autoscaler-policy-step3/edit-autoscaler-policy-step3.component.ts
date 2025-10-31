@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
@@ -29,6 +29,7 @@ import { MetadataItemComponent } from '../../../../../core/src/shared/components
   selector: 'app-edit-autoscaler-policy-step3',
   templateUrl: './edit-autoscaler-policy-step3.component.html',
   styleUrls: ['./edit-autoscaler-policy-step3.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
   ],
@@ -63,7 +64,8 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     public applicationService: ApplicationService,
     private fb: UntypedFormBuilder,
     service: EditAutoscalerPolicyService,
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     super(service, route);
     this.editRecurringScheduleForm = this.fb.group({

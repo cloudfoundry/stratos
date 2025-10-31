@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 
@@ -14,7 +14,8 @@ import { MetadataItemComponent } from '../../../../shared/components/metadata-it
   standalone: true,
   imports: [
     MetadataItemComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
 

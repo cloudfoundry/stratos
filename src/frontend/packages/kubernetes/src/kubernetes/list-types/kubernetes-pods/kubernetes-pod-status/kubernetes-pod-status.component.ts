@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
 import { KubernetesPodExpandedStatusTypes } from '../../../services/kubernetes-expanded-state';
 import { KubernetesPod } from '../../../store/kube.types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-pod-status',
   templateUrl: './kubernetes-pod-status.component.html',
   styleUrls: ['./kubernetes-pod-status.component.scss'],

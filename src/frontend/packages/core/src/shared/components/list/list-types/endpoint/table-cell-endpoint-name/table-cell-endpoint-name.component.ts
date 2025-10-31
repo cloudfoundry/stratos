@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
@@ -24,7 +24,8 @@ export interface RowWithEndpointId {
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 

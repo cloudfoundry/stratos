@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {Component, signal, inject} from '@angular/core';
+import {Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import { HelmReleaseHelperService } from '../helm-release-helper.service';
   selector: 'app-helm-release-values-tab',
   templateUrl: './helm-release-values-tab.component.html',
   styleUrls: ['./helm-release-values-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

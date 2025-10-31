@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { CardCell } from 'frontend/packages/core/src/shared/components/list/list.types';
 import { MetaCardComponent } from 'frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from 'frontend/packages/core/src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -11,6 +11,7 @@ import { KubeService } from '../../../store/kube.types';
 import { KubernetesServicePortsComponent } from '../../kubernetes-service-ports/kubernetes-service-ports.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-service-card',
   templateUrl: './kubernetes-service-card.component.html',
   styleUrls: ['./kubernetes-service-card.component.scss'],

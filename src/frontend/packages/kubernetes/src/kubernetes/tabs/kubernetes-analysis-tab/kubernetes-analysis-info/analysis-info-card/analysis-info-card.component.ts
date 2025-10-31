@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, Input, inject} from '@angular/core';
+import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { marked } from 'marked';
 import { Observable, of } from 'rxjs';
@@ -9,6 +9,7 @@ import { catchError, map } from 'rxjs/operators';
   selector: 'app-analysis-info-card',
   templateUrl: './analysis-info-card.component.html',
   styleUrls: ['./analysis-info-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule

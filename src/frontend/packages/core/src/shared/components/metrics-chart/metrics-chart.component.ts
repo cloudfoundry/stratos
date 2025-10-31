@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
 import { Store } from '@ngrx/store';
@@ -42,7 +42,8 @@ export interface MetricsConfig<T = any> {
     CommonModule,
     BaseChartDirective,
     CardWrapperComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input()

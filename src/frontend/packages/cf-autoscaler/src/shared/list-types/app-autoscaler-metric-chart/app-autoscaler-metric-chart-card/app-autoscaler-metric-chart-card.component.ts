@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
 import { Observable } from 'rxjs';
@@ -26,6 +26,7 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
   selector: 'app-app-autoscaler-metric-chart-card',
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
   styleUrls: ['./app-autoscaler-metric-chart-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -90,6 +91,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     private appService: ApplicationService,
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
+    private cdr: ChangeDetectorRef
   ) {
     super();
   }
@@ -116,7 +118,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     const action = new GetAppAutoscalerAppMetricAction(this.appService.appGuid,
       this.appService.cfGuid, metricName, false, trigger, params);
     this.store.dispatch(action);
-    return getPaginationObservables<AppAutoscalerMetricData>({
+    const obs = getPaginationObservables<AppAutoscalerMetricData>({
       store: this.store,
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
@@ -127,6 +129,11 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     }, true).entities$.pipe(
       filter(entities => !!entities)
     );
+
+    // Subscribe to trigger change detection for metric updates
+    obs.subscribe(() => this.cdr.markForCheck());
+
+    return obs;
   }
 
 }

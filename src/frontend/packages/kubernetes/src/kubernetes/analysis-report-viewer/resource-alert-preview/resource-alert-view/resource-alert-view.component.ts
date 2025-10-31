@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 @Component({
-selector: 'app-resource-alert-view',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-resource-alert-view',
   templateUrl: './resource-alert-view.component.html',
   styleUrls: ['./resource-alert-view.component.scss'],
   standalone: true

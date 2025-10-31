@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject} from '@angular/core';
+import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -42,6 +42,7 @@ import { ResourceAlert } from './../../../../services/analysis-report.types';
   selector: 'app-helm-release-summary-tab',
   templateUrl: './helm-release-summary-tab.component.html',
   styleUrls: ['./helm-release-summary-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

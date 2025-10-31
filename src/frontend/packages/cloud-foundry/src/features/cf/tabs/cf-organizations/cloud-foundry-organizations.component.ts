@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Store } from '@ngrx/store';
@@ -24,6 +24,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
   templateUrl: './cloud-foundry-organizations.component.html',
   styleUrls: ['./cloud-foundry-organizations.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

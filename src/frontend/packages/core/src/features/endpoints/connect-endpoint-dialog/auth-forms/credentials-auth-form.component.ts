@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
 import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
@@ -15,7 +15,8 @@ import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-
     ReactiveFormsModule,
     CustomFormFieldComponent,
     ShowHideButtonComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CredentialsAuthFormComponent implements IAuthForm {
 

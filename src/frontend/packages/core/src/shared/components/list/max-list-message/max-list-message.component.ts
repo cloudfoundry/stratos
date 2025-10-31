@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
@@ -13,6 +13,7 @@ import { ITableTextMaxed } from '../list-table/table.types';
   selector: 'app-max-list-message',
   templateUrl: './max-list-message.component.html',
   styleUrls: ['./max-list-message.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Observable } from 'rxjs';
@@ -20,6 +20,7 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
   selector: 'app-edit-autoscaler-policy',
   templateUrl: './edit-autoscaler-policy.component.html',
   styleUrls: ['./edit-autoscaler-policy.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
     EditAutoscalerPolicyService
@@ -46,7 +47,8 @@ export class EditAutoscalerPolicyComponent implements OnInit {
 
   constructor(
     public applicationService: ApplicationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
@@ -58,6 +60,7 @@ export class EditAutoscalerPolicyComponent implements OnInit {
       refCount()
     );
     this.isCreate = this.route.snapshot.queryParams.create;
+    this.cdr.markForCheck();
   }
 
 }

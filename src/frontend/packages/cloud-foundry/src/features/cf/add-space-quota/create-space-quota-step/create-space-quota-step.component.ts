@@ -1,5 +1,5 @@
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
@@ -22,6 +22,7 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
     getActiveRouteCfOrgSpaceProvider
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     SpaceQuotaDefinitionFormComponent
 ]

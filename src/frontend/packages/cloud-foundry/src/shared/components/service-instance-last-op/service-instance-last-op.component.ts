@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { APIResource } from '../../../../../store/src/types/api.types';
@@ -10,6 +10,7 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
   templateUrl: './service-instance-last-op.component.html',
   styleUrls: ['./service-instance-last-op.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     BooleanIndicatorComponent

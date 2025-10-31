@@ -1,4 +1,4 @@
-import { Component, OnDestroy, Inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Inject, signal  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
@@ -22,7 +22,8 @@ import { DialogErrorComponent } from '../../../shared/components/dialog-error/di
     CustomFormFieldComponent,
     AppProgressBarComponent,
     DialogErrorComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddApiKeyDialogComponent implements OnDestroy {
 

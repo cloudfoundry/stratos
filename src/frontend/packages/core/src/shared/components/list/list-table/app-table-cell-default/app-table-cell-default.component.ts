@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 
@@ -13,6 +13,7 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
   selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -21,6 +22,10 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
   ]
 })
 export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnDestroy {
+
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
 
   public cellDefinition: ICellDefinition<T>;
 
@@ -103,6 +108,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     this.asyncSub = (rowWithObs[asyncConfig.pathToObs] as Observable<any>).subscribe((value: any) => {
       this.valueContext.value = pathGet(asyncConfig.pathToValue, value as any);
       this.setupAsyncLink(value);
+      this.cdr.markForCheck();
     });
   }
 

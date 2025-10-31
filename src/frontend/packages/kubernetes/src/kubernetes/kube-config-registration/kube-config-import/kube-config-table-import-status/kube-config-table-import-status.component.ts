@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -10,7 +10,8 @@ import { TableCellCustom } from '../../../../../../core/src/shared/components/li
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
-selector: 'app-kube-config-table-import-status',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-kube-config-table-import-status',
   templateUrl: './kube-config-table-import-status.component.html',
   styleUrls: ['./kube-config-table-import-status.component.scss'],
   standalone: true,

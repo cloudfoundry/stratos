@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
@@ -17,6 +17,7 @@ import {
   selector: 'app-autoscaler-metric-page',
   templateUrl: './autoscaler-metric-page.component.html',
   styleUrls: ['./autoscaler-metric-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -39,6 +40,7 @@ export class AutoscalerMetricPageComponent implements OnInit {
 
   constructor(
     public applicationService: ApplicationService,
+    private cdr: ChangeDetectorRef
   ) {
     this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
   }
@@ -49,6 +51,7 @@ export class AutoscalerMetricPageComponent implements OnInit {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
 }

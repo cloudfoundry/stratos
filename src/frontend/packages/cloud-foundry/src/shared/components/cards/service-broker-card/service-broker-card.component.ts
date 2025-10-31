@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { Observable, Subscription } from 'rxjs';
@@ -23,6 +23,7 @@ import { ClickStopPropagationDirective } from '@stratosui/core';
   templateUrl: './service-broker-card.component.html',
   styleUrls: ['./service-broker-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,

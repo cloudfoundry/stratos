@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -11,6 +11,7 @@ import { KubernetesNamespace } from '../../../store/kube.types';
   selector: 'app-kube-namespace-pod-count',
   templateUrl: './kube-namespace-pod-count.component.html',
   styleUrls: ['./kube-namespace-pod-count.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [AsyncPipe]
 })

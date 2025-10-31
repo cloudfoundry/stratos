@@ -73,6 +73,8 @@ export class TailwindSnackBarService {
     if (duration > 0) {
       setTimeout(() => {
         snackbarRef.dismiss();
+        // ZONELESS: Trigger change detection after async operation
+        this.appRef.tick();
       }, duration);
     }
 
@@ -81,6 +83,8 @@ export class TailwindSnackBarService {
     if (actionButton) {
       actionButton.addEventListener('click', () => {
         snackbarRef.dismissWithAction();
+        // ZONELESS: Trigger change detection after user interaction
+        this.appRef.tick();
       });
     }
 
@@ -88,6 +92,8 @@ export class TailwindSnackBarService {
     if (closeButton) {
       closeButton.addEventListener('click', () => {
         snackbarRef.dismiss();
+        // ZONELESS: Trigger change detection after user interaction
+        this.appRef.tick();
       });
     }
 
@@ -160,6 +166,8 @@ export class TailwindSnackBarService {
       if (snackbar.parentNode) {
         snackbar.parentNode.removeChild(snackbar);
       }
+      // ZONELESS: Trigger change detection after async DOM removal
+      this.appRef.tick();
     }, 300);
   }
 }

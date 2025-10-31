@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, Output, computed, inject, signal , ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomCheckboxComponent } from '@stratosui/core';
 import { CustomTooltipDirective } from '@stratosui/core';
@@ -46,6 +46,7 @@ enum CfRoleCheckboxMode {
   templateUrl: './cf-role-checkbox.component.html',
   styleUrls: ['./cf-role-checkbox.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     CustomCheckboxComponent,

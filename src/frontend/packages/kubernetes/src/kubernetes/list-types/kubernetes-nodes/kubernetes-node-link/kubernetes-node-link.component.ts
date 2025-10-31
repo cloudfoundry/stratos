@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 
@@ -10,6 +10,7 @@ import { KubernetesNode } from '../../../store/kube.types';
   selector: 'app-kubernetes-node-link',
   templateUrl: './kubernetes-node-link.component.html',
   styleUrls: ['./kubernetes-node-link.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink, CustomTooltipDirective]
 })

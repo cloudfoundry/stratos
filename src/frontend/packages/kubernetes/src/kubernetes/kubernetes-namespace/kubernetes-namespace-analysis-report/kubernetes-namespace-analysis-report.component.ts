@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subject } from 'rxjs';
 
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
@@ -17,6 +17,7 @@ import { AnalysisReport } from '../../store/kube.types';
 selector: 'app-kubernetes-namespace-analysis-report-tab',
   templateUrl: './kubernetes-namespace-analysis-report.component.html',
   styleUrls: ['./kubernetes-namespace-analysis-report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

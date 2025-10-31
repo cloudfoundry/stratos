@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { marked } from 'marked';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { LoaderComponent } from '../../loader/loader.component';
   selector: 'app-chart-details-readme',
   templateUrl: './chart-details-readme.component.html',
   styleUrls: ['./chart-details-readme.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe,

@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
@@ -12,6 +12,7 @@ import { ServicePlanPriceComponent } from '../../../../service-plan-price/servic
   templateUrl: './table-cell-service-plan-price.component.html',
   styleUrls: ['./table-cell-service-plan-price.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ServicePlanPriceComponent
 ]

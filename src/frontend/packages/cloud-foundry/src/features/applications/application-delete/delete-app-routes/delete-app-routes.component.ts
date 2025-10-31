@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Subscription } from 'rxjs';
 
@@ -12,6 +12,7 @@ import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-confi
   selector: 'app-delete-app-routes',
   templateUrl: './delete-app-routes.component.html',
   styleUrls: ['./delete-app-routes.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListComponent

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -18,6 +18,7 @@ import { DotContentComponent } from '../../../../../../../../core/src/core/dot-c
   templateUrl: './cf-buildpack-card.component.html',
   styleUrls: ['./cf-buildpack-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe,
     MetaCardComponent,

@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { catchError, first } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
   selector: 'app-chart-details-info',
   templateUrl: './chart-details-info.component.html',
   styleUrls: ['./chart-details-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CardWrapperComponent,

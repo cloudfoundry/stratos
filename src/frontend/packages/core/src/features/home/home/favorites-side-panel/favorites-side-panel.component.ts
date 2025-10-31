@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { PreviewableComponent } from '../../../../shared/previewable-component';
@@ -15,7 +15,8 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
     CommonModule,
     SidepanelPreviewComponent,
     FavoritesMetaCardComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoritesSidePanelComponent implements PreviewableComponent {
 

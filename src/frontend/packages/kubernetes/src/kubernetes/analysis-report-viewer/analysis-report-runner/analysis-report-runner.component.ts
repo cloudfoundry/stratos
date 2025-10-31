@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject} from '@angular/core';
+import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SidePanelService } from 'frontend/packages/core/src/shared/services/side-panel.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import {
 selector: 'app-analysis-report-runner',
   templateUrl: './analysis-report-runner.component.html',
   styleUrls: ['./analysis-report-runner.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     AsyncPipe

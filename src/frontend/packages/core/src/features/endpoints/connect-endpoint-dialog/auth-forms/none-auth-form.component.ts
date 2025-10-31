@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
@@ -7,7 +7,8 @@ import { IAuthForm } from '@stratosui/store';
   templateUrl: './none-auth-form.component.html',
   styleUrls: ['./none-auth-form.component.scss'],
   standalone: true,
-  imports: []
+  imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoneAuthFormComponent implements IAuthForm {
   @Input() formGroup: UntypedFormGroup;

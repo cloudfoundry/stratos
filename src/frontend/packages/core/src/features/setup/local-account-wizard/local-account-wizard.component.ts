@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
@@ -27,6 +27,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
 selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
   styleUrls: ['./local-account-wizard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

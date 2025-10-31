@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { TableCellEditComponent } from '../../../../../../core/src/shared/components/list/list-table/table-cell-edit/table-cell-edit.component';
@@ -7,7 +7,8 @@ import { KubeConfigFileCluster } from '../../kube-config.types';
 import { CustomFormFieldComponent } from '../../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 
 @Component({
-selector: 'app-kube-config-table-name',
+changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-kube-config-table-name',
   templateUrl: './kube-config-table-name.component.html',
   styleUrls: ['./kube-config-table-name.component.scss'],
   standalone: true,

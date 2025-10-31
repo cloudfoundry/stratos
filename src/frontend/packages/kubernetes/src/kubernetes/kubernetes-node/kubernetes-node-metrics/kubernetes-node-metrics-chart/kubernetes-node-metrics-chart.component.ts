@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import { CustomCardComponent, CustomCardHeaderComponent, CustomCardContentComponent } from '../../../../../../core/src/shared/components/custom-card/custom-card.component';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -9,6 +9,7 @@ import { IMetricApplication } from '../../../../../../store/src/types/metric.typ
 import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-metrics-chart',
   templateUrl: './kubernetes-node-metrics-chart.component.html',
   styleUrls: ['./kubernetes-node-metrics-chart.component.scss'],

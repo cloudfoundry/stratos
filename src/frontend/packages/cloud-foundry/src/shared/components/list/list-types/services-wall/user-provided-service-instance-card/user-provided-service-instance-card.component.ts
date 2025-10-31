@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of as observableOf } from 'rxjs';
@@ -33,6 +33,7 @@ selector: 'app-user-provided-service-instance-card',
   templateUrl: './user-provided-service-instance-card.component.html',
   styleUrls: ['./user-provided-service-instance-card.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MetaCardComponent,

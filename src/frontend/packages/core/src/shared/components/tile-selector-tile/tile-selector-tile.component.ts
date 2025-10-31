@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
 
 import { ITileConfig, ITileData, ITileGraphic } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -12,7 +12,8 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CustomIconComponent
   ],
   templateUrl: './tile-selector-tile.component.html',
-  styleUrls: ['./tile-selector-tile.component.scss']
+  styleUrls: ['./tile-selector-tile.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileSelectorTileComponent<Y = ITileGraphic> {
 

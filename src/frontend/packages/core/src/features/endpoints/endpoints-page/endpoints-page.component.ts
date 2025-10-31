@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
+import { ChangeDetectionStrategy, AfterViewInit,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
@@ -10,7 +9,7 @@ import {
   OnInit,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -51,6 +50,7 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
     provide: ListConfig,
     useClass: EndpointsListConfigService,
   }, EndpointListHelper],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
@@ -108,7 +108,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
             extras: {
               replaceUrl: true
             }
-          }));
+          });
         }
       }),
       first()

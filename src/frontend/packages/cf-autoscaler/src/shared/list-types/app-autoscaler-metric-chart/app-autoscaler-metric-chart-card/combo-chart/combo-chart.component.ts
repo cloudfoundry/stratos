@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -13,6 +15,7 @@ import { BaseChartDirective } from 'ng2-charts';
   selector: 'app-autoscaler-combo-chart-component',
   templateUrl: './combo-chart.component.html',
   styleUrls: ['./combo-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
@@ -34,6 +37,8 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
   @Output() deactivate = new EventEmitter();
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public comboChartOptions: ChartConfiguration['options'] = {
@@ -77,6 +82,7 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
   ngOnChanges() {
     this.updateChartData();
+    this.cdr.markForCheck();
   }
 
   private updateChartData() {

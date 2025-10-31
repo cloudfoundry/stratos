@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PreviewableComponent } from 'frontend/packages/core/src/shared/previewable-component';
 import { Observable } from 'rxjs';
@@ -9,6 +9,7 @@ import { SidepanelPreviewComponent } from 'frontend/packages/core/src/shared/com
 
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-analysis-info',
   templateUrl: './kubernetes-analysis-info.component.html',
   styleUrls: ['./kubernetes-analysis-info.component.scss'],

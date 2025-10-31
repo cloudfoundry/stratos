@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 
@@ -12,6 +12,7 @@ import { ListComponent } from '../../../../../core/src/shared/components/list/li
   selector: 'app-kubernetes-namespaces-tab',
   templateUrl: './kubernetes-namespaces-tab.component.html',
   styleUrls: ['./kubernetes-namespaces-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     ListComponent

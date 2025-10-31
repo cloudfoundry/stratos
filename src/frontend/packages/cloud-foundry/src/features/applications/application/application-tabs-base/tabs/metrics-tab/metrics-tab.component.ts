@@ -1,5 +1,5 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MetricsChartComponent } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsConfig } from '../../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
@@ -21,6 +21,7 @@ import { ApplicationService } from '../../../../application.service';
   selector: 'app-metrics-tab',
   templateUrl: './metrics-tab.component.html',
   styleUrls: ['./metrics-tab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     MetricsChartComponent,

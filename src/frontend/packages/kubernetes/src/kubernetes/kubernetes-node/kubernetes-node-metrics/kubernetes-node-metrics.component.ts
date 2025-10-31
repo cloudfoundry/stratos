@@ -1,5 +1,5 @@
 
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { MetricsChartComponent, MetricsConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
@@ -21,6 +21,7 @@ import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric
   selector: 'app-kubernetes-node-metrics',
   templateUrl: './kubernetes-node-metrics.component.html',
   styleUrls: ['./kubernetes-node-metrics.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     TileComponent,

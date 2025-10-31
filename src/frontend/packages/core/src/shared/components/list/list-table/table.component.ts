@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSort, Sort } from '../../../services/tailwind-material-replacements';
 import { ListSort } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -44,6 +44,7 @@ const tableColumnAction: ITableColumn<any> = {
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     TableRowExpandedService
   ],
@@ -59,6 +60,8 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   private uberSub: Subscription;
 
   @ViewChild(MatSort, { static: true }) sort: MatSort;
+
+  constructor(private cdr: ChangeDetectorRef) { }
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input() hideTable = false;
@@ -117,6 +120,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
             start: sort.direction as 'asc' | 'desc',
             disableClear: true
           });
+          this.cdr.markForCheck();
         }
       })
     );
@@ -127,6 +131,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           field: sort.active,
           direction: sort.direction,
         });
+        this.cdr.markForCheck();
       })
     );
 

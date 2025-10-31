@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { EMPTY } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
@@ -16,7 +16,8 @@ export class ServiceInstanceEffects {
 
   constructor(
     private actions$: Actions,
-    private longRunningOpService: LongRunningCfOperationsService
+    private longRunningOpService: LongRunningCfOperationsService,
+    private appRef: ApplicationRef
   ) { }
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
@@ -25,6 +26,7 @@ export class ServiceInstanceEffects {
       if (this.longRunningOpService.isLongRunning({ message: action.response })) {
         this.longRunningOpService.handleLongRunningDeleteService(action.apiAction.guid, action.apiAction.endpointGuid);
       }
+      this.appRef.tick();
       return EMPTY;
     }),
   ), { dispatch: false });

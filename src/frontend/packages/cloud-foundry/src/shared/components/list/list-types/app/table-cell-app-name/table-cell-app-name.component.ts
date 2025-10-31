@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -14,6 +14,7 @@ import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../st
   selector: 'app-table-cell-app-name',
   templateUrl: './table-cell-app-name.component.html',
   styleUrls: ['./table-cell-app-name.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

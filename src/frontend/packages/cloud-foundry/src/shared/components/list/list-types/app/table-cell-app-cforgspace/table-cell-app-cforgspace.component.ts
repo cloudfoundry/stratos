@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
@@ -11,6 +11,7 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
   selector: 'app-table-cell-app-cforgspace',
   templateUrl: './table-cell-app-cforgspace.component.html',
   styleUrls: ['./table-cell-app-cforgspace.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CfOrgSpaceLinksComponent

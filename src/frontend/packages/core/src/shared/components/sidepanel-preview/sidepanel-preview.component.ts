@@ -1,6 +1,6 @@
 import { Portal, PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -11,6 +11,7 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
   selector: 'app-sidepanel-preview',
   templateUrl: './sidepanel-preview.component.html',
   styleUrls: ['./sidepanel-preview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,

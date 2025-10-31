@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy, signal } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, signal,
+  ChangeDetectionStrategy} from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -21,6 +22,7 @@ import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-
   templateUrl: './bind-apps-step.component.html',
   styleUrls: ['./bind-apps-step.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

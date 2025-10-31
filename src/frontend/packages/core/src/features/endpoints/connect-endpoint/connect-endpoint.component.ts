@@ -1,6 +1,5 @@
 
-import {
-  Component,
+import { ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
@@ -10,7 +9,7 @@ import {
   Output,
   ViewChild,
   ViewContainerRef,
-} from '@angular/core';
+ } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -33,7 +32,8 @@ import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } fr
     CustomSelectComponent,
     CustomOptionComponent,
     CustomCheckboxComponent
-]
+],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;
@@ -129,7 +129,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
         valid = this.endpointForm.valid;
       }
       this.valid.next(valid);
-    }));
+    });
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();
