@@ -8,7 +8,11 @@ module.exports = {
     "./src/frontend/packages/git/src/**/*.{html,ts}",
     "./src/frontend/packages/cf-autoscaler/src/**/*.{html,ts}",
     "./src/frontend/packages/desktop-extensions/src/**/*.{html,ts}",
-    "./src/frontend/packages/shared/src/**/*.{html,ts}"
+    "./src/frontend/packages/shared/src/**/*.{html,ts}",
+    // Exclude test files and e2e helpers that contain regex patterns
+    "!./src/test-e2e/**/*",
+    "!./src/**/*.spec.ts",
+    "!./src/**/*.test.ts"
   ],
   safelist: [
     // Progress bar colors (dynamically applied)

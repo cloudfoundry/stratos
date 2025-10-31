@@ -1,5 +1,5 @@
-// Import Tailwind CSS
-@use '../../theme/styles/main.scss';
+// Tailwind CSS and theme files are now imported via angular.json
+// to ensure correct processing order (PostCSS before SCSS)
 
 // Import fonts and icons
 @use '../sass/fonts';
@@ -7,9 +7,6 @@
 
 // Import Tailwind animations for custom components
 @use './shared/styles/tailwind-animations.scss';
-
-// Import theme transitions and FOUC prevention
-@use '../../theme/theme-transitions.scss';
 
 // Base styles are handled by Tailwind in main.css
 // Override font family to match existing design
