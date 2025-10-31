@@ -8,6 +8,7 @@ export default defineConfig({
     name: 'store',
     globals: true,
     environment: 'jsdom',
+    pool: 'forks', // Required for Angular 20 + Vitest 4 ESM module resolution
     setupFiles: ['src/test-setup.ts'],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
@@ -18,7 +19,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.spec.ts', 'src/test-setup.ts', 'src/**/*.d.ts'],
     },
-    reporters: ['default', '../../build/vitest-stratos-reporter.ts'],
+    reporters: ['default'], // join(__dirname, '../../../../build/vitest-stratos-reporter.ts')],
     testTimeout: 10000,
     hookTimeout: 10000,
   },
