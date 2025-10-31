@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component,
   ViewChild,
   ViewContainerRef,
  } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
@@ -28,6 +28,7 @@ import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } fr
 interface EndpointForm {
   authType: FormControl<string>;
   systemShared: FormControl<boolean>;
+  [key: string]: AbstractControl<any>;
 }
 
 @Component({
@@ -77,7 +78,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
   public container: ViewContainerRef;
 
-  public endpointForm: TypedFormGroup<EndpointForm>;
+  public endpointForm: FormGroup<EndpointForm>;
 
   private bodyContent = '';
 
@@ -139,7 +140,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
         valid = this.endpointForm.valid;
       }
       this.valid.next(valid);
-    });
+    }));
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();

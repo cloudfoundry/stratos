@@ -102,8 +102,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.allSteps.forEach((step => {
       this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
         this.filterSteps();
-      });
-    });
+      }));
+    }));
     this.filterSteps();
   }
 
@@ -154,7 +154,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss', { panelClass: 'stepper-snack-bar' });
           }
           return observableOf(undefined);
-        }).subscribe();
+        })
+      ).subscribe();
     }
   }
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   InternalAppState,
@@ -52,7 +52,7 @@ export class LocalAccountWizardComponent implements OnInit {
   private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
   public title = inject(APP_TITLE);
 
-  passwordForm: UntypedFormGroup;
+  passwordForm: FormGroup;
   validateLocalAuthForm: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
 
@@ -62,11 +62,28 @@ export class LocalAccountWizardComponent implements OnInit {
     this.passwordForm = new FormGroup<LocalAccountForm>({
       adminPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
       adminPasswordConfirm: new FormControl('', { nonNullable: true, validators: [Validators.required] })
-    }, { validators: this.passwordMatchValidator });
+    }, { validators: this.passwordMatchValidator() });
 
     this.validateLocalAuthForm = this.passwordForm.statusChanges.pipe(
       map(() => this.passwordForm.valid)
     );
+  }
+
+  passwordMatchValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      const password = control.get('adminPassword');
+      const confirmPassword = control.get('adminPasswordConfirm');
+
+      if (!password || !confirmPassword) {
+        return null;
+      }
+
+      if (password.value !== confirmPassword.value) {
+        return { passwordMismatch: true };
+      }
+
+      return null;
+    };
   }
 
   next: StepOnNextFunction = () => {

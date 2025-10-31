@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 
-import { ReactiveFormsModule, TypedFormGroup, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, FormBuilder } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
-import { IAuthForm } from '../../../../../../../store/src/extension-types';
+import { IAuthForm } from '@stratosui/store';
 
 import { ShowHideButtonComponent } from '../../../../core/show-hide-button/show-hide-button.component';
 
@@ -33,7 +33,7 @@ export class CredentialsAuthFormComponent implements IAuthForm {
     passwordLabel: 'Password'
   };
 
-  @Input() formGroup: TypedFormGroup<CredentialsAuthForm>;
+  @Input() formGroup: FormGroup<CredentialsAuthForm>;
 
   get config(): any {
     return this.pConfig;

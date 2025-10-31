@@ -115,21 +115,20 @@ import { AppPaginatorComponent } from '../app-paginator/app-paginator.component'
   animations: [
     trigger('list', [
       transition('* => in', [
-        style({ opacity: '0', transform: 'translateY(-10px)',
-  changeDetection: ChangeDetectionStrategy.OnPush
-}),
-        animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' })
+        style({ opacity: '0', transform: 'translateY(-10px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
       transition('* => left, * => repeatLeft', [
         style({ opacity: '0', transform: 'translateX(-2%)' }),
-        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }))
       ]),
       transition('* => right, * => repeatRight', [
         style({ opacity: '0', transform: 'translateX(2%)' }),
-        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' }))
       ])
     ])
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
@@ -190,7 +189,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       map(value => value as string),
       tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }).subscribe();
+      })
+    ).subscribe();
   }
 
   @Output() initialised = new EventEmitter<boolean>();
@@ -387,7 +387,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         this.multiFilterManagers && this.multiFilterManagers.length ||
         this.config.enableTextFilter
       );
-    });
+    }));
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource, this.ngZone);
     this.multiFilterChangesSub = this.paginationController.multiFilterChanges$.subscribe();
@@ -411,7 +411,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         );
         return !hasRows ||
           pagination && (pagination.totalResults <= minPageSize);
-      });
+      }));
 
 
     this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions ||
@@ -433,7 +433,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.paginatorSettings.length = pagination.totalResults;
       this.paginatorSettings.pageIndex = pagination.pageIndex - 1;
       this.paginatorSettings.pageSize = pagination.pageSize;
-    });
+    }));
 
     this.sortColumns = (this.columns || []).filter((column: ITableColumn<T>) => {
       return column && column.sort;
@@ -442,7 +442,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
       this.headerSort.value = sort.field;
       this.headerSort.direction = sort.direction;
-    });
+    }));
 
     this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
 
@@ -507,7 +507,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
             : toObservable(filterManager.multiFilterConfig.select, { injector: this.injector });
           const sub = select$.pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterManager.multiFilterConfig, filterItem);
-          });
+          }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
         });
       })
@@ -572,7 +572,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     )
       .pipe(
         filter(([pagination, busy, viewType]) => viewType !== 'table'),
-        map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType }),
+        map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
         distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),
         map(([oldVal, newVal]) => {
@@ -829,7 +829,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
           deleting: requestInfo.deleting.busy,
           error: requestInfo.deleting.error,
           message: requestInfo.deleting.error ? requestInfo.deleting.message || `Sorry, deletion failed` : null
-        })
+        }))
       );
     };
   }

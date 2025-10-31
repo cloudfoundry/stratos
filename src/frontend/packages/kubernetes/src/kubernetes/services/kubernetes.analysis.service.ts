@@ -1,4 +1,4 @@
-import { Injectable, computed } from '@angular/core';
+import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -44,6 +44,8 @@ export class KubernetesAnalysisService {
     );
     return enabled$.pipe(startWith(false));
   }
+
+  private injector = inject(Injector);
 
   constructor(
     public kubeEndpointService: KubernetesEndpointService,
@@ -93,28 +95,30 @@ export class KubernetesAnalysisService {
       map(engines => engines.split(',').map(e => allEngines[e.trim()]).filter(e => !!e))
     );
 
-    // Convert to signals for computed
-    const analyzersSignal = toSignal(
-      this.analyzers$,
-      { initialValue: [] as KubernetesAnalysisType[] }
-    );
+    // Convert to signals for computed within injection context
+    runInInjectionContext(this.injector, () => {
+      const analyzersSignal = toSignal(
+        this.analyzers$,
+        { initialValue: [] as KubernetesAnalysisType[] }
+      );
 
-    const enabledSignal = toSignal(
-      this.enabled$,
-      { initialValue: false }
-    );
+      const enabledSignal = toSignal(
+        this.enabled$,
+        { initialValue: false }
+      );
 
-    // Compute namespace analyzers
-    const namespaceAnalyzersComputed = computed(() => {
-      const analyzers = analyzersSignal();
-      const enabled = enabledSignal();
-      if (!enabled) {
-        return null;
-      }
-      return analyzers.filter(v => v.namespaceAware);
+      // Compute namespace analyzers
+      const namespaceAnalyzersComputed = computed(() => {
+        const analyzers = analyzersSignal();
+        const enabled = enabledSignal();
+        if (!enabled) {
+          return null;
+        }
+        return analyzers.filter(v => v.namespaceAware);
+      });
+
+      this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
     });
-
-    this.namespaceAnalyzers$ = toObservable(namespaceAnalyzersComputed);
 
     this.action = kubeEntityCatalog.analysisReport.actions.getMultiple(this.kubeGuid);
   }

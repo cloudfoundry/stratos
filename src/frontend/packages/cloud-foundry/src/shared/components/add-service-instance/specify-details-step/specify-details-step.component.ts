@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnDestroy, signal,
   ChangeDetectionStrategy} from '@angular/core';
-import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -115,7 +115,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     servicePlan: FormControl<string>;
     spaceGuid: FormControl<string>;
     params: FormControl<object>;
-    tags: FormControl<string>;
+    tags: FormControl<string[]>;
   }>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -296,7 +296,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       servicePlan: new FormControl('', { nonNullable: true }),
       spaceGuid: new FormControl('', { nonNullable: true }),
       params: new FormControl({}, { nonNullable: true }),
-      tags: new FormControl('', { nonNullable: true }),
+      tags: new FormControl<string[]>([], { nonNullable: true }),
     });
     this.selectExistingInstanceForm = new FormGroup({
       serviceInstance: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

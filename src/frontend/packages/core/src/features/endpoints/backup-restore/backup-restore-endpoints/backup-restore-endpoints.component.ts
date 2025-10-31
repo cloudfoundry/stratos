@@ -33,7 +33,7 @@ export class BackupRestoreEndpointsComponent {
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
-      this.store.dispatch(new RouterNav({ path: url });
+      this.store.dispatch(new RouterNav({ path: url }));
     }
   }
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
@@ -24,6 +24,12 @@ import {
   UpdateAppAutoscalerCredentialAction,
 } from '../../store/app-autoscaler.actions';
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
+
+interface AutoscalerCredentialForm {
+  actype: FormControl<boolean>;
+  acusername: FormControl<string>;
+  acpassword: FormControl<string>;
+}
 
 @Component({
   selector: 'app-edit-autoscaler-credential',

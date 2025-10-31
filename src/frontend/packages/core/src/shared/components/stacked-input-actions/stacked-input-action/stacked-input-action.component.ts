@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, AfterContentInit,
   Output,
   ViewChild,
  } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
@@ -108,7 +108,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
         // Component is valid if form is ok OR it's already succeeded
         valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });
-    });
+    }));
 
     // Handle change of state from outside
     this.subs.push(this.stateIn$.subscribe(this.handleStateIn.bind(this)));

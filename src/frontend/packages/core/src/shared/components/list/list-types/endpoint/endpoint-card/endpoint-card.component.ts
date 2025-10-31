@@ -261,7 +261,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   editEndpoint() {
     const routerLink = `/endpoints/edit/${this.row.guid}`;
-    this.store.dispatch(new RouterNav({ path: routerLink });
+    this.store.dispatch(new RouterNav({ path: routerLink }));
   }
 
 }

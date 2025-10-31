@@ -48,7 +48,7 @@ export class CreateSpaceQuotaStepComponent {
   validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
+    const formValues = this.form.formGroup.getRawValue();
 
     return cfEntityCatalog.spaceQuota.api.create<RequestInfoState>(formValues.name, this.cfGuid, {
       orgGuid: this.orgGuid,

@@ -36,7 +36,7 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
     CommonModule
   ]
 })
-export class TableCellActionsComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellActionsComponent<T> extends TableCellCustom<T> {
 
   @Input()
   declare rowState: Observable<RowState>;
@@ -51,8 +51,17 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   }
 
   // Convert observables to signals
-  private rowStateSignal: Signal<RowState | undefined>;
-  public busy: Signal<boolean | undefined>;
+  // Note: toSignal must be called in injection context (field initializer)
+  // We use a getter pattern to defer signal creation until rowState is available
+  private _rowStateSignal?: Signal<RowState | undefined>;
+  private get rowStateSignal(): Signal<RowState | undefined> {
+    if (!this._rowStateSignal && this.rowState) {
+      this._rowStateSignal = toSignal(this.rowState);
+    }
+    return this._rowStateSignal!;
+  }
+
+  public busy = computed(() => this.rowStateSignal?.()?.busy);
   public show$: Observable<boolean>;
   public menuOpen = false;
 
@@ -71,11 +80,6 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   ) {
     super();
     this.actions = listConfig.getSingleActions();
-  }
-
-  ngOnInit() {
-    this.rowStateSignal = toSignal(this.rowState);
-    this.busy = computed(() => this.rowStateSignal()?.busy);
   }
 
   initialise(row: any) {

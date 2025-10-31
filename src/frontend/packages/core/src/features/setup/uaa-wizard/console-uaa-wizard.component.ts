@@ -83,7 +83,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_client_secret: this.uaaForm.get('clientSecret').value,
       use_sso: this.uaaForm.get('useSSO').value,
       console_admin_scope: ''
-    });
+    }));
     return this.store.select('uaaSetup').pipe(
       skipWhile((state: UAASetupState) => {
         return state.settingUp;
@@ -102,7 +102,8 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success,
           message: state.message
         };
-      });
+      })
+    );
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
@@ -115,7 +116,7 @@ export class ConsoleUaaWizardComponent implements OnInit {
       console_client_secret: this.uaaForm.get('clientSecret').value,
       use_sso: this.uaaForm.get('useSSO').value,
       console_admin_scope: this.selectedScope
-    });
+    }));
 
     this.applyingSetup.set(true);
     return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
@@ -144,7 +145,8 @@ export class ConsoleUaaWizardComponent implements OnInit {
           success: !state[0].error,
           message: state[0].message
         };
-      });
+      })
+    );
   }
   ngOnInit() {
     this.uaaForm = new FormGroup<UAAWizardForm>({

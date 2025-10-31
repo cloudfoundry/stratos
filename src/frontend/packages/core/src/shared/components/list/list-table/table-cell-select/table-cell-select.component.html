@@ -1,10 +1,10 @@
 <div class="checkbox-container">
   <input type="checkbox"
          class="checkbox"
-         [disabled]="(dataSource.isAdding$ | async) || (disable$ | async)"
-         [checked]="!(disable$ | async) && dataSource.selectedRows()?.has(dataSource.getRowUniqueId(row))"
+         [disabled]="(dataSource.isAdding$ | async) || disable()"
+         [checked]="!disable() && dataSource.selectedRows()?.has(dataSource.getRowUniqueId(row))"
          (change)="dataSource.selectedRowToggle(row)"
-         [title]="tooltip$ | async"
+         [title]="tooltip()"
          [id]="'checkbox-' + dataSource.getRowUniqueId(row)">
   <label class="checkbox-label" [for]="'checkbox-' + dataSource.getRowUniqueId(row)"></label>
 </div>

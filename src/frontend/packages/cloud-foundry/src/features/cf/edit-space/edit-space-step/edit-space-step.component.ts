@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnDestroy , ChangeDetectionStrategy } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';

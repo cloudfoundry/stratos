@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { CustomTabGroupComponent, CustomTabComponent } from '../../../../../core/src/shared/components/custom-tabs/custom-tabs.component';
@@ -36,16 +36,16 @@ export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent 
      * base64encoded:base64encoded
      */
 
-    let certBase64 = this.formGroup.value.authValues.cert;
-    let certKeyBase64 = this.formGroup.value.authValues.certKey;
+    let certBase64 = this.formGroup.value.cert;
+    let certKeyBase64 = this.formGroup.value.certKey;
 
     // May already be base64 encoded
     if (certBase64.indexOf('-----BEGIN') === 0) {
-      certBase64 = btoa(this.formGroup.value.authValues.cert);
+      certBase64 = btoa(this.formGroup.value.cert);
     }
 
     if (certKeyBase64.indexOf('-----BEGIN') === 0) {
-      certKeyBase64 = btoa(this.formGroup.value.authValues.certKey);
+      certKeyBase64 = btoa(this.formGroup.value.certKey);
     }
     return `${certBase64}:${certKeyBase64}`;
   }

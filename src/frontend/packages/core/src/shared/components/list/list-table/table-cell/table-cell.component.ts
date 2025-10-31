@@ -7,7 +7,7 @@ import {
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
-  inject,, ChangeDetectionStrategy } from '@angular/core';
+  inject, ChangeDetectionStrategy } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';

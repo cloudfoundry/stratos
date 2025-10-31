@@ -83,7 +83,7 @@ export class MetricsComponent {
         this.error = true;
       }
       return mapMetricsData(ep);
-    });
+    }));
 
     // Breadcrumbs
     this.breadcrumbs$ = this.metricsEndpoint$.pipe(

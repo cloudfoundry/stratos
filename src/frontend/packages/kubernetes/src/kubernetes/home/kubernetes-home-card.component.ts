@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -55,6 +55,7 @@ export class KubernetesHomeCardComponent implements OnInit {
   public namespaceCount$: Observable<number>;
 
   private store = inject(Store<AppState>);
+  private injector = inject(Injector);
 
   ngOnInit() {
     const guid = this.endpoint.guid;
@@ -113,20 +114,22 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    // Convert counts to signals
-    const podCountSignal = toSignal(this.podCount$, { initialValue: 0 });
-    const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: 0 });
-    const namespaceCountSignal = toSignal(this.namespaceCount$, { initialValue: 0 });
+    // Convert counts to signals within injection context
+    return runInInjectionContext(this.injector, () => {
+      const podCountSignal = toSignal(this.podCount$, { initialValue: 0 });
+      const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: 0 });
+      const namespaceCountSignal = toSignal(this.namespaceCount$, { initialValue: 0 });
 
-    // Compute loaded state - true when all counts are available
-    const loadedComputed = computed(() => {
-      // Access all signals to create dependency
-      podCountSignal();
-      nodeCountSignal();
-      namespaceCountSignal();
-      return true;
+      // Compute loaded state - true when all counts are available
+      const loadedComputed = computed(() => {
+        // Access all signals to create dependency
+        podCountSignal();
+        nodeCountSignal();
+        namespaceCountSignal();
+        return true;
+      });
+
+      return toObservable(loadedComputed);
     });
-
-    return toObservable(loadedComputed);
   }
 }

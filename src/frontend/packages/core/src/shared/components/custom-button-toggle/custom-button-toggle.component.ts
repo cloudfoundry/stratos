@@ -39,9 +39,9 @@ export class CustomButtonToggleComponent {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CustomButtonToggleGroupComponent),
       multi: true,
+    }
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
-})
-  ]
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {
   @Input() multiple = false;

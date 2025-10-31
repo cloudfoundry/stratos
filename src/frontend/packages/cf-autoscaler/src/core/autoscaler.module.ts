@@ -54,8 +54,7 @@ import {
     TableCellAutoscalerEventStatusIconPipe,
     TableCellAutoscalerEventChangeIconPipe,
   ],
-  declarations: [
-  ],
+  declarations: [],
   providers: [
     ApplicationService,
     ApplicationEnvVarsHelper,

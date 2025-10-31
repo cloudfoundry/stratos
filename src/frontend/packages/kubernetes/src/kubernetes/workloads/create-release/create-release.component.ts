@@ -247,16 +247,20 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   installChart(): Observable<StepOnNextResult> {
     const endpoint = getMonocularEndpoint(this.route, null, null);
+    const formValue = this.details.value;
     // Build the request body
     const values: HelmInstallValues = {
-      ...this.details.value,
+      endpoint: formValue.endpoint || '',
+      releaseName: formValue.releaseName || '',
+      releaseNamespace: formValue.releaseNamespace || '',
       values: JSON.stringify(this.editor.getValues()),
       chart: {
         name: this.route.snapshot.params.name,
         repo: this.route.snapshot.params.repo,
         version: this.route.snapshot.params.version,
       },
-      monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint
+      monocularEndpoint: endpoint === stratosMonocularEndpointGuid ? null : endpoint,
+      chartUrl: '' // Will be set after fetching chart info
     };
 
     // Get the chart first, so we can get then install URL, then install

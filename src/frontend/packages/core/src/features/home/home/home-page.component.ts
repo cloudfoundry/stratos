@@ -125,7 +125,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
             extras: {
               replaceUrl: true
             }
-          });
+          }));
         }
       }),
       first()
@@ -389,7 +389,7 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       map(eps => eps.filter(ep => {
         const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
         return !!defn.definition.homeCard;
-      }),
+      })),
       map(eps => {
         switch (eps.length) {
           case 1:

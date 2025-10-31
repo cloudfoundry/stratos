@@ -31,7 +31,7 @@ export class SnackBarReturnComponent extends SimpleSnackBar {
 
   return() {
     if (this.returnUrl) {
-      this.store.dispatch(new RouterNav({ path: this.returnUrl });
+      this.store.dispatch(new RouterNav({ path: this.returnUrl }));
     }
     this.dismiss();
   }

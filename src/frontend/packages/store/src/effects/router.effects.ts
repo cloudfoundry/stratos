@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, tap } from 'rxjs/operators';
@@ -15,7 +15,6 @@ export class RouterEffect {
   constructor(
     private actions$: Actions,
     private router: Router,
-    private appRef: ApplicationRef,
   ) { }
 
   
@@ -28,6 +27,6 @@ export class RouterEffect {
         path = path.split('/');
       }
       this.router.navigate(path, extraParams);
-      this.appRef.tick();
+      // Removed manual tick() call - zoneless change detection handles this automatically
     })), { dispatch: false });
 }

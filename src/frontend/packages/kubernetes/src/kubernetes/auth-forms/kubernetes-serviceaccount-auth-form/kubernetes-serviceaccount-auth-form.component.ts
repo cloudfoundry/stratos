@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule,FormBuilder } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule,FormBuilder } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
 import { EndpointAuthValues, IEndpointAuthComponent } from '../../../../../store/src/extension-types';
@@ -27,6 +27,6 @@ export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent
   }
 
   public getBody(): string {
-    return this.formGroup.value.authValues.kubeconfig;
+    return this.formGroup.value.kubeconfig;
   }
 }

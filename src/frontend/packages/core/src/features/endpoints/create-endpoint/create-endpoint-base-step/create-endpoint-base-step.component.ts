@@ -42,7 +42,7 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
         query: {
           [BASE_REDIRECT_QUERY]: 'endpoints/new'
         }
-      });
+      }));
     }
   }
 

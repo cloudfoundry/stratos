@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Store } from '@ngrx/store';
@@ -53,10 +53,12 @@ export class CreateApplicationStep3Component implements OnInit {
   setDomainHost: FormGroup<DomainHostForm>;
 
   constructor() {
-    this.setDomainHost = new UntypedFormGroup({
-      domain: new UntypedFormControl('', [Validators.required]),
-      host: new UntypedFormControl({ disabled: true }, [Validators.required, Validators.maxLength(63)]),
+    this.setDomainHost = new FormGroup({
+      domain: new FormControl('', {validators: [Validators.required], nonNullable: true}),
+      host: new FormControl('', {validators: [Validators.required, Validators.maxLength(63)], nonNullable: true}),
     });
+    // Disable host control initially - will be enabled when domain is selected
+    this.setDomainHost.controls.host.disable();
   }
 
   domains$: Observable<APIResource<IDomain>[]>;

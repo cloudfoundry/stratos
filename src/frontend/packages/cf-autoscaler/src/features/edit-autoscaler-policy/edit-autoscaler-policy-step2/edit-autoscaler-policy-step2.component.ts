@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -102,8 +102,8 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
     this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
-      map(value => this.getMetricUnit(value)),
-    ).subscribe(unit => {
+      map((value: string) => this.getMetricUnit(value)),
+    ).subscribe((unit: string) => {
       this.metricUnitSubject.next(unit);
       this.cdr.markForCheck();
     }));

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
@@ -68,6 +68,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private store = inject(Store<AppState>);
   private ngZone = inject(NgZone);
   private router = inject(Router);
+  private injector = inject(Injector);
 
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
@@ -180,34 +181,36 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
     this.caaspData$ = this.kubeEndpointService.getCaaspNodesData(nodes$);
 
-    // Convert all observables to signals
-    const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as any });
-    const podCountSignal = toSignal(this.podCount$, { initialValue: null as number | null });
-    const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: null as number | null });
-    const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as any });
-    const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as any });
-    const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as any });
-    const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as any });
-    const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
-    const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
+    // Convert all observables to signals within injection context
+    runInInjectionContext(this.injector, () => {
+      const endpointDetailsSignal = toSignal(this.endpointDetails$, { initialValue: null as any });
+      const podCountSignal = toSignal(this.podCount$, { initialValue: null as number | null });
+      const nodeCountSignal = toSignal(this.nodeCount$, { initialValue: null as number | null });
+      const podCapacitySignal = toSignal(this.podCapacity$, { initialValue: null as any });
+      const diskPressureSignal = toSignal(this.diskPressure$, { initialValue: null as any });
+      const memoryPressureSignal = toSignal(this.memoryPressure$, { initialValue: null as any });
+      const outOfDiskSignal = toSignal(this.outOfDisk$, { initialValue: null as any });
+      const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
+      const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
 
-    // Compute loading state - false when all are loaded
-    const isLoadingComputed = computed(() => {
-      // Check if all required data is loaded
-      return !(
-        endpointDetailsSignal() !== null &&
-        podCountSignal() !== null &&
-        nodeCountSignal() !== null &&
-        podCapacitySignal() !== null &&
-        diskPressureSignal() !== null &&
-        memoryPressureSignal() !== null &&
-        outOfDiskSignal() !== null &&
-        nodesReadySignal() !== null &&
-        networkUnavailableSignal() !== null
-      );
+      // Compute loading state - false when all are loaded
+      const isLoadingComputed = computed(() => {
+        // Check if all required data is loaded
+        return !(
+          endpointDetailsSignal() !== null &&
+          podCountSignal() !== null &&
+          nodeCountSignal() !== null &&
+          podCapacitySignal() !== null &&
+          diskPressureSignal() !== null &&
+          memoryPressureSignal() !== null &&
+          outOfDiskSignal() !== null &&
+          nodesReadySignal() !== null &&
+          networkUnavailableSignal() !== null
+        );
+      });
+
+      this.isLoading$ = toObservable(isLoadingComputed);
     });
-
-    this.isLoading$ = toObservable(isLoadingComputed);
   }
 
   private poll(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {

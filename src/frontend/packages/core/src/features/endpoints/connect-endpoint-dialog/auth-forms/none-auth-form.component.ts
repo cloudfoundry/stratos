@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { IAuthForm } from '@stratosui/store';
 
 /**

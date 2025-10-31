@@ -87,7 +87,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         link: tab.link === '-' ?
           TabNavService.TabsNoLinkValue :
           this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
-      });
+      }));
       this.tabNavService.setTabs(this.pTabs);
     }
   }
@@ -129,7 +129,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
           prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
           metadata: { name: favorite.metadata.name },
-        });
+        }));
       }
     }
   }

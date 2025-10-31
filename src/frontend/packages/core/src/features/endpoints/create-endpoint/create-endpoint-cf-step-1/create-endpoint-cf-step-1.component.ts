@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterContentInit, Component, Input  } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -169,7 +169,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.validate = this.registerForm.statusChanges.pipe(
       map(() => {
         return this.registerForm.valid;
-      });
+      })
+    );
   }
 
   setUrlValidation(endpoint: StratosCatalogEndpointEntity) {

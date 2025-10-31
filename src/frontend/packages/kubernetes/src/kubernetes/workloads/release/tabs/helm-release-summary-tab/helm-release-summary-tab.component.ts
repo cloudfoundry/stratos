@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ComponentFactoryResolver, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -118,7 +118,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReport: any;
 
   private analysisReportId = signal<string | null>(null);
-  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());  private componentFactoryResolver = inject(ComponentFactoryResolver);
+  private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
+  private componentFactoryResolver = inject(ComponentFactoryResolver);
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private store = inject(Store<AppState>);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -126,101 +127,103 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private snackbarService = inject(SnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
+  private injector = inject(Injector);
 
 
 
   constructor() {
+    // Convert signals within injection context
+    runInInjectionContext(this.injector, () => {
+      // Convert isFetching$ to signal for computed
+      const isFetchingSignal = toSignal(
+        this.helmReleaseHelper.isFetching$,
+        { initialValue: true }
+      );
+
+      // Use computed for isBusy
+      const isBusyComputed = computed(() =>
+        isFetchingSignal() || this.busyDeleting()
+      );
+
+      // Provide as Observable for backward compatibility with template
+      this.isBusy$ = toObservable(isBusyComputed);
+
+      this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
+
+      this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
+        distinctUntilChanged(),
+        map((chartData: any) => ({
+          ...chartData,
+          containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
+          podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
+        })
+        )
+      );
+
+      this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
+
+      // Can upgrade if the Chart is available
+      this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
+
+      // Convert release graph to signal
+      const releaseGraphSignal = toSignal(
+        this.helmReleaseHelper.fetchReleaseGraph(),
+        { initialValue: { nodes: {} } as any }
+      );
+
+      // Compute resources based on graph and analysis report
+      const resourcesComputed = computed(() => {
+        const graph = releaseGraphSignal();
+        const _ = this.analysisReportId(); // Dependency on analysis report changes
+
+        const resources: Record<string, any> = {};
+        // Collect the resources
+        if (graph && graph.nodes) {
+          Object.values(graph.nodes).forEach((node: any) => {
+            if (!resources[node.data.kind]) {
+              resources[node.data.kind] = {
+                kind: node.data.kind,
+                label: `${node.data.kind}s`,
+                count: 0,
+                statuses: [],
+                icon: getIcon(node.data.kind)
+              };
+            }
+            resources[node.data.kind].count++;
+            resources[node.data.kind].statuses.push(node.data.status);
+          });
+        }
+        this.applyAnalysis(resources, this.analysisReport);
+        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+      });
+
+      this.resources$ = toObservable(resourcesComputed);
 
 
-    // Convert isFetching$ to signal for computed
-    const isFetchingSignal = toSignal(
-      this.helmReleaseHelper.isFetching$,
-      { initialValue: true }
-    );
+      // Convert chart data to signal
+      const chartDataSignal = toSignal(
+        this.chartData$,
+        { initialValue: null as any }
+      );
 
-    // Use computed for isBusy
-    const isBusyComputed = computed(() =>
-      isFetchingSignal() || this.busyDeleting()
-    );
+      // Compute hasResources
+      const hasResourcesComputed = computed(() => {
+        const chartData = chartDataSignal();
+        const resources = resourcesComputed();
+        return !!chartData && !!resources;
+      });
 
-    // Provide as Observable for backward compatibility with template
-    this.isBusy$ = toObservable(isBusyComputed);
+      this.hasResources$ = toObservable(hasResourcesComputed);
 
-    this.path = `${this.helmReleaseHelper.namespace}/${this.helmReleaseHelper.releaseTitle}`;
+      // Compute hasAllResources
+      const hasAllResourcesComputed = computed(() => {
+        const resources = resourcesComputed();
+        const hasSome = hasResourcesComputed();
+        return hasSome && resources && resources.length > 0;
+      });
 
-    this.chartData$ = this.helmReleaseHelper.fetchReleaseChartStats().pipe(
-      distinctUntilChanged(),
-      map((chartData: any) => ({
-        ...chartData,
-        containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
-        podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
-      })
-      )
-    );
-
-    this.hasUpgrade$ = this.helmReleaseHelper.hasUpgrade().pipe(map((v: any) => v ? v.version : null));
-
-    // Can upgrade if the Chart is available
-    this.canUpgrade$ = this.helmReleaseHelper.hasUpgrade(true).pipe(map((v: any) => !!v));
-
-    // Convert release graph to signal
-    const releaseGraphSignal = toSignal(
-      this.helmReleaseHelper.fetchReleaseGraph(),
-      { initialValue: { nodes: {} } as any }
-    );
-
-    // Compute resources based on graph and analysis report
-    const resourcesComputed = computed(() => {
-      const graph = releaseGraphSignal();
-      const _ = this.analysisReportId(); // Dependency on analysis report changes
-
-      const resources: Record<string, any> = {};
-      // Collect the resources
-      if (graph && graph.nodes) {
-        Object.values(graph.nodes).forEach((node: any) => {
-          if (!resources[node.data.kind]) {
-            resources[node.data.kind] = {
-              kind: node.data.kind,
-              label: `${node.data.kind}s`,
-              count: 0,
-              statuses: [],
-              icon: getIcon(node.data.kind)
-            };
-          }
-          resources[node.data.kind].count++;
-          resources[node.data.kind].statuses.push(node.data.status);
-        });
-      }
-      this.applyAnalysis(resources, this.analysisReport);
-      return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+      this.hasAllResources$ = toObservable(hasAllResourcesComputed);
     });
-
-    this.resources$ = toObservable(resourcesComputed);
-
-
-    // Convert chart data to signal
-    const chartDataSignal = toSignal(
-      this.chartData$,
-      { initialValue: null as any }
-    );
-
-    // Compute hasResources
-    const hasResourcesComputed = computed(() => {
-      const chartData = chartDataSignal();
-      const resources = resourcesComputed();
-      return !!chartData && !!resources;
-    });
-
-    this.hasResources$ = toObservable(hasResourcesComputed);
-
-    // Compute hasAllResources
-    const hasAllResourcesComputed = computed(() => {
-      const resources = resourcesComputed();
-      const hasSome = hasResourcesComputed();
-      return hasSome && resources && resources.length > 0;
-    });
-
-    this.hasAllResources$ = toObservable(hasAllResourcesComputed);
 
     this.deleteReleaseConfirmation = new ConfirmationDialogConfig(
       `Delete Workload`,

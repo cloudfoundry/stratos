@@ -46,7 +46,7 @@ export class PageSideNavComponent implements OnInit {
     this.pTabs = tabs.map(tab => ({
       ...tab,
       hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
-    });
+    }));
   }
   get tabs(): IPageSideNavTab[] {
     return this.pTabs;

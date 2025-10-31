@@ -56,7 +56,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
       success: res.success,
       message: res.errorMessage,
       redirect: res.success
-    })
+    }))
   ) : of({
     success: true,
     redirect: true

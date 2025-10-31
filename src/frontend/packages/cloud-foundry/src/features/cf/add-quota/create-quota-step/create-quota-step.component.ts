@@ -1,5 +1,5 @@
 import { Component, ViewChild , ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
@@ -28,7 +28,7 @@ export class CreateQuotaStepComponent {
 
   quotasSubscription: Subscription;
   cfGuid: string;
-  quotaForm: UntypedFormGroup;
+  quotaForm: FormGroup;
 
   @ViewChild('form', { static: true })
   form: QuotaDefinitionFormComponent;
@@ -42,7 +42,7 @@ export class CreateQuotaStepComponent {
   validate = () => !!this.form && this.form.valid();
 
   submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.value;
+    const formValues = this.form.formGroup.getRawValue();
     return cfEntityCatalog.quotaDefinition.api.create<RequestInfoState>(formValues.name, this.cfGuid, formValues).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.creating && !newV.creating),

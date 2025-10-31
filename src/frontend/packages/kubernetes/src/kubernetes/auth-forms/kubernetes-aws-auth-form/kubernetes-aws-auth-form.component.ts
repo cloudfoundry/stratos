@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 import { IAuthForm } from '../../../../../store/src/extension-types';
 import { ShowHideButtonComponent } from '../../../../../core/src/core/show-hide-button/show-hide-button.component';

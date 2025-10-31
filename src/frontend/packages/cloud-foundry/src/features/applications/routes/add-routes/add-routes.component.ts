@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, signal , ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { Validators, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
@@ -19,10 +19,8 @@ import { APIResource } from '../../../../../../store/src/types/api.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
-import { FormsModule } from '@angular/forms';
 
 import { CustomFormFieldComponent } from '@stratosui/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { CustomCheckboxComponent } from '../../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';

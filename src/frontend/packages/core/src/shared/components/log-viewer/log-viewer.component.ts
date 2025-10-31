@@ -210,7 +210,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
-      });
+      })
+    );
 
     const addedLogs$ = stoppableLogStream$.pipe(
       buffer(buffer$))
@@ -258,19 +259,27 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         }),
         startWith([]),
         catchError(err => {
-          console.error('Log stream processing error:', err);
-          const errorInfo: ConnectionErrorInfo = {
-            code: 'LOG_PROCESSING_ERROR',
-            severity: 'warning',
-            userMessage: 'Error processing log stream. Some logs may be missing.',
-            timestamp: Date.now(),
-            retryable: true
-          };
-          this.connectionErrorInfo$.next(errorInfo);
-          this.statusMessage$.next({
-            message: errorInfo.userMessage,
-            isError: true
-          });
+          // Silently handle expected WebSocket closure errors during navigation
+          const isExpectedClosureError =
+            err?.message?.includes('WebSocket is closed before the connection is established') ||
+            err?.message?.includes('Connection closed') ||
+            err?.type === 'close';
+
+          if (!isExpectedClosureError) {
+            console.error('Log stream processing error:', err);
+            const errorInfo: ConnectionErrorInfo = {
+              code: 'LOG_PROCESSING_ERROR',
+              severity: 'warning',
+              userMessage: 'Error processing log stream. Some logs may be missing.',
+              timestamp: Date.now(),
+              retryable: true
+            };
+            this.connectionErrorInfo$.next(errorInfo);
+            this.statusMessage$.next({
+              message: errorInfo.userMessage,
+              isError: true
+            });
+          }
           // Continue the stream instead of breaking
           return of([]);
         })
@@ -287,7 +296,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           console.warn('Error auto-scrolling log viewer:', scrollErr);
         }
       })
-      .subscribe({
+    ).subscribe({
         next: () => {
           // Successfully processing logs
         },

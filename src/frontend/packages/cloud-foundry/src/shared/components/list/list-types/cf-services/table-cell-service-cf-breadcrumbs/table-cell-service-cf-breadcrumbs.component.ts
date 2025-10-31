@@ -21,6 +21,7 @@ import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space
 export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIResource<IService>> {
 
   cfOrgSpace: CfOrgSpaceLabelService;
+  private store = inject(Store<CFAppState>);
 
   @Input()
   set row(pService: APIResource<IService>) {
@@ -28,10 +29,8 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
     if (!pService || !!this.cfOrgSpace) {
       return;
     }
-    this.cfOrgSpace = new CfOrgSpaceLabelService(pService.entity.cfGuid);
+    this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, pService.entity.cfGuid);
   }
-
-  private store = inject(Store<CFAppState>);
 
   constructor() {
     super();

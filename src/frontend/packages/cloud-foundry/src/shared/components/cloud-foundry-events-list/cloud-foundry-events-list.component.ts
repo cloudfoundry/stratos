@@ -1,7 +1,7 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
 
 import { Subscription } from 'rxjs';

@@ -18,6 +18,7 @@ export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp
   protected init(cfGuid?: string, orgGuid?: string, spaceGuid?: string) {
     if (!this.cfOrgSpace) {
       this.cfOrgSpace = new CfOrgSpaceLabelService(
+        this.store,
         cfGuid,
         orgGuid,
         spaceGuid

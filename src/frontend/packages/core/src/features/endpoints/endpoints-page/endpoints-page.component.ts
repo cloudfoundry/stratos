@@ -108,7 +108,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
             extras: {
               replaceUrl: true
             }
-          });
+          }));
         }
       }),
       first()

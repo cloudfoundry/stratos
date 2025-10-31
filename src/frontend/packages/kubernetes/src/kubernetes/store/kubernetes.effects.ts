@@ -104,13 +104,10 @@ export interface KubeDashboardStatus {
 export class KubernetesEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
-<<<<<<< HEAD
   private http = inject(HttpClient);
   private actions$ = inject(Actions);
   private store = inject(Store<AppState>);
-=======
-  constructor(private http: HttpClient, private actions$: Actions, private store: Store<AppState>, private appRef: ApplicationRef) { }
->>>>>>> 74f779c6b ([Angular 20] Migrate to zoneless change detection)
+  private appRef = inject(ApplicationRef);
 
   
   fetchDashboardInfo$ = createEffect(() => this.actions$.pipe(

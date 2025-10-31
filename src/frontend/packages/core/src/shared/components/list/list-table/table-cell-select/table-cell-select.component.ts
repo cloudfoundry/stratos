@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, Input, OnInit, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, Injector, Input, OnInit, runInInjectionContext, Signal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -22,17 +22,34 @@ export class TableCellSelectComponent<T> extends TableCellCustom<T> implements O
   @Input()
   declare rowState: Observable<RowState>;
 
-  // Convert observables to signals for zoneless
-  private rowStateSignal: Signal<RowState | undefined>;
-  disable: Signal<boolean | undefined>;
-  tooltip: Signal<string | null | undefined>;
+  // Inject the Injector to use in ngOnInit for runInInjectionContext
+  private readonly injector = inject(Injector);
 
-  ngOnInit() {
-    this.rowStateSignal = toSignal(this.rowState);
-    this.disable = computed(() => this.rowStateSignal()?.disabled);
-    this.tooltip = computed(() => {
-      const state = this.rowStateSignal();
-      return state?.disabled ? state.disabledReason : null;
-    });
+  // Convert observables to signals for zoneless
+  // Signal is created in ngOnInit after rowState input is available
+  private rowStateSignal?: Signal<RowState | undefined>;
+
+  // Use writable signals to store computed values, updated via effect
+  protected disableSignal = signal<boolean | undefined>(undefined);
+  protected tooltipSignal = signal<string | null>(null);
+
+  // Computed signals that read from the writable signals
+  disable = computed(() => this.disableSignal());
+  tooltip = computed(() => this.tooltipSignal());
+
+  ngOnInit(): void {
+    // Use runInInjectionContext to create signal from observable
+    if (this.rowState) {
+      runInInjectionContext(this.injector, () => {
+        this.rowStateSignal = toSignal(this.rowState);
+
+        // Use effect to update writable signals when rowState changes
+        effect(() => {
+          const state = this.rowStateSignal?.();
+          this.disableSignal.set(state?.disabled);
+          this.tooltipSignal.set(state?.disabled ? state.disabledReason : null);
+        });
+      });
+    }
   }
 }

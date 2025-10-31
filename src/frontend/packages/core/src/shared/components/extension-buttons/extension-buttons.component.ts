@@ -40,6 +40,6 @@ export class ExtensionButtonsComponent implements OnInit {
     this.extensionActions = getActionsFromExtensions(this.type).map(value => ({
       ...value,
       visible$: value.visible$ || value.visible ? value.visible(this.store) : of(true)
-    });
+    }));
   }
 }

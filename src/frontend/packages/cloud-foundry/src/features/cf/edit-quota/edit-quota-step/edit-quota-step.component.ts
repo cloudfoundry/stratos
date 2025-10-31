@@ -65,7 +65,7 @@ export class EditQuotaStepComponent implements OnDestroy {
   validate = () => this.form && this.form.valid();
 
   submit: StepOnNextFunction = () =>
-    cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.value).pipe(
+    cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
       pairwise(),
       filter(([oldV, newV]) => oldV.busy && !newV.busy),
       map(([, newV]) => newV),

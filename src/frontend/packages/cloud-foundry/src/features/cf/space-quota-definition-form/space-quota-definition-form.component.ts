@@ -1,7 +1,7 @@
 
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../../core/src/shared/components/custom-checkbox/custom-checkbox.component';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -27,6 +27,7 @@ export interface SpaceQuotaFormValues {
   totalReservedRoutePorts: number;
   appInstanceLimit: number;
   totalServiceKeys: number;
+  totalPrivateDomains: number;
   appTasksLimit: number;
 }
 
@@ -64,6 +65,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     totalReservedRoutePorts: FormControl<number>;
     appInstanceLimit: FormControl<number>;
     totalServiceKeys: FormControl<number>;
+    totalPrivateDomains: FormControl<number>;
     appTasksLimit: FormControl<number>;
   }>;
 
@@ -98,6 +100,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
       totalReservedRoutePorts: new FormControl(quota.total_reserved_route_ports, { nonNullable: true }),
       appInstanceLimit: new FormControl(quota.app_instance_limit, { nonNullable: true }),
       totalServiceKeys: new FormControl(quota.total_service_keys, { nonNullable: true }),
+      totalPrivateDomains: new FormControl(quota.total_private_domains, { nonNullable: true }),
       appTasksLimit: new FormControl(quota.app_task_limit, { nonNullable: true }),
     });
   }

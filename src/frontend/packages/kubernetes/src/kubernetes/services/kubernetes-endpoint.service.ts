@@ -1,4 +1,4 @@
-import { Injectable, computed } from '@angular/core';
+import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
@@ -67,6 +67,8 @@ export class KubernetesEndpointService {
   kubeDashboardLabel$: Observable<string>;
   kubeDashboardConfigured$: Observable<boolean>;
   kubeTerminalEnabled$: Observable<boolean>;
+
+  private injector = inject(Injector);
 
   public static hasKubeTerminalEnabled(store: Store<AppState>): Observable<boolean> {
     return store.select('auth').pipe(
@@ -200,23 +202,25 @@ export class KubernetesEndpointService {
   }
 
   getPodCapacity(nodes$: Observable<KubernetesNode[]> = this.nodes$, pods$: Observable<KubernetesPod[]> = this.pods$) {
-    // Convert to signals
-    const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
-    const podsSignal = toSignal(pods$, { initialValue: [] as KubernetesPod[] });
+    // Convert to signals within injection context
+    return runInInjectionContext(this.injector, () => {
+      const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
+      const podsSignal = toSignal(pods$, { initialValue: [] as KubernetesPod[] });
 
-    // Compute capacity
-    const capacityComputed = computed(() => {
-      const nodes = nodesSignal();
-      const pods = podsSignal();
-      return {
-        total: nodes.reduce((cap, node) => {
-          return cap + parseInt(node.status.capacity.pods, 10);
-        }, 0),
-        used: pods.length
-      };
+      // Compute capacity
+      const capacityComputed = computed(() => {
+        const nodes = nodesSignal();
+        const pods = podsSignal();
+        return {
+          total: nodes.reduce((cap, node) => {
+            return cap + parseInt(node.status.capacity.pods, 10);
+          }, 0),
+          used: pods.length
+        };
+      });
+
+      return toObservable(capacityComputed);
     });
-
-    return toObservable(capacityComputed);
   }
 
   getNodeStatusCount(

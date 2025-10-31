@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, signal, WritableSignal, computed } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { safeUnsubscribe } from 'frontend/packages/core/src/core/utils.service';
@@ -66,6 +66,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
 
   private subs: Subscription[] = [];
+  private injector = inject(Injector);
 
   private allNamespaces = this.getNamespacesObservable();
   private allNamespacesLoading$ = this.allNamespaces.pagination$.pipe(map(
@@ -108,37 +109,39 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   }
 
   private createNamespace(): KubernetesNamespacesFilterItem<KubernetesNamespace> {
-    // Convert kube.select Observable to signal for computed
-    const kubeSelectSignal = toSignal(
-      this.kube.select.asObservable(),
-      { initialValue: undefined as string | undefined }
-    );
+    // Convert observables to signals within injection context
+    return runInInjectionContext(this.injector, () => {
+      const kubeSelectSignal = toSignal(
+        this.kube.select.asObservable(),
+        { initialValue: undefined as string | undefined }
+      );
 
-    const allNamespacesSignal = toSignal(
-      this.allNamespaces.entities$,
-      { initialValue: [] as KubernetesNamespace[] }
-    );
+      const allNamespacesSignal = toSignal(
+        this.allNamespaces.entities$,
+        { initialValue: [] as KubernetesNamespace[] }
+      );
 
-    // Use computed for derived list
-    const namespaceListComputed = computed(() => {
-      const selectedKubeId = kubeSelectSignal();
-      const entities = allNamespacesSignal();
-      if (selectedKubeId && entities) {
-        return entities
-          .filter(namespace => namespace.metadata.kubeId === selectedKubeId)
-          .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
-      }
-      return [];
+      // Use computed for derived list
+      const namespaceListComputed = computed(() => {
+        const selectedKubeId = kubeSelectSignal();
+        const entities = allNamespacesSignal();
+        if (selectedKubeId && entities) {
+          return entities
+            .filter(namespace => namespace.metadata.kubeId === selectedKubeId)
+            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+        }
+        return [];
+      });
+
+      // Convert computed to Observable for backward compatibility
+      const namespaceList$ = toObservable(namespaceListComputed);
+
+      return {
+        list$: namespaceList$,
+        loading$: this.allNamespacesLoading$,
+        select: createSignalWrapper<string>(undefined)
+      };
     });
-
-    // Convert computed to Observable for backward compatibility
-    const namespaceList$ = toObservable(namespaceListComputed);
-
-    return {
-      list$: namespaceList$,
-      loading$: this.allNamespacesLoading$,
-      select: createSignalWrapper<string>(undefined)
-    };
   }
 
   private setupAutoSelectors() {

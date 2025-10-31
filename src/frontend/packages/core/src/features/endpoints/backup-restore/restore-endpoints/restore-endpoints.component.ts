@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
@@ -41,7 +41,7 @@ export class RestoreEndpointsComponent {
 
   // Step 2
   passwordValid$: Observable<boolean>;
-  passwordForm: UntypedFormGroup;
+  passwordForm: FormGroup;
   show = false;
 
   constructor(
@@ -53,8 +53,8 @@ export class RestoreEndpointsComponent {
   }
 
   setupPasswordStep() {
-    this.passwordForm = new UntypedFormGroup({
-      password: new UntypedFormControl('', [Validators.required, Validators.minLength(6)]),
+    this.passwordForm = new FormGroup({
+      password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
     this.passwordValid$ = this.passwordForm.statusChanges.pipe(
       map(() => {
