@@ -52,17 +52,17 @@ export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0;
   pageCount = 0;
-  ids = {};
+  ids: Record<number, string[]> = {};
   params: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ListActionState,
-  };
+  } = {};
   clientPagination?: PaginationClientPagination;
   /**
    * The pagination key from where we share our values.
    */
   seed?: string;
-  maxedState: PaginationMaxedState;
+  maxedState: PaginationMaxedState = { isMaxedMode: false };
   isListPagination = false;
 }
 

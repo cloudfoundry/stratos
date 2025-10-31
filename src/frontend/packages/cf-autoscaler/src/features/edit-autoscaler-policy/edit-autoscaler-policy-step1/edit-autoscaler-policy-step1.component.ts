@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import moment from 'moment-timezone';
 import { of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -31,7 +30,7 @@ import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDirective implements OnInit {
 
   policyAlert = PolicyAlert;
-  timezoneOptions = moment.tz.names();
+  timezoneOptions = Intl.supportedValuesOf('timeZone');
   editLimitForm: UntypedFormGroup;
 
   private editLimitValid = true;

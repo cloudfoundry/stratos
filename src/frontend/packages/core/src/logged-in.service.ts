@@ -15,16 +15,7 @@ import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-p
   providedIn: 'root'
 })
 export class LoggedInService {
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private store: Store<AppState>,
-    private dialog: TailwindDialogService,
-    private ngZone: NgZone,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
-
   private userInteractionChecker: Subscription;
-
   private lastUserInteraction = Date.now();
   private sessionChecker: Subscription;
 
@@ -39,18 +30,32 @@ export class LoggedInService {
 
   // Avoid a race condition where the cookie is deleted if the user presses ok just before expiration
   private readonly autoLogoutDelta: number = 5 * 1000;
+
   // When we see the following events, we consider the user as active
-  private userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
+  private readonly userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private activityPromptShown = false;
-
   private sub: Subscription;
-
   private destroying = false;
+  private initialized = false;
+
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private store: Store<AppState>,
+    private dialog: TailwindDialogService,
+    private ngZone: NgZone,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+  ) { }
 
   init() {
+    // Prevent multiple initializations
+    if (this.initialized) {
+      return;
+    }
+    this.initialized = true;
+
     const eventStreams = this.userActiveEvents.map((eventName) => {
-      return fromEvent(document, eventName);
+      return fromEvent(this.document, eventName);
     });
 
     const auth$ = this.store.select(s => s.auth);

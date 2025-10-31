@@ -15,12 +15,10 @@ import {
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import moment from 'moment';
-
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
-  public mostRecentHit: moment.Moment;
+  public mostRecentHit: Date;
   public subText$: Observable<string>;
   public icon: string;
   public iconFont: string;

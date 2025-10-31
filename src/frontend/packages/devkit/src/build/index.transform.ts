@@ -79,4 +79,4 @@ const indexTransform = (options: TargetOptions, content: string) => {
   return Promise.resolve(modified);
 };
 
-module.exports = indexTransform;
+export default indexTransform;

@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { intervalToDuration } from 'date-fns';
 
 
 export function formatCPUTime(value: string | number, debug = false): string {
@@ -38,21 +38,33 @@ function replaceAll(str: string, find: string, replace: string): string {
 }
 
 export function formatAxisCPUTime(value: string) {
-  const duration = moment.duration(parseFloat(value) * 1000);
-  if (duration.asDays() >= 1) {
-    return `${duration.asDays().toPrecision(2)} d`;
+  const milliseconds = parseFloat(value) * 1000;
+  const duration = intervalToDuration({ start: 0, end: milliseconds });
+
+  const days = (duration.years || 0) * 365 + (duration.months || 0) * 30 + (duration.days || 0);
+  const hours = (duration.hours || 0);
+  const minutes = (duration.minutes || 0);
+  const seconds = (duration.seconds || 0);
+
+  const totalDays = days + hours / 24 + minutes / 1440 + seconds / 86400;
+  const totalHours = days * 24 + hours + minutes / 60 + seconds / 3600;
+  const totalMinutes = totalHours * 60;
+  const totalSeconds = milliseconds / 1000;
+
+  if (totalDays >= 1) {
+    return `${totalDays.toPrecision(2)} d`;
   }
-  if (duration.asHours() >= 1) {
-    return `${duration.asHours().toPrecision(2)} hrs`;
+  if (totalHours >= 1) {
+    return `${totalHours.toPrecision(2)} hrs`;
   }
-  if (duration.asMinutes() >= 1) {
-    return `${duration.asMinutes().toPrecision(2)} min`;
+  if (totalMinutes >= 1) {
+    return `${totalMinutes.toPrecision(2)} min`;
   }
-  if (duration.asSeconds() >= 1) {
-    return `${duration.asSeconds().toPrecision(2)} sec`;
+  if (totalSeconds >= 1) {
+    return `${totalSeconds.toPrecision(2)} sec`;
   }
-  if (duration.asMilliseconds() >= 1) {
-    return `${duration.asSeconds().toPrecision(2)} msec`;
+  if (milliseconds >= 1) {
+    return `${totalSeconds.toPrecision(2)} msec`;
   }
   return value;
 }

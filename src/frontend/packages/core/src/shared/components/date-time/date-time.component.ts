@@ -3,8 +3,7 @@ import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, tap } from 'rxjs/operators';
-
-import moment from 'moment';
+import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns';
 
 @Component({
   selector: 'app-date-time',
@@ -21,30 +20,30 @@ export class DateTimeComponent implements OnDestroy {
   public time = new UntypedFormControl();
   private sub: Subscription;
   private changeSub: Subscription;
-  private dateTimeValue: moment.Moment;
+  private dateTimeValue: Date;
 
   private dateObservable: Observable<string>;
   private timeObservable: Observable<string>;
 
   @Output()
-  public dateTimeChange = new EventEmitter<moment.Moment>();
+  public dateTimeChange = new EventEmitter<Date>();
 
   @Input()
   get dateTime() {
     return this.dateTimeValue;
   }
 
-  set dateTime(dateTime: moment.Moment) {
+  set dateTime(dateTime: Date) {
     const empty = !dateTime && this.dateTimeValue !== dateTime;
-    const validDate = dateTime && dateTime.isValid() && (!this.dateTimeValue || !dateTime.isSame(this.dateTimeValue));
+    const validDate = dateTime && isValid(dateTime) && (!this.dateTimeValue || !isEqual(dateTime, this.dateTimeValue));
     if (empty || validDate) {
       this.dateTimeValue = dateTime;
       this.dateTimeChange.emit(this.dateTimeValue);
     }
   }
 
-  private isDifferentDate(oldDate: moment.Moment, newDate: moment.Moment) {
-    return !oldDate || !newDate || !newDate.isValid() || !oldDate.isSame(newDate);
+  private isDifferentDate(oldDate: Date, newDate: Date) {
+    return !oldDate || !newDate || !isValid(newDate) || !isEqual(oldDate, newDate);
   }
 
   private setupInputSub() {
@@ -60,18 +59,15 @@ export class DateTimeComponent implements OnDestroy {
         return [
           parseInt(hour, 10),
           parseInt(minute, 10),
-          moment(date, 'YYYY-MM-DD')
+          parse(date, 'yyyy-MM-dd', new Date())
         ];
       }),
-      filter(([hour, minute]: [number, number, moment.Moment]) => {
+      filter(([hour, minute]: [number, number, Date]) => {
         return !isNaN(hour + minute);
       }),
-      tap(([hour, minute, date]: [number, number, moment.Moment]) => {
+      tap(([hour, minute, date]: [number, number, Date]) => {
 
-        const newDate = date.clone().set({
-          hour,
-          minute
-        });
+        const newDate = setMinutes(setHours(new Date(date), hour), minute);
         if (this.isDifferentDate(this.dateTime, newDate)) {
           this.stopChangeSub();
           this.dateTime = newDate;
@@ -101,8 +97,8 @@ export class DateTimeComponent implements OnDestroy {
           this.emptyDateTime();
         } else {
           this.stopInputSub();
-          this.date.setValue(dateTime.format('YYYY-MM-DD'));
-          this.time.setValue(dateTime.format('HH:mm'));
+          this.date.setValue(format(dateTime, 'yyyy-MM-dd'));
+          this.time.setValue(format(dateTime, 'HH:mm'));
           this.setupInputSub();
         }
       })

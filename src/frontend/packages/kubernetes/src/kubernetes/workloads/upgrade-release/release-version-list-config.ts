@@ -1,7 +1,7 @@
 import { signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { format, formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -81,7 +81,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
       headerCell: () => 'Created',
       cellFlex: '3',
       cellDefinition: {
-        getValue: row => moment(row.attributes.created).format('LLL')
+        getValue: row => format(new Date(row.attributes.created), 'PPPppp')
       }
     },
     {
@@ -89,7 +89,7 @@ export class ReleaseUpgradeVersionsListConfig implements IListConfig<MonocularVe
       headerCell: () => 'Age',
       cellFlex: '2',
       cellDefinition: {
-        getValue: row => moment(row.attributes.created).fromNow(true)
+        getValue: row => formatDistance(new Date(row.attributes.created), new Date())
       }
     },
   ];

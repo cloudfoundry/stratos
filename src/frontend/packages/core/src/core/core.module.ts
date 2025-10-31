@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { PaginationMonitorFactory, EntityCatalogHelper, EntityServiceFactory, EntityMonitorFactory } from '@stratosui/store';
-import { MomentModule } from 'ngx-moment';
 
 // Tailwind Material Replacements
 import { TailwindDialogService, TailwindDialogRef, TailwindDialogRefImpl } from '../shared/services/tailwind-dialog.service';
@@ -38,7 +37,6 @@ import { WindowRef } from './window-ref/window-ref.service';
     imports: [
         MDAppModule,
         RouterModule,
-        MomentModule,
         FormsModule,
         ReactiveFormsModule,
         PortalModule,
@@ -62,7 +60,6 @@ import { WindowRef } from './window-ref/window-ref.service';
         MDAppModule,
         RouterModule,
         FormsModule,
-        MomentModule,
         ReactiveFormsModule,
         PortalModule,
         // Re-export standalone components, directives, and pipes

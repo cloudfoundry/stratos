@@ -3,7 +3,7 @@ import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGr
 import { CommonModule } from '@angular/common';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import moment from 'moment-timezone';
+import { addDays, format } from 'date-fns';
 
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
 import { AutoscalerConstants, PolicyAlert, shiftArray } from '../../../core/autoscaler-helpers/autoscaler-util';
@@ -123,8 +123,8 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     if (this.editEffectiveType === 'custom') {
       if (!this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date &&
         !this.editRecurringScheduleForm.get('start_date')?.value) {
-        this.editRecurringScheduleForm.controls['start_date'].setValue(moment().add(1, 'days').format(AutoscalerConstants.MomentFormateDate));
-        this.editRecurringScheduleForm.controls['end_date'].setValue(moment().add(1, 'days').format(AutoscalerConstants.MomentFormateDate));
+        this.editRecurringScheduleForm.controls['start_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
+        this.editRecurringScheduleForm.controls['end_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
       }
       this.editRecurringScheduleForm.controls['start_date'].setValidators([Validators.required,
       this.validateRecurringScheduleDate('end_date'), this.validateRecurringScheduleGlobal()]);
@@ -205,7 +205,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
         return null;
       }
       const errors: AppAutoscalerInvalidPolicyError = {};
-      if (dateIsAfter(moment().format(AutoscalerConstants.MomentFormateDate), control.value)) {
+      if (dateIsAfter(format(new Date(), AutoscalerConstants.MomentFormateDate), control.value)) {
         errors.alertInvalidPolicyScheduleDateBeforeNow = { value: control.value };
       }
       const lastValid = this.editMutualValidation.date;

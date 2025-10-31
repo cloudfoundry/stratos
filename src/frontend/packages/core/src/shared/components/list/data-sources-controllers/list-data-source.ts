@@ -29,6 +29,7 @@ import {
 } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
+  catchError,
   distinctUntilChanged,
   filter,
   first,
@@ -223,18 +224,56 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.filter$ = this.createFilterObservable();
 
     this.maxedResults$ = this.pagination$.pipe(
-      map(LocalPaginationHelpers.isPaginationMaxed),
+      filter(pagination => !!pagination),
+      // TIMING FIX: Skip emissions where pageCount is undefined during store initialization
+      // Angular 20's stricter immutability enforcement means pagination state may emit before
+      // all default values are applied by reducers. Filter these out to prevent warnings.
+      // For local/client pagination, pageCount may be undefined - use clientPagination instead
+      filter(pagination => {
+        if (this.isLocal) {
+          // For local pagination, we have data if clientPagination exists or pageRequests exist
+          return !!(pagination.clientPagination || pagination.pageRequests);
+        }
+        // For server pagination, require pageCount
+        return pagination.pageCount !== undefined && pagination.pageCount !== null;
+      }),
+      map(pagination => LocalPaginationHelpers.isPaginationMaxed(pagination)),
       distinctUntilChanged(),
+      catchError(error => {
+        console.error('Error checking maxed results:', error);
+        return of(false);
+      })
     );
 
-    const catalogEntity = entityCatalog.getEntity(
-      this.masterAction.endpointType,
-      this.masterAction.entityType
-    );
-    const paginationConfig = catalogEntity.getPaginationConfig();
-    this.maxedStateStartAt$ = paginationConfig ?
-      paginationConfig.maxedStateStartAt(this.store, this.masterAction) :
-      of(null);
+    // Defensive: Entity catalog lookups can fail during initialization when entities aren't registered yet
+    try {
+      const catalogEntity = entityCatalog.getEntity(
+        this.masterAction.endpointType,
+        this.masterAction.entityType
+      );
+
+      // Defensive: catalogEntity may be null if endpoint/entity type not registered yet
+      if (!catalogEntity) {
+        console.warn(
+          `Entity catalog lookup returned null for pagination config. ` +
+          `endpoint=${this.masterAction.endpointType}, entity=${this.masterAction.entityType}. ` +
+          `Using default maxedStateStartAt. This is expected during early initialization.`
+        );
+        this.maxedStateStartAt$ = of(null);
+      } else {
+        // Defensive: getPaginationConfig may not exist on all catalog entities
+        const paginationConfig = catalogEntity.getPaginationConfig?.();
+        this.maxedStateStartAt$ = paginationConfig ?
+          paginationConfig.maxedStateStartAt(this.store, this.masterAction) :
+          of(null);
+      }
+    } catch (error) {
+      console.warn(
+        `Error getting catalog entity for pagination: endpoint=${this.masterAction.endpointType}, entity=${this.masterAction.entityType}. ` +
+        `Error: ${error.message}. Using default maxedStateStartAt.`
+      );
+      this.maxedStateStartAt$ = of(null);
+    }
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -308,14 +347,27 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       return null;
     }
     const pageToIdMap = multiActionConfig.schemaConfigs.reduce((actionMap, schemaConfig, i) => {
+      // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
       const catalogEntity = entityCatalog.getEntity(
         schemaConfig.paginationAction.endpointType,
         schemaConfig.paginationAction.entityType
       );
+
+      // Defensive: Skip this config if catalog entity not found
+      if (!catalogEntity) {
+        console.warn(
+          `Entity catalog lookup failed in getEntitySelectConfig for ` +
+          `endpoint=${schemaConfig.paginationAction.endpointType}, entity=${schemaConfig.paginationAction.entityType}. ` +
+          `Skipping this entity from select config.`
+        );
+        return actionMap;
+      }
+
       const entityKey = entityCatalog.getEntityKey(schemaConfig.paginationAction);
       const idPage = {
         page: i + 1,
-        label: catalogEntity.definition.label || 'Unknown',
+        // Defensive: Use optional chaining for definition.label
+        label: catalogEntity.definition?.label || 'Unknown',
         entityKey
       };
       actionMap.push(idPage);
@@ -347,7 +399,25 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private getSourceSchema(schema: EntitySchema | MultiActionConfig) {
     if (schema instanceof MultiActionConfig) {
       const { paginationAction } = schema.schemaConfigs[0];
+      // Defensive: Entity catalog lookup may return null if endpoint/entity type not registered yet
       const catalogEntity = entityCatalog.getEntity(paginationAction.endpointType, paginationAction.entityType);
+      if (!catalogEntity) {
+        console.error(
+          `Failed to get source schema - catalog entity not found for ` +
+          `endpoint=${paginationAction.endpointType}, entity=${paginationAction.entityType}. ` +
+          `This will likely cause further errors. Check entity catalog initialization.`
+        );
+        // Return schema as-is to avoid crashing, though this may cause downstream issues
+        return schema as unknown as EntitySchema;
+      }
+      // Defensive: getSchema may not exist on all catalog entities
+      if (!catalogEntity.getSchema) {
+        console.error(
+          `Catalog entity for ${paginationAction.entityType} does not have getSchema method. ` +
+          `Using fallback schema.`
+        );
+        return schema as unknown as EntitySchema;
+      }
       return catalogEntity.getSchema(paginationAction.schemaKey);
     }
     return schema;
@@ -521,6 +591,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private createSortObservable(): Observable<ListSort> {
     return this.pagination$.pipe(
+      filter(pag => !!pag && !!pag.params),
       map(pag => {
         const params = pag.params as Record<string, any>;
         return {
@@ -536,6 +607,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private createFilterObservable(): Observable<ListFilter> {
     return this.pagination$.pipe(
+      filter(pag => !!pag && !!pag.clientPagination && !!pag.clientPagination.filter),
       map(pag => ({
         string: this.isLocal ? pag.clientPagination.filter.string : this.getFilterFromParams(pag),
         items: { ...pag.clientPagination.filter.items },

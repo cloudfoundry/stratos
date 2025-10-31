@@ -11,7 +11,7 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import moment from 'moment';
+import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
@@ -155,7 +155,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         const fallback = itemWithDynamicProps['_metadata'] || {};
 
         const ts = item.metadata ? item.metadata.creationTimestamp : fallback.creationTimestamp;
-        resource.age = moment(ts).fromNow(true);
+        resource.age = formatDistance(new Date(ts), new Date());
         resource.creationTimestamp = ts;
 
         if (item.metadata && item.metadata.labels) {

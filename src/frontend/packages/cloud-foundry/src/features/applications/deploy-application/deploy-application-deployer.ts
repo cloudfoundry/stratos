@@ -26,6 +26,10 @@ import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 // while being backed by a Signal for fine-grained reactivity
 function createSignalWrapper<T>(initialValue: T, injector: Injector) {
   const _signal = signal<T>(initialValue);
+  // Create the observable once during initialization, outside of any reactive context
+  // This prevents NG0602 errors when asObservable() is called from reactive contexts
+  const _observable = toObservable(_signal, { injector });
+
   const wrapper = Object.assign(
     // Make it callable like a signal
     () => _signal(),
@@ -37,7 +41,7 @@ function createSignalWrapper<T>(initialValue: T, injector: Injector) {
       // BehaviorSubject compatibility methods
       next: (value: T) => _signal.set(value),
       getValue: () => _signal(),
-      asObservable: () => toObservable(_signal, { injector }),
+      asObservable: () => _observable,
     }
   );
   return wrapper as WritableSignal<T> & {

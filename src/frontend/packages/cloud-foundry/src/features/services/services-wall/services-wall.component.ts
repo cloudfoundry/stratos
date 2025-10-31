@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -33,6 +34,7 @@ import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-pe
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     PageHeaderComponent,
     ListComponent,
     CfEndpointsMissingComponent,

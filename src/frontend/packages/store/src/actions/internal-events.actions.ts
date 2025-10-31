@@ -1,5 +1,4 @@
 import { Action } from '@ngrx/store';
-import moment from 'moment';
 
 import {
   CLEAR_ENDPOINT_ERROR_EVENTS,
@@ -18,7 +17,7 @@ export class SendEventAction<T = InternalEventStateMetadata> implements Action {
     public eventSubjectId: string,
     public eventState: InternalEventState<T>
   ) {
-    eventState.timestamp = moment.now();
+    eventState.timestamp = Date.now();
     if (!eventState.severity) {
       eventState.severity = InternalEventSeverity.SYSTEM;
     }

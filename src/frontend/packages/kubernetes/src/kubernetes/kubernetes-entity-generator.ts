@@ -1,6 +1,6 @@
 import { Compiler, Injector } from '@angular/core';
 import { Validators } from '@angular/forms';
-import moment from 'moment';
+import { formatDuration, intervalToDuration } from 'date-fns';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -628,11 +628,15 @@ export class KubeEntityCatalog {
       return '';
     }
 
-    if (!!status.CompletionTime) {
-      return moment.duration(moment(status.startTime).diff(moment())).humanize();
-    }
+    const startDate = new Date(status.startTime);
+    const endDate = status.CompletionTime ? new Date() : new Date(status.completionTime || '');
 
-    return moment.duration(moment(status.startTime).diff(moment(status.completionTime))).humanize();
+    const duration = intervalToDuration({
+      start: startDate,
+      end: endDate
+    });
+
+    return formatDuration(duration, { format: ['years', 'months', 'days', 'hours', 'minutes'] });
   }
 }
 

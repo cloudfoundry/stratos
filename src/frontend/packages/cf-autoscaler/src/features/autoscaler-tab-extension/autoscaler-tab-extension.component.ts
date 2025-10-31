@@ -344,7 +344,23 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
 
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(response => !!response.error && (!response.response || !response.response.noPolicy)),
+      filter(response => {
+        // Filter out expected errors (no policy, autoscaler unavailable)
+        if (!response.error) {
+          return false;
+        }
+        // Don't show error if policy simply doesn't exist (404 with noPolicy flag)
+        if (response.response?.noPolicy) {
+          return false;
+        }
+        // Don't show error if autoscaler is unavailable (expected when URL not configured)
+        const isAutoscalerUnavailable = response.message?.includes('Autoscaler not available') ||
+                                        response.message?.includes('Autoscaler plugin not available');
+        if (isAutoscalerUnavailable) {
+          return false;
+        }
+        return true;
+      }),
       map(response => response.message),
       distinctUntilChanged(),
     ).subscribe(errorMessage => {
@@ -359,7 +375,15 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     }
     this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
       map(pagination => getCurrentPageRequestInfo(pagination)),
-      filter(request => !!request.error),
+      filter(request => {
+        // Filter out expected autoscaler unavailability errors
+        if (!request.error) {
+          return false;
+        }
+        const isAutoscalerUnavailable = request.message?.includes('Autoscaler not available') ||
+                                        request.message?.includes('Autoscaler plugin not available');
+        return !isAutoscalerUnavailable;
+      }),
       map(request => request.message),
       distinctUntilChanged(),
     ).subscribe(errorMessage => {

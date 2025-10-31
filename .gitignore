@@ -158,3 +158,4 @@ website/versions-repo
 
 src/jetstream/jetstream.exe
 .claude
+build/src/

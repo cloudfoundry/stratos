@@ -7,10 +7,17 @@ export class LocalPaginationHelpers {
    * Looks in all the places necessary to see if the current pagination section is maxed.
    */
   static isPaginationMaxed(pagination: PaginationEntityState) {
+    if (!pagination) {
+      console.warn('LocalPaginationHelpers.isPaginationMaxed - pagination is undefined or null');
+      return false;
+    }
     if (pagination.forcedLocalPage) {
-      const forcedPage = pagination.pageRequests[pagination.forcedLocalPage];
+      const forcedPage = pagination.pageRequests?.[pagination.forcedLocalPage];
       // SI Wall, 2 CFs, Select SI only, Filter to Org, Switch CFs, pagination has been reset so no page
       return forcedPage && forcedPage.maxed;
+    }
+    if (!pagination.pageRequests) {
+      return false;
     }
     return !!Object.values(pagination.pageRequests).find(request => request.maxed);
   }

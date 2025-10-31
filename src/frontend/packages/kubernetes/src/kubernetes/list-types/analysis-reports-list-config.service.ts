@@ -9,7 +9,7 @@ import {
   IGlobalListAction,
   IMultiListAction,
 } from 'frontend/packages/core/src/shared/components/list/list.component.types';
-import moment from 'moment';
+import { formatDistance } from 'date-fns';
 import { of } from 'rxjs';
 
 import { ListView } from '../../../../store/src/actions/list.actions';
@@ -63,7 +63,7 @@ export class AnalysisReportsListConfig implements IListConfig<AnalysisReport> {
       headerCell: () => 'Age',
       cellDefinition: {
         getValue: (row: AnalysisReport) => {
-          return moment(row.created).fromNow(true);
+          return formatDistance(new Date(row.created), new Date());
         }
       },
       sort: {

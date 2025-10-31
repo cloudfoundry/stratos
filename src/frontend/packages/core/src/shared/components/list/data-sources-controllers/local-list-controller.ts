@@ -1,7 +1,7 @@
 import { defaultClientPaginationPageSize, LocalPaginationHelpers, PaginationEntityState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
-import { distinctUntilChanged, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { DataFunction } from './list-data-source';
 import { splitCurrentPage } from './local-list-controller.helpers';
@@ -105,7 +105,7 @@ export class LocalListController<T = any> {
     entities$: Observable<T[]>,
     currentPageNumber$: Observable<number>,
     currentPageSizeObservable$: Observable<number>
-  ) {
+  ): Observable<T[]> {
     return combineLatest(
       entities$,
       currentPageSizeObservable$.pipe(tap(() => {
@@ -123,8 +123,7 @@ export class LocalListController<T = any> {
         this.pageSplitCache = data.entities;
         return (data.entities[data.index] || []) as T[];
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
       tag('local-list')
     );
   }

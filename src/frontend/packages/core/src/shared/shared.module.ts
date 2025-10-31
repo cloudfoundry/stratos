@@ -53,9 +53,8 @@ import {
   TableCellSidePanelComponent,
 } from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
-import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
+import { listTableComponents } from './components/list/list-table/table-components';
 import { TableComponent } from './components/list/list-table/table.component';
-import { listTableComponents } from './components/list/list-table/table.types';
 import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
@@ -419,9 +418,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomDatepickerComponent,
     CustomDatepickerInputComponent,
     CustomDatepickerToggleComponent,
-
-    // === Table Cell Components (all standalone) ===
-    ...listTableCells,
   ],
   providers: [
     ListConfig,

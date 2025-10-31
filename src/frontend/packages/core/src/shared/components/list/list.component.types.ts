@@ -1,6 +1,5 @@
 import { Type, WritableSignal } from '@angular/core';
 import { ActionState, defaultClientPaginationPageSize, ListView } from '@stratosui/store';
-import moment from 'moment';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
@@ -114,7 +113,7 @@ export interface IListConfig<T> {
   /**
    * Custom time window validation for metrics range selector
    */
-  customTimeValidation?: (start: moment.Moment, end: moment.Moment) => string;
+  customTimeValidation?: (start: Date, end: Date) => string;
   /**
    * Custom time polling interval. Falsy for disabled.
    */

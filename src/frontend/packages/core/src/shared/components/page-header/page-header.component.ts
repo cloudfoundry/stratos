@@ -15,7 +15,7 @@ import {
   selectIsMobile,
   UserProfileInfo,
 } from '@stratosui/store';
-import moment from 'moment';
+import { getTime } from 'date-fns';
 import { combineLatest, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -119,7 +119,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
         this.pFavorite = favorite;
         this.store.dispatch(new AddRecentlyVisitedEntityAction({
           guid: favorite.guid,
-          date: moment().valueOf(),
+          date: getTime(new Date()),
           entityType: favorite.entityType,
           endpointType: favorite.endpointType,
           entityId: favorite.entityId,

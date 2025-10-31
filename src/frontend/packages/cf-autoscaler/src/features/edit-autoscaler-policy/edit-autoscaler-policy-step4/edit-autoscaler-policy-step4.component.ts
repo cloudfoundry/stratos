@@ -3,7 +3,8 @@ import { AbstractControl, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGr
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import moment from 'moment-timezone';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { of as observableOf } from 'rxjs';
 import { filter, first, map, pairwise } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -205,8 +206,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone)
-        .format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(format(toZonedTime(new Date(), this.currentPolicy.schedules.timezone),
+        AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleStartDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(control.value, this.editSpecificDateForm.get('end_date_time').value)) {
@@ -238,8 +239,8 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       };
       const lastValid = this.editMutualValidation.datetime;
       this.editMutualValidation.datetime = true;
-      if (dateTimeIsSameOrAfter(moment().tz(this.currentPolicy.schedules.timezone).
-        format(AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
+      if (dateTimeIsSameOrAfter(format(toZonedTime(new Date(), this.currentPolicy.schedules.timezone),
+        AutoscalerConstants.MomentFormateDateTimeT), control.value)) {
         errors.alertInvalidPolicyScheduleEndDateTimeBeforeNow = { value: control.value };
       }
       if (dateTimeIsSameOrAfter(this.editSpecificDateForm.get('start_date_time').value, control.value)) {

@@ -1,4 +1,4 @@
 declare module 'intersect' {
-  function intersect<T>(arr1: T[], arr2: T[]): T[];
+  function intersect<T>(...arrays: T[][]): T[];
   export default intersect;
 }

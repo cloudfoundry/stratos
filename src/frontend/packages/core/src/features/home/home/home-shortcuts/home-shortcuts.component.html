@@ -2,7 +2,7 @@
   <div>
     <div class="home-shortcut__title">Shortcuts</div>
     <div class="home-shortcut__items">
-      @for (shortcut of shortcuts; track shortcut) {
+      @for (shortcut of shortcuts; track shortcut.title) {
         <div class="home-shortcut__item">
           <div class="home-shortcut__icon"><app-custom-icon [routerLink]="shortcut.link" [fontSet]="shortcut.iconFont">{{ shortcut.icon }}</app-custom-icon></div>
           <div><a [routerLink]="shortcut.link">{{ shortcut.title }}</a></div>

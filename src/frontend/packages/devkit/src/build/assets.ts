@@ -1,4 +1,4 @@
-import CopyPlugin = require('copy-webpack-plugin');
+import CopyPlugin from 'copy-webpack-plugin';
 
 import { StratosConfig } from '../lib/stratos.config';
 

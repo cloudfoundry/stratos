@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { ApplicationRef, inject, Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
@@ -16,8 +16,8 @@ import {
   EndpointModel,
   EndpointState,
 } from '@stratosui/store';
-import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
-import { first, map, skipWhile, withLatestFrom } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { catchError, filter, first, map, skipWhile, switchMap, take, tap, timeout, withLatestFrom } from 'rxjs/operators';
 
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
@@ -39,9 +39,27 @@ export class EndpointsService {
     if (!endpoint) {
       return '';
     }
-    const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-    const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
-    if (catalogEntity) {
+    try {
+      // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
+      const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+      if (!catalogEntity) {
+        console.warn(
+          `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+          `Endpoint type may not be registered yet. Returning empty link.`
+        );
+        return '';
+      }
+
+      // Defensive: Verify entity has required builders before accessing
+      if (!catalogEntity.builders?.entityBuilder) {
+        console.warn(
+          `Endpoint catalog entity found but missing entityBuilder for type: ${endpoint.cnsi_type}. ` +
+          `This may indicate an incomplete entity registration.`
+        );
+        return '';
+      }
+
+      const metadata = catalogEntity.builders.entityBuilder.getMetadata(endpoint);
       const fav = new UserFavorite<IEndpointFavMetadata>(
         endpoint.guid,
         endpoint.cnsi_type,
@@ -50,36 +68,131 @@ export class EndpointsService {
         metadata
       );
       return fav.getLink();
+    } catch (error) {
+      console.warn(
+        `Error getting link for endpoint ${endpoint.cnsi_type}: ${error.message}. ` +
+        `This is non-fatal but may indicate a catalog initialization issue.`
+      );
+      return '';
     }
-    return '';
   }
 
   constructor(
     private store: Store<EndpointOnlyAppState>,
     private userService: UserService,
     private endpointHealthChecks: EndpointHealthChecks,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private appRef: ApplicationRef
   ) {
+    // TIMING FIX: Defer entity catalog validation until application is stable
+    // This ensures all feature modules (CloudFoundryPackageModule, KubernetesSetupModule, etc.)
+    // have completed their entity registration before validation runs.
+    // This eliminates "Some common endpoint types not registered" warnings during initialization.
+    this.appRef.isStable.pipe(
+      filter(stable => stable),
+      take(1)
+    ).subscribe(() => {
+      this.validateEntityCatalog();
+    });
+
     this.endpoints$ = store.select(endpointEntitiesSelector);
-    this.haveRegistered$ = this.endpoints$.pipe(map(endpoints => !!Object.keys(endpoints).length));
-    this.connectedEndpoints$ = this.endpoints$.pipe(map(endpoints =>
-      Object.values(endpoints).filter(endpoint => {
-        const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-        if (!epType || !epType.definition) {
-          return false;
-        }
-        const epEntity = epType.definition;
-        return epEntity.unConnectable || endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking';
+    this.haveRegistered$ = this.endpoints$.pipe(
+      map(endpoints => !!Object.keys(endpoints).length),
+      catchError((error): Observable<boolean> => {
+        console.error('Error checking registered endpoints:', error);
+        return of(false);
       })
-    ));
-    this.haveConnected$ = this.connectedEndpoints$.pipe(map(endpoints => endpoints.length > 0));
+    );
+    // Entity registration is synchronous during module construction, so no need to wait for app stability
+    // Navigation will wait for appReady$ in LoginPageComponent, ensuring guards resolve instantly
+    this.connectedEndpoints$ = this.endpoints$.pipe(
+      map(endpoints =>
+        Object.values(endpoints).filter(endpoint => {
+          try {
+            // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
+            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+            if (!epType) {
+              console.warn(
+                `Endpoint catalog entity not found for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
+                `This endpoint will be excluded from connected endpoints list until its type is registered. ` +
+                `Run window.__STRATOS_ENTITY_CATALOG__.getDiagnostics() for details.`
+              );
+              return false;
+            }
+
+            // Defensive: Verify definition exists before accessing properties
+            if (!epType.definition) {
+              console.warn(
+                `Endpoint definition missing for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
+                `This may indicate an incomplete entity registration.`
+              );
+              return false;
+            }
+
+            const epEntity = epType.definition;
+            return epEntity.unConnectable || endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking';
+          } catch (error) {
+            console.warn(
+              `Error filtering endpoint ${endpoint.guid} (${endpoint.cnsi_type}): ${error.message}. ` +
+              `Excluding from connected endpoints.`
+            );
+            return false;
+          }
+        })
+      ),
+      catchError((error): Observable<EndpointModel[]> => {
+        console.error('Error getting connected endpoints:', error);
+        return of([]);
+      })
+    );
+    this.haveConnected$ = this.connectedEndpoints$.pipe(
+      map(endpoints => endpoints.length > 0),
+      catchError((error): Observable<boolean> => {
+        console.error('Error checking connected endpoints:', error);
+        return of(false);
+      })
+    );
 
     this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
       map((auth) => auth.sessionData &&
         auth.sessionData['plugin-config'] &&
         auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
-      )
+      ),
+      catchError((error): Observable<boolean> => {
+        console.error('Error checking persistence features:', error);
+        return of(false);
+      })
     );
+  }
+
+  /**
+   * Validate entity catalog state at startup
+   */
+  private validateEntityCatalog(): void {
+    try {
+      const validation = entityCatalog.validateCatalog();
+
+      if (!validation.valid) {
+        console.error('Entity Catalog Validation Failed:', validation.errors);
+      }
+
+      if (validation.warnings.length > 0) {
+        console.warn('Entity Catalog Validation Warnings:', validation.warnings);
+      }
+
+      // Log summary in development mode
+      if (!(window as any).production) {
+        const diagnostics = entityCatalog.getDiagnostics();
+        console.log('[EndpointsService] Entity Catalog initialized:', {
+          endpoints: diagnostics.summary.totalEndpoints,
+          entities: diagnostics.summary.totalEntities,
+          registeredEndpoints: diagnostics.registeredEndpoints,
+          valid: validation.valid
+        });
+      }
+    } catch (error) {
+      console.error('Error validating entity catalog:', error);
+    }
   }
 
   public registerHealthCheck(healthCheck: EndpointHealthCheck) {
@@ -91,7 +204,13 @@ export class EndpointsService {
   }
 
   public checkAllEndpoints() {
-    this.endpoints$.pipe(first()).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
+    this.endpoints$.pipe(
+      first(),
+      catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
+        console.error('Error checking all endpoints:', error);
+        return of({} as IRequestEntityTypeState<EndpointModel>);
+      })
+    ).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
   }
 
 
@@ -101,13 +220,21 @@ export class EndpointsService {
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
     return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length === 0)
+      map(eps => eps.length === 0),
+      catchError((error): Observable<boolean> => {
+        console.error(`Error checking for endpoints of type ${type}:`, error);
+        return of(true);
+      })
     );
   }
 
   hasConnectedEndpointType(type: string): Observable<boolean> {
     return this.connectedEndpointsOfTypes(type).pipe(
-      map(eps => eps.length > 0)
+      map(eps => eps.length > 0),
+      catchError((error): Observable<boolean> => {
+        console.error(`Error checking for endpoints of type ${type}:`, error);
+        return of(false);
+      })
     );
   }
 
@@ -117,11 +244,41 @@ export class EndpointsService {
         return Object.values(ep)
           .filter(endpoint => {
             if (endpoint.cnsi_type !== type) {
-              return;
+              return false;
             }
-            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
-            return epType.unConnectable || endpoint.connectionStatus === 'connected';
+            try {
+              // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
+              const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
+              if (!epType) {
+                console.warn(
+                  `Endpoint catalog entity not found for type: ${endpoint.cnsi_type}${endpoint.sub_type ? ', subtype: ' + endpoint.sub_type : ''}. ` +
+                  `Excluding from results until type is registered.`
+                );
+                return false;
+              }
+
+              // Defensive: Verify definition exists before accessing properties
+              if (!epType.definition) {
+                console.warn(
+                  `Endpoint definition missing for type: ${endpoint.cnsi_type}. ` +
+                  `This may indicate an incomplete entity registration.`
+                );
+                return false;
+              }
+
+              return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
+            } catch (error) {
+              console.warn(
+                `Error checking endpoint type ${endpoint.cnsi_type}: ${error.message}. ` +
+                `Excluding from results.`
+              );
+              return false;
+            }
           });
+      }),
+      catchError((error): Observable<EndpointModel[]> => {
+        console.error(`Error getting connected endpoints of type ${type}:`, error);
+        return of([]);
       })
     );
   }
@@ -138,12 +295,13 @@ export const endpointsGuard: CanActivateFn = (
   const sessionService = inject(SessionService);
 
   // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-  return observableCombineLatest(
+  const guardLogic$ = observableCombineLatest(
     store.select('auth'),
     store.select(endpointStatusSelector)
   ).pipe(
-    skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
-      return !state.loggedIn || endpointState.loading;
+    filter(([state, endpointState]: [AuthState, EndpointState]) => {
+      // Only proceed when logged in and endpoints are done loading
+      return state.loggedIn && !endpointState.loading;
     }),
     withLatestFrom(
       endpointsService.haveRegistered$,
@@ -156,6 +314,7 @@ export const endpointsGuard: CanActivateFn = (
     map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
       : [[AuthState, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
       const [authState] = state;
+
       if (authState.sessionData.valid) {
         // Redirect to endpoints if there's no connected endpoints
         let redirect: string;
@@ -176,5 +335,15 @@ export const endpointsGuard: CanActivateFn = (
       }
 
       return false;
-    }));
+    }),
+    first(), // Complete the observable after first emission to prevent router navigation hang
+    catchError(error => {
+      console.error('Error in endpoints guard:', error);
+      return of(true); // Allow navigation on error to prevent blocking
+    })
+  );
+
+  // No timeout needed - navigation waits for appReady$ in LoginPageComponent,
+  // ensuring guards resolve instantly with proper sequential initialization
+  return guardLogic$;
 };

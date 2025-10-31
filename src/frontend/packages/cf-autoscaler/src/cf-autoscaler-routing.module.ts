@@ -17,7 +17,7 @@ const customRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(customRoutes),
+    RouterModule.forChild(customRoutes),
   ],
 })
 export class CfAutoscalerRoutingModule { }

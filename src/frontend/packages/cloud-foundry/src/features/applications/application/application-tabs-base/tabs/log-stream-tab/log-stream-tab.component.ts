@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer, throwError } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, debounceTime, first, map, share, startWith, switchMap, tap, retry, retryWhen, delayWhen, take } from 'rxjs/operators';
@@ -241,7 +241,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
       // CF timestamps are in nanoseconds
       const msStamp = Math.round(messageObj.timestamp / 1000000);
-      const timeStamp = moment(msStamp).format('HH:mm:ss.SSS');
+      const timeStamp = format(new Date(msStamp), 'HH:mm:ss.SSS');
 
       if (/APP/.test(messageObj.source_type)) {
         sourceColour = 'green';

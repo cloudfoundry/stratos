@@ -9,18 +9,19 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "esnext",
+    "module": "ES2022",
     "useDefineForClassFields": false,
     "noImplicitThis": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
+    "skipLibCheck": true,
     "types": [
       "jasmine",
       "jasminewd2",
@@ -31,7 +32,7 @@
       "./frontend/@types"
     ],
     "lib": [
-      "es2019",
+      "ES2022",
       "dom"
     ],
     "preserveSymlinks": true,

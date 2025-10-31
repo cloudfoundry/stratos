@@ -334,8 +334,17 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
     entity: StratosEndpointExtensionDefinition | IStratosEndpointDefinition,
     getLink?: (favorite: UserFavorite<IEndpointFavMetadata>) => string
   ) {
+    // For endpoint entities, preserve the endpoint type in the 'type' property
+    // This is used by the entity catalog to identify the endpoint type (e.g., 'cf', 'metrics')
+    // The schema's entityType will be 'endpoint' for all endpoint entities
+    //
+    // CRITICAL: Must exclude 'endpoint' property when spreading to ensure isEndpoint=true
+    // In StratosBaseCatalogEntity constructor, isEndpoint = !baseEntity.endpoint (line 76)
+    // If 'endpoint' property exists, the entity will be registered in the entities map
+    // instead of the endpoints map, breaking endpoint entity lookups
+    const { endpoint: _, ...entityWithoutEndpoint } = entity as any;
     const fullEntity: IStratosEndpointDefinition = {
-      ...entity,
+      ...entityWithoutEndpoint,
       schema: {
         default: stratosEntityFactory(endpointEntityType)
       }

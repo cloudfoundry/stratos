@@ -1,5 +1,5 @@
 import intersect from 'intersect';
-import moment from 'moment-timezone';
+import { isAfter, isEqual, parse } from 'date-fns';
 
 import { AppRecurringSchedule, AppScalingRule, AppSpecificDate } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants } from './autoscaler-util';
@@ -16,17 +16,21 @@ export function numberWithFractionOrExceedRange(value: number | string | null | 
 }
 
 export function timeIsSameOrAfter(startTime: string, endTime: string) {
-  const startTimeMoment = moment('2000-01-01T' + startTime, AutoscalerConstants.MomentFormateDateTimeT);
-  const endTimeMoment = moment('2000-01-01T' + endTime, AutoscalerConstants.MomentFormateDateTimeT);
-  return startTimeMoment.isSameOrAfter(endTimeMoment);
+  const startTimeDate = parse('2000-01-01T' + startTime, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endTimeDate = parse('2000-01-01T' + endTime, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  return isAfter(startTimeDate, endTimeDate) || isEqual(startTimeDate, endTimeDate);
 }
 
 export function dateIsAfter(startDate: string, endDate: string) {
-  return moment(startDate, AutoscalerConstants.MomentFormateDate).isAfter(moment(endDate, AutoscalerConstants.MomentFormateDate));
+  const startDateParsed = parse(startDate, AutoscalerConstants.MomentFormateDate, new Date());
+  const endDateParsed = parse(endDate, AutoscalerConstants.MomentFormateDate, new Date());
+  return isAfter(startDateParsed, endDateParsed);
 }
 
 export function dateTimeIsSameOrAfter(startDateTime: string, endDateTime: string) {
-  return moment(startDateTime).isSameOrAfter(moment(endDateTime));
+  const start = new Date(startDateTime);
+  const end = new Date(endDateTime);
+  return isAfter(start, end) || isEqual(start, end);
 }
 
 export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRecurringSchedule) {
@@ -60,13 +64,13 @@ export function recurringSchedulesOverlapping(
 }
 
 export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index: number, inputSpecificDates: AppSpecificDate[]): boolean {
-  const start = moment(newSchedule.start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
-  const end = moment(newSchedule.end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
+  const start = parse(newSchedule.start_date_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const end = parse(newSchedule.end_date_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
   if (inputSpecificDates) {
     const dateRangeList = inputSpecificDates.map((value, i) => {
       if (i !== index) {
-        const starti = moment(value.start_date_time, AutoscalerConstants.MomentFormateDateTimeT);
-        const endi = moment(value.end_date_time, AutoscalerConstants.MomentFormateDateTimeT);
+        const starti = parse(value.start_date_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+        const endi = parse(value.end_date_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
         return {
           start: starti,
           end: endi
@@ -87,28 +91,28 @@ export function specificDateRangeOverlapping(newSchedule: AppSpecificDate, index
 }
 
 function timeOverlaps(timeI: AppRecurringSchedule, tiemJ: AppRecurringSchedule): boolean {
-  const startDateTimeI = moment('1970-01-01T' + timeI.start_time, AutoscalerConstants.MomentFormateDateTimeT);
-  const endDateTimeI = moment('1970-01-01T' + timeI.end_time, AutoscalerConstants.MomentFormateDateTimeT);
-  const startDateTimeJ = moment('1970-01-01T' + tiemJ.start_time, AutoscalerConstants.MomentFormateDateTimeT);
-  const endDateTimeJ = moment('1970-01-01T' + tiemJ.end_time, AutoscalerConstants.MomentFormateDateTimeT);
+  const startDateTimeI = parse('1970-01-01T' + timeI.start_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeI = parse('1970-01-01T' + timeI.end_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeJ = parse('1970-01-01T' + tiemJ.start_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeJ = parse('1970-01-01T' + tiemJ.end_time, AutoscalerConstants.MomentFormateDateTimeT, new Date());
   return dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
 }
 
 function dateOverlaps(dateI: AppRecurringSchedule, dateJ: AppRecurringSchedule): boolean {
-  const startDateTimeI = moment(dateI.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT);
-  const endDateTimeI = moment(dateI.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT);
-  const startDateTimeJ = moment(dateJ.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT);
-  const endDateTimeJ = moment(dateJ.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT);
+  const startDateTimeI = parse(dateI.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeI = parse(dateI.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const startDateTimeJ = parse(dateJ.start_date + 'T00:00', AutoscalerConstants.MomentFormateDateTimeT, new Date());
+  const endDateTimeJ = parse(dateJ.end_date + 'T23:59', AutoscalerConstants.MomentFormateDateTimeT, new Date());
   return dateTimeOverlaps(startDateTimeI, endDateTimeI, startDateTimeJ, endDateTimeJ);
 }
 
 function dateTimeOverlaps(
-  startDateTimeI: moment.Moment, endDateTimeI: moment.Moment,
-  startDateTimeJ: moment.Moment, endDateTimeJ: moment.Moment): boolean {
-  if (startDateTimeJ.isAfter(startDateTimeI)) {
-    return endDateTimeI.isAfter(startDateTimeJ);
+  startDateTimeI: Date, endDateTimeI: Date,
+  startDateTimeJ: Date, endDateTimeJ: Date): boolean {
+  if (isAfter(startDateTimeJ, startDateTimeI)) {
+    return isAfter(endDateTimeI, startDateTimeJ);
   } else {
-    return endDateTimeJ.isAfter(startDateTimeI);
+    return isAfter(endDateTimeJ, startDateTimeI);
   }
 }
 

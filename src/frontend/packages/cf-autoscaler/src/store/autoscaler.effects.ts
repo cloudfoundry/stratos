@@ -113,9 +113,11 @@ export class AutoscalerEffects {
             ];
           }),
           catchError(err => {
-            // 404 is expected when autoscaler plugin is not installed - suppress error message
-            const errorMessage = err.status === 404
-              ? 'Autoscaler plugin not available'
+            // 404/503 are expected when autoscaler is not configured or unavailable
+            // Don't show error message to user, just mark as unavailable
+            const isExpectedError = err.status === 404 || err.status === 503;
+            const errorMessage = isExpectedError
+              ? 'Autoscaler not available for this endpoint'
               : createAutoscalerErrorMessage('fetch autoscaler info', err);
             return [
               new WrapperRequestActionFailed(errorMessage, action, actionType)
@@ -144,9 +146,16 @@ export class AutoscalerEffects {
               new WrapperRequestActionSuccess(mappedData, action, actionType)
             ];
           }),
-          catchError(err => [
-            new WrapperRequestActionFailed(createAutoscalerErrorMessage('fetch health info', err), action, actionType)
-          ]));
+          catchError(err => {
+            // Gracefully handle autoscaler unavailability
+            const isUnavailable = err.status === 404 || err.status === 503;
+            const errorMessage = isUnavailable
+              ? 'Autoscaler health check unavailable'
+              : createAutoscalerErrorMessage('fetch health info', err);
+            return [
+              new WrapperRequestActionFailed(errorMessage, action, actionType)
+            ];
+          }));
     })));
 
   

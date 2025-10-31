@@ -3,15 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
-import { MomentModule } from 'ngx-moment';
 import { EntityMonitorFactory, MetricQueryType, IMetrics, MetricsAction, EntityMonitor } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
-
-import moment from 'moment';
 
 @Component({
   selector: 'app-metrics-range-selector',
@@ -27,7 +24,6 @@ import moment from 'moment';
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    MomentModule,
     StartEndDateComponent
   ]
 })
@@ -100,7 +96,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   }
 
   @Input()
-  public validate: (start: moment.Moment, end: moment.Moment) => string;
+  public validate: (start: Date, end: Date) => string;
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;

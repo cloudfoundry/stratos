@@ -1,10 +1,10 @@
 
 import { AfterContentInit, Component, ContentChildren, OnDestroy, QueryList } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '@stratosui/core';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
 import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';
-import { MomentModule } from 'ngx-moment';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
@@ -20,11 +20,11 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   ],
   standalone: true,
   imports: [
+    CommonModule,
     CardWrapperComponent,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
-    MomentModule,
     StartEndDateComponent
 ]
 })

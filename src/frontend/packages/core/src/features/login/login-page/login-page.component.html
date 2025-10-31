@@ -41,9 +41,9 @@
     </div>
 
     <div class="login-body">
-      <div class="login-form-outer" [ngClass]="{'login-sso': ssoLogin}">
+      <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-          @if (!ssoLogin) {
+          @if (!(ssoLogin$ | async)) {
             <div class="space-y-1">
               <label for="username" class="sr-only">Username</label>
               <input
@@ -58,7 +58,7 @@
             </div>
           }
 
-          @if (!ssoLogin) {
+          @if (!(ssoLogin$ | async)) {
             <div class="space-y-1 relative">
               <label for="password" class="sr-only">Password</label>
               <input
@@ -76,11 +76,11 @@
             </div>
           }
 
-          @if (!loggedIn) {
+          @if (showLoginButton$ | async) {
             <button
               class="btn btn-primary w-full py-3"
               type="submit"
-              [disabled]="!ssoLogin && !loginForm.valid"
+              [disabled]="!(ssoLogin$ | async) && !loginForm.valid"
               >
               Sign In
             </button>
@@ -96,16 +96,16 @@
     </div>
   </div>
 
-  <div
-    id="login-error-message"
-    class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300"
-    [ngClass]="{
-      'translate-y-0 opacity-100': !!message,
-      '-translate-y-full opacity-0': !message,
-      'alert alert-danger': error,
-      'alert alert-info': !error
-    }"
-    >
-    {{ message }}
-  </div>
+  @if (message$ | async; as displayMessage) {
+    <div
+      id="login-error-message"
+      class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 alert"
+      [ngClass]="{
+        'translate-y-0 opacity-100': !!displayMessage,
+        '-translate-y-full opacity-0': !displayMessage
+      }"
+      >
+      {{ displayMessage }}
+    </div>
+  }
 </app-intro-screen>

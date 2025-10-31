@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { format } from 'date-fns';
 
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { AnsiColorizer } from '../../../../../../core/src/shared/components/log-viewer/ansi-colorizer';
@@ -80,7 +80,7 @@ export class CloudFoundryFirehoseFormatter {
   private buildTimestampString(cfEvent: FireHoseItem) {
     // CF time stamps are in nanoseconds
     const msStamp = Math.round(cfEvent.timestamp / 1000000);
-    return moment(msStamp).format('HH:mm:ss.SSS');
+    return format(new Date(msStamp), 'HH:mm:ss.SSS');
   }
 
   private emphasizeName(dottedString: string, colour: string): string {

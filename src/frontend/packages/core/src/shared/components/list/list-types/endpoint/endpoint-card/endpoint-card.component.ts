@@ -114,7 +114,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
-    if (this.endpointCatalogEntity) {
+    if (this.endpointCatalogEntity?.definition) {
       this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?
         EndpointsService.getLinkForEndpoint(row) : null;
       this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
@@ -201,7 +201,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   ngOnInit() {
     this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.row);
-    const e = this.endpointCatalogEntity.definition;
+    const e = this.endpointCatalogEntity?.definition;
     this.hasDetails = !!e && !!e.listDetailsComponent;
     this.viewCreator$ = combineLatest([
       this.sessionService.userEndpointsEnabled(),
@@ -225,7 +225,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
   updateInnerComponent() {
-    if (!this.endpointDetails || !this.row) {
+    if (!this.endpointDetails || !this.row || !this.endpointCatalogEntity) {
       return;
     }
     const e = this.endpointCatalogEntity.definition;

@@ -31,13 +31,11 @@
         <div class="metrics-range-selector__selected-range-dates"
           >
           <div class="metrics-range-selector__selected-range-date">{{ rangeSelectorManager.committedStartEnd[0] |
-            amDateFormat:'Do MMM YYYY,
-            HH:mm' }}
+            date:'do MMM yyyy, HH:mm' }}
           </div>
           <div class="metrics-range-selector__selected-range-to">to</div>
           <div class="metrics-range-selector__selected-range-date"> {{ rangeSelectorManager.committedStartEnd[1] |
-            amDateFormat:'Do MMM YYYY,
-            HH:mm' }}
+            date:'do MMM yyyy, HH:mm' }}
           </div>
         </div>
       } @else {

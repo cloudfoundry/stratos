@@ -36,7 +36,7 @@ class StratosBuilder {
 // TODO: tmp solution until webpack is updated to v5
 // This resolves the following error:
 // Error: error:0308010C:digital envelope routines::unsupported
-const crypto = require("crypto");
+import crypto from "crypto";
 const cryptoOrigCreateHash = crypto.createHash;
 crypto.createHash = (algorithm) =>
   cryptoOrigCreateHash(algorithm == "md4" ? "sha256" : algorithm);
@@ -50,4 +50,4 @@ const runBuilder = (config, options) => {
   return config;
 };
 
-module.exports = runBuilder;
+export default runBuilder;

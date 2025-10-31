@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import moment from 'moment-timezone';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 
@@ -17,7 +16,7 @@ export class EditAutoscalerPolicyService {
     instance_max_count: 10,
     scaling_rules: [],
     schedules: {
-      timezone: moment.tz.guess(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       recurring_schedule: [],
       specific_date: []
     }

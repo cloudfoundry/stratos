@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import { addDays, format, setHours, setMinutes } from 'date-fns';
 
 import {
   AppAutoscalerMetricDataPoint,
@@ -26,8 +26,8 @@ export class AutoscalerConstants {
   })();
 
   public static normalColor = 'rgba(90,167,0,0.6)';
-  public static MomentFormateDate = 'YYYY-MM-DD';
-  public static MomentFormateDateTimeT = 'YYYY-MM-DDTHH:mm';
+  public static MomentFormateDate = 'yyyy-MM-dd';
+  public static MomentFormateDateTimeT = "yyyy-MM-dd'T'HH:mm";
   public static MomentFormateTime = 'HH:mm';
   public static MomentFormateTimeS = 'HH:mm:ss';
 
@@ -58,8 +58,8 @@ export class AutoscalerConstants {
     initial_min_instance_count: 5
   };
   public static PolicyDefaultSpecificDate = {
-    start_date_time: moment().add(1, 'days').set('hour', 10).set('minute', 0).format(AutoscalerConstants.MomentFormateDateTimeT),
-    end_date_time: moment().add(1, 'days').set('hour', 18).set('minute', 0).format(AutoscalerConstants.MomentFormateDateTimeT),
+    start_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 10), 0), AutoscalerConstants.MomentFormateDateTimeT),
+    end_date_time: format(setMinutes(setHours(addDays(new Date(), 1), 18), 0), AutoscalerConstants.MomentFormateDateTimeT),
     instance_min_count: 1,
     instance_max_count: 10,
     initial_min_instance_count: 5

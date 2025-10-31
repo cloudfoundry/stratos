@@ -1,4 +1,3 @@
-
 import {
   Component,
   ComponentFactoryResolver,
@@ -11,56 +10,10 @@ import {
 } from '@angular/core';
 import { MultiActionListEntity } from '@stratosui/store';
 
-import { coreEndpointListDetailsComponents } from '../../../../../features/endpoints/endpoint-helpers';
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import {
-  TableCellEndpointAddressComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
-import {
-  TableCellEndpointDetailsComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
-import {
-  TableCellEndpointNameComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import {
-  TableCellEndpointStatusComponent,
-} from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
-import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
-import { TableCellBooleanIndicatorComponent } from '../table-cell-boolean-indicator/table-cell-boolean-indicator.component';
-import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
-import { TableCellExpanderComponent } from '../table-cell-expander/table-cell-expander.component';
-import { TableCellFavoriteComponent } from '../table-cell-favorite/table-cell-favorite.component';
-import { TableCellIconComponent } from '../table-cell-icon/table-cell-icon.component';
-import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
-import {
-  TableCellRequestMonitorIconComponent,
-} from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
-import { TableCellSidePanelComponent } from '../table-cell-side-panel/table-cell-side-panel.component';
-import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-
-export const listTableCells: Type<TableCellCustom<any>>[] = [
-  TableCellDefaultComponent,
-  TableHeaderSelectComponent,
-  TableCellSelectComponent,
-  TableCellEditComponent,
-  TableCellActionsComponent,
-  // TableCellEndpointStatusComponent, // Now standalone - should not be in declarations array
-  TableCellEndpointNameComponent,
-  TableCellBooleanIndicatorComponent,
-  TableCellRadioComponent,
-  TableCellRequestMonitorIconComponent,
-  TableCellFavoriteComponent,
-  TableCellEndpointDetailsComponent,
-  TableCellSidePanelComponent,
-  TableCellIconComponent,
-  TableCellExpanderComponent,
-  TableCellEndpointAddressComponent,
-  ...coreEndpointListDetailsComponents
-];
 
 @Component({
   selector: 'app-table-cell',

@@ -1,7 +1,12 @@
 {
-  "extends": "../../../tsconfig.spec.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../../../out-tsc"
+    "outDir": "../../../../out-tsc/spec",
+    "types": [
+      "jasmine",
+      "jasminewd2",
+      "karma"
+    ]
   },
   "files": ["src/test.ts", "src/polyfills.ts"],
   "include": ["**/*.spec.ts", "**/*.d.ts"]

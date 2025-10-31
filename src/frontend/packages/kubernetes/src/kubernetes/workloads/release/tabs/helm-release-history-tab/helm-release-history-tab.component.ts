@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import moment from 'moment';
+import { format } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -61,7 +61,7 @@ export class HelmReleaseHistoryTabComponent {
         headerCell: () => 'Updated',
         cellFlex: '3',
         cellDefinition: {
-          getValue: row => moment(row.last_deployed).format('LLL')
+          getValue: row => format(new Date(row.last_deployed), 'PPPppp')
         }
       },
       {

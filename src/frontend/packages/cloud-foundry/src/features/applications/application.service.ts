@@ -248,7 +248,7 @@ export class ApplicationService {
       refCount());
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
-      ev => !!(getCurrentPageRequestInfo(ev).busy && (ev.ids as { [key: number]: string })[ev.currentPage])
+      ev => !!(getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]?.length > 0)
     ), startWith(false), publishReplay(1), refCount());
 
     this.isFetchingStats$ = this.appStatsFetching$.pipe(map(

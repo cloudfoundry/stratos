@@ -1,7 +1,7 @@
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
-import moment from 'moment';
+import { isBefore, isAfter } from 'date-fns';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -73,11 +73,11 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
       return 'Unknown';
     }
     const sorted = entries.sort((a, b) => {
-      const aStarted = moment(a[1].startedAt);
-      const bStarted = moment(b[1].startedAt);
+      const aStarted = new Date(a[1].startedAt);
+      const bStarted = new Date(b[1].startedAt);
 
-      return aStarted.isBefore(bStarted) ? -1 :
-        aStarted.isAfter(bStarted) ? 1 : 0;
+      return isBefore(aStarted, bStarted) ? -1 :
+        isAfter(aStarted, bStarted) ? 1 : 0;
 
     });
     return this.containerStatusToString(sorted[0][0], sorted[0][1]);

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, Injector } from '@angular/core';
 import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import moment from 'moment';
+import { format } from 'date-fns';
 import { httpErrorResponseToSafeString, entityCatalog, stratosEntityCatalog, EndpointModel } from '@stratosui/store';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
@@ -159,7 +159,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       const link = document.createElement('a');
       link.href = downloadURL;
       // Time of client, not server
-      const dateTime = moment().format('YYYYMMDD-HHmmss');
+      const dateTime = format(new Date(), 'yyyyMMdd-HHmmss');
       link.download = `stratos_backup_${dateTime}.bk`;
       link.click();
 

@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 export type SortDirection = 'asc' | 'desc' | '';
 import { Store } from '@ngrx/store';
 import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
-
-import moment from 'moment';
+import { format } from 'date-fns';
 
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -56,7 +55,7 @@ export class ApiKeyListConfigService implements IListConfig<ApiKey> {
       columnId: ApiKeyListConfigService.lastUsedName,
       headerCell: (): string => 'Last Used',
       cellDefinition: {
-        getValue: (row: ApiKey): string | null => row.last_used ? moment(row.last_used).format('LLL') : null
+        getValue: (row: ApiKey): string | null => row.last_used ? format(new Date(row.last_used), 'PPPp') : null
       },
       sort: {
         type: 'sort',

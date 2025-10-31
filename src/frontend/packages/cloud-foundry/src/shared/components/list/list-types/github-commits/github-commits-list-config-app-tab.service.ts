@@ -11,7 +11,7 @@ import {
   GitSCMService,
   GitSCMType,
 } from '@stratosui/git';
-import moment from 'moment';
+import { getUnixTime } from 'date-fns';
 import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map } from 'rxjs/operators';
 
@@ -88,7 +88,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
           // The github url will show 'no change' if the compare to commit is earlier in the tree than the deployed commit. We could swap
           // these around for those cases... however the diff +/- is then incorrect. So until we have a better way of doing this disable
           // the button instead
-          return this.deployedTime < moment(commit.commit.author.date).unix();
+          return this.deployedTime < getUnixTime(new Date(commit.commit.author.date));
         }
         return false;
       }));
@@ -159,7 +159,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       first(),
     ).subscribe(deployedCommit => {
       this.deployedCommit = deployedCommit;
-      this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
+      this.deployedTime = getUnixTime(new Date(this.deployedCommit.commit.author.date));
     });
   }
 

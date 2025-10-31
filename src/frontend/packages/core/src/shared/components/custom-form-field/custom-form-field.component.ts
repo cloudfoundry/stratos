@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
@@ -10,7 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
   standalone: true,
   imports: []
 })
-export class CustomFormFieldComponent implements AfterContentInit, OnDestroy {
+export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit, OnDestroy {
   @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
   @Input() floatLabel: 'always' | 'never' | 'auto' = 'auto';
@@ -28,6 +28,7 @@ export class CustomFormFieldComponent implements AfterContentInit, OnDestroy {
   public inputId = '';
 
   private destroy$ = new Subject<void>();
+  private isInitialized = false;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -81,12 +82,17 @@ export class CustomFormFieldComponent implements AfterContentInit, OnDestroy {
       }
     }
 
-    // Check for errors on init
-    setTimeout(() => {
+    this.isInitialized = true;
+  }
+
+  ngAfterViewInit() {
+    // Perform initial error check and ARIA update after view is fully initialized
+    // This ensures all DOM elements and form controls are ready
+    if (this.isInitialized) {
       this.updateErrorMessage();
       this.updateAriaAttributes();
       this.cdr.detectChanges();
-    });
+    }
   }
 
   ngOnDestroy() {

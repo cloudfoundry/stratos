@@ -1,8 +1,9 @@
 import {
   StratosBaseCatalogEntity,
+  StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
+import { IStratosEndpointDefinition, StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { APIResource } from '../../../store/src/types/api.types';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
@@ -20,17 +21,24 @@ import {
 } from './autoscaler-entity-factory';
 
 export function generateASEntities(): StratosBaseCatalogEntity[] {
-  const endpointDefinition = {
+  const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: AUTOSCALER_ENDPOINT_TYPE,
-    label: 'Cloud Foundry',
-    labelPlural: 'Cloud Foundry',
+    label: 'Cloud Foundry Autoscaler',
+    labelPlural: 'Cloud Foundry Autoscalers',
     icon: 'cloud_foundry',
     iconFont: 'stratos-icons',
-    logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
-    authTypes: [] as any[],
-    schema: undefined as any
+    // No logoUrl for virtual endpoints - they don't appear in endpoint listings
+    // and don't need image-based branding. Use icon/iconFont instead.
+    logoUrl: null,
+    authTypes: [],
+    // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
+    // as it's a feature running on CF endpoints, not a separate connectable endpoint
+    unConnectable: true,
+    listDetailsComponent: null as any,
+    renderPriority: 0,
   };
   return [
+    generateAutoscalerEndpointEntity(endpointDefinition),
     generatePolicyEntity(endpointDefinition),
     generateInfoEntity(endpointDefinition),
     generatePolicyTriggerEntity(endpointDefinition),
@@ -42,7 +50,21 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
   ];
 }
 
-function generatePolicyEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateAutoscalerEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const endpointEntity = new StratosCatalogEndpointEntity(endpointDefinition);
+  // Debug: Log endpoint entity creation
+  if (!(window as any).production) {
+    console.log('[AutoscalerEntityGenerator] Created endpoint entity:', {
+      type: endpointEntity.definition.type,
+      isEndpoint: endpointEntity.isEndpoint,
+      entityKey: endpointEntity.entityKey,
+      hasEndpointProperty: !!(endpointEntity.definition as any).endpoint
+    });
+  }
+  return endpointEntity;
+}
+
+function generatePolicyEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerPolicyEntityType,
     schema: autoscalerEntityFactory(appAutoscalerPolicyEntityType),
@@ -51,7 +73,7 @@ function generatePolicyEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
 }
 
-function generateCredentialEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateCredentialEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerCredentialEntityType,
     schema: autoscalerEntityFactory(appAutoscalerCredentialEntityType),
@@ -60,7 +82,7 @@ function generateCredentialEntity(endpointDefinition: IStratosEndpointDefinition
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
 }
 
-function generateInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateInfoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerInfoEntityType,
     schema: autoscalerEntityFactory(appAutoscalerInfoEntityType),
@@ -69,7 +91,7 @@ function generateInfoEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppScalingTrigger>>(definition);
 }
 
-function generatePolicyTriggerEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generatePolicyTriggerEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerPolicyTriggerEntityType,
     schema: autoscalerEntityFactory(appAutoscalerPolicyTriggerEntityType),
@@ -78,7 +100,7 @@ function generatePolicyTriggerEntity(endpointDefinition: IStratosEndpointDefinit
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppScalingTrigger>>(definition);
 }
 
-function generateHealthEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateHealthEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerHealthEntityType,
     schema: autoscalerEntityFactory(appAutoscalerHealthEntityType),
@@ -87,7 +109,7 @@ function generateHealthEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerHealth>>(definition);
 }
 
-function generateScalingEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateScalingEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerScalingHistoryEntityType,
     schema: autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType),
@@ -96,7 +118,7 @@ function generateScalingEntity(endpointDefinition: IStratosEndpointDefinition) {
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerEvent>>(definition);
 }
 
-function generateAppMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateAppMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: appAutoscalerAppMetricEntityType,
     schema: autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
@@ -105,7 +127,7 @@ function generateAppMetricEntity(endpointDefinition: IStratosEndpointDefinition)
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
 }
 
-function generateMetricEntity(endpointDefinition: IStratosEndpointDefinition) {
+function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const definition = {
     type: metricEntityType,
     schema: autoscalerEntityFactory(metricEntityType),

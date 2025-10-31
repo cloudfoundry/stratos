@@ -9,43 +9,28 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "allowedCommonJsDependencies": [
-              "moment-timezone",
-              "moment",
-              "deepmerge",
-              "xterm",
-              "xterm-addon-fit",
-              "js-yaml",
-              "webcola",
-              "dagre",
-              "lodash/isEqual",
-              "ajv",
-              "lodash/filter",
-              "lodash/map",
-              "lodash/uniqueId",
-              "lodash/cloneDeep",
-              "intersect"
-            ],
-            "customWebpackConfig": {
-              "path": "./dist-devkit/build/main.js"
-            },
-            "indexTransform": "./dist-devkit/build/index.transform.js",
-            "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/frontend/packages/core/src/index.html",
-            "main": "src/frontend/packages/core/src/main.ts",
+            "browser": "src/frontend/packages/core/src/main.ts",
+            "polyfills": [
+              "src/frontend/packages/core/src/polyfills.ts"
+            ],
+            "allowedCommonJsDependencies": [
+              "deepmerge",
+              "xterm",
+              "xterm-addon-fit"
+            ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
-            "polyfills": "src/frontend/packages/core/src/polyfills.ts",
             "assets": [
               "src/frontend/packages/core/assets",
+              "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "custom-src/frontend/assets/custom",
                 "output": "/core/assets/custom"
               },
-              "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor/min/vs",
@@ -66,41 +51,20 @@
                 "src/frontend/packages/core/sass",
                 "src/frontend/packages/core/src/sass"
               ]
-            },
-            "scripts": []
+            }
           },
           "configurations": {
             "development": {
-              "optimization": {
-                "scripts": false,
-                "styles": {
-                  "minify": false,
-                  "inlineCritical": false
-                },
-                "fonts": false
-              },
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": true,
+              "optimization": false,
               "extractLicenses": false,
-              "vendorChunk": true,
-              "buildOptimizer": false
+              "sourceMap": true,
+              "namedChunks": true
             },
             "production": {
-              "optimization": {
-                "scripts": true,
-                "styles": {
-                  "minify": true,
-                  "inlineCritical": true
-                },
-                "fonts": true
-              },
+              "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
               "fileReplacements": [{
                 "replace": "src/frontend/packages/core/src/environments/environment.ts",
                 "with": "src/frontend/packages/core/src/environments/environment.prod.ts"
@@ -110,27 +74,23 @@
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": false,
-              "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
               "fileReplacements": [{
                 "replace": "src/frontend/packages/core/src/environments/environment.ts",
                 "with": "src/frontend/packages/core/src/environments/environment.desktop.ts"
               }]
             }
-
           }
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "sslCert": "dev-ssl/server.crt",
-            "proxyConfig": "proxy.conf.js",
+            "buildTarget": "stratos:build:development",
+            "port": 5440,
             "ssl": true,
             "sslKey": "dev-ssl/server.key",
-            "buildTarget": "stratos:build:development",
-            "port": 5440
+            "sslCert": "dev-ssl/server.crt",
+            "proxyConfig": "proxy.conf.js"
           },
           "configurations": {
             "development": {

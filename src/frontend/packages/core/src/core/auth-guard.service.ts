@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
+import { CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { RouterNav, InternalAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap: { [key: string]: string } = {};
@@ -11,25 +11,45 @@ export function queryParamMap(): { [key: string]: string } {
   if (query.length === 0) {
     return paramMap;
   }
-  const vars = query.split('&');
-  for (const pair of vars) {
-    const vals = pair.split('=');
-    paramMap[decodeURIComponent(vals[0])] = decodeURIComponent(vals[1]);
-  }
+  const searchParams = new URLSearchParams(query);
+  searchParams.forEach((value, key) => {
+    paramMap[key] = value;
+  });
   return paramMap;
 }
 
-export const authGuard: CanActivateFn = (): Observable<boolean> => {
+function snapshotToQueryParams(state: RouterStateSnapshot): { [key: string]: string } {
+  const params: { [key: string]: string } = {};
+  const queryIndex = state.url.indexOf('?');
+  if (queryIndex === -1) {
+    return params;
+  }
+
+  const search = state.url.substring(queryIndex + 1);
+  const searchParams = new URLSearchParams(search);
+  searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
+
+  return params;
+}
+
+export const authGuard: CanActivateFn = (_route, state): Observable<boolean> => {
   const store = inject(Store<InternalAppState>);
 
   return store.select('auth').pipe(
-    map((state) => {
-      if (!state.sessionData || !state.sessionData.valid) {
+    // Wait for auth state to stabilize before evaluation
+    // This prevents redirecting to /login during transient state updates
+    filter(authState => !authState.verifying),
+    map((authState) => {
+      if (!authState.sessionData || !authState.sessionData.valid) {
+        const [pathOnly] = state.url ? state.url.split('?') : ['/'];
+        const targetPath = pathOnly && pathOnly !== '/' && pathOnly.length > 0 ? pathOnly : '/home';
         store.dispatch(new RouterNav({
           path: ['/login']
         }, {
-            path: window.location.pathname,
-            queryParams: queryParamMap()
+            path: targetPath,
+            queryParams: snapshotToQueryParams(state)
           }));
         return false;
       }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { differenceInMilliseconds, isBefore } from 'date-fns';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
@@ -72,14 +72,14 @@ export class AppAutoscalerMetricChartListConfigService extends BaseCfListConfig<
   ];
 
   private twoHours = 1000 * 60 * 60 * 2;
-  customTimeValidation = (start: moment.Moment | null, end: moment.Moment | null): string | null => {
+  customTimeValidation = (start: Date | null, end: Date | null): string | null => {
     if (!end || !start) {
       return ' ';
     }
-    if (!start.isBefore(end)) {
+    if (!isBefore(start, end)) {
       return 'Start date must be before end date.';
     }
-    if (end.diff(start) > this.twoHours) {
+    if (differenceInMilliseconds(end, start) > this.twoHours) {
       return 'Time window must be two hours or less';
     }
     return null;

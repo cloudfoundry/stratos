@@ -1,4 +1,4 @@
-import { Injectable, NgModule } from '@angular/core';
+import { ApplicationRef, Injectable, NgModule } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -30,7 +30,7 @@ import {
   UserFavoriteManager
 } from '@stratosui/store';
 import { StratosThemeModule } from '../../theme/theme.module';
-import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, filter, take, withLatestFrom } from 'rxjs/operators';
 
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
@@ -100,7 +100,30 @@ const storeDebugImports = environment.production ? [] : [
 })
 class AppStoreDebugModule { }
 
-
+/**
+ * AppModule - Main application module
+ *
+ * CRITICAL: Module import order must be preserved for correct entity catalog initialization
+ *
+ * Entity Registration Flow:
+ * 1. EntityCatalogModule.forFeature(generateStratosEntities) - MUST BE FIRST
+ *    - Registers core Stratos entities (endpoint, systemInfo, userFavorites, etc.)
+ *    - These entities are required by all feature modules
+ *    - Registration is SYNCHRONOUS - completes before component constructors
+ *
+ * 2. Core infrastructure modules (Store, Router, etc.)
+ *    - Provide foundational services
+ *
+ * 3. CustomImportModule - MUST BE LAST
+ *    - Dynamically loads feature modules (CF, K8s, Git, Autoscaler, etc.)
+ *    - Replaced by webpack at build time with actual feature module imports
+ *    - Feature modules register their own entities via EntityCatalogModule.forFeature()
+ *
+ * Angular guarantees module constructors (including EntityCatalogFeatureModule) complete
+ * before any component constructors run, ensuring entities are always registered before access.
+ *
+ * DO NOT REORDER imports without understanding entity registration dependencies.
+ */
 @NgModule({
   declarations: [
     AppComponent
@@ -109,6 +132,7 @@ class AppStoreDebugModule { }
     // Standalone Components
     NoEndpointsNonAdminComponent,
     // Modules
+    // CRITICAL: Core Stratos entities MUST register first - required by all feature modules
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     AppStoreModule,
@@ -123,6 +147,7 @@ class AppStoreDebugModule { }
     HomeModule,
     DashboardModule,
     StoreRouterConnectingModule.forRoot({ serializer: FullRouterStateSerializer }), // Create action for router navigation
+    // CRITICAL: CustomImportModule MUST be last - loads feature modules that depend on core entities
     CustomImportModule,
   ],
   providers: [
@@ -153,8 +178,41 @@ export class AppModule {
     private userFavoriteManager: UserFavoriteManager,
     ech: EntityCatalogHelper,
     customizationService: CustomizationService,
+    private appRef: ApplicationRef
   ) {
     EntityCatalogHelpers.SetEntityCatalogHelper(ech);
+
+    // Validate entity catalog after all modules have loaded and registered their entities
+    // This ensures CF, K8s, and other feature modules have completed registration before validation
+    this.appRef.isStable.pipe(
+      filter(stable => stable),
+      take(1)
+    ).subscribe(() => {
+      try {
+        const validation = entityCatalog.validateCatalog();
+
+        if (!validation.valid) {
+          console.error('[EntityCatalog] Validation errors:', validation.errors);
+        }
+
+        if (validation.warnings.length > 0) {
+          console.warn('[EntityCatalog] Validation warnings:', validation.warnings);
+        }
+
+        // Log diagnostic information in development mode
+        if (!(window as any).production) {
+          const diagnostics = entityCatalog.getDiagnostics();
+          console.log('[EntityCatalog] Initialized:', {
+            endpoints: diagnostics.summary.totalEndpoints,
+            entities: diagnostics.summary.totalEntities,
+            registeredEndpoints: diagnostics.registeredEndpoints,
+            valid: validation.valid
+          });
+        }
+      } catch (error) {
+        console.error('[EntityCatalog] Error during validation:', error);
+      }
+    });
 
     eventService.addEventConfig<boolean>({
       eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),

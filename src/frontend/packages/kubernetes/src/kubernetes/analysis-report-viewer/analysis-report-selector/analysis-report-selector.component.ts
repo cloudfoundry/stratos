@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import moment from 'moment';
+import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
@@ -53,7 +53,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
           reports.forEach((r: AnalysisReport) => {
             const c: AnalysisReport & { title?: string } = { ...r };
             const title = c.type.substr(0, 1).toUpperCase() + c.type.substr(1);
-            const age = moment(c.created).fromNow(true);
+            const age = formatDistance(new Date(c.created), new Date());
             c.title = `${title} (${age})`;
             res.push(c);
           });

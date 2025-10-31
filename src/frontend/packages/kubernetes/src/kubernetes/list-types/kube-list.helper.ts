@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { formatDistance } from 'date-fns';
 
 import { DataFunction } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { ITableColumn } from '../../../../core/src/shared/components/list/list-table/table.types';
@@ -41,7 +41,7 @@ export function createKubeAgeColumn<T extends BasicKubeAPIResource>(): ITableCol
     headerCell: () => 'Age',
     cellDefinition: {
       getValue: (row: T) => {
-        return moment(row.metadata.creationTimestamp).fromNow(true);
+        return formatDistance(new Date(row.metadata.creationTimestamp), new Date());
       }
     },
     sort: {

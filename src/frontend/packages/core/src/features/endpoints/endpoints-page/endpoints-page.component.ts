@@ -97,6 +97,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     this.customizations = cs.get();
 
     // Redirect to /applications if not enabled.
+    // Defensive: Use catchError to prevent subscription errors from breaking initialization
     endpointsService.disablePersistenceFeatures$.pipe(
       filter(off => off !== undefined && off !== null),
       map(off => {
@@ -111,8 +112,11 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
         }
       }),
       first()
-    ).subscribe();
+    ).subscribe({
+      error: (err) => console.error('Error checking persistence features:', err)
+    });
 
+    // Defensive: Add null guards for session service observables
     this.canRegisterEndpoint = this.sessionService.userEndpointsEnabled().pipe(
       filter(enabled => enabled !== undefined && enabled !== null),
       map(enabled => {
@@ -125,6 +129,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     );
 
     // Is the backup/restore plugin available on the backend?
+    // Defensive: Add catchError to handle session data access issues
     this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
       filter(sessionData => !!sessionData),
       first(),
@@ -133,10 +138,11 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     );
 
     // Create an observable to track when endpoints are loaded and ready
+    // Defensive: Add null checks and error handling
     this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
       filter(endpointState => !!endpointState),
       map(endpointState => !endpointState.loading),
-      delay(500) // Increased delay to ensure proper loading sequence
+      delay(500) // Delay to ensure proper loading sequence
     );
   }
 
@@ -166,125 +172,86 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     }
   }
 
-    ngOnInit() {
-    // Fetch endpoints list on page load
-    console.log('Endpoints page loaded - fetching endpoints list');
+  ngOnInit() {
+    // Defensive: Validate entity catalog initialization before dispatching actions
+    // Entity catalog entities are populated during module initialization (see EntityCatalogFeatureModule)
+    // and should be available by the time component constructors run. However, we add defensive checks
+    // to gracefully handle edge cases where catalog might not be fully initialized.
 
     // Dispatch the GET_ENDPOINTS action which triggers system info fetch
-    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    console.log('Dispatched GET_ENDPOINTS action');
+    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
+      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
+    } else {
+      console.error('Entity catalog endpoint actions not initialized. This may indicate a module initialization issue.', {
+        hasCatalog: !!stratosEntityCatalog,
+        hasEndpoint: !!stratosEntityCatalog?.endpoint,
+        hasActions: !!stratosEntityCatalog?.endpoint?.actions
+      });
+    }
 
     // Also explicitly trigger system info
-    this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
-    console.log('Dispatched system info action');
+    if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {
+      this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
+    } else {
+      console.error('Entity catalog systemInfo actions not initialized. This may indicate a module initialization issue.', {
+        hasCatalog: !!stratosEntityCatalog,
+        hasSystemInfo: !!stratosEntityCatalog?.systemInfo,
+        hasActions: !!stratosEntityCatalog?.systemInfo?.actions
+      });
+    }
 
-    // Subscribe to haveRegistered$ with proper null checks
+    // Subscribe to haveRegistered$ to handle custom no-endpoints component
+    // Defensive: Add error handling to prevent subscription failures from breaking the page
     this.subs.push(
       this.endpointsService.haveRegistered$.pipe(
         filter(haveRegistered => haveRegistered !== undefined && haveRegistered !== null)
-      ).subscribe(haveRegistered => {
-        console.log('haveRegistered changed:', haveRegistered);
-        // Use custom component if specified
-        if (this.customNoEndpointsContainer) {
-          this.customNoEndpointsContainer.clear();
-        }
-        if (!haveRegistered && this.customizations.noEndpointsComponent) {
-          const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
-          this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
-        }
+      ).subscribe({
+        next: (haveRegistered) => {
+          // Use custom component if specified and no endpoints are registered
+          if (this.customNoEndpointsContainer) {
+            this.customNoEndpointsContainer.clear();
+          }
+          if (!haveRegistered && this.customizations.noEndpointsComponent) {
+            try {
+              const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(this.customizations.noEndpointsComponent);
+              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(factory);
+            } catch (error) {
+              console.error('Error creating custom no-endpoints component:', error);
+            }
+          }
+        },
+        error: (err) => console.error('Error subscribing to haveRegistered$:', err)
       })
     );
 
-    // Debug: Subscribe to endpoints data with proper null checks
-    this.subs.push(
-      this.endpointsService.endpoints$.pipe(
-        filter(endpoints => !!endpoints)
-      ).subscribe(endpoints => {
-        console.log('Endpoints in store:', endpoints);
-        console.log('Number of endpoints:', Object.keys(endpoints).length);
-      })
-    );
+    // Trigger endpoint health checks
+    // Defensive: Wrap in try-catch to prevent errors from breaking initialization
+    try {
+      this.endpointsService.checkAllEndpoints();
+    } catch (error) {
+      console.error('Error checking endpoints:', error);
+    }
 
-    // Debug: Check list component data source with proper null guards and subscription tracking
-    setTimeout(() => {
-      console.log('Checking if we can access list component data source...');
-      if (this.listComponent) {
-        console.log('List component found:', this.listComponent);
-        console.log('Data source:', this.listComponent.dataSource);
-        if (this.listComponent.dataSource) {
-          // Safely subscribe to data source observables with null checks and tracking
-          if (this.listComponent.dataSource.page$) {
-            this.subs.push(
-              this.listComponent.dataSource.page$.pipe(
-                filter(page => !!page)
-              ).subscribe(page => {
-                console.log('Data source page$:', page);
-              })
-            );
-          }
-
-          if (this.listComponent.dataSource.pagination$) {
-            this.subs.push(
-              this.listComponent.dataSource.pagination$.pipe(
-                filter(pagination => !!pagination)
-              ).subscribe(pagination => {
-                console.log('Data source pagination$:', pagination);
-              })
-            );
-          }
-
-          // Debug the specific observables that control hasRows$
-          if (this.listComponent.dataSource.maxedResults$) {
-            this.subs.push(
-              this.listComponent.dataSource.maxedResults$.subscribe(maxedResults => {
-                console.log('Data source maxedResults$:', maxedResults);
-              })
-            );
-          }
-
-          // Debug hasRows$ directly from the list component
-          if (this.listComponent.hasRows$) {
-            this.subs.push(
-              this.listComponent.hasRows$.subscribe(hasRows => {
-                console.log('List component hasRows$:', hasRows);
-              })
-            );
-          }
-
-          // Debug the view type and card component
-          if (this.listComponent.view$) {
-            this.subs.push(
-              this.listComponent.view$.subscribe(view => {
-                console.log('List component view$:', view);
-              })
-            );
-          }
-
-          console.log('List config cardComponent:', this.listComponent.config?.cardComponent);
-        }
-      } else {
-        console.log('List component not found');
-      }
-    }, 2000);
-
-    this.endpointsService.checkAllEndpoints();
-
-    // Subscribe to dashboard state with proper tracking
+    // Subscribe to dashboard state to enable polling if configured
+    // Defensive: Add error handling and ensure subscription cleanup
     this.subs.push(
       this.store.select(selectDashboardState).pipe(
         filter(dashboard => !!dashboard),
         first()
-      ).subscribe(dashboard => {
-        if (dashboard.pollingEnabled) {
-          this.startEndpointHealthCheckPulse();
-        }
+      ).subscribe({
+        next: (dashboard) => {
+          if (dashboard.pollingEnabled) {
+            this.startEndpointHealthCheckPulse();
+          }
+        },
+        error: (err) => console.error('Error subscribing to dashboard state:', err)
       })
     );
   }
 
   ngAfterViewInit() {
-    console.log('ngAfterViewInit - checking if list component is rendered');
-
+    // Subscribe to endpoint registration state to show snackbar when endpoints exist but aren't connected
+    // Defensive: Add error handling and ensure proper cleanup
     this.subs.push(
       combineLatest([
         this.endpointsService.haveRegistered$.pipe(filter(val => val !== undefined && val !== null)),
@@ -292,20 +259,42 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       ]).pipe(
         delay(1),
         tap(([hasRegistered, hasConnected]) => {
-          console.log('hasRegistered:', hasRegistered, 'hasConnected:', hasConnected);
+          // Show snackbar if endpoints are registered but none are connected
           this.showSnackBar(hasRegistered && !hasConnected);
         })
-      ).subscribe()
+      ).subscribe({
+        error: (err) => console.error('Error subscribing to endpoint state:', err)
+      })
     );
   }
 
   ngOnDestroy() {
-    this.stopEndpointHealthCheckPulse();
-    safeUnsubscribe(...this.subs);
-    if (this.customContentComponentRef) {
-      this.customContentComponentRef.destroy();
+    // Defensive: Ensure all cleanup operations complete even if one fails
+    try {
+      this.stopEndpointHealthCheckPulse();
+    } catch (error) {
+      console.error('Error stopping health check pulse:', error);
     }
-    this.showSnackBar(false);
+
+    try {
+      safeUnsubscribe(...this.subs);
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
+    }
+
+    try {
+      if (this.customContentComponentRef) {
+        this.customContentComponentRef.destroy();
+      }
+    } catch (error) {
+      console.error('Error destroying custom component:', error);
+    }
+
+    try {
+      this.showSnackBar(false);
+    } catch (error) {
+      console.error('Error hiding snackbar:', error);
+    }
   }
 
   // Modal methods
@@ -320,22 +309,39 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   onEndpointRegistered() {
-    console.log('onEndpointRegistered called - refreshing endpoints');
-    
-    // Dispatch the GET_ENDPOINTS action to refresh the list
-    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    console.log('Dispatched GET_ENDPOINTS action after registration');
-    
+    // Defensive: Validate entity catalog before dispatching refresh actions
+    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
+      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
+    } else {
+      console.error('Cannot refresh endpoints - entity catalog not initialized', {
+        hasCatalog: !!stratosEntityCatalog,
+        hasEndpoint: !!stratosEntityCatalog?.endpoint,
+        hasActions: !!stratosEntityCatalog?.endpoint?.actions
+      });
+    }
+
     // Also trigger system info refresh to update overall state
-    this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
-    console.log('Dispatched system info action after registration');
-    
-    // Also trigger health checks
-    this.endpointsService.checkAllEndpoints();
-    
+    if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {
+      this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
+    } else {
+      console.error('Cannot refresh system info - entity catalog not initialized', {
+        hasCatalog: !!stratosEntityCatalog,
+        hasSystemInfo: !!stratosEntityCatalog?.systemInfo,
+        hasActions: !!stratosEntityCatalog?.systemInfo?.actions
+      });
+    }
+
+    // Trigger endpoint health checks
+    // Defensive: Wrap in try-catch to prevent errors from breaking the flow
+    try {
+      this.endpointsService.checkAllEndpoints();
+    } catch (error) {
+      console.error('Error checking endpoints after registration:', error);
+    }
+
     // Show success message
     this.snackBarService.show('Endpoint registered successfully!', 'OK', 5000);
-    
+
     // Close the modal
     this.closeRegisterModal();
   }

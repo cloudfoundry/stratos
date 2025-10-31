@@ -60,6 +60,13 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   private destroyed$ = new Subject<void>();
   public errorMessage: string | null = null;
 
+  // Effect to track form validation status - runs in injection context
+  private readonly formValidationEffect = effect(() => {
+    // Track form status via signal
+    const isValid = this.stepperForm.controls.service.valid;
+    this.validate.set(isValid);
+  });
+
   constructor() {
     this.stepperForm = new UntypedFormGroup({
       service: new UntypedFormControl('', [Validators.required as any]),
@@ -135,14 +142,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    // Validate step based on form status using effect
-    effect(() => {
-      // Track form status via signal
-      const isValid = this.stepperForm.controls.service.valid;
-      this.validate.set(isValid);
-    });
-
-    // Original observable subscription for validation
+    // Effect now runs as field initializer above
+    // Original observable subscription for validation (kept for compatibility)
     this.stepperForm.controls.service.statusChanges.pipe(
       map(() => this.validate.set(this.stepperForm.controls.service.valid)),
       takeUntil(this.destroyed$)

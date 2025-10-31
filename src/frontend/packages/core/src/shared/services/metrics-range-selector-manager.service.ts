@@ -2,11 +2,10 @@ import { Injectable, NgZone } from '@angular/core';
 import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+import { isValid, isEqual } from 'date-fns';
 
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 import { ITimeRange } from './metrics-range-selector.types';
-
-import moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +18,7 @@ export class MetricsRangeSelectorManagerService {
 
   public dateValid = false;
 
-  public committedStartEnd: [moment.Moment, moment.Moment] = [null, null];
+  public committedStartEnd: [Date, Date] = [null, null];
 
   public rangeTypes = MetricQueryType;
 
@@ -31,7 +30,7 @@ export class MetricsRangeSelectorManagerService {
 
   private readonly endIndex = 1;
 
-  public startEnd: [moment.Moment, moment.Moment] = [null, null];
+  public startEnd: [Date, Date] = [null, null];
 
   private initSub: Subscription;
 
@@ -50,14 +49,14 @@ export class MetricsRangeSelectorManagerService {
     private ngZone: NgZone,
     ) { }
 
-  private commitDate(date: moment.Moment, type: 'start' | 'end') {
+  private commitDate(date: Date, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
     if (oldDate && !date) {
       this.startEnd[index] = date;
       return;
     }
-    if (!date || !date.isValid() || date.isSame(oldDate)) {
+    if (!date || !isValid(date) || isEqual(date, oldDate)) {
       return;
     }
     this.startEnd[index] = date;
@@ -76,7 +75,7 @@ export class MetricsRangeSelectorManagerService {
 
   private setTimeWindowFromStore(metrics: IMetrics) {
     const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-    const isDifferent = (!start || !end) || !start.isSame(this.start) || !end.isSame(this.end);
+    const isDifferent = (!start || !end) || !isEqual(start, this.start) || !isEqual(end, this.end);
     if (isDifferent) {
       this.committedStartEnd = [start, end];
     }
@@ -126,7 +125,7 @@ export class MetricsRangeSelectorManagerService {
     }
   }
 
-  set start(start: moment.Moment) {
+  set start(start: Date) {
     this.commitDate(start, 'start');
   }
 
@@ -134,7 +133,7 @@ export class MetricsRangeSelectorManagerService {
     return this.startEnd[this.startIndex];
   }
 
-  set end(end: moment.Moment) {
+  set end(end: Date) {
     this.commitDate(end, 'end');
   }
 

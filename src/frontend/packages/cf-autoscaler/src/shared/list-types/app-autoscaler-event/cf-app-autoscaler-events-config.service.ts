@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import moment from 'moment';
+import { differenceInMilliseconds, isBefore } from 'date-fns';
 
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { ApplicationService } from '../../../../../cloud-foundry/src/features/applications/application.service';
@@ -113,14 +113,14 @@ export class CfAppAutoscalerEventsConfigService
   ];
 
   private thirtyDays = 1000 * 60 * 60 * 24 * 30;
-  customTimeValidation = (start: moment.Moment | null, end: moment.Moment | null): string | null => {
+  customTimeValidation = (start: Date | null, end: Date | null): string | null => {
     if (!end || !start) {
       return null;
     }
-    if (!start.isBefore(end)) {
+    if (!isBefore(start, end)) {
       return 'Start date must be before end date.';
     }
-    if (moment().diff(start) > this.thirtyDays) {
+    if (differenceInMilliseconds(new Date(), start) > this.thirtyDays) {
       return 'Only recent 30 days data are support to be query.';
     }
     return null;

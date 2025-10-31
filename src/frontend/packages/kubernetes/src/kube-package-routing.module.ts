@@ -50,7 +50,7 @@ const customRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(customRoutes),
+    RouterModule.forChild(customRoutes),
   ],
   declarations: []
 })

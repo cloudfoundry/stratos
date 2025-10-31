@@ -1,5 +1,3 @@
-import moment from 'moment-timezone';
-
 import {
   AppAutoscalerPolicy,
   AppAutoscalerPolicyLocal,
@@ -31,7 +29,7 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     }
     buildFormUponMap(newPolicy, metricName);
   });
-  newPolicy.schedules = newPolicy.schedules || { timezone: moment.tz.guess() };
+  newPolicy.schedules = newPolicy.schedules || { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
   newPolicy.schedules.recurring_schedule = newPolicy.schedules.recurring_schedule || [];
   newPolicy.schedules.specific_date = newPolicy.schedules.specific_date || [];
   return newPolicy;

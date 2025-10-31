@@ -57,6 +57,11 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
  * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
  */
 function generateEndpoint(stratosType: any) {
+  // NOTE: For endpoint entities, we should NOT set the 'endpoint' property.
+  // The absence of 'endpoint' property triggers isEndpoint=true logic in StratosBaseCatalogEntity,
+  // which correctly registers this as an endpoint entity in the endpoints Map.
+  // However, since this is used as a base entity type and not a true endpoint,
+  // we register it as a regular entity (with endpoint property set).
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(endpointEntityType),
     type: endpointEntityType,

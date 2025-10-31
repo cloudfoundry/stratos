@@ -22,9 +22,20 @@ export const fetchAutoscalerInfo = (
   );
 };
 
+/**
+ * Checks if autoscaler is enabled/available for the given endpoint
+ * Returns true only if autoscaler is configured and accessible
+ * Returns false if autoscaler URL is missing or service is unavailable
+ */
 export const isAutoscalerEnabled = (endpointGuid: string, esf: EntityServiceFactory): Observable<boolean> => {
   return fetchAutoscalerInfo(endpointGuid, esf).pipe(
-    map(entityInfo => !entityInfo.entityRequestInfo.error),
+    map(entityInfo => {
+      // Autoscaler is available only if there's no error and entity data exists
+      const hasError = entityInfo?.entityRequestInfo?.error;
+      const hasEntity = entityInfo?.entity?.entity;
+      return !hasError && !!hasEntity;
+    }),
+    catchError(() => [false]), // If any error occurs, treat as unavailable
     startWith(false)
   );
 };

@@ -1,9 +1,6 @@
 import { Observable } from 'rxjs';
 
 import { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
-import { TableCellStatusDirective } from './table-cell-status.directive';
-import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
-import { TableRowComponent } from './table-row/table-row.component';
 
 export interface ICellAsyncValue {
   pathToObs: string;
@@ -121,11 +118,3 @@ export interface ITableText {
   noEntries?: string;
   maxedResults?: ITableTextMaxed;
 }
-
-export const listTableComponents = [
-  // TableComponent, // Now standalone - should not be in declarations array
-  TableCellComponent,
-  TableRowComponent,
-  ...listTableCells,
-  TableCellStatusDirective,
-];

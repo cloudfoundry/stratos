@@ -11,7 +11,9 @@ func (a *Autoscaler) getAutoscalerInfo(echoContext echo.Context) error {
 	healthURL, _ := url.Parse("/v1/info")
 	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)
 	if err != nil {
-		return err
+		// Return 404 if autoscaler URL is not configured or cannot be reached
+		// This allows frontend to gracefully handle missing autoscaler
+		return echo.NewHTTPError(404, "Autoscaler not available")
 	}
 	return a.portalProxy.SendProxiedResponse(echoContext, responses)
 }
@@ -20,7 +22,8 @@ func (a *Autoscaler) getAutoscalerHealth(echoContext echo.Context) error {
 	healthURL, _ := url.Parse("/health")
 	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)
 	if err != nil {
-		return err
+		// Return 503 if autoscaler health check fails
+		return echo.NewHTTPError(503, "Autoscaler health check failed")
 	}
 	return a.portalProxy.SendProxiedResponse(echoContext, responses)
 }
@@ -30,6 +33,7 @@ func (a *Autoscaler) getAutoscalerPolicy(echoContext echo.Context) error {
 	policyURL, _ := url.Parse("/v1/apps/" + appID + "/policy")
 	responses, err := a.portalProxy.ProxyRequest(echoContext, policyURL)
 	if err != nil {
+		// Return appropriate error - could be 404 (no policy) or connection error
 		return err
 	}
 	return a.portalProxy.SendProxiedResponse(echoContext, responses)
