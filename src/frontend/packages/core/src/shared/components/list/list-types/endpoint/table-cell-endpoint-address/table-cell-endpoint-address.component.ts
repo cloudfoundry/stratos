@@ -20,7 +20,7 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
-  public endpointAddress$: Observable<any>;
+  public endpointAddress$!: Observable<any>;
 
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {

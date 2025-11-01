@@ -99,7 +99,7 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean, }>;
+  public isBusyUpdating$!: Observable<{ updating: boolean, }>;
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   constructor(
@@ -112,17 +112,18 @@ export class BuildTabComponent implements OnInit {
     private cups: CurrentUserPermissionsService
   ) { }
 
-  cardTwoFetching$: Observable<boolean>;
+  cardTwoFetching$!: Observable<boolean>;
 
   public async: any;
 
   getFullApiUrl = getFullEndpointApiUrl;
 
-  sshStatus$: Observable<string>;
+  sshStatus$!: Observable<string>;
 
-  deploySource$: Observable<CustomEnvVarStratosProjectSource>;
+  deploySource$!: Observable<CustomEnvVarStratosProjectSource>;
 
-  public gitRepo$: Observable<GitRepo>;
+  public gitRepo$!: Observable<GitRepo>;
+  public gitRepo: GitRepo | null = null;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.applicationService.application$.pipe(

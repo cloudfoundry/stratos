@@ -33,7 +33,7 @@ export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCar
     }
   }
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   ngOnInit(): void {
     this.url = getFullEndpointApiUrl(this.endpoint);

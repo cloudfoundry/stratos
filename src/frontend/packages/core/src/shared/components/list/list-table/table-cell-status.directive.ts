@@ -6,7 +6,7 @@ standalone: true
 })
 export class TableCellStatusDirective implements OnChanges {
 
-  @Input() appTableCellStatus: string;
+  @Input() appTableCellStatus!: string;
 
   private el = inject(ElementRef);
   private renderer = inject(Renderer2);

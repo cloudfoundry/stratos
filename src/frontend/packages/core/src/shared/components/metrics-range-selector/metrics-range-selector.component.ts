@@ -50,14 +50,14 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     });
   }
 
-  public metricsMonitor: EntityMonitor<IMetrics>;
+  public metricsMonitor!: EntityMonitor<IMetrics>;
 
   public rangeTypes = MetricQueryType;
 
   @Output()
   public metricsAction = new EventEmitter<MetricsAction>();
 
-  private baseActionValue: MetricsAction;
+  private baseActionValue!: MetricsAction;
 
   @Input()
   set baseAction(action: MetricsAction) {
@@ -97,7 +97,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   }
 
   @Input()
-  public validate: (start: Date, end: Date) => string;
+  public validate?: (start: Date, end: Date) => string;
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;

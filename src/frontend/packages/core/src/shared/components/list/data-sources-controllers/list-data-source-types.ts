@@ -52,15 +52,15 @@ export interface AppEvent {
 }
 
 export class ListActionConfig<T> {
-  createAction: (
+  createAction!: (
     dataSource: IListDataSource<T>,
     items: IRequestEntityTypeState<T>
   ) => Action;
-  icon: string;
-  label: string;
-  description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
+  icon!: string;
+  label!: string;
+  description!: string;
+  visible!: (row: T) => boolean;
+  enabled!: (row: T) => boolean;
 }
 
 interface ICoreListDataSource<T> extends DataSource<T> {

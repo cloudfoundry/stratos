@@ -20,7 +20,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
   ]
 })
 export class TableCellRouteAppsAttachedComponent extends TableCellCustom<APIResource<CfRoute>> implements OnInit {
-  boundApps$: Observable<AppChip[]>;
+  boundApps$!: Observable<AppChip[]>;
   config$ = new BehaviorSubject<any>(null);
   row$ = new BehaviorSubject<APIResource<CfRoute> | null>(null);
 

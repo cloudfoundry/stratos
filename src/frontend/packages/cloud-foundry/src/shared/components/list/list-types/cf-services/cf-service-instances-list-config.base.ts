@@ -51,7 +51,7 @@ interface CanCache {
 export class CfServiceInstancesListConfigBase implements IListConfig<APIResource<IServiceInstance>> {
   viewType = ListViewTypes.TABLE_ONLY;
   pageSizeOptions = defaultPaginationPageSizeOptionsTable;
-  dataSource: ListDataSource<APIResource>;
+  dataSource!: ListDataSource<APIResource>;
   defaultView = 'table' as ListView;
   text: ITableText = {
     title: null,

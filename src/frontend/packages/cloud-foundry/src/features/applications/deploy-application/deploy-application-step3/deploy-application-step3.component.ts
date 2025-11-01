@@ -34,23 +34,23 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 
-  @Input() appGuid: string;
+  @Input() appGuid!: string;
 
   // Validation observable
   valid$: Observable<boolean>;
 
-  showOverlay$: Observable<boolean>;
+  showOverlay$!: Observable<boolean>;
 
   error = signal<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
 
-  public deployer: DeployApplicationDeployer;
+  public deployer!: DeployApplicationDeployer;
 
-  private deploySub: Subscription;
-  private errorSub: Subscription;
-  private validSub: Subscription;
-  private busySub: Subscription;
+  private deploySub!: Subscription;
+  private errorSub!: Subscription;
+  private validSub!: Subscription;
+  private busySub!: Subscription;
 
   public busy = false;
 

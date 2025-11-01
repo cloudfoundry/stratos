@@ -20,7 +20,7 @@ import { ApplicationStateIconComponent } from './application-state-icon/applicat
 export class ApplicationStateComponent implements OnInit {
 
   @Input()
-  public state: Observable<StratosStatusMetadata>;
+  public state!: Observable<StratosStatusMetadata>;
 
   public status$: Observable<StratosStatus>;
 

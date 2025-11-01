@@ -31,8 +31,8 @@ export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel
   connectable = false;
   backupType = BackupEndpointTypes;
   connectionTypes = BackupEndpointConnectionTypes;
-  selected: BackupEndpointConnectionTypes;
-  userConnectionWarning: string;
+  selected!: BackupEndpointConnectionTypes;
+  userConnectionWarning!: string;
 
   ngOnInit() {
     const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);

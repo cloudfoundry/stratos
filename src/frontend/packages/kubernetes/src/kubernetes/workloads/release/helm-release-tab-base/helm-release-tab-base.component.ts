@@ -43,7 +43,7 @@ import { HelmReleaseSocketService } from './helm-release-socket-service';
 })
 export class HelmReleaseTabBaseComponent implements OnDestroy {
 
-  isFetching$: Observable<boolean>;
+  isFetching$!: Observable<boolean>;
 
   public breadcrumbs = [{
     breadcrumbs: [

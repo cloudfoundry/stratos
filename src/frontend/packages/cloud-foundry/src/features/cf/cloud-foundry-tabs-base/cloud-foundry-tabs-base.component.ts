@@ -45,9 +45,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   // Used to hide tab that is not yet implemented when in production
   isDevEnvironment = !environment.production;
 
-  isFetching$: Observable<boolean>;
+  isFetching$!: Observable<boolean>;
 
-  public canAddOrg$: Observable<boolean>;
+  public canAddOrg$!: Observable<boolean>;
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 

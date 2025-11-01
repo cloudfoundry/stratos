@@ -19,9 +19,9 @@ export class DateTimeComponent implements OnDestroy {
 
   public date = new FormControl<string | null>(null);
   public time = new FormControl<string | null>(null);
-  private sub: Subscription;
-  private changeSub: Subscription;
-  private dateTimeValue: Date;
+  private sub!: Subscription;
+  private changeSub!: Subscription;
+  private dateTimeValue!: Date;
 
   private dateObservable: Observable<string>;
   private timeObservable: Observable<string>;

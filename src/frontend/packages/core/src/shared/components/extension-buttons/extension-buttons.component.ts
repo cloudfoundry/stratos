@@ -30,7 +30,7 @@ export class ExtensionButtonsComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = [];
 
-  @Input() type: StratosActionType;
+  @Input() type!: StratosActionType;
 
   constructor(
     private store: Store<AppState>

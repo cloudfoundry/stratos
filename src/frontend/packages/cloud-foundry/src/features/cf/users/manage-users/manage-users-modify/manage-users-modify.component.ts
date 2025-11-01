@@ -123,25 +123,25 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       }
     }
   ];
-  orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
+  orgDataSource!: ITableListDataSource<APIResource<IOrganization>>;
 
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
-  spaceRolesTable: ViewContainerRef;
+  spaceRolesTable!: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
   private snackBarRef: TailwindSnackBarRef<any>;
 
-  usersNames$: Observable<string[]>;
+  usersNames$!: Observable<string[]>;
   blocked = signal<boolean>(true);
   blocked$: Observable<boolean> = toObservable(this.blocked).pipe(delay(0));
-  valid$: Observable<boolean>;
+  valid$!: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
-  selectedOrgGuid: string;
-  orgGuidChangedSub: Subscription;
-  usersWithWarning$: Observable<string[]>;
-  isSetByUsername$: Observable<boolean>;
-  isRemove$: Observable<boolean>;
+  selectedOrgGuid!: string;
+  orgGuidChangedSub!: Subscription;
+  usersWithWarning$!: Observable<string[]>;
+  isSetByUsername$!: Observable<boolean | undefined>;
+  isRemove$!: Observable<boolean | undefined>;
 
   constructor(
     private store: Store<CFAppState>,

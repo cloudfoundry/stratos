@@ -25,9 +25,9 @@ interface ISetupData<T> {
   imports: []
 })
 export class CardComponent<T> {
-  private componentRef: ComponentRef<any>;
-  private pComponent: CardTypes<T>;
-  private pDataSource: IListDataSource<T>;
+  private componentRef!: ComponentRef<any>;
+  private pComponent!: CardTypes<T>;
+  private pDataSource!: IListDataSource<T>;
 
   @Input() set dataSource(dataSource: IListDataSource<T>) {
     if (!this.pDataSource) {
@@ -47,9 +47,9 @@ export class CardComponent<T> {
     this.componentCreator({ item });
   }
 
-  @ViewChild('target', { read: ViewContainerRef, static: true }) target: ViewContainerRef;
+  @ViewChild('target', { read: ViewContainerRef, static: true }) target!: ViewContainerRef;
 
-  cardComponent: CardCell<T>;
+  cardComponent!: CardCell<T>;
   private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private componentCreator = (() => {

@@ -15,11 +15,11 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 })
 export class UserProfileBannerComponent {
 
-  name: string;
-  email: string;
-  username: string;
+  name!: string;
+  email!: string;
+  username!: string;
   userProfile: any;
-  canUseGravatar: boolean;
+  canUseGravatar!: boolean;
 
   @Input()
   set allowGravatar(allowed: boolean) {

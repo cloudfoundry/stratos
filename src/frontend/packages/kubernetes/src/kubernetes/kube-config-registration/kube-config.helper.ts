@@ -61,7 +61,7 @@ export class KubeConfigHelper {
   ) {
   }
 
-  public clustersChanged: () => void;
+  public clustersChanged!: () => void;
   public update = (cluster: KubeConfigFileCluster) => {
     this.checkValidity(cluster).subscribe(() => this.clustersChanged());
   };

@@ -40,7 +40,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
   /**
    * Values in the `event` filter mist contain this value, for instance `audit.app`
    */
-  @Input() typeMustContain: string;
+  @Input() typeMustContain!: string;
 
   filtersFormGroup: FormGroup<EventsFilterForm>;
   typeValues: string[] = [

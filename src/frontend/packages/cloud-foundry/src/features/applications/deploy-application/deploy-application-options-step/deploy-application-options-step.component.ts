@@ -61,15 +61,15 @@ interface DeployOptionsForm {
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
 
   valid$: Observable<boolean>;
-  domains$: Observable<APIResource<IDomain>[]>;
-  stacks$: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<APIResource<IDomain>[]>;
+  stacks$!: Observable<APIResource<IDomain>[]>;
   deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
-  appGuid: string;
+  appGuid!: string;
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
-  public sourceType$: Observable<SourceType>;
+  public sourceType$!: Observable<SourceType>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor(
@@ -93,9 +93,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       domain: new FormControl<string | null>(null),
       path: new FormControl<string | null>(null),
       buildpack: new FormControl<string | null>(null),
-      no_route: new FormControl<boolean>(false),
-      random_route: new FormControl<boolean>(false),
-      no_start: new FormControl<boolean>(false),
+      no_route: new FormControl<boolean>(false, { nonNullable: true }),
+      random_route: new FormControl<boolean>(false, { nonNullable: true }),
+      no_start: new FormControl<boolean>(false, { nonNullable: true }),
       startCmd: new FormControl<string | null>(null),
       healthCheckType: new FormControl<string | null>(null),
       stack: new FormControl<string | null>(null),
@@ -136,9 +136,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     ).subscribe(deployAppState => {
       const sourceType = deployAppState.applicationSource.type;
       if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName);
-        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage);
-        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername);
+        this.deployOptionsForm.controls.name.setValue(deployAppState.applicationSource.dockerDetails.applicationName ?? null);
+        this.deployOptionsForm.controls.dockerImage.setValue(deployAppState.applicationSource.dockerDetails.dockerImage ?? null);
+        this.deployOptionsForm.controls.dockerUsername.setValue(deployAppState.applicationSource.dockerDetails.dockerUsername ?? null);
       }
     }));
 

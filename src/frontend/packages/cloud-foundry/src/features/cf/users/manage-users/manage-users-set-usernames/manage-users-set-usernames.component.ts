@@ -60,12 +60,12 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
 
   public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean> = toObservable(this.stepValid);
-  private usernames: StackedInputActionsUpdate;
-  public origin: string;
+  private usernames!: StackedInputActionsUpdate;
+  public origin!: string;
   public canAdd$: Observable<boolean>;
   public canRemove$: Observable<boolean>;
   public blocked$: Observable<boolean>;
-  public currentValue: boolean;
+  public currentValue!: boolean;
 
   public stackedActionConfig: StackedInputActionConfig = {
     isEmailInput: false,

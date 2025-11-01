@@ -32,15 +32,15 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
 
-  spaceQuotaSubscription: Subscription;
+  spaceQuotaSubscription!: Subscription;
   cfGuid: string;
   spaceQuotaGuid: string;
-  allQuotas: string[];
-  spaceQuotaDefinition$: Observable<APIResource<ISpaceQuotaDefinition>>;
-  quota: ISpaceQuotaDefinition;
+  allQuotas!: string[];
+  spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
+  quota!: ISpaceQuotaDefinition;
 
   @ViewChild('form', { static: false })
-  form: SpaceQuotaDefinitionFormComponent;
+  form!: SpaceQuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,

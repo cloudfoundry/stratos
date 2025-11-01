@@ -143,9 +143,9 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
-  public cf: CfOrgSpaceItem<EndpointModel>;
-  public org: CfOrgSpaceItem<IOrganization>;
-  public space: CfOrgSpaceItem<ISpace>;
+  public cf!: CfOrgSpaceItem<EndpointModel>;
+  public org!: CfOrgSpaceItem<IOrganization>;
+  public space!: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
   public paginationAction = this.createOrgPaginationAction();
@@ -165,11 +165,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
   /*
    * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
    */
-  public initialValues$: Observable<any>;
+  public initialValues$!: Observable<any>;
   /**
    * Map values from `initialValues$` to supply initial values for drop downs
    */
-  public initialValuesMap: (param: any) => InitialValues;
+  public initialValuesMap!: (param: any) => InitialValues;
 
   constructor(
     private store: Store<CFAppState>,

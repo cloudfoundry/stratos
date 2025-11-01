@@ -34,7 +34,7 @@ export class AddApiKeyDialogComponent implements OnDestroy {
   public hasErrored = signal<string | null>(null);
   public isBusy = signal<boolean>(false);
 
-  private sub: Subscription;
+  private sub!: Subscription;
 
   public formGroup: FormGroup<AddApiKeyForm>;
 

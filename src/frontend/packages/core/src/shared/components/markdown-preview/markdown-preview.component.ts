@@ -22,9 +22,9 @@ import { MarkdownContentObserverDirective } from './markdown-content-observer.di
 })
 export class MarkdownPreviewComponent implements PreviewableComponent {
 
-  markdownHtml: string;
-  documentUrl: string;
-  title: string = null;
+  markdownHtml!: string;
+  documentUrl!: string;
+  title: string = '';
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {

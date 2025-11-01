@@ -71,14 +71,14 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
     this.needsPasswordForEmailChange = false;
   }
 
-  private sub: Subscription;
+  private sub!: Subscription;
 
-  private profile: UserProfileInfo;
+  private profile!: UserProfileInfo;
 
   private lastRequired = false;
   private lastHavePassword = false;
 
-  private emailAddress: string;
+  private emailAddress!: string;
 
   // Only allow password change if user has the 'password.write' group
   public canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);
@@ -113,7 +113,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       // Old password is required if either email or new pw is specified (uaa)
       // or only if new pw is specified (local account)
       const required = this.needsPasswordForEmailChange ?
-        (values.emailAddress !== this.emailAddress || !!values.newPassword.length) : !!values.newPassword.length;
+        (values.emailAddress !== this.emailAddress || !!(values.newPassword ?? '').length) : !!(values.newPassword ?? '').length;
       this.passwordRequired = required;
       if (required !== this.lastRequired) {
         this.lastRequired = required;
@@ -121,7 +121,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         this.editProfileForm.get('currentPassword')?.setValidators(validators);
         this.editProfileForm.get('currentPassword')?.updateValueAndValidity();
       }
-      const havePassword = !!values.newPassword.length;
+      const havePassword = !!(values.newPassword ?? '').length;
       if (havePassword !== this.lastHavePassword) {
         this.lastHavePassword = havePassword;
         const confirmValidator = havePassword ? [Validators.required, this.confirmPasswordValidator()] : [];

@@ -39,9 +39,9 @@ interface CreateSpaceForm {
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
-  cfUrl: string;
-  createSpaceForm: FormGroup<CreateSpaceForm>;
-  quotaSubscription: Subscription;
+  cfUrl!: string;
+  createSpaceForm!: FormGroup<CreateSpaceForm>;
+  quotaSubscription!: Subscription;
 
   get spaceName(): FormControl<string> {
     return this.createSpaceForm ? this.createSpaceForm.get('spaceName') as FormControl<string> : new FormControl('', { nonNullable: true });

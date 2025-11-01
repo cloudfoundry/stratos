@@ -38,11 +38,11 @@ export class EntityFavoriteStarComponent {
 
   @Input() small = false;
 
-  public isFavorite$: Observable<boolean>;
+  public isFavorite$!: Observable<boolean>;
 
   private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
 
-  private pFavourite: UserFavorite<IFavoriteMetadata>;
+  private pFavourite!: UserFavorite<IFavoriteMetadata>;
   private confirmDialog = inject(ConfirmationDialogService);
   public endpointsService = inject(EndpointsService);
   private userFavoriteManager = inject(UserFavoriteManager);

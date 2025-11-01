@@ -15,8 +15,8 @@ import { ListCfRoute } from '../cf-routes-data-source-base';
   imports: []
 })
 export class TableCellRouteComponent extends TableCellCustom<APIResource<ListCfRoute>> implements OnInit {
-  routeUrl: string;
-  isRouteTCP: boolean;
+  routeUrl!: string;
+  isRouteTCP!: boolean;
 
   ngOnInit() {
     const route = this.row.entity;

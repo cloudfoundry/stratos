@@ -15,7 +15,7 @@ export interface IAppChip<T = string> {
 }
 export class AppChip<T = string> implements IAppChip<T> {
   key?: T;
-  value: string;
+  value!: string;
   clearAction?: (chip: IAppChip<T>) => void;
   hideClearButton$?: Observable<boolean>;
   busy?: Observable<boolean>;
@@ -59,7 +59,7 @@ export class AppChipsComponent implements OnInit {
   @Input()
   displayProperty = 'value';
 
-  public limit: number;
+  public limit!: number;
 
   ngOnInit() {
     this.limit = this.lowerLimit;

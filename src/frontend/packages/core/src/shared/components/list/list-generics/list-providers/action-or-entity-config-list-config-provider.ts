@@ -1,6 +1,7 @@
 import { Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { EntityPipelineEntity } from '@stratosui/store';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
 import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';
@@ -10,10 +11,10 @@ import { ListConfigProvider, ListConfigUpdate, ListDataSourceConfigUpdate } from
 /**
  * Create a List provider (list config and data source) using either a paginated action or a list entity config
  */
-export class ActionOrConfigListConfigProvider<T, A = T> implements ListConfigProvider<T, A> {
-  private listConfig: IListConfig<T>;
-  private overrideListConfig: Partial<IListConfig<T>>;
-  private overrideDataSourceConfig: Partial<IListDataSourceConfig<A, T>>;
+export class ActionOrConfigListConfigProvider<T extends EntityPipelineEntity, A = T> implements ListConfigProvider<T, A> {
+  private listConfig!: IListConfig<T>;
+  private overrideListConfig!: Partial<IListConfig<T>>;
+  private overrideDataSourceConfig!: Partial<IListDataSourceConfig<A, T>>;
 
   constructor(
     private store: Store<any>,

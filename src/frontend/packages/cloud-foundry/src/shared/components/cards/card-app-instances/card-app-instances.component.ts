@@ -41,7 +41,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @Input() busy: any;
 
-  @ViewChild('instanceField', { static: true }) instanceField: ElementRef;
+  @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
 
   status$: Observable<StratosStatus>;
 
@@ -70,17 +70,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   private currentCount = 0;
   public editCount = 0;
 
-  private sub: Subscription;
+  private sub!: Subscription;
 
   public isEditing = false;
 
   public editValue: any;
 
   // Observable on the running instances count for the application
-  public runningInstances$: Observable<number>;
+  public runningInstances$!: Observable<number>;
 
   private app: any;
-  private snackBarRef: TailwindSnackBarRef<any>;
+  private snackBarRef!: TailwindSnackBarRef<any>;
 
   ngOnInit() {
     this.sub = this.appService.application$.subscribe(app => {

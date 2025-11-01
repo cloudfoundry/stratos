@@ -28,14 +28,14 @@ import { ApplicationService } from '../application.service';
 })
 export class CliInfoApplicationComponent implements OnInit {
 
-  cfEndpointEntityService: EntityService<EndpointModel>;
-  public previousUrl: string;
-  public previousQueryParams: {
+  cfEndpointEntityService!: EntityService<EndpointModel>;
+  public previousUrl!: string;
+  public previousQueryParams!: {
     [key: string]: string;
   };
 
-  public context$: Observable<CFAppCLIInfoContext>;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public context$!: Observable<CFAppCLIInfoContext>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   constructor(
     private applicationService: ApplicationService,

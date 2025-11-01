@@ -27,8 +27,8 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Input() width = 400;
   @Input() height = 300;
   @Input() legend = false;
-  @Input() xAxisLabel: string;
-  @Input() yAxisLabel: string;
+  @Input() xAxisLabel!: string;
+  @Input() yAxisLabel!: string;
   @Input() results: any[] = [];
   @Input() lineChart: any[] = [];
   @Input() colorSchemeLine: any;

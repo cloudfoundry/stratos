@@ -50,11 +50,11 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
 
-  applicationState$: Observable<ApplicationStateData>;
+  applicationState$!: Observable<ApplicationStateData>;
 
-  appStatus$: Observable<StratosStatus>;
-  entityConfig: ComponentEntityMonitorConfig;
-  cfOrgSpace: CfOrgSpaceLabelService;
+  appStatus$!: Observable<StratosStatus>;
+  entityConfig!: ComponentEntityMonitorConfig;
+  cfOrgSpace!: CfOrgSpaceLabelService;
 
   public favorite: UserFavorite<IFavoriteMetadata>;
 

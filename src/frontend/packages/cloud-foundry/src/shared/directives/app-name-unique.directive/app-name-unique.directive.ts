@@ -19,9 +19,9 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 export type NameTaken<T = any> = (response: HttpResponse<T>) => boolean;
 export type UniqueValidatorRequestBuilder<T = any> = (name: string) => HttpRequest<T>;
 export class AppNameUniqueChecking {
-  busy: boolean;
-  taken: boolean;
-  status: string;
+  busy!: boolean;
+  taken: boolean | undefined;
+  status!: string;
 
   set(busy: boolean, taken?: boolean) {
     this.busy = busy;
@@ -44,8 +44,8 @@ standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
-  @Input() appApplicationNameUnique: AppNameUniqueChecking;
-  @Input() appApplicationNameUniqueRequest: UniqueValidatorRequestBuilder;
+  @Input() appApplicationNameUnique!: AppNameUniqueChecking;
+  @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
   @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
 
   constructor(

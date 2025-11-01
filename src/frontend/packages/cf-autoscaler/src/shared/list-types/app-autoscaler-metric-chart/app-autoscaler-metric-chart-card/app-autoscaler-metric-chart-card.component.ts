@@ -37,13 +37,13 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
 
 export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {
   static columns = 1;
-  listData: {
+  listData!: {
     label: string;
     data$: Observable<string>;
     customStyle?: string;
   }[];
 
-  envVarUrl: string;
+  envVarUrl!: string;
 
   comboBarScheme = {
     name: 'singleLightBlue',
@@ -68,7 +68,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     'order-direction': 'asc'
   };
 
-  public metricType: string;
+  public metricType!: string;
 
   @Input('row')
   set row(row: APIResource<AppScalingTrigger>) {
@@ -96,8 +96,8 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
     super();
   }
 
-  public metricData$: Observable<AppAutoscalerMetricData[]>;
-  public appAutoscalerAppMetricLegend: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: unknown[] };
+  public metricData$!: Observable<AppAutoscalerMetricData[]>;
+  public appAutoscalerAppMetricLegend!: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: unknown[] };
 
   getLegend2(trigger: AppScalingTrigger) {
     const legendColor = buildLegendData(trigger);

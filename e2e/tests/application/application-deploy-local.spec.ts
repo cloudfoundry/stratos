@@ -86,7 +86,7 @@ test.describe('Application Deploy (Local)', () => {
       const uploadAvailable = await isFileUploadAvailable(page, cfGuid);
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available in this CF deployment');
+        test.skip(true, 'File upload deployment not available in this CF deployment');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -100,7 +100,7 @@ test.describe('Application Deploy (Local)', () => {
 
       // Verify file input accepts .zip files
       // This would require actual file fixture for complete test
-      test.skip('Complete file upload test requires test ZIP fixture');
+      test.skip();
     });
 
     test('should accept TAR.GZ upload', async ({ connectedEndpointsAdminPage }) => {
@@ -108,7 +108,7 @@ test.describe('Application Deploy (Local)', () => {
       const uploadAvailable = await isFileUploadAvailable(page, cfGuid);
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -119,7 +119,7 @@ test.describe('Application Deploy (Local)', () => {
       expect(isOnWizard).toBe(true);
 
       // Note: Complete test would upload actual .tar.gz file
-      test.skip('Complete TAR.GZ upload test requires test archive fixture');
+      test.skip();
     });
 
     test('should validate archive format', async ({ connectedEndpointsAdminPage }) => {
@@ -127,7 +127,7 @@ test.describe('Application Deploy (Local)', () => {
       const uploadAvailable = await isFileUploadAvailable(page, cfGuid);
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -138,7 +138,7 @@ test.describe('Application Deploy (Local)', () => {
       // Without file selected, validation state depends on UI
       expect(isValid).toBeDefined();
 
-      test.skip('Format validation test requires attempting upload of invalid file types');
+      test.skip();
       // Would test:
       // - Upload .txt file → expect rejection
       // - Upload .exe file → expect rejection
@@ -150,10 +150,10 @@ test.describe('Application Deploy (Local)', () => {
       const uploadAvailable = await isFileUploadAvailable(page, cfGuid);
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('File upload test requires test archive fixture and upload infrastructure');
+      test.skip();
       // Would test:
       // - Select valid ZIP/TAR.GZ file
       // - Initiate upload
@@ -166,10 +166,10 @@ test.describe('Application Deploy (Local)', () => {
       const uploadAvailable = await isFileUploadAvailable(page, cfGuid);
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('Upload progress test requires active file upload');
+      test.skip();
       // Would test:
       // - Start file upload
       // - Verify progress bar visible
@@ -179,7 +179,7 @@ test.describe('Application Deploy (Local)', () => {
 
     test('should stage uploaded code', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Staging test requires completed file upload and CF staging infrastructure');
+      test.skip();
       // Would test:
       // - Upload valid app archive
       // - Wait for staging to begin
@@ -189,7 +189,7 @@ test.describe('Application Deploy (Local)', () => {
 
     test('should deploy successfully', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Full deployment test requires valid app archive and complete deployment cycle');
+      test.skip();
       // Would test:
       // - Upload app archive
       // - Wait for staging
@@ -214,10 +214,10 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('Manifest detection requires archive with manifest.yml');
+      test.skip();
       // Would test:
       // - Upload archive containing manifest.yml
       // - Verify manifest detected indicator
@@ -238,10 +238,10 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('Manifest parsing test requires archive with valid manifest.yml');
+      test.skip();
       // Would test:
       // - Upload archive with manifest
       // - Verify manifest content parsed
@@ -263,7 +263,7 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -274,7 +274,7 @@ test.describe('Application Deploy (Local)', () => {
       // Without file upload, manifest won't be detected
       expect(hasManifest).toBeDefined();
 
-      test.skip('Using manifest settings requires archive upload with manifest.yml');
+      test.skip();
       // Would test:
       // - Upload archive with manifest
       // - Enable "use manifest" option
@@ -296,10 +296,10 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('Manifest override requires archive with manifest.yml');
+      test.skip();
       // Would test:
       // - Upload archive with manifest
       // - Enable manifest override
@@ -323,10 +323,10 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
-      test.skip('Invalid archive rejection test requires uploading non-archive file');
+      test.skip();
       // Would test:
       // - Attempt to upload .txt file
       // - Verify rejection/error message
@@ -347,7 +347,7 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -358,7 +358,7 @@ test.describe('Application Deploy (Local)', () => {
       // Without upload attempt, no error expected
       expect(hasSizeError).toBe(false);
 
-      test.skip('File size limit test requires very large test archive');
+      test.skip();
       // Would test:
       // - Create archive > size limit
       // - Attempt upload
@@ -379,7 +379,7 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -389,7 +389,7 @@ test.describe('Application Deploy (Local)', () => {
       const hasUploadError = await uploadPage.hasError('upload');
       expect(hasUploadError).toBe(false); // No upload attempted yet
 
-      test.skip('Upload failure test requires simulating network failure or server error');
+      test.skip();
       // Would test:
       // - Start upload
       // - Simulate network interruption
@@ -411,7 +411,7 @@ test.describe('Application Deploy (Local)', () => {
       })();
 
       if (!uploadAvailable) {
-        test.skip('File upload deployment not available');
+        test.skip(true, 'File upload deployment not available');
       }
 
       const uploadPage = new FileUploadStepperPage(page);
@@ -421,7 +421,7 @@ test.describe('Application Deploy (Local)', () => {
       const hasStagingError = await uploadPage.hasError('staging');
       expect(hasStagingError).toBe(false); // No staging attempted yet
 
-      test.skip('Staging error test requires app with build failures');
+      test.skip();
       // Would test:
       // - Upload app with missing dependencies
       // - Wait for staging to fail

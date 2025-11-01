@@ -7,7 +7,7 @@ import { RouterLink, RouterLinkWithHref } from '@angular/router';
 })
 export class DisableRouterLinkDirective {
 
-  @Input() appDisableRouterLink: boolean;
+  @Input() appDisableRouterLink: boolean = false;
 
   constructor(
     // Inject routerLink

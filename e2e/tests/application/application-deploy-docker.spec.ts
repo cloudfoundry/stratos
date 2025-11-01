@@ -111,7 +111,7 @@ test.describe('Application Deploy (Docker)', () => {
       const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available in this CF deployment');
+        test.skip(true, 'Docker deployment not available in this CF deployment');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -131,7 +131,7 @@ test.describe('Application Deploy (Docker)', () => {
       const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -163,10 +163,10 @@ test.describe('Application Deploy (Docker)', () => {
       const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
-      test.skip('Image pulling requires full deployment with CF Docker support');
+      test.skip();
       // Would test:
       // - Enter public image URL
       // - Start deployment
@@ -179,10 +179,10 @@ test.describe('Application Deploy (Docker)', () => {
       const dockerAvailable = await isDockerDeploymentAvailable(page, cfGuid);
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
-      test.skip('Full Docker deployment requires CF Docker support and time for image pull/start');
+      test.skip();
       // Would test complete deployment flow:
       // - Configure Docker app
       // - Pull image
@@ -192,12 +192,12 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should start container successfully', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Container start requires full Docker deployment');
+      test.skip();
     });
 
     test('should show container status', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Container status requires deployed Docker app');
+      test.skip();
     });
   });
 
@@ -216,7 +216,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -252,7 +252,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -275,7 +275,7 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should pull private image', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Private image pull requires valid registry credentials');
+      test.skip();
       // Would test:
       // - Enter private image URL
       // - Provide valid credentials
@@ -285,7 +285,7 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should deploy private image', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Private image deployment requires valid registry access and full deployment');
+      test.skip();
       // Would test:
       // - Complete private image deployment
       // - Verify app runs with private image
@@ -307,7 +307,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -339,7 +339,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -374,10 +374,10 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
-      test.skip('Port configuration typically done via environment variables in CF');
+      test.skip();
       // CF handles port mapping automatically
       // Port is usually set via PORT environment variable
     });
@@ -396,7 +396,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -431,7 +431,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -468,7 +468,7 @@ test.describe('Application Deploy (Docker)', () => {
       })();
 
       if (!dockerAvailable) {
-        test.skip('Docker deployment not available');
+        test.skip(true, 'Docker deployment not available');
       }
 
       const deployPage = new DockerDeployStepperPage(page);
@@ -486,7 +486,7 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should show authentication errors', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Authentication error testing requires attempting deployment with invalid credentials');
+      test.skip();
       // Would test:
       // - Private image with wrong credentials
       // - Attempt deployment
@@ -495,7 +495,7 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should handle pull failures', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Pull failure testing requires non-existent image or network issues');
+      test.skip();
       // Would test:
       // - Non-existent image
       // - Network failure during pull
@@ -504,7 +504,7 @@ test.describe('Application Deploy (Docker)', () => {
 
     test('should display container start errors', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
-      test.skip('Container start error testing requires image that fails to start');
+      test.skip();
       // Would test:
       // - Image with invalid command
       // - Container crashes on start

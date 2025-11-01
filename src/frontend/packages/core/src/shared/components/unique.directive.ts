@@ -9,7 +9,7 @@ import { AbstractControl, NG_VALIDATORS, Validator } from '@angular/forms';
 export class UniqueDirective implements Validator {
   constructor() { }
 
-  @Input() appUnique: any[];
+  @Input() appUnique!: any[];
 
   validate(c: AbstractControl): { [key: string]: any, } {
     const found = this.appUnique ? this.appUnique.indexOf(c.value) >= 0 : false;

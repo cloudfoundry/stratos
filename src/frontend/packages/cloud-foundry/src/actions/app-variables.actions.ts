@@ -10,7 +10,7 @@ export const AppVariables = {
 export class AppVariablesUpdate implements Action {
 
   type = AppVariables.UPDATE;
-  updatedApplication: UpdateApplication;
+  updatedApplication!: UpdateApplication;
   guid: string;
 
   constructor(public cfGuid: string, public appGuid: string) {

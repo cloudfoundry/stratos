@@ -29,8 +29,8 @@ import { ListComponent } from '../../../../../../core/src/shared/components/list
 })
 export class MapRoutesComponent implements OnInit, OnDestroy {
   paginationSubscription: any;
-  subscription: Subscription;
-  @Input() selectedRoute$: BehaviorSubject<APIResource>;
+  subscription!: Subscription;
+  @Input() selectedRoute$!: BehaviorSubject<APIResource>;
 
   constructor(
     private appService: ApplicationService,

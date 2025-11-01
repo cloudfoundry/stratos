@@ -42,7 +42,7 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 export class EditAutoscalerPolicyComponent implements OnInit {
 
   parentUrl: string;
-  applicationName$: Observable<string>;
+  applicationName$!: Observable<string>;
   isCreate = false;
 
   constructor(

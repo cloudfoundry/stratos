@@ -56,20 +56,20 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
   permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
 
-  orgGuid: string;
-  spaceGuid: string;
+  orgGuid!: string;
+  spaceGuid!: string;
 
   cfEndpointEntityService: any;
-  public previousUrl: string;
-  public previousQueryParams: {
+  public previousUrl!: string;
+  public previousQueryParams!: {
     [key: string]: string;
   };
 
-  public context$: Observable<CFAppCLIInfoContext>;
+  public context$!: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$: Observable<{ url: string, queryParams: any }>;
+  public route$!: Observable<{ url: string, queryParams: any }>;
 
-  public endpointOrgSpace$: Observable<[
+  public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
     EntityInfo<APIResource<IOrganization>>,
     EntityInfo<APIResource<ISpace>>

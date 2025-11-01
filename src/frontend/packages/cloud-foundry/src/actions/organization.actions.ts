@@ -68,7 +68,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
 }
 
 export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
-  public schemaKey: string;
+  public schemaKey!: string;
   constructor(
     public paginationKey: string,
     public orgGuid: string,

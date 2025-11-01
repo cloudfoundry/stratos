@@ -162,14 +162,14 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
 
 
 export abstract class BaseSpaceAction extends CFStartAction implements ICFAction {
+  actions!: string[];
+  entity = [cfEntityFactory(spaceEntityType)];
+  entityType = spaceEntityType;
+  options!: HttpRequest<any>;
+  removeEntityOnDelete?: boolean;
   constructor(public guid: string, public orgGuid: string, public endpointGuid: string) {
     super();
   }
-  actions: string[];
-  entity = [cfEntityFactory(spaceEntityType)];
-  entityType = spaceEntityType;
-  options: HttpRequest<any>;
-  removeEntityOnDelete?: boolean;
 }
 
 export class DeleteSpace extends BaseSpaceAction {

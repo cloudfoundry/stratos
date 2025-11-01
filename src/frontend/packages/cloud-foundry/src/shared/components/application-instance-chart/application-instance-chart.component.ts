@@ -24,30 +24,30 @@ import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actio
 export class ApplicationInstanceChartComponent implements OnInit {
 
   @Input()
-  private appGuid: string;
+  private appGuid!: string;
 
   @Input()
-  private endpointGuid: string;
+  private endpointGuid!: string;
 
   @Input()
-  private yAxisLabel: string;
+  private yAxisLabel!: string;
 
   // Prometheus query string
   @Input()
-  private queryString: string;
+  private queryString!: string;
 
   @Input()
-  private seriesTranslation: string;
+  private seriesTranslation!: string;
 
   @Input()
   private queryRange = false;
 
   @Input()
-  public title: string;
+  public title!: string;
 
-  public instanceChartConfig: MetricsLineChartConfig;
+  public instanceChartConfig!: MetricsLineChartConfig;
 
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  public instanceMetricConfig!: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
   constructor() { }
 

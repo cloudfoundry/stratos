@@ -16,7 +16,7 @@ export class CloudFoundryService {
   connectedCFEndpoints$: Observable<EndpointModel[]>;
   cFEndpoints$: Observable<EndpointModel[]>;
   cfEndpointsMonitor: PaginationMonitor<EndpointModel>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource>>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
 
   constructor() {
 

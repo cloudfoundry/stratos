@@ -31,13 +31,13 @@ import { ServicesService } from '../services.service';
   ]
 })
 export class ServiceTabsBaseComponent {
-  canCreateServiceInstance: CfCurrentUserPermissions;
-  toolTipText$: Observable<string>;
-  hasVisiblePlans$: Observable<boolean>;
-  servicesSubscription: Subscription;
-  isServiceSpaceScoped$: Observable<any>;
-  addServiceInstanceLink: string[];
-  serviceLabel$: Observable<string>;
+  canCreateServiceInstance!: CfCurrentUserPermissions;
+  toolTipText$!: Observable<string>;
+  hasVisiblePlans$!: Observable<boolean>;
+  servicesSubscription!: Subscription;
+  isServiceSpaceScoped$!: Observable<any>;
+  addServiceInstanceLink!: string[];
+  serviceLabel$!: Observable<string>;
 
   tabLinks: IPageSideNavTab[] = [
     {

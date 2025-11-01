@@ -13,8 +13,8 @@ export class ViewBuildpackComponent implements OnInit, OnChanges {
 
   constructor() { }
 
-  @Input() buildPack: string;
-  isWebLink: boolean;
+  @Input() buildPack!: string;
+  isWebLink!: boolean;
 
   ngOnInit() { }
 

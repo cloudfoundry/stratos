@@ -7,6 +7,6 @@ export class PageHeaderService {
 
   constructor() { }
 
-  headerActive: boolean;
+  headerActive: boolean = false;
 
 }

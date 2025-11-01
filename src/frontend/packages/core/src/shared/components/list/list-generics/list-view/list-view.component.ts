@@ -24,9 +24,9 @@ export class ListViewComponent<T> implements OnDestroy {
   }
 
   @ViewChild(ListHostDirective, { static: true })
-  public listHost: ListHostDirective;
+  public listHost!: ListHostDirective;
 
-  private componentRef: ComponentRef<ListComponent<unknown>>;
+  private componentRef!: ComponentRef<ListComponent<unknown>>;
 
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,

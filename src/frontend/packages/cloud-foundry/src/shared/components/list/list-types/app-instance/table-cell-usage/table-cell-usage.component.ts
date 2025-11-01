@@ -15,8 +15,8 @@ import { UsageGaugeComponent } from '../../../../../../../../core/src/shared/com
 })
 export class TableCellUsageComponent<T> extends TableCellCustom<T> implements OnInit {
 
-  public value: (row: T) => string;
-  public label: (row: T) => string;
+  public value!: (row: T) => string;
+  public label!: (row: T) => string;
 
   ngOnInit() {
     this.value = this.config ? this.config.value : () => '0';

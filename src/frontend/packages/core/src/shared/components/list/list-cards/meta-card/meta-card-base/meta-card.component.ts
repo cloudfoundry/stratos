@@ -50,13 +50,13 @@ export class MetaCardComponent implements OnDestroy {
   public menuOpen = false;
 
   @ContentChildren(MetaCardItemComponent)
-  metaItems: QueryList<MetaCardItemComponent>;
+  metaItems!: QueryList<MetaCardItemComponent>;
 
   @ContentChild(MetaCardTitleComponent, { static: true })
-  title: MetaCardTitleComponent;
+  title!: MetaCardTitleComponent;
 
   @Input()
-  status$: Observable<StratosStatus>;
+  status$!: Observable<StratosStatus>;
 
   @Input()
   public favorite: UserFavorite<IFavoriteMetadata>;
@@ -71,13 +71,13 @@ export class MetaCardComponent implements OnDestroy {
   statusIconByTitle = false;
 
   @Input()
-  statusIconTooltip: string;
+  statusIconTooltip!: string;
 
   @Input()
   statusBackground = false;
 
   @Input()
-  mode: string;
+  mode!: string;
 
   @Input()
   clickAction: () => void = null;
@@ -129,11 +129,11 @@ export class MetaCardComponent implements OnDestroy {
     return this.pActionMenu;
   }
 
-  entityMonitorSub: Subscription;
+  entityMonitorSub!: Subscription;
 
-  public showMenu$: Observable<boolean>;
+  public showMenu$!: Observable<boolean>;
   public isDeleting$: Observable<boolean> = observableOf(false);
-  private pActionMenu: MenuItem[];
+  private pActionMenu!: MenuItem[];
 
   constructor(
     private entityMonitorFactory: EntityMonitorFactory,

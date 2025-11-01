@@ -61,20 +61,20 @@ interface EditOrganizationForm {
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
-  fetchOrgsSub: Subscription;
+  fetchOrgsSub!: Subscription;
   allOrgsInEndpoint: string[];
-  allOrgsInEndpoint$: Observable<string[]>;
-  orgSubscription: Subscription;
-  currentStatus: string;
-  originalName: string;
+  allOrgsInEndpoint$!: Observable<string[]>;
+  orgSubscription!: Subscription;
+  currentStatus!: string;
+  originalName!: string;
   org$: Observable<IOrganization>;
   editOrgName: FormGroup<EditOrganizationForm>;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
-  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
+  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
 
-  get orgName(): FormControl<string> { return this.editOrgName ? this.editOrgName.get('orgName') as FormControl<string> : new FormControl(''); }
+  get orgName(): FormControl<string> { return this.editOrgName ? this.editOrgName.get('orgName') as FormControl<string> : new FormControl('', { nonNullable: true }); }
 
   get quotaDefinition(): FormControl<string | null> { return this.editOrgName ? this.editOrgName.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 

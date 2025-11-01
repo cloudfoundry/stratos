@@ -20,7 +20,7 @@ import { ServiceInstanceLastOpComponent } from '../../../../service-instance-las
 export class TableCellServiceLastOpComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance: Boolean;
+  isUserProvidedServiceInstance!: Boolean;
 
   ngOnInit() {
     this.isUserProvidedServiceInstance = this.entityKey === userProvidedServiceInstanceEntityType;

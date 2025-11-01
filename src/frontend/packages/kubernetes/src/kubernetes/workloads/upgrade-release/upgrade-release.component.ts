@@ -169,7 +169,7 @@ export class UpgradeReleaseComponent {
         pairwise(),
         filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
         map(([, newVal]) => newVal),
-        map(result => ({
+        map((result: ActionState) => ({
           success: !result.error,
           redirect: !result.error,
           redirectPayload: {

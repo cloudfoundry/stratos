@@ -111,7 +111,7 @@ export class MatDatepickerDirective {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerComponent {
-  @Input() selected: Date;
+  @Input() selected!: Date;
   @Output() selectedChange = new EventEmitter<Date>();
 
   onDateChange(event: any) {
@@ -133,7 +133,7 @@ export class CustomDatepickerComponent {
 export class CustomDatepickerInputComponent {
   @Input() matDatepicker: any;
   @Output() valueChange = new EventEmitter<Date>();
-  private _value: Date;
+  private _value!: Date;
 
   @Input()
   get value(): Date {

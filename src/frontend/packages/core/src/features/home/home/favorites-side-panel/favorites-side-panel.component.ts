@@ -21,7 +21,7 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
 export class FavoritesSidePanelComponent implements PreviewableComponent {
 
   favorites$: Observable<any>;
-  name: string;
+  name!: string;
 
   setProps(props: { [key: string]: any; }): void {
     this.favorites$ = props.favorites$;

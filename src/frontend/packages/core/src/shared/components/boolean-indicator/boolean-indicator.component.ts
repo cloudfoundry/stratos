@@ -40,7 +40,7 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
-  public booleanOutput: IBooleanOutput;
+  public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
   @Input() inverse = false;
   // Should we use a subtle display - this won't show the No option as danger (typically red)
@@ -75,7 +75,7 @@ export class BooleanIndicatorComponent {
     Progress: 'cached'
   };
 
-  private pType: BooleanIndicatorType;
+  private pType!: BooleanIndicatorType;
   @Input()
   get type(): BooleanIndicatorType {
     return this.pType;
@@ -85,7 +85,7 @@ export class BooleanIndicatorComponent {
     this.updateBooleanOutput();
   }
 
-  private pIsTrue: boolean;
+  private pIsTrue!: boolean;
   @Input()
   get isTrue(): boolean {
     return this.pIsTrue;

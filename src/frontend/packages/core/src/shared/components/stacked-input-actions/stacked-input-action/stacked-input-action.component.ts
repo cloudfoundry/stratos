@@ -69,11 +69,11 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-  @Input() stateIn$: Observable<StackedInputActionsState>;
-  @Input() position: number;
-  @Input() showRemove: boolean;
-  @Input() key: number;
-  private pConfig: StackedInputActionConfig;
+  @Input() stateIn$!: Observable<StackedInputActionsState>;
+  @Input() position!: number;
+  @Input() showRemove!: boolean;
+  @Input() key!: number;
+  private pConfig!: StackedInputActionConfig;
   @Input()
   set config(config: StackedInputActionConfig) {
     this.pConfig = config;
@@ -85,13 +85,13 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
 
-  @ViewChild('inputElement', { static: true }) inputElement: ElementRef;
+  @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 
   public result = StackedInputActionResult;
   public textFormControl = new FormControl<string>('', [Validators.required, this.uniqueValidator.bind(this)]);
-  public state: StackedInputActionsState;
+  public state!: StackedInputActionsState;
   private subs: Subscription[] = [];
-  private otherValues: string[];
+  private otherValues!: string[];
 
   ngOnInit() {
     const validators = [Validators.required, this.uniqueValidator.bind(this)];
@@ -104,7 +104,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({
         key: this.key,
-        value,
+        value: value ?? '',
         // Component is valid if form is ok OR it's already succeeded
         valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });

@@ -40,7 +40,7 @@ export class StepComponent {
   pHidden = false;
 
   @Input()
-  title: string;
+  title!: string;
 
   @Output() onHidden = new EventEmitter<boolean>();
 
@@ -85,7 +85,7 @@ export class StepComponent {
   public destructiveStep = false;
 
   @ViewChild(TemplateRef, { static: true })
-  content: TemplateRef<any>;
+  content!: TemplateRef<any>;
 
   @Input()
   skip = false;

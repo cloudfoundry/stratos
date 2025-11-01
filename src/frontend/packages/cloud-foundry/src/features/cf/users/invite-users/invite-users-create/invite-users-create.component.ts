@@ -45,13 +45,13 @@ export class InviteUsersCreateComponent implements OnInit {
   public valid$: Observable<boolean>;
   public stateIn = signal<StackedInputActionsState[]>([]);
   public stateIn$: Observable<StackedInputActionsState[]>;
-  public org$: Observable<APIResource<IOrganization>>;
-  public space$: Observable<APIResource<ISpace>>;
+  public org$!: Observable<APIResource<IOrganization>>;
+  public space$!: Observable<APIResource<ISpace> | null>;
   public madeChanges = false;
   public isSpace = false;
   public spaceRole: UserInviteSendSpaceRoles = UserInviteSendSpaceRoles.auditor;
   public spaceRoles: { label: string, value: UserInviteSendSpaceRoles }[] = [];
-  private users: StackedInputActionsUpdate;
+  private users!: StackedInputActionsUpdate;
 
   constructor(
     private store: Store<CFAppState>,

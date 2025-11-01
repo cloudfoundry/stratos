@@ -49,7 +49,7 @@ export class BreadcrumbsComponent {
     for (let i = 0; i < count; i++) {
       const locator = locators.nth(i);
       const label = (await locator.textContent())?.trim() || '';
-      const href = await locator.getAttribute('href').catch((): string | undefined => undefined);
+      const href = await locator.getAttribute('href').catch((): string | null | undefined => undefined) ?? undefined;
       breadcrumbs.push({ label, href });
     }
 

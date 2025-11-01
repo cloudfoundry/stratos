@@ -27,7 +27,7 @@ interface IAppTileData extends ITileData {
 })
 export class BackupRestoreEndpointsComponent {
 
-  public serviceType: string;
+  public serviceType!: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {

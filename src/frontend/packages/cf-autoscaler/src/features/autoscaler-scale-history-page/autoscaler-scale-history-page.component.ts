@@ -34,7 +34,7 @@ import { CustomIconComponent } from '@stratosui/core';
 export class AutoscalerScaleHistoryPageComponent implements OnInit {
 
   parentUrl: string;
-  applicationName$: Observable<string>;
+  applicationName$!: Observable<string>;
 
   constructor(
     public applicationService: ApplicationService,

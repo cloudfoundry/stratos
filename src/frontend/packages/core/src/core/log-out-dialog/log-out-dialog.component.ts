@@ -25,9 +25,9 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) { }
 
-  private autoLogout: Subscription;
-  private countDown: number;
-  private countdownTotal: number;
+  private autoLogout!: Subscription;
+  private countDown!: number;
+  private countdownTotal!: number;
   public percentage = 0;
 
   ngOnInit() {

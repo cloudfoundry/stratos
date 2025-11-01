@@ -35,7 +35,7 @@ export class StatefulIconComponent {
     this.selectedState = this.stateDefinitions[state] || null;
   }
   public allStateKeys = StratosStatus;
-  public stateKey: StratosStatus;
+  public stateKey!: StratosStatus;
   @Input()
   public inline = false;
 
@@ -56,5 +56,5 @@ export class StatefulIconComponent {
       }
     };
 
-  public selectedState: StatefulIconDefinition;
+  public selectedState!: StatefulIconDefinition;
 }

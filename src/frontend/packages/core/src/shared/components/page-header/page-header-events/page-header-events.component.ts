@@ -38,13 +38,13 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class PageHeaderEventsComponent implements OnInit {
   @Input()
-  public endpointIds$: Observable<string[]>;
+  public endpointIds$!: Observable<string[]>;
   @Input()
   public simpleErrorMessage = false;
 
-  public errorMessage$: Observable<string>;
+  public errorMessage$!: Observable<string>;
   endpointId: any;
-  private events$: Observable<any>;
+  private events$!: Observable<any>;
   constructor(
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,

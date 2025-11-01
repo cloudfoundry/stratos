@@ -142,11 +142,11 @@ export class GetAppAutoscalerPolicyTriggerAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerPolicyTriggerEntityType)];
   entityType = appAutoscalerPolicyTriggerEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options: HttpRequest<any>;
+  options!: HttpRequest<any>;
   query: AutoscalerQuery = {
     metric: 'policy'
   };
-  windowValue: string;
+  windowValue!: string;
 }
 
 export interface AutoscalerPaginationParams extends PaginationParam {
@@ -187,7 +187,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   entity = [autoscalerEntityFactory(appAutoscalerScalingHistoryEntityType)];
   entityType = appAutoscalerScalingHistoryEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  options: HttpRequest<any>;
+  options!: HttpRequest<any>;
   initialParams: AutoscalerPaginationParams = {
     'order-direction-field': GetAppAutoscalerScalingHistoryAction.sortField,
     'order-direction': 'desc',
@@ -198,7 +198,7 @@ export class GetAppAutoscalerScalingHistoryAction implements PaginatedAction {
   query: AutoscalerQuery = {
     metric: 'history'
   };
-  windowValue: string;
+  windowValue!: string;
 }
 
 export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
@@ -217,11 +217,11 @@ export abstract class GetAppAutoscalerMetricAction implements PaginatedAction {
     AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC_SUCCESS,
     AppAutoscalerMetricEvents.GET_APP_AUTOSCALER_METRIC_FAILED
   ];
-  url: string;
+  url!: string;
   type = FETCH_APP_AUTOSCALER_METRIC;
-  entityType: string;
+  entityType!: string;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  paginationKey: string;
+  paginationKey!: string;
   initialParams = this.params;
 }
 

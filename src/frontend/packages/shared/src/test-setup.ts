@@ -1,10 +1,9 @@
-// Vitest + Angular testing setup
+// Vitest + Angular testing setup (Zoneless)
 import '@analogjs/vitest-angular/setup-zone';
 
 // Import compiler for JIT compilation support (required for partially compiled libraries)
 import '@angular/compiler';
 
-import { APP_BASE_HREF } from '@angular/common';
 import { getTestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 

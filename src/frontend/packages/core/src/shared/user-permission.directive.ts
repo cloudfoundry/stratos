@@ -11,12 +11,12 @@ standalone: true
 })
 export class UserPermissionDirective implements OnDestroy, OnInit {
   @Input()
-  public appUserPermission: PermissionTypes[];
+  public appUserPermission!: PermissionTypes[];
 
   @Input()
-  public appUserPermissionEndpointGuid: string;
+  public appUserPermissionEndpointGuid!: string;
 
-  private canSub: Subscription;
+  private canSub!: Subscription;
 
   constructor(
     private templateRef: TemplateRef<any>,

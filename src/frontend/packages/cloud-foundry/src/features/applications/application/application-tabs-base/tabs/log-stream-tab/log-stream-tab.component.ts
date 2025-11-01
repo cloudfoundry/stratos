@@ -38,9 +38,9 @@ interface ConnectionError {
 ]
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
-  public messages: Observable<string>;
+  public messages!: Observable<string>;
   private connectionStatusSubject = new Subject<number>();
-  public connectionStatus: Observable<number>;
+  public connectionStatus!: Observable<number>;
   private socketError = false;
   private connectionAttempts = 0;
   private maxRetries = 3;

@@ -52,8 +52,8 @@ export class LocalAccountWizardComponent implements OnInit {
   private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
   public title = inject(APP_TITLE);
 
-  passwordForm: FormGroup;
-  validateLocalAuthForm: Observable<boolean>;
+  passwordForm!: FormGroup;
+  validateLocalAuthForm!: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
 
   showPassword: boolean[] = [];

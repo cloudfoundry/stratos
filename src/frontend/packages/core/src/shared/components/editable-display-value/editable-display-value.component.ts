@@ -15,8 +15,8 @@ import { DisplayValueComponent } from '../display-value/display-value.component'
 })
 export class EditableDisplayValueComponent {
 
-  @Input() edit: boolean;
-  @Input() label: string;
+  @Input() edit!: boolean;
+  @Input() label!: string;
   @Input() value: any;
 
   constructor() { }

@@ -35,7 +35,7 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 
-  paginationStateSub: Subscription;
+  paginationStateSub!: Subscription;
 
   private store = inject(Store<CFAppState>);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);

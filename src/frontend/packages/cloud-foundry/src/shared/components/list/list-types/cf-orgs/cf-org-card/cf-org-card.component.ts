@@ -63,19 +63,19 @@ selector: 'app-cf-org-card',
 })
 export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {
   cardMenu: MenuItem[];
-  orgGuid: string;
-  normalisedMemoryUsage: number;
-  memoryLimit: string;
-  instancesLimit: string;
+  orgGuid!: string;
+  normalisedMemoryUsage!: number;
+  memoryLimit!: string;
+  instancesLimit!: string;
   subscriptions: Subscription[] = [];
-  memoryTotal: number;
-  instancesCount: number;
-  appCount$: Observable<number>;
-  userRolesInOrg: string;
-  currentUser$: Observable<EndpointUser>;
-  public entityConfig: ComponentEntityMonitorConfig;
-  public favorite: UserFavorite<IFavoriteMetadata>;
-  public orgStatus$: Observable<StratosStatus>;
+  memoryTotal!: number;
+  instancesCount!: number;
+  appCount$!: Observable<number>;
+  userRolesInOrg!: string;
+  currentUser$!: Observable<EndpointUser>;
+  public entityConfig!: ComponentEntityMonitorConfig;
+  public favorite!: UserFavorite<IFavoriteMetadata> | null;
+  public orgStatus$!: Observable<StratosStatus>;
 
   constructor(
     private cfUserService: CfUserService,

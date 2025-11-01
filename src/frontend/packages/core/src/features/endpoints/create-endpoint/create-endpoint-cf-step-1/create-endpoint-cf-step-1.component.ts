@@ -59,7 +59,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   registerForm: FormGroup<CreateEndpointForm>;
 
   @Input() finalStep: boolean;
-  private pFixedUrl: string;
+  private pFixedUrl!: string;
   @Input()
   get fixedUrl(): string {
     return this.pFixedUrl;
@@ -79,7 +79,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   urlValidation: string;
 
   showAdvancedFields = false;
-  clientRedirectURI: string;
+  clientRedirectURI!: string;
 
   endpointTypeSupportsSSO = false;
   endpoint: StratosCatalogEndpointEntity;
@@ -150,13 +150,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       map(result => {
         const data: ConnectEndpointConfig = {
           guid: result.message,
-          name: this.registerForm.value.nameField,
-          type,
-          subType,
+          name: this.registerForm.value.nameField ?? '',
+          type: type || '',
+          subType: subType || '',
           ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
         };
         if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField}'`);
+          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField ?? ''}'`);
         }
         const success = !result.error;
         return {
@@ -197,11 +197,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   toggleCACertField() {
     this.showCACertField = !this.showCACertField;
     if (this.showCACertField) {
-      this.lastSkipSSLValue = this.registerForm.value.skipSSLField;
+      this.lastSkipSSLValue = this.registerForm.value.skipSSLField ?? false;
       this.registerForm.controls.skipSSLField.setValue(false);
       this.registerForm.controls.skipSSLField.disable();
     } else {
-      this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue);
+      this.registerForm.controls.skipSSLField.setValue(this.lastSkipSSLValue ?? false);
       this.registerForm.controls.skipSSLField.enable();
     }
   }

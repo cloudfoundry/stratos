@@ -23,9 +23,9 @@ import { ListAppInstance } from '../app-instance-types';
 })
 export class TableCellCfCellComponent extends TableCellCustom<ListAppInstance> implements OnDestroy {
 
-  cellMetric$: Observable<IMetricCell>;
-  cellLink: string;
-  fetchMetricsSub: Subscription;
+  cellMetric$!: Observable<IMetricCell>;
+  cellLink!: string;
+  fetchMetricsSub!: Subscription;
 
   @Input('config')
   set config(config: {

@@ -13,9 +13,9 @@ export class DialogErrorComponent implements OnInit {
 
   constructor() { }
 
-  @Input() message: string;
+  @Input() message!: string;
 
-  @Input() show: boolean;
+  @Input() show!: boolean;
 
   ngOnInit() {
   }

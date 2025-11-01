@@ -13,5 +13,5 @@ import { ChartItemComponent } from '../chart-item/chart-item.component';
   imports: [ChartItemComponent]
 })
 export class ChartListComponent {
-  @Input() charts: Chart[];
+  @Input() charts!: Chart[];
 }

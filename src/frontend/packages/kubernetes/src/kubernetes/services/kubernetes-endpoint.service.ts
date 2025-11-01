@@ -55,7 +55,7 @@ export class KubernetesEndpointService {
   kubeEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
-  kubeGuid: string;
+  kubeGuid!: string;
   deployments$: Observable<KubernetesDeployment[]>;
   statefulSets$: Observable<KubernetesStatefulSet[]>;
   services$: Observable<KubeService[]>;

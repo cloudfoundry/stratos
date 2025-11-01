@@ -99,18 +99,18 @@ interface FolderSourceInfo extends DeploySource {
 
 export class DeployApplicationDeployer {
 
-  isRedeploy: string;
-  connectSub: Subscription;
-  updateSub: Subscription;
-  msgSub: Subscription;
+  isRedeploy!: string;
+  connectSub!: Subscription;
+  updateSub!: Subscription;
+  msgSub!: Subscription;
   streamTitle = 'Preparing...';
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
+  cfGuid!: string;
+  orgGuid!: string;
+  spaceGuid!: string;
   applicationSource: any;
-  applicationOverrides: OverrideAppDetails;
+  applicationOverrides!: OverrideAppDetails;
 
   // Signal wrappers with BehaviorSubject-compatible API for backward compatibility
   // These provide both Signal reactivity and Observable API via .asObservable()
@@ -131,10 +131,10 @@ export class DeployApplicationDeployer {
 
   private isOpen = false;
 
-  public fsFileInfo: FileScannerInfo;
+  public fsFileInfo!: FileScannerInfo;
 
   private fileTransfers: any;
-  private fileTransferStatus: FileTransferStatus;
+  private fileTransferStatus!: FileTransferStatus;
   private currentFileTransfer: any;
 
   constructor(

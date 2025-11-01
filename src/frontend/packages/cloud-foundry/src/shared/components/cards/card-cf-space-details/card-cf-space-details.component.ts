@@ -33,7 +33,7 @@ export class CardCfSpaceDetailsComponent implements OnDestroy {
   private snackBarService = inject(SnackBarService);
 
   allowSshStatus$: Observable<string>;
-  quotaLinkSub: Subscription;
+  quotaLinkSub!: Subscription;
 
   constructor() {
     this.allowSshStatus$ = this.cfSpaceService.allowSsh$.pipe(

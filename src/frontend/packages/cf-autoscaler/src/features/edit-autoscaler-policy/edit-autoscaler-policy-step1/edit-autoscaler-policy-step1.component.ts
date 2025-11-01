@@ -65,7 +65,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
         if (!this.currentPolicy.scaling_rules_form) {
           this.currentPolicy = autoscalerTransformArrayToMap(this.currentPolicy);
         }
-        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules.timezone);
+        this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules?.timezone ?? '');
         this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
         this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
         this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
@@ -77,9 +77,11 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   }
 
   onNext: StepOnNextFunction = () => {
-    this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count').value);
-    this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count').value);
-    this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone').value;
+    this.currentPolicy.instance_min_count = Math.floor(this.editLimitForm.get('instance_min_count')?.value ?? 0);
+    this.currentPolicy.instance_max_count = Math.floor(this.editLimitForm.get('instance_max_count')?.value ?? 0);
+    if (this.currentPolicy.schedules) {
+      this.currentPolicy.schedules.timezone = this.editLimitForm.get('timezone')?.value ?? '';
+    }
     this.service.setState(this.currentPolicy);
     return observableOf({ success: true });
   };

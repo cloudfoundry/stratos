@@ -93,7 +93,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
   public createEditServiceInstance: FormGroup<CreateEditServiceInstanceForm>;
   public bindExistingInstance: FormGroup<BindExistingInstanceForm>;
-  public allServiceInstanceNames: string[];
+  public allServiceInstanceNames!: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
   public tags: { label: string, }[] = [];
@@ -102,13 +102,13 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private tagsChangedSignal = signal(true);
 
   @Input()
-  public cfGuid: string;
+  public cfGuid!: string;
   @Input()
-  public spaceGuid: string;
+  public spaceGuid!: string;
   @Input()
-  public appId: string;
+  public appId!: string;
   @Input()
-  public serviceInstanceId: string;
+  public serviceInstanceId!: string;
 
   @Input()
   public showModeSelection = false;

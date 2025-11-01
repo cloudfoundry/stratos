@@ -20,10 +20,10 @@ import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 
 export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfigBase implements IListConfig<APIResource> {
 
-  allowSelection: boolean;
-  getDataSource: () => CfAppRoutesDataSource;
+  allowSelection!: boolean;
+  getDataSource!: () => CfAppRoutesDataSource;
 
-  protected dataSource: CfAppRoutesDataSource;
+  protected dataSource!: CfAppRoutesDataSource;
 
   /**
    * Creates an instance of CfAppRoutesListConfigServiceBase.

@@ -25,10 +25,10 @@ import { BooleanIndicatorComponent } from '../../../shared/components/boolean-in
 })
 export class DiagnosticsPageComponent implements OnInit {
 
-  sessionData$: Observable<SessionData>;
-  versionNumber$: Observable<string>;
-  userIsAdmin$: Observable<boolean>;
-  helmLastModified$: Observable<Date>;
+  sessionData$!: Observable<SessionData>;
+  versionNumber$!: Observable<string>;
+  userIsAdmin$!: Observable<boolean>;
+  helmLastModified$!: Observable<Date>;
 
   public breadcrumbs = [
     {

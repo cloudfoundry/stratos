@@ -84,15 +84,15 @@ interface SelectPlanForm {
 ]
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  selectedPlan$: Observable<APIResource<IServicePlan>>;
-  private selectedPlanAccessibilitySignal = signal<StratosStatus>(null);
+  selectedPlan$!: Observable<APIResource<IServicePlan>>;
+  private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
-  cSIHelperService: CreateServiceInstanceHelper;
+  cSIHelperService!: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef, static: true })
-  noPlansDiv: ViewContainerRef;
+  noPlansDiv!: ViewContainerRef;
 
   validate = signal<boolean>(false);
-  subscription: Subscription;
+  subscription!: Subscription;
   stepperForm: FormGroup<SelectPlanForm>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   displayNames: { [guid: string]: string } = {};
@@ -169,9 +169,9 @@ export class SelectPlanStepComponent implements OnDestroy {
       withLatestFrom(this.store.select(selectCreateServiceInstance)),
       tap(([servicePlans, createServiceInstanceState]) => {
         if (this.modeService.isEditServiceInstanceMode()) {
-          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid);
+          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid ?? '');
         } else {
-          this.stepperForm.controls.servicePlans.setValue(servicePlans[0].metadata.guid);
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0]?.metadata.guid ?? '');
         }
         this.stepperForm.updateValueAndValidity();
         this.validate.set(this.stepperForm.valid);

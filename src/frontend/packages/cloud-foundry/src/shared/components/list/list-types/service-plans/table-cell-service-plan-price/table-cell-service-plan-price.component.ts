@@ -18,8 +18,8 @@ import { ServicePlanPriceComponent } from '../../../../service-plan-price/servic
 ]
 })
 export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIResource<IServicePlan>> {
-  isFree: boolean;
-  canShowCosts: boolean;
+  isFree!: boolean;
+  canShowCosts!: boolean;
 
   @Input()
   set row(servicePlan: APIResource<IServicePlan>) {

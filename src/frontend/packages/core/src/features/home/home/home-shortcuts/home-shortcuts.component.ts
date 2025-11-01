@@ -18,6 +18,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class HomeShortcutsComponent {
 
-  @Input() shortcuts: HomeCardShortcut[];
+  @Input() shortcuts: HomeCardShortcut[] = [];
 
 }

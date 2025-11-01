@@ -20,9 +20,9 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   imports: [AsyncPipe, CustomTooltipDirective]
 })
 export class ChartDetailsUsageComponent implements OnInit {
-  @Input() chart: Chart;
+  @Input() chart!: Chart;
   @Input() currentVersion: string;
-  installing: boolean;
+  installing!: boolean;
   private mdIconRegistry = inject(MatIconRegistry);
   private sanitizer = inject(DomSanitizer);
   public snackBar = inject(TailwindSnackBarService);

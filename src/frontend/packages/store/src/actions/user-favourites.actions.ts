@@ -25,7 +25,7 @@ abstract class BaseSingleUserFavouritesAction extends BaseUserFavoritesAction {
 }
 
 abstract class BaseMultipleUserFavouritesAction extends BaseUserFavoritesAction implements PaginatedAction {
-  guid: string;
+  guid!: string;
   constructor(actionType: string, public paginationKey: string) {
     super(actionType);
   }

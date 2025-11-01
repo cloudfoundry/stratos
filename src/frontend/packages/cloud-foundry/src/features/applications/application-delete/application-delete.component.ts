@@ -157,20 +157,20 @@ export class ApplicationDeleteComponent<T> {
     }
   ];
 
-  public selectedRoutes: APIResource<IRoute>[];
-  public selectedServiceInstances: APIResource<IServiceBinding>[];
-  public fetchingRelated$: Observable<boolean>;
-  public selectedApplication$: Observable<APIResource<IApp>[]>;
+  public selectedRoutes!: APIResource<IRoute>[];
+  public selectedServiceInstances!: APIResource<IServiceBinding>[];
+  public fetchingRelated$!: Observable<boolean>;
+  public selectedApplication$!: Observable<APIResource<IApp>[]>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   public selectedUserServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
-  public fetchingApplicationData$: Observable<boolean>;
+  public fetchingApplicationData$!: Observable<boolean>;
 
   public deletingState = AppMonitorComponentTypes.DELETE;
-  public routeMonitor: PaginationMonitor<APIResource<IRoute>>;
-  public instanceMonitor: PaginationMonitor<APIResource<IServiceBinding>>;
+  public routeMonitor!: PaginationMonitor<APIResource<IRoute>>;
+  public instanceMonitor!: PaginationMonitor<APIResource<IServiceBinding>>;
 
-  public appMonitor: EntityMonitor<APIResource<IApp>>;
+  public appMonitor!: EntityMonitor<APIResource<IApp>>;
 
   public cancelUrl: string;
 

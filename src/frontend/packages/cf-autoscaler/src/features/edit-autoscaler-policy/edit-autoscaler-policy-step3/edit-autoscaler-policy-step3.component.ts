@@ -120,7 +120,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
       days_of_month: shiftArray(editSchedule.days_of_month || [], -1),
       instance_min_count: editSchedule.instance_min_count,
       instance_max_count: Math.abs(Number(editSchedule.instance_max_count)),
-      initial_min_instance_count: editSchedule.initial_min_instance_count,
+      initial_min_instance_count: editSchedule.initial_min_instance_count ?? 0,
       start_date: editSchedule.start_date || '',
       end_date: editSchedule.end_date || '',
       start_time: editSchedule.start_time,
@@ -168,24 +168,25 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     const currentSchedule = this.currentPolicy.schedules.recurring_schedule[this.editIndex];
     const repeatOn = ('days_of_' + this.editRepeatType) as 'days_of_week' | 'days_of_month';
     if (this.editRecurringScheduleForm.get('effective_type')?.value === 'custom') {
-      currentSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value;
-      currentSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value;
+      currentSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value ?? '';
+      currentSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value ?? '';
     } else {
       delete currentSchedule.start_date;
       delete currentSchedule.end_date;
     }
     delete currentSchedule.days_of_month;
     delete currentSchedule.days_of_week;
-    currentSchedule[repeatOn] = shiftArray(this.editRecurringScheduleForm.get(repeatOn)?.value, 1);
-    if (this.editRecurringScheduleForm.get('initial_min_instance_count')?.value) {
-      currentSchedule.initial_min_instance_count = this.editRecurringScheduleForm.get('initial_min_instance_count')?.value;
+    currentSchedule[repeatOn] = shiftArray(this.editRecurringScheduleForm.get(repeatOn)?.value ?? [], 1);
+    const initialMinCount = this.editRecurringScheduleForm.get('initial_min_instance_count')?.value ?? 0;
+    if (initialMinCount) {
+      currentSchedule.initial_min_instance_count = initialMinCount;
     } else {
       delete currentSchedule.initial_min_instance_count;
     }
-    currentSchedule.instance_min_count = this.editRecurringScheduleForm.get('instance_min_count')?.value;
-    currentSchedule.instance_max_count = this.editRecurringScheduleForm.get('instance_max_count')?.value;
-    currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time')?.value;
-    currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time')?.value;
+    currentSchedule.instance_min_count = this.editRecurringScheduleForm.get('instance_min_count')?.value ?? 0;
+    currentSchedule.instance_max_count = this.editRecurringScheduleForm.get('instance_max_count')?.value ?? 0;
+    currentSchedule.start_time = this.editRecurringScheduleForm.get('start_time')?.value ?? '';
+    currentSchedule.end_time = this.editRecurringScheduleForm.get('end_time')?.value ?? '';
     this.editIndex = -1;
   }
 
@@ -208,9 +209,10 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
 
   validateRecurringScheduleInitialMin(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: unknown } | null => {
+      const minValue = this.editRecurringScheduleForm?.get('instance_min_count')?.value ?? 0;
+      const maxValue = this.editRecurringScheduleForm?.get('instance_max_count')?.value ?? Number.MAX_VALUE;
       const invalid = this.editRecurringScheduleForm &&
-        numberWithFractionOrExceedRange(control.value, this.editRecurringScheduleForm.get('instance_min_count')?.value,
-          this.editRecurringScheduleForm.get('instance_max_count')?.value + 1, false);
+        numberWithFractionOrExceedRange(control.value, minValue, maxValue + 1, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }
@@ -226,7 +228,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
       }
       const lastValid = this.editMutualValidation.date;
       this.editMutualValidation.date =
-        !dateIsAfter(this.editRecurringScheduleForm.get('start_date')?.value, this.editRecurringScheduleForm.get('end_date')?.value);
+        !dateIsAfter(this.editRecurringScheduleForm.get('start_date')?.value ?? '', this.editRecurringScheduleForm.get('end_date')?.value ?? '');
       if (!this.editMutualValidation.date) {
         errors.alertInvalidPolicyScheduleEndDateBeforeStartDate = { value: control.value };
       }
@@ -238,7 +240,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   validateRecurringScheduleTime(mutualName: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: unknown } | null => {
       const invalid = this.editRecurringScheduleForm &&
-        timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time')?.value, this.editRecurringScheduleForm.get('end_time')?.value);
+        timeIsSameOrAfter(this.editRecurringScheduleForm.get('start_time')?.value ?? '', this.editRecurringScheduleForm.get('end_time')?.value ?? '');
       const lastValid = this.editMutualValidation.time;
       this.editMutualValidation.time = !invalid;
       this.mutualValidate(mutualName, lastValid, this.editMutualValidation.time);
@@ -249,14 +251,14 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   validateRecurringScheduleWeekMonth(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: unknown } | null => {
       const newSchedule: Partial<AppRecurringSchedule> = {
-        start_time: this.editRecurringScheduleForm.get('start_time')?.value,
-        end_time: this.editRecurringScheduleForm.get('end_time')?.value
+        start_time: this.editRecurringScheduleForm.get('start_time')?.value ?? '',
+        end_time: this.editRecurringScheduleForm.get('end_time')?.value ?? ''
       };
       const repeatProperty = 'days_of_' + this.editRepeatType as 'days_of_week' | 'days_of_month';
       newSchedule[repeatProperty] = shiftArray(control.value, 1);
       if (this.editEffectiveType === 'custom') {
-        newSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value;
-        newSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value;
+        newSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value ?? '';
+        newSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value ?? '';
       }
       const invalid = recurringSchedulesOverlapping(newSchedule as AppRecurringSchedule, this.editIndex,
         this.currentPolicy.schedules.recurring_schedule, repeatProperty);

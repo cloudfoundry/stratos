@@ -17,6 +17,6 @@ import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.servic
 })
 export class CfOrgSpaceLinksComponent {
 
-  @Input() service: CfOrgSpaceLabelService;
-  @Input() spaceBreadCrumbs: string;
+  @Input() service!: CfOrgSpaceLabelService;
+  @Input() spaceBreadCrumbs!: string;
 }

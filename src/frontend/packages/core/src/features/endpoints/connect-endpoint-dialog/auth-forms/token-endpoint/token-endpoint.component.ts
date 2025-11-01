@@ -24,7 +24,7 @@ interface TokenAuthForm {
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;
 
-  @Input() formGroup: FormGroup<TokenAuthForm>;
+  @Input() formGroup!: FormGroup<TokenAuthForm>;
 
   @Input() config: any = {};
 }

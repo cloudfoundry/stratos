@@ -18,7 +18,7 @@ import { map } from 'rxjs/operators';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
-  public mostRecentHit: Date;
+  public mostRecentHit?: Date;
   public subText$: Observable<string>;
   public icon: string;
   public iconFont: string;
@@ -63,7 +63,7 @@ export class RecentEntitiesComponent {
   @Input()
   public history = false;
 
-  @Input() mode: string;
+  @Input() mode?: string;
 
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;

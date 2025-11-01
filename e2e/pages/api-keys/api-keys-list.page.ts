@@ -12,7 +12,7 @@ export class APIKeysListPage extends BasePage {
   private readonly pageContainer: Locator;
 
   constructor(page: Page) {
-    super(page, '/api-keys');
+    super(page);
     this.pageContainer = page.locator('app-api-keys-page');
     this.list = new ListComponent(page);
   }

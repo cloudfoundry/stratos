@@ -28,8 +28,8 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   @Input() disabled = false;
   @Input() checked = false;
   @Input() value: any;
-  @Input() name: string;
-  @Input() id: string;
+  @Input() name!: string;
+  @Input() id!: string;
   @Input() required = false;
   @Input() labelPosition: 'before' | 'after' = 'after';
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';

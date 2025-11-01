@@ -30,13 +30,13 @@ const RECENT_ITEMS_COUNT = 10;
 export class CardCfRecentAppsComponent implements OnInit {
 
   public recentApps$: Observable<APIResource<IApp>[]>;
-  @Input() allApps$: Observable<APIResource<IApp>[]>;
-  @Input() loading$: Observable<boolean>;
+  @Input() allApps$!: Observable<APIResource<IApp>[]>;
+  @Input() loading$!: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
-  @Input() endpoint: string;
-  @Input() mode: string;
+  @Input() endpoint!: string;
+  @Input() mode!: string;
   @Input() showDate = true;
-  @Input() dateMode: string;
+  @Input() dateMode!: string;
   @Input() noStats = false;
   @Input() placeholderMode = false;
   @Input() hideWhenEmpty = false;
@@ -45,10 +45,10 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   public placeholders: any[];
 
-  appsPagObs: PaginationObservables<APIResource<IApp>>;
+  appsPagObs!: PaginationObservables<APIResource<IApp>>;
 
-  hasEntities$: Observable<boolean>;
-  show$: Observable<boolean>;
+  hasEntities$!: Observable<boolean>;
+  show$!: Observable<boolean>;
 
   private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
 

@@ -47,7 +47,7 @@ export interface IAppTileData extends ITileData {
 })
 export class NewApplicationBaseStepComponent {
 
-  public serviceType: string;
+  public serviceType!: string;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {

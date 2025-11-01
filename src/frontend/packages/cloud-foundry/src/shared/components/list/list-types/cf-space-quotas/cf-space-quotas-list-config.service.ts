@@ -26,8 +26,8 @@ import { CfOrgSpaceQuotasDataSourceService } from './cf-space-quotas-data-source
   providedIn: 'root'
 })
 export class CfSpaceQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
-  dataSource: CfOrgSpaceQuotasDataSourceService;
-  deleteSubscription: Subscription;
+  dataSource!: CfOrgSpaceQuotasDataSourceService;
+  deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 

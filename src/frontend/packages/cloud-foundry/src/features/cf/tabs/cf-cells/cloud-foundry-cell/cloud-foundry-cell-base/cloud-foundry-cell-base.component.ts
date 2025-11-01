@@ -58,7 +58,7 @@ export class CloudFoundryCellBaseComponent {
   public name$: Observable<string>;
   public waitForEntityId: string;
   public waitForEntitySchema = cfEntityFactory(metricEntityType);
-  public cfCellService: CloudFoundryCellService;
+  public cfCellService!: CloudFoundryCellService;
 
 
   constructor(

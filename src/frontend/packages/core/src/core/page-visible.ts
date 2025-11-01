@@ -15,8 +15,8 @@ class VisibilityStatusConstant {
 }
 
 export class PageVisible {
-  private hidden: string;
-  private visibilityState: string;
+  private hidden!: string;
+  private visibilityState!: string;
   // private visibilityChanged: string;
 
   constructor(@Inject(DOCUMENT) private document: Document) {

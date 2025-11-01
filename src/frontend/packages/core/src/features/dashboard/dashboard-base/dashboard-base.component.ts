@@ -50,16 +50,16 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
-  public activeTabLabel$: Observable<string>;
-  public subNavData$: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
-  public isMobile$: Observable<boolean>;
-  public sideNavMode$: Observable<string>;
-  public sideNavMode: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }>;
-  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object, }>;
-  private dashboardState$: Observable<DashboardState>;
-  public noMargin$: Observable<boolean>;
-  private closeSub: Subscription;
+  public activeTabLabel$!: Observable<string>;
+  public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
+  public isMobile$: Observable<boolean> = of(false);
+  public sideNavMode$!: Observable<string>;
+  public sideNavMode!: string;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }> = of({ mode: 'side', opened: true, iconMode: false });
+  public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
+  private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
+  public noMargin$: Observable<boolean> = of(false);
+  private closeSub!: Subscription;
   private mobileSub: Subscription;
   private drawer: MatDrawer;
   public iconModeOpen = false;
@@ -68,7 +68,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer: ViewContainerRef;
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
 
   @ViewChild('content', { static: false }) public content: any;
 

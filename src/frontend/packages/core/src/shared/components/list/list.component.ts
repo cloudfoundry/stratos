@@ -131,8 +131,8 @@ import { AppPaginatorComponent } from '../app-paginator/app-paginator.component'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterViewInit {
-  private uberSub: Subscription;
-  public entitySelectConfig: EntitySelectConfig;
+  private uberSub!: Subscription;
+  public entitySelectConfig!: EntitySelectConfig;
 
   @Input() addForm: NgForm;
 
@@ -150,7 +150,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   entitySelectValue$ = this.entitySelectValueSubject.asObservable();
 
   pPaginator: MatPaginator;
-  private filterString: string;
+  private filterString!: string;
 
   @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
     if (!paginator || this.paginationWidgetToStore) {
@@ -219,21 +219,21 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   filterColumns: IListFilter[] = [];
   private filterSelected: IListFilter;
 
-  private paginationWidgetToStore: Subscription;
-  private filterWidgetToStore: Subscription;
-  private multiFilterChangesSub: Subscription;
+  private paginationWidgetToStore!: Subscription;
+  private filterWidgetToStore!: Subscription;
+  private multiFilterChangesSub!: Subscription;
 
-  globalActions: IGlobalListAction<T>[];
-  multiActions: IMultiListAction<T>[];
+  globalActions!: IGlobalListAction<T>[];
+  multiActions!: IMultiListAction<T>[];
   private haveMultiActionsSignal = signal<boolean>(false);
   private haveMultiActionsSubject = new BehaviorSubject<boolean>(false);
   haveMultiActions = this.haveMultiActionsSubject.asObservable();
-  hasSingleActions: boolean;
-  columns: ITableColumn<T>[];
-  dataSource: IListDataSource<T>;
+  hasSingleActions!: boolean;
+  columns!: ITableColumn<T>[];
+  dataSource!: IListDataSource<T>;
   multiFilterManagers: MultiFilterManager<T>[];
 
-  paginationController: IListPaginationController<T>;
+  paginationController!: IListPaginationController<T>;
   private multiFilterWidgetObservables = new Array<Subscription>();
 
   view$: Observable<ListView>;
@@ -311,7 +311,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   }
 
   private getMultiFilterManagers() {
-    const configs = this.config.getMultiFiltersConfigs();
+    const configs = this.config?.getMultiFiltersConfigs();
     if (!configs) {
       return null;
     }
@@ -321,15 +321,15 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
   // TODO: This needs tidying up - NJ
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
-      this.config.getGlobalActions()
+      this.config?.getGlobalActions() ?? []
     );
     this.multiActions = this.setupActionsDefaultObservables(
-      this.config.getMultiActions()
+      this.config?.getMultiActions() ?? []
     );
-    this.hasSingleActions = (this.config.getSingleActions() || []).length > 0;
-    this.columns = this.config.getColumns();
-    this.dataSource = this.config.getDataSource();
-    this.entitySelectConfig = this.dataSource.entitySelectConfig;
+    this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
+    this.columns = this.config?.getColumns()!;
+    this.dataSource = this.config?.getDataSource()!;
+    this.entitySelectConfig = this.dataSource.entitySelectConfig || {} as EntitySelectConfig;
 
     this.dataSource.pagination$.pipe(
       first(),
@@ -358,10 +358,10 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     const { view, } = getListStateObservables(this.store, this.listViewKey);
     this.view$ = view.pipe(
       map(listView => {
-        if (this.config.viewType === ListViewTypes.CARD_ONLY) {
+        if (this.config?.viewType === ListViewTypes.CARD_ONLY) {
           return 'cards';
         }
-        if (this.config.viewType === ListViewTypes.TABLE_ONLY) {
+        if (this.config?.viewType === ListViewTypes.TABLE_ONLY) {
           return 'table';
         }
         return listView;
@@ -378,14 +378,14 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     // Determine if this list view needs the control header bar at the top
     this.hasControls$ = this.view$.pipe(map((viewType) => {
       return !!(
-        this.config.viewType === 'both' ||
-        this.config.text && this.config.text.title ||
+        this.config?.viewType === 'both' ||
+        this.config?.text && this.config?.text.title ||
         this.addForm ||
         this.globalActions && this.globalActions.length ||
         this.multiActions && this.multiActions.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
         this.multiFilterManagers && this.multiFilterManagers.length ||
-        this.config.enableTextFilter
+        this.config?.enableTextFilter
       );
     }));
 
@@ -414,8 +414,8 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       }));
 
 
-    this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions ||
-      (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
+    this.paginatorSettings.pageSizeOptions = this.config?.pageSizeOptions ||
+      (this.config?.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
@@ -444,7 +444,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       this.headerSort.direction = sort.direction;
     }));
 
-    this.filterColumns = this.config.getFilters ? this.config.getFilters() : [];
+    this.filterColumns = this.config?.getFilters ? this.config?.getFilters() : [];
 
     const filterStoreToWidget = this.paginationController.filter$.pipe(
       distinctUntilChanged(),
@@ -665,7 +665,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
       case ListViewTypes.CARD_ONLY:
         return 'cards';
       default:
-        return this.config.defaultView || 'table';
+        return this.config?.defaultView || 'table';
     }
   }
 

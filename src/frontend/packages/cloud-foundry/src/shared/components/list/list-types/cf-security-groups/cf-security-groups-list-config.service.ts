@@ -44,7 +44,7 @@ export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResou
 
   constructor() {
     super();
-    this.dataSource = new CfSecurityGroupsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfSecurityGroupsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid!, this as any);
   }
 
   getColumns = () => this.columns;

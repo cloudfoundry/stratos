@@ -31,19 +31,19 @@ enum AlertLevel {
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() label: string;
-  @Input() labelSingular: string;
-  @Input() limit: string;
-  @Input() units: string;
-  @Input() value: string;
+  @Input() icon!: string;
+  @Input() iconFont!: string;
+  @Input() label!: string;
+  @Input() labelSingular!: string;
+  @Input() limit!: string;
+  @Input() units!: string;
+  @Input() value!: string;
   @Input() showUsage = false;
   @Input() textOnly = false;
   @Input() labelAtTop = false;
-  @Input() link: () => void | string;
+  @Input() link!: () => void | string;
   @Output() showAlerts = new EventEmitter<any>();
-  @Input() mode: string;
+  @Input() mode!: string;
 
   @Input('alerts')
   set alerts(alerts: any[]) {
@@ -54,16 +54,16 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   alertInfo: any;
 
-  formattedValue: string;
-  formattedLimit: string;
-  usage: string;
+  formattedValue!: string;
+  formattedLimit!: string;
+  usage!: string;
   private utils = inject(UtilsService);
   private store = inject(Store<AppState>);
 
   private _status = signal<StratosStatus>(StratosStatus.NONE);
   public status = this._status.asReadonly();
   public status$: Observable<StratosStatus> = toObservable(this._status);
-  isUnlimited: boolean;
+  isUnlimited!: boolean;
 
   ngOnInit() {
     this.format();

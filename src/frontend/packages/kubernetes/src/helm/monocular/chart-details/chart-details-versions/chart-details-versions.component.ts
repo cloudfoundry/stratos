@@ -12,8 +12,8 @@ import { ChartsService } from '../../shared/services/charts.service';
   standalone: true
 })
 export class ChartDetailsVersionsComponent {
-  @Input() versions: ChartVersion[];
-  @Input() currentVersion: ChartVersion;
+  @Input() versions!: ChartVersion[];
+  @Input() currentVersion!: ChartVersion;
   showAllVersions: boolean;
   private route = inject(ActivatedRoute);
   private chartService = inject(ChartsService);

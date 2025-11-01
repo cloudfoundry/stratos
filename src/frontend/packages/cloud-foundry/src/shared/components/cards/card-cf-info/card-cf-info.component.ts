@@ -32,11 +32,11 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   private dialog = inject(TailwindDialogService);
   private esf = inject(EntityServiceFactory);
 
-  public apiUrl: string;
+  public apiUrl!: string;
   private subs: Subscription[] = [];
-  public autoscalerVersion$: Observable<string>;
+  public autoscalerVersion$!: Observable<string | null>;
 
-  description$: Observable<string>;
+  description$!: Observable<string>;
 
   ngOnInit() {
     const obs$ = this.cfEndpointService.endpoint$.pipe(

@@ -29,7 +29,7 @@ export interface JsonSchemaFormConfig {
 export class TailwindJsonSchemaFormComponent implements OnInit {
   @Input() schema: any;
   @Input() data: any;
-  @Input() layout: any[];
+  @Input() layout!: any[];
   @Input() options: any;
   @Input() framework: string = 'tailwind';
 

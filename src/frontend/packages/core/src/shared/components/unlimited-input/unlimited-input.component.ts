@@ -26,16 +26,16 @@ const UNLIMITED = -1;
 export class UnlimitedInputComponent implements OnInit {
   public ctrlContainer = inject(FormGroupDirective);
 
-  @Input() name: string;
+  @Input() name!: string;
   @Input() value: any;
-  @Input() required: boolean;
-  @Input() type: string;
-  @Input() placeholder: string;
-  @Input() suffix: string;
-  @Input() prefix: string;
+  @Input() required!: boolean;
+  @Input() type!: string;
+  @Input() placeholder!: string;
+  @Input() suffix!: string;
+  @Input() prefix!: string;
 
-  unlimited: boolean;
-  formControl: AbstractControl;
+  unlimited!: boolean;
+  formControl!: AbstractControl;
   initialValue: any;
 
   onChange() {

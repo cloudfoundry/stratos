@@ -67,9 +67,9 @@ enum Status {
 })
 export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChild('customCard', {read: ViewContainerRef, static: false}) customCard: ViewContainerRef;
+  @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   pLayout: HomePageCardLayout;
 
@@ -100,7 +100,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   favorite: UserFavoriteEndpoint;
 
-  public link: string;
+  public link!: string;
 
   // Status = 0 OK, 1 Loading, 2 Error
   private _status = signal<Status>(Status.OK);
@@ -108,7 +108,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   public status$: Observable<Status>;
 
   private ref: ComponentRef<HomePageEndpointCard>;
-  private sub: Subscription;
+  private sub!: Subscription;
 
   private canLoad = false;
 

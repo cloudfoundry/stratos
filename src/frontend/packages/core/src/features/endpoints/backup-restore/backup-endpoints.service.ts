@@ -32,7 +32,7 @@ export class BackupEndpointsService {
   public allChanged$: Observable<boolean>;
 
   state: BackupEndpointsConfig<BackupEndpointConfigUI> = {};
-  password: string;
+  password!: string;
 
   constructor(
     private store: Store<GeneralEntityAppState>,

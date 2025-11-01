@@ -53,7 +53,7 @@ export class PaginationEntityState {
   totalResults = 0;
   pageCount = 0;
   ids: Record<number, string[]> = {};
-  params: PaginationParam;
+  params!: PaginationParam;
   pageRequests: {
     [pageNumber: string]: ListActionState,
   } = {};

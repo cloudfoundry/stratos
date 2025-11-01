@@ -54,18 +54,18 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 })
 export class CloudFoundryEndpointService {
 
-  hasSSHAccess$: Observable<boolean>;
-  totalMem$: Observable<number>;
-  paginationSubscription: Subscription;
-  appsPagObs: PaginationObservables<APIResource<IApp>>;
-  usersCount$: Observable<number | null>;
-  orgs$: Observable<APIResource<IOrganization>[]>;
-  info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
-  cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
-  endpoint$: Observable<EntityInfo<EndpointModel>>;
-  cfEndpointEntityService: EntityService<EndpointModel>;
-  connected$: Observable<boolean>;
-  currentUser$: Observable<EndpointUser>;
+  hasSSHAccess$!: Observable<boolean>;
+  totalMem$!: Observable<number>;
+  paginationSubscription!: Subscription;
+  appsPagObs!: PaginationObservables<APIResource<IApp>>;
+  usersCount$!: Observable<number | null>;
+  orgs$!: Observable<APIResource<IOrganization>[]>;
+  info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
+  cfInfoEntityService!: EntityService<APIResource<ICfV2Info>>;
+  endpoint$!: Observable<EntityInfo<EndpointModel>>;
+  cfEndpointEntityService!: EntityService<EndpointModel>;
+  connected$!: Observable<boolean>;
+  currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
 
   static createGetAllOrganizations(cfGuid: string) {

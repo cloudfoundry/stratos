@@ -47,15 +47,15 @@ selector: 'app-remove-user',
   ]
 })
 export class RemoveUserComponent implements OnDestroy {
-  initialUsers$: Observable<CfUser[]>;
-  singleUser$: Observable<CfUser>;
-  defaultCancelUrl: string;
-  cfGuid: string;
-  orgGuid: string;
-  spaceGuid: string;
+  initialUsers$!: Observable<CfUser[]>;
+  singleUser$!: Observable<CfUser>;
+  defaultCancelUrl!: string;
+  cfGuid!: string;
+  orgGuid!: string;
+  spaceGuid!: string;
   applyStarted = false;
   onlySpaces = false;
-  isBlocked$: Observable<boolean>;
+  isBlocked$!: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,

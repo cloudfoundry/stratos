@@ -62,11 +62,11 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   }
 
   public busy = computed(() => this.rowStateSignal?.()?.busy);
-  public show$: Observable<boolean>;
+  public show$!: Observable<boolean>;
   public menuOpen = false;
 
   actions: IListAction<T>[];
-  obs: {
+  obs!: {
     visible: { [action: string]: Observable<boolean>; },
     enabled: { [action: string]: Observable<boolean>; };
   };

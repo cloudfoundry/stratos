@@ -79,7 +79,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       cellFlex: '1'
     }
   ];
-  changes$: Observable<CfRoleChangeWithNames[]>;
+  changes$!: Observable<CfRoleChangeWithNames[]>;
   public userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
 
   monitorState = AppMonitorComponentTypes.UPDATE;

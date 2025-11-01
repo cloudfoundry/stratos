@@ -96,14 +96,14 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
   @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
-  @ViewChildren('endpointCard') endpointElements: QueryList<ElementRef>;
+  @ViewChildren('endpointElements') endpointElements!: QueryList<ElementRef>;
 
   notLoadedCardIndices: number[] = [];
   cardsToLoad: HomePageEndpointCardComponent[] = [];
   isLoadingACard = false;
 
-  private viewMonitorSub: Subscription;
-  private cardChangesSub: Subscription;
+  private viewMonitorSub!: Subscription;
+  private cardChangesSub!: Subscription;
   private _checkLayout = signal<boolean>(true);
   private check$ = toObservable(this._checkLayout).pipe(
     filter(v => v),

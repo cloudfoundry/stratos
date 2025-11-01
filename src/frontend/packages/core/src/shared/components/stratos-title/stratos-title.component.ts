@@ -16,7 +16,7 @@ export class StratosTitleComponent {
   private themeService = inject(StratosThemeService);
 
   // Optional title
-  @Input() title: string;
+  @Input() title?: string;
 
   // Theme-related signals (computed from theme service)
   public themeTitle = computed(() =>

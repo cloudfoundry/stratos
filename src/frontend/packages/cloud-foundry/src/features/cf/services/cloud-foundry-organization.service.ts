@@ -67,22 +67,22 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
 export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
-  quotaLink$: Observable<string[]>;
-  userOrgRole$: Observable<string>;
-  quotaDefinition$: Observable<IOrgQuotaDefinition>;
-  totalMem$: Observable<number>;
-  privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
-  routes$: Observable<APIResource<Route>[]>;
-  serviceInstancesCount$: Observable<number>;
-  userProvidedServiceInstancesCount$: Observable<number>;
-  routesCount$: Observable<number>;
-  spaces$: Observable<APIResource<ISpace>[]>;
-  appInstances$: Observable<number>;
-  apps$: Observable<APIResource<IApp>[]>;
-  appCount$: Observable<number>;
-  loadingApps$: Observable<boolean>;
-  org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  usersCount$: Observable<number | null>;
+  quotaLink$!: Observable<string[]>;
+  userOrgRole$!: Observable<string>;
+  quotaDefinition$!: Observable<IOrgQuotaDefinition>;
+  totalMem$!: Observable<number>;
+  privateDomains$!: Observable<APIResource<IPrivateDomain>[]>;
+  routes$!: Observable<APIResource<Route>[]>;
+  serviceInstancesCount$!: Observable<number>;
+  userProvidedServiceInstancesCount$!: Observable<number>;
+  routesCount$!: Observable<number>;
+  spaces$!: Observable<APIResource<ISpace>[]>;
+  appInstances$!: Observable<number>;
+  apps$!: Observable<APIResource<IApp>[]>;
+  appCount$!: Observable<number>;
+  loadingApps$!: Observable<boolean>;
+  org$!: Observable<EntityInfo<APIResource<IOrganization>>>;
+  usersCount$!: Observable<number | null>;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

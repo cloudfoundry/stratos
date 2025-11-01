@@ -18,7 +18,7 @@ describe('LogViewerComponent', () => {
   })
   class TestHostComponent {
     @ViewChild(LogViewerComponent, { static: true })
-    public logViewer: LogViewerComponent;
+    public logViewer!: LogViewerComponent;
   }
 
   let component: TestHostComponent;

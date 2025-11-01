@@ -45,13 +45,13 @@ interface EditSpaceForm {
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnDestroy {
 
   originalName: any;
-  spaceSubscription: Subscription;
-  space: string;
+  spaceSubscription!: Subscription;
+  space!: string;
   space$: Observable<any>;
   spaceGuid: string;
   editSpaceForm: FormGroup<EditSpaceForm>;
-  originalSpaceQuotaGuid: string;
-  spaceName: string;
+  originalSpaceQuotaGuid!: string;
+  spaceName!: string;
 
   constructor(
     store: Store<CFAppState>,

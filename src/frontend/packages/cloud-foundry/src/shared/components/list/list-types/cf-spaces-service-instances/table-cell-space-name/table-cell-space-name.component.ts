@@ -18,9 +18,9 @@ import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 })
 export class TableCellSpaceNameComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
-  breadcrumbs: {};
-  spaceUrl: string[];
-  spaceName: Observable<string>;
+  breadcrumbs!: {};
+  spaceUrl!: string[];
+  spaceName!: Observable<string>;
 
   ngOnInit(): void {
     this.spaceUrl = [

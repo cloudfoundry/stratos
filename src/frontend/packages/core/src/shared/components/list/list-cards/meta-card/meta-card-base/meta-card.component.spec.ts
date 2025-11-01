@@ -24,7 +24,7 @@ import { MetaCardComponent } from './meta-card.component';
 })
 class WrapperComponent {
   @ViewChild(MetaCardComponent, { static: true })
-  metaCard: MetaCardComponent;
+  metaCard!: MetaCardComponent;
 }
 
 class UserFavoriteManagerMock {

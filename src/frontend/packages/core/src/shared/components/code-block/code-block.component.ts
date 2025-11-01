@@ -16,12 +16,12 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
-  @Input() hideCopy: boolean;
-  @Input() codeBlockStyle: string;
+  @Input() hideCopy!: boolean;
+  @Input() codeBlockStyle!: string;
   text = '';
-  private observer: MutationObserver;
+  private observer!: MutationObserver;
 
-  @ViewChild('preBlock', { static: true }) code: ElementRef;
+  @ViewChild('preBlock', { static: true }) code!: ElementRef;
 
   ngOnInit(): void {
     this.observer = new MutationObserver(() => {

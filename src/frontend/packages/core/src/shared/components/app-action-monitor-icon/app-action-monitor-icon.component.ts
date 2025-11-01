@@ -133,16 +133,16 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   // State observable - use this instead of creating one
   @Input()
-  public state: Observable<IActionMonitorComponentState>;
+  public state!: Observable<IActionMonitorComponentState>;
 
   @Input()
-  public entityKey: string;
+  public entityKey!: string;
 
   @Input()
-  public id: string;
+  public id!: string;
 
   @Input()
-  public schema: EntitySchema;
+  public schema!: EntitySchema;
 
   @Input()
   public monitorState: AppMonitorComponentTypes = AppMonitorComponentTypes.FETCHING;
@@ -151,7 +151,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   public updateKey = rootUpdatingKey;
 
   @Output()
-  public currentState: Observable<IActionMonitorComponentState>;
+  public currentState!: Observable<IActionMonitorComponentState>;
   private entityMonitorFactory = inject(EntityMonitorFactory);
 
   ngOnInit() {

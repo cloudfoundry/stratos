@@ -34,20 +34,20 @@ import { UserInviteConfigureService } from '../user-invite.service';
   ]
 })
 export class UserInviteConfigurationDialogComponent {
-  connecting$: Observable<boolean>;
-  connectingError$: Observable<boolean>;
-  fetchingInfo$: Observable<boolean>;
-  endpointConnected$: Observable<boolean>;
-  valid$: Observable<boolean>;
-  canSubmit$: Observable<boolean>;
+  connecting$!: Observable<boolean>;
+  connectingError$!: Observable<boolean>;
+  fetchingInfo$!: Observable<boolean>;
+  endpointConnected$!: Observable<boolean>;
+  valid$!: Observable<boolean>;
+  canSubmit$!: Observable<boolean>;
 
 
   private update$: Observable<ActionState>;
 
-  isBusy$: Observable<boolean>;
+  isBusy$!: Observable<boolean>;
 
-  connectingSub: Subscription;
-  fetchSub: Subscription;
+  connectingSub!: Subscription;
+  fetchSub!: Subscription;
   public endpointForm: FormGroup<UserInviteConfigForm>;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -55,7 +55,7 @@ export class UserInviteConfigurationDialogComponent {
   // and end up with an empty list where we should have results.
   public connectDelay = 1000;
 
-  guid: string;
+  guid!: string;
   public showSecret = false;
 
   constructor(
@@ -76,8 +76,8 @@ export class UserInviteConfigurationDialogComponent {
   submit() {
     this.userInviteConfigureService.configure(
       this.data.guid,
-      this.endpointForm.value.clientID,
-      this.endpointForm.value.clientSecret)
+      this.endpointForm.value.clientID ?? '',
+      this.endpointForm.value.clientSecret ?? '')
       .pipe(
         first()
       ).subscribe((v: any) => {

@@ -17,7 +17,7 @@ import {
 import { Observable, Subscription } from 'rxjs';
 import { filter, first, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextFunction, StepComponent, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -140,8 +140,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
     this.formChangeSub = this.editEndpoint.valueChanges.subscribe(values => {
       // Enable or disable controls based on the checkbox
-      if (values.setClientInfo !== this.setClientInfo) {
-        this.setClientInfo = values.setClientInfo;
+      const newSetClientInfo = values.setClientInfo ?? false;
+      if (newSetClientInfo !== this.setClientInfo) {
+        this.setClientInfo = newSetClientInfo;
         this.updateControls();
       }
     });
@@ -161,30 +162,31 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     }
   }
 
-  onNext: StepOnNextFunction = () => {
+  onNext: StepOnNextFunction = (index: number, step: StepComponent): Observable<StepOnNextResult> => {
     return this.endpoint$.pipe(
+      filter((endpoint): endpoint is EndpointModel => !!endpoint),
       first(),
       switchMap(endpoint => {
         const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
-        const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL;
-        return stratosEntityCatalog.endpoint.api.update<ActionState>(
+        const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
+        return ((stratosEntityCatalog.endpoint.api as any).update(
           this.endpointID,
           this.endpointID, {
           endpointType: endpoint.cnsi_type,
           id: this.endpointID,
-          name: this.editEndpoint.value.name,
+          name: this.editEndpoint.value.name ?? '',
           skipSSL,
-          setClientInfo: this.editEndpoint.value.setClientInfo,
-          clientID: this.editEndpoint.value.clientID,
-          clientSecret: this.editEndpoint.value.clientSecret,
-          allowSSO: this.editEndpoint.value.allowSSO,
+          setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
+          clientID: this.editEndpoint.value.clientID ?? '',
+          clientSecret: this.editEndpoint.value.clientSecret ?? '',
+          allowSSO: this.editEndpoint.value.allowSSO ?? false,
           caCert,
         }
-        ).pipe(
+        ) as Observable<ActionState>).pipe(
           pairwise(),
           filter(([oldV, newV]) => oldV.busy && !newV.busy),
           map(([, newV]) => newV),
-          map(o => {
+          map((o: ActionState): StepOnNextResult => {
             return {
               success: !o.error,
               message: o.message,
@@ -211,10 +213,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   toggleCACertField() {
     this.showCACertField = !this.showCACertField;
     if (this.showCACertField) {
-      this.lastSkipSSLValue = this.editEndpoint.value.skipSSL;
+      this.lastSkipSSLValue = this.editEndpoint.value.skipSSL ?? false;
       this.editEndpoint.controls.skipSSL.setValue(false);
     } else {
-      this.editEndpoint.controls.skipSSL.setValue(this.lastSkipSSLValue);
+      this.editEndpoint.controls.skipSSL.setValue(this.lastSkipSSLValue ?? false);
     }
     this.updateSSLFieldCheckbox();
   }

@@ -88,13 +88,13 @@ describe('TableComponent', () => {
       isTableLoading$: observableOf(false)
     };
     @ViewChild('basicColumnsTable', { static: true })
-    public basicColumnsTable: TableComponent<any>;
+    public basicColumnsTable!: TableComponent<any>;
     @ViewChild('selectionColumnsTable', { static: true })
-    public selectionColumnsTable: TableComponent<any>;
+    public selectionColumnsTable!: TableComponent<any>;
     @ViewChild('actionColumnsTable', { static: true })
-    public actionColumnsTable: TableComponent<any>;
+    public actionColumnsTable!: TableComponent<any>;
     @ViewChild('actionAndSelectionColumnsTable', { static: true })
-    public actionAndSelectionColumnsTable: TableComponent<any>;
+    public actionAndSelectionColumnsTable!: TableComponent<any>;
   }
   let component: TableHostComponent;
   let fixture: ComponentFixture<TableHostComponent>;

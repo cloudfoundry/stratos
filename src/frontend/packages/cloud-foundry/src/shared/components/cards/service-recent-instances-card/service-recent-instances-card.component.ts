@@ -35,7 +35,7 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class ServiceRecentInstancesCardComponent implements OnInit {
 
-  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$!: Observable<APIResource<IServiceInstance>[]>;
   constructor(
     private servicesService: ServicesService
   ) { }

@@ -30,10 +30,10 @@ import { DeployApplicationFsUtils } from './deploy-application-fs-utils';
 })
 export class DeployApplicationFsComponent implements ControlValueAccessor {
 
-  private propagateChange: (fsi: FileScannerInfo) => void;
+  private propagateChange!: (fsi: FileScannerInfo) => void;
   constructor() { }
 
-  @Input() sourceType: string;
+  @Input() sourceType!: string;
 
   @Input() hideTitle = false;
 

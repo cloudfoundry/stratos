@@ -19,7 +19,7 @@ export interface TableCellSidePanelConfig<T> {
 })
 export class TableCellSidePanelComponent<T = any, A = any> extends TableCellCustom<T, object | CellConfigFunction<T>> {
 
-  public actualConfig: TableCellSidePanelConfig<A>;
+  public actualConfig!: TableCellSidePanelConfig<A>;
 
   @Input('row')
   get row(): T { return super.row; }

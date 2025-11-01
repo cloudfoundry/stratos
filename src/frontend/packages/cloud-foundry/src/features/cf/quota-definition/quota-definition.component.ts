@@ -63,11 +63,11 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   declare orgGuid: string;
   declare spaceGuid: string;
   declare quotaGuid: string;
-  editLink$: Observable<string[]>;
+  editLink$!: Observable<string[]>;
   editParams: object;
   declare detailsLoading$: Observable<boolean>;
   declare orgSubscriber: Subscription;
-  public canEditQuota$: Observable<boolean>;
+  public canEditQuota$!: Observable<boolean>;
   public isCf = false;
 
   constructor(

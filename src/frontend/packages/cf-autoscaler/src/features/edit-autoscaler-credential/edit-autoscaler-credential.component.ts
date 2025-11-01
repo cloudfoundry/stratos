@@ -50,13 +50,13 @@ interface AutoscalerCredentialForm {
 export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
   parentUrl: string;
-  applicationName$: Observable<string>;
+  applicationName$!: Observable<string>;
 
   public editCredentialForm: FormGroup<AutoscalerCredentialForm>;
-  public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
+  public appAutoscalerCredential$!: Observable<AppAutoscalerCredential>;
 
-  private appAutoscalerCredentialErrorSub: Subscription;
-  private appAutoscalerCredentialSnackBarRef: TailwindSnackBarRef<any>;
+  private appAutoscalerCredentialErrorSub!: Subscription;
+  private appAutoscalerCredentialSnackBarRef!: TailwindSnackBarRef<any>;
 
 
   private creating = new BehaviorSubject(false);

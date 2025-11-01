@@ -8,11 +8,11 @@ import { ListView } from '../../../../../../../store/src/actions/list.actions';
 
 
 export class BaseCfListConfig<T> implements IListConfig<T> {
-  getDataSource: () => IListDataSource<T>;
+  getDataSource!: () => IListDataSource<T>;
   isLocal = true;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  cardComponent: CardTypes<T>;
+  cardComponent!: CardTypes<T>;
   enableTextFilter = false;
   showCustomTime = false;
   getColumns = (): ITableColumn<T>[] => [];

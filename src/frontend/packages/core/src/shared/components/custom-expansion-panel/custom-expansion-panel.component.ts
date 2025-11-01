@@ -18,7 +18,7 @@ export class CustomExpansionPanelComponent {
   @Output() opened = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
   
-  @ContentChild('header', { static: false }) headerTemplate: TemplateRef<any>;
+  @ContentChild('header', { static: false }) headerTemplate!: TemplateRef<any>;
 
   toggle() {
     if (this.disabled) return;

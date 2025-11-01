@@ -21,7 +21,7 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
     this.tabNavService.setSubNavBreadcrumbs(crumbs);
   }
 
-  @ViewChild('subNavTmpl', { static: true }) subNavTmpl: TemplateRef<any>;
+  @ViewChild('subNavTmpl', { static: true }) subNavTmpl!: TemplateRef<any>;
 
   ngAfterViewInit() {
     const portal = new TemplatePortal(this.subNavTmpl, undefined, {});

@@ -217,7 +217,7 @@ export interface IStratosEntityDefinition<
 }
 
 export class NonJetstreamRequestHandler<T = any> {
-  isSuccess: (request: T) => boolean;
+  isSuccess!: (request: T) => boolean;
   getErrorCode?: (request: T) => string;
 }
 

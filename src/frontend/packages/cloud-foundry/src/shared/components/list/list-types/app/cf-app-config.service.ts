@@ -72,7 +72,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     ];
 
   }
-  appsDataSource: CfAppsDataSource;
+  appsDataSource!: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource<IApp>>> = [
     {
       columnId: 'name', headerCell: () => 'Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: {

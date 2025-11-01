@@ -84,7 +84,7 @@ export class SideNavComponent implements OnInit {
     return this.isIconMode;
   }
 
-  @Input() tabs: SideNavItem[];
+  @Input() tabs: SideNavItem[] = [];
   @Output() changedMode = new EventEmitter();
   private isIconMode = true;
 

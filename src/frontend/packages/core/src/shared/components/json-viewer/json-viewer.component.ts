@@ -24,7 +24,7 @@ export class JsonViewerComponent implements OnChanges {
 
   @Input() json: any;
 
-  @Input() root: string;
+  @Input() root!: string;
 
   // Whether to expand all initially
   @Input() expanded = true;

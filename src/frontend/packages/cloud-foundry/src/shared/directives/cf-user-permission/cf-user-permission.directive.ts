@@ -14,18 +14,18 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
   @Input()
-  public appCfUserPermission: CfCurrentUserPermissions;
+  public appCfUserPermission!: CfCurrentUserPermissions;
 
   @Input()
-  public appCfUserPermissionEndpointGuid: string;
+  public appCfUserPermissionEndpointGuid!: string;
 
   @Input()
-  private appCfUserPermissionOrganizationGuid: string;
+  private appCfUserPermissionOrganizationGuid!: string;
 
   @Input()
-  private appCfUserPermissionSpaceGuid: string;
+  private appCfUserPermissionSpaceGuid!: string;
 
-  private canSub: Subscription;
+  private canSub!: Subscription;
 
   constructor(
     private store: Store<AppState>,

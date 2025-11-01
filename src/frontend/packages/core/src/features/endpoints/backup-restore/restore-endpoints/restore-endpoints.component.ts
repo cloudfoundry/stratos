@@ -40,8 +40,8 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
 export class RestoreEndpointsComponent {
 
   // Step 2
-  passwordValid$: Observable<boolean>;
-  passwordForm: FormGroup;
+  passwordValid$!: Observable<boolean>;
+  passwordForm!: FormGroup;
   show = false;
 
   constructor(

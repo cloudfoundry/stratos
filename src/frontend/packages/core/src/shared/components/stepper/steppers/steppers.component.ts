@@ -37,10 +37,10 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
-  private nextSub: Subscription;
+  private nextSub!: Subscription;
   cancel$: Observable<string>;
 
-  @ContentChildren(StepComponent) stepComponents: QueryList<StepComponent>;
+  @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
 
   @Input() cancel: string = null;
   @Input() nextButtonProgress = true;
@@ -57,7 +57,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   stepValidateSub: Subscription = null;
 
   private enterData: any;
-  private snackBarRef: TailwindSnackBarRef<any>;
+  private snackBarRef!: TailwindSnackBarRef<any>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{

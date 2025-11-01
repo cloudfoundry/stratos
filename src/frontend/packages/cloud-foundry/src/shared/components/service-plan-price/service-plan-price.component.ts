@@ -19,7 +19,7 @@ import { IServicePlan, IServicePlanCost } from '../../../cf-api-svc.types';
 })
 export class ServicePlanPriceComponent {
 
-  @Input() servicePlan: APIResource<IServicePlan>;
+  @Input() servicePlan!: APIResource<IServicePlan>;
 
   constructor() {
     registerLocaleData(localeFr);

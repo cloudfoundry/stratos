@@ -30,9 +30,9 @@ export class TableCellServiceInstanceAppsAttachedComponent
   extends TableCellCustom<APIResource<IServiceInstance>>
   implements OnInit {
 
-  boundApps$: Observable<AppChip[]>;
-  config$ = new BehaviorSubject(null);
-  row$ = new BehaviorSubject<APIResource<IServiceInstance>>(null);
+  boundApps$!: Observable<AppChip[]>;
+  config$ = new BehaviorSubject<any>(null);
+  row$ = new BehaviorSubject<APIResource<IServiceInstance> | null>(null);
 
   @Input('config')
   set config(config: any) {

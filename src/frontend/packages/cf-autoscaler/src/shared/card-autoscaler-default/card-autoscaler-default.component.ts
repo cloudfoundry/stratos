@@ -27,7 +27,7 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 })
 export class CardAutoscalerDefaultComponent implements OnInit {
 
-  @ViewChild('instanceField', { static: false }) instanceField: ElementRef;
+  @ViewChild('instanceField', { static: false }) instanceField!: ElementRef;
 
   constructor(
     public appService: ApplicationService,
@@ -37,9 +37,9 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   ) {
   }
 
-  appAutoscalerPolicyService: EntityService;
-  appAutoscalerPolicy$: Observable<APIResource<AppAutoscalerPolicyLocal>>;
-  applicationInstances$: Observable<number>;
+  appAutoscalerPolicyService!: EntityService;
+  appAutoscalerPolicy$!: Observable<APIResource<AppAutoscalerPolicyLocal>>;
+  applicationInstances$!: Observable<number>;
 
   @Input()
   onUpdate: () => void = () => { }

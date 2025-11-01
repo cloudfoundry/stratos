@@ -25,13 +25,13 @@ import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatte
 ]
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
-  messages: Observable<string>;
-  connectionStatus: Observable<number>;
+  messages!: Observable<string>;
+  connectionStatus!: Observable<number>;
 
   filter: (jsonString: string) => string;
 
   // Formatter for fire hose log messages
-  formatter: CloudFoundryFirehoseFormatter;
+  formatter!: CloudFoundryFirehoseFormatter;
 
   constructor(
     private cfEndpointService: CloudFoundryEndpointService,

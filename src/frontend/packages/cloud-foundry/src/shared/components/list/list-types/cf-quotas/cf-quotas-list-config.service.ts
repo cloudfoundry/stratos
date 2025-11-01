@@ -30,7 +30,7 @@ export const QUOTA_FROM_LIST = 'list';
 })
 export class CfQuotasListConfigService extends BaseCfListConfig<APIResource<IQuotaDefinition>> {
   dataSource: CfQuotasDataSourceService;
-  deleteSubscription: Subscription;
+  deleteSubscription!: Subscription;
   canEdit: Observable<boolean>;
   canDelete: Observable<boolean>;
 

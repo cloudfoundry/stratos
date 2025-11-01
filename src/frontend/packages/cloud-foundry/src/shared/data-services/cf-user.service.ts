@@ -51,7 +51,7 @@ import {
   providedIn: 'root'
 })
 export class CfUserService {
-  private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
+  private allUsers$!: Observable<PaginationObservables<APIResource<CfUser>>>;
 
   users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
 

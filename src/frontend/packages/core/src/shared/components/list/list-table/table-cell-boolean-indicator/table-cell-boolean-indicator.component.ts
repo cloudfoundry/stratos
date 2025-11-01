@@ -49,7 +49,7 @@ export class TableCellBooleanIndicatorComponent<T = any> extends TableCellCustom
     this.showText = config.showText;
   }
 
-  enabled: boolean;
+  enabled!: boolean;
   type = 'enabled-disabled';
   subtle = true;
   showText = true;

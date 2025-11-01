@@ -46,25 +46,25 @@ export const enum CellMetrics {
 })
 export class CloudFoundryCellService {
 
-  cfGuid: string;
-  cellId: string;
-  cellMetric$: Observable<IMetricCell>;
+  cfGuid!: string;
+  cellId!: string;
+  cellMetric$!: Observable<IMetricCell>;
 
-  healthy$: Observable<string>;
-  healthyMetricId: string;
-  cpus$: Observable<string>;
+  healthy$!: Observable<string>;
+  healthyMetricId!: string;
+  cpus$!: Observable<string>;
 
-  usageContainers$: Observable<string>;
-  remainingContainers$: Observable<string>;
-  totalContainers$: Observable<string>;
+  usageContainers$!: Observable<string>;
+  remainingContainers$!: Observable<string>;
+  totalContainers$!: Observable<string>;
 
-  usageDisk$: Observable<string>;
-  remainingDisk$: Observable<string>;
-  totalDisk$: Observable<string>;
+  usageDisk$!: Observable<string>;
+  remainingDisk$!: Observable<string>;
+  totalDisk$!: Observable<string>;
 
-  usageMemory$: Observable<string>;
-  remainingMemory$: Observable<string>;
-  totalMemory$: Observable<string>;
+  usageMemory$!: Observable<string>;
+  remainingMemory$!: Observable<string>;
+  totalMemory$!: Observable<string>;
 
   constructor(
     activeRouteCfCell: ActiveRouteCfCell,

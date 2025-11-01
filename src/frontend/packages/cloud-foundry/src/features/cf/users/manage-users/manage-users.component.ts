@@ -44,12 +44,12 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
   ]
 })
 export class UsersRolesComponent implements OnDestroy {
-  initialUsers$: Observable<CfUser[]>;
-  singleUser$: Observable<CfUser>;
-  defaultCancelUrl: string;
+  initialUsers$!: Observable<CfUser[]>;
+  singleUser$!: Observable<CfUser | null>;
+  defaultCancelUrl!: string;
   applyStarted = false;
   setUsernames = false;
-  title$: Observable<string>;
+  title$!: Observable<string>;
 
   constructor(
     private store: Store<CFAppState>,

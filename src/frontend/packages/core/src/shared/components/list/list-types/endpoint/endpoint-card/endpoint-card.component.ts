@@ -77,30 +77,30 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
 
   public rowObs = new ReplaySubject<EndpointModel>();
-  public favorite: UserFavoriteEndpoint;
-  public address: string;
-  public cardMenu: MenuItem[];
-  public endpointCatalogEntity: StratosCatalogEndpointEntity;
+  public favorite?: UserFavoriteEndpoint;
+  public address!: string;
+  public cardMenu!: MenuItem[];
+  public endpointCatalogEntity!: StratosCatalogEndpointEntity;
   public hasDetails = true;
-  public endpointLink: string = null;
-  public endpointParentType: string;
+  public endpointLink: string | null = null;
+  public endpointParentType!: string;
   private endpointIds = new ReplaySubject<string[]>();
   public endpointIds$: Observable<string[]>;
   public cardStatus$: Observable<StratosStatus>;
   private subs: Subscription[] = [];
-  public connectionStatus: string;
-  public viewCreator$: Observable<boolean>;
+  public connectionStatus!: string;
+  public viewCreator$!: Observable<boolean>;
 
-  private componentRef: ComponentRef<EndpointListDetailsComponent>;
+  private componentRef!: ComponentRef<EndpointListDetailsComponent>;
 
-  @Input() component: EndpointListDetailsComponent;
-  private endpointDetails: ViewContainerRef;
+  @Input() component: EndpointListDetailsComponent | null = null;
+  private endpointDetails!: ViewContainerRef;
   @ViewChild('endpointDetails', { read: ViewContainerRef, static: true }) set content(content: ViewContainerRef) {
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
 
-  @ViewChild('copyToClipboard') copyToClipboard: CopyToClipboardComponent;
+  @ViewChild('copyToClipboard') copyToClipboard!: CopyToClipboardComponent;
 
   @Input('row')
   set row(row: EndpointModel) {
@@ -128,7 +128,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     return super.row;
   }
 
-  private _dataSource: BaseEndpointsDataSource;
+  private _dataSource!: BaseEndpointsDataSource;
 
   @Input('dataSource')
   set dataSource(ds: BaseEndpointsDataSource) {

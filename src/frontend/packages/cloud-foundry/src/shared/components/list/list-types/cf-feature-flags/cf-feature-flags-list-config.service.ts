@@ -23,7 +23,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<IFeatureFl
 
   constructor() {
     super();
-    this.dataSource = new CfFeatureFlagsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfFeatureFlagsDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid!, this as any);
   }
 
   dataSource: CfFeatureFlagsDataSource;

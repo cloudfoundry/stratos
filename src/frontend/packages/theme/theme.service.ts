@@ -18,7 +18,7 @@ export class StratosThemeService {
 
   private readonly THEME_MODE_KEY = 'stratos-theme-mode';
   private readonly THEME_STORAGE_KEY = 'stratos-theme';
-  private mediaQueryList: MediaQueryList;
+  private mediaQueryList!: MediaQueryList;
 
   constructor() {
     this.initializeTheme();

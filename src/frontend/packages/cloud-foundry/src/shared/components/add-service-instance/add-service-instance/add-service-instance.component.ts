@@ -91,21 +91,21 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
 ]
 })
 export class AddServiceInstanceComponent implements OnInit, OnDestroy {
-  initialisedService$: Observable<boolean>;
-  apps$: Observable<APIResource<IApp>[]>;
-  skipApps$: Observable<boolean>;
-  marketPlaceMode: boolean;
-  cSIHelperService: CreateServiceInstanceHelper;
-  displaySelectServiceStep: boolean;
-  displaySelectCfStep: boolean;
+  initialisedService$!: Observable<boolean>;
+  apps$!: Observable<APIResource<IApp>[]>;
+  skipApps$!: Observable<boolean>;
+  marketPlaceMode!: boolean;
+  cSIHelperService!: CreateServiceInstanceHelper;
+  displaySelectServiceStep!: boolean;
+  displaySelectCfStep!: boolean;
   // Use signal for imperative title updates without change detection errors
   private _title = signal<string>('');
   title$ = toObservable(this._title);
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
-  appId: string;
-  serviceInstanceId: string;
+  appId!: string;
+  serviceInstanceId!: string;
   public inMarketplaceMode: boolean;
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;

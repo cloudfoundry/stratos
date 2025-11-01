@@ -13,7 +13,7 @@ export const RequestTypes = {
 
 
 export class APIResponse {
-  response: NormalizedResponse;
-  totalResults: number;
-  totalPages: number;
+  response!: NormalizedResponse;
+  totalResults!: number;
+  totalPages!: number;
 }

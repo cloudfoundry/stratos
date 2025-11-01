@@ -46,24 +46,24 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   /**
    * Emits the current page of entities.
    */
-  public currentPage$: Observable<T[]>;
-  public currentPageState$: Observable<ListActionState>;
+  public currentPage$!: Observable<T[]>;
+  public currentPageState$!: Observable<ListActionState>;
   /**
    * Emits a boolean stating if the current page is fetching or not.
    */
-  public fetchingCurrentPage$: Observable<boolean>;
+  public fetchingCurrentPage$!: Observable<boolean>;
   /**
    * Emits a boolean stating if the current page has errored or not.
    */
-  public currentPageError$: Observable<boolean>;
+  public currentPageError$!: Observable<boolean>;
   /**
    * All the information about the current pagination selection.
    */
-  public pagination$: Observable<PaginationEntityState>;
+  public pagination$!: Observable<PaginationEntityState>;
 
-  public currentPageIds$: Observable<string[]>;
-  public isMultiAction$: Observable<boolean>;
-  public schema: EntitySchema;
+  public currentPageIds$!: Observable<string[]>;
+  public isMultiAction$!: Observable<boolean>;
+  public schema!: EntitySchema;
 
   /**
    * Returns a pagination monitor for a given catalog entity and pagination key.

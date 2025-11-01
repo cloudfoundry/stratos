@@ -79,27 +79,27 @@ export class DeployApplicationStep2Component
 
   commitInfo: GitCommit;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
-  sourceType$: Observable<SourceType>;
+  sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
-  validate: Observable<boolean>;
+  validate!: Observable<boolean>;
 
-  stepperText$: Observable<string>;
+  stepperText$!: Observable<string>;
 
   // Observables for source types
-  sourceTypeGithub$: Observable<boolean>;
-  sourceTypeNeedsUpload$: Observable<boolean>;
+  sourceTypeGithub$!: Observable<boolean>;
+  sourceTypeNeedsUpload$!: Observable<boolean>;
   // tslint:disable-next-line:ban-types
-  canDeployType$: Observable<Boolean>;
-  isLoading$: Observable<boolean>;
+  canDeployType$!: Observable<Boolean>;
+  isLoading$!: Observable<boolean>;
 
   // Local FS data when file or folder upload
   // @Input('fsSourceData') fsSourceData;
 
   // ---- GIT ----------
-  repositoryBranches$: Observable<GitBranch[]>;
+  repositoryBranches$!: Observable<GitBranch[]>;
 
-  projectInfo$: Observable<GitRepo>;
-  commitSubscription: Subscription;
+  projectInfo$!: Observable<GitRepo>;
+  commitSubscription!: Subscription;
 
   sourceType: SourceType;
   repositoryBranch: GitBranch = null;
@@ -110,11 +110,11 @@ export class DeployApplicationStep2Component
   cachedSuggestions = {};
 
   // We don't have any repositories to suggest initially - need user to start typing
-  suggestedRepos$: Observable<GitSuggestedRepo[]>;
+  suggestedRepos$!: Observable<GitSuggestedRepo[]>;
 
   // Git URL
-  gitUrl: string;
-  gitUrlBranchName: string;
+  gitUrl!: string;
+  gitUrlBranchName!: string;
   // --------------
 
   // ---- Docker ----------

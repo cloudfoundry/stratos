@@ -16,9 +16,9 @@ import { ListItemComponent } from '../list-item/list-item.component';
   imports: [RouterLink, ListItemComponent]
 })
 export class ChartItemComponent implements OnInit {
-  public iconUrl: string;
+  public iconUrl!: string;
   // Chart to represent
-  @Input() chart: Chart;
+  @Input() chart!: Chart;
   // Show version form by default
   @Input() showVersion = true;
   // Truncate the description

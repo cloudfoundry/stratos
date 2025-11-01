@@ -61,7 +61,7 @@ interface TCPRouteFormModel {
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
-  model: Route;
+  model!: Route;
   domains: APIResource<IDomain>[] = [];
   addTCPRoute: FormGroup<{
     port: FormControl<string>;
@@ -76,9 +76,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }>;
   appGuid: string;
   cfGuid: string;
-  spaceGuid: string;
+  spaceGuid!: string;
   createTCPRoute = false;
-  selectedDomain: APIResource<any>;
+  selectedDomain!: APIResource<any>;
   private _selectedRoute = signal<any>({
     entity: {},
     metadata: {}
@@ -138,7 +138,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.push(this.addTCPRoute.valueChanges.subscribe(val => {
-      const useRandomPort = val.useRandomPort;
+      const useRandomPort = val.useRandomPort ?? false;
       if (useRandomPort !== this.useRandomPort) {
         this.useRandomPort = useRandomPort;
         const validators = [
@@ -226,13 +226,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   onSubmit(): Observable<StepOnNextResult> {
     const domain = this.domainFormGroup.value.domain;
-    const domainGuid = typeof domain !== 'string' ? domain.metadata.guid : '';
+    const domainGuid = typeof domain !== 'string' ? domain?.metadata.guid : '';
     const isTcpRoute = this.isTCPRouteCreation();
     const formGroup = isTcpRoute ? this.addTCPRoute : this.addHTTPRoute;
 
     // Set port to -1 to indicate that we should generate a random port number
     let port = this._getValue('port', formGroup);
-    if (isTcpRoute && this.addTCPRoute.value.useRandomPort) {
+    if (isTcpRoute && (this.addTCPRoute.value.useRandomPort ?? false)) {
       port = -1;
     }
 
@@ -245,7 +245,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     return this.createAndMapRoute(
       newRouteGuid,
-      domainGuid,
+      domainGuid ?? '',
       this._getValue('host', formGroup),
       this._getValue('path', formGroup),
       port,

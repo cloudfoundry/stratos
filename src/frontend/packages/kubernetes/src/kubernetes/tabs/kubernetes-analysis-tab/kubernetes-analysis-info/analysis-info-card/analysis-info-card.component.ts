@@ -38,9 +38,7 @@ export class AnalysisInfoCardComponent {
 
 
   constructor() {
-
-
-    this.renderer.link = ({ href, title, tokens }: { href: string; title?: string; tokens: any }) => `<a target="_blank" title="${title || ''}" href="${href}">${this.parser.parseInline(tokens)}</a>`;
+    this.renderer.link = ({ href, title, tokens }: { href: string; title?: string | null; tokens: any }) => `<a target="_blank" title="${title ?? ''}" href="${href}">${this.parser.parseInline(tokens)}</a>`;
     this.renderer.code = ({ text }: { text: string }) => `<code>${text}</code>`;
 
 

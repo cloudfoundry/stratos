@@ -87,8 +87,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
-  serviceInstanceName: string;
-  serviceInstanceGuid: string;
+  serviceInstanceName!: string;
+  serviceInstanceGuid!: string;
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
@@ -103,14 +103,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   @Input()
   showModeSelection = false;
 
-  @Input() appId: string;
+  @Input() appId!: string;
 
-  formMode: CreateServiceFormMode;
+  formMode!: CreateServiceFormMode;
 
-  selectExistingInstanceForm: FormGroup<{
+  selectExistingInstanceForm!: FormGroup<{
     serviceInstance: FormControl<string>;
   }>;
-  createNewInstanceForm: FormGroup<{
+  createNewInstanceForm!: FormGroup<{
     name: FormControl<string>;
     servicePlan: FormControl<string>;
     spaceGuid: FormControl<string>;
@@ -119,23 +119,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }>;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  cSIHelperService: CreateServiceInstanceHelper;
-  allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  cSIHelperService!: CreateServiceInstanceHelper;
+  allServiceInstances$!: Observable<APIResource<IServiceInstance>[]>;
   private _validate = signal<boolean>(false);
   validate = toObservable(this._validate);
-  allServiceInstanceNames: string[];
+  allServiceInstanceNames!: string[];
   tagsVisible = true;
   tagsSelectable = true;
   tagsRemovable = true;
   tagsAddOnBlur = true;
   tags: string[] = [];
-  spaceScopeSub: Subscription;
+  spaceScopeSub!: Subscription;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
   private _serviceParamsValid = signal<boolean>(false);
   serviceParamsValid = toObservable(this._serviceParamsValid);
-  serviceParams: object = null;
-  schemaFormConfig: SchemaFormConfig;
+  serviceParams: object = {};
+  schemaFormConfig!: SchemaFormConfig;
 
 
   nameTakenValidator = (): ValidatorFn => {

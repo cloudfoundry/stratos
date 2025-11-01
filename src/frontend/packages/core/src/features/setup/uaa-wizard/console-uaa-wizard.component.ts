@@ -64,8 +64,8 @@ export class ConsoleUaaWizardComponent implements OnInit {
     this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
-  uaaForm: FormGroup<UAAWizardForm>;
-  validateUAAForm: Observable<boolean>;
+  uaaForm!: FormGroup<UAAWizardForm>;
+  validateUAAForm!: Observable<boolean>;
   uaaScopes: string[] = [];
   selectedScope = '';
   applyingSetup = signal<boolean>(false);

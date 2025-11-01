@@ -32,11 +32,11 @@ import {
 })
 export class TableCellServiceComponent extends TableCellCustom<APIResource<IServiceInstance>> implements OnInit {
 
-  serviceName$: Observable<string>;
-  serviceUrl$: Observable<string>;
-  service$: Observable<APIResource<IService>>;
+  serviceName$!: Observable<string>;
+  serviceUrl$!: Observable<string>;
+  service$!: Observable<APIResource<IService>>;
   // tslint:disable-next-line:ban-types
-  isUserProvidedServiceInstance: Boolean;
+  isUserProvidedServiceInstance!: Boolean;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME

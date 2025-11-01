@@ -29,7 +29,7 @@ export function selectAsSignal<T>(
   options?: { initialValue?: T }
 ): Signal<T | undefined> {
   const store = inject(Store);
-  return toSignal(store.select(selector), options);
+  return toSignal(store.select(selector), options as any);
 }
 
 /**
@@ -94,7 +94,7 @@ export function observableAsSignal<T>(
   observable: Observable<T>,
   options?: { initialValue?: T }
 ): Signal<T | undefined> {
-  return toSignal(observable, options);
+  return toSignal(observable, options as any);
 }
 
 /**

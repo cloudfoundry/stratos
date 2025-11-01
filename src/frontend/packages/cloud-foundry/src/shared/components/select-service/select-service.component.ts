@@ -57,7 +57,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   private csiGuidService = inject(CsiGuidsService);
   private servicesWallService = inject(ServicesWallService);
 
-  cfGuid: string;
+  cfGuid!: string;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: FormGroup<SelectServiceForm>;
   validate = signal<boolean>(false);

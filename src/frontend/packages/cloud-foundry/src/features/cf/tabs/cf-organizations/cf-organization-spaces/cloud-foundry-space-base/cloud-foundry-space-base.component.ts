@@ -99,7 +99,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     }
   ];
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   public name$: Observable<string>;
 
@@ -112,7 +112,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
 
   private deleteRedirectSub: Subscription;
 
-  private quotaLinkSub: Subscription;
+  private quotaLinkSub!: Subscription;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
   public favorite$: Observable<UserFavorite<ISpaceFavMetadata>>;

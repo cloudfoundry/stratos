@@ -28,7 +28,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   @Output() onChanges = new EventEmitter<any>();
   @Output() validationErrors = new EventEmitter<any[]>();
 
-  form: FormGroup<any>;
+  form!: FormGroup<any>;
   formFields: any[] = [];
   formData: any = {};
 

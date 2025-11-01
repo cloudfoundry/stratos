@@ -66,15 +66,15 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   public canRegisterEndpoint: Observable<StratosCurrentUserPermissions[]>;
-  private healthCheckTimeout: number;
+  private healthCheckTimeout!: number;
 
   public canBackupRestore$: Observable<boolean>;
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
 
-  @ViewChild('customNoEndpoints', { read: ViewContainerRef, static: true }) customNoEndpointsContainer: ViewContainerRef;
+  @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
   @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
-  customContentComponentRef: ComponentRef<any>;
+  customContentComponentRef!: ComponentRef<any>;
 
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,

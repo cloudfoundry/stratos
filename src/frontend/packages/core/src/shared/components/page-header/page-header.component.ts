@@ -57,8 +57,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
   public eventSeverity = InternalEventSeverity;
-  public pFavorite: UserFavorite<IFavoriteMetadata>;
-  private pTabs: IPageSideNavTab[];
+  public pFavorite!: UserFavorite<IFavoriteMetadata>;
+  private pTabs!: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
 
@@ -68,7 +68,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public isHistoryMenuOpen = false;
   public isUserMenuOpen = false;
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
+  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
 
   @Input() hideSideNavButton = false;
 
@@ -77,7 +77,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   @Input() hideMenu = false;
 
   @Input()
-  endpointIds$: Observable<string[]>;
+  endpointIds$!: Observable<string[]>;
 
   @Input()
   set tabs(tabs: IPageSideNavTab[]) {
@@ -147,7 +147,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input() logoutOnly: boolean;
+  @Input() logoutOnly?: boolean;
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
     if (!breadcrumbs || !breadcrumbs.length) {

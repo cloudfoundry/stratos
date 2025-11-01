@@ -28,7 +28,7 @@ export class ChartDetailsReadmeComponent {
   }
 
   public loading = false;
-  public readmeContent$: Observable<string>;
+  public readmeContent$!: Observable<string>;
   private renderer = new marked.Renderer();
   private loadingDelay: ReturnType<typeof setTimeout>;
   private chartsService = inject(ChartsService);

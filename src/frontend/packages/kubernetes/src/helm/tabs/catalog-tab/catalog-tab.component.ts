@@ -45,9 +45,9 @@ export class CatalogTabComponent implements OnDestroy {
   }>;
 
   private searchRepos = signal<string>('');
-  public searchReposValue: string;
+  public searchReposValue!: string;
 
-  public filteredRepo: string;
+  public filteredRepo!: string;
 
   public collapsed = true;
   public hide = true;

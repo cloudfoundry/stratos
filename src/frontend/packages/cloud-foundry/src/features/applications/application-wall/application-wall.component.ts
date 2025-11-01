@@ -56,11 +56,11 @@ import { goToAppWall } from '../../cf/cf.helpers';
   ]
 })
 export class ApplicationWallComponent implements OnDestroy {
-  public cfIds$: Observable<string[]>;
+  public cfIds$!: Observable<string[]>;
 
-  public canCreateApplication: string;
+  public canCreateApplication!: string;
 
-  public haveConnectedCf$: Observable<boolean>;
+  public haveConnectedCf$!: Observable<boolean>;
 
   constructor(
     public cloudFoundryService: CloudFoundryService,

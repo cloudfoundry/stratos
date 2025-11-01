@@ -13,13 +13,13 @@ export class ListPagination {
 }
 
 export class ListSort {
-  field: string;
-  direction: SortDirection;
+  field!: string;
+  direction!: SortDirection;
 }
 
 export class ListFilter {
-  string: string;
-  items: {
+  string!: string;
+  items!: {
     [key: string]: any;
   };
   filterKey?: string;

@@ -119,7 +119,7 @@ export class KubeConfigImportComponent implements OnDestroy {
   ];
 
   subs: Subscription[] = [];
-  applyStarted: boolean;
+  applyStarted!: boolean;
   private iteration = 0;
 
   private connectService: ConnectEndpointService;

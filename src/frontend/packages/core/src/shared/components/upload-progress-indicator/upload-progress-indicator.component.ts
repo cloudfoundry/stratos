@@ -19,6 +19,6 @@ export class UploadProgressIndicatorComponent {
 
   constructor() { }
 
-  @Input() value: number;
+  @Input() value!: number;
 
 }

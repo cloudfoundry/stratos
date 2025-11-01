@@ -31,7 +31,7 @@ import { CfCellsDataSource } from './cf-cells-data-source';
 })
 export class CfCellsListConfigService extends BaseCfListConfig<IMetricVectorResult<IMetricCell>> {
 
-  dataSource: CfCellsDataSource;
+  dataSource!: CfCellsDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = true;

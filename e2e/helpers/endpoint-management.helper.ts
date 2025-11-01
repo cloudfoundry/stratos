@@ -139,7 +139,7 @@ export class EndpointManagementHelper {
     for (const endpoint of endpoints) {
       // Find credentials in secrets
       const endpointType = endpoint.cnsi_type;
-      const secretEndpoints = this.secrets[endpointType] as any[];
+      const secretEndpoints = this.secrets[endpointType as keyof typeof this.secrets] as any[];
 
       if (!secretEndpoints) {
         console.warn(`No credentials found for endpoint type: ${endpointType}`);
@@ -178,7 +178,7 @@ export class EndpointManagementHelper {
 
     for (const endpoint of endpoints) {
       const endpointType = endpoint.cnsi_type;
-      const secretEndpoints = this.secrets[endpointType] as any[];
+      const secretEndpoints = this.secrets[endpointType as keyof typeof this.secrets] as any[];
 
       if (!secretEndpoints) {
         continue;

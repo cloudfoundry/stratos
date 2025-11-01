@@ -22,10 +22,10 @@ import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-li
 })
 export class TableCellEndpointDetailsComponent extends TableCellCustom<EndpointModel> implements OnDestroy {
 
-  private componentRef: ComponentRef<EndpointListDetailsComponent>;
+  private componentRef!: ComponentRef<EndpointListDetailsComponent>;
   @Input() component: Type<EndpointListDetailsComponent>;
 
-  private endpointDetails: ViewContainerRef;
+  private endpointDetails!: ViewContainerRef;
   @ViewChild('target', { read: ViewContainerRef, static: true }) set target(content: ViewContainerRef) {
     this.endpointDetails = content;
   }

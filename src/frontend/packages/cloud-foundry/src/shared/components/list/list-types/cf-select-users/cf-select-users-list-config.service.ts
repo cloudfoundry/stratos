@@ -33,7 +33,7 @@ import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.se
 
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
-  dataSource: CfSelectUsersDataSourceService;
+  dataSource!: CfSelectUsersDataSourceService;
   defaultView = 'table' as ListView;
   enableTextFilter = true;
   text = {

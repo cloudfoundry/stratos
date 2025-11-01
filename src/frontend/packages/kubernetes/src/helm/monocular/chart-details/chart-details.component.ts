@@ -31,13 +31,13 @@ import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-detail
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */
-  chart: Chart;
+  chart!: Chart;
   loading = false;
   initing = true;
-  currentVersion: ChartVersion;
-  iconUrl: string;
-  titleVersion: string;
-  chartSubTitle: string;
+  currentVersion!: ChartVersion;
+  iconUrl!: string;
+  titleVersion!: string;
+  chartSubTitle!: string;
 
   loadingDelay: ReturnType<typeof setTimeout>;
   private route = inject(ActivatedRoute);

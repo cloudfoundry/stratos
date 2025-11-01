@@ -58,12 +58,12 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   private cfRolesService = inject(CfRolesService);
   private userPerms = inject(CurrentUserPermissionsService);
 
-  @Input() cfGuid: string;
-  @Input() orgGuid: string;
-  @Input() spaceGuid: string;
-  @Input() orgName: string;
-  @Input() spaceName: string;
-  @Input() role: string;
+  @Input() cfGuid!: string;
+  @Input() orgGuid!: string;
+  @Input() spaceGuid!: string;
+  @Input() orgName!: string;
+  @Input() spaceName!: string;
+  @Input() role!: string;
   // Note: This output is currently unused - keeping for API compatibility
   // @Output() changed = new EventEmitter<boolean>();
 
@@ -88,7 +88,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   checked = false;
   tooltip = '';
-  sub: Subscription;
+  sub!: Subscription;
   isOrgRole = false;
   disabled = false;
 

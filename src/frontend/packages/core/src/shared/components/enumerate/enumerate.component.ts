@@ -13,6 +13,6 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnumerateComponent {
-  @Input() collection: Observable<any[]>;
-  @Input() labelPath: string;
+  @Input() collection!: Observable<any[]>;
+  @Input() labelPath!: string;
 }

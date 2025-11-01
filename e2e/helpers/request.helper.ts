@@ -169,6 +169,40 @@ export class RequestHelper {
   }
 
   /**
+   * Send PATCH request with JSON body
+   */
+  async patch(url: string, body?: any): Promise<any> {
+    if (!this.context) {
+      throw new Error('Request context not initialized. Call init() first.');
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (this.xsrfToken) {
+      headers['x-xsrf-token'] = this.xsrfToken;
+    }
+
+    const response = await this.context.patch(url, {
+      headers,
+      data: body ? JSON.stringify(body) : undefined
+    });
+
+    // Update XSRF token
+    const newToken = response.headers()['x-xsrf-token'];
+    if (newToken) {
+      this.xsrfToken = newToken;
+    }
+
+    if (response.ok()) {
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    }
+
+    throw new Error(`PATCH ${url} failed: ${response.status()} ${response.statusText()}`);
+  }
+
+  /**
    * Send DELETE request
    */
   async delete(url: string): Promise<any> {

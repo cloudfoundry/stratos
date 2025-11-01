@@ -20,8 +20,8 @@ import { CardTypes } from './card/card.component';
 })
 export class CardsComponent<T> {
   public columns = CardCell.columns;
-  @Input() dataSource: IListDataSource<T>;
-  private pComponent: CardTypes<T>;
+  @Input() dataSource!: IListDataSource<T>;
+  private pComponent!: CardTypes<T>;
   @Input()
   get component() { return this.pComponent; }
   set component(cardCell: CardTypes<T>) {

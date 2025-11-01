@@ -18,9 +18,9 @@ import { ListViewComponent } from '../list-view/list-view.component';
 })
 export class EntityListViewComponent implements OnInit {
   @Input()
-  public config: ListEntityConfig;
+  public config!: ListEntityConfig;
 
-  provider: ListConfigProvider;
+  provider!: ListConfigProvider;
 
   private store = inject(Store<any>);
 

@@ -12,5 +12,5 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DotContentComponent {
-  @Input() disabled: boolean;
+  @Input() disabled: boolean = false;
 }

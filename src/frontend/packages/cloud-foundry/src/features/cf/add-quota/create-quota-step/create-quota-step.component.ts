@@ -26,12 +26,12 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 })
 export class CreateQuotaStepComponent {
 
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
-  quotaForm: FormGroup;
+  quotaForm!: FormGroup;
 
   @ViewChild('form', { static: true })
-  form: QuotaDefinitionFormComponent;
+  form!: QuotaDefinitionFormComponent;
 
   constructor(
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

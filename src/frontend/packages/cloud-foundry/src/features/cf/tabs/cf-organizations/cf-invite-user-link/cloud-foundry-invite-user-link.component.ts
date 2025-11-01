@@ -25,7 +25,7 @@ interface UserInviteStepperLink {
 })
 export class CloudFoundryInviteUserLinkComponent implements OnInit {
 
-  inviteUserDetails$: Observable<UserInviteStepperLink>;
+  inviteUserDetails$!: Observable<UserInviteStepperLink | null>;
 
   constructor(
     private userInviteService: UserInviteService,

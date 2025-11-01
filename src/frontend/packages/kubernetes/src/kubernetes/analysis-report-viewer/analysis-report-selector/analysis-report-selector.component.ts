@@ -25,8 +25,8 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   public canShow$: Observable<boolean>;
   public analyzers$: Observable<AnalysisReport[]>;
 
-  @Input() endpoint: string;
-  @Input() path: string;
+  @Input() endpoint!: string;
+  @Input() path!: string;
   @Input() prompt = 'Overlay';
   @Input() allowNone = true;
   @Input() autoSelect: boolean;

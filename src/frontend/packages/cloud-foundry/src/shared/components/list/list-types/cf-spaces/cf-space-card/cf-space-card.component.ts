@@ -74,21 +74,21 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
   ]
 })
 export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
-  cardMenu: MenuItem[];
-  spaceGuid: string;
-  appInstancesCount: number;
-  appInstancesLimit: string;
-  orgGuid: string;
-  normalisedMemoryUsage: number;
-  memoryLimit: string;
+  cardMenu!: MenuItem[];
+  spaceGuid!: string;
+  appInstancesCount!: number;
+  appInstancesLimit!: string | null;
+  orgGuid!: string;
+  normalisedMemoryUsage!: number;
+  memoryLimit!: string | null;
   subscriptions: Subscription[] = [];
-  memoryTotal: number;
-  appCount$: Observable<number>;
-  userRolesInSpace: string;
-  currentUser$: Observable<EndpointUser>;
-  entityConfig: ComponentEntityMonitorConfig;
-  favorite: UserFavorite<ISpaceFavMetadata>;
-  spaceStatus$: Observable<StratosStatus>;
+  memoryTotal!: number;
+  appCount$!: Observable<number>;
+  userRolesInSpace!: string;
+  currentUser$!: Observable<EndpointUser>;
+  entityConfig!: ComponentEntityMonitorConfig;
+  favorite: UserFavorite<ISpaceFavMetadata> | undefined;
+  spaceStatus$!: Observable<StratosStatus>;
 
   constructor(
     private cfUserService: CfUserService,

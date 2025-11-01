@@ -17,7 +17,7 @@ export class EventMetadataComponent implements OnInit {
   static maxValuesLength = 500;
   static maxKeys = 5;
 
-  @Input() metadata: { [name: string]: any, };
+  @Input() metadata!: { [name: string]: any, };
   @Input() canShowPopup = true;
   showPopup = false;
   isPopup = false;

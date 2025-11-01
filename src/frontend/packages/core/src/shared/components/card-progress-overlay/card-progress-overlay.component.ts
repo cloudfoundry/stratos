@@ -14,8 +14,8 @@ import { Observable } from 'rxjs';
 })
 export class CardProgressOverlayComponent {
 
-  @Input() label: string;
+  @Input() label!: string;
 
-  @Input() busy: Observable<boolean>;
+  @Input() busy!: Observable<boolean>;
 
 }

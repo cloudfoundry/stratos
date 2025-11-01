@@ -17,11 +17,11 @@ export interface MetricsEndpointProvider {
 
 @Injectable()
 export class MetricsService {
-  metricsEndpoints$: Observable<MetricsEndpointProvider[]>;
+  metricsEndpoints$!: Observable<MetricsEndpointProvider[]>;
   endpointsMonitor: PaginationMonitor<EndpointModel>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource>>;
-  haveNoMetricsEndpoints$: Observable<boolean>;
-  haveNoConnectedMetricsEndpoints$: Observable<boolean>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
+  haveNoMetricsEndpoints$!: Observable<boolean>;
+  haveNoConnectedMetricsEndpoints$!: Observable<boolean>;
 
   constructor() {
     this.endpointsMonitor = stratosEntityCatalog.endpoint.store.getPaginationMonitor();

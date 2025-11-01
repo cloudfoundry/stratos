@@ -17,7 +17,7 @@ export class CustomTabComponent {
   @Input() disabled = false;
   @Input() textLabel = '';
 
-  @ViewChild(TemplateRef, { static: true }) content: TemplateRef<any>;
+  @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
 
   isActive = false;
 }

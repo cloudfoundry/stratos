@@ -15,7 +15,7 @@ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResourceAlertPreviewComponent implements PreviewableComponent {
 
-  title: string;
+  title!: string;
 
   resource: any;
   alerts: any;

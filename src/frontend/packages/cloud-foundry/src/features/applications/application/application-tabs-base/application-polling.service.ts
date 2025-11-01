@@ -14,7 +14,7 @@ import { ApplicationService } from '../../application.service';
 })
 export class ApplicationPollingService {
 
-  private pollingSub: Subscription;
+  private pollingSub!: Subscription;
   private autoRefreshString = 'auto-refresh';
 
   public isPolling$ = this.applicationService.entityService.updatingSection$.pipe(map(

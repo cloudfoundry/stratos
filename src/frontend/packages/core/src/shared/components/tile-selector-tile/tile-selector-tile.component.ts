@@ -17,9 +17,9 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class TileSelectorTileComponent<Y = ITileGraphic> {
 
-  @Input() tile: ITileConfig<ITileData, Y>;
+  @Input() tile!: ITileConfig<ITileData, Y>;
 
-  @Input() active: boolean;
+  @Input() active!: boolean;
 
   @Input() smaller = false;
 

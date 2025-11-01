@@ -59,7 +59,7 @@ export class RestoreEndpointsService {
   public currentDbVersion$: Observable<number>;
 
   // Step 2
-  private password: string;
+  private password!: string;
 
   constructor(
     private store: Store<GeneralEntityAppState>,

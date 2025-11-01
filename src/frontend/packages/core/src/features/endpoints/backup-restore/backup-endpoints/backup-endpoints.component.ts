@@ -50,7 +50,7 @@ interface BackupPasswordForm {
 })
 export class BackupEndpointsComponent implements OnDestroy {
 
-  sub: Subscription;
+  sub!: Subscription;
 
   // Step 1
   columns: ITableColumn<EndpointModel>[] = [
@@ -82,14 +82,14 @@ export class BackupEndpointsComponent implements OnDestroy {
       cellComponent: BackupConnectionCellComponent,
     },
   ];
-  endpointDataSource: ITableListDataSource<EndpointModel>;
-  disableSelectAll$: Observable<boolean>;
-  disableSelectNone$: Observable<boolean>;
-  selectValid$: Observable<boolean>;
+  endpointDataSource!: ITableListDataSource<EndpointModel>;
+  disableSelectAll$!: Observable<boolean>;
+  disableSelectNone$!: Observable<boolean>;
+  selectValid$!: Observable<boolean>;
 
   // Step 2
-  passwordValid$: Observable<boolean>;
-  passwordForm: FormGroup<BackupPasswordForm>;
+  passwordValid$!: Observable<boolean>;
+  passwordForm!: FormGroup<BackupPasswordForm>;
   showPassword: boolean[] = [];
 
   // Custom validator for password matching

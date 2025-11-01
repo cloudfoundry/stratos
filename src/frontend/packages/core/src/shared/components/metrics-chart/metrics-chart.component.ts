@@ -47,11 +47,11 @@ export interface MetricsConfig<T = any> {
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   @Input()
-  public metricsConfig: MetricsConfig;
+  public metricsConfig!: MetricsConfig;
   @Input()
   public chartConfig: MetricsLineChartConfig;
   @Input()
-  public title: string;
+  public title!: string;
 
   @ContentChild(MetricsRangeSelectorComponent, { static: true })
   public timeRangeSelector: MetricsRangeSelectorComponent;
@@ -65,9 +65,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   public chartTypes = MetricsChartTypes;
 
-  private timeSelectorSub: Subscription;
+  private timeSelectorSub!: Subscription;
 
-  public results$: Observable<IMetrics<any> | ChartSeries<any>[]>;
+  public results$!: Observable<IMetrics<any> | ChartSeries<any>[] | null>;
   public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -97,10 +97,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
   public metricsMonitor: EntityMonitor<IMetrics>;
 
-  private committedAction: MetricsAction;
+  private committedAction!: MetricsAction;
 
-  public isRefreshing$: Observable<boolean>;
-  public isFetching$: Observable<boolean>;
+  public isRefreshing$!: Observable<boolean>;
+  public isFetching$!: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,

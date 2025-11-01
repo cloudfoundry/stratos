@@ -50,22 +50,22 @@ class ValidateLoopConfig extends ValidateEntityRelationsConfig {
   /**
    * List of `{parent entity key} - {child entity key}` strings which should exist in entities structure
    */
-  includeRelations: string[];
+  includeRelations!: string[];
   /**
    * List of entities to validate
    */
-  entities: APIResource[];
+  entities!: APIResource[];
   /**
    * Parent entity relation of children in the entities param
    */
-  parentRelation: EntityTreeRelation;
+  parentRelation!: EntityTreeRelation;
 }
 
 class HandleRelationsConfig extends ValidateLoopConfig {
-  parentEntity: APIResource;
-  childRelation: EntityTreeRelation;
-  childEntities: object | any[];
-  childEntitiesUrl: string;
+  parentEntity!: APIResource;
+  childRelation!: EntityTreeRelation;
+  childEntities!: object | any[];
+  childEntitiesUrl!: string;
 }
 
 function createAction(config: HandleRelationsConfig) {

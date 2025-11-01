@@ -18,7 +18,7 @@ import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
 
-  extraInfo: IServiceExtra;
+  extraInfo!: IServiceExtra;
 
   @Input()
   set row(pService: APIResource<IService>) {

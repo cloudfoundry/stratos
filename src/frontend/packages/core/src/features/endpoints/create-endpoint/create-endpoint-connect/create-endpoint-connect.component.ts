@@ -30,10 +30,10 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
-  public validate: Observable<boolean>;
+  public validate!: Observable<boolean>;
   public valid = false;
-  public helpDocumentUrl: string;
-  public connectService: ConnectEndpointService;
+  public helpDocumentUrl!: string;
+  public connectService!: ConnectEndpointService;
 
   public doConnect = false;
 

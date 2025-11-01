@@ -28,7 +28,7 @@ import { ApplicationService } from '../../application.service';
   providedIn: 'root'
 })
 export class AppDeleteServiceInstancesListConfigService extends AppServiceBindingListConfigService {
-  hideRefresh: boolean;
+  hideRefresh!: boolean;
   allowSelection: boolean;
   obsCache: { [serviceGuid: string]: Observable<RowState>, } = {};
 

@@ -18,8 +18,8 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   @Input() hideRequiredMarker = false;
   @Input() hintLabel = '';
 
-  @ContentChild('input', { read: ElementRef, static: false }) inputElement: ElementRef;
-  @ContentChild(NgControl, { static: false }) ngControl: NgControl;
+  @ContentChild('input', { read: ElementRef, static: false }) inputElement!: ElementRef;
+  @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
 
   public focused = false;
   public hasValue = false;
@@ -178,8 +178,8 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
 })
 export class CustomFormFieldIconComponent {
   @Input() fontSet = 'material-icons';
-  @Input() fontIcon: string;
-  @Input() svgIcon: string;
+  @Input() fontIcon!: string;
+  @Input() svgIcon!: string;
 }
 
 @Component({
@@ -222,8 +222,8 @@ export class CustomButtonDirective {
   }
 })
 export class MatInputDirective {
-  @Input() formControl: FormControl<any>;
-  @Input() formControlName: string;
+  @Input() formControl!: FormControl<any>;
+  @Input() formControlName!: string;
 }
 
 @Component({

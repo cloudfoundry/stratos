@@ -31,8 +31,8 @@ export class ChartsComponent implements OnInit {
   charts: Chart[] = [];
   orderedCharts: Chart[] = [];
   loading = true;
-  searchTerm: string;
-  searchTimeout: ReturnType<typeof setTimeout>;
+  searchTerm!: string;
+  searchTimeout!: ReturnType<typeof setTimeout>;
   filtersOpen = false;
 
   // Default filters
@@ -56,7 +56,7 @@ export class ChartsComponent implements OnInit {
   orderBy = 'name';
 
   // Repos
-  repoName: string;
+  repoName!: string;
   private chartsService = inject(ChartsService);
   private reposService = inject(ReposService);
   private route = inject(ActivatedRoute);

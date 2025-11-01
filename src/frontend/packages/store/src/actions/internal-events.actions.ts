@@ -11,7 +11,7 @@ import {
 
 export class SendEventAction<T = InternalEventStateMetadata> implements Action {
   public type = SEND_EVENT;
-  public timestamp: number;
+  public timestamp!: number;
   constructor(
     public eventType: string,
     public eventSubjectId: string,

@@ -23,9 +23,9 @@ import { MonocularChartsDataSource } from './monocular-charts-data-source';
   providedIn: 'root'
 })
 export class MonocularChartsListConfig implements IListConfig<MonocularChart> {
-  dataSource: MonocularChartsDataSource;
+  dataSource!: MonocularChartsDataSource;
   isLocal = true;
-  multiFilterConfigs: IListMultiFilterConfig[];
+  multiFilterConfigs!: IListMultiFilterConfig[];
 
   columns: Array<ITableColumn<MonocularChart>> = [
     {

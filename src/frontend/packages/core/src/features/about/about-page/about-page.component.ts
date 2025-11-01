@@ -37,15 +37,15 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
 
-  sessionData$: Observable<SessionData>;
-  versionNumber$: Observable<string>;
-  userIsAdmin$: Observable<boolean>;
+  sessionData$!: Observable<SessionData>;
+  versionNumber$!: Observable<string>;
+  userIsAdmin$!: Observable<boolean>;
 
-  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer: ViewContainerRef;
-  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer: ViewContainerRef;
+  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
+  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
 
-  aboutInfoComponentRef: ComponentRef<any>;
-  componentRef: ComponentRef<any>;
+  aboutInfoComponentRef!: ComponentRef<any>;
+  componentRef!: ComponentRef<any>;
 
   customizations: CustomizationsMetadata;
 

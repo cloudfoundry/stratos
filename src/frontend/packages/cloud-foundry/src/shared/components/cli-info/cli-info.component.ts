@@ -23,6 +23,6 @@ export interface CFAppCLIInfoContext {
 ]
 })
 export class CliInfoComponent {
-  @Input() context: CFAppCLIInfoContext;
+  @Input() context!: CFAppCLIInfoContext;
 }
 

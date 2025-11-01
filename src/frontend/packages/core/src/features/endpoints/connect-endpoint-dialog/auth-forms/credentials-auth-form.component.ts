@@ -33,7 +33,7 @@ export class CredentialsAuthFormComponent implements IAuthForm {
     passwordLabel: 'Password'
   };
 
-  @Input() formGroup: FormGroup<CredentialsAuthForm>;
+  @Input() formGroup!: FormGroup<CredentialsAuthForm>;
 
   get config(): any {
     return this.pConfig;

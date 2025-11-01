@@ -33,7 +33,7 @@ export class TableCellEditComponent<T> extends TableCellCustom<T> {
   }
 
   @Input()
-  subtle: boolean;
+  subtle!: boolean;
 
   isEditing(): boolean {
     return this.dataSource.editRow ?

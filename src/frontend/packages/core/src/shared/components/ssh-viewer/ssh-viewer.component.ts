@@ -25,13 +25,13 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   errorMessage: string;
 
   @Input()
-  sshStream: Observable<any>;
+  sshStream!: Observable<any>;
 
   @Input()
-  sshInput: Subject<string>;
+  sshInput!: Subject<string>;
 
   @Input()
-  public connectionStatus: Observable<number>;
+  public connectionStatus!: Observable<number>;
 
   public isConnected = false;
   public isConnecting = false;
@@ -39,14 +39,14 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   public message = '';
 
-  @ViewChild('terminal', { static: true }) container: ElementRef;
-  private xterm: Terminal;
+  @ViewChild('terminal', { static: true }) container!: ElementRef;
+  private xterm!: Terminal;
 
   private xtermFitAddon = new FitAddon();
 
-  private msgSubscription: Subscription;
-  private connectSubscription: Subscription;
-  private resizeSubscription: Subscription;
+  private msgSubscription!: Subscription;
+  private connectSubscription!: Subscription;
+  private resizeSubscription!: Subscription;
 
   ngOnInit() {
     if (!this.connectionStatus) {

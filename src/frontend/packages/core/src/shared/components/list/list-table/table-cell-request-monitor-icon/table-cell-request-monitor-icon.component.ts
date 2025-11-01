@@ -28,9 +28,9 @@ selector: 'app-table-cell-request-monitor-icon',
 ]
 })
 export class TableCellRequestMonitorIconComponent<T = any> extends TableCellCustom<T, Config<T>> implements OnInit {
-  public configObj: ITableCellRequestMonitorIconConfig;
+  public configObj!: ITableCellRequestMonitorIconConfig;
 
-  public id: string;
+  public id!: string;
 
   ngOnInit() {
     this.configObj = this.config.getConfig(this.row);

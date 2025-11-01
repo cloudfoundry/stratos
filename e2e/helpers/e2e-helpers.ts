@@ -124,9 +124,9 @@ export class E2EHelpers {
    * Execute JavaScript in browser
    * Migrated from: browser.executeScript()
    */
-  async executeScript<T = any>(script: string | Function, ...args: any[]): Promise<T> {
+  async executeScript<T = any>(script: string | ((...args: any[]) => T | Promise<T>), ...args: any[]): Promise<T> {
     if (typeof script === 'function') {
-      return await this.page.evaluate(script, ...args) as T;
+      return await this.page.evaluate(script as (...args: any[]) => T | Promise<T>, ...args) as T;
     }
     return await this.page.evaluate(script) as T;
   }

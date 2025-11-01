@@ -30,18 +30,18 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input() app: any;
+  @Input() app!: any;
 
-  @Input() endpoint: string;
+  @Input() endpoint!: string;
 
   @Input() showDate = true;
-  @Input() dateMode: string;
+  @Input() dateMode!: string;
 
-  applicationState$: Observable<ApplicationStateData>;
+  applicationState$!: Observable<ApplicationStateData>;
 
-  appStatus$: Observable<StratosStatus>;
+  appStatus$!: Observable<StratosStatus>;
 
-  bcType: any;
+  bcType!: any;
 
 
   constructor(

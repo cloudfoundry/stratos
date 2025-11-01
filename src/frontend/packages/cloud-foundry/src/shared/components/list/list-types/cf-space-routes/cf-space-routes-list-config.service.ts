@@ -20,9 +20,9 @@ import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
   providedIn: 'root'
 })
 export class CfSpaceRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {
-  private dataSource: CfSpaceRoutesDataSource;
+  private dataSource!: CfSpaceRoutesDataSource;
 
-  getDataSource: () => CfSpaceRoutesDataSource;
+  getDataSource!: () => CfSpaceRoutesDataSource;
 
   constructor(
     store: Store<CFAppState>,

@@ -24,5 +24,5 @@ interface SsoAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SSOAuthFormComponent implements IAuthForm {
-  @Input() formGroup: FormGroup<SsoAuthForm>;
+  @Input() formGroup!: FormGroup<SsoAuthForm>;
 }

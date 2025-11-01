@@ -30,7 +30,7 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
   @HostBinding('class.tile-group-2-cols') private isTwoColumn = false;
   @HostBinding('class.tile-group-1-cols') private isOneColumn = false;
 
-  @ContentChildren(TileComponent) tiles: QueryList<TileComponent>;
+  @ContentChildren(TileComponent) tiles!: QueryList<TileComponent>;
 
   ngOnInit() { }
 

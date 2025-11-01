@@ -32,7 +32,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
   @Input() showToolbarHint = true;
   @Input() showDirectToEndpointMessage = true;
 
-  noContent$: Observable<EndpointMissingMessageParts>;
+  noContent$!: Observable<EndpointMissingMessageParts | null>;
 
   protected noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered endpoints',

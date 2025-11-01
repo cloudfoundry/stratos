@@ -53,7 +53,7 @@ import { ApplicationService } from '../../../../../application.service';
 export class RoutesTabComponent implements OnInit {
   private appService = inject(ApplicationService);
 
-  paginationSubscription: Subscription;
+  paginationSubscription!: Subscription;
 
   ngOnInit() {
     this.appService.orgDomains$.pipe(

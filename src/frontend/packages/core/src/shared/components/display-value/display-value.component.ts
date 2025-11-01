@@ -11,8 +11,8 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 })
 export class DisplayValueComponent {
 
-  @Input() label: string;
-  @Input() value: string;
+  @Input() label!: string;
+  @Input() value!: string;
 
   constructor() { }
 }

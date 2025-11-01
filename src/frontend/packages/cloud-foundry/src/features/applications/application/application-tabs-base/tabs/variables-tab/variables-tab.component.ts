@@ -56,13 +56,13 @@ export class VariablesTabComponent implements OnInit {
     this.envVarsDataSource = listConfig.getDataSource();
   }
 
-  envVars$: Observable<{
+  envVars$!: Observable<{
     names: string[],
     values: {}
   }>;
 
   envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
-  allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
+  allEnvVars$!: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
     this.envVars$ = this.appService.waitForAppEntity$.pipe(map(app => ({

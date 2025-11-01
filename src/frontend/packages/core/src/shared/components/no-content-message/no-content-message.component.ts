@@ -22,19 +22,19 @@ export interface NoContentMessageLine {
 })
 export class NoContentMessageComponent implements AfterViewInit {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() firstLine: string;
-  @Input() secondLine: NoContentMessageLine;
-  @Input() otherLines: NoContentMessageLine[];
-  @Input() toolbarLink: {
+  @Input() icon?: string;
+  @Input() iconFont?: string;
+  @Input() firstLine?: string;
+  @Input() secondLine?: NoContentMessageLine;
+  @Input() otherLines?: NoContentMessageLine[];
+  @Input() toolbarLink?: {
     text: string;
   };
-  @Input() toolbarAlign: string;
+  @Input() toolbarAlign?: string;
 
-  @Input() mode: string;
+  @Input() mode?: string;
 
-  @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement: ElementRef;
+  @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement?: ElementRef;
   private renderer = inject(Renderer2);
 
   ngAfterViewInit() {
@@ -42,7 +42,7 @@ export class NoContentMessageComponent implements AfterViewInit {
     // Note - Only execute after a delay. The final place of the target element may change given visibility of other menu items
     // (polling disabled, notification bell). We should come back to this and replace the timeout with a better way of determining readyness
     setTimeout(() => {
-      if (this.toolBarLinkElement) {
+      if (this.toolBarLinkElement && this.toolbarAlign) {
         const elem = document.getElementById(this.toolbarAlign);
         if (elem) {
           const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;

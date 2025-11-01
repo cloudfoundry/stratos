@@ -27,7 +27,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     super();
   }
 
-  public cellDefinition: ICellDefinition<T>;
+  public cellDefinition!: ICellDefinition<T>;
 
   @Input('row')
   get row() { return super.row; }
@@ -39,7 +39,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private pSchemaKey: string;
+  private pSchemaKey!: string;
   @Input('schemaKey')
   get schemaKey() { return this.pSchemaKey; }
   set schemaKey(schemaKey: string) {
@@ -50,14 +50,14 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     }
   }
 
-  private asyncSub: Subscription;
+  private asyncSub!: Subscription;
 
   public valueContext: { value: any } = { value: null as any };
   public isLink = false;
   public isExternalLink = false;
-  public linkValue: string;
+  public linkValue!: string;
   public linkTarget = '_self';
-  public valueGenerator: (row: T, schemaKey?: string) => string | Observable<string>;
+  public valueGenerator!: (row: T, schemaKey?: string) => string | Observable<string>;
   public showShortLink = false;
 
   public init() {

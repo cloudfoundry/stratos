@@ -27,12 +27,12 @@ export class MetaCardItemComponent implements OnInit {
   };
   itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent, { static: true })
-  key: MetaCardKeyComponent;
+  key!: MetaCardKeyComponent;
 
   @ContentChild(MetaCardValueComponent, { static: true })
-  value: MetaCardValueComponent;
+  value!: MetaCardValueComponent;
 
-  @ViewChild('content', { static: true }) content: TemplateRef<any>;
+  @ViewChild('content', { static: true }) content!: TemplateRef<any>;
 
   @Input() customStyle = this.defaultStyle;
 

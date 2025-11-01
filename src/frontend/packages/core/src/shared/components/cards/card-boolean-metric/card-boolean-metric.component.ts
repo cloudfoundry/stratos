@@ -15,14 +15,14 @@ import { RouterNav, AppState } from '@stratosui/store';
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon: string;
-  @Input() iconFont: string;
-  @Input() label: string;
-  @Input() value: string;
+  @Input() icon!: string;
+  @Input() iconFont!: string;
+  @Input() label!: string;
+  @Input() value!: string;
   @Input() textOnly = false;
-  @Input() link: () => void | string;
+  @Input() link!: () => void | string;
 
-  formattedValue: string;
+  formattedValue!: string;
 
   private store = inject(Store<AppState>);
 

@@ -5,7 +5,7 @@ selector: '[appFocus]',
 standalone: true
 })
 export class FocusDirective implements OnChanges {
-  @Input() appFocus: boolean;
+  @Input() appFocus!: boolean;
 
   private element = inject(ElementRef);
   private ngZone = inject(NgZone);

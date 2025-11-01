@@ -22,7 +22,7 @@ export class MetadataItemComponent {
 
   constructor() { }
 
-  @Input() public icon: string;
+  @Input() icon!: string;
 
   @Input() public iconFont: string;
 

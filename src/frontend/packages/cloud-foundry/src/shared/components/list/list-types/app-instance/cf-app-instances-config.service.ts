@@ -52,7 +52,7 @@ export function createAppInstancesMetricAction(appGuid: string, cfGuid: string):
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
 
   instancesSource: CfAppInstancesDataSource;
-  metricResults$: Observable<IMetricMatrixResult<IMetricApplication>[]>;
+  metricResults$!: Observable<IMetricMatrixResult<IMetricApplication>[]>;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
       columnId: 'index',

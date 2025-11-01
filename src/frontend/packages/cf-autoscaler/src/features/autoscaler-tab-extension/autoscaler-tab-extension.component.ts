@@ -138,7 +138,7 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
-  canManageCredentials$: Observable<boolean>;
+  canManageCredentials$!: Observable<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -146,26 +146,26 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   scalingHistoryColumns: string[] = ['event', 'trigger', 'date', 'error'];
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
-  appAutoscalerPolicyService: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService: PaginationObservables<APIResource<AppAutoscalerEvent>>;
-  appAutoscalerPolicy$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerPolicySafe$: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerScalingHistory$: Observable<AppAutoscalerEvent[]>;
-  appAutoscalerAppMetricNames$: Observable<AppAutoscaleMetricChart[]>;
+  appAutoscalerPolicyService!: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
+  public appAutoscalerScalingHistoryService!: PaginationObservables<APIResource<AppAutoscalerEvent>>;
+  appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal>;
+  appAutoscalerPolicySafe$!: Observable<AppAutoscalerPolicyLocal>;
+  appAutoscalerScalingHistory$!: Observable<AppAutoscalerEvent[]>;
+  appAutoscalerAppMetricNames$!: Observable<AppAutoscaleMetricChart[]>;
 
-  public showNoPolicyMessage$: Observable<boolean>;
-  public showAutoscalerHistory$: Observable<boolean>;
+  public showNoPolicyMessage$!: Observable<boolean>;
+  public showAutoscalerHistory$!: Observable<boolean>;
 
   public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
   public noPolicyMessageSecondLine = {
     text: 'To create a policy click the + icon above'
   };
 
-  private appAutoscalerPolicyErrorSub: Subscription;
-  private appAutoscalerScalingHistoryErrorSub: Subscription;
-  private appAutoscalerPolicySnackBarRef: TailwindSnackBarRef<any>;
-  private appAutoscalerScalingHistorySnackBarRef: TailwindSnackBarRef<any>;
-  private scalingHistoryAction: GetAppAutoscalerScalingHistoryAction;
+  private appAutoscalerPolicyErrorSub!: Subscription;
+  private appAutoscalerScalingHistoryErrorSub!: Subscription;
+  private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
+  private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
+  private scalingHistoryAction!: GetAppAutoscalerScalingHistoryAction;
 
   appAutoscalerAppMetrics = {};
 

@@ -44,7 +44,7 @@ export class CfStacksListConfigService extends BaseCfListConfig<APIResource<any>
 
   constructor() {
     super();
-    this.dataSource = new CfStacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid, this);
+    this.dataSource = new CfStacksDataSource(this.store, this.activeRouteCfOrgSpace.cfGuid!, this as any);
   }
 
   getDataSource = () => this.dataSource;

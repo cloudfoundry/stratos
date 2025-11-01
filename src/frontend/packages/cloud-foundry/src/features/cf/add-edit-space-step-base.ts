@@ -18,9 +18,9 @@ export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
   orgGuid: string;
   cfGuid: string;
-  allSpacesInOrg: string[];
+  allSpacesInOrg!: string[];
   allSpacesInOrg$: Observable<string[]>;
-  validate: (spaceName: string) => boolean;
+  validate!: (spaceName: string) => boolean;
   quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
   hasSpaceQuotas$: Observable<boolean>;
 

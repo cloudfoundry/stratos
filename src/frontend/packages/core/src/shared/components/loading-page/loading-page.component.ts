@@ -29,7 +29,7 @@ export class LoadingPageComponent implements OnInit {
   private entityMonitorFactory = inject(EntityMonitorFactory);
 
   @Input()
-  isLoading: Observable<boolean>;
+  isLoading!: Observable<boolean>;
 
   @Input()
   text = 'Retrieving your data';
@@ -41,14 +41,14 @@ export class LoadingPageComponent implements OnInit {
   alert = '';
 
   @Input()
-  entityId: string;
+  entityId!: string;
 
   @Input()
-  entitySchema: EntitySchema;
+  entitySchema!: EntitySchema;
 
-  public isDeleting: Observable<boolean>;
+  public isDeleting!: Observable<boolean>;
 
-  public text$: Observable<string>;
+  public text$!: Observable<string>;
 
   ngOnInit() {
     if (this.isLoading) {

@@ -192,7 +192,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.sub = this.registerForm.controls.selectedType.valueChanges.subscribe(changes => this.updateType(changes));
 
     this.validate = this.registerForm.statusChanges.pipe(map(() => {
-      const typ = this.registerForm.value.selectedType;
+      const typ = this.registerForm.value.selectedType ?? '';
       const defn = this.gitTypes[this.epSubType].types[typ];
       return !!defn.url || this.registerForm.valid;
     }));
@@ -202,7 +202,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   }
 
   private updateType(value?: string) {
-    const typ = value || this.registerForm.value.selectedType;
+    const typ = value ?? this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
     this.showEndpointFields = !defn.url;
 
@@ -218,13 +218,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   // Perform the endpoint registration
   onNext: StepOnNextFunction = () => {
-    const typ = this.registerForm.value.selectedType;
+    const typ = this.registerForm.value.selectedType ?? '';
     const defn = this.gitTypes[this.epSubType].types[typ];
-    const name = defn.name || this.registerForm.controls.nameField.value;
-
-    // Normalize URL using shared utility
-    const rawUrl = normalizeUrl(defn.url || this.registerForm.controls.urlField.value);
-    const url: string = this.updateUrlWithSuffix(rawUrl, defn);
+    const name = defn.name ?? this.registerForm.controls.nameField.value ?? '';
+    const url: string = this.updateUrlWithSuffix(defn.url ?? this.registerForm.controls.urlField.value ?? '', defn);
     // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSSLField.value :

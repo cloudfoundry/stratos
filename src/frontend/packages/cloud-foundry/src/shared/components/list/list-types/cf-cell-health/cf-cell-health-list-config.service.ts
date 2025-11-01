@@ -32,7 +32,7 @@ import { CfCellHealthDataSource, CfCellHealthEntry, CfCellHealthState } from './
 })
 export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealthEntry> {
 
-  dataSource: CfCellHealthDataSource;
+  dataSource!: CfCellHealthDataSource;
   defaultView = 'table' as ListView;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;

@@ -56,13 +56,13 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input() filter: (a: any) => void;
 
-  @Input() status: Observable<number>;
+  @Input() status!: Observable<number>;
 
   @Input() logStream: Observable<any>;
 
-  @ViewChild('container', { static: true }) container: ElementRef;
+  @ViewChild('container', { static: true }) container!: ElementRef;
 
-  @ViewChild('content', { static: true }) content: ElementRef;
+  @ViewChild('content', { static: true }) content!: ElementRef;
 
   private logLinesCount = 0;
   private countAttribute = 'batchLength';
@@ -70,9 +70,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
   private highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
 
-  private listeningSub: Subscription;
-  private statusSub: Subscription;
-  private resizeSub: Subscription;
+  private listeningSub!: Subscription;
+  private statusSub!: Subscription;
+  private resizeSub!: Subscription;
 
   private stopped$ = new BehaviorSubject<boolean>(false);
   private colorizer = new AnsiColors();
@@ -83,8 +83,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private lastConnectionError: ConnectionErrorInfo | null = null;
 
   public maxLogLines = 1000;
-  public isHighThroughput$: Observable<boolean>;
-  public isLocked$: Observable<boolean>;
+  public isHighThroughput$!: Observable<boolean>;
+  public isLocked$!: Observable<boolean>;
   public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
   public connectionErrorInfo$ = new BehaviorSubject<ConnectionErrorInfo | null>(null);
 

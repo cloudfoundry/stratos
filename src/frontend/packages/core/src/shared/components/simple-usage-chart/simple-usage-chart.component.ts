@@ -63,7 +63,7 @@ export class SimpleUsageChartComponent {
     }
   };
 
-  @ViewChild('colors', { static: true }) colorsElement: ElementRef;
+  @ViewChild('colors', { static: true }) colorsElement!: ElementRef;
 
   @Input() chartTitle = 'Usage';
 

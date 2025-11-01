@@ -45,7 +45,7 @@ export class TableCellIconComponent<T = any> extends TableCellCustom<T, TableCel
     this.size = config.size;
   }
 
-  icon: { icon: string, font?: string, tooltip?: string; };
+  icon!: { icon: string, font?: string, tooltip?: string; };
   size = '24px';
   tooltip = '';
 

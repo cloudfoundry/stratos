@@ -46,7 +46,7 @@ selector: 'app-kube-config-selection',
 })
 export class KubeConfigSelectionComponent {
 
-  @Input() applyStarted: boolean;
+  @Input() applyStarted!: boolean;
   public dataSource: KubeConfigTableListDataSource = {
     connect: () => this.helper.clusters$,
     disconnect: () => { },

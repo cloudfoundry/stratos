@@ -61,11 +61,11 @@ export class CreateApplicationStep3Component implements OnInit {
     this.setDomainHost.controls.host.disable();
   }
 
-  domains$: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<APIResource<IDomain>[] | undefined>;
 
   message: any = null;
 
-  newAppData: CreateNewApplicationState;
+  newAppData!: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
     const { cloudFoundryDetails, name } = this.newAppData;
 

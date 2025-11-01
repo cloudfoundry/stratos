@@ -31,23 +31,23 @@ import { ApplicationService } from '../application.service';
 })
 export class SshApplicationComponent implements OnInit {
 
-  public messages: Observable<string>;
+  public messages!: Observable<string>;
 
   public connectionStatus = new Subject<number>();
 
-  public sshInput: Subject<string>;
+  public sshInput!: Subject<string>;
 
-  public errorMessage: string;
+  public errorMessage!: string;
 
-  public sshRoute: string;
+  public sshRoute!: string;
 
-  public connected: boolean;
+  public connected!: boolean;
 
-  public appInstanceLink: string;
+  public appInstanceLink!: string;
 
-  public instanceId: string;
+  public instanceId!: string;
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
 

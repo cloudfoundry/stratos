@@ -92,7 +92,7 @@ export class EndpointsPage extends BasePage {
    */
   async isNoneConnectedSnackBar(): Promise<boolean> {
     const snackbar = this.page.locator('snack-bar-container');
-    const text = await snackbar.textContent().catch(() => '');
+    const text = (await snackbar.textContent().catch(() => null)) ?? '';
     return text.includes('There are no connected endpoints, connect with your personal credentials to get started.');
   }
 

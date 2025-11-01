@@ -38,8 +38,8 @@ export class CreateEndpointComponent implements OnInit, OnDestroy {
   showConnectStep: boolean;
 
   component: any;
-  @ViewChild('customComponent', { read: ViewContainerRef, static: true }) customComponentContainer: ViewContainerRef;
-  componentRef: ComponentRef<any>;
+  @ViewChild('customComponentContainer', { read: ViewContainerRef, static: true }) customComponentContainer!: ViewContainerRef;
+  componentRef!: ComponentRef<any>;
 
   constructor(
     activatedRoute: ActivatedRoute,

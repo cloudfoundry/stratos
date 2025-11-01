@@ -98,30 +98,30 @@ export class ApplicationService {
   /**
    * An observable based on the core application entity
    */
-  isFetchingApp$: Observable<boolean>;
-  isUpdatingApp$: Observable<boolean>;
+  isFetchingApp$!: Observable<boolean>;
+  isUpdatingApp$!: Observable<boolean>;
 
-  isDeletingApp$: Observable<boolean>;
+  isDeletingApp$!: Observable<boolean>;
 
-  isFetchingEnvVars$: Observable<boolean>;
-  isUpdatingEnvVars$: Observable<boolean>;
-  isFetchingStats$: Observable<boolean>;
+  isFetchingEnvVars$!: Observable<boolean>;
+  isUpdatingEnvVars$!: Observable<boolean>;
+  isFetchingStats$!: Observable<boolean>;
 
-  app$: Observable<EntityInfo<APIResource<IApp>>>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$: Observable<EntityInfo<IAppSummary>>;
-  appStats$: Observable<AppStat[]>;
-  private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
+  app$!: Observable<EntityInfo<APIResource<IApp>>>;
+  waitForAppEntity$!: Observable<EntityInfo<APIResource<IApp>>>;
+  appSummary$!: Observable<EntityInfo<IAppSummary>>;
+  appStats$!: Observable<AppStat[]>;
+  private appStatsFetching$!: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
-  appOrg$: Observable<APIResource<IOrganization>>;
-  appSpace$: Observable<APIResource<ISpace>>;
+  appOrg$!: Observable<APIResource<IOrganization>>;
+  appSpace$!: Observable<APIResource<ISpace>>;
 
-  application$: Observable<ApplicationData>;
-  applicationStratProject$: Observable<EnvVarStratosProject>;
-  applicationState$: Observable<ApplicationStateData>;
-  applicationUrl$: Observable<string>;
-  applicationRunning$: Observable<boolean>;
-  orgDomains$: Observable<APIResource<IDomain>[]>;
+  application$!: Observable<ApplicationData>;
+  applicationStratProject$!: Observable<EnvVarStratosProject>;
+  applicationState$!: Observable<ApplicationStateData>;
+  applicationUrl$!: Observable<string>;
+  applicationRunning$!: Observable<boolean>;
+  orgDomains$!: Observable<APIResource<IDomain>[]>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready

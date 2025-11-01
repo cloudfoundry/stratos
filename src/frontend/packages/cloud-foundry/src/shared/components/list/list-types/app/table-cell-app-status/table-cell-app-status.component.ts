@@ -22,7 +22,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
   private appStateService = inject(ApplicationStateService);
 
-  applicationState: ApplicationStateData;
+  applicationState!: ApplicationStateData;
   @Input('config')
   set config(value: { hideIcon: boolean, initialStateOnly: boolean, }) {
     super.config = value;
@@ -33,7 +33,7 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
     this.hideIcon = value.hideIcon || false;
     this.initialStateOnly = value.initialStateOnly || false;
   }
-  public fetchAppState$: Observable<ApplicationStateData>;
+  public fetchAppState$!: Observable<ApplicationStateData>;
   public hideIcon = false;
   public initialStateOnly = false;
 

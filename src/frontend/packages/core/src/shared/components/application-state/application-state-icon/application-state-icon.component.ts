@@ -18,6 +18,6 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 })
 export class ApplicationStateIconComponent {
 
-  @Input() public status: StratosStatus;
+  @Input() public status!: StratosStatus;
 
 }

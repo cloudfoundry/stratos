@@ -17,5 +17,5 @@ export interface NoneAuthFormValue {}
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoneAuthFormComponent implements IAuthForm {
-  @Input() formGroup: FormGroup<NoneAuthFormValue>;
+  @Input() formGroup!: FormGroup<NoneAuthFormValue>;
 }

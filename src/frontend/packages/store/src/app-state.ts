@@ -25,19 +25,19 @@ export type BaseRequestDataState = Record<string, IRequestEntityTypeState<any>>;
 export abstract class AppState<
   T extends Record<string, any> = any
   > {
-  auth: AuthState;
-  uaaSetup: UAASetupState;
-  endpoints: EndpointState;
-  pagination: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
-  request: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
-  requestData: T;
-  dashboard: DashboardState;
-  lists: ListsState;
-  routing: RoutingHistory;
-  internalEvents: InternalEventsState;
-  currentUserRoles: ICurrentUserRolesState;
-  userFavoritesGroups: IUserFavoritesGroupsState;
-  recentlyVisited: IRecentlyVisitedState;
+  auth!: AuthState;
+  uaaSetup!: UAASetupState;
+  endpoints!: EndpointState;
+  pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
+  request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
+  requestData!: T;
+  dashboard!: DashboardState;
+  lists!: ListsState;
+  routing!: RoutingHistory;
+  internalEvents!: InternalEventsState;
+  currentUserRoles!: ICurrentUserRolesState;
+  userFavoritesGroups!: IUserFavoritesGroupsState;
+  recentlyVisited!: IRecentlyVisitedState;
 }
 
 export interface GeneralRequestDataState {

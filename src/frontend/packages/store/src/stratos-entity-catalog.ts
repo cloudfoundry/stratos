@@ -3,6 +3,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
+import { IEntityMetadata } from './entity-catalog/entity-catalog.types';
 import {
   ApiKeyActionBuilder,
   EndpointActionBuilder,
@@ -16,34 +17,34 @@ import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
 
 export class StratosEntityCatalog {
-  endpoint: StratosCatalogEntity<
-    undefined,
+  endpoint!: StratosCatalogEntity<
+    IEntityMetadata,
     EndpointModel,
     EndpointActionBuilder
   >;
 
-  systemInfo: StratosCatalogEntity<
-    undefined,
+  systemInfo!: StratosCatalogEntity<
+    IEntityMetadata,
     SystemInfo,
     SystemInfoActionBuilder
   >;
 
-  userFavorite: StratosCatalogEntity<
-    undefined,
+  userFavorite!: StratosCatalogEntity<
+    IEntityMetadata,
     UserFavorite,
     UserFavoriteActionBuilder
   >;
 
-  userProfile: StratosCatalogEntity<
-    undefined,
+  userProfile!: StratosCatalogEntity<
+    IEntityMetadata,
     UserProfileInfo,
     UserProfileActionBuilder
   >;
 
-  metricsEndpoint: StratosCatalogEndpointEntity;
+  metricsEndpoint!: StratosCatalogEndpointEntity;
 
-  apiKey: StratosCatalogEntity<
-    undefined,
+  apiKey!: StratosCatalogEntity<
+    IEntityMetadata,
     ApiKey,
     ApiKeyActionBuilder
   >;

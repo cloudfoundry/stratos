@@ -113,7 +113,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     return runInInjectionContext(this.injector, () => {
       const kubeSelectSignal = toSignal(
         this.kube.select.asObservable(),
-        { initialValue: undefined as string | undefined }
+        { initialValue: '' }
       );
 
       const allNamespacesSignal = toSignal(
@@ -126,9 +126,9 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         const selectedKubeId = kubeSelectSignal();
         const entities = allNamespacesSignal();
         if (selectedKubeId && entities) {
-          return entities
-            .filter(namespace => namespace.metadata.kubeId === selectedKubeId)
-            .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+          return (entities as KubernetesNamespace[])
+            .filter((namespace: KubernetesNamespace) => namespace.metadata?.kubeId === selectedKubeId)
+            .sort((a: KubernetesNamespace, b: KubernetesNamespace) => (a.metadata?.name ?? '').localeCompare(b.metadata?.name ?? ''));
         }
         return [];
       });

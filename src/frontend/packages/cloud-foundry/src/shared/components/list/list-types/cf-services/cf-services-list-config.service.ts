@@ -69,8 +69,8 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
 
   static cfColumnId = 'cf';
 
-  cf: CfOrgSpaceItem;
-  isLocal: true;
+  cf!: CfOrgSpaceItem;
+  isLocal!: true;
   viewType = ListViewTypes.BOTH;
   enableTextFilter = true;
   dataSource: CfServicesDataSource;

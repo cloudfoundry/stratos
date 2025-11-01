@@ -47,8 +47,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() placeholder = '';
   @Input() multiple = false;
   @Input() required = false;
-  @Input() name: string;
-  @Input() id: string;
+  @Input() name!: string;
+  @Input() id!: string;
   @Input() invalid = false;
   @Input() errorMessage = '';
 
@@ -64,7 +64,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Output() valueChange = new EventEmitter<any>();
 
   @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
-  @ViewChild('selectTrigger', { static: true }) selectTrigger: ElementRef;
+  @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
 
   isOpen = false;
   selectedValues: any[] = [];

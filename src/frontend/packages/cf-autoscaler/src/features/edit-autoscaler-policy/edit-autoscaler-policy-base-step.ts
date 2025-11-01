@@ -9,8 +9,8 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 
 @Directive()
 export abstract class EditAutoscalerPolicyDirective implements OnInit {
-  public currentPolicy: AppAutoscalerPolicyLocal;
-  public appAutoscalerPolicy$: Observable<AppAutoscalerPolicy>;
+  public currentPolicy!: AppAutoscalerPolicyLocal;
+  public appAutoscalerPolicy$!: Observable<AppAutoscalerPolicy>;
   protected isCreate = false;
 
   constructor(

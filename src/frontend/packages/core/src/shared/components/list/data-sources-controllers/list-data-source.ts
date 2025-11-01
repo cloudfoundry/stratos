@@ -58,9 +58,9 @@ import { LocalListController } from './local-list-controller';
 export type DataFunctionDefinitionType = 'sort' | 'filter';
 
 export class DataFunctionDefinition {
-  type: DataFunctionDefinitionType;
+  type!: DataFunctionDefinitionType;
   orderKey?: string;
-  field: string;
+  field!: string;
   static is(obj: any): obj is DataFunctionDefinition {
     if (obj) {
       const typed = obj as DataFunctionDefinition;
@@ -82,15 +82,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // -------------- Public
   // Core observables
-  public pagination$: Observable<PaginationEntityState>;
-  public page$: Observable<T[]>;
+  public pagination$!: Observable<PaginationEntityState>;
+  public page$!: Observable<T[]>;
 
   // Store related
-  public entityKey: string;
-  public endpointType: string;
+  public entityKey!: string;
+  public endpointType!: string;
 
   // Add item
-  public addItem: T;
+  public addItem!: T;
   private _isAdding = signal<boolean>(false);
   public isAdding = this._isAdding.asReadonly();
   private _isAddingSubject = new BehaviorSubject<boolean>(false);
@@ -108,36 +108,36 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public selectAllChecked = false;
 
   // Edit item
-  public editRow: T;
+  public editRow!: T;
 
   // Cached collections
-  public transformedEntities: Array<T>;
+  public transformedEntities!: Array<T>;
 
   // Misc
   public isLoadingPage$: Observable<boolean> = observableOf(false);
-  public rowsState: Observable<RowsState>;
+  public rowsState!: Observable<RowsState>;
 
   // Maxed Collection
   public maxedResults$: Observable<boolean> = observableOf(false);
   public maxedStateStartAt$: Observable<number> = observableOf(null);
 
-  public filter$: Observable<ListFilter>;
-  public sort$: Observable<ListSort>;
+  public filter$!: Observable<ListFilter>;
+  public sort$!: Observable<ListSort>;
 
   // ------------- Private
   private externalDestroy: () => void;
 
-  protected store: Store<AppState>;
-  public action: PaginatedAction | PaginatedAction[];
-  public masterAction: PaginatedAction;
-  public sourceScheme: EntitySchema;
+  protected store!: Store<AppState>;
+  public action!: PaginatedAction | PaginatedAction[];
+  public masterAction!: PaginatedAction;
+  public sourceScheme!: EntitySchema;
   // Use A type for getRowUniqueId since it's provided in config with pre-transform type
   // but create a wrapper for post-transform usage
-  private getRowUniqueIdInternal: getRowUniqueId<A>;
-  public getRowUniqueId: getRowUniqueId<T>;
-  private getEmptyType: () => T;
-  public paginationKey: string;
-  private transformEntity: OperatorFunction<A[], T[]> = null;
+  private getRowUniqueIdInternal!: getRowUniqueId<A>;
+  public getRowUniqueId!: getRowUniqueId<T>;
+  private getEmptyType!: () => T;
+  public paginationKey!: string;
+  private transformEntity: OperatorFunction<A[], T[]> | undefined;
   public isLocal = false;
   public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[] = [];
 
@@ -148,8 +148,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public refresh: () => void;
 
-  public isMultiAction$: Observable<boolean>;
-  entityType: string;
+  public isMultiAction$!: Observable<boolean>;
+  entityType!: string;
 
   public getRowState: (row: T) => Observable<RowState> = () => observableOf({});
 

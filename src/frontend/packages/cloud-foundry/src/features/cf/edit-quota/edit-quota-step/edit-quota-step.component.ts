@@ -34,12 +34,12 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   cfGuid: string;
   quotaGuid: string;
-  quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
-  quotaSubscription: Subscription;
-  quota: IOrgQuotaDefinition;
+  quotaDefinition$!: Observable<APIResource<IOrgQuotaDefinition>>;
+  quotaSubscription!: Subscription;
+  quota!: IOrgQuotaDefinition;
 
   @ViewChild('form', { static: false })
-  form: QuotaDefinitionFormComponent;
+  form!: QuotaDefinitionFormComponent;
 
   constructor(
     private store: Store<AppState>,

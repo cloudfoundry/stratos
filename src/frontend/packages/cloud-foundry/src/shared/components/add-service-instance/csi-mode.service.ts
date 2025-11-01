@@ -59,8 +59,8 @@ const defaultViewDetail = {
 })
 export class CsiModeService {
 
-  private mode: string;
-  public viewDetail: ViewDetail;
+  private mode!: string;
+  public viewDetail!: ViewDetail;
   /**
    * Where should the user be taken on cancel (and success). Taken from url param, previous location or deduced
    */

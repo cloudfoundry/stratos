@@ -36,7 +36,7 @@ import {
 export class AutoscalerMetricPageComponent implements OnInit {
 
   parentUrl: string;
-  applicationName$: Observable<string>;
+  applicationName$!: Observable<string>;
 
   constructor(
     public applicationService: ApplicationService,

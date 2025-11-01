@@ -28,13 +28,13 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 })
 export class DeployApplicationStep21Component {
 
-  validate: Observable<boolean>;
-  selectedCommit$: Observable<GitCommit>;
+  validate!: Observable<boolean>;
+  selectedCommit$!: Observable<GitCommit>;
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
-  target: ViewContainerRef;
+  target!: ViewContainerRef;
   wrapperFactory: ComponentFactory<CommitListWrapperComponent>;
-  wrapperRef: ComponentRef<CommitListWrapperComponent>;
+  wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
   constructor(
     private store: Store<CFAppState>,

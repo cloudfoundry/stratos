@@ -77,7 +77,7 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class TestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       paginationController = {
         sort$: observableOf({} as ListSort)
       } as IListPaginationController<TestEntity>;
@@ -208,7 +208,7 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class DynamicTestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       paginationController = {
         sort$: observableOf({} as ListSort)
       } as IListPaginationController<TestEntity>;
@@ -320,7 +320,7 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class FavoriteTestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       paginationController = {
         sort$: observableOf({} as ListSort)
       } as IListPaginationController<TestEntity>;
@@ -479,7 +479,7 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class MixedTestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       paginationController = {
         sort$: observableOf({} as ListSort)
       } as IListPaginationController<TestEntity>;
@@ -601,7 +601,7 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class ErrorTestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       paginationController = {
         sort$: observableOf({} as ListSort)
       } as IListPaginationController<TestEntity>;
@@ -726,11 +726,11 @@ describe('Table CellConfig Integration Flow', () => {
       `
     })
     class CompleteTestHostComponent {
-      columns: ITableColumn<TestEntity>[];
+      columns!: ITableColumn<TestEntity>[];
       listConfig: any = {};
 
       @ViewChild('completeList', { static: true })
-      list: ListComponent<TestEntity>;
+      list!: ListComponent<TestEntity>;
     }
 
     let component: CompleteTestHostComponent;

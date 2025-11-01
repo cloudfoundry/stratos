@@ -49,7 +49,7 @@ export enum UserInviteSendSpaceRoles {
 interface UserInviteSend {
   org: string;
   space: string;
-  spaceRoles: { [spaceRole: string]: boolean, };
+  spaceRoles: { [spaceRole: string]: boolean; };
   emails: string[];
 }
 
@@ -130,9 +130,9 @@ export class UserInviteConfigureService {
 })
 export class UserInviteService {
 
-  configured$: Observable<boolean>;
-  enabled$: Observable<boolean>;
-  canConfigure$: Observable<boolean>;
+  configured$!: Observable<boolean>;
+  enabled$!: Observable<boolean>;
+  canConfigure$!: Observable<boolean>;
 
   constructor(
     private store: Store<CFAppState>,

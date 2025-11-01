@@ -246,11 +246,11 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   installChart(): Observable<StepOnNextResult> {
-    const endpoint = getMonocularEndpoint(this.route, null, null);
+    const endpoint = getMonocularEndpoint(this.route, undefined, undefined);
     const formValue = this.details.value;
     // Build the request body
     const values: HelmInstallValues = {
-      endpoint: formValue.endpoint || '',
+      endpoint: formValue.endpoint ?? '',
       releaseName: formValue.releaseName || '',
       releaseNamespace: formValue.releaseNamespace || '',
       values: JSON.stringify(this.editor.getValues()),

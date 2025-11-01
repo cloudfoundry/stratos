@@ -16,7 +16,7 @@ import { BaseChartDirective } from 'ng2-charts';
 })
 export class RingChartComponent implements OnInit, OnChanges {
 
-  domain: any[];
+  domain: any[] = [];
   chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   chartOptions: any = {
     responsive: true,
@@ -29,10 +29,10 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
   };
 
-  @Input() data: any[];
+  @Input() data: any[] = [];
   @Input() label = 'Total';
   @Input() scheme: any = 'cool';
-  @Input() customColors: any[];
+  @Input() customColors: any[] = [];
 
   @Input() onClick: ($event: Event) => void = () => { };
   @Input() onActivate: ($event: Event) => void = () => { };

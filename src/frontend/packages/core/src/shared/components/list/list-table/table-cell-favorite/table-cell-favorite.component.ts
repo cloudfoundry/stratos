@@ -95,7 +95,7 @@ export class TableCellFavoriteComponent<T, Y extends IFavoriteMetadata> extends
     super();
   }
 
-  public favorite: UserFavorite<Y>;
+  public favorite!: UserFavorite<Y>;
   public canFavorite = false;
 
   @Input('config')

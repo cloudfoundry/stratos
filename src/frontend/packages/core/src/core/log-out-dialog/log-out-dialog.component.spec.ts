@@ -22,7 +22,7 @@ describe('LogOutDialogComponent', () => {
   }
 
   class DialogDataMock {
-    data: '';
+    data = '';
   }
 
   beforeEach(waitForAsync(() => {

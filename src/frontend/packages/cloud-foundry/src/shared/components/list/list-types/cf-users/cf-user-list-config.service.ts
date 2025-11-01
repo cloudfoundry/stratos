@@ -61,7 +61,7 @@ const defaultUserHasRoles: (user: CfUser) => boolean = (user: CfUser): boolean =
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   isLocal = true;
   viewType = ListViewTypes.TABLE_ONLY;
-  dataSource: CfUserDataSourceService;
+  dataSource!: CfUserDataSourceService;
   tableRowAlignSelf = 'end';
   columns: ITableColumn<APIResource<CfUser>>[] = [
     {
@@ -102,8 +102,8 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       filterLine: 'Please navigate to an Organization or Space users list'
     }
   };
-  private initialised: Observable<boolean>;
-  private multiFilterConfigs: IListMultiFilterConfig[];
+  private initialised!: Observable<boolean>;
+  private multiFilterConfigs!: IListMultiFilterConfig[];
 
   manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {

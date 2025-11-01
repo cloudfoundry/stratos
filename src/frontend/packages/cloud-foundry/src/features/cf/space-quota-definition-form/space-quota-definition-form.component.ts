@@ -50,12 +50,12 @@ export interface SpaceQuotaFormValues {
 ]
 })
 export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
   orgGuid: string;
-  allQuotas: string[];
-  spaceQuotaDefinitions$: Observable<string[]>;
-  formGroup: FormGroup<{
+  allQuotas!: string[];
+  spaceQuotaDefinitions$!: Observable<string[]>;
+  formGroup!: FormGroup<{
     name: FormControl<string>;
     totalServices: FormControl<number>;
     totalRoutes: FormControl<number>;
@@ -136,7 +136,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     }
 
     if (this.allQuotas) {
-      return this.allQuotas.indexOf(value || this.formGroup.value.name) === -1;
+      return this.allQuotas.indexOf(value ?? this.formGroup.value.name ?? '') === -1;
     }
 
     return true;

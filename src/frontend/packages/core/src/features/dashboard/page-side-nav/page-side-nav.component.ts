@@ -53,9 +53,9 @@ export class PageSideNavComponent implements OnInit {
   }
 
   @Input()
-  public header: string;
-  public activeTab$: Observable<string>;
-  public breadcrumbs$: Observable<IBreadcrumb[]>;
+  public header!: string;
+  public activeTab$!: Observable<string>;
+  public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor(
     public tabNavService: TabNavService,

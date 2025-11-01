@@ -30,10 +30,10 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
-  private actionSub: Subscription;
+  private actionSub!: Subscription;
 
   @ContentChildren(MetricsChartComponent)
-  private metricsCharts: QueryList<MetricsChartComponent>;
+  private metricsCharts!: QueryList<MetricsChartComponent>;
 
   public rangeTypes = MetricQueryType;
 

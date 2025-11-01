@@ -30,8 +30,8 @@ export class CardAppUsageComponent implements OnInit {
   private appService = inject(ApplicationService);
   private appMonitor = inject(ApplicationMonitorService);
 
-  appData$: Observable<any>;
-  status$: Observable<StratosStatus>;
+  appData$!: Observable<any>;
+  status$!: Observable<StratosStatus>;
 
   ngOnInit() {
     this.appData$ = observableCombineLatest(

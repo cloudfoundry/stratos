@@ -26,11 +26,11 @@ import { CfRoutesListConfigBase } from './cf-routes-list-config-base';
   providedIn: 'root'
 })
 export class CfRoutesListConfigService extends CfRoutesListConfigBase implements IListConfig<APIResource> {
-  private dataSource: CfRoutesDataSource;
+  private dataSource!: CfRoutesDataSource;
 
-  getDataSource: () => CfRoutesDataSource;
+  getDataSource!: () => CfRoutesDataSource;
   declare getMultiFiltersConfigs: () => IListMultiFilterConfig[];
-  getInitialised: () => Observable<boolean>;
+  getInitialised!: () => Observable<boolean>;
 
   constructor(
     store: Store<CFAppState>,

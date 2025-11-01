@@ -34,7 +34,7 @@ import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/
 })
 export class KubernetesHomeCardComponent implements OnInit {
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
   pLayout: HomePageCardLayout;
 
@@ -48,11 +48,11 @@ export class KubernetesHomeCardComponent implements OnInit {
     }
   }
 
-  public shortcuts: HomeCardShortcut[];
+  public shortcuts!: HomeCardShortcut[];
 
-  public podCount$: Observable<number>;
-  public nodeCount$: Observable<number>;
-  public namespaceCount$: Observable<number>;
+  public podCount$!: Observable<number>;
+  public nodeCount$!: Observable<number>;
+  public namespaceCount$!: Observable<number>;
 
   private store = inject(Store<AppState>);
   private injector = inject(Injector);

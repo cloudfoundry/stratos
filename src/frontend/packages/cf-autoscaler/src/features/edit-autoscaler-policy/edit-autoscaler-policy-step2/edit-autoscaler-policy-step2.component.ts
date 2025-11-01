@@ -138,31 +138,32 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
       unit: this.currentPolicy.scaling_rules_form[index].unit || '',
       adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
-      breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs,
-      cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs,
+      breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs ?? 0,
+      cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs ?? 0,
       adjustment_type: this.editAdjustmentType
     });
     this.metricUnitSubject.next(this.getMetricUnit(this.editMetricType));
   }
 
   finishTrigger() {
-    const adjustmentP = this.editTriggerForm.get('adjustment_type').value === 'value' ? '' : '%';
-    const adjustmentI = this.editTriggerForm.get('adjustment').value;
+    const adjustmentP = this.editTriggerForm.get('adjustment_type')?.value === 'value' ? '' : '%';
+    const adjustmentI = this.editTriggerForm.get('adjustment')?.value ?? 0;
     const adjustmentM = this.editScaleType === 'upper' ? `+${adjustmentI}${adjustmentP}` : `-${adjustmentI}${adjustmentP}`;
-    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold').value;
-    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit').value;
+    this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator')?.value ?? '';
+    this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold')?.value ?? 0;
+    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit')?.value ?? '';
     this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentM;
-    if (this.editTriggerForm.get('breach_duration_secs').value) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
-        this.editTriggerForm.get('breach_duration_secs').value;
+    const breachDuration = this.editTriggerForm.get('breach_duration_secs')?.value ?? 0;
+    if (breachDuration) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs = breachDuration;
     } else {
       this.currentPolicy.scaling_rules_form[this.editIndex].breach_duration_secs =
         AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_default;
     }
-    if (this.editTriggerForm.get('cool_down_secs').value) {
-      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = this.editTriggerForm.get('cool_down_secs').value;
+    const coolDown = this.editTriggerForm.get('cool_down_secs')?.value ?? 0;
+    if (coolDown) {
+      this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs = coolDown;
     } else {
       this.currentPolicy.scaling_rules_form[this.editIndex].cool_down_secs =
         AutoscalerConstants.PolicyDefaultSetting.cool_down_secs_default;

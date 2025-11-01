@@ -20,7 +20,7 @@ import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/tabl
 
 export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResource<ISpace>> {
   viewType = ListViewTypes.TABLE_ONLY;
-  dataSource: CfUsersSpaceRolesDataSourceService;
+  dataSource!: CfUsersSpaceRolesDataSourceService;
   defaultView = 'table' as ListView;
   enableTextFilter = true;
   // This is a list of spaces and refresh will update the spaces rather than the roles as might have been expected. Until then disable

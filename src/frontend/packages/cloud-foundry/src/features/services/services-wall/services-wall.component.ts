@@ -46,10 +46,10 @@ export class ServicesWallComponent {
 
   public haveConnectedCf$: Observable<boolean>;
 
-  canCreateServiceInstance: CfCurrentUserPermissions;
-  initCfOrgSpaceService: Subscription;
-  cfIds$: Observable<string[]>;
-  location: { [CSI_CANCEL_URL]: string, };
+  canCreateServiceInstance!: CfCurrentUserPermissions;
+  initCfOrgSpaceService!: Subscription;
+  cfIds$!: Observable<string[]>;
+  location!: { [CSI_CANCEL_URL]: string, };
 
   constructor(
     public cloudFoundryService: CloudFoundryService,

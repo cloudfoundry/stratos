@@ -93,7 +93,7 @@ export type HelmReleaseResource = HelmReleaseKubeAPIResource | KubeStatus;
 
 @Injectable()
 export class HelmReleaseGuid {
-  guid: string;
+  guid!: string;
 }
 
 export interface HelmReleaseChartData {

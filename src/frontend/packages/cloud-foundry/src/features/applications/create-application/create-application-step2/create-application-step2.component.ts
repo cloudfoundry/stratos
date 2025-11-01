@@ -37,15 +37,15 @@ export class CreateApplicationStep2Component implements OnInit {
   private store = inject(Store<CFAppState>);
   private fb = inject(FormBuilder);
 
-  form: FormGroup<CreateApplicationForm>;
+  form!: FormGroup<CreateApplicationForm>;
 
-  validate: Observable<boolean>;
+  validate!: Observable<boolean>;
 
   appName = new FormControl<string | null>(null);
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetNewAppName(this.appName.value));
+    this.store.dispatch(new SetNewAppName(this.appName.value ?? ''));
     return observableOf({ success: true });
   }
 

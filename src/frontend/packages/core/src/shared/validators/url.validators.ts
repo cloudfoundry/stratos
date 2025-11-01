@@ -197,7 +197,6 @@ export function requireProtocol(): ValidatorFn {
  */
 export const cfEndpointUrlValidator = createUrlValidator({
   allowHttp: true,
-  allowHttps: true,
   allowIpAddress: true,
   requirePort: false,
 });
@@ -208,7 +207,6 @@ export const cfEndpointUrlValidator = createUrlValidator({
  */
 export const gitRepositoryUrlValidator = createUrlValidator({
   allowHttp: true,
-  allowHttps: true,
   allowIpAddress: true,
   requirePort: false,
 });

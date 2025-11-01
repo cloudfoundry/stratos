@@ -47,7 +47,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   @Input() multiple = false;
   @Input() disabled = false;
   @Input() vertical = false;
-  @Input() name: string;
+  @Input() name!: string;
 
   @Output() valueChange = new EventEmitter<any>();
   @Output() change = new EventEmitter<MatButtonToggleChange>();

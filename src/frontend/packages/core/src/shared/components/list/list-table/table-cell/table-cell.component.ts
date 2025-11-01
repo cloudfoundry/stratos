@@ -26,14 +26,14 @@ import { ICellDefinition } from '../table.types';
 })
 export class TableCellComponent<T> implements OnInit {
   @ViewChild('target', { read: ViewContainerRef, static: true })
-  target: ViewContainerRef;
-  private rcRow: T | MultiActionListEntity;
+  target!: ViewContainerRef;
+  private rcRow!: T | MultiActionListEntity;
 
   @Input() dataSource = null as IListDataSource<T>;
 
-  @Input() component: Type<{}>;
-  @Input() cellDefinition: ICellDefinition<T>;
-  @Input() func: () => string;
+  @Input() component!: Type<{}>;
+  @Input() cellDefinition!: ICellDefinition<T>;
+  @Input() func!: () => string;
   @Input() set row(row: T | MultiActionListEntity) {
     if (this.cellComponent) {
       const { rowValue, entityKey } = this.getRowData(row);
@@ -51,7 +51,7 @@ export class TableCellComponent<T> implements OnInit {
 
   @Input() config: object | undefined;
 
-  private cellComponent: TableCellCustom<T>;
+  private cellComponent!: TableCellCustom<T>;
   private componentFactoryResolver = inject(ComponentFactoryResolver);
 
   private getComponent() {

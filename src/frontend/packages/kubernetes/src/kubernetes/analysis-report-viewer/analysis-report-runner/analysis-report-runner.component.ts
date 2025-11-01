@@ -24,9 +24,9 @@ export class AnalysisReportRunnerComponent implements OnInit {
   canShow$: Observable<boolean>;
   analyzers$: Observable<KubernetesAnalysisType[]>;
   menuOpen = false;
-  @Input() kubeId: string;
-  @Input() namespace: string;
-  @Input() app: string;
+  @Input() kubeId!: string;
+  @Input() namespace!: string;
+  @Input() app!: string;
   public analysisService = inject(KubernetesAnalysisService);
   private sidePanelService = inject(SidePanelService);
 

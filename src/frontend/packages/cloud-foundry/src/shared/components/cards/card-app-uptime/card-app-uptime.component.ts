@@ -26,7 +26,7 @@ export class CardAppUptimeComponent implements OnInit {
   public appService = inject(ApplicationService);
   private appMonitor = inject(ApplicationMonitorService);
 
-  appData$: Observable<{
+  appData$!: Observable<{
     maxUptime: number,
     minUptime: number,
     averageUptime: number,

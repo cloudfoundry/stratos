@@ -20,9 +20,9 @@ import { ChartListComponent } from '../chart-list/chart-list.component';
   ]
 })
 export class ChartIndexComponent implements OnInit {
-  charts: Chart[];
+  charts!: Chart[];
   loading = true;
-  totalChartsNumber: number;
+  totalChartsNumber!: number;
   private chartsService = inject(ChartsService);
 
   ngOnInit() {

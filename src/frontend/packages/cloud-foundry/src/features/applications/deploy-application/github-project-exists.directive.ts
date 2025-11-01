@@ -25,7 +25,7 @@ const GITHUB_PROJECT_EXISTS = {
 })
 export class GithubProjectExistsDirective implements Validator {
 
-  @Input() appGithubProjectExists: string;
+  @Input() appGithubProjectExists!: string;
 
   private lastValue = '';
 

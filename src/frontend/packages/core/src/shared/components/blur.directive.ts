@@ -5,7 +5,7 @@ selector: '[appBlur]',
 standalone: true
 })
 export class BlurDirective implements OnChanges {
-  @Input() appBlur: boolean;
+  @Input() appBlur!: boolean;
 
   private element = inject(ElementRef);
   private ngZone = inject(NgZone);

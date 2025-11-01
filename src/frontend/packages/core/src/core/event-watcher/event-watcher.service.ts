@@ -7,7 +7,7 @@ import {map, debounceTime} from 'rxjs/operators';
 
 
 export class ResizeEventData {
-  innerWidth: number;
+  innerWidth: number = 0;
 }
 
 @Injectable({

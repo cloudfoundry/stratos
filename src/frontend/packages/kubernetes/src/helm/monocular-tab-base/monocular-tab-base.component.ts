@@ -22,7 +22,7 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 })
 export class MonocularTabBaseComponent implements OnInit {
 
-  public endpointIds$: Observable<string[]>;
+  public endpointIds$!: Observable<string[]>;
   private store = inject(Store<AppState>);
 
   ngOnInit() {

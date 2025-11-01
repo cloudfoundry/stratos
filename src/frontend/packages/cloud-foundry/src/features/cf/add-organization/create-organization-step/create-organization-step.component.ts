@@ -47,16 +47,16 @@ interface CreateOrganizationForm {
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
-  orgSubscription: Subscription;
-  submitSubscription: Subscription;
+  orgSubscription!: Subscription;
+  submitSubscription!: Subscription;
   cfGuid: string;
-  allOrgs: string[];
-  orgs$: Observable<APIResource<IOrganization>[]>;
-  quotaDefinitions$: Observable<APIResource<IOrgQuotaDefinition>[]>;
-  cfUrl: string;
-  addOrg: FormGroup<CreateOrganizationForm>;
+  allOrgs!: string[];
+  orgs$!: Observable<string[]>;
+  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
+  cfUrl!: string;
+  addOrg!: FormGroup<CreateOrganizationForm>;
 
-  get orgName(): FormControl<string> { return this.addOrg ? this.addOrg.get('orgName') as FormControl<string> : new FormControl(''); }
+  get orgName(): FormControl<string> { return this.addOrg ? this.addOrg.get('orgName') as FormControl<string> : new FormControl('', { nonNullable: true }); }
 
   get quotaDefinition(): FormControl<string | null> { return this.addOrg ? this.addOrg.get('quotaDefinition') as FormControl<string | null> : new FormControl(null); }
 
@@ -121,7 +121,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   submit: StepOnNextFunction = () => {
     this.store.dispatch(new CreateOrganization(this.cfGuid, {
       name: this.orgName.value,
-      quota_definition_guid: this.quotaDefinition.value
+      quota_definition_guid: this.quotaDefinition.value ?? undefined
     }));
 
     return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(

@@ -54,11 +54,11 @@ import { ApplicationPollingService } from './application-polling.service';
   ]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-  public appState$: Observable<ApplicationStateData>;
+  public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
 
-  isBusyUpdating$: Observable<{ updating: boolean; }>;
+  isBusyUpdating$!: Observable<{ updating: boolean; }>;
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Application);
 
@@ -159,11 +159,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  isFetching$: Observable<boolean>;
-  applicationActions$: Observable<string[]>;
-  summaryDataChanging$: Observable<boolean>;
-  appSub$: Subscription;
-  stratosProjectSub: Subscription;
+  isFetching$!: Observable<boolean>;
+  applicationActions$!: Observable<string[]>;
+  summaryDataChanging$!: Observable<boolean>;
+  appSub$!: Subscription;
+  stratosProjectSub!: Subscription;
 
   tabLinks: IPageSideNavTab[];
 

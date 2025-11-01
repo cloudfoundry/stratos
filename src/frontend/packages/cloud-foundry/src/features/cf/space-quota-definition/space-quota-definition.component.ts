@@ -53,15 +53,15 @@ export const QUOTA_SPACE_GUID = 'space';
 })
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  spaceQuotaDefinition$: Observable<APIResource<ISpaceQuotaDefinition>>;
+  spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
   declare cfGuid: string;
   declare orgGuid: string;
   declare spaceGuid: string;
   declare quotaGuid: string;
-  editLink$: Observable<string[]>;
-  editParams: object;
+  editLink$!: Observable<string[]>;
+  editParams!: object;
   declare detailsLoading$: Observable<boolean>;
-  spaceSubscriber: Subscription;
+  spaceSubscriber!: Subscription;
   public canEditQuota$: Observable<boolean>;
   public isOrg = false;
 

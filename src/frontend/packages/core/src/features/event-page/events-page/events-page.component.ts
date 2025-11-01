@@ -40,7 +40,7 @@ export class EventsPageComponent implements OnInit {
   public unreadEvents$: Observable<IGlobalEvent[]>;
   public readEvents$: Observable<IGlobalEvent[]>;
   public events$: Observable<IGlobalEvent[]>;
-  public hasReadEvents$: Observable<boolean>;
+  public hasReadEvents$!: Observable<boolean>;
   public back$: Observable<string>;
   public filterValues = EventFilterValues;
   public selectedFilter = EventFilterValues.UNREAD;

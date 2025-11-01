@@ -20,9 +20,9 @@ import { getServiceName, getServicePlans } from '../../../features/service-catal
 import { QParam, QParamJoiners } from '../../q-param';
 
 export class CreateServiceInstanceHelper {
-  servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
-  service$: Observable<APIResource<IService>>;
-  serviceBroker$: Observable<APIResource<IServiceBroker>>;
+  servicePlanVisibilities$!: Observable<APIResource<IServicePlanVisibility>[]>;
+  service$!: Observable<APIResource<IService>>;
+  serviceBroker$!: Observable<APIResource<IServiceBroker>>;
   // Is instance being created from the Marketplace
   public marketPlaceMode = false;
 

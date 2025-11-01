@@ -47,7 +47,7 @@ interface EndpointForm {
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pDisabled = false;
-  private pConnectService: ConnectEndpointService;
+  private pConnectService!: ConnectEndpointService;
   @Input() set connectService(service: ConnectEndpointService) {
     if (!service || this.pConnectService) {
       return;
@@ -76,9 +76,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   // Component reference for the dynamically created auth form
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
-  public container: ViewContainerRef;
+  public container!: ViewContainerRef;
 
-  public endpointForm: FormGroup<EndpointForm>;
+  public endpointForm!: FormGroup<EndpointForm>;
 
   private bodyContent = '';
 
@@ -87,8 +87,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private cachedAuthTypeFormFields: string[] = [];
 
   // The auth type that was initially auto-selected
-  private autoSelected: EndpointAuthTypeConfig;
-  private authFormComponentRef: ComponentRef<IAuthForm>;
+  private autoSelected!: EndpointAuthTypeConfig;
+  private authFormComponentRef!: ComponentRef<IAuthForm>;
 
   private subs: Subscription[] = [];
 
@@ -162,8 +162,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (!this.sameAuthTypeFormFields(this.cachedAuthTypeFormFields, authTypeFormFields)) {
       // Don't remove and re-add the same control, this helps with form validation
       this.cachedAuthTypeFormFields = authTypeFormFields;
-      this.endpointForm.removeControl('authValues');
-      this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+      (this.endpointForm as any).removeControl('authValues');
+      (this.endpointForm as any).addControl('authValues', this.fb.group(authType.form || {}));
 
       // Update the auth form component
       this.createComponent(authType);
@@ -205,9 +205,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     return {
-      authType,
+      authType: authType ?? '',
       authVal,
-      systemShared,
+      systemShared: systemShared ?? false,
       bodyContent: this.bodyContent,
     };
   }

@@ -20,7 +20,7 @@ import { ConfirmationDialogConfig, TypeToConfirm } from '../confirmation-dialog.
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogConfirmComponent {
-  public textToMatch: string;
+  public textToMatch!: string;
 
   constructor(
     public dialogRef: TailwindDialogRef<DialogConfirmComponent>,

@@ -32,7 +32,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
   public container: ViewContainerRef;
   private reportComponentRef: ComponentRef<IReportViewer>;
 
-  private id: string;
+  private id!: string;
 
   constructor(private cdr: ChangeDetectorRef) {}
 

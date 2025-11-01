@@ -29,13 +29,13 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 })
 export class CreateSpaceQuotaStepComponent {
 
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
   orgGuid: string;
-  spaceQuotaDefinitions$: Observable<APIResource<IQuotaDefinition>[]>;
+  spaceQuotaDefinitions$!: Observable<APIResource<IQuotaDefinition>[]>;
 
   @ViewChild('form', { static: true })
-  form: SpaceQuotaDefinitionFormComponent;
+  form!: SpaceQuotaDefinitionFormComponent;
 
   constructor(
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

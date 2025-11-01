@@ -61,9 +61,9 @@ export class LoginPageComponent implements OnInit {
   );
 
   // Form state
-  loginForm: NgForm;
-  username: string;
-  password: string;
+  loginForm!: NgForm;
+  username = '';
+  password = '';
   showPassword = false;
   message = '';
 

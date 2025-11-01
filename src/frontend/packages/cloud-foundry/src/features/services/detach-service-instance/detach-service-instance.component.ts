@@ -44,10 +44,10 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 })
 export class DetachServiceInstanceComponent {
 
-  title$: Observable<string>;
-  cfGuid: string;
-  selectedBindings: APIResource<IServiceBinding>[];
-  deleteStarted: boolean;
+  title$!: Observable<string>;
+  cfGuid!: string;
+  selectedBindings!: APIResource<IServiceBinding>[];
+  deleteStarted!: boolean;
   public siBindingCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
 
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [

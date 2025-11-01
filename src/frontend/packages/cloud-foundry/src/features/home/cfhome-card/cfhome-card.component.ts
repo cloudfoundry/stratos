@@ -61,7 +61,7 @@ import { TileSelectorComponent } from '../../../../../core/src/shared/components
 })
 export class CFHomeCardComponent implements HomePageEndpointCard {
 
-  pLayout: HomePageCardLayout;
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;
@@ -84,11 +84,11 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
 
   appLink: () => void;
 
-  appCount$: Observable<number>;
-  orgCount$: Observable<number>;
-  routeCount$: Observable<number>;
+  appCount$!: Observable<number>;
+  orgCount$!: Observable<number>;
+  routeCount$!: Observable<number>;
 
-  hasNoApps$: Observable<boolean>;
+  hasNoApps$!: Observable<boolean>;
 
   cardLoaded = false;
 

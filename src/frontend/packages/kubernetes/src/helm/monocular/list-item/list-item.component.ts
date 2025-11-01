@@ -24,10 +24,10 @@ export class ListItemComponent implements OnInit {
 
   @Input() height = 'default';
   @Input() public artifactHubAndHelmRepoTypes$: Observable<boolean>;
-  @Input() chart: Chart;
+  @Input() chart!: Chart;
 
   @Input() public detailUrl: string;
-  public showArtifactHub$: Observable<boolean>;
+  public showArtifactHub$!: Observable<boolean>;
 
   ngOnInit() {
     this.showArtifactHub$ = this.artifactHubAndHelmRepoTypes$ ? this.artifactHubAndHelmRepoTypes$.pipe(

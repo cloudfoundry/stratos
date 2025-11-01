@@ -68,13 +68,13 @@ export class StartEndDateComponent {
   public isValid = new EventEmitter<boolean>();
 
   public validValue = true;
-  public validMessage: string;
+  public validMessage!: string;
 
-  private startValue: Date;
-  private endValue: Date;
+  private startValue!: Date;
+  private endValue!: Date;
 
-  private lastValidStartValue: Date;
-  private lastValidEndValue: Date;
+  private lastValidStartValue!: Date;
+  private lastValidEndValue!: Date;
 
   private emitChanges() {
     if (this.isDifferentDate(this.lastValidStartValue, this.startValue)) {

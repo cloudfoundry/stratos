@@ -73,20 +73,20 @@ export class UserRoleInOrg {
   /**
    * See {OrgUserRoleNames.MANAGER} for name
    */
-  managers: boolean;
+  managers!: boolean;
   /**
    * See {OrgUserRoleNames.BILLING_MANAGERS} for name
    */
   /* tslint:disable-next-line:variable-name  */
-  billing_managers: boolean;
+  billing_managers!: boolean;
   /**
    * See {OrgUserRoleNames.AUDITOR} for name
    */
-  auditors: boolean;
+  auditors!: boolean;
   /**
    * See {OrgUserRoleNames.USER} for name
    */
-  users: boolean;
+  users!: boolean;
 
   // Index signature to allow dynamic property access
   [key: string]: boolean;

@@ -24,10 +24,10 @@ export class SidepanelPreviewComponent {
   public sidePanelService = inject(SidePanelService);
 
   @Input()
-  title: string;
+  title!: string;
 
   @Input()
-  favorite: UserFavorite<IFavoriteMetadata>;
+  favorite!: UserFavorite<IFavoriteMetadata>;
 
-  @Input() header: Portal<any>;
+  @Input() header?: Portal<any>;
 }

@@ -70,14 +70,14 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
 
-  public hasRepo$: Observable<boolean>;
-  public isLoading$: Observable<boolean>;
+  public hasRepo$!: Observable<boolean>;
+  public isLoading$!: Observable<boolean>;
 
-  public gitSCMRepo$: Observable<GitRepo>;
-  public commit$: Observable<GitCommit>;
-  public isHead$: Observable<boolean>;
+  public gitSCMRepo$!: Observable<GitRepo>;
+  public commit$!: Observable<GitCommit>;
+  public isHead$!: Observable<boolean>;
 
-  private gitSCMRepoErrorSub: Subscription;
+  private gitSCMRepoErrorSub!: Subscription;
   private snackBarRef: TailwindSnackBarRef<any>;
 
   public noContentFirstLine = 'Unable to fetch details';
@@ -87,7 +87,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public noContentOtherLines: NoContentMessageLine[] = [{
     text: 'Alternatively this may be due to a communication issue.'
   }];
-  public icon$: Observable<SCMIcon>;
+  public icon$!: Observable<SCMIcon>;
 
   ngOnDestroy(): void {
     if (this.snackBarRef) {

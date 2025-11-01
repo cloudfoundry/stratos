@@ -73,22 +73,22 @@ interface EnvVarData {
 })
 export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
-  envVarsAvailable$: Observable<EnvVarData>;
-  listData: {
+  envVarsAvailable$!: Observable<EnvVarData | null>;
+  listData!: {
     label: string;
     data$: Observable<string>;
     customStyle?: string;
   }[];
   cardMenu: MenuItem[];
-  service$: Observable<APIResource<IService> | null>;
-  serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
-  tags$: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
-  entityConfig: ComponentEntityMonitorConfig;
-  private envVarServicesSection$: Observable<string>;
-  isUserProvidedServiceInstance: boolean;
-  serviceDescription$: Observable<string>;
-  serviceUrl$: Observable<string>;
-  serviceName$: Observable<string>;
+  service$!: Observable<APIResource<IService> | null>;
+  serviceInstance$!: Observable<EntityInfo<APIResource<IServiceInstance | IUserProvidedServiceInstance>>>;
+  tags$!: Observable<AppChip<IServiceInstance | IUserProvidedServiceInstance>[]>;
+  entityConfig!: ComponentEntityMonitorConfig;
+  private envVarServicesSection$!: Observable<string>;
+  isUserProvidedServiceInstance!: boolean;
+  serviceDescription$!: Observable<string | undefined>;
+  serviceUrl$!: Observable<string | undefined>;
+  serviceName$!: Observable<string | undefined>;
 
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME

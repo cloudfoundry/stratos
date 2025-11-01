@@ -22,7 +22,7 @@ import { getCurrentRoutingState, RoutingEvent } from '../../../../../../../../st
   ]
 })
 export class TableCellAppNameComponent<T> extends TableCellCustom<T> implements OnInit {
-  public appLinkUrlParam$: Observable<any>;
+  public appLinkUrlParam$!: Observable<any>;
 
   private store = inject(Store<CFAppState>);
 

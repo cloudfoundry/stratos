@@ -48,10 +48,10 @@ export interface QuotaFormValues {
 ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
-  quotasSubscription: Subscription;
+  quotasSubscription!: Subscription;
   cfGuid: string;
-  allQuotas: string[];
-  formGroup: FormGroup<{
+  allQuotas!: string[];
+  formGroup!: FormGroup<{
     name: FormControl<string>;
     totalServices: FormControl<number>;
     totalRoutes: FormControl<number>;
@@ -65,7 +65,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     appTasksLimit: FormControl<number>;
   }>;
 
-  @Input() quota: IQuotaDefinition;
+  @Input() quota!: IQuotaDefinition;
 
   constructor(
     activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -124,7 +124,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     }
 
     if (this.allQuotas) {
-      return this.allQuotas.indexOf(value || this.formGroup.value.name) === -1;
+      return this.allQuotas.indexOf(value ?? this.formGroup.value.name ?? '') === -1;
     }
 
     return true;

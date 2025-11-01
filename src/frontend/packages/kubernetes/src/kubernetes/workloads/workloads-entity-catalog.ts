@@ -13,10 +13,10 @@ import { HelmRelease, HelmReleaseGraph, HelmReleaseHistory, HelmReleaseResources
  * This can be used to access functionality exposed by each specific type, such as get, update, delete, etc
  */
 export class WorkloadsEntityCatalog {
-  release: StratosCatalogEntity<IFavoriteMetadata, HelmRelease, WorkloadReleaseBuilders>;
-  graph: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseGraph, WorkloadGraphBuilders>;
-  resource: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResources, WorkloadResourceBuilders>;
-  history: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseHistory, WorkloadResourceHistoryBuilders>;
+  release!: StratosCatalogEntity<IFavoriteMetadata, HelmRelease, WorkloadReleaseBuilders>;
+  graph!: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseGraph, WorkloadGraphBuilders>;
+  resource!: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseResources, WorkloadResourceBuilders>;
+  history!: StratosCatalogEntity<IFavoriteMetadata, HelmReleaseHistory, WorkloadResourceHistoryBuilders>;
 }
 
 /**

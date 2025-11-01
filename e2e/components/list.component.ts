@@ -409,8 +409,9 @@ export class ListComponent {
   public header: ListHeaderComponent;
   public pagination: ListPaginationComponent;
   public empty: ListEmptyComponent;
+  public locator: Locator;
 
-  constructor(private page: Page, public locator?: Locator) {
+  constructor(private page: Page, locator?: Locator) {
     this.locator = locator || page.locator('app-list').first();
     this.table = new ListTableComponent(page, this.locator);
     this.cards = new ListCardComponent(page, this.locator);
@@ -421,13 +422,13 @@ export class ListComponent {
 
   async isTableView(): Promise<boolean> {
     const listElement = this.locator.locator('.list-component');
-    const className = await listElement.getAttribute('class') || '';
+    const className = (await listElement.getAttribute('class')) ?? '';
     return className.includes('list-component__table');
   }
 
   async isCardsView(): Promise<boolean> {
     const listElement = this.locator.locator('.list-component');
-    const className = await listElement.getAttribute('class') || '';
+    const className = (await listElement.getAttribute('class')) ?? '';
     return className.includes('list-component__cards');
   }
 

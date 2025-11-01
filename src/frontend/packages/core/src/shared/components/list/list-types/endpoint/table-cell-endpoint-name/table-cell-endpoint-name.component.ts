@@ -29,7 +29,7 @@ export interface RowWithEndpointId {
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
-  public endpoint$: Observable<any>;
+  public endpoint$!: Observable<any>;
 
   @Input('row')
   set row(row: EndpointModel | RowWithEndpointId) {

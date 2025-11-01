@@ -20,7 +20,7 @@ export class PollingIndicatorComponent {
   /**
    * Is polling currently happening
    */
-  @Input() isPolling: boolean;
+  @Input() isPolling?: boolean;
   /**
    * Can a manual poll be kicked off?
    */

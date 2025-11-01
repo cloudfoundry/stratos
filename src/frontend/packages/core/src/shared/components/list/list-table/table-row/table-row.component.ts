@@ -38,17 +38,17 @@ selector: 'app-table-row',
 export class TableRowComponent<T = any> implements OnInit {
 
   @ViewChild('expandedComponent', { read: ViewContainerRef, static: true })
-  expandedComponent: ViewContainerRef;
+  expandedComponent!: ViewContainerRef;
 
-  @Input() columns: ITableColumn<T>[];
+  @Input() columns!: ITableColumn<T>[];
   @Input() dataSource: any;
-  @Input() rowState: Observable<RowState>;
-  @Input() expandComponent: ListExpandedComponentType<T>;
-  @Input() row: T;
-  @Input() minRowHeight: string;
-  @Input() inExpandedRow: boolean;
-  @Input() rowId: string;
-  @Input() prominentErrorBar: boolean;
+  @Input() rowState!: Observable<RowState>;
+  @Input() expandComponent!: ListExpandedComponentType<T>;
+  @Input() row!: T;
+  @Input() minRowHeight!: string;
+  @Input() inExpandedRow!: boolean;
+  @Input() rowId!: string;
+  @Input() prominentErrorBar!: boolean;
   @Input() togglePosition: 'before' | 'after' = 'before';
 
   public inErrorState$: Observable<boolean>;

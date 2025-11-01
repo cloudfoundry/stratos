@@ -6,8 +6,8 @@ import { Injectable } from '@angular/core';
 })
 export class CsiGuidsService {
 
-  public cfGuid: string;
-  public serviceGuid: string;
+  public cfGuid!: string;
+  public serviceGuid!: string;
   constructor() { }
 
 }

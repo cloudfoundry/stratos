@@ -53,7 +53,7 @@ export abstract class BaseEndpointAction implements EntityRequestAction {
   public subType = '';
   public entity = [stratosEntityFactory(endpointEntityType)];
   constructor(public type: string) { }
-  actions: string[];
+  actions!: string[];
 }
 
 export abstract class SingleBaseEndpointAction extends BaseEndpointAction {

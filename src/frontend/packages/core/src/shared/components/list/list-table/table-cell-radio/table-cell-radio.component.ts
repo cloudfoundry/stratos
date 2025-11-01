@@ -14,7 +14,7 @@ import { TableCellCustom } from '../../list.types';
   ]
 })
 export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
-  disable: boolean;
+  disable!: boolean;
 
   constructor(private cdr: ChangeDetectorRef) {
     super();

@@ -29,21 +29,21 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 })
 export class FileInputComponent implements OnInit, OnDestroy {
 
-  @ViewChild('inputFile', { static: true }) nativeInputFile: ElementRef;
+  @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
-  @Input() accept: string;
+  @Input() accept!: string;
   @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
   @Output() onFileData: EventEmitter<string> = new EventEmitter();
 
-  @Input() fileFormControlName: string;
+  @Input() fileFormControlName!: string;
 
   @Input() buttonLabel = '';
 
-  private files: File[];
+  private files!: File[];
 
   public name = '';
 
-  private formGroupControl: FormGroupName;
+  private formGroupControl!: FormGroupName;
   public disabled = false;
   private sub: Subscription;
 

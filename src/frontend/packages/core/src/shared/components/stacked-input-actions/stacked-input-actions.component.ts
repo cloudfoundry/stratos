@@ -48,14 +48,14 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
 })
 export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
-  @Input() stateIn$: Observable<StackedInputActionsState[]>;
+  @Input() stateIn$!: Observable<StackedInputActionsState[]>;
   @Input() isEmailInput = true;
-  @Input() stackedActionConfig: StackedInputActionConfig;
+  @Input() stackedActionConfig!: StackedInputActionConfig;
 
   @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
 
   @ViewChild('inputs', { read: ViewContainerRef, static: true })
-  inputs: ViewContainerRef;
+  inputs!: ViewContainerRef;
 
   disabled = false;
   private count = 0;

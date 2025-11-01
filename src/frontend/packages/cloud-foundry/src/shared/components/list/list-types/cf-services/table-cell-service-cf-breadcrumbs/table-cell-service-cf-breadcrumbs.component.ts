@@ -20,7 +20,7 @@ import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space
 })
 export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIResource<IService>> {
 
-  cfOrgSpace: CfOrgSpaceLabelService;
+  cfOrgSpace!: CfOrgSpaceLabelService;
   private store = inject(Store<CFAppState>);
 
   @Input()

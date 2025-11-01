@@ -53,7 +53,7 @@ export class SchemaFormConfig {
 })
 export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
 
-  mode: 'JSON' | 'schema';
+  mode!: 'JSON' | 'schema';
   schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
   private schema: object | undefined;
 
@@ -89,8 +89,8 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
 
   cleanSchema: object;
 
-  jsonData: object;
-  jsonForm: FormGroup<SchemaJsonForm>;
+  jsonData: object | null = null;
+  jsonForm!: FormGroup<SchemaJsonForm>;
 
   formData: object = {};
   formInitialData: object;

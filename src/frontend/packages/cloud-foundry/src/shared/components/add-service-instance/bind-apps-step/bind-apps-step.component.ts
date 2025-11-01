@@ -40,18 +40,18 @@ interface BindAppsForm {
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   @Input()
-  boundAppId: string;
+  boundAppId!: string;
 
   @Input()
-  apps$: Observable<APIResource<IApp>[]>;
+  apps$!: Observable<APIResource<IApp>[]>;
 
   validate = signal<boolean>(true);
-  serviceInstanceGuid: string;
-  stepperForm: FormGroup<BindAppsForm>;
+  serviceInstanceGuid!: string;
+  stepperForm!: FormGroup<BindAppsForm>;
   guideText = 'Specify the application to bind (Optional)';
-  selectedServicePlan: APIResource<IServicePlan>;
+  selectedServicePlan!: APIResource<IServicePlan>;
   bindingParams: object = {};
-  schemaFormConfig: SchemaFormConfig;
+  schemaFormConfig!: SchemaFormConfig;
 
   // Lifecycle management for subscriptions
   private destroyed$ = new Subject<void>();

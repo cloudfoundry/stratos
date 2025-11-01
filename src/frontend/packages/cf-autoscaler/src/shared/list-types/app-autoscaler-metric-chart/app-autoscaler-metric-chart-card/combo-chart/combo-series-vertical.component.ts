@@ -63,15 +63,15 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
   @Input() dims: any;
   @Input() type = 'standard';
-  @Input() series: any[];
-  @Input() seriesLine: any[];
+  @Input() series!: any[];
+  @Input() seriesLine!: any[];
   @Input() xScale: any;
   @Input() yScale: any;
   @Input() colors: any;
   @Input() tooltipDisabled = false;
-  @Input() gradient: boolean;
-  @Input() activeEntries: AppAutoscalerMetricDataLine[];
-  @Input() seriesName: string;
+  @Input() gradient!: boolean;
+  @Input() activeEntries!: AppAutoscalerMetricDataLine[];
+  @Input() seriesName!: string;
   @Input() animations = true;
 
   @Output() select = new EventEmitter();
@@ -79,7 +79,7 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   @Output() deactivate = new EventEmitter();
   @Output() bandwidth = new EventEmitter<number>();
 
-  bars: any[];
+  bars!: any[];
   x: any;
   y: any;
 

@@ -17,20 +17,20 @@ export interface CfUserRolesSelected {
 }
 
 export class CfRoleChange {
-  userGuid: string;
-  orgGuid: string;
+  userGuid!: string;
+  orgGuid!: string;
   spaceGuid?: string;
-  add: boolean;
-  role: OrgUserRoleNames | SpaceUserRoleNames;
-  orgName: string;
+  add!: boolean;
+  role!: OrgUserRoleNames | SpaceUserRoleNames;
+  orgName!: string;
   spaceName?: string;
 }
 
 export class CfRoleChangeWithNames extends CfRoleChange {
-  username: string; // Why are all these names set out flat? So we can easily sort in future
+  username!: string; // Why are all these names set out flat? So we can easily sort in future
   declare orgName: string;
   declare spaceName?: string;
-  roleName: string;
+  roleName!: string;
 }
 
 export const UserRoleLabels: {

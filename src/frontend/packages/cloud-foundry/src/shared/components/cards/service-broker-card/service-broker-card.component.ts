@@ -38,8 +38,8 @@ import { ClickStopPropagationDirective } from '@stratosui/core';
 })
 export class ServiceBrokerCardComponent implements OnDestroy {
 
-  spaceName: string;
-  spaceLink: string[];
+  spaceName!: string;
+  spaceLink!: string[];
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   subs: Subscription[] = [];
 

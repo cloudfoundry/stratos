@@ -17,7 +17,7 @@ import { TabNavItem } from '../../../tab-nav.types';
 export class NestedTabsComponent implements OnInit {
 
   @Input()
-  tabs: TabNavItem[];
+  tabs: TabNavItem[] = [];
   constructor() {
 
   }

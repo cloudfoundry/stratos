@@ -15,9 +15,9 @@ import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-p
   providedIn: 'root'
 })
 export class LoggedInService {
-  private userInteractionChecker: Subscription;
+  private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
-  private sessionChecker: Subscription;
+  private sessionChecker!: Subscription;
 
   // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
   private readonly checkSessionInterval: number = 5 * 1000;
@@ -35,7 +35,7 @@ export class LoggedInService {
   private readonly userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private activityPromptShown = false;
-  private sub: Subscription;
+  private sub!: Subscription;
   private destroying = false;
   private initialized = false;
 

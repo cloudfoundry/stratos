@@ -147,10 +147,12 @@ export class MetricsRangeSelectorManagerService {
     this.ngZone.runOutsideAngular(() => {
       this.pollIndex = window.setInterval(
         () => {
-          this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
-          // ZONELESS: Trigger change detection after periodic metrics update
-          // This runs outside Angular zone but needs to notify Angular of state changes
-          this.ngZone.run(() => this.appRef.tick());
+          if (timeWindow.value != null && this.baseAction) {
+            this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
+            // ZONELESS: Trigger change detection after periodic metrics update
+            // This runs outside Angular zone but needs to notify Angular of state changes
+            this.ngZone.run(() => this.appRef.tick());
+          }
         },
         this.pollInterval
       );

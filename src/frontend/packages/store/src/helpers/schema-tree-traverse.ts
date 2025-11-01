@@ -14,7 +14,7 @@ export interface IFlatTree {
 
 export class EntitySchemaTreeBuilder {
 
-  private entityExcludes: string[];
+  private entityExcludes!: string[];
   public getFlatTree(treeDefinition: IRecursiveDelete, state: IRequestTypeState): IFlatTree {
     const { schema, guid } = treeDefinition;
     const denormed = denormalize(guid, schema, state);

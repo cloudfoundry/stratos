@@ -32,9 +32,9 @@ export class FavoritesMetaCardComponent {
   public favoriteType: string;
 
   // Favorite name
-  public name: string;
+  public name!: string;
 
-  public routerLink: string;
+  public routerLink!: string;
 
   public icon: FavoriteIconData;
 
