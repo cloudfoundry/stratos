@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
  * - query: Shows a query animation
  */
 @Component({
-  selector: 'app-progress-bar',
+  selector: 'lib-progress-bar',
   standalone: true,
   imports: [CommonModule],
   template: `

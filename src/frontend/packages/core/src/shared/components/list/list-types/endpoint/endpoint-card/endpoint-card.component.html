@@ -8,7 +8,11 @@
       @if (!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl) {
         <div
           class="endpoint-card__image-wrapper">
-          <img class="endpoint-card__image" src="{{endpointCatalogEntity.definition.logoUrl}}" />
+          <img class="endpoint-card__image"
+               [src]="endpointCatalogEntity.definition.logoUrl"
+               [alt]="endpointCatalogEntity.definition.label + ' logo'"
+               loading="lazy"
+               (error)="onImageError($event)" />
         </div>
       }
       <div class="endpoint-card__title-text">

@@ -264,4 +264,22 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.store.dispatch(new RouterNav({ path: routerLink }));
   }
 
+  /**
+   * Handle image loading errors to prevent retry loops
+   * Removes the src to stop browser from continuously retrying
+   */
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      console.warn(`Failed to load endpoint icon: ${img.src}`);
+      // Clear src to prevent retry loop
+      img.src = '';
+      // Optionally hide the image wrapper
+      const wrapper = img.closest('.endpoint-card__image-wrapper') as HTMLElement;
+      if (wrapper) {
+        wrapper.style.display = 'none';
+      }
+    }
+  }
+
 }

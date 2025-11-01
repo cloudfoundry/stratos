@@ -10,13 +10,13 @@ import { ProgressBarComponent } from './progress-bar.component';
   standalone: true,
   imports: [ProgressBarComponent],
   template: `
-    <app-progress-bar
+    <lib-progress-bar
       [mode]="mode"
       [value]="value"
       [bufferValue]="bufferValue"
       [color]="color"
       [customHeight]="customHeight">
-    </app-progress-bar>
+    </lib-progress-bar>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

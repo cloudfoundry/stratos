@@ -25,9 +25,10 @@ import {
   selectDashboardState,
   SetHomeCardLayoutAction,
   SetDashboardStateValueAction,
+  stratosEntityCatalog,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map, startWith } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -116,6 +117,11 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     public userFavoriteManager: UserFavoriteManager,
     private scrollDispatcher: ScrollDispatcher,
   ) {
+    // Ensure endpoints are loaded from the backend
+    // This is necessary because the home page relies on endpoint data being present in the store
+    // Without this, the CF home cards will timeout trying to fetch data
+    this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll(false));
+
     // Redirect to /applications if not enabled
     endpointsService.disablePersistenceFeatures$.pipe(
       map(off => {
@@ -133,7 +139,13 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.layouts$ = of(this.layouts);
     this.layout$ = toObservable(this._layout);
-    this.allEndpointIds$ = this.endpointsService.connectedEndpoints$.pipe(
+
+    // Wait for endpoints to be loaded before creating the endpoint IDs list
+    // This ensures CF data fetches have the endpoint context they need
+    this.allEndpointIds$ = this.endpointsService.haveRegistered$.pipe(
+      filter(haveRegistered => haveRegistered),
+      first(),
+      switchMap(() => this.endpointsService.connectedEndpoints$),
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
