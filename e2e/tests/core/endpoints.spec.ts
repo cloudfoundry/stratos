@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-base';
 import { EndpointsPage } from '../../pages/endpoints/endpoints.page';
-import { ApplicationsPage } from '../../pages/application/applications.page';
+import { ApplicationsPage } from '../../pages/application/applications-list.page';
 import { HomePage } from '../../pages/home.page';
 import { MenuComponent } from '../../components';
 import { SnackBarComponent } from '../../components';

@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/test-base';
-import { ApplicationsPage } from '../../pages/application/applications.page';
+import { ApplicationsPage } from '../../pages/application/applications-list.page';
 import { createCustomName } from '../../helpers/test-utils';
 
 /**

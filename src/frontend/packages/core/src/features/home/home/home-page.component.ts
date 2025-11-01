@@ -149,7 +149,15 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
-    const connected$ = this.endpointsService.connectedEndpoints$;
+
+    // Wait for endpoints to be registered before setting up the connected endpoints observable
+    // This ensures we don't try to render cards before the store is populated
+    const connected$ = this.endpointsService.haveRegistered$.pipe(
+      filter(haveRegistered => haveRegistered),
+      first(),
+      switchMap(() => this.endpointsService.connectedEndpoints$)
+    );
+
     const showMode$ = toObservable(this._showMode);
 
     // Default value from backend
