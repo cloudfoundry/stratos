@@ -88,7 +88,7 @@ export class EndpointManagementHelper {
   async registerDefaultCloudFoundry(): Promise<void> {
     await this.ensureAdminSession();
 
-    const cfEndpoints = this.secrets.cloudfoundry;
+    const cfEndpoints = this.secrets.cloudFoundry;
     if (!cfEndpoints || cfEndpoints.length === 0) {
       throw new Error('No Cloud Foundry endpoints configured in secrets');
     }
@@ -108,7 +108,7 @@ export class EndpointManagementHelper {
   async registerMultipleCloudFoundries(): Promise<void> {
     await this.ensureAdminSession();
 
-    const cfEndpoints = this.secrets.cloudfoundry;
+    const cfEndpoints = this.secrets.cloudFoundry;
     if (!cfEndpoints || cfEndpoints.length < 2) {
       throw new Error('At least 2 Cloud Foundry endpoints must be configured for this test');
     }

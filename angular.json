@@ -20,7 +20,10 @@
             "allowedCommonJsDependencies": [
               "deepmerge",
               "xterm",
-              "xterm-addon-fit"
+              "xterm-addon-fit",
+              "dagre",
+              "webcola",
+              "intersect"
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
@@ -29,7 +32,13 @@
               {
                 "glob": "**/*",
                 "input": "custom-src/frontend/assets/custom",
-                "output": "/core/assets/custom"
+                "output": "/core/assets/custom",
+                "ignore": ["**/.gitkeep"]
+              },
+              {
+                "glob": "**/*",
+                "input": "src/frontend/packages/kubernetes/assets",
+                "output": "/kubernetes/assets"
               },
               {
                 "glob": "**/*",
@@ -114,20 +123,6 @@
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "buildTarget": "stratos:build"
-          }
-        }
-      }
-    },
-    "stratos-e2e": {
-      "root": "e2e",
-      "sourceRoot": "",
-      "projectType": "application",
-      "architect": {
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "stratos:serve"
           }
         }
       }

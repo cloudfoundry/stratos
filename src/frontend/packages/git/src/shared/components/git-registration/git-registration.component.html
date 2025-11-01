@@ -45,17 +45,17 @@
               </div>
               <div class="form-group">
                 <label for="url" class="label">Endpoint Address</label>
-                <input id="url" name="url" formControlName="urlField" type="url" required
-                  placeholder="Endpoint Address" pattern="{{urlValidation}}" class="input"
+                <input id="url" name="url" formControlName="urlField" type="text" required
+                  placeholder="Endpoint Address" class="input"
                   [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
                 @if (registerForm.controls.urlField.errors?.required) {
                   <div class="text-red-600 text-sm mt-1">
                     URL is required
                   </div>
                 }
-                @if (registerForm.controls.urlField.errors?.pattern) {
+                @if (registerForm.controls.urlField.errors?.invalidUrl) {
                   <div class="text-red-600 text-sm mt-1">
-                    Invalid API URL
+                    Invalid API URL. Enter a valid hostname or URL (e.g., github.com or https://github.enterprise.com)
                   </div>
                 }
                 @if (registerForm.controls.urlField.errors?.appUnique) {

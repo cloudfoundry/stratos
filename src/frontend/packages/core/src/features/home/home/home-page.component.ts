@@ -10,7 +10,6 @@ import { ChangeDetectionStrategy, AfterViewInit,
   ViewChild,
   ViewChildren,
   signal,
-  computed,
  } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -150,12 +149,13 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
     );
     this.haveRegistered$ = this.endpointsService.haveRegistered$;
 
-    // Wait for endpoints to be registered before setting up the connected endpoints observable
-    // This ensures we don't try to render cards before the store is populated
+    // ZONELESS FIX: Don't block the observable chain when no endpoints are registered
+    // The filter was preventing any emissions, which blocked combineLatest from ever firing
+    // Now we emit an empty array when no endpoints are registered, allowing the template to render
     const connected$ = this.endpointsService.haveRegistered$.pipe(
-      filter(haveRegistered => haveRegistered),
-      first(),
-      switchMap(() => this.endpointsService.connectedEndpoints$)
+      switchMap((haveRegistered) =>
+        haveRegistered ? this.endpointsService.connectedEndpoints$ : of([])
+      )
     );
 
     const showMode$ = toObservable(this._showMode);

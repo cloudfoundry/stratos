@@ -19,6 +19,7 @@ import {
   ResetAuth,
   ResetSSOAuth,
   SESSION_INVALID,
+  SESSION_VERIFIED,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
@@ -63,6 +64,7 @@ export class AuthEffect {
 
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers,
+        withCredentials: true
       }).pipe(
         map(data => {
           this.appRef.tick();
@@ -138,10 +140,22 @@ export class AuthEffect {
       return new LoginFailed('Invalid session');
     })));
 
+  // Trigger change detection after session is verified and endpoints are loaded into store
+  // This ensures zoneless change detection updates components that depend on endpoint data
+   sessionVerified$ = createEffect(() => this.actions$.pipe(
+    ofType<VerifiedSession>(SESSION_VERIFIED),
+    tap(() => {
+      // The SESSION_VERIFIED reducer has already updated the store with endpoint data
+      // Trigger change detection so components can react to the state changes
+      this.appRef.tick();
+    })), { dispatch: false });
+
    logoutRequest$ = createEffect(() => this.actions$.pipe(
     ofType<Logout>(LOGOUT),
     switchMap(() => {
-      return this.http.post('/pp/v1/auth/logout', {}).pipe(
+      return this.http.post('/pp/v1/auth/logout', {}, {
+        withCredentials: true
+      }).pipe(
         mergeMap((data: any) => {
           this.appRef.tick();
           if (data.isSSO) {

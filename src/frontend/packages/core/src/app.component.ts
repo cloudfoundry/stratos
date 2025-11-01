@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService } from '@stratosui/store';
+import { AuthOnlyAppState, ThemeService, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
@@ -25,13 +25,17 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     private loggedInService: LoggedInService,
-    store: Store<AuthOnlyAppState>,
+    private store: Store<AuthOnlyAppState>,
     public themeService: ThemeService,
     private stratosThemeService: StratosThemeService,
     @Inject(DOCUMENT) private document: Document,
   ) {
+    // Dispatch initial session verification BEFORE routing starts
+    // This prevents the authGuard from blocking indefinitely waiting for verifying=false
+    this.store.dispatch(new VerifySession());
+
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    this.userId$ = this.store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();

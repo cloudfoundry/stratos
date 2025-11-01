@@ -11,18 +11,25 @@ Run `npm run lint` to execute tslint lint checking.
 
 ### Unit tests
 
-Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in `./coverage`
+Run `npm test` to execute the unit tests via [Vitest](https://vitest.dev). Coverage information can be found in `./coverage`
 
-To execute an individual package run `ng test <package name>`. To execute the tests again automatically on code changes add `--watch=true`
+To execute an individual package run `npm run test:<package name>`. For example:
+- `npm run test:core` - Test core package
+- `npm run test:store` - Test store package
+- `npm run test:cloud-foundry` - Test Cloud Foundry package
 
-> **NOTE** npm test will search for chrome on your path. If this is not so please set an env var CHROME_BIN pointing to your executable
-(chromium is fine too).
+To run tests in watch mode: `npm run test:watch`
 
 ### End-to-end tests
 
-Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Run `npm run e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev/).
 
-Run `npm run e2e-dev` to execute end-to-end tests against a locally running instance on `https://localhost:4200`
+Additional E2E commands:
+- `npm run e2e:dev` - Run tests against local instance on `https://127.0.0.1:4200`
+- `npm run e2e:ui` - Run tests with Playwright UI mode
+- `npm run e2e:debug` - Run tests in debug mode
+- `npm run e2e:headed` - Run tests in headed mode (see browser)
+- `npm run e2e:report` - View test report
 
 More information on the E2E tests and pre-requisites for running them is available here - [E2E Tests](developers-guide-e2e-tests.md).
 

@@ -101,7 +101,7 @@ export default defineConfig({
   webServer: {
     command: 'bun run start',
     url: 'https://localhost:5440',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Always reuse existing server (dev server + backend must be running)
     ignoreHTTPSErrors: true,
     timeout: 120000, // 2 minutes to start server
   },

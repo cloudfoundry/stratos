@@ -161,4 +161,4 @@ src/jetstream/jetstream.exe
 build/src/
 src/frontend/packages/store/node_modules/
 test-results/
-src/test-e2e/secrets.yaml
+secrets.yaml

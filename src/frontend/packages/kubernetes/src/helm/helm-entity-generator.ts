@@ -40,7 +40,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
   const helmRepoRenderPriority = 10;
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     type: HELM_ENDPOINT_TYPE,
-    logoUrl: '/core/assets/custom/helm.svg',
+    logoUrl: '/kubernetes/assets/custom/helm.svg',
     authTypes: [],
     registeredLimit: () => 0,
     icon: 'helm',
@@ -53,7 +53,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         type: HELM_REPO_ENDPOINT_TYPE,
         label: 'Helm Repository',
         labelPlural: 'Helm Repositories',
-        logoUrl: '/core/assets/custom/helm.svg',
+        logoUrl: '/kubernetes/assets/custom/helm.svg',
         unConnectable: true,
         techPreview: false,
         authTypes: [],
@@ -86,7 +86,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         labelPlural: 'Artifact Hubs',
         authTypes: [],
         unConnectable: true,
-        logoUrl: '/core/assets/custom/helm.svg',
+        logoUrl: '/kubernetes/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
         registeredLimit: (store: Store<AppState>): Observable<number> => store.select('auth').pipe(

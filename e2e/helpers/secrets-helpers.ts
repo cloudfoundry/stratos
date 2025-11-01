@@ -20,7 +20,7 @@ export class SecretsHelper {
     if (!fs.existsSync(secretsPath)) {
       throw new Error(
         `Secrets file not found at ${secretsPath}.\n` +
-        `Please provide a secrets.yaml file. See src/test-e2e/secrets.yaml.example as reference.`
+        `Please provide a secrets.yaml file. See e2e/secrets.yaml.example as reference.`
       );
     }
 
@@ -35,13 +35,14 @@ export class SecretsHelper {
             password: secrets.consoleUsers?.admin?.password || '',
           },
           user: {
-            username: secrets.consoleUsers?.user?.username || '',
-            password: secrets.consoleUsers?.user?.password || '',
+            username: secrets.consoleUsers?.user?.username || secrets.consoleUsers?.nonAdmin?.username || '',
+            password: secrets.consoleUsers?.user?.password || secrets.consoleUsers?.nonAdmin?.password || '',
           },
         },
 
         // Cloud Foundry configuration
-        cloudFoundry: secrets.cloudFoundry || {},
+        // Support both 'cloudFoundry' (root level) and 'endpoints.cf' (nested) formats
+        cloudFoundry: secrets.cloudFoundry || secrets.endpoints?.cf || [],
 
         // GitHub configuration
         github: {

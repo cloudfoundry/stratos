@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Input } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -100,7 +101,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
     this.registerForm = this.fb.group<CreateEndpointForm>({
       nameField: this.fb.nonNullable.control('', [Validators.required]),
-      urlField: this.fb.nonNullable.control('', [Validators.required]),
+      urlField: this.fb.nonNullable.control('', [Validators.required, cfEndpointUrlValidator]),
       skipSSLField: this.fb.nonNullable.control(false, []),
       ssoAllowedField: this.fb.nonNullable.control(false, []),
       // Optional Client ID and Client Secret
@@ -128,11 +129,14 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       sslAllow = false;
     }
 
+    // Normalize URL using shared utility
+    const url = normalizeUrl(this.registerForm.value.urlField || '');
+
     return stratosEntityCatalog.endpoint.api.register<ActionState>(
       type,
       subType,
       this.registerForm.value.nameField,
-      this.registerForm.value.urlField,
+      url,
       sslAllow,
       this.registerForm.value.clientIDField,
       this.registerForm.value.clientSecretField,

@@ -71,21 +71,30 @@ export class KubernetesEndpointService {
   private injector = inject(Injector);
 
   public static hasKubeTerminalEnabled(store: Store<AppState>): Observable<boolean> {
+    // ZONELESS FIX: Don't block when plugin-config is missing
+    // Use switchMap to emit false when config is unavailable
     return store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+          : of(false)
+      )
     );
   }
 
   public static getKubeDashboardStatus(store: Store<AppState>, kubeGuid: string): Observable<KubeDashboardStatus> {
+    // ZONELESS FIX: Don't block when plugin-config is missing
     const kubeDashboardEnabled$ = store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
+          : of(false)
+      )
     );
 
+    // ZONELESS FIX: Don't block when status entity is null
     const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(kubeGuid).waitForEntity$.pipe(
-      map(status => status.entity),
-      filter(status => !!status)
+      map(status => status?.entity || null)
     );
 
     return kubeDashboardEnabled$.pipe(switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)));
@@ -281,9 +290,13 @@ export class KubernetesEndpointService {
 
     this.kubeDashboardEnabled$ = KubernetesEndpointService.hasKubeTerminalEnabled(this.store);
 
+    // ZONELESS FIX: Don't block when plugin-config is missing
     this.kubeTerminalEnabled$ = this.store.select('auth').pipe(
-      filter(auth => !!auth.sessionData['plugin-config']),
-      map(auth => auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+      switchMap(auth =>
+        auth?.sessionData?.['plugin-config']
+          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
+          : of(false)
+      )
     );
 
     this.kubeDashboardStatus$ = KubernetesEndpointService.getKubeDashboardStatus(this.store, this.kubeGuid);
@@ -310,6 +323,12 @@ export class KubernetesEndpointService {
   }
 
   private getObservable<T>(obs: PaginationObservables<T>): Observable<T[]> {
-    return obs.entities$.pipe(filter(p => !!p), first());
+    // ZONELESS FIX: Don't block the observable chain when entities are null
+    // The filter was preventing any emissions, which blocked combineLatest from ever firing
+    // Now we emit an empty array when entities are null, allowing the template to render
+    return obs.entities$.pipe(
+      map(p => p || []),
+      first()
+    );
   }
 }

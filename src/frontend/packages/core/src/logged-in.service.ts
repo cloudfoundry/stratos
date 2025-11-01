@@ -90,8 +90,8 @@ export class LoggedInService {
     }
   }
 
-  // Run outside Angular zone for protractor tests to work
-  // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
+  // Run outside Angular zone to prevent E2E test timeouts
+  // Polling intervals should not block Angular change detection
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
     // Ensure interval configuration is valid

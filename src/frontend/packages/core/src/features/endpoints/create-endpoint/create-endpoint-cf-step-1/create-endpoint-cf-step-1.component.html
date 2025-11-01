@@ -13,15 +13,14 @@
           <app-error>Name is not unique</app-error>
         }
       </app-form-field>
-      <app-form-field novalidate>
-        <input appInput id="url" name="url" formControlName="urlField" type="url" required placeholder="Endpoint Address"
-          pattern="{{urlValidation}}"
+      <app-form-field>
+        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address"
           [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.urls : (existingPersonalEndpoints | async)?.urls">
         @if (registerForm.controls.urlField.errors?.required) {
           <app-error>URL is required</app-error>
         }
-        @if (registerForm.controls.urlField.errors?.pattern) {
-          <app-error>Invalid API URL</app-error>
+        @if (registerForm.controls.urlField.errors?.invalidUrl) {
+          <app-error>Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)</app-error>
         }
         @if (registerForm.controls.urlField.errors?.appUnique) {
           <app-error>URL is not unique</app-error>
@@ -38,13 +37,13 @@
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
       <h1 class="create-endpoint__section-title">Options</h1>
-      <app-checkbox appInput name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</app-checkbox>
-      <app-checkbox appInput (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+      <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</app-checkbox>
+      <app-checkbox appInput id="useCACert" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
       @if (showAdvancedFields) {
-        <app-checkbox appInput (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+        <app-checkbox appInput id="showAdvanced" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
       }
       @if (endpointTypeSupportsSSO) {
-        <app-checkbox appInput name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
+        <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
       }
     </div>
   </div>

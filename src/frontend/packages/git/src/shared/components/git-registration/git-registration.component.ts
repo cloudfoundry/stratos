@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { gitRepositoryUrlValidator, normalizeUrl } from '../../../../../core/src/shared/validators';
 import {
   CreateEndpointHelperComponent,
 } from 'frontend/packages/core/src/features/endpoints/create-endpoint/create-endpoint-helper';
@@ -181,7 +182,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.registerForm = this.fb.group<GitRegistrationForm>({
       selectedType: new FormControl(defaultSelection || '', { nonNullable: true, validators: [] }),
       nameField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-      urlField: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+      urlField: new FormControl('', { nonNullable: true, validators: [Validators.required, gitRepositoryUrlValidator] }),
       skipSSLField: new FormControl(false, { nonNullable: true, validators: [] }),
       createSystemEndpointField: new FormControl(true, { nonNullable: true, validators: [] }),
     });
@@ -220,7 +221,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const typ = this.registerForm.value.selectedType;
     const defn = this.gitTypes[this.epSubType].types[typ];
     const name = defn.name || this.registerForm.controls.nameField.value;
-    const url: string = this.updateUrlWithSuffix(defn.url || this.registerForm.controls.urlField.value, defn);
+
+    // Normalize URL using shared utility
+    const rawUrl = normalizeUrl(defn.url || this.registerForm.controls.urlField.value);
+    const url: string = this.updateUrlWithSuffix(rawUrl, defn);
     // If we're in enterprise mode also assign the skipSSL field, otherwise assume false
     const skipSSL = this.registerForm.controls.nameField.value && this.registerForm.controls.urlField.value ?
       this.registerForm.controls.skipSSLField.value :
