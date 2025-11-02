@@ -64,7 +64,7 @@
     <div class="event-page__list space-y-2"
       [ngClass]="{'event-page__list-has-read': hasReadEvents$ | async}"
       role="list">
-      @for (event of events; track event) {
+      @for (event of events; track event.key) {
         <app-card class="event-page__event-row-card">
           <div class="event-page__event-row flex items-center gap-4 p-4" role="listitem">
             <app-stateful-icon class="event-page__event-row-icon flex-shrink-0" [state]="event.stratosStatus">

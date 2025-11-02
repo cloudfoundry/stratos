@@ -1,8 +1,8 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { filter, first, map, pairwise, tap } from 'rxjs/operators';
 
 import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
@@ -105,6 +105,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
     private store: Store<CFAppState>,
     private pmf: PaginationMonitorFactory,
     appDeploySourceTypes: ApplicationDeploySourceTypes,
+    private cdr: ChangeDetectorRef,
   ) {
     // Set a default layout
     this.pLayout = new HomePageCardLayout(1, 1);
@@ -146,31 +147,54 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
   // Card is instructed to load its view by the container, when it is visible
   load(): Observable<boolean> {
     this.cardLoaded = true;
-    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
-    this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
-    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid);
+    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid).pipe(
+      tap(() => this.cdr.markForCheck())
+    );
+    this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid).pipe(
+      tap(() => this.cdr.markForCheck())
+    );
+    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid).pipe(
+      tap(() => this.cdr.markForCheck())
+    );
+    this.cdr.markForCheck(); // Trigger change detection for cardLoaded = true
 
     this.appLink = () => goToAppWall(this.store, this.guid);
 
     const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
 
     // When the apps are loaded, fetch the app stats
-    this.hasNoApps$ = appsPagObs.entities$.pipe(first(), map(apps => {
-      this.recentApps = apps;
-      this.appStatsToLoad = this.restrictApps(apps);
-      // Initiate app stats fetching (recursive method handles batching)
-      this.fetchAppStats();
-      return apps.length === 0;
-    }));
+    this.hasNoApps$ = appsPagObs.entities$.pipe(
+      first(),
+      map(apps => {
+        this.recentApps = apps;
+        this.appStatsToLoad = this.restrictApps(apps);
+        // Initiate app stats fetching (recursive method handles batching)
+        this.fetchAppStats();
+        return apps.length === 0;
+      })
+    );
 
-    const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(filter(loaded => loaded));
+    const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(
+      filter(loaded => loaded),
+      first() // Complete after first true emission
+    );
+
     return combineLatest([
-      this.routeCount$,
-      this.appCount$,
-      this.orgCount$,
-      appsPagObs.entities$,
+      this.routeCount$.pipe(first()),
+      this.appCount$.pipe(first()),
+      this.orgCount$.pipe(first()),
+      appsPagObs.entities$.pipe(
+        first(),
+        tap(apps => {
+          this.recentApps = apps;
+          this.appStatsToLoad = this.restrictApps(apps);
+          // Initiate app stats fetching (recursive method handles batching)
+          this.fetchAppStats();
+        })
+      ),
       appStatLoaded$
     ]).pipe(
+      first(),
       map(() => true)
     );
   }
@@ -204,7 +228,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard {
           pairwise(),
           filter(([oldR, newR]) => oldR.busy && !newR.busy),
           first()
-        ).subscribe((a: any) => {
+        ).subscribe(() => {
           this.fetchAppStats();
         });
       } else {

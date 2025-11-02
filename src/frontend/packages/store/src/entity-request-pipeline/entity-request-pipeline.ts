@@ -121,11 +121,19 @@ export const apiRequestPipelineFactory = (
         recursivelyDelete
       );
 
-      // Only log errors that are not expected 404s (e.g., autoscaler plugin not available)
+      // Filter out expected errors to reduce console noise
       const isExpected404 = httpResponse?.status === 404 &&
         (error.url?.includes('/autoscaler/') || action.options?.url?.includes('/autoscaler/'));
 
-      if (!isExpected404) {
+      // Network errors (status 0) are transient connectivity issues
+      const isNetworkError = httpResponse?.status === 0;
+
+      // App stats failures for stopped apps are expected
+      const isExpectedStatsError = httpResponse?.status === 0 &&
+        (error.url?.includes('/apps/') && error.url?.includes('/stats'));
+
+      // Only log unexpected errors
+      if (!isExpected404 && !isNetworkError && !isExpectedStatsError) {
         console.warn(error);
       }
 

@@ -25,8 +25,6 @@ export class StratosThemeService {
   }
 
   private async initializeTheme() {
-    console.log('[StratosThemeService] Initializing theme...');
-
     // Add initializing class to prevent FOUC (Flash of Unstyled Content)
     document.body.classList.add('theme-initializing');
 
@@ -40,12 +38,10 @@ export class StratosThemeService {
 
     // Load theme configuration
     await this.loadThemeFromConfig();
-    console.log('[StratosThemeService] Theme loaded:', this._theme());
 
     // Apply the theme based on mode
     this.applyThemeMode(savedMode);
     this.updateBranding(this._theme());
-    console.log('[StratosThemeService] Theme applied to DOM');
 
     // Remove initializing class after a small delay to enable transitions
     // This prevents the initial flash while allowing smooth transitions afterward
@@ -161,34 +157,27 @@ export class StratosThemeService {
 
   // Load theme from various sources
   private async loadThemeFromConfig() {
-    console.log('[StratosThemeService] Loading theme from config...');
     try {
       // Try to load from localStorage first
       const savedTheme = localStorage.getItem('stratos-theme');
       if (savedTheme) {
-        console.log('[StratosThemeService] Found saved theme in localStorage');
         const theme = JSON.parse(savedTheme);
         this._theme.set(theme);
         return;
       }
 
       // Try to load from config file
-      console.log('[StratosThemeService] Fetching theme from /core/assets/theme-config.json');
       const response = await fetch('/core/assets/theme-config.json');
       if (response.ok) {
         const themeConfig = await response.json();
-        console.log('[StratosThemeService] Loaded theme config:', themeConfig);
         this._theme.set({ ...defaultTheme, ...themeConfig });
         return;
-      } else {
-        console.warn('[StratosThemeService] Failed to fetch theme config:', response.status, response.statusText);
       }
     } catch (error) {
-      console.warn('[StratosThemeService] Could not load theme configuration:', error);
+      // Silently fall back to default theme
     }
 
     // Fallback to default theme
-    console.log('[StratosThemeService] Using default theme');
     this._theme.set(defaultTheme);
   }
 
@@ -236,7 +225,6 @@ export class StratosThemeService {
     // Update theme colors based on mode
     // This allows the theme service to maintain its color system
     // while respecting dark/light mode
-    console.log('[StratosThemeService] Theme mode applied:', mode, 'isDark:', isDark);
   }
 
   private resolveThemeMode(mode: ThemeMode): boolean {

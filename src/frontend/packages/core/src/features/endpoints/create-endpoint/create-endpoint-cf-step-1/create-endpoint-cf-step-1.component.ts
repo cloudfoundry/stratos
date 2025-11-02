@@ -13,7 +13,7 @@ import {
   StratosCatalogEndpointEntity
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { filter, map, pairwise, startWith } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -171,9 +171,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   ngAfterContentInit() {
     this.validate = this.registerForm.statusChanges.pipe(
-      map(() => {
-        return this.registerForm.valid;
-      })
+      startWith(this.registerForm.status),
+      map(() => this.registerForm.valid)
     );
   }
 

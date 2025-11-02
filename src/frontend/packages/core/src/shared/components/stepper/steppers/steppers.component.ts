@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, AfterContentInit,
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit,
   Component,
   ContentChildren,
   Input,
@@ -67,7 +67,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     private steppersService: SteppersService,
     private store: Store<AppState>,
     private snackBar: TailwindSnackBarService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
@@ -102,6 +103,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.allSteps.forEach((step => {
       this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
         this.filterSteps();
+      }));
+      // Listen for validation changes to trigger change detection
+      this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+        this.cdr.markForCheck();
       }));
     }));
     this.filterSteps();
@@ -219,6 +224,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.steps[this.currentIndex].onEnter(this.enterData);
     }
     this.enterData = undefined;
+
+    // Trigger change detection for OnPush strategy
+    this.cdr.markForCheck();
   }
 
   private findValidStep(index: number, isNextDirection: boolean) {

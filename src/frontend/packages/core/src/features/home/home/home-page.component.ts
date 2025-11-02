@@ -27,7 +27,7 @@ import {
   stratosEntityCatalog,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';

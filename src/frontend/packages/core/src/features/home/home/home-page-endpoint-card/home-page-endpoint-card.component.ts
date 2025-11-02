@@ -250,14 +250,22 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
       this._status.set(Status.Loading);
       const loadObs = this.ref.instance.load() || of(true);
 
-      // Timeout after 15 seconds
-      this.sub = loadObs.pipe(timeout(15000), filter(v => v === true), first()).subscribe(() => {
-        this.loaded.next(void 0);
-        setTimeout(() => this._status.set(Status.OK), 0);
-      }, () => {
-        this.loaded.next(void 0);
-        this._status.set(Status.Error);
-        this.sub.unsubscribe();
+      // Timeout after 60 seconds (increased from 15 to allow for slow API responses)
+      // CF home cards need to fetch apps, orgs, routes which can take time on large deployments
+      this.sub = loadObs.pipe(
+        timeout(60000),
+        filter((v: boolean) => v === true),
+        first()
+      ).subscribe({
+        next: () => {
+          this._status.set(Status.OK);
+          this.loaded.next(void 0);
+        },
+        error: () => {
+          this.loaded.next(void 0);
+          this._status.set(Status.Error);
+          this.sub.unsubscribe();
+        }
       });
     }
   }

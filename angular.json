@@ -27,7 +27,11 @@
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "assets": [
-              "src/frontend/packages/core/assets",
+              {
+                "glob": "**/*",
+                "input": "src/frontend/packages/core/assets",
+                "output": "/core/assets"
+              },
               "src/frontend/packages/core/favicon.ico",
               {
                 "glob": "**/*",

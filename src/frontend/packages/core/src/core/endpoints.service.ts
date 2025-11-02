@@ -180,16 +180,7 @@ export class EndpointsService {
         console.warn('Entity Catalog Validation Warnings:', validation.warnings);
       }
 
-      // Log summary in development mode
-      if (!(window as any).production) {
-        const diagnostics = entityCatalog.getDiagnostics();
-        console.log('[EndpointsService] Entity Catalog initialized:', {
-          endpoints: diagnostics.summary.totalEndpoints,
-          entities: diagnostics.summary.totalEntities,
-          registeredEndpoints: diagnostics.registeredEndpoints,
-          valid: validation.valid
-        });
-      }
+      // Entity catalog initialized successfully
     } catch (error) {
       console.error('Error validating entity catalog:', error);
     }

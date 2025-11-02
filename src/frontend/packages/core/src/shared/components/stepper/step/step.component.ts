@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { IRouterNavPayload } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 
@@ -55,7 +55,19 @@ export class StepComponent {
   }
 
   @Input()
-  valid = true;
+  set valid(value: boolean) {
+    if (this._valid !== value) {
+      this._valid = value;
+      // Emit event to notify parent stepper of validation change
+      this.onValidChange.emit(value);
+    }
+  }
+  get valid(): boolean {
+    return this._valid;
+  }
+  private _valid = true;
+
+  @Output() onValidChange = new EventEmitter<boolean>();
 
   @Input()
   canClose = true;
