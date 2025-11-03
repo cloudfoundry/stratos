@@ -2,24 +2,29 @@
 
 version: 2
 
+# Disable Dependabot during Angular
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule: 
-      interval: "daily"
+      interval: "weekly"
+    open-pull-requests-limit: 0 # Angular v14 tree depracated, being updated to v20/v21
   
   - package-ecosystem: "npm"
     directory: "/electron"
     schedule: 
-      interval: "daily"
+      interval: "weekly"
+    open-pull-requests-limit: 0 # Electron app deprecated
   
   - package-ecosystem: "npm"
     directory: "/website"
     schedule: 
-      interval: "daily"
+      interval: "weekly"
+    open-pull-requests-limit: 0 # Website being refactored
   
   - package-ecosystem: "gomod"
     directory: "src/jetstream/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    open-pull-requests-limit: 0 # GoLang CVE updates being done as part of refactor
     
