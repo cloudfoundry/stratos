@@ -27,7 +27,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.0.0",
+    "@docusaurus/module-type-aliases": "3.9.2",
     "@docusaurus/types": "3.0.0"
   },
   "browserslist": {
