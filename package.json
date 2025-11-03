@@ -139,7 +139,7 @@
     "@types/node": "^20.6.1",
     "acorn": "^7.1.1",
     "adm-zip": "^0.4.16",
-    "browserstack-local": "^1.4.5",
+    "browserstack-local": "^1.5.8",
     "codecov": "^3.7.1",
     "copy-webpack-plugin": "^6.2.0",
     "delete": "^1.1.0",
