@@ -89,7 +89,7 @@
     "@angular/router": "^14.3.0",
     "@cfstratos/monaco-yaml": "^2.5.0",
     "@ngrx/effects": "^14.3.3",
-    "@ngrx/router-store": "^14.3.3",
+    "@ngrx/router-store": "^20.1.0",
     "@ngrx/store": "^14.3.3",
     "@ngrx/store-devtools": "^14.3.3",
     "@swimlane/ngx-charts": "^20.4.1",
