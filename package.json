@@ -105,7 +105,7 @@
     "marked": "^4.3.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.13",
-    "ngrx-store-localstorage": "^14.0.0",
+    "ngrx-store-localstorage": "^20.0.0",
     "ngx-moment": "^3.5.0",
     "ngx-monaco-editor": "^9.0.0",
     "normalizr": "^3.6.0",
