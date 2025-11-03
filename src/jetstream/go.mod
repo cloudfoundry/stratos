@@ -32,12 +32,13 @@ require (
 	github.com/cloudfoundry/noaa/v2 v2.5.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
+	github.com/cloudfoundry/stratos/src/jetstream/docs v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular v0.0.0-00010101000000-000000000000
 	github.com/domodwyer/mailyak v3.1.1+incompatible
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/context v1.1.2
 	github.com/gorilla/securecookie v1.1.2
@@ -59,7 +60,6 @@ require (
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.33.0
-
 )
 
 require (
