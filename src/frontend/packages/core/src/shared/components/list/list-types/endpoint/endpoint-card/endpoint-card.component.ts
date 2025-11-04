@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,
+import {
+  ChangeDetectionStrategy, Component,
   ComponentFactoryResolver,
   ComponentRef,
   Input,
@@ -8,7 +9,7 @@ import { ChangeDetectionStrategy, Component,
   ViewChild,
   ViewContainerRef,
   ChangeDetectorRef,
- } from '@angular/core';
+} from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -109,8 +110,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       console.log('Row set to null/undefined');
       return;
     }
-
-    console.log('Setting row for endpoint:', row.name, 'ID:', row.guid);
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
     this.rowObs.next(row);
@@ -120,7 +119,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
-    
+
     // Try to create the card menu now that we have a row
     this.createCardMenuIfReady();
   }

@@ -33,24 +33,26 @@
 }
 
 <!-- Show content once loaded -->
-@if (isInitialised$ | async) {
-  @if ((endpointsService.haveRegistered$ | async)) {
-    <app-list></app-list>
-  } @else {
-    @if (!customizations.noEndpointsComponent) {
-      <app-endpoints-missing
-      [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+<div class="endpoints-content flex flex-col flex-1 min-h-0">
+  @if (isInitialised$ | async) {
+    @if ((endpointsService.haveRegistered$ | async)) {
+      <app-list class="flex-1"></app-list>
     } @else {
+      @if (!customizations.noEndpointsComponent) {
+        <app-endpoints-missing
+        [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+      } @else {
+      }
     }
+    <ng-template #noEndpointsContainer>
+      @if (!customizations.noEndpointsComponent) {
+        <app-endpoints-missing
+        [showDirectToEndpointMessage]="false"></app-endpoints-missing>
+      } @else {
+      }
+    </ng-template>
   }
-  <ng-template #noEndpointsContainer>
-    @if (!customizations.noEndpointsComponent) {
-      <app-endpoints-missing
-      [showDirectToEndpointMessage]="false"></app-endpoints-missing>
-    } @else {
-    }
-  </ng-template>
-}
+</div>
 <ng-template #customNoEndpoints></ng-template>
 
 <!-- Register Endpoint Modal -->

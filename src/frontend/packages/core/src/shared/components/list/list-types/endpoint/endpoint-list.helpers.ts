@@ -126,7 +126,10 @@ export class EndpointListHelper {
               subType: item.sub_type,
               ssoAllowed: item.sso_allowed
             },
-            disableClose: true
+            disableClose: true,
+            width: '550px',
+            maxWidth: '550px',
+            panelClass: ['overflow-visible', 'p-6']
           });
         },
         label: 'Connect',

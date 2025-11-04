@@ -41,13 +41,13 @@ $app-header-height: 56px;
   &__inner {
     display: flex;
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: 0;
   }
   &__content {
+    display: flex;
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    flex-direction: column;
+    min-height: 0;
     padding: 20px;
     width: 100%;
   }

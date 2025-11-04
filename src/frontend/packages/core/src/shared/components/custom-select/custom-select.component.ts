@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, TemplateRef, ContentChildren, QueryList, AfterContentInit, HostListener  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -72,6 +72,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   displayValue = '';
   dropdownTop = '0px';
   dropdownLeft = '0px';
+  dropdownWidth = '0px';
 
   private _onChange = (value: any) => {};
   private _onTouched = () => {};
@@ -94,9 +95,10 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       // Calculate position for fixed dropdown
       setTimeout(() => {
         const rect = this.selectTrigger.nativeElement.getBoundingClientRect();
-        this.dropdownTop = `${rect.bottom}px`;
+        this.dropdownTop = `${rect.bottom + 2}px`;  // Add 2px gap
         this.dropdownLeft = `${rect.left}px`;
-      });
+        this.dropdownWidth = `${rect.width}px`;  // Match trigger width
+      }, 0);
     }
 
     this._onTouched();
@@ -177,5 +179,16 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const clickedInside = this.selectTrigger.nativeElement.contains(target) ||
+      (this.selectOptions && this.selectOptions.nativeElement.contains(target));
+
+    if (!clickedInside && this.isOpen) {
+      this.isOpen = false;
+    }
   }
 }

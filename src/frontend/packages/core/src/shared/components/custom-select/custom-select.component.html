@@ -19,7 +19,11 @@
   </div>
 
   @if (isOpen) {
-    <div class="select-options" #selectOptions [style.top]="dropdownTop" [style.left]="dropdownLeft">
+    <div class="select-options"
+      #selectOptions
+      [style.top]="dropdownTop"
+      [style.left]="dropdownLeft"
+      [style.width]="dropdownWidth">
       <div class="options-container">
         <ng-content></ng-content>
       </div>

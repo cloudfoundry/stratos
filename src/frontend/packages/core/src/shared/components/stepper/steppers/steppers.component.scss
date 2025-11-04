@@ -3,10 +3,13 @@
   flex: 1;
   flex-direction: column;
   position: relative;
-  max-height: 100%;
-  overflow-y: auto;
+  min-height: 0;
 
   &-wrapper {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     background-color: var(--card-bg);
     color: var(--content-text);
   }
@@ -19,27 +22,36 @@
   }
   &-headers {
     display: flex;
-    flex: 0 0 72px;
-    height: 72px;
+    min-height: 72px;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--content-border);
+      border-radius: 2px;
+    }
   }
 
   &-header {
     align-items: center;
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 0;
 
     &-inner {
       align-items: center;
       display: flex;
-      flex: 1;
-      padding: 0 10px;
-    }
-
-    &::after {
-      background-color: var(--content-border);
-      content: '';
-      height: 1px;
-      width: 100%;
+      flex: 0 0 auto;
+      min-width: 0;
+      padding: 0 8px;
     }
 
     &:first-child {
@@ -49,10 +61,7 @@
     }
 
     &:last-child {
-      flex: none;
-      &::after {
-        content: none;
-      }
+      flex: 0 0 auto;
     }
 
     &--active {
@@ -124,11 +133,10 @@
   &-contents {
     display: flex;
     flex: 1 1 auto;
-    height: 0;
-    min-height: 160px;
-    max-height: calc(100% - 132px); // Reserve space for header (72px) and navigation (60px)
-    overflow-y: auto;
+    flex-direction: column;
+    min-height: 0;
     padding: 12px 36px;
+    overflow-y: auto;
   }
 
   &-navigation {

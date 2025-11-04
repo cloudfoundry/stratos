@@ -4,18 +4,18 @@
       <div class="steppers-inner">
         <!-- Step headers -->
         @if (steps.length > 1) {
-          <div class="steppers-headers flex items-center justify-center mb-8">
+          <div class="steppers-headers flex flex-wrap sm:flex-nowrap items-center justify-center mb-8 gap-2 overflow-x-auto">
             @for (step of steps; track $index; let i = $index; let isLast = $last) {
               <div
-                class="steppers-header flex items-center"
+                class="steppers-header flex items-center flex-shrink-0 min-w-0"
              [ngClass]="{
                'steppers-header--active': step.active,
                'steppers-header--busy': step.blocked || step.showBusy
              }">
                 @if (steps.length !== 1) {
-                  <div class="steppers-header-inner flex items-center">
+                  <div class="steppers-header-inner flex items-center min-w-0">
                     <!-- Step indicator -->
-                    <div class="steppers-header-indicator relative flex items-center justify-center">
+                    <div class="steppers-header-indicator relative flex items-center justify-center flex-shrink-0">
                       <!-- Loading spinner -->
                       @if ((step.blocked || step.showBusy)) {
                         <div
@@ -41,7 +41,7 @@
                       <!-- Normal state -->
                     </div>
                     <!-- Step title -->
-                    <span class="steppers-header-text ml-3 text-sm font-medium"
+                    <span class="steppers-header-text ml-2 sm:ml-3 text-xs sm:text-sm font-medium truncate max-w-[120px] sm:max-w-none"
                   [ngClass]="{
                     'steppers-header-text--active': step.active,
                     'steppers-header-text--complete': step.complete,
@@ -55,7 +55,7 @@
                 <!-- Connector line -->
                 @if (!isLast) {
                   <div
-                    class="steppers-header-connector w-12 h-0.5 mx-4"
+                    class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 flex-shrink-0 hidden sm:block"
                [ngClass]="{
                  'steppers-header-connector--complete': step.complete,
                  'steppers-header-connector--incomplete': !step.complete

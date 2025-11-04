@@ -238,12 +238,23 @@ export class TailwindDialogService {
 
     // Dialog panel
     const dialog = document.createElement('div');
+
+    // Base classes - only include essentials, let config override sizing/overflow
     let panelClasses = [
       'bg-white', 'dark:bg-gray-800', 'rounded-lg', 'shadow-xl',
-      'max-w-md', 'w-full', 'mx-4', 'max-h-96vh', 'overflow-auto',
       'transform', 'transition-all', 'duration-300', 'ease-out',
       'scale-95', 'opacity-0'
     ];
+
+    // Add default sizing only if not provided in config
+    if (!config?.width && !config?.maxWidth) {
+      panelClasses.push('max-w-md', 'w-full', 'mx-4');
+    }
+
+    // Add default overflow handling only if maxHeight not specified
+    if (!config?.maxHeight) {
+      panelClasses.push('max-h-[90vh]', 'overflow-auto');
+    }
 
     if (config?.panelClass) {
       if (Array.isArray(config.panelClass)) {

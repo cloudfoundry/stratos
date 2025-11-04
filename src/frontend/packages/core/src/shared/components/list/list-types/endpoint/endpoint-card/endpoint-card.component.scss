@@ -10,6 +10,7 @@
   height: 100%;
   border-radius: 8px;
   transition: all 0.2s ease-in-out;
+  overflow: visible;
 
   &:hover:not(&--no-link) {
     transform: translateY(-2px);
