@@ -5,12 +5,14 @@
 }
 
 .theme-toggle-button {
-  @apply flex items-center gap-2 px-2 py-2 rounded-md transition-all duration-200;
+  @apply flex items-center gap-2 p-2 rounded-md transition-all duration-200;
   @apply bg-transparent;
   @apply border border-transparent;
   @apply focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-opacity-50;
 
   cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
 
   // Header context - inherit text color from header
   color: inherit;
@@ -41,17 +43,20 @@
 
 .theme-options {
   @apply flex gap-1 p-1 rounded-lg;
-  @apply bg-gray-100 dark:bg-gray-800;
+  background-color: var(--card-header-bg);
 }
 
 .theme-option {
   @apply px-3 py-1 rounded text-sm transition-all;
-  @apply text-gray-600 dark:text-gray-400;
-  @apply hover:text-gray-900 dark:hover:text-gray-100;
+  color: var(--content-muted);
+
+  &:hover {
+    color: var(--content-text);
+  }
 
   &.active {
-    @apply bg-white dark:bg-gray-700;
-    @apply text-gray-900 dark:text-gray-100;
+    background-color: var(--card-bg);
+    color: var(--content-text);
     @apply shadow-sm;
   }
 }

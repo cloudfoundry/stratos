@@ -1,4 +1,4 @@
-<div class="steppers-wrapper bg-white">
+<div class="steppers-wrapper">
   @if (steps && steps.length) {
     <div class="steppers">
       <div class="steppers-inner">
@@ -23,12 +23,12 @@
                         </div>
                       } @else {
                         <app-dot-content [disabled]="step.skip"
-                          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors"
+                          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors steppers-header-indicator-content"
                                  [ngClass]="{
-                                   'bg-primary text-white': step.active,
-                                   'bg-success-500 text-white': step.complete,
-                                   'bg-gray-200 text-gray-600': !step.active && !step.complete,
-                                   'bg-gray-100 text-gray-400': step.skip
+                                   'steppers-header-indicator-content--active': step.active,
+                                   'steppers-header-indicator-content--complete': step.complete,
+                                   'steppers-header-indicator-content--inactive': !step.active && !step.complete,
+                                   'steppers-header-indicator-content--skip': step.skip
                                  }">
                           @if (step.complete) {
                             <span class="material-icons text-sm">{{ this.getIconLigature() }}</span>
@@ -43,10 +43,10 @@
                     <!-- Step title -->
                     <span class="steppers-header-text ml-3 text-sm font-medium"
                   [ngClass]="{
-                    'text-primary': step.active,
-                    'text-success-600': step.complete,
-                    'text-gray-900': !step.active && !step.complete,
-                    'text-gray-400': step.skip
+                    'steppers-header-text--active': step.active,
+                    'steppers-header-text--complete': step.complete,
+                    'steppers-header-text--inactive': !step.active && !step.complete,
+                    'steppers-header-text--skip': step.skip
                   }">
                       {{ step.title }}
                     </span>
@@ -57,8 +57,8 @@
                   <div
                     class="steppers-header-connector w-12 h-0.5 mx-4"
                [ngClass]="{
-                 'bg-primary': step.complete,
-                 'bg-gray-200': !step.complete
+                 'steppers-header-connector--complete': step.complete,
+                 'steppers-header-connector--incomplete': !step.complete
                }">
                   </div>
                 }
@@ -71,7 +71,7 @@
           <span *ngTemplateOutlet="steps[currentIndex].content"></span>
         </div>
         <!-- Navigation buttons -->
-        <div class="steppers-navigation flex items-center justify-between border-t border-gray-200 pt-6">
+        <div class="steppers-navigation flex items-center justify-between border-t pt-6">
           <div class="steppers-navigation-left">
             @if (steps.length !== 1 || basePreviousRedirect) {
               <button id="stepper_previous"

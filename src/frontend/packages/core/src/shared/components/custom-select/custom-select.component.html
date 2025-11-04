@@ -10,11 +10,6 @@
       {{ displayValue || placeholder }}
     </span>
     <div class="select-suffix">
-      @if (invalid) {
-        <svg class="error-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V13H11V15ZM11 11H9V5H11V11Z" fill="currentColor"/>
-        </svg>
-      }
       <div class="select-arrow">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -24,17 +19,9 @@
   </div>
 
   @if (isOpen) {
-    <div class="select-options">
+    <div class="select-options" #selectOptions [style.top]="dropdownTop" [style.left]="dropdownLeft">
       <div class="options-container">
         <ng-content></ng-content>
-      </div>
-    </div>
-  }
-
-  @if (invalid && errorMessage) {
-    <div class="select-error">
-      <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
-        {{ errorMessage }}
       </div>
     </div>
   }

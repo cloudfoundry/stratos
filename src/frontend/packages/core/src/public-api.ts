@@ -68,6 +68,7 @@ export {
   CustomIconButtonDirective,
   CustomButtonDirective,
   MatInputDirective,
+  AppInputDirective,
   MatSuffixDirective,
   MatLabelComponent
 } from './shared/components/custom-form-field/custom-form-field.component';

@@ -16,7 +16,7 @@
 .table-header-row {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid var(--table-border);
   min-height: 48px;
   padding: 0 24px;
 }
@@ -26,7 +26,7 @@
   padding: 8px;
   font-weight: 500;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--table-header-text);
 
   app-table-cell {
     width: 100%;
@@ -84,9 +84,9 @@ mat-header-cell {
 
   &__header-row {
     &.in-expanded-row {
-      border-left-color: rgba(0, 0, 0, .12);
+      border-left-color: var(--table-border);
       border-left-width: 1px;
-      border-top-color: rgba(0, 0, 0, .12);
+      border-top-color: var(--table-border);
       border-top-width: 1px;
     }
   }
@@ -151,7 +151,7 @@ mat-header-cell {
     }
 
     &:hover {
-      background-color: rgba(0, 0, 0, .05);
+      background-color: var(--table-row-hover);
     }
   }
 }

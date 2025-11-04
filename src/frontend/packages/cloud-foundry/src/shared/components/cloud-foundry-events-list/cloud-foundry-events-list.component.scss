@@ -1,5 +1,14 @@
 form {
   app-form-field {
-    @apply flex-1 max-w-xs;
+    @apply flex-1;
+
+    &:first-child {
+      min-width: 180px;
+      max-w: 220px;
+    }
+
+    &:last-child {
+      max-width: 300px;
+    }
   }
 }

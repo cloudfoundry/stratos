@@ -1,11 +1,11 @@
-<h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between">
+<h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between" style="color: var(--content-text)">
   <span class="confirm-dialog__header-title">{{data.title}}</span>
   @if (data.critical || textToMatch) {
-    <span class="material-icons text-warning-500 confirm-dialog__warn-icon">warning</span>
+    <span class="material-icons confirm-dialog__warn-icon" style="color: var(--color-warning)">warning</span>
   }
 </h1>
 @if (!textToMatch) {
-  <div class="confirm-dialog__message mb-4 text-gray-700" [innerHtml]="data.message"></div>
+  <div class="confirm-dialog__message mb-4" style="color: var(--content-text)" [innerHtml]="data.message"></div>
 }
 @if (textToMatch) {
   <div class="confirm-dialog__enter-text mb-4">

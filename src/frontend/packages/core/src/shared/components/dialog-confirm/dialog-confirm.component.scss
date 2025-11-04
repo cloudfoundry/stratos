@@ -1,8 +1,12 @@
+:host {
+  display: block;
+  // Remove padding - let Angular Material dialog handle it
+}
+
 .confirm-dialog {
   min-width: 250px;
   &__actions {
-    justify-content: flex-end;
-    margin-top: 24px;
+    @apply flex justify-end gap-2 mt-6;
   }
 
   &__header {

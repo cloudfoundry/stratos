@@ -47,7 +47,7 @@
           </div>
 
           <!-- Right content -->
-          <div class="page-header-right flex items-center space-x-2">
+          <div class="page-header-right flex items-center gap-3">
             <!-- Extension buttons -->
             <div #extensionRef>
               @if (actionsKey) {
@@ -63,7 +63,7 @@
             <!-- Divider -->
             @if ((extensionRef.children[0] && extensionRef.children[0].children && extensionRef.children[0].children.length > 0) ||
               (ref.children[0] && ref.children[0] && ref.children[0].children && ref.children[0].children.length > 0)) {
-              <span class="page-header-divider text-white/30 mx-2"
+              <span class="page-header-divider text-white/30"
                 >
                 |
               </span>
@@ -112,7 +112,7 @@
             @if (!hideMenu && !environment.hideUserMenu) {
               <div class="relative">
                 <button id="userMenu"
-                  class="page-header-menu-button page-header-usermenu p-1 hover:bg-white/10 rounded-md transition-colors"
+                  class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
                   (click)="toggleUserMenu()">
                   <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                   </app-user-avatar>

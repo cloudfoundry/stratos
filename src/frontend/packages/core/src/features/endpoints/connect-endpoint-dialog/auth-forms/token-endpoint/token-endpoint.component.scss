@@ -1,9 +1,26 @@
 .token {
-  min-width: 350px;
+  width: 100%;
+  max-width: 100%;
+
+  &__help-text {
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.6);
+
+    p {
+      margin: 0 0 8px 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
 
   &__form {
     display: flex;
     flex-direction: column;
+    width: 100%;
 
     textarea {
       font-family: 'Source Code Pro';
@@ -11,6 +28,7 @@
       line-break: anywhere;
     }
   }
+
   &__title {
     font-size: 14px;
     margin-bottom: 12px;

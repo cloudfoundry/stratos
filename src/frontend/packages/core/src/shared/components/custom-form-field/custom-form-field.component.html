@@ -10,7 +10,10 @@
   [class.appearance-legacy]="appearance === 'legacy'"
   [class.color-primary]="color === 'primary'"
   [class.color-accent]="color === 'accent'"
-  [class.color-warn]="color === 'warn'">
+  [class.color-warn]="color === 'warn'"
+  [class.float-label-never]="floatLabel === 'never'"
+  [class.float-label-always]="floatLabel === 'always'"
+  [class.float-label-auto]="floatLabel === 'auto'">
 
   <div class="form-field-wrapper relative"
     style="padding-bottom: 1.34375em;">
@@ -31,7 +34,7 @@
         style="padding: 0.75em 0; min-width: 180px;">
 
         <!-- Input content -->
-        <ng-content select="input, textarea, select"></ng-content>
+        <ng-content select="input, textarea, select, app-select"></ng-content>
 
         <!-- Floating Label -->
         @if (placeholder) {

@@ -2,6 +2,7 @@ import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive
 import { FormControl, NgControl } from '@angular/forms';
 
 import { Subject, takeUntil } from 'rxjs';
+import { CustomSelectComponent } from '../custom-select/custom-select.component';
 
 @Component({
   selector: 'app-form-field',
@@ -19,6 +20,7 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   @Input() hintLabel = '';
 
   @ContentChild('input', { read: ElementRef, static: false }) inputElement!: ElementRef;
+  @ContentChild(CustomSelectComponent, { static: false }) selectComponent!: CustomSelectComponent;
   @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
 
   public focused = false;
@@ -34,7 +36,30 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   private cdr = inject(ChangeDetectorRef);
 
   ngAfterContentInit() {
-    if (this.inputElement) {
+    // Handle app-select components
+    if (this.selectComponent) {
+      this.placeholder = this.selectComponent.placeholder || '';
+      this.isRequired = this.selectComponent.required;
+      this.inputId = this.selectComponent.id || this.selectComponent.name || `form-field-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Set select id if not present
+      if (!this.selectComponent.id) {
+        this.selectComponent.id = this.inputId;
+      }
+
+      // Monitor select value changes
+      this.selectComponent.valueChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.hasValue = this.selectComponent.value != null &&
+                       (Array.isArray(this.selectComponent.value) ? this.selectComponent.value.length > 0 : true);
+        this.cdr.detectChanges();
+      });
+
+      // Initial value check
+      this.hasValue = this.selectComponent.value != null &&
+                     (Array.isArray(this.selectComponent.value) ? this.selectComponent.value.length > 0 : true);
+    }
+    // Handle native input/textarea/select elements
+    else if (this.inputElement) {
       const input = this.inputElement.nativeElement;
       this.placeholder = input.placeholder || '';
       this.isRequired = input.hasAttribute('required');
@@ -72,15 +97,15 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
 
       // Initial value check
       this.hasValue = input.value.length > 0;
+    }
 
-      // Listen to form control status changes if available
-      if (this.ngControl && this.ngControl.statusChanges) {
-        this.ngControl.statusChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-          this.updateErrorMessage();
-          this.updateAriaAttributes();
-          this.cdr.detectChanges();
-        });
-      }
+    // Listen to form control status changes if available
+    if (this.ngControl && this.ngControl.statusChanges) {
+      this.ngControl.statusChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.updateErrorMessage();
+        this.updateAriaAttributes();
+        this.cdr.detectChanges();
+      });
     }
 
     this.isInitialized = true;
@@ -156,6 +181,8 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   }
 
   private updateAriaAttributes(): void {
+    // For now, only update ARIA attributes for native input elements
+    // The app-select component manages its own ARIA attributes
     if (!this.inputElement) return;
 
     const input = this.inputElement.nativeElement;
@@ -222,6 +249,18 @@ export class CustomButtonDirective {
   }
 })
 export class MatInputDirective {
+  @Input() formControl!: FormControl<any>;
+  @Input() formControlName!: string;
+}
+
+@Directive({
+  selector: '[appInput]',
+  standalone: true,
+  host: {
+    'class': 'mat-input-element app-input-element'
+  }
+})
+export class AppInputDirective {
   @Input() formControl!: FormControl<any>;
   @Input() formControlName!: string;
 }

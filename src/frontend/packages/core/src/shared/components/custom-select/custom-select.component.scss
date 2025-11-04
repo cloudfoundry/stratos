@@ -2,6 +2,7 @@
   position: relative;
   display: inline-block;
   width: 100%;
+  min-width: 100px;
   font-family: inherit;
 
   &.disabled {
@@ -28,29 +29,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border: 1px solid var(--input-border, #d1d5db);
-  border-radius: 4px;
-  background-color: var(--input-bg, white);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
   color: var(--input-text, #1e293b);
   cursor: pointer;
   user-select: none;
   min-height: 20px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: none;
 
   &:hover:not(.disabled) {
-    border-color: var(--input-focus-border, #999);
+    // No hover effect when inside form field
   }
 
   .custom-select.open & {
-    border-color: var(--color-primary, #2196f3);
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    // No open state styling when inside form field
   }
 
   &:focus-within {
     outline: none;
-    border-color: var(--color-primary, #2196f3);
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
   }
 }
 
@@ -87,18 +85,16 @@
 }
 
 .select-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--card-bg, white);
+  border: 1px solid var(--content-border, #ccc);
+  border-radius: 4px;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.15));
+  max-height: 320px;
   overflow-y: auto;
+  min-width: 400px;
+  width: 400px;
 }
 
 .options-container {
@@ -108,7 +104,7 @@
 :host ::ng-deep .custom-option-content {
   padding: 8px 12px;
   cursor: pointer;
-  color: inherit;
+  color: var(--content-text, inherit);
 
   &:hover {
     background-color: var(--table-row-hover, #f5f5f5);
@@ -116,7 +112,7 @@
 
   &.selected {
     background-color: var(--info-bg, #e3f2fd);
-    color: var(--color-primary, #1976d2);
+    color: var(--info-text, var(--color-primary, #1976d2));
   }
 
   &.disabled {

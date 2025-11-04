@@ -54,6 +54,7 @@
                 name="username"
                 placeholder="Username"
                 type="text"
+                autocomplete="username"
                 >
             </div>
           }
@@ -69,6 +70,7 @@
                 [(ngModel)]="password"
                 name="password"
                 placeholder="Password"
+                autocomplete="current-password"
                 >
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>

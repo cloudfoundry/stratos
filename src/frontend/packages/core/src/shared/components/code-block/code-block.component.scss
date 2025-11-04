@@ -1,6 +1,10 @@
 .app-code-block {
   padding: 10px 20px;
   position: relative;
+  background-color: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
+  color: var(--code-block-text);
+
   &__content {
     display: flex;
     flex-direction: column;
@@ -8,6 +12,7 @@
     font-size: 14px;
     justify-content: center;
     margin-right: 20px; // Prevent text overlapping copy button
+    color: var(--code-block-text);
   }
   &__pre {
     // For wrapped PRE, vertical padding is already on the PRE element, so remove it here

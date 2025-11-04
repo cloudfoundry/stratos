@@ -65,10 +65,13 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
+  @ViewChild('selectOptions', { static: false }) selectOptions?: ElementRef;
 
   isOpen = false;
   selectedValues: any[] = [];
   displayValue = '';
+  dropdownTop = '0px';
+  dropdownLeft = '0px';
 
   private _onChange = (value: any) => {};
   private _onTouched = () => {};
@@ -86,6 +89,16 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   toggle() {
     if (this.disabled) return;
     this.isOpen = !this.isOpen;
+
+    if (this.isOpen) {
+      // Calculate position for fixed dropdown
+      setTimeout(() => {
+        const rect = this.selectTrigger.nativeElement.getBoundingClientRect();
+        this.dropdownTop = `${rect.bottom}px`;
+        this.dropdownLeft = `${rect.left}px`;
+      });
+    }
+
     this._onTouched();
   }
 

@@ -81,6 +81,11 @@
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: #f3f4f6;
 
+  /* Code block - light theme */
+  --code-block-bg: #f3f4f6;
+  --code-block-border: #d1d5db;
+  --code-block-text: #1e293b;
+
   /* Card and panel colors */
   --card-bg: #ffffff;
   --card-border: #e5e7eb;
@@ -92,6 +97,12 @@
   --table-header-text: #374151;
   --table-row-hover: #f9fafb;
   --table-border: #e5e7eb;
+
+  /* Stepper colors - light theme */
+  --step-inactive-bg: #e5e7eb;
+  --step-inactive-text: #4b5563;
+  --step-skip-bg: #f3f4f6;
+  --step-skip-text: #9ca3af;
 
   /* Status and state colors */
   --success-bg: #dcfce7;
@@ -167,6 +178,11 @@
   --input-focus-border: var(--color-primary);
   --input-disabled-bg: #0f172a;
 
+  /* Code block - dark theme */
+  --code-block-bg: #0f172a;
+  --code-block-border: #334155;
+  --code-block-text: #e2e8f0;
+
   /* Card and panel colors - dark theme */
   --card-bg: #1e293b;
   --card-border: #334155;
@@ -178,6 +194,12 @@
   --table-header-text: #cbd5e1;
   --table-row-hover: #334155;
   --table-border: #334155;
+
+  /* Stepper colors - dark theme */
+  --step-inactive-bg: #334155;
+  --step-inactive-text: #cbd5e1;
+  --step-skip-bg: #1e293b;
+  --step-skip-text: #64748b;
 
   /* Status and state colors - dark theme with WCAG AA compliance */
   --success-bg: #14532d;
@@ -283,8 +305,16 @@ body {
 
   /* Secondary Button */
   .btn-secondary {
-    @apply text-gray-700 bg-white border-gray-300 shadow-sm;
-    @apply hover:bg-gray-50 hover:border-gray-400 hover:shadow;
+    @apply shadow-sm;
+    color: var(--content-text);
+    background-color: var(--card-bg);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      @apply shadow;
+      background-color: color-mix(in srgb, var(--card-bg) 95%, black);
+      border-color: var(--content-border);
+    }
 
     &:focus {
       --tw-ring-color: var(--color-primary);
@@ -428,9 +458,34 @@ body {
 
   /* Input styles */
   .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm;
-    @apply placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent;
+    @apply block w-full px-3 py-2 border rounded-md shadow-sm;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
     --tw-ring-color: var(--color-primary);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+
+    &::placeholder {
+      color: var(--content-muted);
+      opacity: 0.7;
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border);
+      background-color: var(--input-bg);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dark-theme & {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--input-text);
+    }
   }
 
   /* Form field wrapper */
@@ -450,9 +505,9 @@ body {
 
   /* Select dropdown styles */
   .select {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm;
-    @apply bg-white text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent;
-    @apply disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-100;
+    @apply block w-full px-3 py-2 border rounded-md shadow-sm;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
+    @apply disabled:opacity-60 disabled:cursor-not-allowed;
     --tw-ring-color: var(--color-primary);
     background-color: var(--input-bg);
     border-color: var(--input-border);

@@ -25,8 +25,12 @@
   &__label {
     display: flex;
     flex: 1;
-    opacity: 0.7;
+    color: rgb(107 114 128); // gray-500
     padding-bottom: 3px;
+
+    :host-context(.dark) & {
+      color: rgb(156 163 175); // gray-400
+    }
 
     &-only {
       padding-bottom: 0;
@@ -34,6 +38,11 @@
   }
   &__value {
     flex: 1;
+    color: rgb(17 24 39); // gray-900
+
+    :host-context(.dark) & {
+      color: rgb(243 244 246); // gray-100
+    }
   }
 
   &__label-copy {

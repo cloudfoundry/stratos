@@ -134,16 +134,16 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
     this.subs.push(this.endpointForm.valueChanges.pipe().subscribe(res => {
       const authType = this.authTypesForEndpoint.find(ep => ep.value === res.authType);
-      let valid = false;
       if (authType.component === this.authFormComponentRef.componentType) {
         this.setData();
-        valid = this.endpointForm.valid;
       }
-      this.valid.next(valid);
+      // Always emit actual form validity, regardless of component state
+      this.valid.next(this.endpointForm.valid);
     }));
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();
+    this.valid.next(this.endpointForm.valid);
   }
 
   ngOnInit() {

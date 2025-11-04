@@ -5,16 +5,16 @@
       <div class="relative inline-block">
         <div class="dropdown">
           <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
-            type="button" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
             <span class="material-icons">view_week</span>
             <span class="material-icons">arrow_drop_down</span>
           </button>
-          <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden">
+          <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden" #dropdownMenu>
             <div class="py-1">
               @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
-                    <button (click)="onChangeLayout(layout)"
+                    <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
                       class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <span>{{ layout.title }}</span>
                       <span class="material-icons text-primary-600"
@@ -28,7 +28,7 @@
                 </div>
               }
               <div class="border-t border-gray-200 my-1"></div>
-              <button (click)="toggleShowAllEndpoints()"
+              <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
                 class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                 <span>Show all endpoints</span>
                 <span class="material-icons text-primary-600"

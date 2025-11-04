@@ -214,9 +214,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : params['results-per-page'] as number)
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
-        // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
+        const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
         return {
-          totalResults: pag.totalResults,
+          totalResults,
           pageSize,
           pageIndex
         };

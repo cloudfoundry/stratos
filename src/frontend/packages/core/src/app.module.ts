@@ -200,17 +200,6 @@ export class AppModule {
         if (validation.warnings.length > 0) {
           console.warn('[EntityCatalog] Validation warnings:', validation.warnings);
         }
-
-        // Log diagnostic information in development mode
-        if (!(window as any).production) {
-          const diagnostics = entityCatalog.getDiagnostics();
-          console.log('[EntityCatalog] Initialized:', {
-            endpoints: diagnostics.summary.totalEndpoints,
-            entities: diagnostics.summary.totalEntities,
-            registeredEndpoints: diagnostics.registeredEndpoints,
-            valid: validation.valid
-          });
-        }
       } catch (error) {
         console.error('[EntityCatalog] Error during validation:', error);
       }
@@ -341,7 +330,7 @@ export class AppModule {
     );
 
     customizationService.setAppNameFromTitle();
-    
+
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
       ...customizationService.get(),

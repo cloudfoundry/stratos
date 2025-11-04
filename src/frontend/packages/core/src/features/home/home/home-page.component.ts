@@ -439,4 +439,19 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   trackByEndpointGuid(index: number, endpoint: EndpointModel): string {
     return endpoint?.guid ?? index.toString();
   }
+
+  // Dropdown menu helpers
+  toggleDropdown(button: HTMLElement) {
+    const menu = button.nextElementSibling as HTMLElement;
+    if (menu) {
+      menu.classList.toggle('hidden');
+    }
+  }
+
+  closeDropdown(button: HTMLElement) {
+    const menu = button.nextElementSibling as HTMLElement;
+    if (menu) {
+      menu.classList.add('hidden');
+    }
+  }
 }

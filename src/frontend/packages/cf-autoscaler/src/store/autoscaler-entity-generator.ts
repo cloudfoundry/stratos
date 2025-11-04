@@ -52,15 +52,6 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
 
 function generateAutoscalerEndpointEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
   const endpointEntity = new StratosCatalogEndpointEntity(endpointDefinition);
-  // Debug: Log endpoint entity creation
-  if (!(window as any).production) {
-    console.log('[AutoscalerEntityGenerator] Created endpoint entity:', {
-      type: endpointEntity.definition.type,
-      isEndpoint: endpointEntity.isEndpoint,
-      entityKey: endpointEntity.entityKey,
-      hasEndpointProperty: !!(endpointEntity.definition as any).endpoint
-    });
-  }
   return endpointEntity;
 }
 

@@ -36,6 +36,7 @@
   align-items: center;
   border-style: solid;
   border-width: 0 0 1px;
+  border-color: var(--table-border);
   display: flex;
   transition: opacity .25s;
   &-wrapper {
@@ -132,6 +133,7 @@
   padding: 8px;
   display: flex;
   align-items: center;
+  color: var(--content-text);
 
   app-table-cell {
     width: 100%;

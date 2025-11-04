@@ -2,12 +2,25 @@
   &__title {
     margin-bottom: 10px;
     margin-top: 20px;
+    color: rgb(17 24 39); // gray-900
+
+    :host-context(.dark) & {
+      color: rgb(243 244 246); // gray-100
+    }
   }
   &__item {
     align-items: center;
     display: flex;
     margin-bottom: 10px;
     margin-left: 12px;
+
+    a {
+      color: rgb(37 99 235); // blue-600
+
+      :host-context(.dark) & {
+        color: rgb(96 165 250); // blue-400
+      }
+    }
 
     mat-icon {
       cursor: pointer;

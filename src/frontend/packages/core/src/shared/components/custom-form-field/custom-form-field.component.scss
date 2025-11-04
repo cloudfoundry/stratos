@@ -525,6 +525,37 @@
 }
 
 /* ============================================================================
+   Compact Form Field for Filters
+   ============================================================================ */
+
+/* When floatLabel is 'never', reduce padding and margins */
+.custom-form-field[ng-reflect-float-label="never"],
+.custom-form-field.float-label-never {
+  @apply mb-0;
+
+  .form-field-wrapper {
+    padding-bottom: 0 !important;
+  }
+
+  .form-field-infix {
+    padding: 0 !important;
+    min-width: auto !important;
+  }
+
+  .form-field-label {
+    @apply hidden;
+  }
+
+  .form-field-subscript-wrapper {
+    @apply hidden;
+  }
+
+  .form-field-underline {
+    @apply hidden;
+  }
+}
+
+/* ============================================================================
    Responsive Adjustments
    ============================================================================ */
 

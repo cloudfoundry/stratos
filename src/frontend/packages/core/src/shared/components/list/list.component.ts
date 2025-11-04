@@ -329,7 +329,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     this.hasSingleActions = (this.config?.getSingleActions() || []).length > 0;
     this.columns = this.config?.getColumns()!;
     this.dataSource = this.config?.getDataSource()!;
-    this.entitySelectConfig = this.dataSource.entitySelectConfig || {} as EntitySelectConfig;
+    this.entitySelectConfig = this.dataSource.entitySelectConfig;
 
     this.dataSource.pagination$.pipe(
       first(),
@@ -403,7 +403,7 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     );
 
     // Determine if we should hide the paginator
-    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.dataSource.pagination$).pipe(
+    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.paginationController.pagination$).pipe(
       map(([hasRows, pagination]) => {
         const minPageSize = (
           this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?

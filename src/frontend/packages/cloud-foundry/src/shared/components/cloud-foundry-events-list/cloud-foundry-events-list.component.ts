@@ -1,5 +1,5 @@
 
-import { CustomFormFieldComponent } from '@stratosui/core';
+import { CustomFormFieldComponent, AppInputDirective } from '@stratosui/core';
 import { Component, Input, OnDestroy, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../core/src/shared/components/custom-select/custom-select.component';
@@ -32,6 +32,7 @@ interface EventsFilterForm {
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
+    AppInputDirective,
     ListComponent
 ]
 })

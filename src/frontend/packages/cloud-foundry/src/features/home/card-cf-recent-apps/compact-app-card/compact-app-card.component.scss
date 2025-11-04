@@ -3,6 +3,10 @@
   display: flex;
   padding: 0 12px;
 
+  :host-context(.dark) & {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
   &:not(:first-child) {
     border-top: 0;
   }
@@ -15,9 +19,30 @@
   font-size: 14px;
   height: 40px;
   width: 100%;
+  color: rgba(0, 0, 0, 0.87);
+
+  :host-context(.dark) & {
+    color: rgba(255, 255, 255, 0.87);
+  }
+
   &__name {
     flex: 1;
     padding-left: 12px;
+
+    a {
+      color: rgb(37 99 235); // blue-600
+
+      :host-context(.dark) & {
+        color: rgb(96 165 250); // blue-400
+      }
+    }
+  }
+  &__updated {
+    color: rgba(0, 0, 0, 0.6);
+
+    :host-context(.dark) & {
+      color: rgba(255, 255, 255, 0.6);
+    }
   }
   &__subtle {
     font-size: 12px;

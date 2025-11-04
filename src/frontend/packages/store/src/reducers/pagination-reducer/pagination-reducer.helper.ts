@@ -233,7 +233,7 @@ function getObservables<T = any>(
       startWith(false)
     ),
     totalEntities$: pagination$.pipe(
-      map(pag => pag.totalResults),
+      map(pag => isLocal ? pag.clientPagination.totalResults : pag.totalResults),
       distinctUntilChanged()
     ),
     fetchingEntities$: paginationMonitor.fetchingCurrentPage$
