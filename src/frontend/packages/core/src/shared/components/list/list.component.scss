@@ -4,6 +4,7 @@
   position: relative;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 
   mat-progress-bar {
     position: absolute;
@@ -50,7 +51,8 @@
 
   &__body-inner {
     position: relative;
-    max-height: calc(100vh - 280px);
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -185,6 +187,12 @@
   }
 
   &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
     .no-rows {
       padding: 20px $title-left-padding;
     }
@@ -197,6 +205,7 @@
   }
 
   &__paginator {
+    flex: 0 0 auto;
     height: 67px;
     padding: 4px;
 

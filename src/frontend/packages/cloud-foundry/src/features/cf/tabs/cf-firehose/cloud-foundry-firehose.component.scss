@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 
 .firehose-filter-panel {
@@ -26,4 +27,6 @@
 .app-logstream-viewer {
   display: flex;
   flex: 1;
+  min-height: 0;
+  margin-bottom: 12px;
 }
