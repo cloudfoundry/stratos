@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { AfterContentInit, Component, Input, OnInit, ViewChild,
   ChangeDetectionStrategy} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -27,8 +26,6 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
   imports: [
     CommonModule,
     FormsModule,
-    CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     FocusDirective
