@@ -43,7 +43,10 @@ if [ "${ACTION}" == "build" ]; then
   df -h 
 
   echo "Building version: ${VERSION}"
-  go build -ldflags -X=main.appVersion=${VERSION}
+  GOOS=linux GOARCH=amd64 go build -ldflags -X=main.appVersion=${VERSION}
+  if [[ "$(uname)" == "Darwin" ]]; then
+    go build -ldflags -X=main.appVersion=${VERSION} -o jetstream.darwin
+  fi
   echo "Build complete ..."
 else
   echo "Running backend tests ..."
